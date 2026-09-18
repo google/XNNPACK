@@ -1103,20 +1103,19 @@ TEST_P(Fp16ToFp32FallbackBinaryOpTest, Rewrite) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
-    // Add has a software emulation fallback and will therefore not be
+    XnnTensor output;
+    // Add and Mul have scalar FP16 fallbacks and will therefore not be
     // converted.
-    if (param.name == "Add") {
-      XnnTensor output = param.op_builder(a, b);
-      LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
-                                      BuildXnnpackGraph({output}));
+    if (param.name == "Add" || param.name == "Mul") {
+      output = param.op_builder(a, b);
     } else {
       XnnTensor a_fp32 = Cast(a, Type::kFP32);
       XnnTensor b_fp32 = Cast(b, Type::kFP32);
       XnnTensor output_fp32 = param.op_builder(a_fp32, b_fp32);
-      XnnTensor output = Cast(output_fp32, Type::kFP16);
-      LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
-                                      BuildXnnpackGraph({output}));
+      output = Cast(output_fp32, Type::kFP16);
     }
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
   }
 
   ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),

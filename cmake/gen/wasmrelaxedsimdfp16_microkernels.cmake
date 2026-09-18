@@ -17,6 +17,8 @@ SET(PROD_WASMRELAXEDSIMDFP16_MICROKERNEL_SRCS
   src/f16-vapproxgelu/gen/f16-vapproxgelu-wasmrelaxedsimd-rational-6-4-div.c
   src/f16-vbinary/gen/f16-vadd-wasmrelaxedsimdfp16-u8.c
   src/f16-vbinary/gen/f16-vaddc-wasmrelaxedsimdfp16-u8.c
+  src/f16-vbinary/gen/f16-vmul-wasmrelaxedsimdfp16-u8.c
+  src/f16-vbinary/gen/f16-vmulc-wasmrelaxedsimdfp16-u8.c
   src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-poly-3.c
   src/f16-vexp/gen/f16-vexp-wasmrelaxedsimd-poly-3.c
   src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-1-3-div.c
