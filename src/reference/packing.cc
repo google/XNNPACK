@@ -3474,6 +3474,13 @@ void xnn_pack_kai_f32_weights_and_biases_sme2(
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
     accumulator_init = calloc(output_channels, sizeof(float));
+    if (accumulator_init == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME2 bias substitute buffer",
+          output_channels * sizeof(float));
+      assert(false);
+      return;
+    }
     free_accumulator_init = true;
   }
 
@@ -3628,6 +3635,13 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
 
   if (b == NULL) {
     tmp_bias = (uint16_t*)xnn_allocate_zero_memory(g * nc * sizeof(uint16_t));
+    if (tmp_bias == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
+          g * nc * sizeof(uint16_t));
+      assert(false);
+      return;
+    }
     b = tmp_bias;
   }
 
@@ -3692,6 +3706,13 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
 
   if (b == NULL) {
     tmp_bias = (int32_t*)xnn_allocate_zero_memory(g * nc * sizeof(int32_t));
+    if (tmp_bias == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
+          g * nc * sizeof(int32_t));
+      assert(false);
+      return;
+    }
     b = tmp_bias;
   }
 
@@ -3759,6 +3780,13 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
 
   if (b == NULL) {
     tmp_bias = (float*) calloc(g * nc, sizeof(float));
+    if (tmp_bias == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
+          g * nc * sizeof(float));
+      assert(false);
+      return;
+    }
     b = tmp_bias;
   }
 
