@@ -4,6 +4,16 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################ Portable FP16 ###############################
+tools/xngen src/f16-vbinary/vop.c.in  -D OP=MUL -D ARCH=scalar -o src/f16-vbinary/gen/f16-vmul-scalar-u1.c &
+tools/xngen src/f16-vbinary/vopc.c.in -D OP=MUL -D ARCH=scalar -o src/f16-vbinary/gen/f16-vmulc-scalar-u1.c &
+tools/xngen src/f16-vbinary/vop.c.in  -D OP=MUL -D ARCH=wasmrelaxedsimdfp16 -o src/f16-vbinary/gen/f16-vmul-wasmrelaxedsimdfp16-u8.c &
+tools/xngen src/f16-vbinary/vopc.c.in -D OP=MUL -D ARCH=wasmrelaxedsimdfp16 -o src/f16-vbinary/gen/f16-vmulc-wasmrelaxedsimdfp16-u8.c &
+
+######################## Portable FP32 arithmetic ############################
+tools/xngen src/f16-vbinary/f16-f32acc-vop.c.in  -D OP=MUL -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -o src/f16-vbinary/gen/f16-f32acc-vmul-wasmrelaxedsimd-u8.c &
+tools/xngen src/f16-vbinary/f16-f32acc-vopc.c.in -D OP=MUL -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -o src/f16-vbinary/gen/f16-f32acc-vmulc-wasmrelaxedsimd-u8.c &
+
 ################################### ARM NEON ##################################
 tools/xngen src/f16-vbinary/vop-neonfp16arith.c.in -D OP=ADD     -D BATCH_TILE=8  -o src/f16-vbinary/gen/f16-vadd-neonfp16arith-u8.c &
 tools/xngen src/f16-vbinary/vop-neonfp16arith.c.in -D OP=ADD     -D BATCH_TILE=16 -o src/f16-vbinary/gen/f16-vadd-neonfp16arith-u16.c &
