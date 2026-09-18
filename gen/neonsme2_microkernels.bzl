@@ -6,6 +6,7 @@
 #
 
 PROD_NEONSME2_MICROKERNEL_SRCS = [
+    "src/f32-dwconv/f32-dwconv-9pvc-minmax-neonsme2.c",
     "src/pf16-f16-f16-igemm/pf16-f16-f16-igemm-32x32c2-minmax-neonsme2.c",
     "src/pf16-gemm/pf16-gemm-1x32c2-minmax-neonsme2.c",
     "src/pf16-gemm/pf16-gemm-32x32c2-minmax-neonsme2.c",
