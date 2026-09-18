@@ -3,18 +3,23 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <gtest/gtest.h>
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <random>
 #include <tuple>
 #include <type_traits>
 #include <vector>
 
-#include <gtest/gtest.h>
+#include "slinky/builder/pipeline.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/evaluate.h"
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
@@ -26,12 +31,107 @@
 #include "ynnpack/base/to_string.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
 using ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 namespace ynn {
+
+namespace {
+
+TEST(Reduce, BroadcastPartialReduction) {
+  TestScheduler scheduler(4);
+  if (TestScheduler::num_threads_impl(&scheduler) < 2) {
+    GTEST_SKIP() << "Parallel reduction requires multiple worker threads.";
+  }
+  ynn_subgraph_t subgraph_ptr = nullptr;
+  ASSERT_EQ(ynn_create_subgraph(2, 0, &subgraph_ptr), ynn_status_success);
+  std::unique_ptr<ynn_subgraph, decltype(&ynn_delete_subgraph)> subgraph(
+      subgraph_ptr, ynn_delete_subgraph);
+  uint32_t input_id = 0, output_id = 1;
+  const size_t input_dims[] = {1024};
+  ASSERT_EQ(
+      ynn_define_tensor(subgraph.get(), ynn_type_fp32, 1, input_dims, nullptr,
+                        YNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+      ynn_status_success);
+  ASSERT_EQ(
+      ynn_define_tensor(subgraph.get(), ynn_type_fp32, 0, nullptr, nullptr,
+                        YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+      ynn_status_success);
+  uint32_t expanded = YNN_INVALID_VALUE_ID;
+  const int32_t expand_axes[] = {0, 2};
+  ASSERT_EQ(ynn_define_static_expand_dims(subgraph.get(), 2, expand_axes,
+                                          input_id, &expanded, 0),
+            ynn_status_success);
+  uint32_t broadcast = YNN_INVALID_VALUE_ID;
+  const size_t output_dims[] = {2, 1024, 1024};
+  ASSERT_EQ(ynn_define_static_broadcast(subgraph.get(), 3, output_dims,
+                                        expanded, &broadcast, 0),
+            ynn_status_success);
+  const int32_t axes[] = {0, 1, 2};
+  ASSERT_EQ(ynn_define_reduce(subgraph.get(), ynn_reduce_sum, 3, axes,
+                              broadcast, YNN_INVALID_VALUE_ID, &output_id, 0),
+            ynn_status_success);
+
+  Runtime runtime(subgraph.get(), &scheduler, /*flags=*/0, /*optimize=*/false);
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  // Invoke the partial reduction for the first tile directly. Slinky drops
+  // the trailing singleton broadcast dimension of this tile's input, but
+  // the partial output still has two entries in that dimension. The call
+  // must leave every other tile's output untouched, regardless of scheduling.
+  bool tested_partial = false;
+  for (const slinky::func& func : runtime.get()->funcs) {
+    if (func.outputs().size() != 2 || func.outputs()[0].buffer->rank() != 3) {
+      continue;
+    }
+    std::vector<float> tile_data(32, 1.0f);
+    slinky::buffer<float, 3> tile(2);
+    tile.raw_buffer::base = tile_data.data();
+    tile.mutable_dim(0) = slinky::dim(0, 1023, 0);
+    tile.mutable_dim(1) = slinky::dim(0, 31, sizeof(float));
+    float zero = 0.0f;
+    slinky::buffer<float, 3> init(0);
+    init.raw_buffer::base = &zero;
+    std::vector<float> partial_data(64, -1.0f);
+    slinky::buffer<float, 3> partial({1, 32, 2});
+    partial.raw_buffer::base = partial_data.data();
+    slinky::buffer<void, 3> bounds(3, 0);
+    bounds.mutable_dim(0) = slinky::dim(0, 1023, 0, 1024);
+    bounds.mutable_dim(1) = slinky::dim(0, 31, 0, 32);
+    bounds.mutable_dim(2) = slinky::dim(0, 0, 0, 1);
+    slinky::eval_context context;
+    auto bind = [&](slinky::var sym, const slinky::raw_buffer* buffer) {
+      context.reserve(sym.id + 1);
+      context.set(sym, reinterpret_cast<slinky::index_t>(buffer));
+    };
+    bind(func.inputs()[0].buffer->sym(), &tile);
+    bind(func.inputs()[1].buffer->sym(), &init);
+    bind(func.outputs()[0].buffer->sym(), &partial);
+    bind(func.outputs()[1].buffer->sym(), &bounds);
+    ASSERT_EQ(slinky::evaluate(func.make_call(), context), 0);
+    for (size_t i = 0; i < partial_data.size(); ++i) {
+      EXPECT_EQ(partial_data[i], i == 0 ? 32768.0f : -1.0f) << i;
+    }
+    tested_partial = true;
+  }
+  ASSERT_TRUE(tested_partial);
+
+  std::vector<float> input(1024, 1.0f);
+  float output = 0.0f;
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), 0, input.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), 1, &output),
+            ynn_status_success);
+  for (int i = 0; i < 100; ++i) {
+    ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+    EXPECT_EQ(output, 2097152.0f);
+  }
+}
+
+}  // namespace
 
 // We only test reduce up to this rank. The reduce implementation has no special
 // cases for more than one or two dimensions, so this should be plenty of
