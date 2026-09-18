@@ -215,4 +215,15 @@ interleave_kernel_fn get_interleave_kernel(size_t element_size_bits, size_t m) {
   return nullptr;
 }
 
+interleave_block_kernel_fn get_interleave_block_kernel(size_t element_size_bits,
+                                                       size_t m) {
+#ifdef YNN_ARCH_X86_AVX512
+  if (element_size_bits == 16 && m == 2 &&
+      is_arch_supported(arch_flag::avx512)) {
+    return interleave2_x16_block_avx512;
+  }
+#endif  // YNN_ARCH_X86_AVX512
+  return nullptr;
+}
+
 }  // namespace ynn
