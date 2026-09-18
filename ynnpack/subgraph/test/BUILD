@@ -212,6 +212,18 @@ cc_test(
     deps = TEST_DEPS + ["//ynnpack/subgraph"],
 )
 
+cc_test(
+    name = "reduce",
+    srcs = ["reduce.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = TEST_DEPS + [
+        "//ynnpack/subgraph",
+        "@slinky//slinky/builder",
+        "@slinky//slinky/runtime",
+    ],
+)
+
 [cc_test(
     name = name,
     srcs = [name + ".cc"],
@@ -230,7 +242,6 @@ cc_test(
     "gather",
     "get_tensor_shape",
     "iota",
-    "reduce",
     "reduce_dot",
     "runtime",
     "split_dim",
