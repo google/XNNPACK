@@ -22,19 +22,30 @@ class packer {
   // If `transpose` is true, the input is transposed prior to the above reshape
   // and transpose operation.
   // `tile_m` must be a power of 2.
-  packer(bool transpose, size_t elem_size_bits, size_t tile_m, size_t tile_n);
+  // If `allow_fused` is false, a fused block kernel will not be used even if
+  // one exists. This only exists so tests and benchmarks can compare the two
+  // implementations; production callers should leave it alone.
+  packer(bool transpose, size_t elem_size_bits, size_t tile_m, size_t tile_n,
+         bool allow_fused = true);
+
+  // Return a copy of this packer configured for `new_tile_n` columns without
+  // re-querying architecture dispatch tables when `tile_m > 1`.
+  packer with_tile_n(size_t new_tile_n) const;
 
   // Run the packing operation for input and output buffers. The input has an
   // un-transposed shape of `m` x `n`. The output will be rounded up to a
   // multiple of the tile size.
   void pack(size_t m, size_t n, size_t input_stride, const void* input,
-            size_t output_stride, size_t output_block_stride, void* output);
+            size_t output_stride, size_t output_block_stride,
+            void* output) const;
 
  protected:
   size_t elem_size_bits;
   size_t tile_m;
   size_t tile_n;
   interleave_kernel_fn interleave_fn = nullptr;
+  // Takes priority over `interleave_fn` when non-null and `allow_fused=true`.
+  interleave_block_kernel_fn interleave_block_fn = nullptr;
   transpose_kernel_fn transpose_fn = nullptr;
   ynn::transpose_fn transpose_blocks_fn = nullptr;
 };

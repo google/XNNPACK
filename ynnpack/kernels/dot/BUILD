@@ -7,7 +7,7 @@ load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
-load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_srcs", "ynn_kernel_copts", "ynn_test_deps")
+load("//ynnpack:build_defs.bzl", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_srcs", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
 
@@ -614,7 +614,20 @@ cc_test(
     deps = [
         ":pack",
         "//ynnpack/base",
+        "//ynnpack/kernels/transpose:transpose_x86_avx512",
     ] + ynn_test_deps(),
+)
+
+cc_test(
+    name = "pack_bench",
+    srcs = ["pack_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":pack",
+        "//ynnpack/base",
+    ] + ynn_benchmark_deps(),
 )
 
 cc_test(
