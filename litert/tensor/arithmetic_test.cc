@@ -984,6 +984,17 @@ TEST(ArithmeticTest, NonMaxSuppressionV5Works) {
   ASSERT_EQ(op, op_valid);
 }
 
+TEST(ArithmeticTest, SumRejectsShortAxisBuffer) {
+  Tensor input({.type = Type::kFP32, .shape = {2, 3}});
+  Tensor axes({.type = Type::kI32, .shape = {2}, .buffer = std::vector<int32_t>{0}});
+  Tensor output = Sum(input, axes, false);
+
+  ASSERT_FALSE(output.GetStatus().ok());
+  EXPECT_EQ(output.GetStatus().code(), absl::StatusCode::kInvalidArgument);
+  EXPECT_THAT(output.GetStatus().message(),
+              ::testing::HasSubstr("reduction axis buffer is smaller"));
+}
+
 TEST(ArithmeticTest, NonMaxSuppressionV5ShapeInference) {
   Tensor boxes({.type = Type::kFP32, .shape = {1, 6, 4}});
   Tensor scores({.type = Type::kFP32, .shape = {1, 6}});
