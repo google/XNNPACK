@@ -1011,6 +1011,25 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     }
   }
 
+  if (filter_value->shape.num_dims != 4 ||
+      filter_value->shape.dim[0] != 1 ||
+      filter_value->shape.dim[1] != kernel_height ||
+      filter_value->shape.dim[2] != kernel_width ||
+      filter_value->shape.dim[3] != input_channels * depth_multiplier) {
+    xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32
+        ": filter shape must be [1, kernel_height=%" PRIu32
+        ", kernel_width=%" PRIu32
+        ", input_channels * depth_multiplier=%zu], but got shape [%zu, %zu, "
+        "%zu, %zu]",
+        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d),
+        filter_id, kernel_height, kernel_width,
+        input_channels * depth_multiplier, filter_value->shape.dim[0],
+        filter_value->shape.dim[1], filter_value->shape.dim[2],
+        filter_value->shape.dim[3]);
+    return xnn_status_invalid_parameter;
+  }
+
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;
