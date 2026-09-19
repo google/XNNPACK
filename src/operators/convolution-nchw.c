@@ -145,10 +145,24 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_spmm_path(
   // 4. An array of float or fp16 values storing all bias elements (group_output_channels) and non-zero kernel elements.
   //    All elements within non-zero block are assumed to be non-zero.
 
-  const size_t packed_weights_size =
-    num_nonzero_blocks * 2 * sizeof(int32_t) +
-    num_output_channel_blocks * sizeof(uint32_t) +
-    ((context->group_output_channels + num_nonzero_values) << log2_filter_element_size) + XNN_EXTRA_BYTES;
+  const size_t per_block_bytes = 2 * sizeof(int32_t);
+  size_t nonzero_blocks_bytes = 0;
+  size_t channel_blocks_bytes = 0;
+  size_t channels_and_values = 0;
+  size_t values_bytes = 0;
+  size_t packed_weights_size = 0;
+  if (!xnn_safe_mul(num_nonzero_blocks, per_block_bytes, &nonzero_blocks_bytes) ||
+      !xnn_safe_mul(num_output_channel_blocks, sizeof(uint32_t), &channel_blocks_bytes) ||
+      !xnn_safe_add(context->group_output_channels, num_nonzero_values, &channels_and_values) ||
+      !xnn_safe_mul(channels_and_values, (size_t) 1 << log2_filter_element_size, &values_bytes) ||
+      !xnn_safe_add(nonzero_blocks_bytes, channel_blocks_bytes, &packed_weights_size) ||
+      !xnn_safe_add(packed_weights_size, values_bytes, &packed_weights_size) ||
+      !xnn_safe_add(packed_weights_size, XNN_EXTRA_BYTES, &packed_weights_size)) {
+    xnn_log_error(
+      "failed to create %s operator: packed weights size overflows size_t",
+      xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
 
   convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
   if (convolution_op->packed_weights.pointer == NULL) {
