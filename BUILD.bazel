@@ -1064,7 +1064,8 @@ config_setting(
     define_values = {"xnn_enable_arm_sme": "false"},
 )
 
-# Enables usage of ARM SME2 kernels.
+# Enables usage of ARM SME2 and later SME2.x kernels, including SME2.1.
+# Runtime dispatch checks the corresponding hardware feature separately.
 config_setting(
     name = "xnn_enable_arm_sme2_explicit_true",
     define_values = {"xnn_enable_arm_sme2": "true"},

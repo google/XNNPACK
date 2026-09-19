@@ -257,6 +257,7 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_arm_sve2, cpuinfo_has_arm_sve2());
   set_arch_flag(xnn_arch_arm_sme, cpuinfo_has_arm_sme());
   set_arch_flag(xnn_arch_arm_sme2, cpuinfo_has_arm_sme2());
+  set_arch_flag(xnn_arch_arm_sme2p1, cpuinfo_has_arm_sme2p1());
 #endif
 
 #if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_CPUINFO
