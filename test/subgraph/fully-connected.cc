@@ -240,11 +240,15 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   std::bernoulli_distribution flag_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-#ifndef XNNPACK_USE_YNNPACK
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   if (require_qp8_qc2w && xnn_init_qp8_f32_qc2w_gemm_config() == nullptr) {
     GTEST_SKIP() << "QP8 F32 QC2W is not available";
   }
-#endif
+#else
+  if (require_qp8_qc2w) {
+    GTEST_SKIP() << "QP8 F32 QC2W is not available";
+  }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 
   auto input_gen = MakeDatatypeGenerator(Input());
   auto output_gen = MakeDatatypeGenerator(Output());
@@ -553,7 +557,7 @@ TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
 
-#ifndef XNNPACK_USE_YNNPACK
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 static void TestQD8F32QC2WPackingSelection(
     size_t input_channels, uint32_t fully_connected_flags,
     bool nonzero_channelwise_zero_point, bool expect_qp8) {
@@ -759,7 +763,7 @@ TEST(FullyConnectedQS8QC4W, transposed_weights_use_unpacked_lhs) {
   EXPECT_EQ(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
   EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_invalid);
 }
-#endif  // XNNPACK_USE_YNNPACK
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
 
@@ -817,6 +821,7 @@ TEST(FullyConnectedQD8F32QC4W, static_b) {
 TEST(FullyConnectedQD8F32QC2W, static_b) {
   TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 TEST(FullyConnectedQP8F32QC2W, static_b) {
   TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8,
                                     /*block_size=*/no_blockwise,
@@ -829,6 +834,7 @@ TEST(FullyConnectedQP8F32QC2W, batch_size_1_inline_lhs_packing) {
                                     /*test_config=*/
                                         StaticBTestConfig::kQp8Qc2wUnitBatch);
 }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
@@ -1051,7 +1057,7 @@ TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && !defined(XNNPACK_USE_YNNPACK)
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_inline) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
@@ -1278,7 +1284,7 @@ TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_no_inline) {
 
   xnn_delete_subgraph(subgraph);
 }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && !defined(XNNPACK_USE_YNNPACK)
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 
 #ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
