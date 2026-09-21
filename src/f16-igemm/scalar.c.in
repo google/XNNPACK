@@ -120,7 +120,7 @@ void xnn_f16_igemm${SUFFIX}_ukernel_${MR}x${NR}__scalar(
             $for N in range(1 << LOG2N):
               c${M}[${N}] = xnn_float16_from_float(vacc${M}${N});
             $if LOG2N != 0:
-              $for N in range(NR - (1 << LOG2N) - 1):
+              $for N in range((1 << LOG2N) - 1):
                 vacc${M}${N} = vacc${M}${N + (1 << LOG2N)};
               c${M} += ${1 << LOG2N};
         }

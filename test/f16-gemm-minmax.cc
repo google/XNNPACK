@@ -1685,18 +1685,18 @@ std::vector<GemmTestParams> CreateTests1(
 
 
 INSTANTIATE_TEST_SUITE_P(
-    F16_GEMM_MINMAX_1X8__SCALAR, GemmTest,
+    F16_GEMM_MINMAX_1X4__SCALAR, GemmTest,
     testing::ValuesIn(CreateTests1(
         /*k_block=*/1,
         /*adj_k_block=*/1,
-        /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+        /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
         /*planes=*/1,
         [](GemmMicrokernelTester& tester) {
-          tester.Test(xnn_f16_gemm_minmax_ukernel_1x8__scalar,
+          tester.Test(xnn_f16_gemm_minmax_ukernel_1x4__scalar,
                       xnn_init_f16_minmax_scalar_params,
-                      xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
+                      xnn_pack_f16_gemm_goi_w);
         },
         0)),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -1705,18 +1705,18 @@ INSTANTIATE_TEST_SUITE_P(
 
 
 INSTANTIATE_TEST_SUITE_P(
-    F16_GEMM_MINMAX_4X8__SCALAR, GemmTest,
+    F16_GEMM_MINMAX_4X4__SCALAR, GemmTest,
     testing::ValuesIn(CreateTests1(
         /*k_block=*/1,
         /*adj_k_block=*/1,
-        /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+        /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
         /*planes=*/1,
         [](GemmMicrokernelTester& tester) {
-          tester.Test(xnn_f16_gemm_minmax_ukernel_4x8__scalar,
+          tester.Test(xnn_f16_gemm_minmax_ukernel_4x4__scalar,
                       xnn_init_f16_minmax_scalar_params,
-                      xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
+                      xnn_pack_f16_gemm_goi_w);
         },
         0)),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {

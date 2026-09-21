@@ -693,27 +693,27 @@ namespace {
 #endif  // XNN_ENABLE_WASMRELAXEDSIMDFP16 && XNN_ARCH_WASMRELAXEDSIMD
 
 
-static void f16_gemm_minmax_ukernel_1x8__scalar(benchmark::State& state) {
+static void f16_gemm_minmax_ukernel_1x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
-    xnn_f16_gemm_minmax_ukernel_1x8__scalar,
+    xnn_f16_gemm_minmax_ukernel_1x4__scalar,
     xnn_init_f16_minmax_scalar_params,
-    xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4,
-    /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+    xnn_pack_f16_gemm_goi_w,
+    /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
     /*arch_flags=*/0);
 }
 
-BENCHMARK_GEMM(f16_gemm_minmax_ukernel_1x8__scalar)
+BENCHMARK_GEMM(f16_gemm_minmax_ukernel_1x4__scalar)
 
-static void f16_gemm_minmax_ukernel_4x8__scalar(benchmark::State& state) {
+static void f16_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
-    xnn_f16_gemm_minmax_ukernel_4x8__scalar,
+    xnn_f16_gemm_minmax_ukernel_4x4__scalar,
     xnn_init_f16_minmax_scalar_params,
-    xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4,
-    /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+    xnn_pack_f16_gemm_goi_w,
+    /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
     /*arch_flags=*/0);
 }
 
-BENCHMARK_GEMM(f16_gemm_minmax_ukernel_4x8__scalar)
+BENCHMARK_GEMM(f16_gemm_minmax_ukernel_4x4__scalar)
 
 #if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
   static void f16_gemm_minmax_ukernel_1x4v__rvvfp16arith(benchmark::State& state) {
