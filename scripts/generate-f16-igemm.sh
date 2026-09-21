@@ -5,8 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 ##################################### Scalar ####################################
-tools/xngen src/f16-igemm/scalar.c.in -D MR=1 -D NR=8 -D ACTIVATION=MINMAX -o src/f16-igemm/gen/f16-igemm-1x8-minmax-scalar.c &
-tools/xngen src/f16-igemm/scalar.c.in -D MR=4 -D NR=8 -D ACTIVATION=MINMAX -o src/f16-igemm/gen/f16-igemm-4x8-minmax-scalar.c &
+tools/xngen src/f16-igemm/scalar.c.in -D MR=1 -D NR=4 -D ACTIVATION=MINMAX -o src/f16-igemm/gen/f16-igemm-1x4-minmax-scalar.c &
+tools/xngen src/f16-igemm/scalar.c.in -D MR=4 -D NR=4 -D ACTIVATION=MINMAX -o src/f16-igemm/gen/f16-igemm-4x4-minmax-scalar.c &
 
 ########################## ARM NEON with FP16 compute #########################
 ### LD64 micro-kernels

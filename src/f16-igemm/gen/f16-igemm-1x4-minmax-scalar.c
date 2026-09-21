@@ -18,7 +18,7 @@
 #include "src/xnnpack/microparams.h"
 
 
-void xnn_f16_igemm_minmax_ukernel_1x8__scalar(
+void xnn_f16_igemm_minmax_ukernel_1x4__scalar(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -53,11 +53,7 @@ void xnn_f16_igemm_minmax_ukernel_1x8__scalar(
     float vacc01 = xnn_float16_to_float(w[1]);
     float vacc02 = xnn_float16_to_float(w[2]);
     float vacc03 = xnn_float16_to_float(w[3]);
-    float vacc04 = xnn_float16_to_float(w[4]);
-    float vacc05 = xnn_float16_to_float(w[5]);
-    float vacc06 = xnn_float16_to_float(w[6]);
-    float vacc07 = xnn_float16_to_float(w[7]);
-    w += 8;
+    w += 4;
 
     size_t p = ks;
     do {
@@ -76,20 +72,12 @@ void xnn_f16_igemm_minmax_ukernel_1x8__scalar(
         const float vb1 = xnn_float16_to_float(w[1]);
         const float vb2 = xnn_float16_to_float(w[2]);
         const float vb3 = xnn_float16_to_float(w[3]);
-        const float vb4 = xnn_float16_to_float(w[4]);
-        const float vb5 = xnn_float16_to_float(w[5]);
-        const float vb6 = xnn_float16_to_float(w[6]);
-        const float vb7 = xnn_float16_to_float(w[7]);
-        w += 8;
+        w += 4;
 
         vacc00 = math_muladd_f32(va0, vb0, vacc00);
         vacc01 = math_muladd_f32(va0, vb1, vacc01);
         vacc02 = math_muladd_f32(va0, vb2, vacc02);
         vacc03 = math_muladd_f32(va0, vb3, vacc03);
-        vacc04 = math_muladd_f32(va0, vb4, vacc04);
-        vacc05 = math_muladd_f32(va0, vb5, vacc05);
-        vacc06 = math_muladd_f32(va0, vb6, vacc06);
-        vacc07 = math_muladd_f32(va0, vb7, vacc07);
 
         k -= sizeof(xnn_float16);
       } while (k != 0);
@@ -100,51 +88,25 @@ void xnn_f16_igemm_minmax_ukernel_1x8__scalar(
     vacc01 = math_max_f32(vacc01, vmin);
     vacc02 = math_max_f32(vacc02, vmin);
     vacc03 = math_max_f32(vacc03, vmin);
-    vacc04 = math_max_f32(vacc04, vmin);
-    vacc05 = math_max_f32(vacc05, vmin);
-    vacc06 = math_max_f32(vacc06, vmin);
-    vacc07 = math_max_f32(vacc07, vmin);
 
     vacc00 = math_min_f32(vacc00, vmax);
     vacc01 = math_min_f32(vacc01, vmax);
     vacc02 = math_min_f32(vacc02, vmax);
     vacc03 = math_min_f32(vacc03, vmax);
-    vacc04 = math_min_f32(vacc04, vmax);
-    vacc05 = math_min_f32(vacc05, vmax);
-    vacc06 = math_min_f32(vacc06, vmax);
-    vacc07 = math_min_f32(vacc07, vmax);
-    if XNN_LIKELY(nc >= 8) {
+    if XNN_LIKELY(nc >= 4) {
       c0[0] = xnn_float16_from_float(vacc00);
       c0[1] = xnn_float16_from_float(vacc01);
       c0[2] = xnn_float16_from_float(vacc02);
       c0[3] = xnn_float16_from_float(vacc03);
-      c0[4] = xnn_float16_from_float(vacc04);
-      c0[5] = xnn_float16_from_float(vacc05);
-      c0[6] = xnn_float16_from_float(vacc06);
-      c0[7] = xnn_float16_from_float(vacc07);
       c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
       a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
-      nc -= 8;
+      nc -= 4;
     } else {
-      if (nc & 4) {
-        c0[0] = xnn_float16_from_float(vacc00);
-        c0[1] = xnn_float16_from_float(vacc01);
-        c0[2] = xnn_float16_from_float(vacc02);
-        c0[3] = xnn_float16_from_float(vacc03);
-        vacc00 = vacc04;
-        vacc01 = vacc05;
-        vacc02 = vacc06;
-        c0 += 4;
-      }
       if (nc & 2) {
         c0[0] = xnn_float16_from_float(vacc00);
         c0[1] = xnn_float16_from_float(vacc01);
         vacc00 = vacc02;
-        vacc01 = vacc03;
-        vacc02 = vacc04;
-        vacc03 = vacc05;
-        vacc04 = vacc06;
         c0 += 2;
       }
       if (nc & 1) {
