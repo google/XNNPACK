@@ -113,8 +113,7 @@ static void init_f16_dwconv_config(void) {
         f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
         f16_dwconv_config[3].channel_tile = 32;
         f16_dwconv_config[3].primary_tile = 25;
-        return;
-      }
+      } else
     #endif  // XNN_ENABLE_AVX512FP16
     #if XNN_ENABLE_FMA3
       if (hardware_config->arch_flags & xnn_arch_x86_fma3) {
@@ -137,28 +136,29 @@ static void init_f16_dwconv_config(void) {
         f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
         f16_dwconv_config[3].channel_tile = 8;
         f16_dwconv_config[3].primary_tile = 25;
-        return;
-      }
+      } else
     #endif  // XNN_ENABLE_FMA3
-    f16_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_3p1c__scalar_acc2);
-    f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
-    f16_dwconv_config[0].channel_tile = 1;
-    f16_dwconv_config[0].primary_tile = 3;
+    {
+      f16_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_3p1c__scalar_acc2);
+      f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_dwconv_config[0].channel_tile = 1;
+      f16_dwconv_config[0].primary_tile = 3;
 
-    f16_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_4p1c__scalar_acc2);
-    f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_scalar_params;
-    f16_dwconv_config[1].channel_tile = 1;
-    f16_dwconv_config[1].primary_tile = 4;
+      f16_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_4p1c__scalar_acc2);
+      f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_dwconv_config[1].channel_tile = 1;
+      f16_dwconv_config[1].primary_tile = 4;
 
-    f16_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_9p1c__scalar_acc2);
-    f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
-    f16_dwconv_config[2].channel_tile = 1;
-    f16_dwconv_config[2].primary_tile = 9;
+      f16_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_9p1c__scalar_acc2);
+      f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_dwconv_config[2].channel_tile = 1;
+      f16_dwconv_config[2].primary_tile = 9;
 
-    f16_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_25p2c__scalar_acc2);
-    f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
-    f16_dwconv_config[3].channel_tile = 2;
-    f16_dwconv_config[3].primary_tile = 25;
+      f16_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_25p2c__scalar_acc2);
+      f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_dwconv_config[3].channel_tile = 2;
+      f16_dwconv_config[3].primary_tile = 25;
+    }
   #elif XNN_ARCH_WASMRELAXEDSIMDFP16
     f16_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_3p1c__scalar_acc2);
     f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;

@@ -798,4 +798,188 @@ TEST(fusion, reduce_sum_to_dot_f32) {
       AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)), InputsAre(a_id)));
 }
 
+TEST(fusion, reduce_sum_of_gather_constant) {
+  const uint32_t w_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t y_id = 2;
+  uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+  const std::vector<float> w_data(4 * 3 * 2, 1.0f);
+
+  SubgraphBuilder builder(3);
+  uint32_t w_tensor_id = w_id;
+  builder.AddTensor(ynn_type_fp32, {4, 3, 2}, w_tensor_id, w_data.data())
+      .AddInput(ynn_type_int32, {1, 1, 2, 1, 1}, index_id)
+      .AddOutput(ynn_type_fp32, 5, y_id)
+      .AddTensor(ynn_type_fp32, 5, gathered_id);
+
+  // y = sum(gather(w, index), axis=-2)
+  // This should rewrite to gather(sum(w, axis=-2), index): the reduction moves
+  // onto the constant so it folds at build time instead of running on every
+  // invocation.
+  builder
+      .AddGather(/*axes=*/{0}, /*output_rank=*/5, w_id, index_id, gathered_id)
+      .AddReduce(ynn_reduce_sum, /*reduce_axes=*/{-2}, gathered_id,
+                 YNN_INVALID_VALUE_ID, y_id, YNN_NODE_FLAG_KEEP_DIMS);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& gather_node = ProducerOf(y_id, subgraph);
+  ASSERT_THAT(gather_node, AllOf(IsGather(), InputsInclude(index_id)));
+  EXPECT_THAT(ProducerOf(gather_node.inputs[0], subgraph),
+              AllOf(IsReduce(ynn_reduce_sum), InputsInclude(w_id)));
+}
+
+TEST(fusion, reduce_sum_of_gather_non_constant) {
+  const uint32_t w_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t y_id = 2;
+  uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(3);
+  builder.AddInput(ynn_type_fp32, {4, 3, 2}, w_id)
+      .AddInput(ynn_type_int32, {1, 1, 2, 1, 1}, index_id)
+      .AddOutput(ynn_type_fp32, 5, y_id)
+      .AddTensor(ynn_type_fp32, 5, gathered_id);
+
+  // Same graph, but w is not constant, so this should not be rewritten: the
+  // reduction would not fold, and moving it above a narrowing gather makes it
+  // much more expensive, running over every expert rather than only the
+  // selected ones.
+  builder
+      .AddGather(/*axes=*/{0}, /*output_rank=*/5, w_id, index_id, gathered_id)
+      .AddReduce(ynn_reduce_sum, /*reduce_axes=*/{-2}, gathered_id,
+                 YNN_INVALID_VALUE_ID, y_id, YNN_NODE_FLAG_KEEP_DIMS);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& reduce_node = ProducerOf(y_id, subgraph);
+  ASSERT_THAT(reduce_node, IsReduce(ynn_reduce_sum));
+  EXPECT_THAT(ProducerOf(reduce_node.inputs[0], subgraph),
+              AllOf(IsGather(), InputsInclude(w_id, index_id)));
+}
+
+namespace {
+
+// Runs `subgraph`, optionally optimizing (and therefore fusing) it first, and
+// returns the contents of the output tensor.
+std::vector<float> RunGatherReduce(ynn_subgraph_t subgraph, uint32_t index_id,
+                                   const std::vector<size_t>& index_shape,
+                                   std::vector<int32_t>& index_data,
+                                   uint32_t y_id, size_t y_size,
+                                   bool optimize) {
+  std::vector<float> y(y_size, -1.0f);
+  Runtime runtime(subgraph, nullptr, /*flags=*/0, optimize);
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+  runtime.ReshapeExternalTensor(index_shape, index_data.data(), index_id);
+  runtime.SetupExternalTensor(y.data(), y_id);
+  EXPECT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_success);
+  EXPECT_EQ(runtime.InvokeRuntime().Status(), ynn_status_success);
+  return y;
+}
+
+}  // namespace
+
+TEST(fusion, reduce_sum_of_gather_index_varies_along_reduced_dim) {
+  const uint32_t index_id = 0;
+  const uint32_t y_id = 1;
+
+  // w[e][j][c] = e * 8 + j * 4 + c + 1, shape {3, 2, 4}.
+  std::vector<float> w_data(3 * 2 * 4);
+  for (size_t i = 0; i < w_data.size(); ++i) w_data[i] = i + 1;
+
+  // index[b][r][c], shape {2, 2, 4}, gathering dim 0 of `w`. The index varies
+  // along dim 1, which is the dim the reduction reduces, so the reduction sums
+  // elements of `w` selected by different indices and cannot be hoisted above
+  // the gather.
+  const std::vector<size_t> index_shape = {2, 2, 4};
+  std::vector<int32_t> index_data(2 * 2 * 4);
+  for (size_t b = 0; b < 2; ++b) {
+    for (size_t c = 0; c < 4; ++c) {
+      index_data[b * 8 + 0 * 4 + c] = 0;
+      index_data[b * 8 + 1 * 4 + c] = 2;
+    }
+  }
+
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(2);
+  builder.AddTensor(ynn_type_fp32, {3, 2, 4}, w_id, w_data.data(),
+                    YNN_VALUE_FLAG_COPY_DATA)
+      .AddInput(ynn_type_int32, index_shape, index_id)
+      .AddOutput(ynn_type_fp32, 3, y_id)
+      .AddTensor(ynn_type_fp32, 3, gathered_id);
+
+  builder.AddGather(/*axes=*/{0}, /*output_rank=*/3, w_id, index_id,
+                    gathered_id)
+      .AddReduce(ynn_reduce_sum, /*reduce_axes=*/{1}, gathered_id,
+                 YNN_INVALID_VALUE_ID, y_id, YNN_NODE_FLAG_KEEP_DIMS);
+
+  const size_t y_size = 2 * 1 * 4;
+  std::vector<float> unfused =
+      RunGatherReduce(builder.GetSubgraph(), index_id, index_shape, index_data,
+                      y_id, y_size, /*optimize=*/false);
+  std::vector<float> fused =
+      RunGatherReduce(builder.GetSubgraph(), index_id, index_shape, index_data,
+                      y_id, y_size, /*optimize=*/true);
+
+  // w[0][0][c] + w[2][1][c] = 2c + 22.
+  EXPECT_THAT(unfused, ElementsAre(22, 24, 26, 28, 22, 24, 26, 28));
+  EXPECT_EQ(fused, unfused);
+
+  // The reduction must still consume the gather.
+  EXPECT_THAT(ProducerOf(y_id, *builder.GetSubgraph()),
+              IsReduce(ynn_reduce_sum));
+}
+
+TEST(fusion, reduce_min_max_of_gather) {
+  const uint32_t index_id = 0;
+  const uint32_t y_id = 1;
+
+  std::vector<float> w_data(3 * 2 * 4);
+  for (size_t i = 0; i < w_data.size(); ++i) w_data[i] = i + 1;
+
+  // The index is a broadcast along the reduced dim, so the only thing
+  // preventing the rewrite is the extra dim `ynn_reduce_min_max` appends to
+  // the reduction output.
+  const std::vector<size_t> index_shape = {2, 1, 4};
+  std::vector<int32_t> index_data(2 * 1 * 4);
+  for (size_t b = 0; b < 2; ++b) {
+    for (size_t c = 0; c < 4; ++c) {
+      index_data[b * 4 + c] = b == 0 ? 0 : 2;
+    }
+  }
+
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(2);
+  builder.AddTensor(ynn_type_fp32, {3, 2, 4}, w_id, w_data.data(),
+                    YNN_VALUE_FLAG_COPY_DATA)
+      .AddInput(ynn_type_int32, index_shape, index_id)
+      .AddOutput(ynn_type_fp32, 4, y_id)
+      .AddTensor(ynn_type_fp32, 3, gathered_id);
+
+  builder.AddGather(/*axes=*/{0}, /*output_rank=*/3, w_id, index_id,
+                    gathered_id)
+      .AddReduce(ynn_reduce_min_max, /*reduce_axes=*/{1}, gathered_id,
+                 YNN_INVALID_VALUE_ID, y_id, YNN_NODE_FLAG_KEEP_DIMS);
+
+  const size_t y_size = 2 * 1 * 4 * 2;
+  std::vector<float> unfused =
+      RunGatherReduce(builder.GetSubgraph(), index_id, index_shape, index_data,
+                      y_id, y_size, /*optimize=*/false);
+  std::vector<float> fused =
+      RunGatherReduce(builder.GetSubgraph(), index_id, index_shape, index_data,
+                      y_id, y_size, /*optimize=*/true);
+  EXPECT_EQ(fused, unfused);
+
+  // The reduction must still consume the gather.
+  EXPECT_THAT(ProducerOf(y_id, *builder.GetSubgraph()),
+              IsReduce(ynn_reduce_min_max));
+}
+
+
 }  // namespace ynn

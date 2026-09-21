@@ -5,6 +5,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/kai-dwconv.h"
 
@@ -12,7 +13,10 @@
 #include "kai/kai_common.h"
 #include "kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p_interface.h"
 
-// KleidiAI's public interface does not declare concrete kernel symbols.
+// KleidiAI's public headers hide SME helpers unless SVE2 is enabled and do not
+// declare concrete kernel symbols. This forwarding wrapper must remain usable
+// on SME2-only CPUs, so declare the linked symbols directly.
+extern uint64_t kai_get_sme_vector_length_u8(void);
 extern size_t
 kai_get_m_step_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla(void);
 extern void kai_run_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla(
@@ -38,7 +42,7 @@ void xnn_kai_f32_dwconv_minmax_ukernel_9pvc__neonsme2(
 
 size_t xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile(void) {
 #if XNN_ENABLE_KLEIDIAI
-  return kai_get_sme_vector_length_u32();
+  return kai_get_sme_vector_length_u8() / sizeof(float);
 #else
   return 1;
 #endif  // XNN_ENABLE_KLEIDIAI

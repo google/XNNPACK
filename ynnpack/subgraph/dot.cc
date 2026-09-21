@@ -733,7 +733,8 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
     // don't require their steps, so they adopt the loops of the dot as
     // before.
     std::vector<slinky::expr> given_splits = {output.physical_extent(0),
-                                              output.physical_extent(1)};
+                                              output.physical_extent(1),
+                                              output.physical_extent(2)};
     auto sched =
         runtime.make_schedule(dims, output.physical_extents(),
                               output.buffer->elem_size(), given_splits);

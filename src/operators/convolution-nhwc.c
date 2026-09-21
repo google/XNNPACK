@@ -198,9 +198,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_vmulcaddc_path(
 
   if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
     const size_t c_stride = round_up_po2(groups, vmulcaddc_config->channel_tile);
-    const size_t packed_weights_size =
-        ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) *
-        c_stride;
+    const size_t per_channel_bytes =
+        ((size_t)1 << log2_filter_element_size) + bias_element_size;
+    size_t packed_weights_size = 0;
+    if (!xnn_safe_mul(per_channel_bytes, c_stride, &packed_weights_size)) {
+      xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                    xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
     size_t aligned_total_weights_size =
         round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
     void* weights_ptr = xnn_get_pointer_to_write_weights(
@@ -279,10 +284,21 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_packed_weights(
       convolution_op->packed_weights.offset != XNN_CACHE_NOT_FOUND;
 
   const size_t c_stride = round_up(groups, channel_tile);
+  size_t per_channel_bytes = 0;
+  if (!xnn_safe_mul((size_t)primary_tile, (size_t)1 << log2_filter_element_size,
+                    &per_channel_bytes) ||
+      !xnn_safe_add(per_channel_bytes, bias_element_size, &per_channel_bytes) ||
+      !xnn_safe_add(per_channel_bytes, extra_weights_bytes, &per_channel_bytes)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   size_t packed_weights_size = 0;
-  packed_weights_size = ((primary_tile << log2_filter_element_size) +
-                         bias_element_size + extra_weights_bytes) *
-                        c_stride;
+  if (!xnn_safe_mul(per_channel_bytes, c_stride, &packed_weights_size)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
   size_t aligned_total_weights_size =
       round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);

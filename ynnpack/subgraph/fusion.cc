@@ -2158,10 +2158,119 @@ bool is_constant_value(const ynn_subgraph& subgraph, uint32_t value_id,
   return true;
 }
 
+// Rewrite reduce(gather(w, index, axes), r) to gather(reduce(w, r), index, r').
+//
+// `gather` here is dimension aligned: output dimension `d` takes its extent
+// from the index if `d` is a gathered axis, and from the input otherwise. The
+// reduced axes therefore map onto the gather input unchanged, as long as they
+// are not themselves gathered and lie within the input's rank.
+//
+// This is only performed when the gather input is constant, so that the
+// reduction constant folds and costs nothing at runtime. Without a constant
+// input the rewrite can be a large pessimization: when the gather narrows, the
+// reduction is much cheaper after the gather than before it.
+bool rewrite_reduce_gather(ynn_subgraph& subgraph, ynn_node& node,
+                           subgraph_analysis& analysis) {
+  const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
+  if (!reduce_op) return false;
+
+  // A non-trivial reduction initializer is shaped for the gathered output and
+  // would not match the pre-gather reduction result.
+  if (node.inputs.size() > 1 && node.inputs[1] != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+
+  const ynn_node::gather* gather_op =
+      std::get_if<ynn_node::gather>(&producer->op);
+  if (!gather_op) return false;
+
+  // The gather node is not modified: this rewrite adds a second, much cheaper
+  // gather of the constant folded reduction. The number of consumers of the
+  // gather therefore doesn't matter, and the gather is removed as dead code if
+  // this was its only consumer.
+  const uint32_t w_id = producer->inputs[0];
+  const uint32_t index_id = producer->inputs[1];
+  const ynn_value& w = subgraph.value(w_id);
+
+  if (!is_constant_value(subgraph, w_id, analysis)) return false;
+
+  const size_t output_rank = subgraph.value(producer->outputs[0]).rank();
+
+  // `k_dims` can legitimately be empty: `ynn_define_reduce` drops axes that
+  // are out of range of the input rank (reductions of implicit broadcasts).
+  // Such a reduce is a copy, and rewriting it replaces the copy with a
+  // duplicate of the gather plus a no-op reduce of `w`, which constant folds
+  // into a second copy of `w` and doesn't make sense.
+  if (reduce_op->k_dims.none()) return false;
+
+  // `ynn_reduce_min_max` appends a dimension holding the min/max pair to the
+  // reduction output, so its output rank is one more than the rank the
+  // rewritten gather produces. Hoisting it would silently drop that dimension.
+  if (reduce_op->op == ynn_reduce_min_max) return false;
+
+  const ynn_value& index = subgraph.value(index_id);
+
+  // Every reduced axis must exist in the gather input and must not be gathered.
+  for (size_t d = 0; d < output_rank; ++d) {
+    if (!reduce_op->k_dims[d]) continue;
+    if (d >= w.rank()) return false;
+    if (std::find(gather_op->axes.begin(), gather_op->axes.end(),
+                  static_cast<int32_t>(d)) != gather_op->axes.end()) {
+      return false;
+    }
+    // The index must also be a broadcast along the reduced axes. If it varies
+    // along a reduced axis, `reduce(gather(w, index))` combines elements of
+    // `w` selected by *different* indices, which `gather(reduce(w), index)`
+    // cannot express: it reduces `w` along the axis first and then applies a
+    // single index.
+    if (d < index.rank() && index.extents[d].defined()) return false;
+  }
+
+  // Only rewrite rank preserving reductions. `gather` is dimension aligned, so
+  // dropping the reduced dimensions from the data would leave the index
+  // tensor, whose rank still matches the original output, misaligned against
+  // it.
+  if (!reduce_op->keep_dims) return false;
+
+  // Save the reduce properties: `reduce_op` points into `node.op`, which is
+  // overwritten below.
+  const ynn_reduce_operator op = reduce_op->op;
+  const ynn::axes_set k_dims = reduce_op->k_dims;
+
+  YNN_LOG_DEBUG()
+      << "Rewriting reduce(gather(w, index)) to gather(reduce(w), index)";
+
+  // 1. Reduce the constant input.
+  uint32_t w_reduced_id = YNN_INVALID_VALUE_ID;
+  ynn_node reduce_node;
+  ynn::define_reduce(subgraph, reduce_node, op, k_dims, w_id,
+                     YNN_INVALID_VALUE_ID, &w_reduced_id, /*keep_dims=*/true);
+  subgraph.add_node(std::move(reduce_node));
+
+  // 2. Redefine the reduce node as a gather of the reduced constant. The
+  // original gather node is left untouched for its remaining consumers.
+  node.checks.clear();
+  uint32_t output_id = node.outputs[0];
+  ynn::define_gather(subgraph, node, gather_op->axes, output_rank, w_reduced_id,
+                     index_id, output_id);
+
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
 // Rewrite pack_b(gather(w, index, axes)) to
 // gather(pack_b(w), expand_dims(index), axes + 2)
 // where w is a constant tensor and all axes in gather are >= 2 (batch
 // dimensions).
+//
+// The gather node is not modified: this rewrite adds a new `pack_b` of the
+// constant `w`, which constant folds, and gathers its result instead. The
+// number of consumers of the gather therefore doesn't matter, and the gather
+// is removed as dead code if this was its only consumer.
 bool rewrite_pack_b_gather(ynn_subgraph& subgraph, ynn_node& node,
                            subgraph_analysis& analysis) {
   if (!std::holds_alternative<ynn_node::pack_b>(node.op)) return false;
@@ -2172,12 +2281,6 @@ bool rewrite_pack_b_gather(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_node::gather* gather_op =
       std::get_if<ynn_node::gather>(&producer->op);
   if (!gather_op) return false;
-
-  // Only rewrite if we won't break other consumers of the gather.
-  if (analysis.consumers[producer->outputs[0]].size() != 1 ||
-      subgraph.value(producer->outputs[0]).is_external_output()) {
-    return false;
-  }
 
   // Check if gather axes are all >= 2 (batch dimensions in Slinky).
   if (std::any_of(gather_op->axes.begin(), gather_op->axes.end(),
@@ -2217,12 +2320,14 @@ bool rewrite_pack_b_gather(ynn_subgraph& subgraph, ynn_node& node,
   }
   uint32_t packed_w_id = packed_w.id;
 
-  // 3. Redefine producer (the old gather node) as pack_b(w)
-  producer->checks.clear();
-  producer->inputs = {w_id};
-  producer->outputs = {packed_w_id};
-  producer->op = ynn_node::pack_b{};
-  producer->create = node.create;
+  // 3. Add a new pack_b(w) node. The gather node is left untouched for its
+  // remaining consumers.
+  ynn_node pack_w_node;
+  pack_w_node.inputs = {w_id};
+  pack_w_node.outputs = {packed_w_id};
+  pack_w_node.op = ynn_node::pack_b{};
+  pack_w_node.create = node.create;
+  subgraph.add_node(std::move(pack_w_node));
 
   // 4. Expand index dimensions by inserting 2 unit dimensions at dims 0, 1 so
   // that index batch dimensions align with packed_w batch dimensions (shifted
@@ -2587,6 +2692,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 ynn::rewrite_reduce_convert(*this, node, analysis) ||
                 ynn::rewrite_reduce_static_transpose(*this, node, analysis) ||
+                ynn::rewrite_reduce_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_gather(*this, node, analysis) ||
                 ynn::rewrite_fast_math(*this, node, analysis) ||
                 ynn::rewrite_requantize_quantize(*this, node, analysis) ||

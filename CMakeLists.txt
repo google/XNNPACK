@@ -130,7 +130,9 @@ OPTION(XNNPACK_ENABLE_ARM_BF16 "Build XNNPACK with ARM BF16 (BFLOAT16) micro-ker
 OPTION(XNNPACK_ENABLE_ARM_DOTPROD "Build XNNPACK with ARM DotProd (integer dot product) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_I8MM "Build XNNPACK with ARM I8MM (8-bit integer matrix multiply accumulate) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_SME "Build XNNPACK with ARM SME micro-kernels" ON)
-OPTION(XNNPACK_ENABLE_ARM_SME2 "Build XNNPACK with ARM SME2 micro-kernels" ON)
+# This is the build-time gate for SME2 and later SME2.x micro-kernels, including
+# SME2.1. Runtime dispatch checks the corresponding hardware feature separately.
+OPTION(XNNPACK_ENABLE_ARM_SME2 "Build XNNPACK with ARM SME2 and later SME2.x micro-kernels" ON)
 
 IF(NOT XNNPACK_TARGET_PROCESSOR MATCHES "arm(64)?")
   SET(XNNPACK_ENABLE_ARM_FP16_SCALAR OFF)
