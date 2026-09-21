@@ -947,11 +947,12 @@ constexpr index_t max_multiplier_k = radix_k - 1;
 constexpr index_t step_m = 16;
 constexpr index_t step_k = 1024;
 
-std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
-                                                           index_t k,
-                                                           index_t block_n,
-                                                           size_t a_elem_size) {
+std::tuple<index_t, index_t, index_t> choose_split_factors(
+    index_t m, index_t n, index_t k, index_t block_n, const dot_kernel& kernel,
+    size_t a_elem_size, size_t b_elem_size) {
   assert(block_n > 0);
+  assert(a_elem_size > 0);
+  assert(b_elem_size > 0);
 
   // If k gets big, we're going to tile k anyways. It could be faster to
   // parallelize more finely, but it will waste CPU cycles due to more memory
@@ -968,20 +969,33 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   const index_t min_area_1d = 256;
   const index_t min_area = std::max<index_t>(min_area_2d, min_area_1d);
   const index_t max_area = 256 * 256;
-  // The maximum cost of a tile, according to the cost function (m + n) * k.
-  const index_t max_cost = 1024 * 64;
+
+  // The maximum memory footprint of a tile in bytes (inputs A and B).
+  // This budget is limited by L2 cache capacity and is independent of compute
+  // throughput.
+  const index_t max_mem_cost = 2 * cache_size_l2;
+
+  // The maximum arithmetic operations per tile.
+  // We scale this for more powerful kernels (e.g. AMX, SME) because they
+  // execute operations significantly faster per cycle, so tasks need more work
+  // to amortize scheduling overhead.
+  const index_t block_ops = kernel.tile_m * kernel.tile_n * kernel.tile_k;
+  const index_t max_op_cost =
+      1024 * 1024 * 2 * std::max<index_t>(1, block_ops / 16);
 
   // A parameter indicating the target split_m/split_n ratio.
   // TODO(b/438841352): Figure out why we want tall skinny tiles, at least on
   // AMD Rome.
-  const index_t aspect_ratio = 4;
+  const index_t aspect_ratio = 2;
 
   index_t split_n = std::min<index_t>(n, block_n);
   index_t split_m = std::min<index_t>(m, step_m);
   while (true) {
     if (split_n * split_m >= min_area) {
-      // We've reached the minimum tile size, should we stop?
-      if ((split_m + split_n) * effective_k >= max_cost ||
+      const index_t mem_cost =
+          (split_m * a_elem_size + split_n * b_elem_size) * effective_k;
+      const index_t op_cost = split_m * split_n * effective_k;
+      if (mem_cost >= max_mem_cost || op_cost >= max_op_cost ||
           split_m * split_n >= max_area) {
         // We've reached the maximum task size, we should stop.
         break;
@@ -1035,15 +1049,16 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
 
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n, size_t a_elem_size) {
+    slinky::expr block_n, const dot_kernel& kernel, size_t a_elem_size,
+    size_t b_elem_size) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
     index_t n = evaluate(op->args[1], ctx);
     index_t k = evaluate(op->args[2], ctx);
     index_t block_n = evaluate(op->args[3], ctx);
-    auto [split_n, split_m, split_k] =
-        choose_split_factors(m, n, k, block_n, a_elem_size);
+    auto [split_n, split_m, split_k] = choose_split_factors(
+        m, n, k, block_n, kernel, a_elem_size, b_elem_size);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
     index_t mult_m = std::max<index_t>(1, split_m / step_m);
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
@@ -1389,9 +1404,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                             : std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size,
                                             unpacked_kernel.block_n);
   node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
-                 block_n_unpacked, tile_k = kernel.tile_k,
-                 tile_m = kernel.tile_m](
-                    const ynn_node& node, ynn_runtime& runtime) {
+                 block_n_unpacked,
+                 kernel](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
     ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
@@ -1438,7 +1452,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
         // tile_k. The logical extent of the reduction dimension should be the
         // total number of elements, so we multiply the number of blocks by the
         // block size.
-        k_extent *= tile_k;
+        k_extent *= kernel.tile_k;
       }
       all_extents.push_back(k_extent);
 
@@ -1460,13 +1474,14 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     if (transpose_a) {
       a_bounds[0] = all_bounds(input_a.physical_extent(0));
       a_bounds[1] = all_bounds(input_a.physical_extent(1));
-      a_bounds[2] = slinky::point(slinky::simplify(reduction_dims[0] / tile_k));
+      a_bounds[2] =
+          slinky::point(slinky::simplify(reduction_dims[0] / kernel.tile_k));
       for (size_t d = 1; d < num_k_dims; ++d) {
         a_bounds[2 + d] = slinky::point(reduction_dims[d]);
       }
       if (output_dims.size() >= 2) {
         slinky::var i = output_dims[1];
-        a_bounds.push_back(slinky::point(i) / tile_m);
+        a_bounds.push_back(slinky::point(i) / kernel.tile_m);
       } else {
         a_bounds.push_back(slinky::point(0));
       }
@@ -1483,7 +1498,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     b_bounds[0] = all_bounds(packed_b.physical_extent(0));  // ki
     b_bounds[1] = all_bounds(packed_b.physical_extent(1));  // ni
     if (pack_b) {
-      b_bounds[2] = slinky::point(slinky::simplify(reduction_dims[0] / tile_k));
+      b_bounds[2] =
+          slinky::point(slinky::simplify(reduction_dims[0] / kernel.tile_k));
     } else {
       b_bounds[2] = slinky::point(reduction_dims[0]);
     }
@@ -1560,7 +1576,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     auto [split_n, split_m, split_k] = choose_split_factors(
-        runtime, m, n, k, block_n, type_size_bytes(input_a.type));
+        runtime, m, n, k, block_n, kernel, type_size_bytes(input_a.type),
+        type_size_bytes(packed_b.type));
 
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
