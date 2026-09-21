@@ -320,9 +320,9 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_gemm_minmax_ukernel_8x16__wasmrelaxedsimdfp16_splat)
 
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f16_gemm_minmax_ukernel_1x8__scalar)
+    xnn_f16_gemm_minmax_ukernel_1x4__scalar)
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f16_gemm_minmax_ukernel_4x8__scalar)
+    xnn_f16_gemm_minmax_ukernel_4x4__scalar)
 
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_gemm_minmax_ukernel_1x4v__rvvfp16arith)
