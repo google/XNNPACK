@@ -494,15 +494,15 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_x86_splat)
 
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimdfp16_splat)
+    xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimdfp16_splat)
+    xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_splat)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimdfp16_splat)
+    xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimdfp16_splat)
+    xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_splat)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimdfp16_splat)
+    xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat)
 
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat)
