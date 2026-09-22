@@ -882,7 +882,12 @@ absl::Status OpMixin<MeanOperation, XnnpackMixinTag>::ToXnnpack(
         absl::StrFormat("%s: axes tensor must not be a 0D scalar", op_name));
   }
   const size_t num_axes = axes_info.shape[0];
-  const std::vector<int64_t> axes(axes_data.begin(), axes_data.end());
+  if (axes_data.size() < num_axes) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "%s: axes buffer is smaller than the specified shape", op_name));
+  }
+  const std::vector<int64_t> axes(axes_data.begin(), axes_data.begin() +
+                                                      static_cast<ptrdiff_t>(num_axes));
   // Set XNN_FLAG_KEEP_DIMS if keep_dims is true
   const uint32_t flags = op_data.keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
 
@@ -922,14 +927,17 @@ absl::Status OpMixin<SliceOperation, XnnpackMixinTag>::ToXnnpack(
     return absl::InvalidArgumentError(
         absl::StrFormat("%s: begin must be a constant tensor", op_name));
   }
-  auto begin_locked = begin_info.buffer->Lock();
-  const int32_t* begin_data =
-      reinterpret_cast<const int32_t*>(begin_locked.data());
+  LockedBufferSpan<const int32_t> begin_data =
+      begin_info.buffer->Lock().As<const int32_t>();
   if (begin_info.shape.empty()) {
     return absl::InvalidArgumentError(
         absl::StrFormat("%s: begin tensor must not be a 0D scalar", op_name));
   }
-  size_t num_dims = begin_info.shape[0];
+  const size_t num_dims = begin_info.shape[0];
+  if (begin_data.size() < num_dims) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "%s: begin buffer is smaller than the specified shape", op_name));
+  }
 
   // Get sizes from const tensor
   LRT_TENSOR_ASSIGN_OR_RETURN(const auto& size_info,
@@ -938,9 +946,12 @@ absl::Status OpMixin<SliceOperation, XnnpackMixinTag>::ToXnnpack(
     return absl::InvalidArgumentError(
         absl::StrFormat("%s: size must be a constant tensor", op_name));
   }
-  auto size_locked = size_info.buffer->Lock();
-  const int32_t* size_data =
-      reinterpret_cast<const int32_t*>(size_locked.data());
+  LockedBufferSpan<const int32_t> size_data =
+      size_info.buffer->Lock().As<const int32_t>();
+  if (size_data.size() < num_dims) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "%s: size buffer is smaller than the specified shape", op_name));
+  }
 
   std::vector<size_t> offsets(num_dims);
   std::vector<size_t> sizes(num_dims);
