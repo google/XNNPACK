@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "test/operators/depth-to-space-operator-tester.h"
@@ -149,4 +150,37 @@ TEST(DEPTH_TO_SPACE_NCHW2NHWC_X32, varying_batch_size) {
         .output_channels(17)
         .TestNCHW2NHWCxX32();
   }
+}
+
+TEST(DEPTH_TO_SPACE_NCHW2NHWC_X32, overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t depth_to_space_op = nullptr;
+
+  const uint32_t block_size = 2;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_depth_to_space_nchw2nhwc_x32(block_size, 0, &depth_to_space_op));
+  ASSERT_NE(nullptr, depth_to_space_op);
+
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      depth_to_space_op, xnn_delete_operator);
+
+  // Normal control case: must succeed.
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_depth_to_space_nchw2nhwc_x32(
+                depth_to_space_op, /*batch_size=*/1, /*input_height=*/4, /*input_width=*/4,
+                /*input_channels=*/4, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                /*output_channels_out=*/nullptr, /*threadpool=*/nullptr));
+
+  // Overflow case: input_height * output_stride_1 overflows size_t.
+  // input_width = (SIZE_MAX / 4) + 1, output_channels = 1 (input_channels = 4).
+  // output_stride[2] = ((SIZE_MAX / 4) + 1) * 2 = (SIZE_MAX / 2) + 2.
+  // output_stride[1] = 2 * ((SIZE_MAX / 2) + 2) overflows size_t.
+  const size_t large_width = (SIZE_MAX / 4) + 1;
+  const size_t channels = 4; // block_size^2 * output_channels (2^2 * 1)
+
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_depth_to_space_nchw2nhwc_x32(
+                depth_to_space_op, /*batch_size=*/1, /*input_height=*/1, large_width, channels,
+                /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                /*output_channels_out=*/nullptr, /*threadpool=*/nullptr));
 }
