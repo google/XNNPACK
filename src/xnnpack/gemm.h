@@ -30,6 +30,16 @@ extern "C" {
 DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar)
 DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_gemm_minmax_ukernel_4x8__neonfma_lane_ld64)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_gemm_minmax_ukernel_6x8__neonfma_lane_ld64)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_gemm_minmax_ukernel_1x16__neonfma_lane_ld64)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_gemm_minmax_ukernel_4x16__neonfma_lane_ld64)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512bf16_broadcast)
 DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_bf16_f32_gemm_minmax_ukernel_2x16c2__asm_amd64_avx512bf16_broadcast)

@@ -4458,7 +4458,7 @@ void GemmMicrokernelTester::Test(
   gemm_minmax(m(), n(), k() * sizeof(xnn_bfloat16),
               reinterpret_cast<const uint16_t*>(a.data()),
               a_stride() * sizeof(xnn_bfloat16), packed_w.data(), c.data(),
-              cm_stride() * sizeof(float), /*unused_cn_stride=*/0, &params);
+              cm_stride() * sizeof(float), nr() * sizeof(float), &params);
 
   // Validate micro-kernel outputs.
   for (size_t i = 0; i < m(); i++) {
