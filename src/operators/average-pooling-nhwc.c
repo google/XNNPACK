@@ -630,7 +630,18 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     }
   }
 
-  average_pooling_op->context.average_pooling = (struct average_pooling_context) {
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+  if (!xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, output_batch_stride, &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: total buffer size overflows size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
+  average_pooling_op->context.average_pooling =
+      (struct average_pooling_context) {
     .indirect_input = average_pooling_op->convolution_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
     .indirect_top_height = indirect_top_height,
