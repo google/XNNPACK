@@ -3559,3 +3559,71 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
     ASSERT_EQ(output[i], reference_output[i]) << "at index " << i;
   }
 }
+
+TEST(DECONVOLUTION_NHWC_F32, input_channels_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  constexpr uint32_t groups = std::numeric_limits<uint32_t>::max();
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / groups + 1;
+  const float kernel[1] = {0.0f};
+  const float bias[1] = {0.0f};
+  xnn_operator_t deconvolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_deconvolution2d_nhwc_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, group_input_channels, 1,
+          group_input_channels, 1, kernel, bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &deconvolution_op));
+  EXPECT_EQ(nullptr, deconvolution_op);
+}
+
+TEST(DECONVOLUTION_NHWC_F32, output_channels_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  constexpr uint32_t groups = std::numeric_limits<uint32_t>::max();
+  constexpr size_t group_output_channels =
+      std::numeric_limits<size_t>::max() / groups + 1;
+  const float kernel[1] = {0.0f};
+  const float bias[1] = {0.0f};
+  xnn_operator_t deconvolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_deconvolution2d_nhwc_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, 1, group_output_channels,
+          1, group_output_channels, kernel, bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &deconvolution_op));
+  EXPECT_EQ(nullptr, deconvolution_op);
+}
+
+TEST(DECONVOLUTION_NHWC_F32, batch_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const float kernel[1] = {1.0f};
+  const float bias[1] = {0.0f};
+  xnn_operator_t deconvolution_op = nullptr;
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_deconvolution2d_nhwc_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+          kernel, bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &deconvolution_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      deconvolution_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t overflow_batch = (SIZE_MAX / 4) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_deconvolution2d_nhwc_f32(
+          deconvolution_op, overflow_batch, 1, 1, 0, 0,
+          &output_height, &output_width, nullptr));
+}
+
