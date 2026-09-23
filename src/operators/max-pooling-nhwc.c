@@ -601,6 +601,17 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     return xnn_status_out_of_memory;
   }
 
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+  if (!xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, output_batch_stride, &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(max_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
   max_pooling_op->context.max_pooling = (struct max_pooling_context) {
     .indirect_input = max_pooling_op->convolution_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
@@ -610,7 +621,7 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     .output_width = output_width,
     .pooling_size = pooling_size,
     .channels = channels,
-    .input_increment = (pooling_height * step_width) * sizeof(void*),
+    .input_increment = input_increment,
     .output_increment = output_width_stride,
     .ukernel = maxpool->ukernel,
   };
