@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
@@ -167,11 +168,59 @@ static enum xnn_status reshape_rope_nthc(
 
   const struct xnn_cmul_config* config = rope_op->cmul_config;
 
+  const size_t element_size = (size_t) 1 << log2_data_element_size;
+
+  size_t scaled_channels = 0;
+  if (!xnn_safe_mul(channels / 2, element_size, &scaled_channels)) {
+    xnn_log_error(
+        "failed to reshape %s operator: scaled channels overflows size_t",
+        xnn_operator_type_to_string_v2(rope_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t head_stride = 0;
+  if (!xnn_safe_mul(channels, element_size, &head_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: head stride overflows size_t",
+        xnn_operator_type_to_string_v2(rope_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t sequence_elements = 0;
+  size_t sequence_stride = 0;
+  if (!xnn_safe_mul(heads, channels, &sequence_elements) ||
+      !xnn_safe_mul(sequence_elements, element_size, &sequence_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: sequence stride overflows size_t",
+        xnn_operator_type_to_string_v2(rope_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t batch_elements = 0;
+  size_t batch_stride = 0;
+  if (!xnn_safe_mul(tokens, sequence_elements, &batch_elements) ||
+      !xnn_safe_mul(batch_elements, element_size, &batch_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: batch stride overflows size_t",
+        xnn_operator_type_to_string_v2(rope_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t total_elements = 0;
+  size_t total_bytes = 0;
+  if (!xnn_safe_mul(batch_size, batch_elements, &total_elements) ||
+      !xnn_safe_mul(total_elements, element_size, &total_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: total tensor size overflows size_t",
+        xnn_operator_type_to_string_v2(rope_op));
+    return xnn_status_out_of_memory;
+  }
+
   rope_op->context.rope = (struct rope_context) {
-    .scaled_channels = (channels / 2) << log2_data_element_size,
-    .batch_stride = (tokens * heads * channels) << log2_data_element_size,
-    .head_stride = channels << log2_data_element_size,
-    .sequence_stride = (heads * channels) << log2_data_element_size,
+    .scaled_channels = scaled_channels,
+    .batch_stride = batch_stride,
+    .head_stride = head_stride,
+    .sequence_stride = sequence_stride,
     .vcmul = config->ukernel,
   };
 
