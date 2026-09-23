@@ -211,10 +211,18 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
   size_t num_output_elements = 1;
   size_t reduction_axis_index = 0;
   for (size_t i = 0; i < num_input_dims; i++) {
-    if (reduction_axis_index < num_reduction_axes && normalized_reduction_axes[reduction_axis_index] == i) {
+    if (reduction_axis_index < num_reduction_axes &&
+        normalized_reduction_axes[reduction_axis_index] == i) {
       reduction_axis_index++;
     } else {
-      num_output_elements *= normalized_input_shape[i];
+      if (!xnn_safe_mul(num_output_elements, normalized_input_shape[i],
+                        &num_output_elements)) {
+        xnn_log_error(
+            "failed to reshape %s operator: num_output_elements overflows "
+            "size_t",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_out_of_memory;
+      }
     }
   }
 
@@ -223,11 +231,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     return xnn_status_success;
   }
 
-  memmove(&normalized_input_shape[XNN_MAX_TENSOR_DIMS - num_input_dims], &normalized_input_shape[0], sizeof(size_t) * num_input_dims);
+  memmove(&normalized_input_shape[XNN_MAX_TENSOR_DIMS - num_input_dims],
+          &normalized_input_shape[0], sizeof(size_t) * num_input_dims);
   for (int i = 0; i < XNN_MAX_TENSOR_DIMS - num_input_dims; ++i) {
     normalized_input_shape[i] = 1;
   }
-  const uint32_t log2_data_element_size = reduce_op->reduce.log2_data_element_size;
+  const uint32_t log2_data_element_size =
+      reduce_op->reduce.log2_data_element_size;
   const uint32_t log2_accumulator_element_size =
       reduce_op->reduce.log2_accumulator_element_size;
   const bool is_old_reduce =
@@ -238,18 +248,37 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
   // Reduction along the innermost dimension.
 
   size_t num_reduction_elements;
-  if (normalized_reduction_axes[num_reduction_axes - 1] == num_input_dims - 1) {
+  if (normalized_reduction_axes[num_reduction_axes - 1] ==
+      num_input_dims - 1) {
     if (workspace_size != NULL) {
       size_t num_output_elements;
-      if (!xnn_safe_mul(normalized_input_shape[0], normalized_input_shape[2], &num_output_elements) ||
-          !xnn_safe_mul(num_output_elements, normalized_input_shape[4], &num_output_elements)) {
+      if (!xnn_safe_mul(normalized_input_shape[0], normalized_input_shape[2],
+                        &num_output_elements) ||
+          !xnn_safe_mul(num_output_elements, normalized_input_shape[4],
+                        &num_output_elements)) {
         xnn_log_error("failed to reshape %s operator: workspace size overflow",
                       xnn_operator_type_to_string_v2(reduce_op));
         return xnn_status_out_of_memory;
       }
-      *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
+      if (num_output_elements >
+          (SIZE_MAX - XNN_EXTRA_BYTES) >> log2_accumulator_element_size) {
+        xnn_log_error("failed to reshape %s operator: workspace size overflow",
+                      xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_out_of_memory;
+      }
+      *workspace_size = (num_output_elements << log2_accumulator_element_size) +
+                        XNN_EXTRA_BYTES;
     }
-    num_reduction_elements = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
+    if (!xnn_safe_mul(normalized_input_shape[1], normalized_input_shape[3],
+                      &num_reduction_elements) ||
+        !xnn_safe_mul(num_reduction_elements, normalized_input_shape[5],
+                      &num_reduction_elements)) {
+      xnn_log_error(
+          "failed to reshape %s operator: num_reduction_elements overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(reduce_op));
+      return xnn_status_out_of_memory;
+    }
     const size_t axis_dim = normalized_input_shape[5];
 
     if (reduce_op->reduce_config->update != NULL) {
@@ -261,7 +290,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
       reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
     }
 
-    uint32_t identity_value = get_identity_value(reduce_op, num_reduction_elements);
+    if (axis_dim > SIZE_MAX >> log2_data_element_size) {
+      xnn_log_error(
+          "failed to reshape %s operator: channels overflow size_t",
+          xnn_operator_type_to_string_v2(reduce_op));
+      return xnn_status_out_of_memory;
+    }
+    uint32_t identity_value =
+        get_identity_value(reduce_op, num_reduction_elements);
     *reduce_op->dynamic_context.reduce = (struct reduce_context) {
       .channels = axis_dim << log2_data_element_size,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
@@ -271,7 +307,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
       .is_old_reduce = is_old_reduce,
     };
 
-    reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
+    reduce_op->dynamic_context.reduce->fill_ukernel =
+        reduce_op->fill_config->ukernel;
 
     reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_1d_dynamic;
     reduce_op->compute[0].task_3d_tile_1d_dynamic =
@@ -280,24 +317,51 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[1] = normalized_input_shape[2];
     reduce_op->compute[0].range[2] = normalized_input_shape[4];
     reduce_op->compute[0].tile[0] = 1;
-    reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
-    for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
-      reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
+    reduce_op->dynamic_context.reduce->output_stride[
+        XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
+    for (int i = XNN_MAX_TENSOR_DIMS / 2 - 2; i >= 0; --i) {
+      if (!xnn_safe_mul(
+              reduce_op->dynamic_context.reduce->output_stride[i + 1],
+              normalized_input_shape[(i + 1) * 2],
+              &reduce_op->dynamic_context.reduce->output_stride[i])) {
+        xnn_log_error(
+            "failed to reshape %s operator: output stride overflows size_t",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_out_of_memory;
+      }
     }
   } else {
     // Reduction along the non-innermost dimension
     const size_t channel_like_dim = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
     if (workspace_size != NULL) {
       size_t num_output_elements;
-      if (!xnn_safe_mul(normalized_input_shape[1], normalized_input_shape[3], &num_output_elements) ||
-          !xnn_safe_mul(num_output_elements, normalized_input_shape[5], &num_output_elements)) {
+      if (!xnn_safe_mul(normalized_input_shape[1], normalized_input_shape[3],
+                        &num_output_elements) ||
+          !xnn_safe_mul(num_output_elements, normalized_input_shape[5],
+                        &num_output_elements)) {
         xnn_log_error("failed to reshape %s operator: workspace size overflow",
                       xnn_operator_type_to_string_v2(reduce_op));
         return xnn_status_out_of_memory;
       }
-      *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
+      if (num_output_elements >
+          (SIZE_MAX - XNN_EXTRA_BYTES) >> log2_accumulator_element_size) {
+        xnn_log_error("failed to reshape %s operator: workspace size overflow",
+                      xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_out_of_memory;
+      }
+      *workspace_size = (num_output_elements << log2_accumulator_element_size) +
+                        XNN_EXTRA_BYTES;
     }
-    num_reduction_elements = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
+    if (!xnn_safe_mul(normalized_input_shape[0], normalized_input_shape[2],
+                      &num_reduction_elements) ||
+        !xnn_safe_mul(num_reduction_elements, normalized_input_shape[4],
+                      &num_reduction_elements)) {
+      xnn_log_error(
+          "failed to reshape %s operator: num_reduction_elements overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(reduce_op));
+      return xnn_status_out_of_memory;
+    }
     const size_t axis_dim = normalized_input_shape[4];
 
     if (reduce_op->reduce_config->update != NULL) {
@@ -309,7 +373,15 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
       reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
     }
     if (reduce_op->channels != channel_like_dim) {
-      const size_t zero_size = (channel_like_dim << log2_data_element_size) + XNN_EXTRA_BYTES;
+      if (channel_like_dim >
+          (SIZE_MAX - XNN_EXTRA_BYTES) >> log2_data_element_size) {
+        xnn_log_error(
+            "failed to reshape %s operator: zero padding size overflows size_t",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_out_of_memory;
+      }
+      const size_t zero_size =
+          (channel_like_dim << log2_data_element_size) + XNN_EXTRA_BYTES;
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(reduce_op->zero_buffer);
       reduce_op->zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
@@ -355,9 +427,18 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[1] = normalized_input_shape[3];
     reduce_op->compute[0].range[2] = normalized_input_shape[5];
     reduce_op->compute[0].tile[0] = max(reduce_op->reduce_config->rd_width, 1);
-    reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
-    for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
-      reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i * 2+3)]);
+    reduce_op->dynamic_context.reduce->output_stride[
+        XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
+    for (int i = XNN_MAX_TENSOR_DIMS / 2 - 2; i >= 0; --i) {
+      if (!xnn_safe_mul(
+              reduce_op->dynamic_context.reduce->output_stride[i + 1],
+              normalized_input_shape[(i * 2 + 3)],
+              &reduce_op->dynamic_context.reduce->output_stride[i])) {
+        xnn_log_error(
+            "failed to reshape %s operator: output stride overflows size_t",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_out_of_memory;
+      }
     }
   }
   memcpy(&reduce_op->dynamic_context.reduce->params, &reduce_op->params.reduce, sizeof(reduce_op->params.reduce));
@@ -390,7 +471,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
         reduce_op->dynamic_context.reduce->cvt_params.reference.inv_y_scale;
   }
   for (int i = XNN_MAX_TENSOR_DIMS - 2; i >= 0; --i) {
-    reduce_op->dynamic_context.reduce->input_stride[i] = (reduce_op->dynamic_context.reduce->input_stride[i + 1] * normalized_input_shape[i + 1]);
+    if (!xnn_safe_mul(reduce_op->dynamic_context.reduce->input_stride[i + 1],
+                      normalized_input_shape[i + 1],
+                      &reduce_op->dynamic_context.reduce->input_stride[i])) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride overflows size_t",
+          xnn_operator_type_to_string_v2(reduce_op));
+      return xnn_status_out_of_memory;
+    }
   }
   memcpy(reduce_op->dynamic_context.reduce->input_shape, normalized_input_shape, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
   reduce_op->state = xnn_run_state_needs_setup;
