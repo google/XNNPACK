@@ -122,7 +122,32 @@ static void init_f16_vadd_config(void) {
       f16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__rvvfp16arith_u8v);
       f16_vadd_config.element_tile = 8 * hardware_config->vlenb / sizeof(xnn_float16);
     }
-  #endif
+#elif XNN_ARCH_WASMRELAXEDSIMDFP16
+  f16_vadd_config.op_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_vadd_ukernel__wasmrelaxedsimdfp16_u8);
+  f16_vadd_config.opc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__wasmrelaxedsimdfp16_u8);
+  f16_vadd_config.ropc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__wasmrelaxedsimdfp16_u8);
+  f16_vadd_config.element_tile = 8;
+#elif XNN_ARCH_WASMRELAXEDSIMD
+  f16_vadd_config.op_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_f32acc_vadd_ukernel__wasmrelaxedsimd_u8);
+  f16_vadd_config.opc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_f32acc_vaddc_ukernel__wasmrelaxedsimd_u8);
+  f16_vadd_config.ropc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_f32acc_vaddc_ukernel__wasmrelaxedsimd_u8);
+  f16_vadd_config.element_tile = 8;
+#endif
+    if (f16_vadd_config.op_ukernel == NULL) {
+      f16_vadd_config.op_ukernel =
+          XNN_INIT_BINARY_UKERNEL(xnn_f16_vadd_ukernel__scalar_u1);
+      f16_vadd_config.opc_ukernel =
+          XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__scalar_u1);
+      f16_vadd_config.ropc_ukernel =
+          XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__scalar_u1);
+      f16_vadd_config.element_tile = 1;
+    }
 }
 
 static void init_f16_vdiv_config(void) {
@@ -1701,12 +1726,17 @@ static void init_qu8_vprelu_config(void) {
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f16_vadd_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f16_vadd);
-  return &f16_vadd_config;
+  return f16_vadd_config.op_ukernel != NULL &&
+                 f16_vadd_config.opc_ukernel != NULL &&
+                 f16_vadd_config.ropc_ukernel != NULL
+             ? &f16_vadd_config
+             : NULL;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f16_vdiv_config() {

@@ -277,16 +277,33 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
 OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
     case xnn_node_type_fully_connected: {
-      // Fully-connected with a blockwise int4 filter and a bf16 output has a
-      // native fused-bf16 GEMM. Only keep it native when the unsigned
-      // qdu8_bf16_qb4w path is available: on that hardware the activations are
-      // dynamically quantized to qduint8 by convert_gemm_to_qduint8. Elsewhere,
-      // fall through to the fp32 GEMM + f32->bf16 convert lowering (which always
-      // works).
       const xnn_value& filter = subgraph->values[node.inputs[1]];
       if (filter.datatype == xnn_datatype_qbint4) {
-        if (xnn_init_qdu8_bf16_qb4w_gemm_config() != nullptr) {
-          return OpAction::kTransparent;
+        const xnn_value& input = subgraph->values[node.inputs[0]];
+        const xnn_value& output = subgraph->values[node.outputs[0]];
+        const bool inline_lhs_packing = node.flags & XNN_FLAG_INLINE_LHS_PACKING;
+        const xnn_datatype packed_input_datatype =
+            inline_lhs_packing ? node.packed_input_datatype : input.datatype;
+        switch (packed_input_datatype) {
+          case xnn_datatype_qduint8:
+            if (xnn_init_qdu8_bf16_qb4w_gemm_config() != nullptr) {
+              return OpAction::kTransparent;
+            }
+            break;
+          case xnn_datatype_qdint8: {
+            const xnn_gemm_config* config =
+                xnn_init_qd8_bf16_qb4w_gemm_config();
+            if (config != nullptr && config->arch != 0 &&
+                output.datatype == xnn_datatype_bf16 &&
+                filter.quantization.scale_type == xnn_datatype_bf16 &&
+                (!inline_lhs_packing ||
+                 input.datatype == xnn_datatype_bf16)) {
+              return OpAction::kTransparent;
+            }
+            break;
+          }
+          default:
+            break;
         }
       }
       break;
