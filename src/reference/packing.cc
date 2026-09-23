@@ -3140,12 +3140,23 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
         /*extra_bytes=*/0, &kai_params);
   } else {
     // Transpose the weights until the transpose packing function is ready.
-    int8_t* tmp_data =
-        (int8_t*)malloc(input_channels * output_channels * sizeof(int8_t));
+    size_t tmp_data_size;
+    if (!xnn_safe_mul(input_channels, output_channels, &tmp_data_size) ||
+        !xnn_safe_mul(tmp_data_size, sizeof(int8_t), &tmp_data_size)) {
+      xnn_log_error(
+          "failed to allocate KleidiAI SME weight transpose buffer: "
+          "size overflow");
+      if (free_accumulator_init) {
+        free((void*)accumulator_init);
+      }
+      return;
+    }
+    int8_t* tmp_data = (int8_t*)malloc(tmp_data_size);
     if (tmp_data == NULL) {
       xnn_log_error(
-          "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-          input_channels * output_channels * sizeof(int8_t));
+          "failed to allocate %zu bytes for KleidiAI SME weight transpose "
+          "buffer",
+          tmp_data_size);
       if (free_accumulator_init) {
         free((void*)accumulator_init);
       }
@@ -3646,12 +3657,23 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
     b = tmp_bias;
   }
 
-  uint16_t* tmp_data =
-      (uint16_t*)xnn_allocate_memory(nc * ks * kc * sizeof(uint16_t));
+  size_t tmp_data_size;
+  if (!xnn_safe_mul(nc, ks, &tmp_data_size) ||
+      !xnn_safe_mul(tmp_data_size, kc, &tmp_data_size) ||
+      !xnn_safe_mul(tmp_data_size, sizeof(uint16_t), &tmp_data_size)) {
+    xnn_log_error(
+        "failed to allocate KleidiAI SME weight transpose buffer: "
+        "size overflow");
+    if (tmp_bias != NULL) {
+      xnn_release_memory(tmp_bias);
+    }
+    return;
+  }
+  uint16_t* tmp_data = (uint16_t*)xnn_allocate_memory(tmp_data_size);
   if (tmp_data == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(uint16_t));
+        tmp_data_size);
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
@@ -3717,12 +3739,23 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
     b = tmp_bias;
   }
 
-  int8_t* tmp_data =
-      (int8_t*)xnn_allocate_memory(nc * ks * kc * sizeof(int8_t));
+  size_t tmp_data_size;
+  if (!xnn_safe_mul(nc, ks, &tmp_data_size) ||
+      !xnn_safe_mul(tmp_data_size, kc, &tmp_data_size) ||
+      !xnn_safe_mul(tmp_data_size, sizeof(int8_t), &tmp_data_size)) {
+    xnn_log_error(
+        "failed to allocate KleidiAI SME weight transpose buffer: "
+        "size overflow");
+    if (tmp_bias != NULL) {
+      xnn_release_memory(tmp_bias);
+    }
+    return;
+  }
+  int8_t* tmp_data = (int8_t*)xnn_allocate_memory(tmp_data_size);
   if (tmp_data == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(int8_t));
+        tmp_data_size);
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
@@ -3791,11 +3824,21 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
     b = tmp_bias;
   }
 
-  float* tmp_data = (float*) malloc(nc * ks * kc * sizeof(float));
+  size_t tmp_data_size;
+  if (!xnn_safe_mul(nc, ks, &tmp_data_size) ||
+      !xnn_safe_mul(tmp_data_size, kc, &tmp_data_size) ||
+      !xnn_safe_mul(tmp_data_size, sizeof(float), &tmp_data_size)) {
+    xnn_log_error(
+        "failed to allocate KleidiAI SME weight transpose buffer: "
+        "size overflow");
+    xnn_release_memory(tmp_bias);
+    return;
+  }
+  float* tmp_data = (float*) malloc(tmp_data_size);
   if (tmp_data == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(float));
+        tmp_data_size);
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
