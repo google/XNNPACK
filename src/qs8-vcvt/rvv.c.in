@@ -22,21 +22,30 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__rvv_u${LMUL}v(
   assert(input != NULL);
   assert(output != NULL);
 
-  const ${XINT8_T} input_zero_point = params->scalar.input_zero_point;
-  const int16_t multiplier = params->scalar.multiplier;
-  const int16_t output_zero_point = params->scalar.output_zero_point;
+  $if DATATYPE == "QS8":
+    $LMUL_QS8 = min(LMUL, 2)
+    const int32_t vbias =
+        (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+        (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+        INT32_C(0x8000);
+    const int32_t multiplier = params->scalar.multiplier;
+  $else:
+    const ${XINT8_T} input_zero_point = params->scalar.input_zero_point;
+    const int16_t multiplier = params->scalar.multiplier;
+    const int16_t output_zero_point = params->scalar.output_zero_point;
 
   do {
-    size_t vl = __riscv_vsetvl_e8m${LMUL}(batch); batch -= vl;
     $if DATATYPE == "QS8":
-      vint8m${LMUL}_t in_i8v = __riscv_vle8_v_i8m${LMUL}(input, vl); input += vl;
-      vint16m${LMUL*2}_t acc_i16v = __riscv_vwsub_vx(in_i8v, input_zero_point, vl);
-      acc_i16v = __riscv_vsll(acc_i16v, 7, vl);
-      acc_i16v = __riscv_vsmul(acc_i16v, multiplier, __RISCV_VXRM_RNU, vl);
-      acc_i16v = __riscv_vsadd(acc_i16v, output_zero_point, vl);
-      vint8m${LMUL}_t out_i8v = __riscv_vnclip(acc_i16v, 0, __RISCV_VXRM_RNU, vl);
+      size_t vl = __riscv_vsetvl_e8m${LMUL_QS8}(batch); batch -= vl;
+      vint8m${LMUL_QS8}_t in_i8v = __riscv_vle8_v_i8m${LMUL_QS8}(input, vl); input += vl;
+      vint32m${LMUL_QS8*4}_t acc_i32v = __riscv_vsext_vf4(in_i8v, vl);
+      vint32m${LMUL_QS8*4}_t bias_i32v = __riscv_vmv_v_x_i32m${LMUL_QS8*4}(vbias, vl);
+      acc_i32v = __riscv_vmacc(bias_i32v, multiplier, acc_i32v, vl);
+      vint16m${LMUL_QS8*2}_t out_i16v = __riscv_vnclip(acc_i32v, 16, __RISCV_VXRM_RDN, vl);
+      vint8m${LMUL_QS8}_t out_i8v = __riscv_vnclip(out_i16v, 0, __RISCV_VXRM_RNU, vl);
       __riscv_vse8(output, out_i8v, vl); output += vl;
     $else:
+      size_t vl = __riscv_vsetvl_e8m${LMUL}(batch); batch -= vl;
       vuint8m${LMUL}_t in_u8v = __riscv_vle8_v_u8m${LMUL}(input, vl); input += vl;
       vint16m${LMUL*2}_t acc_i16v = __riscv_vreinterpret_i16m${LMUL*2}(__riscv_vwsubu_vx(in_u8v, input_zero_point, vl));
       acc_i16v = __riscv_vsll(acc_i16v, 7, vl);

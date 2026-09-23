@@ -33,14 +33,21 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  $if DATATYPE == "QU8":
+  $if DATATYPE == "QS8":
+    const int32_t multiplier = params->scalar.multiplier;
+    const int16_t mult_hi = (int16_t) (multiplier >> 8 <= 32767 ? (multiplier >> 8) : 32767);
+    const int16_t mult_lo = (int16_t) (multiplier - ((int32_t) mult_hi << 8));
+    const __m128i vmultiplier = _mm_set1_epi32((int32_t) (((uint32_t) (uint16_t) mult_lo) | (((uint32_t) (uint16_t) mult_hi) << 16)));
+    const __m128i vbias = _mm_set1_epi32(
+        (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+        (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+        INT32_C(0x8000));
+  $elif DATATYPE == "QU8":
     const __m128i vmultiplier = _mm_set1_epi16(params->scalar.multiplier);
-  $else:
-    const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
-  const __m128i vbias = _mm_set1_epi32(
-      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) -
-      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
-      INT32_C(0x80));
+    const __m128i vbias = _mm_set1_epi32(
+        (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) -
+        (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
+        INT32_C(0x80));
   XNN_FORCE_REALIZATION(vmultiplier);
   XNN_FORCE_REALIZATION(vbias);
   $if DATATYPE == "QU8":
@@ -61,22 +68,29 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_u${BATCH_TILE}(
           const __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vm${ABC[N]});
           const __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vm${ABC[N]});
 
-      $for N in range(2*SIMD_TILE):
-        const __m128i vprodlo${ABC[N]} = _mm_mullo_epi16(vextx${ABC[N]}, vmultiplier);
-        const __m128i vprodhi${ABC[N]} = ${_MM_MULHI_EPX16}(vextx${ABC[N]}, vmultiplier);
+      $if DATATYPE == "QS8":
+        $for N in range(2*SIMD_TILE):
+          const __m128i vshift${ABC[N]} = _mm_slli_epi16(vextx${ABC[N]}, 8);
+          const __m128i va_lo${ABC[N]} = _mm_unpacklo_epi16(vextx${ABC[N]}, vshift${ABC[N]});
+          const __m128i va_hi${ABC[N]} = _mm_unpackhi_epi16(vextx${ABC[N]}, vshift${ABC[N]});
 
-      $for N in range(2*SIMD_TILE):
-        __m128i vacc${ABC[2*N]} = _mm_unpacklo_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
-        __m128i vacc${ABC[2*N+1]} = _mm_unpackhi_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
+        $for N in range(2*SIMD_TILE):
+          __m128i vacc${ABC[2*N]} = _mm_madd_epi16(va_lo${ABC[N]}, vmultiplier);
+          __m128i vacc${ABC[2*N+1]} = _mm_madd_epi16(va_hi${ABC[N]}, vmultiplier);
+      $else:
+        $for N in range(2*SIMD_TILE):
+          const __m128i vprodlo${ABC[N]} = _mm_mullo_epi16(vextx${ABC[N]}, vmultiplier);
+          const __m128i vprodhi${ABC[N]} = ${_MM_MULHI_EPX16}(vextx${ABC[N]}, vmultiplier);
+
+        $for N in range(2*SIMD_TILE):
+          __m128i vacc${ABC[2*N]} = _mm_unpacklo_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
+          __m128i vacc${ABC[2*N+1]} = _mm_unpackhi_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
 
       $for N in range(4*SIMD_TILE):
-        $if DATATYPE == "QU8":
-          vacc${ABC[N]} = _mm_add_epi32(vacc${ABC[N]}, vbias);
-        $else:
-          vacc${ABC[N]} = _mm_sub_epi32(vbias, vacc${ABC[N]});
+        vacc${ABC[N]} = _mm_add_epi32(vacc${ABC[N]}, vbias);
 
       $for N in range(4*SIMD_TILE):
-        vacc${ABC[N]} = _mm_srai_epi32(vacc${ABC[N]}, 8);
+        vacc${ABC[N]} = _mm_srai_epi32(vacc${ABC[N]}, ${16 if DATATYPE == "QS8" else 8});
 
       $for N in range(2*SIMD_TILE):
         vacc${ABC[N]} = _mm_packs_epi32(vacc${ABC[2*N]}, vacc${ABC[2*N+1]});
@@ -96,36 +110,42 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_u${BATCH_TILE}(
     $if DATATYPE == "QU8":
       const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
       const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
+
+      const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
+      const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);
+      const __m128i vprodhi_lo = ${_MM_MULHI_EPX16}(vextx_lo, vmultiplier);
+      const __m128i vprodhi_hi = ${_MM_MULHI_EPX16}(vextx_hi, vmultiplier);
+
+      __m128i vacc_ll = _mm_unpacklo_epi16(vprodlo_lo, vprodhi_lo);
+      __m128i vacc_lh = _mm_unpackhi_epi16(vprodlo_lo, vprodhi_lo);
+      __m128i vacc_hl = _mm_unpacklo_epi16(vprodlo_hi, vprodhi_hi);
+      __m128i vacc_hh = _mm_unpackhi_epi16(vprodlo_hi, vprodhi_hi);
     $else:
       const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
       const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vm);
       const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vm);
 
-    const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
-    const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);
-    const __m128i vprodhi_lo = ${_MM_MULHI_EPX16}(vextx_lo, vmultiplier);
-    const __m128i vprodhi_hi = ${_MM_MULHI_EPX16}(vextx_hi, vmultiplier);
+      const __m128i vshift_lo = _mm_slli_epi16(vextx_lo, 8);
+      const __m128i vshift_hi = _mm_slli_epi16(vextx_hi, 8);
+      const __m128i va_ll = _mm_unpacklo_epi16(vextx_lo, vshift_lo);
+      const __m128i va_lh = _mm_unpackhi_epi16(vextx_lo, vshift_lo);
+      const __m128i va_hl = _mm_unpacklo_epi16(vextx_hi, vshift_hi);
+      const __m128i va_hh = _mm_unpackhi_epi16(vextx_hi, vshift_hi);
 
-    __m128i vacc_ll = _mm_unpacklo_epi16(vprodlo_lo, vprodhi_lo);
-    __m128i vacc_lh = _mm_unpackhi_epi16(vprodlo_lo, vprodhi_lo);
-    __m128i vacc_hl = _mm_unpacklo_epi16(vprodlo_hi, vprodhi_hi);
-    __m128i vacc_hh = _mm_unpackhi_epi16(vprodlo_hi, vprodhi_hi);
+      __m128i vacc_ll = _mm_madd_epi16(va_ll, vmultiplier);
+      __m128i vacc_lh = _mm_madd_epi16(va_lh, vmultiplier);
+      __m128i vacc_hl = _mm_madd_epi16(va_hl, vmultiplier);
+      __m128i vacc_hh = _mm_madd_epi16(va_hh, vmultiplier);
 
-    $if DATATYPE == "QU8":
-      vacc_ll = _mm_add_epi32(vacc_ll, vbias);
-      vacc_lh = _mm_add_epi32(vacc_lh, vbias);
-      vacc_hl = _mm_add_epi32(vacc_hl, vbias);
-      vacc_hh = _mm_add_epi32(vacc_hh, vbias);
-    $else:
-      vacc_ll = _mm_sub_epi32(vbias, vacc_ll);
-      vacc_lh = _mm_sub_epi32(vbias, vacc_lh);
-      vacc_hl = _mm_sub_epi32(vbias, vacc_hl);
-      vacc_hh = _mm_sub_epi32(vbias, vacc_hh);
+    vacc_ll = _mm_add_epi32(vacc_ll, vbias);
+    vacc_lh = _mm_add_epi32(vacc_lh, vbias);
+    vacc_hl = _mm_add_epi32(vacc_hl, vbias);
+    vacc_hh = _mm_add_epi32(vacc_hh, vbias);
 
-    vacc_ll = _mm_srai_epi32(vacc_ll, 8);
-    vacc_lh = _mm_srai_epi32(vacc_lh, 8);
-    vacc_hl = _mm_srai_epi32(vacc_hl, 8);
-    vacc_hh = _mm_srai_epi32(vacc_hh, 8);
+    vacc_ll = _mm_srai_epi32(vacc_ll, ${16 if DATATYPE == "QS8" else 8});
+    vacc_lh = _mm_srai_epi32(vacc_lh, ${16 if DATATYPE == "QS8" else 8});
+    vacc_hl = _mm_srai_epi32(vacc_hl, ${16 if DATATYPE == "QS8" else 8});
+    vacc_hh = _mm_srai_epi32(vacc_hh, ${16 if DATATYPE == "QS8" else 8});
 
     const __m128i vacc_lo = _mm_packs_epi32(vacc_ll, vacc_lh);
     const __m128i vacc_hi = _mm_packs_epi32(vacc_hl, vacc_hh);
@@ -143,36 +163,42 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_u${BATCH_TILE}(
     $if DATATYPE == "QU8":
       const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
       const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
+
+      const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
+      const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);
+      const __m128i vprodhi_lo = ${_MM_MULHI_EPX16}(vextx_lo, vmultiplier);
+      const __m128i vprodhi_hi = ${_MM_MULHI_EPX16}(vextx_hi, vmultiplier);
+
+      __m128i vacc_ll = _mm_unpacklo_epi16(vprodlo_lo, vprodhi_lo);
+      __m128i vacc_lh = _mm_unpackhi_epi16(vprodlo_lo, vprodhi_lo);
+      __m128i vacc_hl = _mm_unpacklo_epi16(vprodlo_hi, vprodhi_hi);
+      __m128i vacc_hh = _mm_unpackhi_epi16(vprodlo_hi, vprodhi_hi);
     $else:
       const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
       const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vm);
       const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vm);
 
-    const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
-    const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);
-    const __m128i vprodhi_lo = ${_MM_MULHI_EPX16}(vextx_lo, vmultiplier);
-    const __m128i vprodhi_hi = ${_MM_MULHI_EPX16}(vextx_hi, vmultiplier);
+      const __m128i vshift_lo = _mm_slli_epi16(vextx_lo, 8);
+      const __m128i vshift_hi = _mm_slli_epi16(vextx_hi, 8);
+      const __m128i va_ll = _mm_unpacklo_epi16(vextx_lo, vshift_lo);
+      const __m128i va_lh = _mm_unpackhi_epi16(vextx_lo, vshift_lo);
+      const __m128i va_hl = _mm_unpacklo_epi16(vextx_hi, vshift_hi);
+      const __m128i va_hh = _mm_unpackhi_epi16(vextx_hi, vshift_hi);
 
-    __m128i vacc_ll = _mm_unpacklo_epi16(vprodlo_lo, vprodhi_lo);
-    __m128i vacc_lh = _mm_unpackhi_epi16(vprodlo_lo, vprodhi_lo);
-    __m128i vacc_hl = _mm_unpacklo_epi16(vprodlo_hi, vprodhi_hi);
-    __m128i vacc_hh = _mm_unpackhi_epi16(vprodlo_hi, vprodhi_hi);
+      __m128i vacc_ll = _mm_madd_epi16(va_ll, vmultiplier);
+      __m128i vacc_lh = _mm_madd_epi16(va_lh, vmultiplier);
+      __m128i vacc_hl = _mm_madd_epi16(va_hl, vmultiplier);
+      __m128i vacc_hh = _mm_madd_epi16(va_hh, vmultiplier);
 
-    $if DATATYPE == "QU8":
-      vacc_ll = _mm_add_epi32(vacc_ll, vbias);
-      vacc_lh = _mm_add_epi32(vacc_lh, vbias);
-      vacc_hl = _mm_add_epi32(vacc_hl, vbias);
-      vacc_hh = _mm_add_epi32(vacc_hh, vbias);
-    $else:
-      vacc_ll = _mm_sub_epi32(vbias, vacc_ll);
-      vacc_lh = _mm_sub_epi32(vbias, vacc_lh);
-      vacc_hl = _mm_sub_epi32(vbias, vacc_hl);
-      vacc_hh = _mm_sub_epi32(vbias, vacc_hh);
+    vacc_ll = _mm_add_epi32(vacc_ll, vbias);
+    vacc_lh = _mm_add_epi32(vacc_lh, vbias);
+    vacc_hl = _mm_add_epi32(vacc_hl, vbias);
+    vacc_hh = _mm_add_epi32(vacc_hh, vbias);
 
-    vacc_ll = _mm_srai_epi32(vacc_ll, 8);
-    vacc_lh = _mm_srai_epi32(vacc_lh, 8);
-    vacc_hl = _mm_srai_epi32(vacc_hl, 8);
-    vacc_hh = _mm_srai_epi32(vacc_hh, 8);
+    vacc_ll = _mm_srai_epi32(vacc_ll, ${16 if DATATYPE == "QS8" else 8});
+    vacc_lh = _mm_srai_epi32(vacc_lh, ${16 if DATATYPE == "QS8" else 8});
+    vacc_hl = _mm_srai_epi32(vacc_hl, ${16 if DATATYPE == "QS8" else 8});
+    vacc_hh = _mm_srai_epi32(vacc_hh, ${16 if DATATYPE == "QS8" else 8});
 
     const __m128i vacc_lo = _mm_packs_epi32(vacc_ll, vacc_lh);
     const __m128i vacc_hi = _mm_packs_epi32(vacc_hl, vacc_hh);

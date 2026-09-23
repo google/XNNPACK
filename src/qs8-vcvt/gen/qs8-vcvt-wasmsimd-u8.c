@@ -27,18 +27,22 @@ void xnn_qs8_vcvt_ukernel__wasmsimd_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
-  const v128_t vmultiplier = wasm_i16x8_splat(-params->scalar.multiplier);
-  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
-  XNN_FORCE_REALIZATION(vinput_zero_point);
+  const v128_t vbias = wasm_i32x4_splat(
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x8000));
+  const v128_t vmultiplier = wasm_i32x4_splat(params->scalar.multiplier);
+  XNN_FORCE_REALIZATION(vbias);
   XNN_FORCE_REALIZATION(vmultiplier);
-  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     v128_t vacc = wasm_i16x8_load8x8(input);
-    vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
-    vacc = wasm_i16x8_shl(vacc, 7);
-    vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
-    vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
+    v128_t vacc_lo = wasm_i32x4_extend_low_i16x8(vacc);
+    v128_t vacc_hi = wasm_i32x4_extend_high_i16x8(vacc);
+    vacc_lo = wasm_i32x4_add(wasm_i32x4_mul(vacc_lo, vmultiplier), vbias);
+    vacc_hi = wasm_i32x4_add(wasm_i32x4_mul(vacc_hi, vmultiplier), vbias);
+    vacc_lo = wasm_i32x4_shr(vacc_lo, 16);
+    vacc_hi = wasm_i32x4_shr(vacc_hi, 16);
+    vacc = wasm_i16x8_narrow_i32x4(vacc_lo, vacc_hi);
     input += 8;
 
     const v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
@@ -50,10 +54,13 @@ void xnn_qs8_vcvt_ukernel__wasmsimd_u8(
     assert(batch <= 7 * sizeof(int8_t));
 
     v128_t vacc = wasm_i16x8_load8x8(input);
-    vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
-    vacc = wasm_i16x8_shl(vacc, 7);
-    vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
-    vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
+    v128_t vacc_lo = wasm_i32x4_extend_low_i16x8(vacc);
+    v128_t vacc_hi = wasm_i32x4_extend_high_i16x8(vacc);
+    vacc_lo = wasm_i32x4_add(wasm_i32x4_mul(vacc_lo, vmultiplier), vbias);
+    vacc_hi = wasm_i32x4_add(wasm_i32x4_mul(vacc_hi, vmultiplier), vbias);
+    vacc_lo = wasm_i32x4_shr(vacc_lo, 16);
+    vacc_hi = wasm_i32x4_shr(vacc_hi, 16);
+    vacc = wasm_i16x8_narrow_i32x4(vacc_lo, vacc_hi);
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
     if (batch & (4 * sizeof(int8_t))) {

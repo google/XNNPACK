@@ -1256,9 +1256,9 @@ size_t xnn_init_qs8_cvt_scalar_params(
   assert(input_output_scale >= 0x1.0p-8);
   assert(input_output_scale <= 0x1.0p+7);
 
-  const long multiplier = lrintf(256.0f * input_output_scale);
+  const long multiplier = lrintf(65536.0f * input_output_scale);
   assert(multiplier >= 1L);
-  assert(multiplier <= 32768L);
+  assert(multiplier <= 8388608L);
   params->qs8_cvt.scalar.input_zero_point = (int16_t) input_quantization->zero_point;
   params->qs8_cvt.scalar.multiplier = (int32_t) multiplier;
   params->qs8_cvt.scalar.output_zero_point = (int16_t) output_quantization->zero_point;

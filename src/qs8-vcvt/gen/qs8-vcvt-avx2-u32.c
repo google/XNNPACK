@@ -31,28 +31,36 @@ void xnn_qs8_vcvt_ukernel__avx2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256i vinput_zero_point = _mm256_set1_epi16(params->scalar.input_zero_point);
-  const __m256i vmultiplier = _mm256_set1_epi16(-params->scalar.multiplier);
-  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
-  XNN_FORCE_REALIZATION(vinput_zero_point);
+  const __m256i vbias = _mm256_set1_epi32(
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x8000));
+  const __m256i vmultiplier = _mm256_set1_epi32(params->scalar.multiplier);
+  XNN_FORCE_REALIZATION(vbias);
   XNN_FORCE_REALIZATION(vmultiplier);
-  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
-    __m256i vacc0 = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input));
-    __m256i vacc1 = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) (input + 16)));
+    const __m128i vx0 = _mm_loadu_si128((const __m128i*) (input + 0));
+    __m256i vacc_lo0 = _mm256_cvtepi8_epi32(vx0);
+    __m256i vacc_hi0 = _mm256_cvtepi8_epi32(_mm_srli_si128(vx0, 8));
+    const __m128i vx1 = _mm_loadu_si128((const __m128i*) (input + 16));
+    __m256i vacc_lo1 = _mm256_cvtepi8_epi32(vx1);
+    __m256i vacc_hi1 = _mm256_cvtepi8_epi32(_mm_srli_si128(vx1, 8));
     input += 32;
 
-    vacc0 = _mm256_sub_epi16(vinput_zero_point, vacc0);
-    vacc1 = _mm256_sub_epi16(vinput_zero_point, vacc1);
+    vacc_lo0 = _mm256_add_epi32(_mm256_mullo_epi32(vacc_lo0, vmultiplier), vbias);
+    vacc_hi0 = _mm256_add_epi32(_mm256_mullo_epi32(vacc_hi0, vmultiplier), vbias);
+    vacc_lo1 = _mm256_add_epi32(_mm256_mullo_epi32(vacc_lo1, vmultiplier), vbias);
+    vacc_hi1 = _mm256_add_epi32(_mm256_mullo_epi32(vacc_hi1, vmultiplier), vbias);
 
-    vacc0 = _mm256_slli_epi16(vacc0, 7);
-    vacc1 = _mm256_slli_epi16(vacc1, 7);
+    vacc_lo0 = _mm256_srai_epi32(vacc_lo0, 16);
+    vacc_hi0 = _mm256_srai_epi32(vacc_hi0, 16);
+    vacc_lo1 = _mm256_srai_epi32(vacc_lo1, 16);
+    vacc_hi1 = _mm256_srai_epi32(vacc_hi1, 16);
 
-    vacc0 = _mm256_mulhrs_epi16(vacc0, vmultiplier);
-    vacc1 = _mm256_mulhrs_epi16(vacc1, vmultiplier);
-
-    vacc0 = _mm256_adds_epi16(vacc0, voutput_zero_point);
-    vacc1 = _mm256_adds_epi16(vacc1, voutput_zero_point);
+    __m256i vacc0 = _mm256_packs_epi32(vacc_lo0, vacc_hi0);
+    vacc0 = _mm256_permute4x64_epi64(vacc0, _MM_SHUFFLE(3, 1, 2, 0));
+    __m256i vacc1 = _mm256_packs_epi32(vacc_lo1, vacc_hi1);
+    vacc1 = _mm256_permute4x64_epi64(vacc1, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vy0 = _mm256_packs_epi16(vacc0, vacc1);
 
@@ -62,11 +70,15 @@ void xnn_qs8_vcvt_ukernel__avx2_u32(
     output += 32;
   }
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
-    __m256i vacc = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input));
-    vacc = _mm256_sub_epi16(vinput_zero_point, vacc);
-    vacc = _mm256_slli_epi16(vacc, 7);
-    vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
-    vacc = _mm256_adds_epi16(vacc, voutput_zero_point);
+    const __m128i vx = _mm_loadu_si128((const __m128i*) input);
+    __m256i vacc32_lo = _mm256_cvtepi8_epi32(vx);
+    __m256i vacc32_hi = _mm256_cvtepi8_epi32(_mm_srli_si128(vx, 8));
+    vacc32_lo = _mm256_add_epi32(_mm256_mullo_epi32(vacc32_lo, vmultiplier), vbias);
+    vacc32_hi = _mm256_add_epi32(_mm256_mullo_epi32(vacc32_hi, vmultiplier), vbias);
+    vacc32_lo = _mm256_srai_epi32(vacc32_lo, 16);
+    vacc32_hi = _mm256_srai_epi32(vacc32_hi, 16);
+    __m256i vacc = _mm256_packs_epi32(vacc32_lo, vacc32_hi);
+    vacc = _mm256_permute4x64_epi64(vacc, _MM_SHUFFLE(3, 1, 2, 0));
     input += 16;
 
     const __m128i vacc_hi = _mm256_extracti128_si256(vacc, 1);
@@ -78,11 +90,15 @@ void xnn_qs8_vcvt_ukernel__avx2_u32(
     assert(batch >= 1 * sizeof(int8_t));
     assert(batch <= 15 * sizeof(int8_t));
 
-    __m256i vacc = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input));
-    vacc = _mm256_sub_epi16(vinput_zero_point, vacc);
-    vacc = _mm256_slli_epi16(vacc, 7);
-    vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
-    vacc = _mm256_adds_epi16(vacc, voutput_zero_point);
+    const __m128i vx = _mm_loadu_si128((const __m128i*) input);
+    __m256i vacc32_lo = _mm256_cvtepi8_epi32(vx);
+    __m256i vacc32_hi = _mm256_cvtepi8_epi32(_mm_srli_si128(vx, 8));
+    vacc32_lo = _mm256_add_epi32(_mm256_mullo_epi32(vacc32_lo, vmultiplier), vbias);
+    vacc32_hi = _mm256_add_epi32(_mm256_mullo_epi32(vacc32_hi, vmultiplier), vbias);
+    vacc32_lo = _mm256_srai_epi32(vacc32_lo, 16);
+    vacc32_hi = _mm256_srai_epi32(vacc32_hi, 16);
+    __m256i vacc = _mm256_packs_epi32(vacc32_lo, vacc32_hi);
+    vacc = _mm256_permute4x64_epi64(vacc, _MM_SHUFFLE(3, 1, 2, 0));
 
     const __m128i vacc_hi = _mm256_extracti128_si256(vacc, 1);
     __m128i vy = _mm_packs_epi16(_mm256_castsi256_si128(vacc), vacc_hi);

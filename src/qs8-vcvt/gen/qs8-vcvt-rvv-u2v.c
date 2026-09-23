@@ -24,18 +24,20 @@ void xnn_qs8_vcvt_ukernel__rvv_u2v(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int8_t input_zero_point = params->scalar.input_zero_point;
-  const int16_t multiplier = params->scalar.multiplier;
-  const int16_t output_zero_point = params->scalar.output_zero_point;
+  const int32_t vbias =
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x8000);
+  const int32_t multiplier = params->scalar.multiplier;
 
   do {
     size_t vl = __riscv_vsetvl_e8m2(batch); batch -= vl;
     vint8m2_t in_i8v = __riscv_vle8_v_i8m2(input, vl); input += vl;
-    vint16m4_t acc_i16v = __riscv_vwsub_vx(in_i8v, input_zero_point, vl);
-    acc_i16v = __riscv_vsll(acc_i16v, 7, vl);
-    acc_i16v = __riscv_vsmul(acc_i16v, multiplier, __RISCV_VXRM_RNU, vl);
-    acc_i16v = __riscv_vsadd(acc_i16v, output_zero_point, vl);
-    vint8m2_t out_i8v = __riscv_vnclip(acc_i16v, 0, __RISCV_VXRM_RNU, vl);
+    vint32m8_t acc_i32v = __riscv_vsext_vf4(in_i8v, vl);
+    vint32m8_t bias_i32v = __riscv_vmv_v_x_i32m8(vbias, vl);
+    acc_i32v = __riscv_vmacc(bias_i32v, multiplier, acc_i32v, vl);
+    vint16m4_t out_i16v = __riscv_vnclip(acc_i32v, 16, __RISCV_VXRM_RDN, vl);
+    vint8m2_t out_i8v = __riscv_vnclip(out_i16v, 0, __RISCV_VXRM_RNU, vl);
     __riscv_vse8(output, out_i8v, vl); output += vl;
   } while (batch != 0);
 }

@@ -31,12 +31,16 @@ void xnn_qs8_vcvt_ukernel__ssse3_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
-  const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
-  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
-  XNN_FORCE_REALIZATION(vinput_zero_point);
+  const int32_t multiplier = params->scalar.multiplier;
+  const int16_t mult_hi = (int16_t) (multiplier >> 8 <= 32767 ? (multiplier >> 8) : 32767);
+  const int16_t mult_lo = (int16_t) (multiplier - ((int32_t) mult_hi << 8));
+  const __m128i vmultiplier = _mm_set1_epi32((int32_t) (((uint32_t) (uint16_t) mult_lo) | (((uint32_t) (uint16_t) mult_hi) << 16)));
+  const __m128i vbias = _mm_set1_epi32(
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x8000));
   XNN_FORCE_REALIZATION(vmultiplier);
-  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(vbias);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
     input += 16;
@@ -45,17 +49,25 @@ void xnn_qs8_vcvt_ukernel__ssse3_u16(
     __m128i vacc0 = _mm_unpacklo_epi8(vx0, vm0);
     __m128i vacc1 = _mm_unpackhi_epi8(vx0, vm0);
 
-    vacc0 = _mm_sub_epi16(vinput_zero_point, vacc0);
-    vacc1 = _mm_sub_epi16(vinput_zero_point, vacc1);
+    const __m128i vshift0 = _mm_slli_epi16(vacc0, 8);
+    const __m128i va_lo0 = _mm_unpacklo_epi16(vacc0, vshift0);
+    const __m128i va_hi0 = _mm_unpackhi_epi16(vacc0, vshift0);
+    const __m128i vshift1 = _mm_slli_epi16(vacc1, 8);
+    const __m128i va_lo1 = _mm_unpacklo_epi16(vacc1, vshift1);
+    const __m128i va_hi1 = _mm_unpackhi_epi16(vacc1, vshift1);
 
-    vacc0 = _mm_slli_epi16(vacc0, 7);
-    vacc1 = _mm_slli_epi16(vacc1, 7);
+    __m128i vacc_lo0 = _mm_add_epi32(_mm_madd_epi16(va_lo0, vmultiplier), vbias);
+    __m128i vacc_hi0 = _mm_add_epi32(_mm_madd_epi16(va_hi0, vmultiplier), vbias);
+    __m128i vacc_lo1 = _mm_add_epi32(_mm_madd_epi16(va_lo1, vmultiplier), vbias);
+    __m128i vacc_hi1 = _mm_add_epi32(_mm_madd_epi16(va_hi1, vmultiplier), vbias);
 
-    vacc0 = _mm_mulhrs_epi16(vacc0, vmultiplier);
-    vacc1 = _mm_mulhrs_epi16(vacc1, vmultiplier);
+    vacc_lo0 = _mm_srai_epi32(vacc_lo0, 16);
+    vacc_hi0 = _mm_srai_epi32(vacc_hi0, 16);
+    vacc_lo1 = _mm_srai_epi32(vacc_lo1, 16);
+    vacc_hi1 = _mm_srai_epi32(vacc_hi1, 16);
 
-    vacc0 = _mm_adds_epi16(vacc0, voutput_zero_point);
-    vacc1 = _mm_adds_epi16(vacc1, voutput_zero_point);
+    vacc0 = _mm_packs_epi32(vacc_lo0, vacc_hi0);
+    vacc1 = _mm_packs_epi32(vacc_lo1, vacc_hi1);
 
     const __m128i vy0 = _mm_packs_epi16(vacc0, vacc1);
 
@@ -69,14 +81,26 @@ void xnn_qs8_vcvt_ukernel__ssse3_u16(
     const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
     __m128i vacc_lo = _mm_unpacklo_epi8(vx, vm);
     __m128i vacc_hi = _mm_unpackhi_epi8(vx, vm);
-    vacc_lo = _mm_sub_epi16(vinput_zero_point, vacc_lo);
-    vacc_hi = _mm_sub_epi16(vinput_zero_point, vacc_hi);
-    vacc_lo = _mm_slli_epi16(vacc_lo, 7);
-    vacc_hi = _mm_slli_epi16(vacc_hi, 7);
-    vacc_lo = _mm_mulhrs_epi16(vacc_lo, vmultiplier);
-    vacc_hi = _mm_mulhrs_epi16(vacc_hi, vmultiplier);
-    vacc_lo = _mm_adds_epi16(vacc_lo, voutput_zero_point);
-    vacc_hi = _mm_adds_epi16(vacc_hi, voutput_zero_point);
+
+    const __m128i vshift_lo = _mm_slli_epi16(vacc_lo, 8);
+    const __m128i vshift_hi = _mm_slli_epi16(vacc_hi, 8);
+    const __m128i va_ll = _mm_unpacklo_epi16(vacc_lo, vshift_lo);
+    const __m128i va_lh = _mm_unpackhi_epi16(vacc_lo, vshift_lo);
+    const __m128i va_hl = _mm_unpacklo_epi16(vacc_hi, vshift_hi);
+    const __m128i va_hh = _mm_unpackhi_epi16(vacc_hi, vshift_hi);
+
+    __m128i vacc_ll = _mm_add_epi32(_mm_madd_epi16(va_ll, vmultiplier), vbias);
+    __m128i vacc_lh = _mm_add_epi32(_mm_madd_epi16(va_lh, vmultiplier), vbias);
+    __m128i vacc_hl = _mm_add_epi32(_mm_madd_epi16(va_hl, vmultiplier), vbias);
+    __m128i vacc_hh = _mm_add_epi32(_mm_madd_epi16(va_hh, vmultiplier), vbias);
+
+    vacc_ll = _mm_srai_epi32(vacc_ll, 16);
+    vacc_lh = _mm_srai_epi32(vacc_lh, 16);
+    vacc_hl = _mm_srai_epi32(vacc_hl, 16);
+    vacc_hh = _mm_srai_epi32(vacc_hh, 16);
+
+    vacc_lo = _mm_packs_epi32(vacc_ll, vacc_lh);
+    vacc_hi = _mm_packs_epi32(vacc_hl, vacc_hh);
 
     const __m128i vy = _mm_packs_epi16(vacc_lo, vacc_hi);
     _mm_storeu_si128((__m128i*) output, vy);
@@ -91,14 +115,26 @@ void xnn_qs8_vcvt_ukernel__ssse3_u16(
     const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
     __m128i vacc_lo = _mm_unpacklo_epi8(vx, vm);
     __m128i vacc_hi = _mm_unpackhi_epi8(vx, vm);
-    vacc_lo = _mm_sub_epi16(vinput_zero_point, vacc_lo);
-    vacc_hi = _mm_sub_epi16(vinput_zero_point, vacc_hi);
-    vacc_lo = _mm_slli_epi16(vacc_lo, 7);
-    vacc_hi = _mm_slli_epi16(vacc_hi, 7);
-    vacc_lo = _mm_mulhrs_epi16(vacc_lo, vmultiplier);
-    vacc_hi = _mm_mulhrs_epi16(vacc_hi, vmultiplier);
-    vacc_lo = _mm_adds_epi16(vacc_lo, voutput_zero_point);
-    vacc_hi = _mm_adds_epi16(vacc_hi, voutput_zero_point);
+
+    const __m128i vshift_lo = _mm_slli_epi16(vacc_lo, 8);
+    const __m128i vshift_hi = _mm_slli_epi16(vacc_hi, 8);
+    const __m128i va_ll = _mm_unpacklo_epi16(vacc_lo, vshift_lo);
+    const __m128i va_lh = _mm_unpackhi_epi16(vacc_lo, vshift_lo);
+    const __m128i va_hl = _mm_unpacklo_epi16(vacc_hi, vshift_hi);
+    const __m128i va_hh = _mm_unpackhi_epi16(vacc_hi, vshift_hi);
+
+    __m128i vacc_ll = _mm_add_epi32(_mm_madd_epi16(va_ll, vmultiplier), vbias);
+    __m128i vacc_lh = _mm_add_epi32(_mm_madd_epi16(va_lh, vmultiplier), vbias);
+    __m128i vacc_hl = _mm_add_epi32(_mm_madd_epi16(va_hl, vmultiplier), vbias);
+    __m128i vacc_hh = _mm_add_epi32(_mm_madd_epi16(va_hh, vmultiplier), vbias);
+
+    vacc_ll = _mm_srai_epi32(vacc_ll, 16);
+    vacc_lh = _mm_srai_epi32(vacc_lh, 16);
+    vacc_hl = _mm_srai_epi32(vacc_hl, 16);
+    vacc_hh = _mm_srai_epi32(vacc_hh, 16);
+
+    vacc_lo = _mm_packs_epi32(vacc_ll, vacc_lh);
+    vacc_hi = _mm_packs_epi32(vacc_hl, vacc_hh);
 
     __m128i vy = _mm_packs_epi16(vacc_lo, vacc_hi);
     if (batch & (8 * sizeof(int8_t))) {
