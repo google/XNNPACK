@@ -21,6 +21,16 @@ XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_bf16_f32_dwconv_minmax_ukernel_9p8c__neon
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_bf16_f32_dwconv_minmax_ukernel_9p16c__neonfma, 16, false, 16, 9, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_bf16_f32_dwconv_minmax_ukernel_25p8c__neonfma_acc2, 8, false, 8, 25, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_bf16_f32_dwconv_minmax_ukernel_25p16c__neonfma_acc2, 16, false, 16, 25, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#if XNN_ENABLE_ARM_BF16
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_3p8c__neonbf16, 8, false, 8, 3, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_3p16c__neonbf16, 16, false, 16, 3, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_4p8c__neonbf16, 8, false, 8, 4, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_4p16c__neonbf16, 16, false, 16, 4, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_9p8c__neonbf16, 8, false, 8, 9, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_9p16c__neonbf16, 16, false, 16, 9, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_25p8c__neonbf16_acc2, 8, false, 8, 25, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_arm_neon_bf16, xnn_bf16_f32_dwconv_minmax_ukernel_25p16c__neonbf16_acc2, 16, false, 16, 25, xnn_bfloat16, void, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ENABLE_ARM_BF16
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

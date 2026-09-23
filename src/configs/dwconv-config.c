@@ -608,6 +608,29 @@ static void init_bf16_f32_dwconv_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_3p8c__neonbf16);
+        bf16_f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[0].channel_tile = 8;
+        bf16_f32_dwconv_config[0].primary_tile = 3;
+
+        bf16_f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_4p8c__neonbf16);
+        bf16_f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[1].channel_tile = 8;
+        bf16_f32_dwconv_config[1].primary_tile = 4;
+
+        bf16_f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_9p8c__neonbf16);
+        bf16_f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[2].channel_tile = 8;
+        bf16_f32_dwconv_config[2].primary_tile = 9;
+
+        bf16_f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_25p8c__neonbf16_acc2);
+        bf16_f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[3].channel_tile = 8;
+        bf16_f32_dwconv_config[3].primary_tile = 25;
+      } else
+    #endif  // XNN_ENABLE_ARM_BF16
     if (hardware_config->arch_flags & xnn_arch_arm_neon_fma) {
       bf16_f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_3p8c__neonfma);
       bf16_f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
