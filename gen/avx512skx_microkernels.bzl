@@ -6,6 +6,10 @@
 #
 
 PROD_AVX512SKX_MICROKERNEL_SRCS = [
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p16c-minmax-avx512skx.c",
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p16c-minmax-avx512skx.c",
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p16c-minmax-avx512skx.c",
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p16c-minmax-avx512skx-acc2.c",
     "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u16.c",
     "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u128.c",
     "src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-avx512skx-u128.c",
@@ -71,13 +75,9 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_AVX512SKX_MICROKERNEL_SRCS = [
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p16c-minmax-avx512skx.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p32c-minmax-avx512skx.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p16c-minmax-avx512skx.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p32c-minmax-avx512skx.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p16c-minmax-avx512skx.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p32c-minmax-avx512skx.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p16c-minmax-avx512skx-acc2.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p32c-minmax-avx512skx-acc2.c",
     "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u32.c",
     "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u32.c",

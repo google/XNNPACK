@@ -6,6 +6,10 @@
 #
 
 PROD_AVX2_MICROKERNEL_SRCS = [
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p16c-minmax-avx2.c",
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p16c-minmax-avx2.c",
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p16c-minmax-avx2.c",
+    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p16c-minmax-avx2-acc2.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-avx2-broadcast.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c",
     "src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x16-minmax-avx2-broadcast.c",
@@ -97,13 +101,9 @@ PROD_AVX2_MICROKERNEL_SRCS = [
 
 NON_PROD_AVX2_MICROKERNEL_SRCS = [
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p8c-minmax-avx2.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p16c-minmax-avx2.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p8c-minmax-avx2.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p16c-minmax-avx2.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p8c-minmax-avx2.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p16c-minmax-avx2.c",
     "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p8c-minmax-avx2-acc2.c",
-    "src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p16c-minmax-avx2-acc2.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-avx2-broadcast.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-avx2-broadcast.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-avx2-broadcast.c",

@@ -50,6 +50,8 @@ enum class OpAction {
                      // type if they were rewritten.
   kTransparent,  // If the inputs have been rewritten, the outputs must be also.
   kElide,        // This op should be removed (eg. convert(fp32, fp32)).
+  kFp32Outputs,  // Keep the source 16-bit inputs, force the outputs to fp32
+                 // (eg. bf16 x bf16 -> fp32 convolutions).
 };
 
 template <class T, class = void>
@@ -268,6 +270,54 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   return OpAction::kRewrite;
 }
 
+// Whether a bf16 convolution (or depthwise convolution) node can run natively
+// as a bf16 x bf16 -> fp32 convolution operator.
+bool IsNativeBf16Convolution(const xnn_subgraph_t subgraph,
+                             const xnn_node& node) {
+  const xnn_value& input = subgraph->values[node.inputs[0]];
+  const xnn_value& filter = subgraph->values[node.inputs[1]];
+  // Inputs that were already rewritten to fp32 are cheaper to convolve in fp32
+  // than to convert back to bf16.
+  if (input.datatype != xnn_datatype_bf16 ||
+      filter.datatype != xnn_datatype_bf16 ||
+      !xnn_value_is_static(filter.allocation_type)) {
+    return false;
+  }
+  if (node.num_inputs > 2 && node.inputs[2] != XNN_INVALID_VALUE_ID &&
+      subgraph->values[node.inputs[2]].datatype != xnn_datatype_fp32) {
+    return false;
+  }
+  if (node.flags & XNN_FLAG_INLINE_LHS_PACKING) {
+    return false;
+  }
+
+  size_t kernel_size;
+  bool is_depthwise;
+  if (node.type == xnn_node_type_convolution_2d) {
+    kernel_size = node.params.convolution_2d.kernel_height *
+                  node.params.convolution_2d.kernel_width;
+    is_depthwise = node.params.convolution_2d.group_input_channels == 1 &&
+                   node.params.convolution_2d.group_output_channels == 1;
+  } else {
+    assert(node.type == xnn_node_type_depthwise_convolution_2d);
+    kernel_size = node.params.depthwise_convolution_2d.kernel_height *
+                  node.params.depthwise_convolution_2d.kernel_width;
+    is_depthwise = node.params.depthwise_convolution_2d.depth_multiplier == 1;
+  }
+  if (is_depthwise) {
+    const xnn_dwconv_config* dwconv_config = xnn_init_bf16_f32_dwconv_config();
+    for (size_t i = 0; dwconv_config && i < XNN_MAX_BF16_F32_DWCONV_UKERNELS;
+         i++) {
+      if (dwconv_config[i].minmax != nullptr &&
+          dwconv_config[i].primary_tile >= kernel_size) {
+        return true;
+      }
+    }
+  }
+  const xnn_gemm_config* igemm_config = xnn_init_bf16_f32_igemm_config();
+  return igemm_config != nullptr && igemm_config->mr != 0;
+}
+
 // Is this op supported when bf16 hardware is missing (allow-list).
 //
 // bf16 has very few native microkernels, so most ops fall back to fp32. The
@@ -276,6 +326,12 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
 // available.
 OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
+    case xnn_node_type_convolution_2d:
+    case xnn_node_type_depthwise_convolution_2d:
+      if (IsNativeBf16Convolution(subgraph, node)) {
+        return OpAction::kFp32Outputs;
+      }
+      break;
     case xnn_node_type_fully_connected: {
       // Fully-connected with a blockwise int4 filter and a bf16 output has a
       // native fused-bf16 GEMM. Only keep it native when the unsigned
@@ -712,6 +768,10 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
         value.to_fp32_fallback.was_overwritten = true;
       }
       ++changes;
+    }
+
+    if (op_action == OpAction::kFp32Outputs) {
+      continue;
     }
 
     // Insert conversions to fp32 for `from_dt` inputs.
