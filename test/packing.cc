@@ -741,6 +741,82 @@ TEST(PACK_KAI_F32_WEIGHTS_AND_BIASES_SME2, null_bias_oom) {
   EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
                           [](uint8_t value) { return value == 0xA5; }));
 }
+
+TEST(PACK_KAI_QS8_QC8W_WEIGHTS_AND_BIASES_SME, overflow) {
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr = 1;
+  gemm_config.log2_kr = 0;
+  gemm_config.log2_sr = 0;
+
+  const int8_t weights = 0;
+  const int32_t bias = 0;
+  const struct xnn_qs8_packing_params params = {/*input_zero_point=*/0};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+  const size_t input_channels = 2;
+  const size_t output_channels = SIZE_MAX / 2 + 1;
+
+  xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, /*groups=*/1,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels, &bias, &weights,
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+      /*extra_data0_element_size=*/0, /*init_extra_data1_fn=*/nullptr,
+      /*extra_data1=*/nullptr, /*extra_data1_element_size=*/0,
+      packed_weights.data(), /*params=*/&params);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+
+TEST(PACK_KAI_F16_CONV_GOKI_W_SME, overflow) {
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
+  const uint16_t kernel[1] = {0x3800};
+  const uint16_t bias[1] = {0};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+  const size_t nc = SIZE_MAX / 2 + 1;
+
+  xnn_pack_kai_f16_conv_goki_w_sme(
+      /*g=*/1, nc, /*ks=*/2, /*kc=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      kernel, bias, /*scale=*/nullptr, packed_weights.data(),
+      /*extra_bytes=*/0, /*params=*/nullptr);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+
+TEST(PACK_KAI_QS8_CONV_GOKI_W_SME, overflow) {
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
+  const int8_t kernel[1] = {1};
+  const int32_t bias[1] = {0};
+  const float scale[1] = {1.0f};
+  const struct xnn_qs8_packing_params params = {/*input_zero_point=*/0};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+  const size_t nc = SIZE_MAX / 2 + 1;
+
+  xnn_pack_kai_qs8_conv_goki_w_sme(
+      /*g=*/1, nc, /*ks=*/2, /*kc=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      kernel, bias, scale, packed_weights.data(), /*extra_bytes=*/0, &params);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+
+TEST(PACK_KAI_PF32_CONV_GOKI_W_SME, overflow) {
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
+  const float kernel[1] = {0.5f};
+  const float bias[1] = {0.0f};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+  const size_t nc = SIZE_MAX / 4 + 1;
+
+  xnn_pack_kai_pf32_conv_goki_w_sme(
+      /*g=*/1, nc, /*ks=*/2, /*kc=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      kernel, bias, /*scale=*/nullptr,
+      reinterpret_cast<float*>(packed_weights.data()), /*extra_bytes=*/0,
+      /*params=*/nullptr);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
 #endif  // XNN_ENABLE_KLEIDIAI
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
