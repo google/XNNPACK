@@ -20,4 +20,8 @@ XNN_PAD_UKERNEL(xnn_arch_x86_sse2, xnn_xx_pad_ukernel_p16__sse2_u16, 16)
 XNN_PAD_UKERNEL(xnn_arch_none, xnn_xx_pad_ukernel_p16__wasmsimd_u16, 16)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+# if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_PAD_UKERNEL(xnn_arch_riscv_vector, xnn_xx_pad_ukernel__rvv_u4v, 1)
+#endif // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_PAD_UKERNEL(xnn_arch_none, xnn_xx_pad_ukernel_p4__scalar_u16, 4)
