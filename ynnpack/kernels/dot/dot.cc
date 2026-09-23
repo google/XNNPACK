@@ -391,7 +391,8 @@ struct optimizer {
     assert(tile_n > 0);
     assert(tile_k > 0);
 
-    // We might use this kernel, update max_block_n accordingly.
+    // We might use this kernel, update max_block_m and max_block_n accordingly.
+    result.max_block_m = std::max<int>(result.max_block_m, block_m);
     result.max_block_n = std::max<int>(result.max_block_n, block_n);
 
     constexpr int b_elem_count = type_info<B>::element_count();
@@ -418,6 +419,7 @@ struct optimizer {
         static_cast<int>(tile_k),
         flags,
         dot_cost_k,
+        static_cast<int>(result.max_block_m),
         static_cast<int>(result.max_block_n),
     };
 #if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
