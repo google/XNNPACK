@@ -714,6 +714,70 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
     }
   }
 }
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite, scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_a = XNN_INVALID_VALUE_ID;
+  const size_t dims_a[3] = {1, 1, 1};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 3, dims_a, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_a));
+
+  uint32_t input_b = XNN_INVALID_VALUE_ID;
+  const size_t dims_b[3] = {1, 2, 1};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_quantized_tensor_value(
+          subgraph, xnn_datatype_qint8, 0, 0.125f, 3, dims_b, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_b));
+
+  uint32_t internal_b = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 3, dims_b, nullptr,
+                XNN_INVALID_VALUE_ID, 0, &internal_b));
+
+  uint32_t output = XNN_INVALID_VALUE_ID;
+  const size_t dims_out[3] = {1, 1, 2};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 3, dims_out, nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_b, internal_b, 0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(
+                subgraph, input_a, internal_b, output, XNN_FLAG_TRANSPOSE_B));
+
+  xnn_runtime_t runtime = nullptr;
+  const uint32_t flags =
+      xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING;
+  const xnn_status status = xnn_create_runtime_v4(
+      subgraph, nullptr, nullptr, nullptr, flags, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  // Set dims such that num_channels * qc8_batch_size overflows size_t.
+  const size_t large_dim = (size_t)1 << (sizeof(size_t) * 4);
+  runtime->values[input_b].shape.num_dims = 3;
+  runtime->values[input_b].shape.dim[0] = large_dim;
+  runtime->values[input_b].shape.dim[1] = large_dim;
+  runtime->values[input_b].shape.dim[2] = 1;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
