@@ -4,8 +4,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
 #include "test/operators/resize-bilinear-operator-tester.h"
 
 TEST(RESIZE_BILINEAR_NCHW_F16, aligned_centers_upscale_y) {
@@ -986,4 +989,60 @@ TEST(RESIZE_BILINEAR_NCHW_F32, tf_mode_aligned_centers_varying_batch_size) {
       }
     }
   }
+}
+
+TEST(RESIZE_BILINEAR_NCHW_F32, output_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t resize_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_resize_bilinear2d_nchw(
+                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+                /*flags=*/0, &resize_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      resize_op, xnn_delete_operator);
+  const size_t overflow_stride = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_resize_bilinear2d_nchw(
+                resize_op, /*batch_size=*/1, /*input_height=*/2,
+                /*input_width=*/2, /*channels=*/1,
+                /*input_pixel_stride=*/1,
+                /*output_pixel_stride=*/overflow_stride,
+                /*threadpool=*/nullptr));
+}
+
+TEST(RESIZE_BILINEAR_NCHW_F32, input_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t resize_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_resize_bilinear2d_nchw(
+                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+                /*flags=*/0, &resize_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      resize_op, xnn_delete_operator);
+  const size_t overflow_stride = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_resize_bilinear2d_nchw(
+                resize_op, /*batch_size=*/1, /*input_height=*/2,
+                /*input_width=*/2, /*channels=*/1,
+                /*input_pixel_stride=*/overflow_stride,
+                /*output_pixel_stride=*/1,
+                /*threadpool=*/nullptr));
+}
+
+TEST(RESIZE_BILINEAR_NCHW_F32, batch_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t resize_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_resize_bilinear2d_nchw(
+                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+                /*flags=*/0, &resize_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      resize_op, xnn_delete_operator);
+  const size_t overflow_batch = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_resize_bilinear2d_nchw(
+                resize_op, /*batch_size=*/overflow_batch,
+                /*input_height=*/2, /*input_width=*/2, /*channels=*/1,
+                /*input_pixel_stride=*/1, /*output_pixel_stride=*/1,
+                /*threadpool=*/nullptr));
 }
