@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -98,8 +99,23 @@ static enum xnn_status resize_copy_output_tensor(
   }
 
   const size_t input_num_elements = xnn_shape_multiply_all_dims(&input->shape);
+  if (input_num_elements == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with input ID #%" PRIu32
+        ": input shape overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_static_reshape), input_id);
+    return xnn_status_invalid_parameter;
+  }
   if (output_axis_dynamic < XNN_MAX_TENSOR_DIMS) {
-    const size_t output_num_elements = xnn_shape_multiply_all_dims(&output->shape);
+    const size_t output_num_elements =
+        xnn_shape_multiply_all_dims(&output->shape);
+    if (output_num_elements == SIZE_MAX) {
+      xnn_log_error(
+          "failed to reshape %s operator with output ID #%" PRIu32
+          ": output shape overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_static_reshape), output_id);
+      return xnn_status_invalid_parameter;
+    }
     if (output_num_elements == 0) {
       xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
                     " and output ID #%" PRIu32
@@ -119,7 +135,15 @@ static enum xnn_status resize_copy_output_tensor(
     // Infer dynamic dimension
     output->shape.dim[output_axis_dynamic] = inferred_dim;
   } else {
-    const size_t output_num_elements = xnn_shape_multiply_all_dims(&output->shape);
+    const size_t output_num_elements =
+        xnn_shape_multiply_all_dims(&output->shape);
+    if (output_num_elements == SIZE_MAX) {
+      xnn_log_error(
+          "failed to reshape %s operator with output ID #%" PRIu32
+          ": output shape overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_static_reshape), output_id);
+      return xnn_status_invalid_parameter;
+    }
 
     if (input_num_elements != output_num_elements) {
       xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
@@ -231,7 +255,15 @@ static enum xnn_status resize_fuse_dims_output_tensor(
   }
   output_shape->dim[first_dim] = 1;
   for (size_t k = first_dim; k < first_dim + num_dims; k++) {
-    output_shape->dim[first_dim] *= input_shape->dim[k];
+    if (!xnn_safe_mul(output_shape->dim[first_dim], input_shape->dim[k],
+                      &output_shape->dim[first_dim])) {
+      xnn_log_error(
+          "failed to fuse dims in %s operator with input ID #%" PRIu32
+          " and output ID #%" PRIu32 ": fused dimension overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_fuse_dims), input_id,
+          output_id);
+      return xnn_status_invalid_parameter;
+    }
   }
   for (size_t k = first_dim + num_dims; k < input_shape->num_dims; k++) {
     output_shape->dim[k - num_dims + 1] = input_shape->dim[k];
@@ -287,8 +319,25 @@ static enum xnn_status resize_split_dims_output_tensor(
   size_t count = 1;
   for (size_t k = 0; k < num_dims; k++) {
     if (splits[k]) {
-      count *= splits[k];
+      if (!xnn_safe_mul(count, splits[k], &count)) {
+        xnn_log_error(
+            "failed to split dims in %s operator with input ID #%" PRIu32
+            " and output ID #%" PRIu32
+            ": product of defined splits overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_split_dims), input_id,
+            output_id);
+        return xnn_status_invalid_parameter;
+      }
     }
+  }
+  if (count == 0) {
+    xnn_log_error(
+        "failed to split dims in %s operator with input ID #%" PRIu32
+        " and output ID #%" PRIu32
+        ": product of defined splits must be non-zero",
+        xnn_node_type_to_string(xnn_node_type_split_dims), input_id,
+        output_id);
+    return xnn_status_invalid_parameter;
   }
   size_t remainder = input_shape->dim[axis] / count;
   if (remainder * count != input_shape->dim[axis]) {
@@ -334,7 +383,15 @@ static enum xnn_status reshape_copy_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const size_t batch_size = xnn_shape_multiply_all_dims(&values[input_id].shape);
+  const size_t batch_size =
+      xnn_shape_multiply_all_dims(&values[input_id].shape);
+  if (batch_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with input ID #%" PRIu32
+        ": input shape overflows size_t",
+        xnn_node_type_to_string(opdata->type), input_id);
+    return xnn_status_invalid_parameter;
+  }
 
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
@@ -615,7 +672,7 @@ enum xnn_status xnn_define_split_dim(xnn_subgraph_t subgraph,
     xnn_log_error(
         "failed to define %s operator with %zu-dimensional output shape: at "
         "most %zu dimensions are supported",
-        xnn_node_type_to_string(xnn_node_type_fuse_dims), axis + num_splits,
+        xnn_node_type_to_string(xnn_node_type_split_dims), axis + num_splits,
         (size_t)XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
