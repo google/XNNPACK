@@ -247,7 +247,8 @@ TEST(SPACE_TO_DEPTH_NHWC_X32, overflow_stride) {
 
   const uint32_t block_size = 2;
   ASSERT_EQ(xnn_status_success,
-            xnn_create_space_to_depth_nhwc_x32(block_size, 0, &space_to_depth_op));
+            xnn_create_space_to_depth_nhwc_x32(
+                block_size, 0, &space_to_depth_op));
   ASSERT_NE(nullptr, space_to_depth_op);
 
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
@@ -256,22 +257,25 @@ TEST(SPACE_TO_DEPTH_NHWC_X32, overflow_stride) {
   // Normal control case: must succeed.
   ASSERT_EQ(xnn_status_success,
             xnn_reshape_space_to_depth_nhwc_x32(
-                space_to_depth_op, /*batch_size=*/1, /*input_height=*/4, /*input_width=*/4,
-                /*input_channels=*/2, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                space_to_depth_op, /*batch_size=*/1, /*input_height=*/4,
+                /*input_width=*/4, /*input_channels=*/2,
+                /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                 /*output_channels_out=*/nullptr, /*threadpool=*/nullptr));
 
   // Overflow case:
-  // input_channels = 2, so output_channels = 2 * 2 * 2 = 8 (passes existing channel check).
+  // input_channels = 2, so output_channels = 2 * 2 * 2 = 8.
   // input_height = 2 (divisible by block_size 2).
-  // input_width = (SIZE_MAX / 2) + 2 (even number, passes divisibility by 2).
-  // input_row_stride = input_width * input_channels = ((SIZE_MAX / 2) + 2) * 2 overflows size_t.
+  // input_width = (SIZE_MAX / 2) + 2 (even number).
+  // input_row_stride = input_width * input_channels = ((SIZE_MAX / 2) + 2) * 2
+  // which overflows size_t.
   const size_t large_width = (SIZE_MAX / 2) + 2;
   const size_t height = 2;
   const size_t channels = 2;
 
   ASSERT_EQ(xnn_status_invalid_parameter,
             xnn_reshape_space_to_depth_nhwc_x32(
-                space_to_depth_op, /*batch_size=*/1, height, large_width, channels,
-                /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                /*output_channels_out=*/nullptr, /*threadpool=*/nullptr));
+                space_to_depth_op, /*batch_size=*/1, height, large_width,
+                channels, /*output_height_out=*/nullptr,
+                /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
+                /*threadpool=*/nullptr));
 }
