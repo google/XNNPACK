@@ -1395,12 +1395,24 @@ static enum xnn_status reshape_convolution2d_nchw(
       input_height + convolution_op->convolution_op->padding_bottom;
   const size_t padded_input_width = convolution_op->convolution_op->padding_left +
       input_width + convolution_op->convolution_op->padding_right;
-  const size_t effective_kernel_height =
-      (convolution_op->convolution_op->kernel_height - 1) *
-          convolution_op->convolution_op->dilation_height + 1;
-  const size_t effective_kernel_width =
-      (convolution_op->convolution_op->kernel_width - 1) *
-          convolution_op->convolution_op->dilation_width + 1;
+  size_t effective_kernel_height, effective_kernel_width;
+  if (!xnn_safe_mul(
+          (size_t)(convolution_op->convolution_op->kernel_height - 1),
+          (size_t)convolution_op->convolution_op->dilation_height,
+          &effective_kernel_height) ||
+      !xnn_safe_mul(
+          (size_t)(convolution_op->convolution_op->kernel_width - 1),
+          (size_t)convolution_op->convolution_op->dilation_width,
+          &effective_kernel_width)) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zux%zu input: "
+        "dilation overflows effective kernel size",
+        xnn_operator_type_to_string_v2(convolution_op), input_width,
+        input_height);
+    return xnn_status_invalid_parameter;
+  }
+  effective_kernel_height += 1;
+  effective_kernel_width += 1;
   if (padded_input_height < effective_kernel_height ||
       padded_input_width < effective_kernel_width) {
     xnn_log_error(
