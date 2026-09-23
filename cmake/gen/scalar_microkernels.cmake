@@ -279,7 +279,13 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/xx-transposev/xx-transposev-1x1-scalar-memcpy.c)
 
 SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
+  src/bf16-f32-dwconv/gen/bf16-f32-dwconv-3p2c-minmax-scalar.c
+  src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p2c-minmax-scalar.c
+  src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p2c-minmax-scalar.c
+  src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p2c-minmax-scalar-acc2.c
   src/bf16-f32-gemm/bf16-f32-gemm-1x4c2-minmax-scalar.c
+  src/bf16-f32-igemm/gen/bf16-f32-igemm-1x4c2-minmax-scalar.c
+  src/bf16-f32-igemm/gen/bf16-f32-igemm-4x4c2-minmax-scalar.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u1.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u3.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u4.c

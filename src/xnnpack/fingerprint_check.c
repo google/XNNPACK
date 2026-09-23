@@ -114,6 +114,8 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w_dwconv:
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w:
     case xnn_fingerprint_id_convolution2d_nhwc_pf32_pf32_pf32:
+    case xnn_fingerprint_id_convolution2d_nhwc_bf16_f32_bf16_dwconv:
+    case xnn_fingerprint_id_convolution2d_nhwc_bf16_f32_bf16:
       return xnn_fingerprint_convolution2d_nhwc(fingerprint_id);
     case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16:
     case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16_subconv2d:

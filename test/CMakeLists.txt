@@ -162,6 +162,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
 ENDIF()
 
 SET(MICROKERNEL_DWCONV_UNIT_TESTS
+    bf16-f32-dwconv-minmax
     f16-dwconv-minmax
     f16-dwconv2d-chw
     f32-dwconv-minmax
@@ -191,6 +192,8 @@ SHARD_TEST(qs8-dwconv-minmax-fp32-test 10)
 SHARD_TEST(qs8-qc8w-dwconv-minmax-fp32-test 10)
 
 SET(MICROKERNEL_GEMM_UNIT_TESTS
+    bf16-f32-gemm-minmax
+    bf16-f32-igemm-minmax
     bf16-gemm-minmax
     f16-f32acc-gemm-minmax
     f16-f32acc-igemm-minmax

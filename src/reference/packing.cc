@@ -4062,6 +4062,57 @@ void xnn_pack_f16_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
   } while (--g != 0);
 }
 
+void xnn_pack_bf16_f32_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
+                                   size_t nr, size_t kr, size_t sr,
+                                   const uint16_t* k, const float* b,
+                                   const void* scale, void* packed_weights,
+                                   size_t extra_bytes, const void* params) {
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  const size_t skr = sr * kr;
+  do {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      copy_bias(b, nr_block_start, nr_block_size, (float*)packed_weights);
+      uint16_t* packed_k =
+          (uint16_t*)((uintptr_t)packed_weights + nr * sizeof(float));
+
+      for (size_t ki = 0; ki < ks; ki++) {
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+             kr_block_start += kr) {
+          for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+               nr_block_offset++) {
+            const size_t kc_begin =
+                round_down_po2(kr_block_start, skr) +
+                ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            uint16_t* end = packed_k + kr;
+            if (kc_begin < kc_end) {
+              std::copy_n(
+                  &k[((nr_block_start + nr_block_offset) * ks + ki) * kc +
+                     kc_begin],
+                  kc_end - kc_begin, packed_k);
+              packed_k += kc_end - kc_begin;
+            }
+            std::fill(packed_k, end, UINT16_C(0));
+            packed_k = end;
+          }
+          std::fill_n(packed_k, (nr - nr_block_size) * kr, UINT16_C(0));
+          packed_k += (nr - nr_block_size) * kr;
+        }
+      }
+      packed_weights = (void*)((uintptr_t)packed_k + extra_bytes);
+    }
+    k += ks * kc * nc;
+    if XNN_UNPREDICTABLE (b != nullptr) {
+      b += nc;
+    }
+  } while (--g != 0);
+}
+
 void xnn_pack_f32_to_f16_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
                                      size_t nr, size_t kr, size_t sr,
                                      const float* k, const float* b,
@@ -4346,6 +4397,44 @@ void xnn_pack_f16_conv_kgo_w(size_t g, size_t nc, size_t ks, size_t nr,
         }
       }
       packed_weights = (uint16_t*)((uintptr_t)packed_weights + extra_bytes);
+    }
+    k += nc;
+    if XNN_UNPREDICTABLE (b != nullptr) {
+      b += nc;
+    }
+  }
+}
+
+void xnn_pack_bf16_f32_conv_kgo_w(size_t g, size_t nc, size_t ks, size_t nr,
+                                  size_t kr, size_t sr, const uint16_t* k,
+                                  const float* b, const void* scale,
+                                  void* packed_weights, size_t extra_bytes,
+                                  const void* params) {
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  for (size_t i = 0; i < g; i++) {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      copy_bias(b, nr_block_start, nr_block_size, (float*)packed_weights);
+      uint16_t* packed_k =
+          (uint16_t*)((uintptr_t)packed_weights + nr * sizeof(float));
+
+      for (size_t ki = 0; ki < ks; ki++) {
+        for (size_t sr_block_offset = 0; sr_block_offset < sr;
+             sr_block_offset++) {
+          std::fill_n(packed_k, nr * kr, UINT16_C(0));
+          for (size_t nr_block_offset = (-sr_block_offset) & (sr - 1);
+               nr_block_offset < nr_block_size; nr_block_offset += sr) {
+            packed_k[nr_block_offset * kr] =
+                k[ki * g * nc + (nr_block_start + nr_block_offset)];
+          }
+          packed_k += nr * kr;
+        }
+      }
+      packed_weights = (void*)((uintptr_t)packed_k + extra_bytes);
     }
     k += nc;
     if XNN_UNPREDICTABLE (b != nullptr) {
@@ -4947,6 +5036,45 @@ void xnn_pack_f16_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
   }
 }
 
+void xnn_pack_bf16_f32_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
+                                    size_t c, size_t channel_tile,
+                                    const uint16_t* k, const float* b,
+                                    const void* scale, void* packed_weights,
+                                    size_t per_tile_extra_bytes,
+                                    const void* params) {
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  const size_t kernel_size = h * w;
+  assert(kernel_size <= primary_tile);
+
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    float* packed_b = (float*)packed_weights;
+    copy_bias(b, cr_block_start, cr_block_size, packed_b);
+    std::fill(packed_b + cr_block_size, packed_b + channel_tile, 0.0f);
+    uint16_t* packed_k = (uint16_t*)(packed_b + channel_tile);
+
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        packed_k[cr_block_offset] =
+            k[((cr_block_start + cr_block_offset) * h + y) * w + x];
+      }
+      std::fill(packed_k + cr_block_size, packed_k + channel_tile, UINT16_C(0));
+      packed_k += channel_tile;
+      advance_x_y(h, &x, &y);
+    }
+    std::fill_n(packed_k, (primary_tile - kernel_size) * channel_tile,
+                UINT16_C(0));
+    packed_k += (primary_tile - kernel_size) * channel_tile;
+    packed_weights = (void*)((uintptr_t)packed_k + per_tile_extra_bytes);
+  }
+}
+
 void xnn_pack_f32_to_f16_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                       size_t c, size_t channel_tile,
                                       const float* k, const float* b,
@@ -5168,6 +5296,45 @@ void xnn_pack_f16_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
     std::fill_n(packed_weights, (primary_tile - kernel_size) * channel_tile,
                 UINT16_C(0));
     packed_weights += (primary_tile - kernel_size) * cr_block_size;
+  }
+}
+
+void xnn_pack_bf16_f32_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
+                                    size_t c, size_t channel_tile,
+                                    const uint16_t* k, const float* b,
+                                    const void* scale, void* packed_weights,
+                                    size_t per_tile_extra_bytes,
+                                    const void* params) {
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  const size_t kernel_size = h * w;
+  assert(kernel_size <= primary_tile);
+
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    float* packed_b = (float*)packed_weights;
+    copy_bias(b, cr_block_start, cr_block_size, packed_b);
+    std::fill(packed_b + cr_block_size, packed_b + channel_tile, 0.0f);
+    uint16_t* packed_k = (uint16_t*)(packed_b + channel_tile);
+
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        packed_k[cr_block_offset] =
+            k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+      }
+      std::fill(packed_k + cr_block_size, packed_k + channel_tile, UINT16_C(0));
+      packed_k += channel_tile;
+      advance_x_y(h, &x, &y);
+    }
+    std::fill_n(packed_k, (primary_tile - kernel_size) * channel_tile,
+                UINT16_C(0));
+    packed_k += (primary_tile - kernel_size) * channel_tile;
+    packed_weights = (void*)((uintptr_t)packed_k + per_tile_extra_bytes);
   }
 }
 

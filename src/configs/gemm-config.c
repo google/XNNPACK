@@ -37,6 +37,7 @@ static const int default_config = 0;
 static const int consistent_config = 1;
 
 static struct xnn_gemm_config bf16_f32_gemm_config = {0};
+static struct xnn_gemm_config bf16_f32_igemm_config = {0};
 static struct xnn_gemm_config f16_gemm_config = {0};
 static struct xnn_gemm_config f32_gemm_config[2] = {0};
 static struct xnn_gemm_config f32_igemm_config = {0};
@@ -77,6 +78,7 @@ static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
 
 XNN_INIT_ONCE_GUARD(bf16_f32_gemm);
+XNN_INIT_ONCE_GUARD(bf16_f32_igemm);
 XNN_INIT_ONCE_GUARD(f16_gemm);
 XNN_INIT_ONCE_GUARD(f32_igemm);
 XNN_INIT_ONCE_GUARD(f32_gemm);
@@ -456,7 +458,32 @@ static void init_bf16_f32_gemm_config(void) {
   bf16_f32_gemm_config.bias_element_size = sizeof(float);
 
   // Arch-specific parameters.
-#if XNN_ARCH_X86_64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  #if XNN_ENABLE_ARM_BF16
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128);
+      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128);
+      bf16_f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      bf16_f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_bf16_f32_gemm_goi_w;
+      bf16_f32_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_bf16_f32_gemm_gio_w;
+      bf16_f32_gemm_config.mr = 6;
+      bf16_f32_gemm_config.nr = 8;
+      bf16_f32_gemm_config.log2_kr = 1;
+    } else
+  #endif  // XNN_ENABLE_ARM_BF16
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fma) {
+    bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64);
+    bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_6x8__neonfma_lane_ld64);
+    bf16_f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    bf16_f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_bf16_f32_gemm_goi_w;
+    bf16_f32_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_bf16_f32_gemm_gio_w;
+    bf16_f32_gemm_config.mr = 6;
+    bf16_f32_gemm_config.nr = 8;
+  }
+#elif XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
@@ -473,7 +500,54 @@ static void init_bf16_f32_gemm_config(void) {
     #endif  // XNN_ENABLE_AVX512BF16
   }
   assert(bf16_f32_gemm_config.mr <= XNN_MAX_MR);
-#endif  // XNN_ARCH_X86_64
+#endif
+}
+
+static void init_bf16_f32_igemm_config(void) {
+  // Common parameters.
+  bf16_f32_igemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_BFLOAT16;
+  bf16_f32_igemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_BFLOAT16;
+  bf16_f32_igemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_BFLOAT16 + 3;
+  bf16_f32_igemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  #if XNN_ENABLE_ARM_BF16
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+      bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128);
+      bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128);
+      bf16_f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      bf16_f32_igemm_config.mr = 6;
+      bf16_f32_igemm_config.nr = 8;
+      bf16_f32_igemm_config.log2_kr = 1;
+    } else
+  #endif  // XNN_ENABLE_ARM_BF16
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fma) {
+    bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64);
+    bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld64);
+    bf16_f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    bf16_f32_igemm_config.mr = 6;
+    bf16_f32_igemm_config.nr = 8;
+  }
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  #if XNN_ENABLE_AVX512BF16
+    if (hardware_config->arch_flags & xnn_arch_x86_avx512bf16) {
+      bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_1x32c2__avx512bf16_broadcast);
+      bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_7x32c2__avx512bf16_broadcast);
+      bf16_f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      bf16_f32_igemm_config.mr = 7;
+      bf16_f32_igemm_config.nr = 32;
+      bf16_f32_igemm_config.log2_kr = 1;
+    }
+  #endif  // XNN_ENABLE_AVX512BF16
+#endif
+  assert(bf16_f32_igemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_pf32_gemm_config(void) {
@@ -6564,11 +6638,22 @@ const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
 
 const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_bf16_compatible_config(hardware_config)) {
+  if (hardware_config == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(bf16_f32_gemm);
   return bf16_f32_gemm_config.mr ? &bf16_f32_gemm_config : NULL;
+}
+
+// Unlike most configs, this one is returned even when there are no igemm
+// micro-kernels (`mr == 0`) so that depthwise bf16 convolutions can still use
+// the bf16_f32 dwconv micro-kernels.
+const struct xnn_gemm_config* xnn_init_bf16_f32_igemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(bf16_f32_igemm);
+  return &bf16_f32_igemm_config;
 }
 
 const struct xnn_gemm_config* xnn_init_pf32_gemm_config() {

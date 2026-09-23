@@ -600,6 +600,12 @@ static enum xnn_status select_microkernel_type(
 
   } else {
     context->microkernel_type = xnn_microkernel_type_igemm;
+    if (context->gemm_config->mr == 0) {
+      xnn_log_error(
+          "failed to create %s operator: no igemm micro-kernel available",
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_unsupported_hardware;
+    }
   }
   return xnn_status_success;
 }
@@ -1328,6 +1334,31 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
   return xnn_status_success;
 }
 
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_bf16_f32(
+    const struct convolution2d_nhwc_variant* variant,
+    struct convolution2d_nhwc_context* context) {
+  // Without bf16_f32 dwconv micro-kernels, depthwise convolutions use igemm.
+  const struct xnn_dwconv_config* dwconv_config =
+      xnn_init_bf16_f32_dwconv_config();
+  if (dwconv_config == NULL) {
+    return xnn_status_success;
+  }
+  size_t kernel_size;
+  if (!xnn_safe_mul(context->kernel_height, context->kernel_width,
+                    &kernel_size)) {
+    return xnn_status_unsupported_parameter;
+  }
+  context->dwconv_ukernel = find_dwconv_ukernel(
+      kernel_size, dwconv_config, XNN_MAX_BF16_F32_DWCONV_UKERNELS);
+  if XNN_LIKELY (context->dwconv_ukernel != NULL) {
+    context->dwconv_ukernel->init.f32(&context->dwconv_params.f32,
+                                      context->output_min, context->output_max);
+    context->dwconv_params_size = sizeof(context->dwconv_params.f32);
+    context->dwconv_params_ptr = &context->dwconv_params.f32;
+  }
+  return xnn_status_success;
+}
+
 static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_vmuladdc_params_f16(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
@@ -1450,6 +1481,20 @@ static enum xnn_status set_context_params_f32(
       (xnn_pack_dwconv_ghw_w_fn)xnn_pack_f32_dwconv_ghw_w;
   context->pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn)xnn_pack_f32_conv_kgo_w;
   context->pack_conv_goki_w = (xnn_pack_conv_goki_w_fn)xnn_pack_f32_conv_goki_w;
+  return xnn_status_success;
+}
+
+static enum xnn_status set_context_params_bf16_f32(
+    const struct convolution2d_nhwc_variant* variant,
+    struct convolution2d_nhwc_context* context) {
+  context->pack_dwconv_hwg_w =
+      (xnn_pack_dwconv_hwg_w_fn)xnn_pack_bf16_f32_dwconv_hwg_w;
+  context->pack_dwconv_ghw_w =
+      (xnn_pack_dwconv_ghw_w_fn)xnn_pack_bf16_f32_dwconv_ghw_w;
+  context->pack_conv_kgo_w =
+      (xnn_pack_conv_kgo_w_fn)xnn_pack_bf16_f32_conv_kgo_w;
+  context->pack_conv_goki_w =
+      (xnn_pack_conv_goki_w_fn)xnn_pack_bf16_f32_conv_goki_w;
   return xnn_status_success;
 }
 
@@ -1578,6 +1623,22 @@ static struct convolution2d_nhwc_variant f32_variant = {
     .cleanup = UNUSED_FUNCTION,
 };
 
+// bf16 input and weights, fp32 bias and output.
+static struct convolution2d_nhwc_variant bf16_f32_variant = {
+    .check_input_scale = UNUSED_FUNCTION,
+    .check_kernel_scale = UNUSED_FUNCTION,
+    .check_output_scale = UNUSED_FUNCTION,
+    .check_output_range = check_output_range_f32,
+    .init_linear_activation = init_linear_activation_f32,
+    .init_requantization_scale = UNUSED_FUNCTION,
+    .init_packing_params = UNUSED_FUNCTION,
+    .init_gemm_params = init_gemm_params_f32,
+    .init_dwconv_params = init_dwconv_params_bf16_f32,
+    .init_vmuladdc_params = UNUSED_FUNCTION,
+    .set_context_params = set_context_params_bf16_f32,
+    .cleanup = UNUSED_FUNCTION,
+};
+
 static enum xnn_status compute_fingerprint_id(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
@@ -1622,6 +1683,11 @@ static enum xnn_status compute_fingerprint_id(
     OPERATOR_TYPE_CASE(qs8);
     OPERATOR_TYPE_CASE(qc8);
     OPERATOR_TYPE_CASE(pqs8, qs8, qc8w);
+    case xnn_operator_type_convolution_nhwc_bf16_f32:
+      in = xnn_fingerprint_id_helper_bf16;
+      out = xnn_fingerprint_id_helper_f32;
+      weights = xnn_fingerprint_id_helper_bf16;
+      break;
     default:
       xnn_log_error(
           "Unsupported operator type when computing the fingerprint id for "
@@ -1686,6 +1752,9 @@ static enum xnn_status select_gemm_config(
       break;
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
       context->gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+      break;
+    case xnn_operator_type_convolution_nhwc_bf16_f32:
+      context->gemm_config = xnn_init_bf16_f32_igemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_f16:
       context->gemm_config = xnn_init_f16_gemm_config();
@@ -1921,6 +1990,10 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
     case xnn_fingerprint_id_convolution2d_nhwc_f32_f32_f32:
       variant = &f32_variant;
       context.operator_type = xnn_operator_type_convolution_nhwc_f32;
+      break;
+    case xnn_fingerprint_id_convolution2d_nhwc_bf16_f32_bf16:
+      variant = &bf16_f32_variant;
+      context.operator_type = xnn_operator_type_convolution_nhwc_bf16_f32;
       break;
     case xnn_fingerprint_id_convolution2d_nhwc_pf32_pf32_pf32:
       variant = &f32_variant;
@@ -2457,6 +2530,44 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       .operator_type = xnn_operator_type_convolution_nhwc_f32,
   };
   return create_convolution2d_nhwc_helper(&f32_variant, &context,
+                                          convolution_op_out);
+}
+
+enum xnn_status xnn_create_convolution2d_nhwc_bf16_f32(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  struct convolution2d_nhwc_context context = {
+      .input_padding_top = input_padding_top,
+      .input_padding_right = input_padding_right,
+      .input_padding_bottom = input_padding_bottom,
+      .input_padding_left = input_padding_left,
+      .kernel_height = kernel_height,
+      .kernel_width = kernel_width,
+      .subsampling_height = subsampling_height,
+      .subsampling_width = subsampling_width,
+      .dilation_height = dilation_height,
+      .dilation_width = dilation_width,
+      .groups = groups,
+      .group_input_channels = group_input_channels,
+      .group_output_channels = group_output_channels,
+      .input_channel_stride = input_channel_stride,
+      .output_channel_stride = output_channel_stride,
+      .kernel = kernel,
+      .bias = bias,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_convolution_nhwc_bf16_f32,
+  };
+  return create_convolution2d_nhwc_helper(&bf16_f32_variant, &context,
                                           convolution_op_out);
 }
 
@@ -3745,6 +3856,22 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
       output_width_out, threadpool);
 }
 
+enum xnn_status xnn_reshape_convolution2d_nhwc_bf16_f32(
+    xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t* workspace_size, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool) {
+  return reshape_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_bf16_f32, batch_size,
+      input_height, input_width,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_BFLOAT16,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_BFLOAT16,
+      /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*extra_weights_elements_size=*/sizeof(float),
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*dynamic_quantization=*/false, workspace_size, output_height_out,
+      output_width_out, threadpool);
+}
+
 enum xnn_status xnn_reshape_convolution2d_nhwc_pf16(
     xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
     size_t input_width, size_t* workspace_size, size_t* output_height_out,
@@ -3973,6 +4100,15 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(xnn_operator_t convolution_op,
       convolution_op, xnn_operator_type_convolution_nhwc_f16, workspace, input,
       output, /*quantization_params=*/NULL,
       /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16);
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_bf16_f32(
+    xnn_operator_t convolution_op, void* workspace, const void* input,
+    float* output) {
+  return setup_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_bf16_f32, workspace,
+      input, output, /*quantization_params=*/NULL,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_BFLOAT16);
 }
 
 enum xnn_status xnn_setup_convolution2d_nhwc_pf16(xnn_operator_t convolution_op,
