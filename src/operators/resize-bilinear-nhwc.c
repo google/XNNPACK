@@ -194,7 +194,15 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   const size_t output_height = resize_op->convolution_op->output_height;
   const size_t output_width = resize_op->convolution_op->output_width;
   const bool enable_transient_indirection = !!(resize_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER);
-  const size_t input_pixel_stride_in_bytes = input_pixel_stride << log2_data_element_size;
+  size_t input_pixel_stride_in_bytes = 0;
+  if (!xnn_safe_mul(input_pixel_stride, (size_t) 1u << log2_data_element_size,
+                    &input_pixel_stride_in_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in input pixel stride",
+        xnn_operator_type_to_string_v2(resize_op));
+    return xnn_status_out_of_memory;
+  }
   size_t num_output_pixels = 0;
   if (!xnn_safe_mul(output_height, output_width, &num_output_pixels)) {
     xnn_log_error(
@@ -303,16 +311,45 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   }
 
   const struct xnn_ibilinear_config* ibilinear = resize_op->ibilinear_config;
-  const size_t output_pixel_stride_in_bytes = output_pixel_stride << log2_data_element_size;
+  size_t output_pixel_stride_in_bytes = 0;
+  size_t scaled_channels = 0;
+  size_t input_height_stride = 0;
+  size_t input_batch_stride = 0;
+  size_t output_height_stride = 0;
+  size_t output_batch_stride = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+
+  if (!xnn_safe_mul(output_pixel_stride, (size_t) 1u << log2_data_element_size,
+                    &output_pixel_stride_in_bytes) ||
+      !xnn_safe_mul(channels, (size_t) 1u << log2_data_element_size,
+                    &scaled_channels) ||
+      !xnn_safe_mul(input_width, input_pixel_stride_in_bytes,
+                    &input_height_stride) ||
+      !xnn_safe_mul(input_height, input_height_stride,
+                    &input_batch_stride) ||
+      !xnn_safe_mul(output_width, output_pixel_stride_in_bytes,
+                    &output_height_stride) ||
+      !xnn_safe_mul(output_height, output_height_stride,
+                    &output_batch_stride) ||
+      !xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, output_batch_stride, &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(resize_op));
+    return xnn_status_out_of_memory;
+  }
+
   // Resize bilinear packed weights can change when the operator is resized, we will not use weights cache.
   assert(resize_op->weights_cache == NULL);
   resize_op->context.resize_bilinear = (struct resize_bilinear_context) {
-    .scaled_channels = channels << log2_data_element_size,
+    .scaled_channels = scaled_channels,
     .indirect_input = resize_op->convolution_op->indirection_buffer,
-    .input_batch_stride = input_pixel_stride_in_bytes * input_height * input_width,
+    .input_batch_stride = input_batch_stride,
     .packed_weights = resize_op->packed_weights.pointer,
     .output_pixel_stride = output_pixel_stride_in_bytes,
-    .output_batch_stride = output_pixel_stride_in_bytes * output_height * output_width,
+    .output_batch_stride = output_batch_stride,
     .log2_wsize = 1 + log2_weight_element_size /* log2(2 * sizeof(weight)) */,
     .input_offset = (size_t) 0,
     .ukernel = ibilinear->ukernel,
