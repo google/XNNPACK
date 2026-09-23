@@ -486,7 +486,18 @@ static void init_bf16_f32_igemm_config(void) {
   bf16_f32_igemm_config.bias_element_size = sizeof(float);
 
   // Arch-specific parameters.
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fma) {
+    bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64);
+    bf16_f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_bf16_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld64);
+    bf16_f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    bf16_f32_igemm_config.mr = 6;
+    bf16_f32_igemm_config.nr = 8;
+  }
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
@@ -500,7 +511,7 @@ static void init_bf16_f32_igemm_config(void) {
       bf16_f32_igemm_config.log2_kr = 1;
     }
   #endif  // XNN_ENABLE_AVX512BF16
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif
   assert(bf16_f32_igemm_config.mr <= XNN_MAX_MR);
 }
 
