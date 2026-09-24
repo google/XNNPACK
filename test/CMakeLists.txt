@@ -483,6 +483,14 @@ TARGET_LINK_LIBRARIES(polyfill-test PRIVATE
 ADD_TEST(NAME polyfill-test COMMAND polyfill-test)
 SET_TARGET_PROPERTIES(polyfill-test PROPERTIES CXX_EXTENSIONS YES)
 
+ADD_EXECUTABLE(reference-utils-test reference-utils.cc)
+TARGET_LINK_LIBRARIES(reference-utils-test PRIVATE
+  xnnpack-test
+  xnnpack-datatype
+  XNNPACK)
+ADD_TEST(NAME reference-utils-test COMMAND reference-utils-test)
+SET_TARGET_PROPERTIES(reference-utils-test PROPERTIES CXX_EXTENSIONS YES)
+
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)
   TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK pthreadpool GTest::gtest GTest::gtest_main)
