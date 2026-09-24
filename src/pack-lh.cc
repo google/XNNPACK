@@ -23,6 +23,12 @@ namespace {
 
 size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
                                       size_t kr, size_t sr) {
+  if (mr_packed == 0 || kr == 0 || sr == 0) {
+    return 0;
+  }
+  if (kr > SIZE_MAX / sr) {
+    return 0;
+  }
   // Each packed row starts with the `mr_packed` quantization params, followed
   // by the `mr_packed` rows of quantized data.
   m = round_up(m, mr_packed);
@@ -36,6 +42,12 @@ size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
 size_t xnn_pack_lh_fx_qd8_row_sums_packed_size(size_t m, size_t k,
                                                size_t mr_packed,
                                                size_t kr, size_t sr) {
+  if (mr_packed == 0 || kr == 0 || sr == 0) {
+    return 0;
+  }
+  if (kr > SIZE_MAX / sr) {
+    return 0;
+  }
   // Each packed row starts with the `mr_packed` quantization params,
   // followed by the `mr_packed` row_sums followed by the `mr_packed` rows of
   // quantized data.
@@ -49,6 +61,12 @@ size_t xnn_pack_lh_fx_qd8_row_sums_packed_size(size_t m, size_t k,
 
 size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
                                         size_t kr, size_t sr) {
+  if (mr_packed == 0 || kr == 0 || sr == 0) {
+    return 0;
+  }
+  if (kr > SIZE_MAX / sr) {
+    return 0;
+  }
   // Each packed row starts with the `mr_packed` quantization params, followed
   // by the `mr_packed` rows of quantized data.
   assert(m % mr_packed == 0);
@@ -62,6 +80,12 @@ size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
 size_t xnn_pack_lh_fx_qd8_qc2w_packed_offset(size_t m, size_t k,
                                              size_t mr_packed, size_t kr,
                                              size_t sr) {
+  if (mr_packed == 0 || kr == 0 || sr == 0) {
+    return 0;
+  }
+  if (kr > SIZE_MAX / sr) {
+    return 0;
+  }
   // Each packed row starts with the `mr_packed` quantization params, followed
   // by the `mr_packed` row_sums, followed by the `mr_packed` rows of quantized
   // data.
@@ -88,6 +112,15 @@ static XNN_NO_SANITIZE_FUNCTION void pack_lh_fx_qd(
     xnn_vunary_ukernel_fn convert_ukernel, xnn_reduce_ukernel_fn minmax_ukernel,
     xnn_reduce_ukernel_fn rsum_ukernel) {
   assert(m_idx_start == 0);
+  if (m == 0 || k == 0 || lhs == nullptr || lhs_packed == nullptr) {
+    return;
+  }
+  if (mr_packed == 0 || kr == 0 || sr == 0) {
+    return;
+  }
+  if (convert_ukernel == nullptr || minmax_ukernel == nullptr) {
+    return;
+  }
 
   struct xnn_f32_default_params minmax_params;
   qs8_cvt_params_t convert_params;
