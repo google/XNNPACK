@@ -149,12 +149,22 @@ static void init_f32_avgpool_config(void) {
       f32_avgpool_config.channel_tile = 32;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__rvv_u2v);
-    f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
-    f32_avgpool_config.primary_tile = 9;
-    f32_avgpool_config.channel_tile = 2 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL && hardware_config->vlenb > 0) {
+      f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(
+          xnn_f32_avgpool_minmax_ukernel_9p__rvv_u2v);
+      f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
+      f32_avgpool_config.primary_tile = 9;
+      f32_avgpool_config.channel_tile =
+          2 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(
+          xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1);
+      f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
+      f32_avgpool_config.primary_tile = 9;
+      f32_avgpool_config.channel_tile = 1;
+    }
   #else
     f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1);
     f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
