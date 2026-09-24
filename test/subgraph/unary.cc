@@ -23,6 +23,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/reference-utils.h"
 #include "src/xnnpack/subgraph.h"
@@ -464,5 +465,29 @@ INSTANTIATE_TEST_SUITE_P(UnaryTestQint8ToQcint8, Convert,
                                      testing::Range(1, XNN_MAX_TENSOR_DIMS))),
                          [](const auto& info) { return info.param.Name(); });
 #endif
+
+TEST(MicroparamsInitTest, IgnoresInvalidScalePackingArguments) {
+  xnn_init_qs8_qc8w_scale_fp32_params(0, 0, 0, nullptr, nullptr);
+  xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(0, 0, 0, nullptr, nullptr);
+  xnn_init_blockwise_scale_fp32_params(0, 0, 0, 0, 0, nullptr, nullptr);
+  xnn_init_blockwise_scale_bf16_params(0, 0, 0, 0, 0, nullptr, nullptr);
+}
+
+TEST(MicroparamsInitTest, AllowsNullScalarParams) {
+  EXPECT_EQ(xnn_init_f16_scale_scalar_params(nullptr, 0),
+            sizeof(struct xnn_f16_scale_params));
+  EXPECT_EQ(xnn_init_f16_f32acc_scale_scalar_params(nullptr, 0.0f),
+            sizeof(struct xnn_f16_f32acc_scale_params));
+  EXPECT_EQ(xnn_init_f32_scale_scalar_params(nullptr, 0.0f),
+            sizeof(struct xnn_f32_scale_params));
+  EXPECT_EQ(xnn_init_f16_scaleminmax_scalar_params(nullptr, 0, 0, 0),
+            sizeof(struct xnn_f16_scaleminmax_params));
+  EXPECT_EQ(
+      xnn_init_f32_scaleminmax_scalar_params(nullptr, 0.0f, 0.0f, 0.0f),
+      sizeof(struct xnn_f32_scaleminmax_params));
+
+  xnn_update_f16_scaleminmax_scalar_params(nullptr, 0);
+  xnn_update_f32_scaleminmax_scalar_params(nullptr, 0.0f);
+}
 
 }  // namespace xnnpack
