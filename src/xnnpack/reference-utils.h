@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/datatype.h"
@@ -62,6 +63,12 @@ T euclidean_div(T a, T b) {
   if (b == 0) {
     return 0;
   }
+  if (std::is_unsigned<T>::value) {
+    return a / b;
+  }
+  if (a == std::numeric_limits<T>::min() && b == -1) {
+    return a;
+  }
   T q = a / b;
   T r = a - q * b;
   T bs = b >> (sizeof(T) * 8 - 1);
@@ -71,8 +78,11 @@ T euclidean_div(T a, T b) {
 
 template <typename T>
 T euclidean_mod(T a, T b) {
-  if (b == 0) {
+  if (b == 0 || b == 1 || b == -1) {
     return 0;
+  }
+  if (std::is_unsigned<T>::value) {
+    return a % b;
   }
   T r = a % b;
   return r >= 0 ? r : (b < 0 ? r - b : r + b);
@@ -81,14 +91,20 @@ T euclidean_mod(T a, T b) {
 template <typename T>
 T integer_pow(T a, T b) {
   if (b < 0) {
-    return euclidean_div<T>(1, integer_pow(a, -b));
+    if (a == 1) {
+      return 1;
+    } else if (a == -1) {
+      return (b & 1) ? -1 : 1;
+    } else {
+      return 0;
+    }
   }
   T result = 1;
   for (; b; b >>= 1) {
     if (b & 1) {
-      result = widen(result) * widen(a);
+      result = static_cast<T>(widen(result) * widen(a));
     }
-    a = widen(a) * widen(a);
+    a = static_cast<T>(widen(a) * widen(a));
   }
   return result;
 }

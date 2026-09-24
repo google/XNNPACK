@@ -1062,6 +1062,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "reference_utils_test",
+    srcs = [
+        "reference-utils.cc",
+    ],
+    deps = [
+        "//:XNNPACK",
+        "//:common",
+    ],
+)
+
+xnnpack_unit_test(
     name = "fingerprint_cache_test",
     srcs = ["fingerprint_cache.cc"],
     deps = [
