@@ -1034,7 +1034,8 @@ TEST_P(Fp16ToFp32FallbackUnaryOpTest, Rewrite) {
         XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
         // These ops have software emulation fallbacks and will therefore not be
         // converted.
-        if (param.name == "Cos" || param.name == "Sin") {
+        if (param.name == "Cos" || param.name == "HardSwish" ||
+            param.name == "Sin") {
           XnnTensor output = param.op_builder(input);
           return BuildXnnpackGraph({output});
         } else {
