@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
@@ -3976,4 +3977,75 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2_without_bias) {
       .subsampling(2)
       .groups(19)
       .TestNCHWxF32();
+}
+
+TEST(CONVOLUTION_NCHW_F32, input_channels_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr uint32_t groups = std::numeric_limits<uint32_t>::max();
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / groups + 1;
+  const std::array<float, 1> kernel{};
+  const std::array<float, 1> bias{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, group_input_channels, 1,
+          group_input_channels, 1, kernel.data(), bias.data(),
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW_F32, output_channels_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr uint32_t groups = std::numeric_limits<uint32_t>::max();
+  constexpr size_t group_output_channels =
+      std::numeric_limits<size_t>::max() / groups + 1;
+  const std::array<float, 1> kernel{};
+  const std::array<float, 1> bias{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, 1, group_output_channels,
+          1, group_output_channels, kernel.data(), bias.data(),
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW_F32, batch_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::array<float, 1> kernel{{1.0f}};
+  const std::array<float, 1> bias{{0.0f}};
+  xnn_operator_t convolution_op = nullptr;
+
+  const xnn_status status = xnn_create_convolution2d_nchw_f32(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), 0, nullptr,
+      &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      convolution_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t overflow_batch = (SIZE_MAX / 4) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_convolution2d_nchw_f32(
+          convolution_op, overflow_batch, 1, 1, &output_height,
+          &output_width, nullptr));
 }
