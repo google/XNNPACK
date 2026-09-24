@@ -66,6 +66,13 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
+  if (transpose_op_out == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: transpose_op_out is NULL",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
     xnn_log_error(
@@ -158,6 +165,9 @@ static enum xnn_status reshape_transpose_nd(
   const size_t* output_stride,
   size_t element_size)
 {
+  if (transpose_op == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   transpose_op->state = xnn_run_state_invalid;
   if (num_dims == 0) {
     xnn_log_error(
@@ -173,6 +183,13 @@ static enum xnn_status reshape_transpose_nd(
         "%d",
         xnn_operator_type_to_string_v2(transpose_op), num_dims,
         XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_shape == NULL || perm == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: input_shape and perm must not be NULL",
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -198,6 +215,23 @@ static enum xnn_status reshape_transpose_nd(
     }
   }
 
+  size_t num_elements = 1;
+  for (size_t i = 0; i < num_dims; ++i) {
+    if (!xnn_safe_mul(num_elements, input_shape[i], &num_elements)) {
+      xnn_log_error(
+          "failed to create %s operator: total elements overflow size_t",
+          xnn_operator_type_to_string_v2(transpose_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+  size_t total_bytes;
+  if (!xnn_safe_mul(num_elements, element_size, &total_bytes)) {
+    xnn_log_error(
+        "failed to create %s operator: total bytes overflow size_t",
+        xnn_operator_type_to_string_v2(transpose_op));
+    return xnn_status_out_of_memory;
+  }
+
   if (input_stride != NULL) {
     if (input_stride[num_dims - 1] != 1) {
       xnn_log_error(
@@ -209,7 +243,10 @@ static enum xnn_status reshape_transpose_nd(
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
-      if ((input_stride[i - 1] < input_stride[i] * input_shape[i]) || (input_stride[i - 1] < current_stride)) {
+      size_t min_stride;
+      if (!xnn_safe_mul(input_stride[i], input_shape[i], &min_stride) ||
+          input_stride[i - 1] < min_stride ||
+          input_stride[i - 1] < current_stride) {
         xnn_log_error(
             "failed to create %s operator with %zu input_shape and %zu "
             "input_stride: input_stride >= input_shape",
@@ -217,7 +254,9 @@ static enum xnn_status reshape_transpose_nd(
             input_stride[i]);
         return xnn_status_invalid_parameter;
       }
-      current_stride *= input_shape[i];
+      if (!xnn_safe_mul(current_stride, input_shape[i], &current_stride)) {
+        return xnn_status_out_of_memory;
+      }
     }
   }
 
@@ -232,7 +271,10 @@ static enum xnn_status reshape_transpose_nd(
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
-      if ((output_stride[i - 1] < output_stride[i] * input_shape[perm[i]]) || (output_stride[i - 1] < current_stride)) {
+      size_t min_stride;
+      if (!xnn_safe_mul(output_stride[i], input_shape[perm[i]], &min_stride) ||
+          output_stride[i - 1] < min_stride ||
+          output_stride[i - 1] < current_stride) {
         xnn_log_error(
             "failed to create %s operator with %zu output_shape and %zu "
             "output_stride: output_stride >= output_shape",
@@ -240,7 +282,10 @@ static enum xnn_status reshape_transpose_nd(
             output_stride[i]);
         return xnn_status_invalid_parameter;
       }
-      current_stride *= input_shape[perm[i]];
+      if (!xnn_safe_mul(current_stride, input_shape[perm[i]],
+                        &current_stride)) {
+        return xnn_status_out_of_memory;
+      }
     }
   }
 
@@ -260,8 +305,16 @@ static enum xnn_status reshape_transpose_nd(
   size_t normalized_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_perm[XNN_MAX_TENSOR_DIMS];
   size_t normalized_element_size;
-  xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, input_stride, output_stride, &normalized_dims,
-                                      &normalized_element_size, normalized_perm, normalized_shape, context->input_stride, context->output_stride);
+  xnn_normalize_transpose_permutation(
+      num_dims, element_size, perm, input_shape, input_stride, output_stride,
+      &normalized_dims, &normalized_element_size, normalized_perm,
+      normalized_shape, context->input_stride, context->output_stride);
+  if (normalized_dims == 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: dimension normalization failed",
+        xnn_operator_type_to_string_v2(transpose_op));
+    return xnn_status_invalid_parameter;
+  }
   assert(normalized_dims);
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
@@ -315,19 +368,29 @@ static enum xnn_status reshape_transpose_nd(
       context->const_size_ukernel = transpose_config->x32.const_size_ukernel;
       break;
     default: {
-      // Chose the tile size such that ~64k of data are processed per
+      if (normalized_element_size == 0) {
+        xnn_log_error(
+            "failed to reshape %s operator: normalized_element_size is 0",
+            xnn_operator_type_to_string_v2(transpose_op));
+        return xnn_status_invalid_parameter;
+      }
+      // Choose the tile size such that ~64k of data are processed per
       // microkernel call.
       const size_t target_size = (1 << 16);
       const size_t num_tiles = max(1, target_size / normalized_element_size);
       if (1 < normalized_dims) {
+        const size_t max_tile1 =
+            transpose_op->compute[0].range[normalized_dims - 1];
         transpose_op->compute[0].tile[1] =
-            min((size_t)sqrtf(num_tiles),
-                transpose_op->compute[0].range[normalized_dims - 1]);
+            max(1, min((size_t) sqrtf(num_tiles), max_tile1));
+        const size_t max_tile0 =
+            transpose_op->compute[0].range[normalized_dims - 2];
         transpose_op->compute[0].tile[0] =
-            min(num_tiles / transpose_op->compute[0].tile[1],
-                transpose_op->compute[0].range[normalized_dims - 2]);
+            max(1, min(num_tiles / transpose_op->compute[0].tile[1],
+                       max_tile0));
       }
-      context->variable_size_ukernel = transpose_config->xx.variable_size_ukernel;
+      context->variable_size_ukernel =
+          transpose_config->xx.variable_size_ukernel;
       variable_size_ukernel = true;
     }
   }
@@ -525,6 +588,13 @@ static enum xnn_status setup_transpose_nd(
     case xnn_run_state_ready:
       // Operator has been reshaped, and we are setting up with different pointers.
       break;
+  }
+
+  if (input == NULL || output == NULL) {
+    xnn_log_error(
+        "failed to setup %s operator: input and output must not be NULL",
+        xnn_operator_type_to_string_v2(transpose_op));
+    return xnn_status_invalid_parameter;
   }
 
   if (transpose_op->ukernel.type == xnn_microkernel_type_default) {
