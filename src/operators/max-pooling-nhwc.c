@@ -601,9 +601,14 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     return xnn_status_out_of_memory;
   }
 
+  size_t input_increment_elements = 0;
+  size_t input_increment = 0;
   size_t total_input_bytes = 0;
   size_t total_output_bytes = 0;
-  if (!xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
+  if (!xnn_safe_mul(pooling_height, step_width, &input_increment_elements) ||
+      !xnn_safe_mul(input_increment_elements, sizeof(void*),
+                    &input_increment) ||
+      !xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
       !xnn_safe_mul(batch_size, output_batch_stride, &total_output_bytes)) {
     xnn_log_error(
         "failed to reshape %s operator: "
