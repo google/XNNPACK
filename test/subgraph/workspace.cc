@@ -814,11 +814,16 @@ TEST(SubgraphUtilsTest, SubgraphLogging) {
             xnn_define_binary(subgraph, xnn_binary_add, nullptr, in1_id, in2_id,
                               out_id, 0));
 
+#if defined(_WIN32)
+  FILE* devnull = fopen("NUL", "w");
+#else
   FILE* devnull = fopen("/dev/null", "w");
-  ASSERT_NE(devnull, nullptr);
-  xnn_subgraph_log_impl("test.c", 1, subgraph, devnull);
-  xnn_subgraph_log_dot_impl(subgraph, devnull);
-  fclose(devnull);
+#endif
+  if (devnull != nullptr) {
+    xnn_subgraph_log_impl("test.c", 1, subgraph, devnull);
+    xnn_subgraph_log_dot_impl(subgraph, devnull);
+    fclose(devnull);
+  }
 }
 
 TEST(SubgraphUtilsTest, PrintFlagsNullSafety) {
