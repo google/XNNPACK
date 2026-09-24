@@ -416,18 +416,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_igemm(
   const bool weights_already_cached =
       convolution_op->packed_weights.offset != XNN_CACHE_NOT_FOUND;
 
-  size_t kernel_k_stride_size = 0;
-  size_t kernel_bytes_size = 0;
-  size_t packed_group_weights_term = 0;
-  size_t packed_group_weights_size = 0;
   size_t total_weights_size = 0;
-  if (!xnn_safe_mul(kernel_size, k_stride, &kernel_k_stride_size) ||
-      !xnn_safe_mul(kernel_k_stride_size, (size_t) 1 << log2_filter_element_size,
-                    &kernel_bytes_size) ||
-      !xnn_safe_add(kernel_bytes_size, bias_element_size, &packed_group_weights_term) ||
-      !xnn_safe_add(packed_group_weights_term, extra_weights_bytes, &packed_group_weights_term) ||
-      !xnn_safe_mul(packed_group_weights_term, n_stride, &packed_group_weights_size) ||
-      !xnn_safe_mul(packed_group_weights_size, groups, &total_weights_size)) {
+  if (!xnn_safe_mul(kernel_size, k_stride, &total_weights_size) ||
+      !xnn_safe_mul(total_weights_size, (size_t) 1 << log2_filter_element_size,
+                    &total_weights_size) ||
+      !xnn_safe_add(total_weights_size, bias_element_size, &total_weights_size) ||
+      !xnn_safe_add(total_weights_size, extra_weights_bytes, &total_weights_size) ||
+      !xnn_safe_mul(total_weights_size, n_stride, &total_weights_size) ||
+      !xnn_safe_mul(total_weights_size, groups, &total_weights_size)) {
     xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
                   xnn_operator_type_to_string(operator_type));
     goto error;
