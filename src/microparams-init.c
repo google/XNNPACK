@@ -409,10 +409,16 @@ void xnn_init_qs8_qc8w_scale_fp32_params(
   const float* scale,
   void* packed_w)
 {
+  if (channels == 0 || channels_tile == 0 ||
+      scale == NULL || packed_w == NULL) {
+    return;
+  }
   for (size_t tile_start = 0; tile_start < channels; tile_start += channels_tile) {
     const size_t tile_size = min(channels - tile_start, channels_tile);
     for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
-      unaligned_indexed_store_f32(packed_w, tile_offset, unaligned_indexed_load_f32(scale, tile_start + tile_offset));
+      unaligned_indexed_store_f32(
+          packed_w, tile_offset,
+          unaligned_indexed_load_f32(scale, tile_start + tile_offset));
     }
     packed_w = (void*) ((uintptr_t) packed_w + stride);
   }
@@ -425,6 +431,10 @@ void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   const float* scale,
   void* packed_w)
 {
+  if (channels == 0 || channels_tile == 0 ||
+      scale == NULL || packed_w == NULL) {
+    return;
+  }
   for (size_t tile_start = 0; tile_start < channels; tile_start += channels_tile) {
     const size_t tile_size = min(channels - tile_start, channels_tile);
     for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
@@ -443,13 +453,18 @@ void xnn_init_blockwise_scale_fp32_params(
   const float* scale,
   void* packed_w)
 {
+  if (channels == 0 || channels_tile == 0 || num_blocks == 0 ||
+      scale == NULL || packed_w == NULL) {
+    return;
+  }
   void* packed_w_saved = packed_w;
   for (size_t block_start = 0; block_start < num_blocks; block_start++) {
     packed_w = (void*)((uintptr_t) packed_w_saved + block_start * block_stride);
     for (size_t tile_start = 0; tile_start < channels; tile_start += channels_tile) {
       const size_t tile_size = min(channels - tile_start, channels_tile);
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
-        size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
+        size_t scale_index =
+            (tile_start + tile_offset) * num_blocks + block_start;
         // 1/16 because the weight are << 4 in the innermost loop to save a shift
         unaligned_indexed_store_f32(packed_w, tile_offset,
           unaligned_indexed_load_f32(scale, scale_index) / 16.0f);
@@ -468,17 +483,23 @@ void xnn_init_blockwise_scale_bf16_params(
   const xnn_bfloat16* scale,
   void* packed_w)
 {
+  if (channels == 0 || channels_tile == 0 || num_blocks == 0 ||
+      scale == NULL || packed_w == NULL) {
+    return;
+  }
   void* packed_w_saved = packed_w;
   for (size_t block_start = 0; block_start < num_blocks; block_start++) {
     packed_w = (void*)((uintptr_t) packed_w_saved + block_start * block_stride);
     for (size_t tile_start = 0; tile_start < channels; tile_start += channels_tile) {
       const size_t tile_size = min(channels - tile_start, channels_tile);
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
-        size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
+        size_t scale_index =
+            (tile_start + tile_offset) * num_blocks + block_start;
         xnn_bfloat16 vscale = xnn_bfloat16_from_bits(
             unaligned_indexed_load_u16(scale, scale_index));
         // 1/16 because the weight are << 4 in the innermost loop to save a shift
-        float scale_16 = math_cvt_bf16_fp32(xnn_bfloat16_to_float(vscale) / 16.0f);
+        float scale_16 =
+            math_cvt_bf16_fp32(xnn_bfloat16_to_float(vscale) / 16.0f);
         unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
       }
       packed_w = (void*) ((uintptr_t) packed_w + stride);
@@ -490,7 +511,9 @@ size_t xnn_init_f16_scale_scalar_params(
   struct xnn_f16_scale_params* params,
   xnn_float16 scale)
 {
-  params->scalar.scale = scale;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+  }
   return sizeof(params[0]);
 }
 
@@ -498,7 +521,9 @@ size_t xnn_init_f16_f32acc_scale_scalar_params(
   struct xnn_f16_f32acc_scale_params* params,
   float scale)
 {
-  params->scalar.scale = scale;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+  }
   return sizeof(params[0]);
 }
 
@@ -506,7 +531,9 @@ size_t xnn_init_f32_scale_scalar_params(
   struct xnn_f32_scale_params* params,
   float scale)
 {
-  params->scalar.scale = scale;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+  }
   return sizeof(params[0]);
 }
 
@@ -514,7 +541,9 @@ void xnn_update_f32_scaleminmax_scalar_params(
   struct xnn_f32_scaleminmax_params* params,
   float scale)
 {
-  params->scalar.scale = scale;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+  }
 }
 
 size_t xnn_init_f16_scaleminmax_scalar_params(
@@ -523,9 +552,11 @@ size_t xnn_init_f16_scaleminmax_scalar_params(
   xnn_float16 min,
   xnn_float16 max)
 {
-  params->scalar.scale = scale;
-  params->scalar.min = min;
-  params->scalar.max = max;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+    params->scalar.min = min;
+    params->scalar.max = max;
+  }
   return sizeof(params->scalar);
 }
 
@@ -533,7 +564,9 @@ void xnn_update_f16_scaleminmax_scalar_params(
   struct xnn_f16_scaleminmax_params* params,
   xnn_float16 scale)
 {
-  params->scalar.scale = scale;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+  }
 }
 
 
@@ -543,9 +576,11 @@ size_t xnn_init_f32_scaleminmax_scalar_params(
   float min,
   float max)
 {
-  params->scalar.scale = scale;
-  params->scalar.min = min;
-  params->scalar.max = max;
+  if (params != NULL) {
+    params->scalar.scale = scale;
+    params->scalar.min = min;
+    params->scalar.max = max;
+  }
   return sizeof(params->scalar);
 }
 
