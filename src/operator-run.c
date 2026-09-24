@@ -1989,6 +1989,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dqigemm(struct igemm_context* rest
 }
 
 enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool) {
+  if (op == NULL) {
+    xnn_log_error("failed to run operator: operator is NULL");
+    return xnn_status_invalid_parameter;
+  }
   return xnn_run_operator_with_index(op, 0, 0, threadpool);
 }
 
@@ -1996,6 +2000,12 @@ enum xnn_status xnn_run_operator_with_index(xnn_operator_t op,
                                             size_t opdata_index,
                                             size_t operator_object_index,
                                             pthreadpool_t threadpool) {
+  if (op == NULL) {
+    xnn_log_error(
+        "failed to run operator %zu:%zu: operator is NULL",
+        opdata_index, operator_object_index);
+    return xnn_status_invalid_parameter;
+  }
   switch (op->state) {
     case xnn_run_state_invalid:
       xnn_log_error(

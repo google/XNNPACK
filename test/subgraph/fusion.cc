@@ -14,6 +14,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/subgraph/runtime-tester.h"
 #include "test/subgraph/subgraph-tester.h"
@@ -1124,6 +1125,14 @@ TEST(UNARY_QUANTIZED_TO_LUT, binary_not_unary) {
   xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
   EXPECT_EQ(tester.NumOperators(), 2);
   EXPECT_EQ(unoptimized_output, optimized_output);
+}
+
+TEST(OperatorLifecycleTest, NullOperatorHandling) {
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_delete_operator(nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_run_operator(nullptr, nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_run_operator_with_index(nullptr, 0, 0, nullptr));
 }
 
 }  // namespace xnnpack
