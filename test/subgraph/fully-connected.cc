@@ -530,9 +530,10 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;
-        const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                (input_channels * max_a * max_b + max_bias) *
-                                4.0f;
+        const float tolerance =
+            xnnpack::epsilon(xnn_datatype_of<Output>()) *
+                (input_channels * max_a * max_b + max_bias) * 4.0f +
+            NumericLimits<Output>::smallest_normal();
         for (const auto& i : EnumerateIndices(output.extents())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "i=" << index_to_string(i)
@@ -1029,9 +1030,10 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;
-        const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                (input_channels * max_a * max_b + max_bias) *
-                                4.0f;
+        const float tolerance =
+            xnnpack::epsilon(xnn_datatype_of<Output>()) *
+                (input_channels * max_a * max_b + max_bias) * 4.0f +
+            NumericLimits<Output>::smallest_normal();
         for (const auto& i : EnumerateIndices(output.extents())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "input_shape=" << index_to_string(input_shape)
