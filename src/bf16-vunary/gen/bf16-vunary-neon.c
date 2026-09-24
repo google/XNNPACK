@@ -29,13 +29,13 @@ static inline uint16x4_t convert_f32_to_bf16(float32x4_t value) {
   const uint32x4_t vabs_mask = vdupq_n_u32(UINT32_C(0x7FFFFFFF));
   const uint32x4_t vquiet = vdupq_n_u32(UINT32_C(0x00400000));
 
-  uint32x4_t vi = vreinterpretq_u32_f32(value);
+  const uint32x4_t vi = vreinterpretq_u32_f32(value);
   const uint32x4_t vlsb = vandq_u32(vshrq_n_u32(vi, 16), vone);
-  const uint32x4_t vrounded = vaddq_u32(vaddq_u32(vi, vbias), vlsb);
-  const uint32x4_t vnanmask =
-      vcgtq_u32(vandq_u32(vi, vabs_mask), vexp_mask);
-  vi = vbslq_u32(vnanmask, vorrq_u32(vi, vquiet), vrounded);
-  return vshrn_n_u32(vi, 16);
+  const uint16x4_t vrounded = vaddhn_u32(vi, vaddq_u32(vlsb, vbias));
+  const uint16x4_t vnan = vshrn_n_u32(vorrq_u32(vi, vquiet), 16);
+  const uint16x4_t vnanmask =
+      vmovn_u32(vcgtq_u32(vandq_u32(vi, vabs_mask), vexp_mask));
+  return vbsl_u16(vnanmask, vnan, vrounded);
 }
 
 static inline void store_f32_as_bf16(uint16_t* output, float32x4_t value) {
