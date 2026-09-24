@@ -168,6 +168,9 @@ XNN_INTERNAL void xnn_reset_hardware_config(void);
 
 static inline bool xnn_is_bf16_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
+  if (hardware_config == NULL) {
+    return false;
+  }
 #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_BF16
   return hardware_config->arch_flags & xnn_arch_arm_neon_bf16;
 #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512BF16
@@ -179,10 +182,14 @@ static inline bool xnn_is_bf16_compatible_config(
 
 static inline bool xnn_is_f16_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
+  if (hardware_config == NULL) {
+    return false;
+  }
 #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
   return hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith;
 #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX
-  return (hardware_config->arch_flags & xnn_arch_x86_f16c) && (hardware_config->arch_flags & xnn_arch_x86_avx);
+  return (hardware_config->arch_flags & xnn_arch_x86_f16c) &&
+         (hardware_config->arch_flags & xnn_arch_x86_avx);
 #elif (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR)
   return hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith;
 #else
@@ -192,6 +199,9 @@ static inline bool xnn_is_f16_compatible_config(
 
 static inline bool xnn_is_f16_chw_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
+  if (hardware_config == NULL) {
+    return false;
+  }
 #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && \
      XNN_ENABLE_ARM_FP16_SCALAR) ||                \
     (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
@@ -205,6 +215,9 @@ static inline bool xnn_is_f16_chw_compatible_config(
 
 static inline bool xnn_is_chw_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
+  if (hardware_config == NULL) {
+    return false;
+  }
 #if (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   // Sparse microkernels on x86 currently target only SSE, and on processors
   // with AVX ISA dense inference is expected to be faster than sparse.
@@ -216,6 +229,9 @@ static inline bool xnn_is_chw_compatible_config(
 
 static inline bool xnn_is_f16_supported_natively(
     const struct xnn_hardware_config* hardware_config) {
+  if (hardware_config == NULL) {
+    return false;
+  }
 #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && \
      XNN_ENABLE_ARM_FP16_SCALAR) ||                \
     (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
