@@ -142,9 +142,18 @@ static enum xnn_status release_memory(void* start, size_t capacity) {
 // Returns a pointer to a buffer which might be the same as old_pointer if we can remap virtual memory, otherwise we
 // allocate a new buffer and copy contents of old_buffer over.
 static void* resize_buffer(
-  void* old_pointer, size_t old_size, size_t old_capacity, size_t new_size, size_t* new_capacity_out)
+  void* old_pointer,
+  size_t old_size,
+  size_t old_capacity,
+  size_t new_size,
+  size_t* new_capacity_out)
 {
-  const size_t new_capacity = round_up_po2(new_size, get_page_size());
+  const size_t page_size = get_page_size();
+  if (new_size > SIZE_MAX - (page_size - 1)) {
+    xnn_log_error("resize_buffer: new_size %zu causes overflow", new_size);
+    return NULL;
+  }
+  const size_t new_capacity = round_up_po2(new_size, page_size);
   #if XNN_PLATFORM_LINUX
     void* new_pointer = mremap(old_pointer, old_capacity, new_capacity, MREMAP_MAYMOVE, NULL);
     if (new_pointer == MAP_FAILED) {
@@ -171,13 +180,20 @@ static void* resize_buffer(
   return new_pointer;
 }
 
-// Releases unused memory. Will write the new capacity to `capacity`.
-static enum xnn_status release_unused_memory(size_t size, void* start, size_t* capacity) {
+static enum xnn_status release_unused_memory(
+  size_t size, void* start, size_t* capacity)
+{
   // Release all unused pages.
-  const size_t page_aligned_size = round_up_po2(size, get_page_size());
+  const size_t page_size = get_page_size();
+  if (size > SIZE_MAX - (page_size - 1)) {
+    return xnn_status_invalid_state;
+  }
+  const size_t page_aligned_size = round_up_po2(size, page_size);
+  if (*capacity < page_aligned_size) {
+    return xnn_status_invalid_state;
+  }
   const uint8_t* mem_start = (uint8_t*) start;
   const uint8_t* unused_start = mem_start + page_aligned_size;
-  assert(*capacity >= page_aligned_size);
   const size_t unused_capacity = *capacity - page_aligned_size;
 
   xnn_log_debug("releasing memory, start %p, used: %zu, capacity: %zu, unused %zu", mem_start, size, *capacity,
@@ -265,9 +281,17 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
   return xnn_status_success;
 }
 
-enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buffer, size_t size) {
+enum xnn_status xnn_allocate_weights_memory(
+  struct xnn_weights_buffer* buffer, size_t size)
+{
   memset(buffer, 0, sizeof(struct xnn_weights_buffer));
-  const size_t page_aligned_size = round_up_po2(size, get_page_size());
+  const size_t page_size = get_page_size();
+  if (size > SIZE_MAX - (page_size - 1)) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for weights buffer: overflow", size);
+    return xnn_status_out_of_memory;
+  }
+  const size_t page_aligned_size = round_up_po2(size, page_size);
   buffer->start = allocate_buffer(page_aligned_size);
   if (buffer->start == NULL) {
     return xnn_status_out_of_memory;
@@ -290,15 +314,32 @@ enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buffer) {
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buffer, size_t min_available_size) {
-  if (buffer->size + min_available_size <= buffer->capacity) {
-    xnn_log_debug("reserving weights memory of size %zu without growing buffer", min_available_size);
+enum xnn_status xnn_reserve_weights_memory(
+  struct xnn_weights_buffer* buffer, size_t min_available_size)
+{
+  size_t required_capacity;
+  if (!xnn_safe_add(buffer->size, min_available_size, &required_capacity)) {
+    xnn_log_error("failed to reserve weights memory: size overflow");
+    return xnn_status_out_of_memory;
+  }
+
+  if (required_capacity <= buffer->capacity) {
+    xnn_log_debug(
+      "reserving weights memory of size %zu without growing buffer",
+      min_available_size);
     return xnn_status_success;
   }
 
+  const size_t page_size = get_page_size();
+  if (required_capacity > SIZE_MAX - (page_size - 1)) {
+    xnn_log_error("failed to reserve weights memory: capacity overflow");
+    return xnn_status_out_of_memory;
+  }
+
   size_t new_capacity = 0;
-  void* new_start =
-    resize_buffer(buffer->start, buffer->size, buffer->capacity, buffer->size + min_available_size, &new_capacity);
+  void* new_start = resize_buffer(
+    buffer->start, buffer->size, buffer->capacity, required_capacity,
+    &new_capacity);
   if (new_start == NULL) {
     xnn_log_error("failed to reserve weights memory");
     return xnn_status_out_of_memory;
