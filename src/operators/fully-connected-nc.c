@@ -1864,7 +1864,15 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
   const void* bias_to_use = bias;
   void* allocated_bias = NULL;
   if (bias != NULL && (flags & XNN_FLAG_FP32_STATIC_BIASES)) {
-    allocated_bias = xnn_allocate_memory(output_channels * sizeof(xnn_float16));
+    size_t bias_bytes;
+    if (!xnn_safe_mul(output_channels, sizeof(xnn_float16), &bias_bytes)) {
+      xnn_log_error(
+          "failed to create %s operator: bias size overflows size_t",
+          xnn_operator_type_to_string(
+              xnn_operator_type_fully_connected_nc_f16));
+      return xnn_status_invalid_parameter;
+    }
+    allocated_bias = xnn_allocate_memory(bias_bytes);
     if (allocated_bias == NULL) {
       return xnn_status_out_of_memory;
     }
@@ -1907,7 +1915,15 @@ enum xnn_status xnn_create_fully_connected_nc_pf16(
   const void* bias_to_use = bias;
   void* allocated_bias = NULL;
   if (bias != NULL && (flags & XNN_FLAG_FP32_STATIC_BIASES)) {
-    allocated_bias = xnn_allocate_memory(output_channels * sizeof(xnn_float16));
+    size_t bias_bytes;
+    if (!xnn_safe_mul(output_channels, sizeof(xnn_float16), &bias_bytes)) {
+      xnn_log_error(
+          "failed to create %s operator: bias size overflows size_t",
+          xnn_operator_type_to_string(
+              xnn_operator_type_fully_connected_nc_pf16));
+      return xnn_status_invalid_parameter;
+    }
+    allocated_bias = xnn_allocate_memory(bias_bytes);
     if (allocated_bias == NULL) {
       return xnn_status_out_of_memory;
     }
@@ -2726,8 +2742,16 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
     fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
   }
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
-    fp32_bias_buffer_to_release =
-        (float*)xnn_allocate_memory(output_channels * sizeof(float));
+    size_t bias_bytes;
+    if (!xnn_safe_mul(output_channels, sizeof(float), &bias_bytes)) {
+      xnn_log_error(
+          "failed to create %s operator: bias size overflows size_t",
+          xnn_operator_type_to_string(
+              xnn_operator_type_fully_connected_nc_f32));
+      xnn_release_memory(fp32_kernel_buffer);
+      return xnn_status_invalid_parameter;
+    }
+    fp32_bias_buffer_to_release = (float*)xnn_allocate_memory(bias_bytes);
     if (fp32_bias_buffer_to_release == NULL) {
       xnn_release_memory(fp32_kernel_buffer);
       return xnn_status_out_of_memory;
@@ -2790,8 +2814,16 @@ enum xnn_status xnn_create_fully_connected_nc_pf32_f16(
     fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
   }
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
-    fp32_bias_buffer_to_release =
-        (float*)xnn_allocate_memory(output_channels * sizeof(float));
+    size_t bias_bytes;
+    if (!xnn_safe_mul(output_channels, sizeof(float), &bias_bytes)) {
+      xnn_log_error(
+          "failed to create %s operator: bias size overflows size_t",
+          xnn_operator_type_to_string(
+              xnn_operator_type_fully_connected_nc_pf32));
+      xnn_release_memory(fp32_kernel_buffer);
+      return xnn_status_invalid_parameter;
+    }
+    fp32_bias_buffer_to_release = (float*)xnn_allocate_memory(bias_bytes);
     if (fp32_bias_buffer_to_release == NULL) {
       xnn_release_memory(fp32_kernel_buffer);
       return xnn_status_out_of_memory;
