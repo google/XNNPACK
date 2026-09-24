@@ -651,24 +651,42 @@ static enum xnn_status create_convolution2d_nchw(
     goto error;
   }
 
-  const size_t input_channels = context->groups * context->group_input_channels;
+  size_t input_channels = 0;
+  if (!xnn_safe_mul(context->groups, context->group_input_channels,
+                    &input_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: "
+        "number of input channels overflows size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   if (context->input_channel_stride < input_channels) {
     xnn_log_error(
         "failed to create %s operator with input channel stride of %zu: stride "
         "must be at least as large as the number of input channels (%" PRIu32
         "x%zu)",
-        xnn_operator_type_to_string(operator_type), context->input_channel_stride,
+        xnn_operator_type_to_string(operator_type),
+        context->input_channel_stride,
         context->groups, context->group_input_channels);
     goto error;
   }
 
-  const size_t output_channels = context->groups * context->group_output_channels;
+  size_t output_channels = 0;
+  if (!xnn_safe_mul(context->groups, context->group_output_channels,
+                    &output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: "
+        "number of output channels overflows size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   if (context->output_channel_stride < output_channels) {
     xnn_log_error(
         "failed to create %s operator with output channel stride of %zu: "
         "stride must be at least as large as the number of output channels "
         "(%" PRIu32 "x%zu)",
-        xnn_operator_type_to_string(operator_type), context->output_channel_stride,
+        xnn_operator_type_to_string(operator_type),
+        context->output_channel_stride,
         context->groups, context->group_output_channels);
     goto error;
   }
@@ -1429,8 +1447,38 @@ static enum xnn_status reshape_convolution2d_nchw(
     *output_width_out = output_width;
   }
 
-  const size_t input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size;
-  const size_t output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size;
+  size_t num_input_pixels = 0;
+  size_t input_channel_stride = 0;
+  size_t input_batch_stride = 0;
+  size_t num_output_pixels = 0;
+  size_t output_channel_stride = 0;
+  size_t output_batch_stride = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+
+  if (!xnn_safe_mul(input_height, input_width, &num_input_pixels) ||
+      !xnn_safe_mul(num_input_pixels, (size_t) 1u << log2_input_element_size,
+                    &input_channel_stride) ||
+      !xnn_safe_mul(num_input_pixels, convolution_op->input_pixel_stride,
+                    &input_batch_stride) ||
+      !xnn_safe_mul(input_batch_stride, (size_t) 1u << log2_input_element_size,
+                    &input_batch_stride) ||
+      !xnn_safe_mul(output_height, output_width, &num_output_pixels) ||
+      !xnn_safe_mul(num_output_pixels, (size_t) 1u << log2_output_element_size,
+                    &output_channel_stride) ||
+      !xnn_safe_mul(num_output_pixels, convolution_op->output_pixel_stride,
+                    &output_batch_stride) ||
+      !xnn_safe_mul(output_batch_stride,
+                    (size_t) 1u << log2_output_element_size,
+                    &output_batch_stride) ||
+      !xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, output_batch_stride, &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   switch (convolution_op->ukernel.type) {
     case xnn_microkernel_type_spmm:
@@ -1446,7 +1494,7 @@ static enum xnn_status reshape_convolution2d_nchw(
       const void* nonzero_values = (const void*) (output_channel_nonzeros + num_output_channel_blocks);
 
       // Scale input_channel_diffs by input_size to compute input_increments;
-      const size_t input_size = input_height * input_width;
+      const size_t input_size = num_input_pixels;
       for (size_t i = 0; i < num_nonzero_blocks; i++) {
         const int32_t diff = input_channel_diffs[i];
         const int64_t increment = (int64_t) diff * input_size;
@@ -1462,7 +1510,7 @@ static enum xnn_status reshape_convolution2d_nchw(
 
       convolution_op->context.spmm = (struct spmm_context) {
           .n = convolution_op->convolution_op->group_output_channels,
-          .scaled_m = input_size << log2_input_element_size,
+          .scaled_m = input_channel_stride,
           .nonzero_weights = nonzero_values,
           .input_increments = input_increments,
           .output_channel_nonzeros = output_channel_nonzeros,
@@ -1484,7 +1532,7 @@ static enum xnn_status reshape_convolution2d_nchw(
       convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
       convolution_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_spmm;
       convolution_op->compute[0].range[0] = batch_size;
-      convolution_op->compute[0].range[1] = input_size << log2_input_element_size;
+      convolution_op->compute[0].range[1] = input_channel_stride;
       convolution_op->compute[0].tile[0] = mc << log2_input_element_size;
       convolution_op->state = xnn_run_state_needs_setup;
 
@@ -1492,7 +1540,19 @@ static enum xnn_status reshape_convolution2d_nchw(
     }
     case xnn_microkernel_type_conv2d_hwc2chw:
     {
-      const size_t zero_size = (input_width * convolution_op->convolution_op->group_input_channels << log2_input_element_size) + XNN_EXTRA_BYTES;
+      size_t zero_size = 0;
+      if (!xnn_safe_mul(input_width,
+                        convolution_op->convolution_op->group_input_channels,
+                        &zero_size) ||
+          !xnn_safe_mul(zero_size, (size_t) 1u << log2_input_element_size,
+                        &zero_size) ||
+          !xnn_safe_add(zero_size, XNN_EXTRA_BYTES, &zero_size)) {
+        xnn_log_error(
+            "failed to reshape %s operator: "
+            "zero buffer size overflows size_t",
+            xnn_operator_type_to_string_v2(convolution_op));
+        return xnn_status_out_of_memory;
+      }
 
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(convolution_op->zero_buffer);
@@ -1505,6 +1565,16 @@ static enum xnn_status reshape_convolution2d_nchw(
         return xnn_status_out_of_memory;
       }
 
+      size_t output_height_stride = 0;
+      if (!xnn_safe_mul(output_width, (size_t) 1u << log2_output_element_size,
+                        &output_height_stride)) {
+        xnn_log_error(
+            "failed to reshape %s operator: "
+            "output height stride overflows size_t",
+            xnn_operator_type_to_string_v2(convolution_op));
+        return xnn_status_out_of_memory;
+      }
+
       convolution_op->context.conv2d = (struct conv2d_context) {
         .input_height = input_height,
         .input_width = input_width,
@@ -1513,9 +1583,10 @@ static enum xnn_status reshape_convolution2d_nchw(
         .packed_weights = packed_weights(convolution_op),
         .output_batch_stride = output_batch_stride,
         .input_padding_top = convolution_op->convolution_op->padding_top,
-        .output_channels = convolution_op->convolution_op->group_output_channels,
-        .output_height_stride = output_width << log2_output_element_size,
-        .output_channel_stride = output_height * output_width << log2_output_element_size,
+        .output_channels =
+            convolution_op->convolution_op->group_output_channels,
+        .output_height_stride = output_height_stride,
+        .output_channel_stride = output_channel_stride,
         .hwc2chw_ukernel = convolution_op->ukernel.conv2d.hwc2chw_fn,
       };
       memcpy(&convolution_op->context.conv2d.params, params, sizeof(convolution_op->context.conv2d.params));
@@ -1541,7 +1612,16 @@ static enum xnn_status reshape_convolution2d_nchw(
     }
     case xnn_microkernel_type_dwconv:
     {
-      const size_t zero_size = (input_width << log2_input_element_size) + 2 * XNN_EXTRA_BYTES;
+      size_t zero_size = 0;
+      if (!xnn_safe_mul(input_width, (size_t) 1u << log2_input_element_size,
+                        &zero_size) ||
+          !xnn_safe_add(zero_size, 2 * XNN_EXTRA_BYTES, &zero_size)) {
+        xnn_log_error(
+            "failed to reshape %s operator: "
+            "zero buffer size overflows size_t",
+            xnn_operator_type_to_string_v2(convolution_op));
+        return xnn_status_out_of_memory;
+      }
 
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(convolution_op->zero_buffer);
@@ -1554,17 +1634,27 @@ static enum xnn_status reshape_convolution2d_nchw(
         return xnn_status_out_of_memory;
       }
 
+      size_t scaled_input_width = 0;
+      if (!xnn_safe_mul(input_width, (size_t) 1u << log2_input_element_size,
+                        &scaled_input_width)) {
+        xnn_log_error(
+            "failed to reshape %s operator: "
+            "scaled input width overflows size_t",
+            xnn_operator_type_to_string_v2(convolution_op));
+        return xnn_status_out_of_memory;
+      }
+
       convolution_op->context.dwconv2d = (struct dwconv2d_context) {
         .input_height = input_height,
-        .input_width = input_width << log2_input_element_size,
+        .input_width = scaled_input_width,
         .zero = convolution_op->zero_buffer,
         .input_padding_top = convolution_op->convolution_op->padding_top,
-        .input_channel_stride = input_height * input_width << log2_input_element_size,
+        .input_channel_stride = input_channel_stride,
         .input_batch_stride = input_batch_stride,
         .packed_weights = packed_weights(convolution_op),
         .weights_channel_stride = bias_element_size +
           (convolution_op->convolution_op->kernel_height * convolution_op->convolution_op->kernel_width << log2_filter_element_size),
-        .output_channel_stride = output_height * output_width << log2_output_element_size,
+        .output_channel_stride = output_channel_stride,
         .output_batch_stride = output_batch_stride,
         .chw_ukernel = convolution_op->ukernel.dwconv2d.chw_fn,
       };

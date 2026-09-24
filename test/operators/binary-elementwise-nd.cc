@@ -668,4 +668,49 @@ INSTANTIATE_TEST_SUITE_P(QuantizedTest, QuantizedTest,
                              ValuesIn(all_binary_ops))),
                          [](const auto& info) { return info.param.Name(); });
 
+TEST(BINARY_ELEMENTWISE_ND, overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_binary_elementwise_nd(
+                xnn_binary_add, xnn_datatype_fp32,
+                /*a_quantization=*/nullptr,
+                /*b_quantization=*/nullptr,
+                /*output_quantization=*/nullptr,
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const std::array<size_t, 2> input1_shape = {1, SIZE_MAX};
+  const std::array<size_t, 2> input2_shape = {SIZE_MAX / 2, 1};
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_binary_elementwise_nd(
+                op, input1_shape.size(), input1_shape.data(),
+                input2_shape.size(), input2_shape.data(),
+                /*threadpool=*/nullptr));
+}
+
+TEST(BINARY_ELEMENTWISE_ND, overflow_compressed_shape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_binary_elementwise_nd(
+                xnn_binary_add, xnn_datatype_fp32,
+                /*a_quantization=*/nullptr,
+                /*b_quantization=*/nullptr,
+                /*output_quantization=*/nullptr,
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const std::array<size_t, 2> input1_shape = {SIZE_MAX / 2 + 1, 2};
+  const std::array<size_t, 1> input2_shape = {1};
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_binary_elementwise_nd(
+                op, input1_shape.size(), input1_shape.data(),
+                input2_shape.size(), input2_shape.data(),
+                /*threadpool=*/nullptr));
+}
+
 }  // namespace xnnpack
+

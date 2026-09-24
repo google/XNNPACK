@@ -204,15 +204,34 @@ static enum xnn_status reshape_constant_pad_nd(
       assert(post_padding == 0);
       assert(i != 0);
 
-      normalized_input_shape[XNN_MAX_TENSOR_DIMS - num_squeezed_dims] *= input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - num_squeezed_dims] *= input_dim;
+      if (!xnn_safe_mul(
+              normalized_input_shape[XNN_MAX_TENSOR_DIMS - num_squeezed_dims],
+              input_dim,
+              &normalized_input_shape[
+                  XNN_MAX_TENSOR_DIMS - num_squeezed_dims]) ||
+          !xnn_safe_mul(
+              normalized_output_shape[XNN_MAX_TENSOR_DIMS - num_squeezed_dims],
+              input_dim,
+              &normalized_output_shape[
+                  XNN_MAX_TENSOR_DIMS - num_squeezed_dims])) {
+        xnn_log_error(
+            "failed to reshape %s operator: "
+            "collapsed dimension overflows size_t",
+            xnn_operator_type_to_string_v2(constant_pad_op));
+        return xnn_status_out_of_memory;
+      }
     }
   }
 
   // If the resulting output has size zero, then there is nothing left to do.
   size_t output_size = 1;
   for (int i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
-    output_size *= normalized_output_shape[i];
+    if (!xnn_safe_mul(output_size, normalized_output_shape[i], &output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output size overflows size_t",
+          xnn_operator_type_to_string_v2(constant_pad_op));
+      return xnn_status_out_of_memory;
+    }
   }
   if (output_size == 0) {
     xnn_log_debug("skipping %s operator: output size is zero",
@@ -231,22 +250,64 @@ static enum xnn_status reshape_constant_pad_nd(
   };
 
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
-    constant_pad_op->dynamic_context.pad->pre_paddings[i] = normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - i];
-    constant_pad_op->dynamic_context.pad->input_size[i] = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    constant_pad_op->dynamic_context.pad->pre_paddings[i] =
+        normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - i];
+    constant_pad_op->dynamic_context.pad->input_size[i] =
+        normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
   size_t input_stride = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
   size_t output_stride = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1];
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
-    constant_pad_op->dynamic_context.pad->input_stride[i - 1] = input_stride << log2_element_size;
-    constant_pad_op->dynamic_context.pad->output_stride[i - 1] = output_stride << log2_element_size;
-    input_stride *= normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
-    output_stride *= normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    size_t input_stride_bytes = 0;
+    size_t output_stride_bytes = 0;
+    if (!xnn_safe_mul(input_stride, (size_t) 1u << log2_element_size,
+                      &input_stride_bytes) ||
+        !xnn_safe_mul(output_stride, (size_t) 1u << log2_element_size,
+                      &output_stride_bytes) ||
+        !xnn_safe_mul(input_stride,
+                      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i],
+                      &input_stride) ||
+        !xnn_safe_mul(output_stride,
+                      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i],
+                      &output_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: stride overflows size_t",
+          xnn_operator_type_to_string_v2(constant_pad_op));
+      return xnn_status_out_of_memory;
+    }
+    constant_pad_op->dynamic_context.pad->input_stride[i - 1] =
+        input_stride_bytes;
+    constant_pad_op->dynamic_context.pad->output_stride[i - 1] =
+        output_stride_bytes;
+    size_t pre_padding_input_stride = 0;
+    if (!xnn_safe_mul(constant_pad_op->dynamic_context.pad->pre_paddings[i],
+                      input_stride_bytes, &pre_padding_input_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: pre_padding offset overflows size_t",
+          xnn_operator_type_to_string_v2(constant_pad_op));
+      return xnn_status_out_of_memory;
+    }
   }
-  constant_pad_op->dynamic_context.pad->input_size[0] <<= log2_element_size;
-  constant_pad_op->dynamic_context.pad->output_size[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] << log2_element_size;
-  constant_pad_op->dynamic_context.pad->pre_paddings[0] <<= log2_element_size;
+  size_t input_size_0_bytes = 0;
+  size_t output_size_0_bytes = 0;
+  size_t pre_padding_0_bytes = 0;
+  if (!xnn_safe_mul(constant_pad_op->dynamic_context.pad->input_size[0],
+                    (size_t) 1u << log2_element_size, &input_size_0_bytes) ||
+      !xnn_safe_mul(normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1],
+                    (size_t) 1u << log2_element_size, &output_size_0_bytes) ||
+      !xnn_safe_mul(constant_pad_op->dynamic_context.pad->pre_paddings[0],
+                    (size_t) 1u << log2_element_size, &pre_padding_0_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "scaled dimension size overflows size_t",
+        xnn_operator_type_to_string_v2(constant_pad_op));
+    return xnn_status_out_of_memory;
+  }
+  constant_pad_op->dynamic_context.pad->input_size[0] = input_size_0_bytes;
+  constant_pad_op->dynamic_context.pad->output_size[0] = output_size_0_bytes;
+  constant_pad_op->dynamic_context.pad->pre_paddings[0] = pre_padding_0_bytes;
   constant_pad_op->dynamic_context.pad->post_paddings[0] =
-    constant_pad_op->dynamic_context.pad->output_size[0] - constant_pad_op->dynamic_context.pad->pre_paddings[0] - constant_pad_op->dynamic_context.pad->input_size[0];
+      output_size_0_bytes - pre_padding_0_bytes - input_size_0_bytes;
 
   constant_pad_op->compute[0].type = xnn_parallelization_type_5d;
   constant_pad_op->compute[0].task_5d = (pthreadpool_task_5d_t) xnn_compute_pad_5d;

@@ -128,4 +128,112 @@ INSTANTIATE_TEST_SUITE_P(Concatenate, ConcatenateBF16, params,
 INSTANTIATE_TEST_SUITE_P(Concatenate, ConcatenateF32, params,
                          [](auto p) { return p.param.Name(); });
 
+class ConcatenateTester : public SubgraphTester {
+ public:
+  using SubgraphTester::SubgraphTester;
+
+  xnn_runtime_t Runtime() const { return runtime_.get(); }
+};
+
+TEST(ConcatenateTest, OverflowConcatenatedDimension) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id1 = 1;
+  uint32_t input_id2 = 2;
+  uint32_t output_id = 0;
+  std::vector<uint32_t> input_ids = {input_id1, input_id2};
+
+  ConcatenateTester tester(3);
+  tester.AddOutputTensorF32(TensorShape({2, 10}), output_id)
+      .AddInputTensorF32(TensorShape({1, 10}), input_id1)
+      .AddInputTensorF32(TensorShape({1, 10}), input_id2)
+      .AddConcatenate(/*axis=*/0, input_ids, output_id)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  runtime->values[input_id1].shape.dim[0] = SIZE_MAX / 2 + 1;
+  runtime->values[input_id2].shape.dim[0] = SIZE_MAX / 2 + 1;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
+
+TEST(ConcatenateTest, OverflowOutputStride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id1 = 1;
+  uint32_t input_id2 = 2;
+  uint32_t output_id = 0;
+  std::vector<uint32_t> input_ids = {input_id1, input_id2};
+
+  ConcatenateTester tester(3);
+  tester.AddOutputTensorF32(TensorShape({1, 20}), output_id)
+      .AddInputTensorF32(TensorShape({1, 10}), input_id1)
+      .AddInputTensorF32(TensorShape({1, 10}), input_id2)
+      .AddConcatenate(/*axis=*/1, input_ids, output_id)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  runtime->values[input_id1].shape.dim[1] = SIZE_MAX / 2 + 1;
+  runtime->values[input_id2].shape.dim[1] = SIZE_MAX / 2 + 1;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
+
+TEST(ConcatenateTest, OverflowInputChannels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id1 = 1;
+  uint32_t input_id2 = 2;
+  uint32_t output_id = 0;
+  std::vector<uint32_t> input_ids = {input_id1, input_id2};
+
+  ConcatenateTester tester(3);
+  tester.AddOutputTensorF32(TensorShape({2, 10, 10}), output_id)
+      .AddInputTensorF32(TensorShape({1, 10, 10}), input_id1)
+      .AddInputTensorF32(TensorShape({1, 10, 10}), input_id2)
+      .AddConcatenate(/*axis=*/0, input_ids, output_id)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  runtime->values[input_id1].shape.dim[1] = SIZE_MAX / 2;
+  runtime->values[input_id1].shape.dim[2] = 3;
+  runtime->values[input_id2].shape.dim[1] = SIZE_MAX / 2;
+  runtime->values[input_id2].shape.dim[2] = 3;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
+
+TEST(ConcatenateTest, OverflowBatchSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id1 = 1;
+  uint32_t input_id2 = 2;
+  uint32_t output_id = 0;
+  std::vector<uint32_t> input_ids = {input_id1, input_id2};
+
+  ConcatenateTester tester(3);
+  tester.AddOutputTensorF32(TensorShape({10, 10, 20}), output_id)
+      .AddInputTensorF32(TensorShape({10, 10, 10}), input_id1)
+      .AddInputTensorF32(TensorShape({10, 10, 10}), input_id2)
+      .AddConcatenate(/*axis=*/2, input_ids, output_id)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  runtime->values[input_id1].shape.dim[0] = SIZE_MAX / 2;
+  runtime->values[input_id1].shape.dim[1] = 3;
+  runtime->values[input_id2].shape.dim[0] = SIZE_MAX / 2;
+  runtime->values[input_id2].shape.dim[1] = 3;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
+
 }  // namespace xnnpack
+

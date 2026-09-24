@@ -7,12 +7,18 @@
 ################################ Portable FP16 ###############################
 tools/xngen src/f16-vbinary/vop.c.in  -D OP=ADD -D ARCH=scalar -o src/f16-vbinary/gen/f16-vadd-scalar-u1.c &
 tools/xngen src/f16-vbinary/vopc.c.in -D OP=ADD -D ARCH=scalar -o src/f16-vbinary/gen/f16-vaddc-scalar-u1.c &
+tools/xngen src/f16-vbinary/vop.c.in  -D OP=MUL -D ARCH=scalar -o src/f16-vbinary/gen/f16-vmul-scalar-u1.c &
+tools/xngen src/f16-vbinary/vopc.c.in -D OP=MUL -D ARCH=scalar -o src/f16-vbinary/gen/f16-vmulc-scalar-u1.c &
 tools/xngen src/f16-vbinary/vop.c.in  -D OP=ADD -D ARCH=wasmrelaxedsimdfp16 -o src/f16-vbinary/gen/f16-vadd-wasmrelaxedsimdfp16-u8.c &
 tools/xngen src/f16-vbinary/vopc.c.in -D OP=ADD -D ARCH=wasmrelaxedsimdfp16 -o src/f16-vbinary/gen/f16-vaddc-wasmrelaxedsimdfp16-u8.c &
+tools/xngen src/f16-vbinary/vop.c.in  -D OP=MUL -D ARCH=wasmrelaxedsimdfp16 -o src/f16-vbinary/gen/f16-vmul-wasmrelaxedsimdfp16-u8.c &
+tools/xngen src/f16-vbinary/vopc.c.in -D OP=MUL -D ARCH=wasmrelaxedsimdfp16 -o src/f16-vbinary/gen/f16-vmulc-wasmrelaxedsimdfp16-u8.c &
 
 ######################## Portable FP32 arithmetic ############################
-tools/xngen src/f16-vbinary/f16-f32acc-vop.c.in  -D OP=ADD -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8  -o src/f16-vbinary/gen/f16-f32acc-vadd-wasmrelaxedsimd-u8.c &
-tools/xngen src/f16-vbinary/f16-f32acc-vopc.c.in -D OP=ADD -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8  -o src/f16-vbinary/gen/f16-f32acc-vaddc-wasmrelaxedsimd-u8.c &
+tools/xngen src/f16-vbinary/f16-f32acc-vop.c.in  -D OP=ADD -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -o src/f16-vbinary/gen/f16-f32acc-vadd-wasmrelaxedsimd-u8.c &
+tools/xngen src/f16-vbinary/f16-f32acc-vopc.c.in -D OP=ADD -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -o src/f16-vbinary/gen/f16-f32acc-vaddc-wasmrelaxedsimd-u8.c &
+tools/xngen src/f16-vbinary/f16-f32acc-vop.c.in  -D OP=MUL -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -o src/f16-vbinary/gen/f16-f32acc-vmul-wasmrelaxedsimd-u8.c &
+tools/xngen src/f16-vbinary/f16-f32acc-vopc.c.in -D OP=MUL -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -o src/f16-vbinary/gen/f16-f32acc-vmulc-wasmrelaxedsimd-u8.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/f16-vbinary/vop-neonfp16arith.c.in -D OP=ADD     -D BATCH_TILE=8  -o src/f16-vbinary/gen/f16-vadd-neonfp16arith-u8.c &

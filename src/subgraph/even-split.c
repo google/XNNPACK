@@ -14,6 +14,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -98,21 +99,38 @@ static enum xnn_status reshape_even_split_operator_helper(
     // output_id was removed during optimization.
     return xnn_status_success;
   }
-  const size_t input_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, axis);
-  assert(input_stride % num_splits == 0);
+  const size_t input_stride =
+      xnn_shape_multiply_trailing_dims(&values[input_id].shape, axis);
+  if (input_stride == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_even_split));
+    return xnn_status_out_of_memory;
+  }
+  if (input_stride % num_splits != 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride (%zu) is not divisible by "
+        "the number of splits (%zu)",
+        xnn_node_type_to_string(xnn_node_type_even_split), input_stride,
+        num_splits);
+    return xnn_status_invalid_parameter;
+  }
   const size_t channels = input_stride / num_splits;
   const size_t output_stride = channels;
 
   switch (opdata->operator_objects[operator_index]->type) {
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
-        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
+          opdata->operator_objects[operator_index], batch_size, channels,
+          input_stride, output_stride, threadpool);
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
-        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
+          opdata->operator_objects[operator_index], batch_size, channels,
+          input_stride, output_stride, threadpool);
     case xnn_operator_type_copy_nc_x8:
       return xnn_reshape_copy_nc_x8(
-        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
+          opdata->operator_objects[operator_index], batch_size, channels,
+          input_stride, output_stride, threadpool);
     default:
       XNN_UNREACHABLE;
   }
@@ -144,14 +162,22 @@ static enum xnn_status reshape_even_split_operator(
         input_id, axis, input_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
-  size_t batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
+  const size_t batch_size =
+      xnn_shape_multiply_leading_dims(&input_value->shape, axis);
+  if (batch_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: batch size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_even_split));
+    return xnn_status_out_of_memory;
+  }
 
   size_t num_splits = opdata->num_outputs;
   if (input_value->shape.dim[axis] % num_splits != 0) {
     xnn_log_error(
         "failed to reshape %s operator with the input ID #%" PRIu32
         ": split dimension (%zu) is not divisible by the number of splits (%zu)",
-        xnn_node_type_to_string(xnn_node_type_even_split), input_id, input_value->shape.dim[axis], num_splits);
+        xnn_node_type_to_string(xnn_node_type_even_split), input_id,
+        input_value->shape.dim[axis], num_splits);
     return xnn_status_invalid_parameter;
   }
   const size_t axis_elements = input_value->shape.dim[axis] / num_splits;
@@ -161,7 +187,9 @@ static enum xnn_status reshape_even_split_operator(
   for (size_t i = 0; i < num_splits; ++i) {
     const uint32_t output_id = opdata->outputs[i];
     if (values[output_id].type == xnn_value_type_invalid)  continue;
-    status = reshape_even_split_operator_helper(values, num_values, opdata, operator_index, i, num_splits, axis, batch_size, threadpool);
+    status = reshape_even_split_operator_helper(
+        values, num_values, opdata, operator_index, i, num_splits, axis,
+        batch_size, threadpool);
     ++operator_index;
     if (status != xnn_status_success) {
       return status;
@@ -174,10 +202,17 @@ static enum xnn_status reshape_even_split_operator(
       // output_id was removed during optimization.
       continue;
     }
-    memcpy(output_n_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
+    memcpy(output_n_value->shape.dim, input_value->shape.dim,
+           input_value->shape.num_dims * sizeof(size_t));
     output_n_value->shape.num_dims = input_value->shape.num_dims;
     output_n_value->shape.dim[axis] = axis_elements;
     const size_t new_size = xnn_runtime_tensor_get_size(output_n_value);
+    if (new_size == SIZE_MAX) {
+      xnn_log_error(
+          "failed to reshape %s operator: output tensor size overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_even_split));
+      return xnn_status_out_of_memory;
+    }
     if (new_size > output_n_value->size) {
       output_n_value->size = new_size;
       reallocation_required = true;
@@ -213,19 +248,43 @@ static enum xnn_status setup_even_split_operator_helper(
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
+  size_t channel_offset;
+  if (!xnn_safe_mul(output_index, channels, &channel_offset)) {
+    xnn_log_error(
+        "failed to setup %s operator: channel offset overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_even_split));
+    return xnn_status_out_of_memory;
+  }
+
   switch (opdata->operator_objects[operator_index]->type) {
-    case xnn_operator_type_copy_nc_x16:
+    case xnn_operator_type_copy_nc_x16: {
+      size_t byte_offset;
+      if (!xnn_safe_mul(channel_offset, sizeof(uint16_t), &byte_offset)) {
+        xnn_log_error(
+            "failed to setup %s operator: byte offset overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_even_split));
+        return xnn_status_out_of_memory;
+      }
       return xnn_setup_copy_nc_x16(
-        opdata->operator_objects[operator_index], (const uint16_t*) input_data + output_index * channels,
-        output_data);
-    case xnn_operator_type_copy_nc_x32:
+          opdata->operator_objects[operator_index],
+          (const void*) ((uintptr_t) input_data + byte_offset), output_data);
+    }
+    case xnn_operator_type_copy_nc_x32: {
+      size_t byte_offset;
+      if (!xnn_safe_mul(channel_offset, sizeof(uint32_t), &byte_offset)) {
+        xnn_log_error(
+            "failed to setup %s operator: byte offset overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_even_split));
+        return xnn_status_out_of_memory;
+      }
       return xnn_setup_copy_nc_x32(
-        opdata->operator_objects[operator_index], (const uint32_t*) input_data + output_index * channels,
-        output_data);
+          opdata->operator_objects[operator_index],
+          (const void*) ((uintptr_t) input_data + byte_offset), output_data);
+    }
     case xnn_operator_type_copy_nc_x8:
       return xnn_setup_copy_nc_x8(
-        opdata->operator_objects[operator_index], (const uint8_t*) input_data + output_index * channels,
-        output_data);
+          opdata->operator_objects[operator_index],
+          (const void*) ((uintptr_t) input_data + channel_offset), output_data);
     default:
       XNN_UNREACHABLE;
   }

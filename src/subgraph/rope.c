@@ -68,10 +68,37 @@ static enum xnn_status reshape_rope_operator(
       input_id, num_input_dims);
     return xnn_status_invalid_parameter;
   }
-  const size_t batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, 3);
+
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&input_value->shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_rope), input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  const size_t batch_size =
+      xnn_shape_multiply_batch_dims(&input_value->shape, 3);
+  if (batch_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": batch dimensions overflow size_t",
+      xnn_node_type_to_string(xnn_node_type_rope), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const size_t tokens = input_value->shape.dim[num_input_dims - 3];
   const size_t heads = input_value->shape.dim[num_input_dims - 2];
   const size_t channels = input_value->shape.dim[num_input_dims - 1];
+
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": channels must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_rope), input_id);
+    return xnn_status_invalid_parameter;
+  }
 
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
@@ -111,7 +138,7 @@ static enum xnn_status reshape_rope_operator(
   const struct xnn_runtime_value* weights_value = values + weights_id;
   const size_t weights_elements =
     xnn_shape_multiply_all_dims(&weights_value->shape);
-  if (weights_elements / channels < tokens) {
+  if (weights_elements == SIZE_MAX || weights_elements / channels < tokens) {
     xnn_log_error(
       "failed to reshape %s operator with input ID #%" PRIu32
       ": %zu tokens of %zu channels exceed the %zu-element weights tensor",
@@ -125,9 +152,19 @@ static enum xnn_status reshape_rope_operator(
   struct xnn_runtime_value* output_value = values + output_id;
 
   output_value->shape.num_dims = input_value->shape.num_dims;
-  memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
+  memcpy(
+      output_value->shape.dim, input_value->shape.dim,
+      input_value->shape.num_dims * sizeof(size_t));
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
-  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with output ID #%" PRIu32
+      ": output tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_rope), output_id);
+    return xnn_status_out_of_memory;
+  }
+  if (new_size > output_value->size ||
+      opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }

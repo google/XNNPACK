@@ -67,6 +67,19 @@ TEST_P(XnnTestQS8, k_eq_kblock) {
       .Test(GetParam().ukernel);
 }
 
+TEST_P(XnnTestQS8, n_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+      .n(GetParam().nr * GetParam().nr_scale * 2 + 2)
+      .k(GetParam().kblock + 1)
+      .n_stride(GetParam().kblock + 17)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .izp(GetParam().izp)
+      .Test(GetParam().ukernel);
+}
+
 TEST_P(XnnTestQS8, k_div_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t k = GetParam().kblock; k < GetParam().kblock * 5;
@@ -239,7 +252,7 @@ TEST_P(XnnTestQS8GIO, null_bias) {
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .izp(GetParam().izp)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8GIO, k_eq_kblock) {
@@ -251,7 +264,7 @@ TEST_P(XnnTestQS8GIO, k_eq_kblock) {
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .izp(GetParam().izp)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8GIO, k_div_kblock) {
@@ -265,7 +278,7 @@ TEST_P(XnnTestQS8GIO, k_div_kblock) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -282,7 +295,7 @@ TEST_P(XnnTestQS8GIO, k_lt_kblock) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -297,7 +310,7 @@ TEST_P(XnnTestQS8GIO, k_gt_kblock) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -313,7 +326,7 @@ TEST_P(XnnTestQS8GIO, n_eq_1) {
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .izp(GetParam().izp)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8GIO, n_div_nr_null_bias) {
@@ -327,7 +340,7 @@ TEST_P(XnnTestQS8GIO, n_div_nr_null_bias) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -341,7 +354,7 @@ TEST_P(XnnTestQS8GIO, n_div_nr) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -358,7 +371,7 @@ TEST_P(XnnTestQS8GIO, n_lt_nr) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -374,7 +387,7 @@ TEST_P(XnnTestQS8GIO, n_gt_nr) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -385,4 +398,3 @@ INSTANTIATE_TEST_SUITE_P(qs8_gio_packw, XnnTestQS8GIO,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 }  // namespace
-

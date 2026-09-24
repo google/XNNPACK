@@ -321,25 +321,54 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
         broadcast_input2 = false;
         num_compressed_dims++;
       }
-      compressed_input2_shape[num_compressed_dims - 1] *= input2_dim;
-      compressed_output_shape[num_compressed_dims - 1] *= input2_dim;
+      if (!xnn_safe_mul(
+              compressed_input2_shape[num_compressed_dims - 1], input2_dim,
+              &compressed_input2_shape[num_compressed_dims - 1]) ||
+          !xnn_safe_mul(
+              compressed_output_shape[num_compressed_dims - 1], input2_dim,
+              &compressed_output_shape[num_compressed_dims - 1])) {
+        xnn_log_error(
+            "failed to reshape %s operator: compressed shape overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     } else if (input2_dim == 1) {
       if (!broadcast_input2) {
         broadcast_input1 = false;
         broadcast_input2 = true;
         num_compressed_dims++;
       }
-      compressed_input1_shape[num_compressed_dims - 1] *= input1_dim;
-      compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
+      if (!xnn_safe_mul(
+              compressed_input1_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_input1_shape[num_compressed_dims - 1]) ||
+          !xnn_safe_mul(
+              compressed_output_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_output_shape[num_compressed_dims - 1])) {
+        xnn_log_error(
+            "failed to reshape %s operator: compressed shape overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     } else if (input1_dim == input2_dim) {
       if (broadcast_input1 || broadcast_input2 || first_nonunit) {
         broadcast_input1 = false;
         broadcast_input2 = false;
         num_compressed_dims++;
       }
-      compressed_input1_shape[num_compressed_dims - 1] *= input1_dim;
-      compressed_input2_shape[num_compressed_dims - 1] *= input1_dim;
-      compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
+      if (!xnn_safe_mul(
+              compressed_input1_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_input1_shape[num_compressed_dims - 1]) ||
+          !xnn_safe_mul(
+              compressed_input2_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_input2_shape[num_compressed_dims - 1]) ||
+          !xnn_safe_mul(
+              compressed_output_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_output_shape[num_compressed_dims - 1])) {
+        xnn_log_error(
+            "failed to reshape %s operator: compressed shape overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     } else {
       xnn_log_error(
           "failed to reshape %s operator: shape dimension #%zu of input1 (%zu) "
@@ -357,8 +386,17 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
     for (size_t i = 0; i < num_input1_dims - num_input2_dims; i++) {
       const size_t input1_dim = input1_shape[i];
       degenerate_shape |= input1_dim == 0;
-      compressed_input1_shape[num_compressed_dims - 1] *= input1_dim;
-      compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
+      if (!xnn_safe_mul(
+              compressed_input1_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_input1_shape[num_compressed_dims - 1]) ||
+          !xnn_safe_mul(
+              compressed_output_shape[num_compressed_dims - 1], input1_dim,
+              &compressed_output_shape[num_compressed_dims - 1])) {
+        xnn_log_error(
+            "failed to reshape %s operator: compressed shape overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     }
   } else if (num_input2_dims > num_input1_dims) {
     if (!broadcast_input1) {
@@ -367,8 +405,17 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
     for (size_t i = 0; i < num_input2_dims - num_input1_dims; i++) {
       const size_t input2_dim = input2_shape[i];
       degenerate_shape |= input2_dim == 0;
-      compressed_input2_shape[num_compressed_dims - 1] *= input2_dim;
-      compressed_output_shape[num_compressed_dims - 1] *= input2_dim;
+      if (!xnn_safe_mul(
+              compressed_input2_shape[num_compressed_dims - 1], input2_dim,
+              &compressed_input2_shape[num_compressed_dims - 1]) ||
+          !xnn_safe_mul(
+              compressed_output_shape[num_compressed_dims - 1], input2_dim,
+              &compressed_output_shape[num_compressed_dims - 1])) {
+        xnn_log_error(
+            "failed to reshape %s operator: compressed shape overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     }
   }
   num_compressed_dims = max(num_compressed_dims, 1);
@@ -380,8 +427,16 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   }
 
   const uint32_t log2_element_size = op->binary_elementwise.log2_element_size;
+  size_t elements;
+  if (!xnn_safe_mul(compressed_output_shape[0],
+                    (size_t) 1 << log2_element_size, &elements)) {
+    xnn_log_error(
+        "failed to reshape %s operator: elements count overflows size_t",
+        xnn_operator_type_to_string_v2(op));
+    return xnn_status_out_of_memory;
+  }
   op->context.elementwise_binary = (struct elementwise_binary_context){
-      .elements = compressed_output_shape[0] << log2_element_size,
+      .elements = elements,
   };
   memcpy(&op->context.elementwise_binary.params, &op->params.binary,
          sizeof(op->params.binary));
@@ -408,18 +463,44 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   size_t y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {
     if (compressed_a_shape[i] != 1) {
-      op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
-          a_stride << log2_element_size;
+      if (!xnn_safe_mul(
+              a_stride, (size_t) 1 << log2_element_size,
+              &op->context.elementwise_binary.a_stride[
+                  XNN_MAX_TENSOR_DIMS - 1 - i])) {
+        xnn_log_error(
+            "failed to reshape %s operator: input A stride overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     }
     if (compressed_b_shape[i] != 1) {
-      op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
-          b_stride << log2_element_size;
+      if (!xnn_safe_mul(
+              b_stride, (size_t) 1 << log2_element_size,
+              &op->context.elementwise_binary.b_stride[
+                  XNN_MAX_TENSOR_DIMS - 1 - i])) {
+        xnn_log_error(
+            "failed to reshape %s operator: input B stride overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
     }
-    op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
-        y_stride << log2_element_size;
-    a_stride *= compressed_a_shape[i];
-    b_stride *= compressed_b_shape[i];
-    y_stride *= compressed_output_shape[i];
+    if (!xnn_safe_mul(
+            y_stride, (size_t) 1 << log2_element_size,
+            &op->context.elementwise_binary.y_stride[
+                XNN_MAX_TENSOR_DIMS - 1 - i])) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride overflows size_t",
+          xnn_operator_type_to_string_v2(op));
+      return xnn_status_out_of_memory;
+    }
+    if (!xnn_safe_mul(a_stride, compressed_a_shape[i], &a_stride) ||
+        !xnn_safe_mul(b_stride, compressed_b_shape[i], &b_stride) ||
+        !xnn_safe_mul(y_stride, compressed_output_shape[i], &y_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: stride accumulation overflows size_t",
+          xnn_operator_type_to_string_v2(op));
+      return xnn_status_out_of_memory;
+    }
   }
 
   if (compressed_output_shape[5] == 1) {
@@ -438,8 +519,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
             op->compute[0].task_1d_tile_1d_dynamic =
                 (pthreadpool_task_1d_tile_1d_dynamic_t)
                     xnn_compute_elementwise_binary_1d_tile;
-            op->compute[0].range[0] = compressed_output_shape[0]
-                                      << log2_element_size;
+            op->compute[0].range[0] = elements;
             op->compute[0].tile[0] = get_tile_size(op);
           } else {
             op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;

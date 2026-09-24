@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -70,6 +71,16 @@ static enum xnn_status reshape_pack_lh_operator(
   assert(output_id < num_values);
   struct xnn_runtime_value* output_value = &values[output_id];
 
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&input_value->shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_pack_lh), input_id);
+    return xnn_status_invalid_parameter;
+  }
+
   const size_t num_input_dims = input_value->shape.num_dims;
   const size_t channels =
       num_input_dims < 1 ? 1 : input_value->shape.dim[num_input_dims - 1];
@@ -79,13 +90,26 @@ static enum xnn_status reshape_pack_lh_operator(
                           ? xnn_shape_multiply_leading_dims(&input_value->shape,
                                                             num_input_dims - 2)
                           : 1;
+  if (num_groups == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_pack_lh), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   size_t output_size_bytes = 0;
 
   // Squash the group dimension into the batch size if requested.
   if (output_value->flags & XNN_FLAG_SQUASH_GROUPS) {
-    batch_size *= num_groups;
+    if (!xnn_safe_mul(batch_size, num_groups, &batch_size)) {
+      xnn_log_error(
+        "failed to reshape %s operator with input ID #%" PRIu32
+        ": batch size and num groups product overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_pack_lh), input_id);
+      return xnn_status_invalid_parameter;
+    }
     num_groups = 1;
   }
 
@@ -122,6 +146,13 @@ static enum xnn_status reshape_pack_lh_operator(
   }
   if (status != xnn_status_success) {
     return status;
+  }
+  if (output_size_bytes == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with output ID #%" PRIu32
+      ": output tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_pack_lh), output_id);
+    return xnn_status_out_of_memory;
   }
   // output shape is identical to input shape, however the data is packed into
   // an appropriate format for the following operation so the number of bytes

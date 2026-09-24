@@ -66,6 +66,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" i
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const ${WTYPE}* weights,
   const ${BTYPE}* bias,
   const ${SCALETYPE}* scale,
@@ -105,7 +106,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" i
     size_t n = nc;
     for (;n >= ${NR}; n -= ${NR}) {
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
 
       $if DATATYPE in ["QS8", "QS4"]:
         ${BTYPE}* packed_b = (${BTYPE}*) out;
@@ -248,7 +249,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" i
         $for N in range(0, NR, 8):
           _mm256_storeu_si256((__m256i *) (packed_b + ${N}), vpack${N});
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
-      w0 = w${NR-1};
+      w0 = w${NR-1} + n_stride - kc;
     }
 
     // NC remainder (1..${NR-1})
@@ -275,7 +276,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" i
       out += ${NR} * sizeof(${BTYPE});
 
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};
@@ -373,6 +374,6 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" i
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
     }
 
-    weights += nc * kc;
+    weights += nc * n_stride;
   } while (--g != 0);
 }

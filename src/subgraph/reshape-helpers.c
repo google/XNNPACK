@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -40,9 +41,23 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   output->quantization.row_sum_size =
       xnn_tensor_get_row_sum_size(output->datatype, &output->shape,
                                   output->quantization.num_nonbatch_dims);
+  if (output->quantization.dynamic_params_size == SIZE_MAX ||
+      output->quantization.row_sum_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to resize output tensor with ID #%" PRIu32
+        ": dynamic quantization params size overflows size_t", output_id);
+    return xnn_status_out_of_memory;
+  }
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to resize output tensor with ID #%" PRIu32
+        ": output tensor size overflows size_t", output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size ||
-      output->quantization.dynamic_params_size > old_dynamic_quant_params_size ||
+      output->quantization.dynamic_params_size >
+          old_dynamic_quant_params_size ||
       output->quantization.row_sum_size > old_row_sum_size ||
       opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
@@ -97,6 +112,12 @@ enum xnn_status resize_binary_elementwise_output_tensor(
   }
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to resize output tensor with ID #%" PRIu32
+        ": output tensor size overflows size_t", output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;

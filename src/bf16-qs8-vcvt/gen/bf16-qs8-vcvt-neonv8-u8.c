@@ -1,9 +1,9 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/bf16-qs8-vcvt/neonv8.c.in
+//   Template: src/f32-qs8-vcvt/neonv8.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2026 Google LLC
+// Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -32,19 +32,14 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint16_t* i = (const uint16_t*) input;
-  // Match the scalar path when the reciprocal underflows in BF16.
-  const float32x4_t vscale = vdupq_n_f32(
-      math_max_f32(FLT_MIN, xnn_bfloat16_to_float(params->scalar.scale)));
-  const int16x8_t voutput_zero_point =
-      vdupq_n_s16(params->scalar.output_zero_point);
+  // Don't let the scale be 0, which can happen for large scales, and should
+  // not happen because this value is a reciprocal.
+  const float32x4_t vscale = vdupq_n_f32(math_max_f32(FLT_MIN, xnn_bfloat16_to_float(params->scalar.scale)));
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
   for (; batch >= 8 * sizeof(xnn_bfloat16); batch -= 8 * sizeof(xnn_bfloat16)) {
-    const uint16x8_t vbf = vld1q_u16(i); i += 8;
-
-    float32x4_t vx_lo =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-    float32x4_t vx_hi =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    const uint16x8_t vbf = vld1q_u16((const uint16_t*) input); input += 8;
+    float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+    float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -52,22 +47,18 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u8(
     const int32x4_t vacc_lo = vcvtnq_s32_f32(vx_lo);
     const int32x4_t vacc_hi = vcvtnq_s32_f32(vx_hi);
 
-    int16x8_t vacc =
-        vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
-    const int8x8_t vy = vqmovn_s16(vacc);
+    int8x8_t vy = vqmovn_s16(vacc);
     vst1_s8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(xnn_bfloat16));
     assert(batch <= 7 * sizeof(xnn_bfloat16));
-    const uint16x8_t vbf = vld1q_u16(i);
-
-    float32x4_t vx_lo =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-    float32x4_t vx_hi =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    const uint16x8_t vbf = vld1q_u16((const uint16_t*) input);
+    float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+    float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -75,11 +66,11 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u8(
     const int32x4_t vacc_lo = vcvtnq_s32_f32(vx_lo);
     const int32x4_t vacc_hi = vcvtnq_s32_f32(vx_hi);
 
-    int16x8_t vacc =
-        vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
     int8x8_t vy = vqmovn_s16(vacc);
+
     if (batch & (4 * sizeof(xnn_bfloat16))) {
       vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;
       vy = vext_s8(vy, vy, 4);

@@ -32,7 +32,8 @@ enum xnn_status create_pack_lh(uint32_t flags,
     return xnn_status_uninitialized;
   }
 
-  if (pack_lh_config == NULL) {
+  if (pack_lh_config == NULL || pack_lh_config->size_fn == NULL ||
+      pack_lh_config->pack_lh_fn == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
         xnn_operator_type_to_string(expected_operator_type));
@@ -142,7 +143,13 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
       .pack_lh_ukernel = (xnn_pack_lh_ukernel_fn)pack_lh_config->pack_lh_fn,
   };
 
-  *output_size_bytes = num_groups * group_size;
+  if (!xnn_safe_mul(num_groups, group_size, output_size_bytes)) {
+    *output_size_bytes = SIZE_MAX;
+    xnn_log_error(
+      "failed to reshape %s operator: output size overflows size_t",
+      xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_out_of_memory;
+  }
   pack_lh_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
   pack_lh_op->compute[0].task_2d_tile_1d =
       (pthreadpool_task_2d_tile_1d_t)xnn_compute_pack_lh;

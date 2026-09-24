@@ -411,6 +411,15 @@ static enum xnn_status reshape_deconvolution_operator(
       xnn_node_type_to_string(xnn_node_type_deconvolution_2d), input_id, values[input_id].shape.num_dims);
     return xnn_status_invalid_parameter;
   }
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&values[input_id].shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with input ID #%" PRIu32
+        ": input shape overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_deconvolution_2d), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
@@ -499,6 +508,13 @@ static enum xnn_status reshape_deconvolution_operator(
   output_value->shape.dim[3] = output_pixel_stride;
   output_value->shape.num_dims = 4;
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with output ID #%" PRIu32
+        ": output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_deconvolution_2d), output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output_value->size ||
       opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;

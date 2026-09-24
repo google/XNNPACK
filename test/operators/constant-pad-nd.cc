@@ -4,6 +4,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "test/operators/constant-pad-operator-tester.h"
@@ -601,4 +604,44 @@ TEST(CONSTANT_PAD_ND_X32, constant_pad_6d) {
       }
     }
   }
+}
+
+TEST(CONSTANT_PAD_ND_X32, output_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t constant_pad_op = nullptr;
+  const uint32_t padding_value = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x32(
+                &padding_value, 0, &constant_pad_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      constant_pad_op, xnn_delete_operator);
+
+  const size_t input_shape[2] = {SIZE_MAX / 2, 3};
+  const size_t pre_padding[2] = {0, 0};
+  const size_t post_padding[2] = {0, 0};
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_constant_pad_nd_x32(
+          constant_pad_op, 2, input_shape, pre_padding, post_padding,
+          nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X32, stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t constant_pad_op = nullptr;
+  const uint32_t padding_value = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x32(
+                &padding_value, 0, &constant_pad_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      constant_pad_op, xnn_delete_operator);
+
+  const size_t input_shape[2] = {1, (SIZE_MAX / 4) + 1};
+  const size_t pre_padding[2] = {0, 0};
+  const size_t post_padding[2] = {0, 0};
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_constant_pad_nd_x32(
+          constant_pad_op, 2, input_shape, pre_padding, post_padding,
+          nullptr));
 }

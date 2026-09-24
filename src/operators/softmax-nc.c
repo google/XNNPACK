@@ -184,6 +184,27 @@ enum xnn_status xnn_reshape_softmax_nc_qu8(
     return xnn_status_success;
   }
 
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(softmax_op->input_pixel_stride, batch_size - 1,
+                      &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(softmax_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t total_output_size;
+    if (!xnn_safe_mul(softmax_op->output_pixel_stride, batch_size - 1,
+                      &total_output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(softmax_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   uint32_t* lookup_table = softmax_op->lookup_table;
   const double qscale = fmin(((double) UINT32_MAX) / (double) channels, 8388607.0);
   for (int32_t i = 0; i < 256; i++) {
@@ -442,10 +463,58 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     return xnn_status_success;
   }
 
-  softmax_op->context.floating_point_softmax = (struct floating_point_softmax_context) {
-    .n = softmax_op->channels << log2_element_size,
-    .x_stride = softmax_op->input_pixel_stride << log2_element_size,
-    .y_stride = softmax_op->output_pixel_stride << log2_element_size,
+  size_t n;
+  if (!xnn_safe_mul(softmax_op->channels, (size_t) 1 << log2_element_size,
+                    &n)) {
+    xnn_log_error(
+        "failed to reshape %s operator: channels * element_size overflows "
+        "size_t",
+        xnn_operator_type_to_string_v2(softmax_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t x_stride;
+  if (!xnn_safe_mul(softmax_op->input_pixel_stride,
+                    (size_t) 1 << log2_element_size, &x_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride overflows size_t",
+        xnn_operator_type_to_string_v2(softmax_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t y_stride;
+  if (!xnn_safe_mul(softmax_op->output_pixel_stride,
+                    (size_t) 1 << log2_element_size, &y_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output stride overflows size_t",
+        xnn_operator_type_to_string_v2(softmax_op));
+    return xnn_status_out_of_memory;
+  }
+
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(x_stride, batch_size - 1, &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(softmax_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t total_output_size;
+    if (!xnn_safe_mul(y_stride, batch_size - 1, &total_output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(softmax_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
+  softmax_op->context.floating_point_softmax =
+      (struct floating_point_softmax_context) {
+    .n = n,
+    .x_stride = x_stride,
+    .y_stride = y_stride,
     .rmax_ukernel = rmax,
     .raddstoreexpminusmax_ukernel = raddstoreexpminusmax->ukernel,
     .compute_reciprocal = compute_reciprocal,

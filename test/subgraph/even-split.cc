@@ -127,4 +127,61 @@ INSTANTIATE_TEST_SUITE_P(EvenSplit, EvenSplitBF16, params,
 INSTANTIATE_TEST_SUITE_P(EvenSplit, EvenSplitF32, params,
                          [](auto p) { return p.param.Name(); });
 
+class EvenSplitTester : public SubgraphTester {
+ public:
+  using SubgraphTester::SubgraphTester;
+
+  xnn_runtime_t Runtime() const { return runtime_.get(); }
+};
+
+TEST(EvenSplitTest, OverflowBatchSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id = 0;
+  uint32_t output_id1 = 1;
+  uint32_t output_id2 = 2;
+  std::vector<uint32_t> output_ids = {output_id1, output_id2};
+
+  EvenSplitTester tester(3);
+  tester.AddInputTensorF32(TensorShape({10, 10, 10}), input_id)
+      .AddOutputTensorF32(TensorShape({10, 10, 5}), output_id1)
+      .AddOutputTensorF32(TensorShape({10, 10, 5}), output_id2)
+      .AddEvenSplit(/*axis=*/2, input_id, output_ids)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  runtime->values[input_id].shape.dim[0] = SIZE_MAX / 2;
+  runtime->values[input_id].shape.dim[1] = 3;
+  runtime->values[input_id].shape.dim[2] = 2;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
+
+TEST(EvenSplitTest, OverflowInputStride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id = 0;
+  uint32_t output_id1 = 1;
+  uint32_t output_id2 = 2;
+  std::vector<uint32_t> output_ids = {output_id1, output_id2};
+
+  EvenSplitTester tester(3);
+  tester.AddInputTensorF32(TensorShape({10, 10, 10}), input_id)
+      .AddOutputTensorF32(TensorShape({5, 10, 10}), output_id1)
+      .AddOutputTensorF32(TensorShape({5, 10, 10}), output_id2)
+      .AddEvenSplit(/*axis=*/0, input_id, output_ids)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  runtime->values[input_id].shape.dim[0] = 2;
+  runtime->values[input_id].shape.dim[1] = SIZE_MAX / 2;
+  runtime->values[input_id].shape.dim[2] = 3;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
+
 }  // namespace xnnpack

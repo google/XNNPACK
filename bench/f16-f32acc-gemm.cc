@@ -64,7 +64,7 @@ static void f16_gemm(benchmark::State& state,
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
                                                            num_buffers);
-  xnn_pack_f16_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+  xnn_pack_f16_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc,
                           reinterpret_cast<const uint16_t*>(k.data()),
                           reinterpret_cast<const uint16_t*>(b.data()),
                           /*scale=*/nullptr,
@@ -115,48 +115,39 @@ static void f16_gemm(benchmark::State& state,
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f16_f32acc_gemm_1x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast, 1, 8,
-           1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_4x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x8__avx2_broadcast, 4, 8,
-           1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_5x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x8__avx2_broadcast, 5, 8,
-           1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_6x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x8__avx2_broadcast, 6, 8,
-           1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_7x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x8__avx2_broadcast, 7, 8,
-           1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_1x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast, 1,
-           16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           16, 1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_3x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_3x16__avx2_broadcast, 3,
-           16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           16, 1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_4x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx2_broadcast, 4,
-           16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           16, 1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_5x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x16__avx2_broadcast, 5,
-           16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           xnn_arch_x86_avx2);
+           16, 1, 1, xnn_init_f16_minmax_scalar_params, xnn_arch_x86_avx2);
 }
 
 BENCHMARK_GEMM(f16_f32acc_gemm_1x8__avx2_broadcast)
@@ -172,63 +163,63 @@ BENCHMARK_GEMM(f16_f32acc_gemm_5x16__avx2_broadcast)
 
 #if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f16_f32acc_gemm_1x16__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx512skx_broadcast, 1, 16,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx512skx_broadcast,
+           1, 16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_4x16__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx512skx_broadcast, 4, 16,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx512skx_broadcast,
+           4, 16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_5x16__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x16__avx512skx_broadcast, 5, 16,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x16__avx512skx_broadcast,
+           5, 16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_6x16__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x16__avx512skx_broadcast, 6, 16,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x16__avx512skx_broadcast,
+           6, 16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_7x16__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x16__avx512skx_broadcast, 7, 16,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x16__avx512skx_broadcast,
+           7, 16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_8x16__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_8x16__avx512skx_broadcast, 8, 16,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_8x16__avx512skx_broadcast,
+           8, 16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_1x32__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x32__avx512skx_broadcast, 1, 32,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x32__avx512skx_broadcast,
+           1, 32, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_4x32__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x32__avx512skx_broadcast, 4, 32,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x32__avx512skx_broadcast,
+           4, 32, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_5x32__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x32__avx512skx_broadcast, 5, 32,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x32__avx512skx_broadcast,
+           5, 32, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_6x32__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x32__avx512skx_broadcast, 6, 32,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x32__avx512skx_broadcast,
+           6, 32, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_7x32__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x32__avx512skx_broadcast, 7, 32,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x32__avx512skx_broadcast,
+           7, 32, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 static void f16_f32acc_gemm_8x32__avx512skx_broadcast(benchmark::State& state) {
-  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_8x32__avx512skx_broadcast, 8, 32,
-           1, 1, xnn_init_f16_minmax_scalar_params,
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_8x32__avx512skx_broadcast,
+           8, 32, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx512skx);
 }
 
