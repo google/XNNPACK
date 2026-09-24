@@ -18,11 +18,7 @@
 #include "src/xnnpack/vunary.h"
 
 
-static inline float32x4_t load_bf16_as_f32(const uint16_t* input) {
-  return vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vld1_u16(input)), 16));
-}
-
-static inline uint16x4_t convert_f32_to_bf16(float32x4_t value) {
+static XNN_INTRINSIC uint16x4_t convert_f32_to_bf16(float32x4_t value) {
   const uint32x4_t vexp_mask = vdupq_n_u32(UINT32_C(0x7F800000));
   const uint32x4_t vbias = vdupq_n_u32(UINT32_C(0x00007FFF));
   const uint32x4_t vone = vdupq_n_u32(UINT32_C(1));
@@ -38,24 +34,7 @@ static inline uint16x4_t convert_f32_to_bf16(float32x4_t value) {
   return vshrn_n_u32(vi, 16);
 }
 
-static inline void store_f32_as_bf16(uint16_t* output, float32x4_t value) {
-  vst1_u16(output, convert_f32_to_bf16(value));
-}
-
-static inline void store_tail_f32_as_bf16(
-    uint16_t* output, float32x4_t value, size_t elements) {
-  uint16x4_t vbf16 = convert_f32_to_bf16(value);
-  if (elements & 2) {
-    vst1_lane_u32((void*) output, vreinterpret_u32_u16(vbf16), 0);
-    output += 2;
-    vbf16 = vext_u16(vbf16, vbf16, 2);
-  }
-  if (elements & 1) {
-    vst1_lane_u16(output, vbf16, 0);
-  }
-}
-
-static inline float32x4_t sigmoid_f32(float32x4_t vx) {
+static XNN_INTRINSIC float32x4_t sigmoid_f32(float32x4_t vx) {
   const float32x4_t vmagic_bias = vdupq_n_f32(0x1.8000FEp23f);
   const float32x4_t vminus_log2e = vdupq_n_f32(-0x1.715476p0f);
   const float32x4_t vln2_hi = vdupq_n_f32(0x1.62E400p-1f);
@@ -92,7 +71,7 @@ static inline float32x4_t sigmoid_f32(float32x4_t vx) {
                     vsubq_f32(vone, vf));
 }
 
-static inline float32x4_t rsqrt_f32(float32x4_t vx) {
+static XNN_INTRINSIC float32x4_t rsqrt_f32(float32x4_t vx) {
   const uint32x4_t vzero_mask = vceqq_f32(vx, vdupq_n_f32(0.0f));
   const uint32x4_t vnegative_mask = vcltq_f32(vx, vdupq_n_f32(0.0f));
   const uint32x4_t vpos_inf_mask = vceqq_u32(
@@ -134,31 +113,44 @@ void xnn_bf16_vsqr_ukernel__neon_u8(
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 8 * sizeof(xnn_bfloat16);
        batch -= 8 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx0 = load_bf16_as_f32(i + 0);
-    const float32x4_t vx1 = load_bf16_as_f32(i + 4);
+    const uint16x8_t vbf0 = vld1q_u16(i + 0);
     i += 8;
+
+    const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf0), 16));
+    const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf0), 16));
 
     const float32x4_t vy0 = vmulq_f32(vx0, vx0);
     const float32x4_t vy1 = vmulq_f32(vx1, vx1);
 
-    store_f32_as_bf16(o + 0, vy0);
-    store_f32_as_bf16(o + 4, vy1);
+    const uint16x8_t vout0 = vcombine_u16(convert_f32_to_bf16(vy0), convert_f32_to_bf16(vy1));
+    vst1q_u16(o + 0, vout0);
     o += 8;
   }
 
-  for (; batch >= 4 * sizeof(xnn_bfloat16);
-       batch -= 4 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx = load_bf16_as_f32(i);
-    i += 4;
-    const float32x4_t vy = vmulq_f32(vx, vx);
-    store_f32_as_bf16(o, vy);
-    o += 4;
-  }
-
   if XNN_UNLIKELY(batch != 0) {
-    const float32x4_t vx = load_bf16_as_f32(i);
-    const float32x4_t vy = vmulq_f32(vx, vx);
-    store_tail_f32_as_bf16(o, vy, batch / sizeof(xnn_bfloat16));
+    const uint16x8_t vbf = vld1q_u16(i);
+    const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+    const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+
+    const float32x4_t vy0 = vmulq_f32(vx0, vx0);
+    const float32x4_t vy1 = vmulq_f32(vx1, vx1);
+
+    uint16x8_t vout = vcombine_u16(convert_f32_to_bf16(vy0), convert_f32_to_bf16(vy1));
+    if (batch & (4 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vget_low_u16(vout)), 0);
+      vst1_lane_u32((void*) (o + 2), vreinterpret_u32_u16(vget_low_u16(vout)), 1);
+      o += 4;
+      vout = vcombine_u16(vget_high_u16(vout), vget_high_u16(vout));
+    }
+    uint16x4_t vbf_low = vget_low_u16(vout);
+    if (batch & (2 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vbf_low), 0);
+      o += 2;
+      vbf_low = vext_u16(vbf_low, vbf_low, 2);
+    }
+    if (batch & (1 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u16(o, vbf_low, 0);
+    }
   }
 }
 void xnn_bf16_vrsqrt_ukernel__neon_u8(
@@ -176,31 +168,44 @@ void xnn_bf16_vrsqrt_ukernel__neon_u8(
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 8 * sizeof(xnn_bfloat16);
        batch -= 8 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx0 = load_bf16_as_f32(i + 0);
-    const float32x4_t vx1 = load_bf16_as_f32(i + 4);
+    const uint16x8_t vbf0 = vld1q_u16(i + 0);
     i += 8;
+
+    const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf0), 16));
+    const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf0), 16));
 
     const float32x4_t vy0 = rsqrt_f32(vx0);
     const float32x4_t vy1 = rsqrt_f32(vx1);
 
-    store_f32_as_bf16(o + 0, vy0);
-    store_f32_as_bf16(o + 4, vy1);
+    const uint16x8_t vout0 = vcombine_u16(convert_f32_to_bf16(vy0), convert_f32_to_bf16(vy1));
+    vst1q_u16(o + 0, vout0);
     o += 8;
   }
 
-  for (; batch >= 4 * sizeof(xnn_bfloat16);
-       batch -= 4 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx = load_bf16_as_f32(i);
-    i += 4;
-    const float32x4_t vy = rsqrt_f32(vx);
-    store_f32_as_bf16(o, vy);
-    o += 4;
-  }
-
   if XNN_UNLIKELY(batch != 0) {
-    const float32x4_t vx = load_bf16_as_f32(i);
-    const float32x4_t vy = rsqrt_f32(vx);
-    store_tail_f32_as_bf16(o, vy, batch / sizeof(xnn_bfloat16));
+    const uint16x8_t vbf = vld1q_u16(i);
+    const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+    const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+
+    const float32x4_t vy0 = rsqrt_f32(vx0);
+    const float32x4_t vy1 = rsqrt_f32(vx1);
+
+    uint16x8_t vout = vcombine_u16(convert_f32_to_bf16(vy0), convert_f32_to_bf16(vy1));
+    if (batch & (4 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vget_low_u16(vout)), 0);
+      vst1_lane_u32((void*) (o + 2), vreinterpret_u32_u16(vget_low_u16(vout)), 1);
+      o += 4;
+      vout = vcombine_u16(vget_high_u16(vout), vget_high_u16(vout));
+    }
+    uint16x4_t vbf_low = vget_low_u16(vout);
+    if (batch & (2 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vbf_low), 0);
+      o += 2;
+      vbf_low = vext_u16(vbf_low, vbf_low, 2);
+    }
+    if (batch & (1 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u16(o, vbf_low, 0);
+    }
   }
 }
 void xnn_bf16_vsigmoid_ukernel__neon_u8(
@@ -218,30 +223,43 @@ void xnn_bf16_vsigmoid_ukernel__neon_u8(
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 8 * sizeof(xnn_bfloat16);
        batch -= 8 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx0 = load_bf16_as_f32(i + 0);
-    const float32x4_t vx1 = load_bf16_as_f32(i + 4);
+    const uint16x8_t vbf0 = vld1q_u16(i + 0);
     i += 8;
+
+    const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf0), 16));
+    const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf0), 16));
 
     const float32x4_t vy0 = sigmoid_f32(vx0);
     const float32x4_t vy1 = sigmoid_f32(vx1);
 
-    store_f32_as_bf16(o + 0, vy0);
-    store_f32_as_bf16(o + 4, vy1);
+    const uint16x8_t vout0 = vcombine_u16(convert_f32_to_bf16(vy0), convert_f32_to_bf16(vy1));
+    vst1q_u16(o + 0, vout0);
     o += 8;
   }
 
-  for (; batch >= 4 * sizeof(xnn_bfloat16);
-       batch -= 4 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx = load_bf16_as_f32(i);
-    i += 4;
-    const float32x4_t vy = sigmoid_f32(vx);
-    store_f32_as_bf16(o, vy);
-    o += 4;
-  }
-
   if XNN_UNLIKELY(batch != 0) {
-    const float32x4_t vx = load_bf16_as_f32(i);
-    const float32x4_t vy = sigmoid_f32(vx);
-    store_tail_f32_as_bf16(o, vy, batch / sizeof(xnn_bfloat16));
+    const uint16x8_t vbf = vld1q_u16(i);
+    const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+    const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+
+    const float32x4_t vy0 = sigmoid_f32(vx0);
+    const float32x4_t vy1 = sigmoid_f32(vx1);
+
+    uint16x8_t vout = vcombine_u16(convert_f32_to_bf16(vy0), convert_f32_to_bf16(vy1));
+    if (batch & (4 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vget_low_u16(vout)), 0);
+      vst1_lane_u32((void*) (o + 2), vreinterpret_u32_u16(vget_low_u16(vout)), 1);
+      o += 4;
+      vout = vcombine_u16(vget_high_u16(vout), vget_high_u16(vout));
+    }
+    uint16x4_t vbf_low = vget_low_u16(vout);
+    if (batch & (2 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vbf_low), 0);
+      o += 2;
+      vbf_low = vext_u16(vbf_low, vbf_low, 2);
+    }
+    if (batch & (1 * sizeof(xnn_bfloat16))) {
+      vst1_lane_u16(o, vbf_low, 0);
+    }
   }
 }
