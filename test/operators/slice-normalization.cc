@@ -215,3 +215,42 @@ TEST(SLICE_NORMALIZATION_TEST, normalize_6d_remove_size_1) {
       .expected_output_shape({2, 2})
       .Test();
 }
+
+TEST(SLICE_NORMALIZATION_TEST, invalid_num_dims_zero) {
+  size_t offsets[1] = {0};
+  size_t sizes[1] = {1};
+  size_t input_shape[1] = {1};
+  size_t norm_offsets[XNN_MAX_TENSOR_DIMS];
+  size_t norm_input_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_output_shape[XNN_MAX_TENSOR_DIMS];
+  size_t num_normalized_dims = 123;
+  xnn_normalize_slice(0, offsets, sizes, input_shape, norm_offsets,
+                      norm_input_shape, norm_output_shape,
+                      &num_normalized_dims);
+  EXPECT_EQ(num_normalized_dims, 0);
+}
+
+TEST(SLICE_NORMALIZATION_TEST, invalid_num_dims_too_large) {
+  size_t offsets[XNN_MAX_TENSOR_DIMS + 1] = {0};
+  size_t sizes[XNN_MAX_TENSOR_DIMS + 1] = {1};
+  size_t input_shape[XNN_MAX_TENSOR_DIMS + 1] = {1};
+  size_t norm_offsets[XNN_MAX_TENSOR_DIMS];
+  size_t norm_input_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_output_shape[XNN_MAX_TENSOR_DIMS];
+  size_t num_normalized_dims = 123;
+  xnn_normalize_slice(XNN_MAX_TENSOR_DIMS + 1, offsets, sizes, input_shape,
+                      norm_offsets, norm_input_shape, norm_output_shape,
+                      &num_normalized_dims);
+  EXPECT_EQ(num_normalized_dims, 0);
+}
+
+TEST(SLICE_NORMALIZATION_TEST, null_pointers) {
+  size_t norm_offsets[XNN_MAX_TENSOR_DIMS];
+  size_t norm_input_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_output_shape[XNN_MAX_TENSOR_DIMS];
+  size_t num_normalized_dims = 123;
+  xnn_normalize_slice(1, nullptr, nullptr, nullptr, norm_offsets,
+                      norm_input_shape, norm_output_shape,
+                      &num_normalized_dims);
+  EXPECT_EQ(num_normalized_dims, 0);
+}
