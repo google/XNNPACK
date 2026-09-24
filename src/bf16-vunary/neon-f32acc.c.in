@@ -15,11 +15,11 @@ $SIMD_TILE = BATCH_TILE // 4
 #include "src/xnnpack/vunary.h"
 
 
-static inline float32x4_t load_bf16_as_f32(const uint16_t* input) {
-  return vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vld1_u16(input)), 16));
+static XNN_INTRINSIC float32x4_t load_bf16_as_f32(const uint16_t* input) {
+  return vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(input), 16));
 }
 
-static inline uint16x4_t convert_f32_to_bf16(float32x4_t value) {
+static XNN_INTRINSIC uint16x4_t convert_f32_to_bf16(float32x4_t value) {
   const uint32x4_t vexp_mask = vdupq_n_u32(UINT32_C(0x7F800000));
   const uint32x4_t vbias = vdupq_n_u32(UINT32_C(0x00007FFF));
   const uint32x4_t vone = vdupq_n_u32(UINT32_C(1));
@@ -35,11 +35,11 @@ static inline uint16x4_t convert_f32_to_bf16(float32x4_t value) {
   return vbsl_u16(vnanmask, vnan, vrounded);
 }
 
-static inline void store_f32_as_bf16(uint16_t* output, float32x4_t value) {
+static XNN_INTRINSIC void store_f32_as_bf16(uint16_t* output, float32x4_t value) {
   vst1_u16(output, convert_f32_to_bf16(value));
 }
 
-static inline void store_tail_f32_as_bf16(
+static XNN_INTRINSIC void store_tail_f32_as_bf16(
     uint16_t* output, float32x4_t value, size_t elements) {
   uint16x4_t vbf16 = convert_f32_to_bf16(value);
   if (elements & 2) {
@@ -52,7 +52,7 @@ static inline void store_tail_f32_as_bf16(
   }
 }
 
-static inline float32x4_t sigmoid_f32(float32x4_t vx) {
+static XNN_INTRINSIC float32x4_t sigmoid_f32(float32x4_t vx) {
   const float32x4_t vmagic_bias = vdupq_n_f32(0x1.8000FEp23f);
   const float32x4_t vminus_log2e = vdupq_n_f32(-0x1.715476p0f);
   const float32x4_t vln2_hi = vdupq_n_f32(0x1.62E400p-1f);
@@ -89,7 +89,7 @@ static inline float32x4_t sigmoid_f32(float32x4_t vx) {
                     vsubq_f32(vone, vf));
 }
 
-static inline float32x4_t rsqrt_f32(float32x4_t vx) {
+static XNN_INTRINSIC float32x4_t rsqrt_f32(float32x4_t vx) {
   const uint32x4_t vzero_mask = vceqq_f32(vx, vdupq_n_f32(0.0f));
   const uint32x4_t vnegative_mask = vcltq_f32(vx, vdupq_n_f32(0.0f));
   const uint32x4_t vpos_inf_mask = vceqq_u32(
