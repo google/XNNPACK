@@ -337,7 +337,15 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     return xnn_status_invalid_parameter;
   }
 
-  const size_t zero_bytes = (channels << log2_data_element_size) + XNN_EXTRA_BYTES;
+  size_t zero_bytes = 0;
+  if (!xnn_safe_mul(channels, (size_t) 1 << log2_data_element_size,
+                    &zero_bytes) ||
+      !xnn_safe_add(zero_bytes, XNN_EXTRA_BYTES, &zero_bytes)) {
+    xnn_log_error(
+        "failed to create %s operator: zero padding size overflows size_t",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
 
   const size_t last_input_channels = average_pooling_op->convolution_op->last_input_channels;
   const size_t last_input_height = average_pooling_op->convolution_op->last_input_height;
@@ -457,6 +465,17 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
   const size_t indirect_top_height = divide_round_up(average_pooling_op->convolution_op->padding_top, average_pooling_op->convolution_op->stride_height);
   const size_t indirect_bot_height = divide_round_up(average_pooling_op->convolution_op->padding_bottom, average_pooling_op->convolution_op->stride_height);
 
+  size_t input_pixel_stride_in_bytes = 0;
+  if (!xnn_safe_mul(average_pooling_op->input_pixel_stride,
+                    (size_t) 1 << log2_data_element_size,
+                    &input_pixel_stride_in_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input pixel stride in bytes overflows "
+        "size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
   if (input_size_changed) {
     const size_t indirection_buffer_output_height = (indirect_top_height + indirect_bot_height + 1);
     size_t indirection_buffer_elements = 0;
@@ -497,7 +516,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
       /*output_y_start=*/0, /*output_y_end=*/average_pooling_op->convolution_op->output_height,
       average_pooling_op->convolution_op->indirection_buffer,
       average_pooling_op->convolution_op->input,
-      average_pooling_op->input_pixel_stride << log2_data_element_size,
+      input_pixel_stride_in_bytes,
       average_pooling_op->zero_buffer,
       average_pooling_op->convolution_op->input_height, average_pooling_op->convolution_op->input_width,
       average_pooling_op->convolution_op->output_height, average_pooling_op->convolution_op->output_width,
@@ -515,8 +534,22 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
   }
 
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
-  const size_t output_width_stride = average_pooling_op->output_pixel_stride << log2_data_element_size;
-  const size_t output_height_stride = output_width * output_width_stride;
+  size_t output_width_stride = 0;
+  if (!xnn_safe_mul(average_pooling_op->output_pixel_stride,
+                    (size_t) 1 << log2_data_element_size,
+                    &output_width_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output width stride overflows size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t output_height_stride = 0;
+  if (!xnn_safe_mul(output_width, output_width_stride, &output_height_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output height stride overflows size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
 
   if (is_pixelwise) {
     assert(indirection_init_pavgpool2d != NULL);
@@ -555,18 +588,58 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     }
   }
 
+  size_t output_batch_stride = 0;
+  if (!xnn_safe_mul(output_height, output_height_stride,
+                    &output_batch_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output batch stride overflows size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t input_batch_stride = 0;
+  if (!xnn_safe_mul(input_height, input_width, &input_batch_stride) ||
+      !xnn_safe_mul(input_batch_stride, input_pixel_stride_in_bytes,
+                    &input_batch_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input batch stride overflows size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t input_y_stride = 0;
+  if (!xnn_safe_mul(average_pooling_op->convolution_op->stride_height,
+                    input_width, &input_y_stride) ||
+      !xnn_safe_mul(input_y_stride, input_pixel_stride_in_bytes,
+                    &input_y_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input y stride overflows size_t",
+        xnn_operator_type_to_string_v2(average_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t pixelwise_buffer_height_stride = 0;
+  if (is_pixelwise) {
+    if (!xnn_safe_mul(output_width, (size_t) 1 << log2_data_element_size,
+                      &pixelwise_buffer_height_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: pixelwise buffer height stride "
+          "overflows size_t",
+          xnn_operator_type_to_string_v2(average_pooling_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   average_pooling_op->context.average_pooling = (struct average_pooling_context) {
     .indirect_input = average_pooling_op->convolution_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
     .indirect_top_height = indirect_top_height,
     .indirect_bot_start = average_pooling_op->convolution_op->output_height - indirect_bot_height,
-    .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride << log2_data_element_size,
-    .input_y_stride =
-        average_pooling_op->convolution_op->stride_height * input_width * average_pooling_op->input_pixel_stride
-        << log2_data_element_size,
+    .input_batch_stride = input_batch_stride,
+    .input_y_stride = input_y_stride,
     .pixelwise_buffer = average_pooling_op->convolution_op->pixelwise_buffer,
-    .pixelwise_buffer_height_stride = output_width << log2_data_element_size,
-    .output_batch_stride = output_height * output_height_stride,
+    .pixelwise_buffer_height_stride = pixelwise_buffer_height_stride,
+    .output_batch_stride = output_batch_stride,
     .output_height_stride = output_height_stride,
     .output_width = output_width,
     .pooling_size = pooling_size,
