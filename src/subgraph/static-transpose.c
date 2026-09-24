@@ -94,6 +94,15 @@ static enum xnn_status reshape_transpose_operator(
     return xnn_status_invalid_parameter;
   }
 
+  const size_t input_size = xnn_runtime_tensor_get_size(input);
+  if (input_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_transpose), input_id);
+    return xnn_status_out_of_memory;
+  }
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_transpose_nd_x16: {
       status = xnn_reshape_transpose_nd_x16(

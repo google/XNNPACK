@@ -87,6 +87,15 @@ static enum xnn_status reshape_resize_bilinear_operator(
       input_id);
     return xnn_status_invalid_parameter;
   }
+  const size_t input_size = xnn_runtime_tensor_get_size(&values[input_id]);
+  if (input_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_resize_bilinear_2d),
+      input_id);
+    return xnn_status_out_of_memory;
+  }
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
