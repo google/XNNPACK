@@ -945,6 +945,29 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     return status;
   }
 
+  if (filter_value->shape.num_dims != 4) {
+    xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32
+        ": unsupported number of dimensions %zu, must be 4",
+        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d),
+        filter_id, filter_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (filter_value->shape.dim[0] != 1 ||
+      filter_value->shape.dim[1] != kernel_height ||
+      filter_value->shape.dim[2] != kernel_width ||
+      filter_value->shape.dim[3] != input_channels * depth_multiplier) {
+    xnn_log_error(
+        "failed to define %s operator with filter shape [%zu, %zu, %zu, %zu]: "
+        "filter shape must match [1, %" PRIu32 ", %" PRIu32 ", %zu]",
+        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d),
+        filter_value->shape.dim[0], filter_value->shape.dim[1],
+        filter_value->shape.dim[2], filter_value->shape.dim[3],
+        kernel_height, kernel_width, input_channels * depth_multiplier);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
