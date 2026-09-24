@@ -13,8 +13,9 @@ const char* xnn_node_type_to_string(enum xnn_node_type node_type) {
   #define XNN_ENUM_ITEM(enum_name, enum_string) case enum_name: return enum_string;
   #include "src/xnnpack/node-type-defs.inc"
   default:
-    XNN_UNREACHABLE;
+    return "<unknown>";
   #undef XNN_ENUM_ITEM
   };
+  return "<unknown>";
 }
 #endif  // XNN_LOG_LEVEL > 0

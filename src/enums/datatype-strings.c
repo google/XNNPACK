@@ -56,7 +56,8 @@ const char* xnn_datatype_to_string(enum xnn_datatype type) {
       return "QINT4";
     case xnn_datatype_qint2:
       return "QINT2";
+    default:
+      return "<unknown>";
   }
-  XNN_UNREACHABLE;
-  return NULL;
+  return "<unknown>";
 }

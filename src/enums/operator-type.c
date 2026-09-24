@@ -16,7 +16,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type operator_type) {
     return enum_string;
 #include "src/xnnpack/operator-type-defs.inc"
     default:
-      XNN_UNREACHABLE;
+      return "<unknown>";
 #undef XNN_ENUM_ITEM
   };
+  return "<unknown>";
 }

@@ -14,8 +14,9 @@ const char* xnn_allocation_type_to_string(enum xnn_allocation_type allocation_ty
   #define XNN_ENUM_ITEM(enum_name, enum_string) case enum_name: return enum_string;
   #include "src/xnnpack/allocation-type-defs.inc"
   default:
-    XNN_UNREACHABLE;
+    return "<unknown>";
   #undef XNN_ENUM_ITEM
   };
+  return "<unknown>";
 }
 #endif  // XNN_LOG_LEVEL > 0

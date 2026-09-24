@@ -21,9 +21,12 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/subgraph/subgraph-utils.h"
+#include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/microkernel-type.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/runtime-flags.h"
@@ -2075,5 +2078,62 @@ INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteClampsTest, testing::Values(0, 1, 3));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteArithmeticTest,
                          testing::Values(0, 1, 3));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteGemmTest, testing::Values(3, 4));
+
+TEST(EnumStringsTest, DatatypeToString) {
+  EXPECT_STREQ("FP32", xnn_datatype_to_string(xnn_datatype_fp32));
+  EXPECT_STREQ("FP16", xnn_datatype_to_string(xnn_datatype_fp16));
+  EXPECT_STREQ("Invalid", xnn_datatype_to_string(xnn_datatype_invalid));
+  EXPECT_STREQ("<unknown>",
+               xnn_datatype_to_string(static_cast<enum xnn_datatype>(-1)));
+  EXPECT_STREQ("<unknown>",
+               xnn_datatype_to_string(static_cast<enum xnn_datatype>(99999)));
+}
+
+TEST(EnumStringsTest, AllocationTypeToString) {
+#if XNN_LOG_LEVEL > 0
+  EXPECT_STREQ("static",
+               xnn_allocation_type_to_string(xnn_allocation_type_static));
+  EXPECT_STREQ("workspace",
+               xnn_allocation_type_to_string(xnn_allocation_type_workspace));
+#endif
+  EXPECT_STREQ("<unknown>",
+               xnn_allocation_type_to_string(
+                   static_cast<enum xnn_allocation_type>(-1)));
+  EXPECT_STREQ("<unknown>",
+               xnn_allocation_type_to_string(
+                   static_cast<enum xnn_allocation_type>(99999)));
+}
+
+TEST(EnumStringsTest, NodeTypeToString) {
+#if XNN_LOG_LEVEL > 0
+  EXPECT_STREQ("Invalid", xnn_node_type_to_string(xnn_node_type_invalid));
+#endif
+  EXPECT_STREQ("<unknown>",
+               xnn_node_type_to_string(static_cast<enum xnn_node_type>(-1)));
+  EXPECT_STREQ("<unknown>",
+               xnn_node_type_to_string(static_cast<enum xnn_node_type>(99999)));
+}
+
+TEST(EnumStringsTest, OperatorTypeToString) {
+  EXPECT_STREQ("Invalid",
+               xnn_operator_type_to_string(xnn_operator_type_invalid));
+  EXPECT_STREQ("<unknown>",
+               xnn_operator_type_to_string(
+                   static_cast<enum xnn_operator_type>(-1)));
+  EXPECT_STREQ("<unknown>",
+               xnn_operator_type_to_string(
+                   static_cast<enum xnn_operator_type>(99999)));
+}
+
+TEST(EnumStringsTest, MicrokernelTypeToString) {
+  EXPECT_STREQ("GEMM",
+               xnn_microkernel_type_to_string(xnn_microkernel_type_gemm));
+  EXPECT_STREQ("<unknown>",
+               xnn_microkernel_type_to_string(
+                   static_cast<enum xnn_microkernel_type>(-1)));
+  EXPECT_STREQ("<unknown>",
+               xnn_microkernel_type_to_string(
+                   static_cast<enum xnn_microkernel_type>(99999)));
+}
 
 }  // namespace xnnpack
