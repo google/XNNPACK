@@ -72,6 +72,15 @@ static enum xnn_status reshape_slice_operator(
   struct xnn_runtime_value* output_value = values + output_id;
   struct xnn_runtime_value* input_value = values + input_id;
   const size_t num_dims = input_value->shape.num_dims;
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&input_value->shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_slice), input_id);
+    return xnn_status_invalid_parameter;
+  }
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   size_t offsets[XNN_MAX_TENSOR_DIMS], sizes[XNN_MAX_TENSOR_DIMS];
@@ -117,6 +126,13 @@ static enum xnn_status reshape_slice_operator(
     return status;
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with output ID #%" PRIu32
+      ": output tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_slice), output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
