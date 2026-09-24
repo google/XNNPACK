@@ -84,6 +84,16 @@ static enum xnn_status reshape_transpose_operator(
     return xnn_status_invalid_parameter;
   }
 
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&input->shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_transpose), input_id);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_transpose_nd_x16: {
       status = xnn_reshape_transpose_nd_x16(
@@ -127,6 +137,13 @@ static enum xnn_status reshape_transpose_operator(
     output->shape.dim[cur_dim] = input->shape.dim[opdata->shape1.dim[cur_dim]];
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with output ID #%" PRIu32
+      ": output tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_transpose), output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
