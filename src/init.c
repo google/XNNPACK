@@ -45,26 +45,32 @@ static void init_allocator_config(void) {
 }
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
   if (hardware_config == NULL) {
     xnn_log_error("XNNPACK initialization failed: hardware not supported");
     return xnn_status_unsupported_hardware;
   }
 
-  if (allocator == NULL) {
+  if (allocator != NULL) {
+    if (allocator->allocate == NULL || allocator->deallocate == NULL ||
+        allocator->aligned_allocate == NULL ||
+        allocator->aligned_deallocate == NULL) {
+      xnn_log_error(
+          "XNNPACK initialization failed: "
+          "custom allocator missing required function pointers");
+      return xnn_status_invalid_parameter;
+    }
+  } else {
     allocator = &xnn_default_allocator;
   }
   #ifdef _MSC_VER
-    _InterlockedCompareExchangePointer((PVOID volatile*) &init_allocator, (PVOID) allocator, NULL);
+    _InterlockedCompareExchangePointer(
+        (PVOID volatile*) &init_allocator, (PVOID) allocator, NULL);
   #else
     __sync_bool_compare_and_swap(&init_allocator, NULL, allocator);
   #endif
   XNN_INIT_ONCE(allocator);
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) != 0) {
-    return xnn_status_success;
-  } else {
-    return xnn_status_unsupported_hardware;
-  }
 
 #if XNN_ENABLE_KLEIDIAI
   /* If we're using KleidiAI, log their version string. */
@@ -77,6 +83,12 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
             kai_get_version());
   }
 #endif  // XNN_ENABLE_KLEIDIAI
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) != 0) {
+    return xnn_status_success;
+  } else {
+    return xnn_status_unsupported_hardware;
+  }
 }
 
 enum xnn_status xnn_deinitialize(void) {
