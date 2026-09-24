@@ -27,7 +27,8 @@ void* xnn_get_pointer_to_write_weights(
 {
   assert(aligned_weights_size % XNN_ALLOCATION_ALIGNMENT == 0);
   if (use_weights_cache(op)) {
-    void* weights_ptr = op->weights_cache->reserve_space(op->weights_cache->context, aligned_weights_size);
+    void* weights_ptr = op->weights_cache->reserve_space(
+      op->weights_cache->context, aligned_weights_size);
     // Some implementations of the weights cache return pointers that seg fault
     // when we read from them, *if* we haven't written to them first?? This can
     // happen because packing doesn't initialize all memory if it doesn't affect
@@ -48,8 +49,21 @@ size_t xnn_compute_convolution_output_dimension(
   size_t dilation_dimension,
   size_t subsampling_dimension)
 {
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
-  return doz(padded_input_dimension, effective_kernel_dimension) / subsampling_dimension + 1;
+  if (subsampling_dimension == 0 || kernel_dimension == 0) {
+    return 0;
+  }
+  size_t effective_kernel_dimension;
+  if (!xnn_safe_mul(
+        kernel_dimension - 1, dilation_dimension,
+        &effective_kernel_dimension) ||
+      !xnn_safe_add(
+        effective_kernel_dimension, 1, &effective_kernel_dimension)) {
+    return 1;
+  }
+  const size_t diff =
+    doz(padded_input_dimension, effective_kernel_dimension);
+  const size_t result = diff / subsampling_dimension;
+  return result == SIZE_MAX ? SIZE_MAX : result + 1;
 }
 
 size_t xnn_compute_deconvolution_output_dimension(
@@ -60,10 +74,27 @@ size_t xnn_compute_deconvolution_output_dimension(
   size_t dilation_dimension,
   size_t stride_dimension)
 {
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
-  return doz(
-    stride_dimension * (input_dimension - 1) + adjustment_dimension + effective_kernel_dimension,
-    output_padding_dimension);
+  if (input_dimension == 0 || kernel_dimension == 0) {
+    return 0;
+  }
+  size_t effective_kernel_dimension;
+  if (!xnn_safe_mul(
+        kernel_dimension - 1, dilation_dimension,
+        &effective_kernel_dimension) ||
+      !xnn_safe_add(
+        effective_kernel_dimension, 1, &effective_kernel_dimension)) {
+    return 0;
+  }
+  size_t scaled_input;
+  if (!xnn_safe_mul(stride_dimension, input_dimension - 1, &scaled_input)) {
+    return 0;
+  }
+  size_t total_dim;
+  if (!xnn_safe_add(scaled_input, adjustment_dimension, &total_dim) ||
+      !xnn_safe_add(total_dim, effective_kernel_dimension, &total_dim)) {
+    return 0;
+  }
+  return doz(total_dim, output_padding_dimension);
 }
 
 size_t xnn_compute_unpooling_output_dimension(
@@ -83,9 +114,26 @@ size_t xnn_compute_unpooling_output_dimension(
 //   divide_round_up(batch_size, mr) * (mr * nr) FMAs.
 // The total cost is then a linear combination of these 2 operations. From experimental data, use a multiplier of 3 for
 // loads, to prefer higher tile sizes which have better computation intensity.
-static size_t calculate_microkernel_cost(size_t batch_size, uint32_t mr, uint32_t nr)
+static size_t calculate_microkernel_cost(
+  size_t batch_size, uint32_t mr, uint32_t nr)
 {
-  return divide_round_up(batch_size, mr) * (3 * (mr + nr) + mr * nr);
+  if (mr == 0) {
+    return SIZE_MAX;
+  }
+  if (batch_size == 0) {
+    return 0;
+  }
+  const size_t tiles = 1 + (batch_size - 1) / mr;
+  const uint64_t tile_cost =
+    3ULL * ((uint64_t) mr + nr) + (uint64_t) mr * nr;
+  if (tile_cost > SIZE_MAX) {
+    return SIZE_MAX;
+  }
+  size_t total_cost;
+  if (!xnn_safe_mul(tiles, (size_t) tile_cost, &total_cost)) {
+    return SIZE_MAX;
+  }
+  return total_cost;
 }
 
 static bool mr_is_available_gemm(size_t mr, struct xnn_hmp_gemm_ukernel *gemm_cases)
@@ -158,11 +206,18 @@ uint32_t xnn_get_heuristic_mr_igemm(
 
 enum xnn_status xnn_allocate_extra_params(
     xnn_operator_t op, size_t num_extra_params) {
-  op->extra_params = xnn_allocate_zero_memory(
-      num_extra_params * sizeof(union xnn_params));
+  size_t total_bytes;
+  if (!xnn_safe_mul(
+        num_extra_params, sizeof(union xnn_params), &total_bytes)) {
+    xnn_log_error(
+      "failed to allocate memory for %zu extra params: size overflow",
+      num_extra_params);
+    return xnn_status_out_of_memory;
+  }
+  op->extra_params = xnn_allocate_zero_memory(total_bytes);
   if (op->extra_params == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for operator descriptor",
-                  num_extra_params * sizeof(union xnn_params));
+    xnn_log_error(
+      "failed to allocate %zu bytes for operator descriptor", total_bytes);
     return xnn_status_out_of_memory;
   }
   op->num_extra_params = num_extra_params;
