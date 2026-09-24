@@ -393,3 +393,39 @@ TEST(UNPOOLING_NHWC_X32, batch_stride_overflow) {
                 &output_height, &output_width, /*threadpool=*/nullptr));
 }
 
+TEST(UNPOOLING_NHWC_X32, reshape_overflow_batch_size) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t unpooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unpooling2d_nhwc_x32(
+                0, 0, 0, 0, 2, 2, 0, &unpooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      unpooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_unpooling2d_nhwc_x32(
+          unpooling_op, SIZE_MAX, 2, 2, 2, 2, 2,
+          &output_height, &output_width, nullptr));
+}
+
+TEST(UNPOOLING_NHWC_X32, reshape_overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t unpooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unpooling2d_nhwc_x32(
+                0, 0, 0, 0, 2, 2, 0, &unpooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      unpooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t large_width = (SIZE_MAX / (2 * sizeof(float))) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_unpooling2d_nhwc_x32(
+          unpooling_op, 1, 1, large_width, 2, 2, 2,
+          &output_height, &output_width, nullptr));
+}
