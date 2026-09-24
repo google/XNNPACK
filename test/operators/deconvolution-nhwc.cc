@@ -3607,14 +3607,16 @@ TEST(DECONVOLUTION_NHWC_F32, batch_stride_overflow) {
   const float bias[1] = {0.0f};
   xnn_operator_t deconvolution_op = nullptr;
 
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_create_deconvolution2d_nhwc_f32(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          kernel, bias,
-          -std::numeric_limits<float>::infinity(),
-          std::numeric_limits<float>::infinity(), 0, nullptr,
-          &deconvolution_op));
+  const xnn_status status = xnn_create_deconvolution2d_nhwc_f32(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      kernel, bias,
+      -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), 0, nullptr,
+      &deconvolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
       deconvolution_op, xnn_delete_operator);
   size_t output_height = 0;
