@@ -994,10 +994,13 @@ TEST(RESIZE_BILINEAR_NCHW_F32, tf_mode_aligned_centers_varying_batch_size) {
 TEST(RESIZE_BILINEAR_NCHW_F32, output_stride_overflow) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_operator_t resize_op = nullptr;
-  ASSERT_EQ(xnn_status_success,
-            xnn_create_resize_bilinear2d_nchw(
-                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
-                /*flags=*/0, &resize_op));
+  const xnn_status status = xnn_create_resize_bilinear2d_nchw(
+      xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+      /*flags=*/0, &resize_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
       resize_op, xnn_delete_operator);
   const size_t overflow_stride = (SIZE_MAX / 4) + 1;
@@ -1013,10 +1016,13 @@ TEST(RESIZE_BILINEAR_NCHW_F32, output_stride_overflow) {
 TEST(RESIZE_BILINEAR_NCHW_F32, input_stride_overflow) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_operator_t resize_op = nullptr;
-  ASSERT_EQ(xnn_status_success,
-            xnn_create_resize_bilinear2d_nchw(
-                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
-                /*flags=*/0, &resize_op));
+  const xnn_status status = xnn_create_resize_bilinear2d_nchw(
+      xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+      /*flags=*/0, &resize_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
       resize_op, xnn_delete_operator);
   const size_t overflow_stride = (SIZE_MAX / 4) + 1;
@@ -1032,10 +1038,13 @@ TEST(RESIZE_BILINEAR_NCHW_F32, input_stride_overflow) {
 TEST(RESIZE_BILINEAR_NCHW_F32, batch_stride_overflow) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_operator_t resize_op = nullptr;
-  ASSERT_EQ(xnn_status_success,
-            xnn_create_resize_bilinear2d_nchw(
-                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
-                /*flags=*/0, &resize_op));
+  const xnn_status status = xnn_create_resize_bilinear2d_nchw(
+      xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+      /*flags=*/0, &resize_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
       resize_op, xnn_delete_operator);
   const size_t overflow_batch = (SIZE_MAX / 4) + 1;
