@@ -57,6 +57,15 @@ static enum xnn_status create_constant_pad_nd(
     goto error;
   }
 
+  status = xnn_status_invalid_parameter;
+
+  if (constant_pad_op_out == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: constant_pad_op_out is NULL",
+      xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
   status = xnn_status_out_of_memory;
 
   constant_pad_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -66,7 +75,8 @@ static enum xnn_status create_constant_pad_nd(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  constant_pad_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  constant_pad_op->compute =
+      xnn_allocate_zero_memory(sizeof(struct compute_parameters));
   if (constant_pad_op->compute == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct compute_parameters),
@@ -74,8 +84,9 @@ static enum xnn_status create_constant_pad_nd(
     goto error;
   }
   constant_pad_op->num_compute_invocations = 1;
-  constant_pad_op->dynamic_context.reduce = xnn_allocate_zero_simd_memory(sizeof(struct pad_context));
-  if (constant_pad_op->dynamic_context.reduce == NULL) {
+  constant_pad_op->dynamic_context.pad =
+      xnn_allocate_zero_simd_memory(sizeof(struct pad_context));
+  if (constant_pad_op->dynamic_context.pad == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
       sizeof(struct pad_context), xnn_operator_type_to_string(operator_type));
@@ -98,7 +109,9 @@ static enum xnn_status create_constant_pad_nd(
     goto error;
   }
 
-  init_constant_pad_nd(padding_value, flags, operator_type, fill_config, pad_config, constant_pad_op);
+  init_constant_pad_nd(
+      padding_value, flags, operator_type, fill_config, pad_config,
+      constant_pad_op);
   *constant_pad_op_out = constant_pad_op;
 
   return xnn_status_success;
@@ -113,9 +126,16 @@ enum xnn_status xnn_create_constant_pad_nd_x8(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
+  if (padding_value == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: padding value is NULL",
+      xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x8));
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint8_t*) padding_value);
   return create_constant_pad_nd(
-    padding_pattern * UINT32_C(0x01010101), flags, xnn_operator_type_constant_pad_nd_x8, constant_pad_op_out);
+    padding_pattern * UINT32_C(0x01010101), flags,
+    xnn_operator_type_constant_pad_nd_x8, constant_pad_op_out);
 }
 
 enum xnn_status xnn_create_constant_pad_nd_x16(
@@ -123,9 +143,16 @@ enum xnn_status xnn_create_constant_pad_nd_x16(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
+  if (padding_value == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: padding value is NULL",
+      xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x16));
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint16_t*) padding_value);
   return create_constant_pad_nd(
-    padding_pattern * UINT32_C(0x00010001), flags, xnn_operator_type_constant_pad_nd_x16, constant_pad_op_out);
+    padding_pattern * UINT32_C(0x00010001), flags,
+    xnn_operator_type_constant_pad_nd_x16, constant_pad_op_out);
 }
 
 enum xnn_status xnn_create_constant_pad_nd_x32(
@@ -133,8 +160,15 @@ enum xnn_status xnn_create_constant_pad_nd_x32(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
+  if (padding_value == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: padding value is NULL",
+      xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x32));
+    return xnn_status_invalid_parameter;
+  }
   return create_constant_pad_nd(
-    *((const uint32_t*) padding_value), flags, xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
+    *((const uint32_t*) padding_value), flags,
+    xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
 }
 
 static enum xnn_status reshape_constant_pad_nd(
@@ -147,6 +181,11 @@ static enum xnn_status reshape_constant_pad_nd(
     uint32_t log2_element_size,
     pthreadpool_t threadpool)
 {
+  if (constant_pad_op == NULL) {
+    xnn_log_error("failed to reshape operator: operator is NULL");
+    return xnn_status_invalid_parameter;
+  }
+
   if (constant_pad_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -164,6 +203,15 @@ static enum xnn_status reshape_constant_pad_nd(
         xnn_operator_type_to_string_v2(constant_pad_op), num_dims,
         XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
+  }
+
+  if (num_dims != 0 &&
+      (input_shape == NULL || pre_paddings == NULL || post_paddings == NULL)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input_shape, pre_paddings, and "
+        "post_paddings must not be NULL when num_dims > 0",
+        xnn_operator_type_to_string_v2(constant_pad_op));
+    return xnn_status_invalid_parameter;
   }
 
   size_t num_squeezed_dims = 0;
@@ -192,9 +240,12 @@ static enum xnn_status reshape_constant_pad_nd(
             xnn_operator_type_to_string_v2(constant_pad_op));
         return xnn_status_unsupported_parameter;
       }
-      normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = pre_padding;
-      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = output_dim;
+      normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] =
+          pre_padding;
+      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] =
+          input_dim;
+      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] =
+          output_dim;
 
       num_squeezed_dims += 1;
       is_previous_dim_padded = is_current_dim_padded;
@@ -240,7 +291,8 @@ static enum xnn_status reshape_constant_pad_nd(
     return xnn_status_success;
   }
 
-  const struct xnn_xx_fill_config* xx_fill_config = constant_pad_op->fill_config;
+  const struct xnn_xx_fill_config* xx_fill_config =
+      constant_pad_op->fill_config;
   const struct xnn_xx_pad_config* xx_pad_config = constant_pad_op->pad_config;
 
   *constant_pad_op->dynamic_context.pad = (struct pad_context) {
@@ -306,8 +358,15 @@ static enum xnn_status reshape_constant_pad_nd(
   constant_pad_op->dynamic_context.pad->input_size[0] = input_size_0_bytes;
   constant_pad_op->dynamic_context.pad->output_size[0] = output_size_0_bytes;
   constant_pad_op->dynamic_context.pad->pre_paddings[0] = pre_padding_0_bytes;
+  const size_t pre_plus_input = pre_padding_0_bytes + input_size_0_bytes;
+  if (output_size_0_bytes < pre_plus_input) {
+    xnn_log_error(
+        "failed to reshape %s operator: post_paddings underflow",
+        xnn_operator_type_to_string_v2(constant_pad_op));
+    return xnn_status_invalid_parameter;
+  }
   constant_pad_op->dynamic_context.pad->post_paddings[0] =
-      output_size_0_bytes - pre_padding_0_bytes - input_size_0_bytes;
+      output_size_0_bytes - pre_plus_input;
 
   constant_pad_op->compute[0].type = xnn_parallelization_type_5d;
   constant_pad_op->compute[0].task_5d = (pthreadpool_task_5d_t) xnn_compute_pad_5d;
@@ -372,6 +431,11 @@ static enum xnn_status setup_constant_pad_nd(
     const void* input,
     void* output)
 {
+  if (constant_pad_op == NULL) {
+    xnn_log_error("failed to setup operator: operator is NULL");
+    return xnn_status_invalid_parameter;
+  }
+
   if (constant_pad_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -394,6 +458,14 @@ static enum xnn_status setup_constant_pad_nd(
     case xnn_run_state_ready:
       // Operator has been reshaped, and we are setting up with different pointers.
       break;
+  }
+
+  if (input == NULL || output == NULL) {
+    xnn_log_error(
+        "failed to setup %s operator: input and output pointers must not be "
+        "NULL",
+        xnn_operator_type_to_string_v2(constant_pad_op));
+    return xnn_status_invalid_parameter;
   }
 
   constant_pad_op->dynamic_context.pad->input = input;
@@ -516,13 +588,19 @@ enum xnn_status xnn_run_constant_pad_nd_x8(
     const void* padding_value,
     pthreadpool_t threadpool)
 {
+  if (padding_value == NULL) {
+    xnn_log_error(
+        "failed to run %s operator: padding value is NULL",
+        xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x8));
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint8_t*) padding_value);
   return run_constant_pad_nd(
     flags,
     num_dims, input_shape, pre_paddings, post_paddings,
     input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     padding_pattern * UINT32_C(0x01010101),
-    xnn_operator_type_constant_pad_nd_x32,
+    xnn_operator_type_constant_pad_nd_x8,
     threadpool);
 }
 
@@ -537,13 +615,19 @@ enum xnn_status xnn_run_constant_pad_nd_x16(
     const void* padding_value,
     pthreadpool_t threadpool)
 {
+  if (padding_value == NULL) {
+    xnn_log_error(
+        "failed to run %s operator: padding value is NULL",
+        xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x16));
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint16_t*) padding_value);
   return run_constant_pad_nd(
     flags,
     num_dims, input_shape, pre_paddings, post_paddings,
     input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT16_T,
     padding_pattern * UINT32_C(0x00010001),
-    xnn_operator_type_constant_pad_nd_x32,
+    xnn_operator_type_constant_pad_nd_x16,
     threadpool);
 }
 
@@ -558,6 +642,12 @@ enum xnn_status xnn_run_constant_pad_nd_x32(
     const void* padding_value,
     pthreadpool_t threadpool)
 {
+  if (padding_value == NULL) {
+    xnn_log_error(
+        "failed to run %s operator: padding value is NULL",
+        xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x32));
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint32_t*) padding_value);
   return run_constant_pad_nd(
     flags,
