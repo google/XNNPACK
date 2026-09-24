@@ -21,25 +21,25 @@
 #include "src/xnnpack/vcvt.h"
 
 
-void xnn_bf16_qs8_vcvt_ukernel__neonv8_u8(
+void xnn_f16_qu8_vcvt_ukernel__neonv8_u8(
     size_t batch,
-    const xnn_bfloat16* input,
-    int8_t* output,
-    const struct xnn_bf16_qs8_cvt_params* restrict params) XNN_OOB_READS
+    const xnn_float16* input,
+    uint8_t* output,
+    const struct xnn_f16_qu8_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
-  assert(batch % sizeof(xnn_bfloat16) == 0);
+  assert(batch % sizeof(xnn_float16) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
   // Don't let the scale be 0, which can happen for large scales, and should
   // not happen because this value is a reciprocal.
-  const float32x4_t vscale = vdupq_n_f32(math_max_f32(FLT_MIN, xnn_bfloat16_to_float(params->scalar.scale)));
+  const float32x4_t vscale = vdupq_n_f32(math_max_f32(FLT_MIN, xnn_float16_to_float(params->scalar.scale)));
   const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
-  for (; batch >= 8 * sizeof(xnn_bfloat16); batch -= 8 * sizeof(xnn_bfloat16)) {
-    const uint16x8_t vbf = vld1q_u16((const uint16_t*) input); input += 8;
-    float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-    float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+  for (; batch >= 8 * sizeof(xnn_float16); batch -= 8 * sizeof(xnn_float16)) {
+    const float16x8_t vfp = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input)); input += 8;
+    float32x4_t vx_lo = vcvt_f32_f16(vget_low_f16(vfp));
+    float32x4_t vx_hi = vcvt_f32_f16(vget_high_f16(vfp));
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -50,15 +50,15 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u8(
     int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
-    int8x8_t vy = vqmovn_s16(vacc);
-    vst1_s8(output, vy); output += 8;
+    uint8x8_t vy = vqmovun_s16(vacc);
+    vst1_u8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(xnn_bfloat16));
-    assert(batch <= 7 * sizeof(xnn_bfloat16));
-    const uint16x8_t vbf = vld1q_u16((const uint16_t*) input);
-    float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-    float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    assert(batch >= 1 * sizeof(xnn_float16));
+    assert(batch <= 7 * sizeof(xnn_float16));
+    const float16x8_t vfp = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input));
+    float32x4_t vx_lo = vcvt_f32_f16(vget_low_f16(vfp));
+    float32x4_t vx_hi = vcvt_f32_f16(vget_high_f16(vfp));
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -69,18 +69,18 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u8(
     int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
-    int8x8_t vy = vqmovn_s16(vacc);
+    uint8x8_t vy = vqmovun_s16(vacc);
 
-    if (batch & (4 * sizeof(xnn_bfloat16))) {
-      vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;
-      vy = vext_s8(vy, vy, 4);
+    if (batch & (4 * sizeof(xnn_float16))) {
+      vst1_lane_u32((void*) output, vreinterpret_u32_u8(vy), 0); output += 4;
+      vy = vext_u8(vy, vy, 4);
     }
-    if (batch & (2 * sizeof(xnn_bfloat16))) {
-      vst1_lane_u16((void*) output, vreinterpret_u16_s8(vy), 0); output += 2;
-      vy = vext_s8(vy, vy, 2);
+    if (batch & (2 * sizeof(xnn_float16))) {
+      vst1_lane_u16((void*) output, vreinterpret_u16_u8(vy), 0); output += 2;
+      vy = vext_u8(vy, vy, 2);
     }
-    if (batch & (1 * sizeof(xnn_bfloat16))) {
-      vst1_lane_s8(output, vy, 0);
+    if (batch & (1 * sizeof(xnn_float16))) {
+      vst1_lane_u8(output, vy, 0);
     }
   }
 }

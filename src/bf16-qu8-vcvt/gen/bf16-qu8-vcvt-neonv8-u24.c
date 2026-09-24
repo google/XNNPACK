@@ -21,11 +21,11 @@
 #include "src/xnnpack/vcvt.h"
 
 
-void xnn_bf16_qs8_vcvt_ukernel__neonv8_u24(
+void xnn_bf16_qu8_vcvt_ukernel__neonv8_u24(
     size_t batch,
     const xnn_bfloat16* input,
-    int8_t* output,
-    const struct xnn_bf16_qs8_cvt_params* restrict params) XNN_OOB_READS
+    uint8_t* output,
+    const struct xnn_bf16_qu8_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_bfloat16) == 0);
@@ -69,11 +69,11 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u24(
     vacc89ABCDEF = vqaddq_s16(vacc89ABCDEF, voutput_zero_point);
     vaccGHIJKLMN = vqaddq_s16(vaccGHIJKLMN, voutput_zero_point);
 
-    int8x16_t vy0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc01234567), vqmovn_s16(vacc89ABCDEF));
-    int8x8_t vyGHIJKLMN = vqmovn_s16(vaccGHIJKLMN);
+    uint8x16_t vy0123456789ABCDEF = vcombine_u8(vqmovun_s16(vacc01234567), vqmovun_s16(vacc89ABCDEF));
+    uint8x8_t vyGHIJKLMN = vqmovun_s16(vaccGHIJKLMN);
 
-    vst1q_s8(output, vy0123456789ABCDEF); output += 16;
-    vst1_s8(output, vyGHIJKLMN); output += 8;
+    vst1q_u8(output, vy0123456789ABCDEF); output += 16;
+    vst1_u8(output, vyGHIJKLMN); output += 8;
   }
   for (; batch >= 8 * sizeof(xnn_bfloat16); batch -= 8 * sizeof(xnn_bfloat16)) {
     const uint16x8_t vbf = vld1q_u16((const uint16_t*) input); input += 8;
@@ -89,8 +89,8 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u24(
     int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
-    int8x8_t vy = vqmovn_s16(vacc);
-    vst1_s8(output, vy); output += 8;
+    uint8x8_t vy = vqmovun_s16(vacc);
+    vst1_u8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(xnn_bfloat16));
@@ -108,18 +108,18 @@ void xnn_bf16_qs8_vcvt_ukernel__neonv8_u24(
     int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
-    int8x8_t vy = vqmovn_s16(vacc);
+    uint8x8_t vy = vqmovun_s16(vacc);
 
     if (batch & (4 * sizeof(xnn_bfloat16))) {
-      vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;
-      vy = vext_s8(vy, vy, 4);
+      vst1_lane_u32((void*) output, vreinterpret_u32_u8(vy), 0); output += 4;
+      vy = vext_u8(vy, vy, 4);
     }
     if (batch & (2 * sizeof(xnn_bfloat16))) {
-      vst1_lane_u16((void*) output, vreinterpret_u16_s8(vy), 0); output += 2;
-      vy = vext_s8(vy, vy, 2);
+      vst1_lane_u16((void*) output, vreinterpret_u16_u8(vy), 0); output += 2;
+      vy = vext_u8(vy, vy, 2);
     }
     if (batch & (1 * sizeof(xnn_bfloat16))) {
-      vst1_lane_s8(output, vy, 0);
+      vst1_lane_u8(output, vy, 0);
     }
   }
 }
