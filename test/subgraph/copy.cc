@@ -9,9 +9,11 @@
 #include <cstdint>
 #include <vector>
 
+#include <cstring>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
@@ -81,5 +83,40 @@ INSTANTIATE_TEST_SUITE_P(Copy, CopyQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyBF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyF32, rank_params);
+
+TEST(InitAndAllocatorTest, CustomAllocatorMissingPointers) {
+  struct xnn_allocator bad_allocator;
+  memset(&bad_allocator, 0, sizeof(bad_allocator));
+
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_initialize(&bad_allocator));
+
+  bad_allocator.allocate = [](void*, size_t s) -> void* { return malloc(s); };
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_initialize(&bad_allocator));
+
+  bad_allocator.deallocate = [](void*, void* p) { free(p); };
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_initialize(&bad_allocator));
+
+  bad_allocator.aligned_allocate = [](void*, size_t, size_t s) -> void* {
+    return malloc(s);
+  };
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_initialize(&bad_allocator));
+}
+
+TEST(InitAndAllocatorTest, AlignedAllocationInvalidAlignment) {
+  EXPECT_EQ(nullptr,
+            xnn_default_allocator.aligned_allocate(nullptr, 0, 64));
+  EXPECT_EQ(nullptr,
+            xnn_default_allocator.aligned_allocate(nullptr, 3, 64));
+  EXPECT_EQ(nullptr,
+            xnn_default_allocator.aligned_allocate(nullptr, 7, 64));
+  EXPECT_EQ(nullptr,
+            xnn_default_allocator.aligned_allocate(
+                nullptr, sizeof(void*) - 1, 64));
+
+  void* ptr = xnn_default_allocator.aligned_allocate(nullptr, 64, 128);
+  EXPECT_NE(nullptr, ptr);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(ptr) % 64);
+  xnn_default_allocator.aligned_deallocate(nullptr, ptr);
+}
 
 }  // namespace xnnpack
