@@ -781,7 +781,10 @@ enum xnn_status xnn_shape_fill_gaps(const struct xnn_shape* shape_a,
   int zero_dim = -1;
   for (int k = 0; k < shape_b->num_dims; k++) {
     if (shape_b->dim[k]) {
-      num_elements_b *= shape_b->dim[k];
+      if (!xnn_safe_mul(num_elements_b, shape_b->dim[k], &num_elements_b)) {
+        xnn_log_error("Invalid shape, dimension product overflows size_t.");
+        return xnn_status_invalid_parameter;
+      }
     } else if (zero_dim < 0) {
       zero_dim = k;
     } else {
@@ -791,7 +794,9 @@ enum xnn_status xnn_shape_fill_gaps(const struct xnn_shape* shape_a,
   }
   if (zero_dim >= 0) {
     shape_b->dim[zero_dim] = num_elements_a / num_elements_b;
-    if (shape_b->dim[zero_dim] * num_elements_b != num_elements_a) {
+    size_t reconstructed;
+    if (!xnn_safe_mul(shape_b->dim[zero_dim], num_elements_b, &reconstructed) ||
+        reconstructed != num_elements_a) {
       xnn_log_error(
           "Invalid shape dimensions, num_elements_a=%zu, num_elements_b=%zu.",
           num_elements_a, num_elements_b);
