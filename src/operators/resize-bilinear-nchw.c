@@ -191,14 +191,16 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nchw(
   const size_t log2_weight_element_size = resize_op->ibilinear_chw_config->log2_weight_element_size;
   const size_t output_height = resize_op->convolution_op->output_height;
   const size_t output_width = resize_op->convolution_op->output_width;
-  if (output_height * output_width != resize_op->convolution_op->last_output_height * resize_op->convolution_op->last_output_width) {
-    size_t num_output_pixels = 0;
-    if (!xnn_safe_mul(output_height, output_width, &num_output_pixels)) {
-      xnn_log_error(
-          "failed to reshape %s operator: output pixel count overflows size_t",
-          xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
-      return xnn_status_out_of_memory;
-    }
+  size_t num_output_pixels = 0;
+  if (!xnn_safe_mul(output_height, output_width, &num_output_pixels)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output pixel count overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+    return xnn_status_out_of_memory;
+  }
+  if (num_output_pixels !=
+      resize_op->convolution_op->last_output_height *
+          resize_op->convolution_op->last_output_width) {
     size_t indirection_buffer_size = 0;
     if (!xnn_safe_mul(num_output_pixels, 4 * sizeof(void*), &indirection_buffer_size)) {
       xnn_log_error(
@@ -262,17 +264,50 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nchw(
   }
 
   const struct xnn_ibilinear_chw_config* ibilinear_chw = resize_op->ibilinear_chw_config;
+  size_t input_channel_stride = 0;
+  if (!xnn_safe_mul(input_height, input_width, &input_channel_stride) ||
+      !xnn_safe_mul(input_channel_stride, (size_t) 1 << log2_data_element_size,
+                    &input_channel_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input channel stride overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+    return xnn_status_out_of_memory;
+  }
+  size_t input_batch_stride = 0;
+  if (!xnn_safe_mul(input_pixel_stride, input_channel_stride,
+                    &input_batch_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input batch stride overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+    return xnn_status_out_of_memory;
+  }
+  size_t output_channel_stride = 0;
+  if (!xnn_safe_mul(num_output_pixels, (size_t) 1 << log2_data_element_size,
+                    &output_channel_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output channel stride overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+    return xnn_status_out_of_memory;
+  }
+  size_t output_batch_stride = 0;
+  if (!xnn_safe_mul(output_pixel_stride, output_channel_stride,
+                    &output_batch_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output batch stride overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+    return xnn_status_out_of_memory;
+  }
   // Resize bilinear packed weights can change when the operator is resized, we will not use weights cache.
   assert(resize_op->weights_cache == NULL);
   resize_op->context.resize_bilinear_chw = (struct resize_bilinear_chw_context) {
-    .output_pixels = output_height * output_width,
+    .output_pixels = num_output_pixels,
     .channels = resize_op->channels,
-    .input_channel_stride = (input_height * input_width) << log2_data_element_size,
+    .input_channel_stride = input_channel_stride,
     .indirect_input = resize_op->convolution_op->indirection_buffer,
-    .input_batch_stride = (input_pixel_stride * input_height * input_width) << log2_data_element_size,
+    .input_batch_stride = input_batch_stride,
     .packed_weights = resize_op->packed_weights.pointer,
-    .output_batch_stride = (output_pixel_stride * output_height * output_width) << log2_data_element_size,
-    .output_channel_stride = (output_height * output_width) << log2_data_element_size,
+    .output_batch_stride = output_batch_stride,
+    .output_channel_stride = output_channel_stride,
     .ukernel = ibilinear_chw->ukernel,
   };
 
