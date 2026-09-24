@@ -302,11 +302,26 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size(value);
   if (value->size == SIZE_MAX) {
-    xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: size overflow for the given shape");
+    xnn_log_error(
+        "failed to create Dynamically Quantized Dense Tensor value: "
+        "size overflow for the given shape");
     return xnn_status_unsupported_parameter;
   }
-  value->quantization.dynamic_params_size = xnn_tensor_get_dynamic_quant_param_size(value->datatype, &value->shape, value->quantization.num_nonbatch_dims);
-  value->quantization.row_sum_size = xnn_tensor_get_row_sum_size(value->datatype, &value->shape, value->quantization.num_nonbatch_dims);
+  value->quantization.dynamic_params_size =
+      xnn_tensor_get_dynamic_quant_param_size(
+          value->datatype, &value->shape,
+          value->quantization.num_nonbatch_dims);
+  value->quantization.row_sum_size =
+      xnn_tensor_get_row_sum_size(
+          value->datatype, &value->shape,
+          value->quantization.num_nonbatch_dims);
+  if (value->quantization.dynamic_params_size == SIZE_MAX ||
+      value->quantization.row_sum_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to create Dynamically Quantized Dense Tensor value: "
+        "quantization params size overflow");
+    return xnn_status_unsupported_parameter;
+  }
   value->flags = flags;
   value->data = NULL;
   set_allocation_type(value);
@@ -858,7 +873,16 @@ size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,
     case xnn_datatype_qduint8: {
       const size_t batch_dims_size = xnn_shape_multiply_batch_dims(
           shape, num_nonbatch_dims);
-      return batch_dims_size * sizeof(struct xnn_quantization_params);
+      if (batch_dims_size == SIZE_MAX) {
+        return SIZE_MAX;
+      }
+      size_t params_size = 0;
+      if (!xnn_safe_mul(batch_dims_size,
+                        sizeof(struct xnn_quantization_params),
+                        &params_size)) {
+        return SIZE_MAX;
+      }
+      return params_size;
     }
     default:
       return 0;
@@ -876,7 +900,14 @@ size_t xnn_tensor_get_row_sum_size(enum xnn_datatype datatype,
     case xnn_datatype_qduint8: {
       const size_t batch_dims_size = xnn_shape_multiply_batch_dims(
           shape, num_nonbatch_dims);
-      return batch_dims_size * sizeof(float);
+      if (batch_dims_size == SIZE_MAX) {
+        return SIZE_MAX;
+      }
+      size_t row_sum_size = 0;
+      if (!xnn_safe_mul(batch_dims_size, sizeof(float), &row_sum_size)) {
+        return SIZE_MAX;
+      }
+      return row_sum_size;
     }
     default:
       return 0;
