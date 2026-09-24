@@ -410,3 +410,58 @@ TEST(WEIGHTS_CACHE, insert_into_finalized_cache_soft) {
 
   ASSERT_EQ(xnn_status_success, xnn_internal_release_weights_cache(&cache));
 }
+
+TEST(WEIGHTS_MEMORY, allocate_overflow) {
+  xnn_weights_buffer b;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_allocate_weights_memory(&b, SIZE_MAX));
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_allocate_weights_memory(&b, SIZE_MAX - 100));
+}
+
+TEST(WEIGHTS_MEMORY, reserve_overflow) {
+  xnn_weights_buffer b;
+  ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, 8));
+  const size_t initial_capacity = b.capacity;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_reserve_weights_memory(&b, SIZE_MAX));
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_reserve_weights_memory(&b, SIZE_MAX - b.capacity + 1));
+  EXPECT_EQ(initial_capacity, b.capacity);
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+
+TEST(WEIGHTS_CACHE, init_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  struct xnn_internal_weights_cache cache;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_internal_init_weights_cache_with_size(&cache, SIZE_MAX));
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_internal_init_weights_cache_with_size(&cache, SIZE_MAX - 100));
+}
+
+TEST(WEIGHTS_CACHE, reserve_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  struct xnn_internal_weights_cache cache;
+  ASSERT_EQ(xnn_status_success, xnn_internal_init_weights_cache_with_size(
+                                    &cache, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));
+  EXPECT_EQ(nullptr,
+            xnn_internal_reserve_space_in_weights_cache(&cache, SIZE_MAX));
+  EXPECT_EQ(xnn_status_success, xnn_internal_release_weights_cache(&cache));
+}
+
+TEST(WEIGHTS_CACHE, offset_to_addr_bounds) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  struct xnn_internal_weights_cache cache;
+  ASSERT_EQ(xnn_status_success, xnn_internal_init_weights_cache_with_size(
+                                    &cache, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));
+  EXPECT_EQ(nullptr, xnn_internal_weights_cache_offset_to_addr(
+                         &cache, XNN_CACHE_NOT_FOUND));
+  EXPECT_EQ(nullptr,
+            xnn_internal_weights_cache_offset_to_addr(&cache, SIZE_MAX));
+  EXPECT_EQ(nullptr, xnn_internal_weights_cache_offset_to_addr(
+                         &cache, cache.cache.weights.capacity + 100));
+  EXPECT_EQ(nullptr,
+            xnn_internal_weights_cache_offset_to_addr(nullptr, 0));
+  EXPECT_EQ(xnn_status_success, xnn_internal_release_weights_cache(&cache));
+}
