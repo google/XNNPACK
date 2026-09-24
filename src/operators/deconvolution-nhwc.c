@@ -288,16 +288,30 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
     return xnn_status_out_of_memory;
   }
   enum xnn_microkernel_type ukernel_type = xnn_microkernel_type_igemm;
-  size_t packed_group_weights_size =
-      ((kernel_size * k_stride << log2_filter_element_size) +
-       bias_element_size + extra_weights_bytes) *
-      n_stride;
+  size_t kernel_k_stride_size = 0;
+  size_t kernel_bytes_size = 0;
+  size_t packed_group_weights_size = 0;
+  if (!xnn_safe_mul(kernel_size, k_stride, &kernel_k_stride_size) ||
+      !xnn_safe_mul(kernel_k_stride_size, (size_t) 1 << log2_filter_element_size,
+                    &kernel_bytes_size)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   if (is_subconv2d(context)) {
     ukernel_type = xnn_microkernel_type_subconv2d;
     const size_t subkernels = stride_height * stride_width;
-    packed_group_weights_size =
-        n_stride * (((kernel_size * k_stride) << log2_filter_element_size) +
-                    (bias_element_size + extra_weights_bytes) * subkernels);
+    size_t bias_extra_size = 0;
+    size_t bias_extra_scaled_size = 0;
+    size_t packed_group_weights_term = 0;
+    if (!xnn_safe_add(bias_element_size, extra_weights_bytes, &bias_extra_size) ||
+        !xnn_safe_mul(bias_extra_size, subkernels, &bias_extra_scaled_size) ||
+        !xnn_safe_add(kernel_bytes_size, bias_extra_scaled_size, &packed_group_weights_term) ||
+        !xnn_safe_mul(n_stride, packed_group_weights_term, &packed_group_weights_size)) {
+      xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                    xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
     const size_t subconvolution_buffer_size =
         sizeof(struct subconvolution_params) * subkernels;
     deconvolution_op->convolution_op->subconvolution_buffer =
@@ -310,6 +324,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
       goto error;
     }
   } else {
+    size_t packed_group_weights_term = 0;
+    if (!xnn_safe_add(kernel_bytes_size, bias_element_size, &packed_group_weights_term) ||
+        !xnn_safe_add(packed_group_weights_term, extra_weights_bytes, &packed_group_weights_term) ||
+        !xnn_safe_mul(packed_group_weights_term, n_stride, &packed_group_weights_size)) {
+      xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                    xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
     deconvolution_op->dynamic_context.igemm =
         xnn_allocate_zero_simd_memory(sizeof(struct igemm_op_context));
     if (deconvolution_op->dynamic_context.igemm == NULL) {
@@ -319,8 +341,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
       goto error;
     }
   }
+  size_t total_weights_size = 0;
+  if (!xnn_safe_mul(packed_group_weights_size, groups, &total_weights_size)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   const size_t aligned_total_weights_size = round_up_po2(
-      packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
+      total_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
       deconvolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {

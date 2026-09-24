@@ -416,12 +416,24 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_igemm(
   const bool weights_already_cached =
       convolution_op->packed_weights.offset != XNN_CACHE_NOT_FOUND;
 
-  const size_t packed_group_weights_size =
-      ((kernel_size * k_stride << log2_filter_element_size) +
-       bias_element_size + extra_weights_bytes) *
-      n_stride;
+  size_t kernel_k_stride_size = 0;
+  size_t kernel_bytes_size = 0;
+  size_t packed_group_weights_term = 0;
+  size_t packed_group_weights_size = 0;
+  size_t total_weights_size = 0;
+  if (!xnn_safe_mul(kernel_size, k_stride, &kernel_k_stride_size) ||
+      !xnn_safe_mul(kernel_k_stride_size, (size_t) 1 << log2_filter_element_size,
+                    &kernel_bytes_size) ||
+      !xnn_safe_add(kernel_bytes_size, bias_element_size, &packed_group_weights_term) ||
+      !xnn_safe_add(packed_group_weights_term, extra_weights_bytes, &packed_group_weights_term) ||
+      !xnn_safe_mul(packed_group_weights_term, n_stride, &packed_group_weights_size) ||
+      !xnn_safe_mul(packed_group_weights_size, groups, &total_weights_size)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   const size_t aligned_total_weights_size = round_up_po2(
-      packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
+      total_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = NULL;
 
   if (!weights_already_cached) {
