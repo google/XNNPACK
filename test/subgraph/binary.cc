@@ -393,4 +393,118 @@ INSTANTIATE_TEST_SUITE_P(BinaryTest, RealOps,
                                      ValuesIn(all_real_ops), all_ranks)),
                          [](const auto& info) { return info.param.Name(); });
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(Binary, ReshapeOverflowInput1Elements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input1_id = XNN_INVALID_VALUE_ID;
+  const size_t input1_dims[2] = {1, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input1_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+
+  uint32_t input2_id = XNN_INVALID_VALUE_ID;
+  const size_t input2_dims[2] = {1, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input2_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[2] = {1, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, output_dims, nullptr,
+          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_binary(
+          subgraph, xnn_binary_add, nullptr, input1_id, input2_id, output_id,
+          0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  runtime->values[input1_id].shape.num_dims = 2;
+  runtime->values[input1_id].shape.dim[0] = SIZE_MAX;
+  runtime->values[input1_id].shape.dim[1] = 2;
+
+  const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
+  EXPECT_EQ(xnn_status_invalid_parameter, reshape_status);
+}
+
+TEST(Binary, ReshapeOverflowInput2Elements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input1_id = XNN_INVALID_VALUE_ID;
+  const size_t input1_dims[2] = {1, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input1_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+
+  uint32_t input2_id = XNN_INVALID_VALUE_ID;
+  const size_t input2_dims[2] = {1, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input2_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[2] = {1, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, output_dims, nullptr,
+          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_binary(
+          subgraph, xnn_binary_add, nullptr, input1_id, input2_id, output_id,
+          0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  runtime->values[input2_id].shape.num_dims = 2;
+  runtime->values[input2_id].shape.dim[0] = SIZE_MAX;
+  runtime->values[input2_id].shape.dim[1] = 2;
+
+  const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
+  EXPECT_EQ(xnn_status_invalid_parameter, reshape_status);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack
