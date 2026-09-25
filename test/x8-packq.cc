@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -68,5 +69,28 @@ TEST_P(XnnTest, k_div_kr_m_lt_mr) {
 
 INSTANTIATE_TEST_SUITE_P(x8_packq, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
+
+TEST(PackQ, packed_size_overflow) {
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_size(SIZE_MAX, 1, 1, 1, 1));
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_size(1, SIZE_MAX - 30, 1, 1, 1));
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_size(1, SIZE_MAX, 1, 1, 1));
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_size(1, 1, 0, 1, 1));
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_size(1, SIZE_MAX / 2, 2, 1, 1));
+  EXPECT_EQ(0, xnn_x8_packq_f32qp8_packed_size(0, SIZE_MAX, 1, 1, 1));
+}
+
+TEST(PackQ, packed_offset_overflow) {
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_offset(SIZE_MAX, 1, 1, 1, 1));
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_offset(1, SIZE_MAX - 30, 1, 1, 1));
+  EXPECT_EQ(SIZE_MAX,
+            xnn_x8_packq_f32qp8_packed_offset(0, 1, 0, 1, 1));
+}
 
 }  // namespace
