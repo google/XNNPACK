@@ -29,15 +29,15 @@ void xnn_qs8_vcvt_ukernel__scalar_u1(
   assert(output != NULL);
 
   const int32_t vbias =
-      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) -
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
       (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
-      INT32_C(0x80);
+      INT32_C(0x8000);
   const int32_t vmultiplier = params->scalar.multiplier;
   do {
     int32_t vacc = *input++;
     vacc = vbias + vacc * vmultiplier;
 
-    int32_t vout = math_asr_s32(vacc, 8);
+    int32_t vout = math_asr_s32(vacc, 16);
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
     *output++ = (int8_t) vout;

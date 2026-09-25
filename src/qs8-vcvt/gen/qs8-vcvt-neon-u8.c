@@ -29,16 +29,20 @@ void xnn_qs8_vcvt_ukernel__neon_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int16x8_t vinput_zero_point = vdupq_n_s16(params->scalar.input_zero_point);
-  const int16x8_t vmultiplier = vdupq_n_s16(-params->scalar.multiplier);
-  const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
+  const int32x4_t vbias = vdupq_n_s32(
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x8000));
+  const int32x4_t vmultiplier = vdupq_n_s32(params->scalar.multiplier);
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     const int8x8_t vx = vld1_s8(input); input += 8;
-    int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
-    vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
-    const int8x8_t vy = vqmovn_s16(vacc);
+    const int16x8_t vx16 = vmovl_s8(vx);
+    int32x4_t vacc_lo = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx16)), vmultiplier);
+    int32x4_t vacc_hi = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx16)), vmultiplier);
+    vacc_lo = vshrq_n_s32(vacc_lo, 16);
+    vacc_hi = vshrq_n_s32(vacc_hi, 16);
+    const int16x8_t vy16 = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    const int8x8_t vy = vqmovn_s16(vy16);
     vst1_s8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -46,11 +50,13 @@ void xnn_qs8_vcvt_ukernel__neon_u8(
     assert(batch <= 7 * sizeof(int8_t));
 
     const int8x8_t vx = vld1_s8(input);
-    int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
-    vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
-    int8x8_t vy = vqmovn_s16(vacc);
+    const int16x8_t vx16 = vmovl_s8(vx);
+    int32x4_t vacc_lo = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx16)), vmultiplier);
+    int32x4_t vacc_hi = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx16)), vmultiplier);
+    vacc_lo = vshrq_n_s32(vacc_lo, 16);
+    vacc_hi = vshrq_n_s32(vacc_hi, 16);
+    const int16x8_t vy16 = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    int8x8_t vy = vqmovn_s16(vy16);
 
     if (batch & (4 * sizeof(int8_t))) {
       vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;

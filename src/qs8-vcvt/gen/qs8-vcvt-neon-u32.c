@@ -29,46 +29,58 @@ void xnn_qs8_vcvt_ukernel__neon_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int16x8_t vinput_zero_point = vdupq_n_s16(params->scalar.input_zero_point);
-  const int16x8_t vmultiplier = vdupq_n_s16(-params->scalar.multiplier);
-  const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
+  const int32x4_t vbias = vdupq_n_s32(
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x8000));
+  const int32x4_t vmultiplier = vdupq_n_s32(params->scalar.multiplier);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const int8x16_t vx0 = vld1q_s8(input); input += 16;
     const int8x16_t vx1 = vld1q_s8(input); input += 16;
 
-    int16x8_t vacc0 = vsubw_s8(vinput_zero_point, vget_low_s8(vx0));
-    int16x8_t vacc1 = vsubw_s8(vinput_zero_point, vget_high_s8(vx0));
-    int16x8_t vacc2 = vsubw_s8(vinput_zero_point, vget_low_s8(vx1));
-    int16x8_t vacc3 = vsubw_s8(vinput_zero_point, vget_high_s8(vx1));
+    const int16x8_t vx0_lo = vmovl_s8(vget_low_s8(vx0));
+    const int16x8_t vx0_hi = vmovl_s8(vget_high_s8(vx0));
+    const int16x8_t vx1_lo = vmovl_s8(vget_low_s8(vx1));
+    const int16x8_t vx1_hi = vmovl_s8(vget_high_s8(vx1));
 
-    vacc0 = vshlq_n_s16(vacc0, 7);
-    vacc1 = vshlq_n_s16(vacc1, 7);
-    vacc2 = vshlq_n_s16(vacc2, 7);
-    vacc3 = vshlq_n_s16(vacc3, 7);
+    int32x4_t vacc00 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx0_lo)), vmultiplier);
+    int32x4_t vacc01 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx0_lo)), vmultiplier);
+    int32x4_t vacc02 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx0_hi)), vmultiplier);
+    int32x4_t vacc03 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx0_hi)), vmultiplier);
+    int32x4_t vacc10 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx1_lo)), vmultiplier);
+    int32x4_t vacc11 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx1_lo)), vmultiplier);
+    int32x4_t vacc12 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx1_hi)), vmultiplier);
+    int32x4_t vacc13 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx1_hi)), vmultiplier);
 
-    vacc0 = vqrdmulhq_s16(vacc0, vmultiplier);
-    vacc1 = vqrdmulhq_s16(vacc1, vmultiplier);
-    vacc2 = vqrdmulhq_s16(vacc2, vmultiplier);
-    vacc3 = vqrdmulhq_s16(vacc3, vmultiplier);
+    vacc00 = vshrq_n_s32(vacc00, 16);
+    vacc01 = vshrq_n_s32(vacc01, 16);
+    vacc02 = vshrq_n_s32(vacc02, 16);
+    vacc03 = vshrq_n_s32(vacc03, 16);
+    vacc10 = vshrq_n_s32(vacc10, 16);
+    vacc11 = vshrq_n_s32(vacc11, 16);
+    vacc12 = vshrq_n_s32(vacc12, 16);
+    vacc13 = vshrq_n_s32(vacc13, 16);
 
-    vacc0 = vqaddq_s16(vacc0, voutput_zero_point);
-    vacc1 = vqaddq_s16(vacc1, voutput_zero_point);
-    vacc2 = vqaddq_s16(vacc2, voutput_zero_point);
-    vacc3 = vqaddq_s16(vacc3, voutput_zero_point);
+    const int16x8_t vy0_lo = vcombine_s16(vqmovn_s32(vacc00), vqmovn_s32(vacc01));
+    const int16x8_t vy0_hi = vcombine_s16(vqmovn_s32(vacc02), vqmovn_s32(vacc03));
+    const int16x8_t vy1_lo = vcombine_s16(vqmovn_s32(vacc10), vqmovn_s32(vacc11));
+    const int16x8_t vy1_hi = vcombine_s16(vqmovn_s32(vacc12), vqmovn_s32(vacc13));
 
-    const int8x16_t vy0 = vcombine_s8(vqmovn_s16(vacc0), vqmovn_s16(vacc1));
-    const int8x16_t vy1 = vcombine_s8(vqmovn_s16(vacc2), vqmovn_s16(vacc3));
+    const int8x16_t vy0 = vcombine_s8(vqmovn_s16(vy0_lo), vqmovn_s16(vy0_hi));
+    const int8x16_t vy1 = vcombine_s8(vqmovn_s16(vy1_lo), vqmovn_s16(vy1_hi));
 
     vst1q_s8(output, vy0); output += 16;
     vst1q_s8(output, vy1); output += 16;
   }
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     const int8x8_t vx = vld1_s8(input); input += 8;
-    int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
-    vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
-    const int8x8_t vy = vqmovn_s16(vacc);
+    const int16x8_t vx16 = vmovl_s8(vx);
+    int32x4_t vacc_lo = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx16)), vmultiplier);
+    int32x4_t vacc_hi = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx16)), vmultiplier);
+    vacc_lo = vshrq_n_s32(vacc_lo, 16);
+    vacc_hi = vshrq_n_s32(vacc_hi, 16);
+    const int16x8_t vy16 = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    const int8x8_t vy = vqmovn_s16(vy16);
     vst1_s8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -76,11 +88,13 @@ void xnn_qs8_vcvt_ukernel__neon_u32(
     assert(batch <= 7 * sizeof(int8_t));
 
     const int8x8_t vx = vld1_s8(input);
-    int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
-    vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
-    int8x8_t vy = vqmovn_s16(vacc);
+    const int16x8_t vx16 = vmovl_s8(vx);
+    int32x4_t vacc_lo = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vx16)), vmultiplier);
+    int32x4_t vacc_hi = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vx16)), vmultiplier);
+    vacc_lo = vshrq_n_s32(vacc_lo, 16);
+    vacc_hi = vshrq_n_s32(vacc_hi, 16);
+    const int16x8_t vy16 = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    int8x8_t vy = vqmovn_s16(vy16);
 
     if (batch & (4 * sizeof(int8_t))) {
       vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;
