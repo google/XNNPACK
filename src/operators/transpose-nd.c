@@ -853,11 +853,91 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
 
   const size_t input_shape[6] = {batch_size, block_size, block_size, output_channels, input_height, input_width};
   const size_t perm[6] = {0, 4, 1, 5, 2, 3};
-  const size_t area = input_height * input_width;
-  const size_t elements_per_batch = area * output_channels;
+
+  size_t area = 0;
+  if (!xnn_safe_mul(input_height, input_width, &area)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in input_height * input_width",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t elements_per_batch = 0;
+  if (!xnn_safe_mul(area, output_channels, &elements_per_batch)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in area * output_channels",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t input_stride_0 = 0;
+  if (!xnn_safe_mul(input_channels, area, &input_stride_0)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in input_channels * area",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t input_stride_1 = 0;
+  if (!xnn_safe_mul((size_t)block_size, elements_per_batch, &input_stride_1)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "overflow in block_size * elements_per_batch",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_height = 0;
+  if (!xnn_safe_mul(input_height, (size_t)block_size, &output_height)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in input_height * block_size",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_width = 0;
+  if (!xnn_safe_mul(input_width, (size_t)block_size, &output_width)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in input_width * block_size",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_stride_3 = 0;
+  if (!xnn_safe_mul((size_t)block_size, output_channels, &output_stride_3)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in output_stride[3]",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_stride_2 = 0;
+  if (!xnn_safe_mul(input_width, output_stride_3, &output_stride_2)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in output_stride[2]",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_stride_1 = 0;
+  if (!xnn_safe_mul((size_t)block_size, output_stride_2, &output_stride_1)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in output_stride[1]",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_stride_0 = 0;
+  if (!xnn_safe_mul(input_height, output_stride_1, &output_stride_0)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in output_stride[0]",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   const size_t input_stride[6] = {
-    input_channels * area,
-    block_size * elements_per_batch,
+    input_stride_0,
+    input_stride_1,
     elements_per_batch,
     area,
     input_width,
@@ -865,20 +945,20 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
   };
 
   if (output_height_out != NULL) {
-    *output_height_out = input_height * block_size;
+    *output_height_out = output_height;
   }
   if (output_width_out != NULL) {
-    *output_width_out = input_width * block_size;
+    *output_width_out = output_width;
   }
   if (output_channels_out != NULL) {
     *output_channels_out = output_channels;
   }
 
   const size_t output_stride[6] = {
-    input_height * block_size * input_width * block_size * output_channels,
-    block_size * input_width * block_size * output_channels,
-    input_width * block_size * output_channels,
-    block_size * output_channels,
+    output_stride_0,
+    output_stride_1,
+    output_stride_2,
+    output_stride_3,
     output_channels,
     1
   };
@@ -1501,36 +1581,83 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     return xnn_status_success;
   }
 
+  const size_t input_height_div_block = input_height / block_size;
+  const size_t input_width_div_block = input_width / block_size;
+
+  size_t batch_height = 0;
+  if (!xnn_safe_mul(batch_size, input_height_div_block, &batch_height)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "overflow in batch_size * (input_height / block_size)",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t block_input_channels = 0;
+  if (!xnn_safe_mul((size_t)block_size, input_channels,
+                    &block_input_channels)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "overflow in block_size * input_channels",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t input_row_stride = 0;
+  if (!xnn_safe_mul(input_width, input_channels, &input_row_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "overflow in input_width * input_channels",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t input_stride_0 = 0;
+  if (!xnn_safe_mul((size_t)block_size, input_row_stride, &input_stride_0)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in input_stride[0]",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_stride_0 = 0;
+  if (!xnn_safe_mul(input_width_div_block, output_channels, &output_stride_0)) {
+    xnn_log_error(
+        "failed to reshape %s operator: overflow in output_stride[0]",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   const size_t input_shape[5] = {
-    batch_size * (input_height / block_size),
+    batch_height,
     block_size,
-    input_width / block_size,
+    input_width_div_block,
     block_size,
     input_channels
   };
   const size_t perm[5] = {0, 2, 1, 3, 4};
 
   if (output_height_out != NULL) {
-    *output_height_out = input_height / block_size;
+    *output_height_out = input_height_div_block;
   }
   if (output_width_out != NULL) {
-    *output_width_out = input_width / block_size;
+    *output_width_out = input_width_div_block;
   }
   if (output_channels_out != NULL) {
     *output_channels_out = output_channels;
   }
 
   const size_t input_stride[5] = {
-    block_size * input_width * input_channels,
-    input_width * input_channels,
-    block_size * input_channels,
+    input_stride_0,
+    input_row_stride,
+    block_input_channels,
     input_channels,
     1
   };
   const size_t output_stride[5] = {
-    (input_width/block_size) * output_channels,
+    output_stride_0,
     output_channels,
-    block_size * input_channels,
+    block_input_channels,
     input_channels,
     1
   };
