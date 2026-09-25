@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -132,6 +133,146 @@ TEST(Softmax, define_rejects_input_output_datatype_mismatch) {
   EXPECT_EQ(
       xnn_define_softmax(subgraph.Subgraph(), 0, 1, /*flags=*/0),
       xnn_status_invalid_parameter);
+}
+
+TEST(Softmax, ReshapeOverflowInputElements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[2] = {2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[2] = {2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_softmax(subgraph, input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  const size_t large_dim = (size_t)1 << (sizeof(size_t) * 4);
+  runtime->values[input_id].shape.num_dims = 2;
+  runtime->values[input_id].shape.dim[0] = large_dim;
+  runtime->values[input_id].shape.dim[1] = large_dim;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
+
+TEST(Softmax, ReshapeOverflowBatchDims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[3] = {2, 2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[3] = {2, 2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_softmax(subgraph, input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  const size_t large_dim = (size_t)1 << (sizeof(size_t) * 4);
+  runtime->values[input_id].shape.num_dims = 3;
+  runtime->values[input_id].shape.dim[0] = large_dim;
+  runtime->values[input_id].shape.dim[1] = large_dim;
+  runtime->values[input_id].shape.dim[2] = 2;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
+
+TEST(Softmax, ReshapeOverflowOutputSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[2] = {2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[2] = {2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_softmax(subgraph, input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  runtime->values[input_id].shape.num_dims = 2;
+  runtime->values[input_id].shape.dim[0] = 1;
+  runtime->values[input_id].shape.dim[1] = SIZE_MAX / 3;
+
+  const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
+  EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
+              reshape_status == xnn_status_invalid_parameter);
 }
 #else
 // This is not an error in YNNPACK (and it doesn't crash either).
