@@ -680,7 +680,17 @@ static void init_f16_hswish_config(void) {
       f16_hswish_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vhswish_ukernel__rvvfp16arith_u8v);
       f16_hswish_config.element_tile = 8 * hardware_config->vlenb / sizeof(xnn_float16);
     }
+  #elif XNN_ARCH_WASMRELAXEDSIMDFP16
+    f16_hswish_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vhswish_ukernel__wasmrelaxedsimdfp16_u8);
+    f16_hswish_config.element_tile = 8;
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    f16_hswish_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32acc_vhswish_ukernel__wasmrelaxedsimd_u8);
+    f16_hswish_config.element_tile = 8;
   #endif
+  if (f16_hswish_config.ukernel == NULL) {
+    f16_hswish_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vhswish_ukernel__scalar_u1);
+    f16_hswish_config.element_tile = 1;
+  }
 }
 
 static void init_f16_log_config(void) {
@@ -4393,11 +4403,11 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_gelu_config() {
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_hswish_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+  if (hardware_config == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f16_hswish);
-  return &f16_hswish_config;
+  return f16_hswish_config.ukernel != NULL ? &f16_hswish_config : NULL;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_log_config() {
