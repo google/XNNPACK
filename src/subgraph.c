@@ -2696,6 +2696,81 @@ static enum xnn_status optimize_common_subgraphs_reduce_sum_to_square(
   return xnn_status_success;
 }
 
+// Computes the shape of the result of broadcasting `a` against `b` over all
+// but their last `num_trailing_dims` dimensions (which are left out of the
+// result). Returns false if the two are not broadcast-compatible.
+static bool broadcast_leading_dims(const struct xnn_shape* a,
+                                   const struct xnn_shape* b,
+                                   size_t num_trailing_dims,
+                                   struct xnn_shape* result) {
+  if (a->num_dims < num_trailing_dims || b->num_dims < num_trailing_dims) {
+    return false;
+  }
+  const size_t a_rank = a->num_dims - num_trailing_dims;
+  const size_t b_rank = b->num_dims - num_trailing_dims;
+  const size_t rank = max(a_rank, b_rank);
+  result->num_dims = rank;
+  for (size_t i = 0; i < rank; i++) {
+    // Broadcasting aligns the trailing dimensions; missing leading ones are 1.
+    const size_t a_dim = i + a_rank >= rank ? a->dim[i + a_rank - rank] : 1;
+    const size_t b_dim = i + b_rank >= rank ? b->dim[i + b_rank - rank] : 1;
+    if (a_dim != b_dim && a_dim != 1 && b_dim != 1) {
+      return false;
+    }
+    result->dim[i] = max(a_dim, b_dim);
+  }
+  return true;
+}
+
+// Returns true if replacing the inputs of `consumer` that refer to `output_id`
+// with `input_id` (whose value is broadcast into `output_id`) leaves the
+// consumer's result shape unchanged, i.e. the consumer's own implicit
+// broadcasting already produces the broadcast's output shape.
+static bool consumer_broadcasts_implicitly(const xnn_subgraph_t subgraph,
+                                           const struct xnn_node* consumer,
+                                           uint32_t input_id,
+                                           uint32_t output_id) {
+  if (consumer->num_inputs != 2) {
+    return false;
+  }
+  // Binary elementwise nodes broadcast all dimensions; batch_matrix_multiply
+  // only broadcasts the batch dimensions, so the broadcast must leave the
+  // matrix dimensions alone.
+  size_t num_trailing_dims = 0;
+  const struct xnn_shape* input_shape = &subgraph->values[input_id].shape;
+  const struct xnn_shape* output_shape = &subgraph->values[output_id].shape;
+  if (consumer->type == xnn_node_type_batch_matrix_multiply) {
+    if (consumer->flags & XNN_FLAG_NO_BROADCAST) {
+      return false;
+    }
+    num_trailing_dims = 2;
+    if (input_shape->num_dims < 2 || output_shape->num_dims < 2) {
+      return false;
+    }
+    for (size_t i = 0; i < 2; i++) {
+      if (input_shape->dim[input_shape->num_dims - 1 - i] !=
+          output_shape->dim[output_shape->num_dims - 1 - i]) {
+        return false;
+      }
+    }
+  } else if (consumer->type != xnn_node_type_binary_elementwise) {
+    return false;
+  }
+  const struct xnn_shape* before[2];
+  const struct xnn_shape* after[2];
+  for (size_t j = 0; j < 2; j++) {
+    before[j] = &subgraph->values[consumer->inputs[j]].shape;
+    after[j] = consumer->inputs[j] == output_id ? input_shape : before[j];
+  }
+  struct xnn_shape shape_before;
+  struct xnn_shape shape_after;
+  return broadcast_leading_dims(before[0], before[1], num_trailing_dims,
+                                &shape_before) &&
+         broadcast_leading_dims(after[0], after[1], num_trailing_dims,
+                                &shape_after) &&
+         xnn_shape_match(&shape_before, &shape_after);
+}
+
 // XNNPACK doesn't need explicit braodcasting for binary and
 // batch_matrix_multiply nodes, so check if it can be elided.
 static enum xnn_status optimize_common_subgraphs_broadcast(
@@ -2710,6 +2785,7 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
 
   const uint32_t input_id = node->inputs[0];
   const uint32_t output_id = node->outputs[0];
+  const struct xnn_value* input_value = &subgraph->values[input_id];
   const struct xnn_value* output_value = &subgraph->values[output_id];
 
   // Find all consumers of the broadcast node's output.
@@ -2717,15 +2793,19 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
   for (uint32_t k = node_id + 1; k < subgraph->num_nodes && num_consumers;
        k++) {
     struct xnn_node* consumer = &subgraph->nodes[k];
+    bool consumes_output = false;
     for (uint32_t j = 0; j < consumer->num_inputs; j++) {
-      if (consumer->inputs[j] == output_id) {
-        // If the consumer is known to broadcast implicitly,
-        // short-circuit it.
-        if (consumer->type == xnn_node_type_binary_elementwise ||
-            consumer->type == xnn_node_type_batch_matrix_multiply) {
-          if (!is_repeated_input(consumer, j)) {
-            num_consumers--;
-          }
+      consumes_output |= consumer->inputs[j] == output_id;
+    }
+    // If the consumer is known to broadcast implicitly, and doing so gives
+    // the same result shape as the explicit broadcast, short-circuit it. A
+    // consumer counts once no matter how many of its inputs it feeds.
+    if (consumes_output &&
+        consumer_broadcasts_implicitly(subgraph, consumer, input_id,
+                                       output_id)) {
+      num_consumers--;
+      for (uint32_t j = 0; j < consumer->num_inputs; j++) {
+        if (consumer->inputs[j] == output_id) {
           consumer->inputs[j] = input_id;
           (*changes)++;
         }
@@ -2743,15 +2823,21 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
     // that, when added to the input, will result in the correct
     // output shape.
     size_t shape[XNN_MAX_TENSOR_DIMS];
-    size_t num_dims = node->params.static_reshape.new_shape.num_dims;
-    const struct xnn_value* input_value = &subgraph->values[input_id];
+    const size_t num_dims = node->params.static_reshape.new_shape.num_dims;
+    const size_t input_num_dims = input_value->shape.num_dims;
     const size_t* old_shape = input_value->shape.dim;
     const size_t* new_shape = node->params.static_reshape.new_shape.dim;
+    // The input's dimensions line up with the trailing dimensions of the
+    // output. A dimension that the input already has is broadcast against 1;
+    // the zero tensor supplies the new and the grown dimensions.
+    const size_t rank_diff =
+        num_dims > input_num_dims ? num_dims - input_num_dims : 0;
     size_t num_elements = 1;
     for (uint32_t k = 0; k < num_dims; k++) {
-      shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
-                     ? 1
-                     : new_shape[k];
+      const bool has_old_dim = k >= rank_diff;
+      const size_t old_dim = has_old_dim ? old_shape[k - rank_diff] : 1;
+      const size_t dim = new_shape[k] == 0 ? old_dim : new_shape[k];
+      shape[k] = (has_old_dim && dim == old_dim) ? 1 : dim;
       num_elements *= shape[k];
     }
 
