@@ -567,6 +567,12 @@ reshape_dynamic_fully_connected_nc(
       assert(workspace_size);
       const size_t per_thread_workspace_size = packed_lh_config->size_fn(
           mr, /*k=*/input_channels, mr_packed, kr, sr);
+      if (per_thread_workspace_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator: packed LHS size overflows size_t",
+            xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+        return xnn_status_out_of_memory;
+      }
 
       // If `xnn_gemm_best_tile_size` suggests an `nc` that is smaller than `n`,
       // i.e. it suggests splitting along `output_channels`, then it's probably
@@ -654,6 +660,12 @@ reshape_dynamic_fully_connected_nc(
             batch_size, output_channels, input_channels);
         const size_t per_thread_workspace_size = packed_lh_config->size_fn(
             mr, /*k=*/input_channels, mr_packed, kr, sr);
+        if (per_thread_workspace_size == SIZE_MAX) {
+          xnn_log_error(
+              "failed to reshape %s operator: packed LHS size overflows size_t",
+              xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+          return xnn_status_out_of_memory;
+        }
         size_t total_lh_size;
         if (!xnn_safe_mul(num_threads, per_thread_workspace_size,
                           &total_lh_size) ||

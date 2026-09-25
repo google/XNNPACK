@@ -1263,6 +1263,14 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                                                       : gemm_config->mr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t group_stride = xnn_x8_packq_f32qp8_packed_size(
+      batch_size, channels, mr_packed, kr, sr);
+  if (group_stride == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: packed output size overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
 
   convert_op->context.f32_qp8_convert = (struct f32_qp8_convert_context){
       .m = batch_size,
@@ -1271,8 +1279,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
       .kr = kr,
       .sr = sr,
       .lhs_stride = input_stride * sizeof(float),
-      .group_stride = xnn_x8_packq_f32qp8_packed_size(batch_size, channels,
-                                                      mr_packed, kr, sr),
+      .group_stride = group_stride,
       .packq_ukernel = (xnn_x8_packq_f32qp8_ukernel_fn)
                            convert_op->unary_elementwise_config->ukernel,
   };
