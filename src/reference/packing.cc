@@ -3473,7 +3473,15 @@ void xnn_pack_kai_f32_weights_and_biases_sme2(
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(float));
+    accumulator_init =
+        xnn_allocate_zero_memory(output_channels * sizeof(float));
+    if (accumulator_init == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME2 bias substitute "
+          "buffer",
+          output_channels * sizeof(float));
+      return;
+    }
     free_accumulator_init = true;
   }
 
@@ -3520,7 +3528,7 @@ void xnn_pack_kai_f32_weights_and_biases_sme2(
     api.run(&config, &args);
   }
   if (free_accumulator_init) {
-    free((void*)accumulator_init);
+    xnn_release_memory((void*)accumulator_init);
   }
 }
 
@@ -3628,6 +3636,13 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
 
   if (b == NULL) {
     tmp_bias = (uint16_t*)xnn_allocate_zero_memory(g * nc * sizeof(uint16_t));
+    if (tmp_bias == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute "
+          "buffer",
+          g * nc * sizeof(uint16_t));
+      return;
+    }
     b = tmp_bias;
   }
 
@@ -3692,6 +3707,13 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
 
   if (b == NULL) {
     tmp_bias = (int32_t*)xnn_allocate_zero_memory(g * nc * sizeof(int32_t));
+    if (tmp_bias == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute "
+          "buffer",
+          g * nc * sizeof(int32_t));
+      return;
+    }
     b = tmp_bias;
   }
 
@@ -3758,7 +3780,14 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
   float* tmp_bias = NULL;
 
   if (b == NULL) {
-    tmp_bias = (float*) calloc(g * nc, sizeof(float));
+    tmp_bias = (float*)xnn_allocate_zero_memory(g * nc * sizeof(float));
+    if (tmp_bias == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute "
+          "buffer",
+          g * nc * sizeof(float));
+      return;
+    }
     b = tmp_bias;
   }
 
@@ -3767,7 +3796,9 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
         nc * ks * kc * sizeof(float));
-    free(tmp_bias);
+    if (tmp_bias != NULL) {
+      xnn_release_memory(tmp_bias);
+    }
     assert(false);
     return;
   }
@@ -3787,7 +3818,7 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
   free(tmp_data);
 
   if (tmp_bias != NULL) {
-      free(tmp_bias);
+    xnn_release_memory(tmp_bias);
   }
 }
 #endif  // XNN_ENABLE_KLEIDIAI

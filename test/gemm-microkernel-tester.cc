@@ -3065,6 +3065,7 @@ void GemmMicrokernelTester::Test_PF32(
     xnn_pack_weights_and_biases_fn pack,
     xnn_packed_stride_weights_and_biases_fn packed_stride) {
   ASSERT_LE(m(), mr());
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
 
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
@@ -3169,39 +3170,40 @@ void GemmMicrokernelTester::Test_PF32(
     xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
     xnn_pack_lh_igemm_size_fn size_for_igemm_fn, xnn_pack_f32_igemm_fn pack_rhs) const{
     ASSERT_LE(m(), mr());
+    ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
-  const float max_abs_product = 1.0f;
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+    const float max_abs_product = 1.0f;
 
-  xnnpack::Buffer<float> a((mr() - 1) * a_stride() + k(),
-                           xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<float> b(n() * ks() * k());
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
-      ks() * packed_k() * packed_n() + packed_n());
-  xnnpack::Buffer<float> bias(n());
-  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
-  xnnpack::Buffer<float> c_ref(m() * n());
-  xnnpack::Buffer<float> junk(k(), xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<const float*> im2col(mr() * ks());
+    xnnpack::Buffer<float> a((mr() - 1) * a_stride() + k(),
+                             xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> b(n() * ks() * k());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        ks() * packed_k() * packed_n() + packed_n());
+    xnnpack::Buffer<float> bias(n());
+    xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
+    xnnpack::Buffer<float> c_ref(m() * n());
+    xnnpack::Buffer<float> junk(k(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<const float*> im2col(mr() * ks());
 
-  std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-  std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
 
-  pack_rhs(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(), b.data(), bias.data(),
-       /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
-       /*params=*/nullptr);
+    pack_rhs(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(), b.data(), bias.data(),
+             /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
+             /*params=*/nullptr);
 
-  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-    for (size_t m_index = 0; m_index < mr(); m_index++) {
-      im2col[ks_index * mr() + m_index] =
-          a.data() + a_stride() * m_index - a_offset();
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      for (size_t m_index = 0; m_index < mr(); m_index++) {
+        im2col[ks_index * mr() + m_index] =
+            a.data() + a_stride() * m_index - a_offset();
+      }
     }
-  }
   std::shuffle(im2col.begin(), im2col.end(), rng);
   if (zero_index() != SIZE_MAX) {
     for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
