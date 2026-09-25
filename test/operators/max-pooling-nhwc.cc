@@ -8,6 +8,9 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
@@ -1892,4 +1895,48 @@ TEST(MAX_POOLING_NHWC_F32, setup_swap_height_and_width) {
       .pooling_width(3)
       .channels(24)
       .TestSetupF32();
+}
+
+TEST(MAX_POOLING_NHWC_F32, reshape_overflow_input_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t max_pooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_max_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 2, 2, 1, 1, 1, 1,
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                0, &max_pooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      max_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t large_stride = (SIZE_MAX / sizeof(float)) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_max_pooling2d_nhwc_f32(
+          max_pooling_op, 1, 4, 4, 1, large_stride, 1,
+          &output_height, &output_width, nullptr));
+}
+
+TEST(MAX_POOLING_NHWC_F32, reshape_overflow_output_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t max_pooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_max_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 2, 2, 1, 1, 1, 1,
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                0, &max_pooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      max_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t large_stride = (SIZE_MAX / sizeof(float)) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_max_pooling2d_nhwc_f32(
+          max_pooling_op, 1, 4, 4, 1, 1, large_stride,
+          &output_height, &output_width, nullptr));
 }
