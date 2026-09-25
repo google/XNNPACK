@@ -63,6 +63,7 @@ SET(NON_PROD_F16C_MICROKERNEL_SRCS
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u16-acc2.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u24-acc3.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc2.c
+  src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr2-p5-u8.c
   src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-f16c-rational-6-4-nr.c
   src/f16-vbinary/gen/f16-vadd-f16c-u8.c
   src/f16-vbinary/gen/f16-vaddc-f16c-u8.c
