@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #include <gtest/gtest.h>
 #include "test/operators/reduce-normalization-tester.h"
 
@@ -541,4 +543,35 @@ TEST(REDUCE_NORMALIZATION_TEST, normalize_1D_reduce_all) {
 
 TEST(REDUCE_NORMALIZATION_TEST, normalize_1D_reduce_none) {
   ReduceNormalizationTester().shape({2}).expected_shape({2}).Test();
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, zero_input_dims) {
+  size_t num_reduction_axes = 5;
+  size_t reduction_axes[1] = {0};
+  size_t num_input_dims = 0;
+  size_t input_dims[1] = {1};
+  xnn_normalize_reduction(&num_reduction_axes, reduction_axes,
+                          &num_input_dims, input_dims);
+  EXPECT_EQ(num_reduction_axes, 0);
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, null_pointers) {
+  size_t num_reduction_axes = 1;
+  size_t num_input_dims = 1;
+  xnn_normalize_reduction(nullptr, nullptr, &num_input_dims, nullptr);
+  xnn_normalize_reduction(&num_reduction_axes, nullptr, nullptr, nullptr);
+  xnn_normalize_reduction(&num_reduction_axes, nullptr, &num_input_dims,
+                          nullptr);
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, overflow_reduction_elements) {
+  size_t num_reduction_axes = 2;
+  size_t reduction_axes[2] = {0, 1};
+  size_t num_input_dims = 2;
+  size_t input_dims[2] = {SIZE_MAX / 2 + 1, 3};
+  xnn_normalize_reduction(&num_reduction_axes, reduction_axes,
+                          &num_input_dims, input_dims);
+  EXPECT_EQ(num_reduction_axes, 1);
+  EXPECT_EQ(num_input_dims, 1);
+  EXPECT_EQ(input_dims[0], SIZE_MAX);
 }

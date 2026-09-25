@@ -758,3 +758,64 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_flatten_ones) {
       .calculate_expected_output_stride()
       .Test();
 }
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, invalid_num_dims_zero) {
+  size_t perm[1] = {0};
+  size_t shape[1] = {1};
+  size_t norm_num_dims = 123;
+  size_t norm_elem_size = 123;
+  size_t norm_perm[XNN_MAX_TENSOR_DIMS];
+  size_t norm_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_in_stride[XNN_MAX_TENSOR_DIMS];
+  size_t norm_out_stride[XNN_MAX_TENSOR_DIMS];
+  xnn_normalize_transpose_permutation(
+      0, 4, perm, shape, nullptr, nullptr, &norm_num_dims, &norm_elem_size,
+      norm_perm, norm_shape, norm_in_stride, norm_out_stride);
+  EXPECT_EQ(norm_num_dims, 0);
+  EXPECT_EQ(norm_elem_size, 4);
+}
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, invalid_num_dims_too_large) {
+  size_t perm[XNN_MAX_TENSOR_DIMS + 1] = {0};
+  size_t shape[XNN_MAX_TENSOR_DIMS + 1] = {1};
+  size_t norm_num_dims = 123;
+  size_t norm_elem_size = 123;
+  size_t norm_perm[XNN_MAX_TENSOR_DIMS];
+  size_t norm_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_in_stride[XNN_MAX_TENSOR_DIMS];
+  size_t norm_out_stride[XNN_MAX_TENSOR_DIMS];
+  xnn_normalize_transpose_permutation(
+      XNN_MAX_TENSOR_DIMS + 1, 4, perm, shape, nullptr, nullptr, &norm_num_dims,
+      &norm_elem_size, norm_perm, norm_shape, norm_in_stride, norm_out_stride);
+  EXPECT_EQ(norm_num_dims, 0);
+}
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, invalid_perm_out_of_range) {
+  size_t perm[2] = {0, 2};
+  size_t shape[2] = {2, 3};
+  size_t norm_num_dims = 123;
+  size_t norm_elem_size = 123;
+  size_t norm_perm[XNN_MAX_TENSOR_DIMS];
+  size_t norm_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_in_stride[XNN_MAX_TENSOR_DIMS];
+  size_t norm_out_stride[XNN_MAX_TENSOR_DIMS];
+  xnn_normalize_transpose_permutation(
+      2, 4, perm, shape, nullptr, nullptr, &norm_num_dims, &norm_elem_size,
+      norm_perm, norm_shape, norm_in_stride, norm_out_stride);
+  EXPECT_EQ(norm_num_dims, 0);
+}
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, overflow_element_size) {
+  size_t perm[2] = {0, 1};
+  size_t shape[2] = {2, SIZE_MAX};
+  size_t norm_num_dims = 123;
+  size_t norm_elem_size = 123;
+  size_t norm_perm[XNN_MAX_TENSOR_DIMS];
+  size_t norm_shape[XNN_MAX_TENSOR_DIMS];
+  size_t norm_in_stride[XNN_MAX_TENSOR_DIMS];
+  size_t norm_out_stride[XNN_MAX_TENSOR_DIMS];
+  xnn_normalize_transpose_permutation(
+      2, 4, perm, shape, nullptr, nullptr, &norm_num_dims, &norm_elem_size,
+      norm_perm, norm_shape, norm_in_stride, norm_out_stride);
+  EXPECT_EQ(norm_num_dims, 0);
+}
