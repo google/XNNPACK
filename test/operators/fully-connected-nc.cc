@@ -3018,6 +3018,78 @@ TEST(FULLY_CONNECTED_NC_QB4W_F16_SCALES, scale_buffer_size_overflow) {
   EXPECT_EQ(nullptr, fully_connected_op);
 }
 
+TEST(FULLY_CONNECTED_NC_F16, static_bias_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t fully_connected_op = nullptr;
+  const uint16_t kernel = 0;
+  const float bias = 0.0f;
+  const size_t overflow_channels = (SIZE_MAX / sizeof(uint16_t)) + 1;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_f16(
+          /*input_channels=*/1, /*output_channels=*/overflow_channels,
+          /*input_stride=*/1, /*output_stride=*/1, &kernel, &bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(),
+          XNN_FLAG_FP32_STATIC_BIASES,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
+TEST(FULLY_CONNECTED_NC_PF16, static_bias_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t fully_connected_op = nullptr;
+  const uint16_t kernel = 0;
+  const float bias = 0.0f;
+  const size_t overflow_channels = (SIZE_MAX / sizeof(uint16_t)) + 1;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_pf16(
+          /*input_channels=*/1, /*output_channels=*/overflow_channels,
+          /*input_stride=*/1, /*output_stride=*/1, &kernel, &bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(),
+          XNN_FLAG_FP32_STATIC_BIASES,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
+TEST(FULLY_CONNECTED_NC_F32_F16, static_bias_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t fully_connected_op = nullptr;
+  const uint16_t kernel = 0;
+  const uint16_t bias = 0;
+  const size_t overflow_channels = (SIZE_MAX / sizeof(float)) + 1;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_f32_f16(
+          /*input_channels=*/0, /*output_channels=*/overflow_channels,
+          /*input_stride=*/1, /*output_stride=*/1, &kernel, &bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(),
+          /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
+TEST(FULLY_CONNECTED_NC_PF32_F16, static_bias_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t fully_connected_op = nullptr;
+  const uint16_t kernel = 0;
+  const uint16_t bias = 0;
+  const size_t overflow_channels = (SIZE_MAX / sizeof(float)) + 1;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_pf32_f16(
+          /*input_channels=*/0, /*output_channels=*/overflow_channels,
+          /*input_stride=*/1, /*output_stride=*/1, &kernel, &bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(),
+          /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
 TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch) {
   FullyConnectedOperatorTester()
       .batch_size(1)
