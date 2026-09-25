@@ -1044,4 +1044,55 @@ TEST(MemoryPlanner, FullyConnectedExternalFilterExternalBias) {
           + MEMORY_ARENA_EXTRA_BYTES);
 }
 
+TEST(MemoryPlanner, RoundedSizeOverflow) {
+  EXPECT_EQ(SIZE_MAX, xnn_get_rounded_size(SIZE_MAX));
+  EXPECT_EQ(SIZE_MAX, xnn_get_rounded_size(SIZE_MAX - 1));
+}
+
+TEST(MemoryPlanner, ValueAllocationTrackerOverflow) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 2;
+  struct xnn_value_allocation_tracker tracker;
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+
+  tracker.usage[0].first_node = 0;
+  tracker.usage[0].last_node = 1;
+  xnn_add_value_allocation_tracker(&tracker, 0, SIZE_MAX);
+
+  for (size_t i = 0; i < runtime.num_values; i++) {
+    tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
+  }
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_plan_value_allocation_tracker(&tracker));
+
+  xnn_release_value_allocation_tracker(&tracker);
+}
+
+TEST(MemoryPlanner, LiveMemoryBlocksOverflow) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 2;
+  struct xnn_value_allocation_tracker tracker;
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+
+  tracker.usage[0].first_node = 0;
+  tracker.usage[0].last_node = 1;
+  xnn_add_value_allocation_tracker(&tracker, 0, SIZE_MAX - 16);
+
+  tracker.usage[1].first_node = 0;
+  tracker.usage[1].last_node = 1;
+  xnn_add_value_allocation_tracker(&tracker, 1, SIZE_MAX - 16);
+
+  for (size_t i = 0; i < runtime.num_values; i++) {
+    tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
+  }
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_plan_value_allocation_tracker(&tracker));
+
+  xnn_release_value_allocation_tracker(&tracker);
+}
+
 }  // namespace xnnpack

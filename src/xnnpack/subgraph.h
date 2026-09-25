@@ -564,6 +564,10 @@ size_t xnn_tensor_get_size(const struct xnn_value* value);
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value);
 
 XNN_INLINE static size_t xnn_get_rounded_size(size_t size) {
+  if (size == SIZE_MAX ||
+      size > SIZE_MAX - XNN_EXTRA_BYTES - XNN_ALLOCATION_ALIGNMENT) {
+    return SIZE_MAX;
+  }
   // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the
   // actual size of the tensor, and round it to allocation alignment to ensure
   // that all tensors and operator workspaces are aligned correctly.
