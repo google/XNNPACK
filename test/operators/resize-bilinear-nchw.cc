@@ -4,8 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
 #include "test/operators/resize-bilinear-operator-tester.h"
 
 TEST(RESIZE_BILINEAR_NCHW_F16, aligned_centers_upscale_y) {
@@ -986,4 +990,42 @@ TEST(RESIZE_BILINEAR_NCHW_F32, tf_mode_aligned_centers_varying_batch_size) {
       }
     }
   }
+}
+
+TEST(RESIZE_BILINEAR_NCHW, reshape_overflow_input_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t resize_op = nullptr;
+  const xnn_status status = xnn_create_resize_bilinear2d_nchw(
+      xnn_datatype_fp32, 2, 2, 0, &resize_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      resize_op, xnn_delete_operator);
+
+  const size_t large_stride = (SIZE_MAX / sizeof(float)) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_resize_bilinear2d_nchw(
+          resize_op, 1, 2, 2, 1, large_stride, 1, nullptr));
+}
+
+TEST(RESIZE_BILINEAR_NCHW, reshape_overflow_output_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t resize_op = nullptr;
+  const xnn_status status = xnn_create_resize_bilinear2d_nchw(
+      xnn_datatype_fp32, 2, 2, 0, &resize_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      resize_op, xnn_delete_operator);
+
+  const size_t large_stride = (SIZE_MAX / sizeof(float)) + 1;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_resize_bilinear2d_nchw(
+          resize_op, 1, 2, 2, 1, 1, large_stride, nullptr));
 }
