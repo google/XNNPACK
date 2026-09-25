@@ -153,6 +153,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c8__avx2_madd(
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     }
+    // Make sure there were no leftovers.
+    assert(k == 0);
     vacc0x0123 = _mm256_add_epi32(vacc0x0123, vacc1x0x0123);
     vacc0x4567 = _mm256_add_epi32(vacc0x4567, vacc1x0x4567);
 

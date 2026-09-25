@@ -96,14 +96,14 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd(
       __m128i vb01234567x67 = _mm_and_si128(vbs01234567x67, vmask);
       __m128i vb89ABCDEFx67 = _mm_and_si128(vbs89ABCDEFx67, vmask);
 
-      vacc0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc0x01, va0x0, vb01234567x01);
-      vacc0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc0x23, va0x0, vb89ABCDEFx01);
-      vacc1x0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc1x0x01, va0x1, vb01234567x23);
-      vacc1x0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc1x0x23, va0x1, vb89ABCDEFx23);
-      vacc0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc0x01, va0x2, vb01234567x45);
-      vacc0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc0x23, va0x2, vb89ABCDEFx45);
-      vacc1x0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc1x0x01, va0x3, vb01234567x67);
-      vacc1x0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc1x0x23, va0x3, vb89ABCDEFx67);
+      vacc0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x01, vb01234567x01, va0x0);
+      vacc0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x23, vb89ABCDEFx01, va0x0);
+      vacc1x0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc1x0x01, vb01234567x23, va0x1);
+      vacc1x0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc1x0x23, vb89ABCDEFx23, va0x1);
+      vacc0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x01, vb01234567x45, va0x2);
+      vacc0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x23, vb89ABCDEFx45, va0x2);
+      vacc1x0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc1x0x01, vb01234567x67, va0x3);
+      vacc1x0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc1x0x23, vb89ABCDEFx67, va0x3);
       w = (const int8_t*) w + 32;
       k -= 32 * sizeof(int8_t);
     }
@@ -122,10 +122,10 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd(
       __m128i vb01234567x23 = _mm_and_si128(vbs01234567x23, vmask);
       __m128i vb89ABCDEFx23 = _mm_and_si128(vbs89ABCDEFx23, vmask);
 
-      vacc0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc0x01, va0x01234567, vb01234567x01);
-      vacc0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc0x23, va0x01234567, vb89ABCDEFx01);
-      vacc1x0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc1x0x01, va0x89ABCDEF, vb01234567x23);
-      vacc1x0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc1x0x23, va0x89ABCDEF, vb89ABCDEFx23);
+      vacc0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x01, vb01234567x01, va0x01234567);
+      vacc0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x23, vb89ABCDEFx01, va0x01234567);
+      vacc1x0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc1x0x01, vb01234567x23, va0x89ABCDEF);
+      vacc1x0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc1x0x23, vb89ABCDEFx23, va0x89ABCDEF);
 
       w = (const int8_t*) w + 32;
       k -= 16 * sizeof(int8_t);
@@ -139,8 +139,8 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd(
         __m128i vbs89ABCDEFx45 = _mm_srli_epi32(vbb89ABCDEFx01234567, 4);
         __m128i vb01234567x45 = _mm_and_si128(vbs01234567x45, vmask);
         __m128i vb89ABCDEFx45 = _mm_and_si128(vbs89ABCDEFx45, vmask);
-        vacc0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc0x01, va0x3, vb01234567x45);
-        vacc0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc0x23, va0x3, vb89ABCDEFx45);
+        vacc0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x01, vb01234567x45, va0x3);
+        vacc0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x23, vb89ABCDEFx45, va0x3);
         k -= 8 * sizeof(int8_t);
       }
     }
@@ -155,8 +155,8 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd(
       __m128i vb01234567x01 = _mm_and_si128(vbb01234567x01234567, vmask);
       __m128i vb89ABCDEFx01 = _mm_and_si128(vbb89ABCDEFx01234567, vmask);
 
-      vacc0x01 = _mm_dpbusd_epi32_madd_kzp2(vacc0x01, va0x01234567, vb01234567x01);
-      vacc0x23 = _mm_dpbusd_epi32_madd_kzp2(vacc0x23, va0x01234567, vb89ABCDEFx01);
+      vacc0x01 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x01, vb01234567x01, va0x01234567);
+      vacc0x23 = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc0x23, vb89ABCDEFx01, va0x01234567);
 
       w = (const int8_t*) w + 32;
       k -= 8 * sizeof(int8_t);
@@ -174,10 +174,10 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd(
 
     const __m128 rh_zero_points_0123 = _mm_load_ps((const float*) kzp);
     kzp = (const float*)kzp + 4;
-
+    const __m128 biased_rh_zero_points_0123 = _mm_add_ps(rh_zero_points_0123, _mm_set1_ps(2.0f));
     // Subtract out the scaled left-hand row sums.
     const __m128 lh_row_sum_0 = _mm_set1_ps(row_sum[0]);
-    vout0x0123 = _mm_sub_ps(vout0x0123, _mm_mul_ps(rh_zero_points_0123, lh_row_sum_0));
+    vout0x0123 = _mm_sub_ps(vout0x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_0));
     // Add the product of left/right-hand zero points and `kc`.
     // TODO: use kc
     const __m128 vscaled_lh_zero_point_0 = _mm_set1_ps((float)original_kc * quantization_params[0].zero_point);
