@@ -38,6 +38,22 @@
 //  * The GEMM.
 #define XNN_BATCH_MATMUL_MAX_COMPUTE_INVOCATIONS 3
 
+static bool batch_matrix_safe_round_up(size_t n, size_t q, size_t* result) {
+  if (q == 0) {
+    return false;
+  }
+  return xnn_safe_mul(divide_round_up(n, q), q, result);
+}
+
+static bool batch_matrix_safe_round_up_po2(size_t n, size_t q,
+                                           size_t* result) {
+  if (!is_po2(q) || n > SIZE_MAX - (q - 1)) {
+    return false;
+  }
+  *result = round_up_po2(n, q);
+  return true;
+}
+
 enum xnn_status create_batch_matrix_multiply_nc(
     uint32_t flags, const void* params, size_t params_size,
     const struct xnn_gemm_config* gemm_config,
@@ -432,21 +448,57 @@ create_batch_matrix_multiply_nc_const_weights(
   // Compute the shape and size of the packed data.
   const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.kr;
   const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.sr;
-  const size_t extra_bytes = scale_b_size + extra_weights_bytes;
-  const size_t k_stride = round_up_po2(k, kr * sr);
-  const size_t weights_stride =
-      gemm_config->packed_stride_weights_and_biases
-          ? gemm_config->packed_stride_weights_and_biases(
-                gemm_config, k, /*block_size=*/0, k_stride, extra_bytes)
-          : (k_stride << log2_kernel_element_size) + bias_element_size +
-                extra_bytes;
+  size_t extra_bytes;
+  if (!xnn_safe_add(scale_b_size, extra_weights_bytes, &extra_bytes)) {
+    xnn_log_error(
+        "failed to create %s operator: extra weights size overflows size_t",
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t k_block;
+  size_t k_stride;
+  if (!xnn_safe_mul((size_t)kr, (size_t)sr, &k_block) ||
+      !batch_matrix_safe_round_up_po2(k, k_block, &k_stride)) {
+    xnn_log_error(
+        "failed to create %s operator: k stride overflows size_t",
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t weights_stride;
+  if (gemm_config->packed_stride_weights_and_biases) {
+    weights_stride = gemm_config->packed_stride_weights_and_biases(
+        gemm_config, k, /*block_size=*/0, k_stride, extra_bytes);
+  } else {
+    size_t scaled_k;
+    if (!xnn_safe_mul(k_stride, (size_t) 1 << log2_kernel_element_size,
+                      &scaled_k) ||
+        !xnn_safe_add(scaled_k, bias_element_size, &weights_stride) ||
+        !xnn_safe_add(weights_stride, extra_bytes, &weights_stride)) {
+      xnn_log_error(
+          "failed to create %s operator: weights stride overflows size_t",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+  if (weights_stride == SIZE_MAX) {
+    xnn_log_error(
+        "failed to create %s operator: weights stride overflows size_t",
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+    return xnn_status_out_of_memory;
+  }
   batch_matrix_multiply_op->weights_stride = weights_stride;
 
   // If the packed data has not been cached, pack and cache it.
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
     const uint32_t nr =
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
-    const size_t n_stride = round_up(n, nr);
+    size_t n_stride;
+    if (!batch_matrix_safe_round_up(n, nr, &n_stride)) {
+      xnn_log_error(
+          "failed to create %s operator: n stride overflows size_t",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
     size_t packed_size;
     if (!xnn_safe_mul(batch_size_b, n_stride, &packed_size) ||
         !xnn_safe_mul(packed_size, weights_stride, &packed_size)) {
@@ -455,8 +507,14 @@ create_batch_matrix_multiply_nc_const_weights(
           xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_out_of_memory;
     }
-    const size_t aligned_size =
-        round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT);
+    size_t aligned_size;
+    if (!batch_matrix_safe_round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT,
+                                         &aligned_size)) {
+      xnn_log_error(
+          "failed to create %s operator: aligned weights size overflows size_t",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
 
     // Allocate the packed weights.
     void* packed_data = xnn_get_pointer_to_write_weights(
@@ -986,17 +1044,43 @@ reshape_batch_matrix_multiply_nc(
     gemm_compute++;
     batch_matrix_multiply_op->num_compute_invocations++;
 
-    const size_t n_stride = round_up(n, nr);
-    const size_t k_stride = round_up_po2(k, kr * sr);
+    size_t n_stride;
+    size_t k_block;
+    size_t k_stride;
+    if (!batch_matrix_safe_round_up(n, nr, &n_stride) ||
+        !xnn_safe_mul((size_t)kr, (size_t)sr, &k_block) ||
+        !batch_matrix_safe_round_up_po2(k, k_block, &k_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: GEMM strides overflow size_t",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
     const struct xnn_gemm_config* gemm_config =
         batch_matrix_multiply_op->gemm_config;
-    const size_t weights_stride =
-        gemm_config->packed_stride_weights_and_biases
-            ? gemm_config->packed_stride_weights_and_biases(
-                  gemm_config, k, /*block_size=*/k_stride, k_stride,
-                  extra_weights_bytes)
-            : (k_stride << log2_input_b_element_size) + bias_element_size +
-                  extra_weights_bytes;
+    size_t weights_stride;
+    if (gemm_config->packed_stride_weights_and_biases) {
+      weights_stride = gemm_config->packed_stride_weights_and_biases(
+          gemm_config, k, /*block_size=*/k_stride, k_stride,
+          extra_weights_bytes);
+    } else {
+      size_t scaled_k;
+      if (!xnn_safe_mul(k_stride, (size_t) 1 << log2_input_b_element_size,
+                        &scaled_k) ||
+          !xnn_safe_add(scaled_k, bias_element_size, &weights_stride) ||
+          !xnn_safe_add(weights_stride, extra_weights_bytes,
+                        &weights_stride)) {
+        xnn_log_error(
+            "failed to reshape %s operator: weights stride overflows size_t",
+            xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+        return xnn_status_out_of_memory;
+      }
+    }
+    if (weights_stride == SIZE_MAX) {
+      xnn_log_error(
+          "failed to reshape %s operator: weights stride overflows size_t",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
     size_t input_b_batch_stride = 0;
     if (!xnn_safe_mul(n_stride, weights_stride, &input_b_batch_stride)) {
       xnn_log_error(
@@ -1147,11 +1231,20 @@ reshape_batch_matrix_multiply_nc(
   }
 
   // Compute the optimal tile size for this GEMM.
+  size_t m_stride;
+  if (!xnn_safe_mul(
+          k,
+          (size_t)1 << (packed_lh_config ? packed_lh_config->log2_packed_element_size
+                                         : log2_input_a_element_size),
+          &m_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride overflows size_t",
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+    return xnn_status_out_of_memory;
+  }
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/batch_size_c, m, n,
-      /*m_stride=*/k << (packed_lh_config
-                             ? packed_lh_config->log2_packed_element_size
-                             : log2_input_a_element_size),
+      /*m_stride=*/m_stride,
       /*n_stride=*/batch_matrix_multiply_op->weights_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
@@ -1173,6 +1266,15 @@ reshape_batch_matrix_multiply_nc(
       assert(workspace_size);
       const size_t per_thread_workspace_size =
           packed_lh_config->size_fn(mr, k, mr_packed, kr, sr);
+      size_t rounded_batch_size;
+      size_t thread_rows;
+      if (!batch_matrix_safe_round_up(batch_size_a, mr, &rounded_batch_size) ||
+          !xnn_safe_mul(num_threads, (size_t)mr, &thread_rows)) {
+        xnn_log_error(
+            "failed to reshape %s operator: batch tiling overflows size_t",
+            xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+        return xnn_status_out_of_memory;
+      }
 
       // If the batch size of the LHS is smaller than that of the output, then
       // it does not make sense to inline the LHS packing, as this would mean
@@ -1202,7 +1304,7 @@ reshape_batch_matrix_multiply_nc(
             xnn_operator_type_to_string(batch_matrix_multiply_op->type),
             batch_size_c, m, n, k);
       } else if (batch_size_a < batch_size_c || !should_inline_lhs_packing ||
-                 num_threads * mr > round_up(batch_size_a, mr)) {
+                 thread_rows > rounded_batch_size) {
         xnn_log_debug(
             "Pre-packing LHS of %s with batch_size=%zu, m=%zu, n=%zu, and "
             "k=%zu despite request to inline because %s.",
@@ -1216,8 +1318,13 @@ reshape_batch_matrix_multiply_nc(
                          "of threads"));
 
         // Allocate a workspace for the entire LHS.
-        workspace_offset =
-            round_up_po2(*workspace_size, XNN_ALLOCATION_ALIGNMENT);
+        if (!batch_matrix_safe_round_up_po2(
+                *workspace_size, XNN_ALLOCATION_ALIGNMENT, &workspace_offset)) {
+          xnn_log_error(
+              "failed to reshape %s operator: workspace offset overflows size_t",
+              xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+          return xnn_status_out_of_memory;
+        }
         size_t total_ga_workspace = 0;
         if (!xnn_safe_mul(batch_size_a, ga_stride, &total_ga_workspace) ||
             !xnn_safe_add(workspace_offset, total_ga_workspace,
@@ -1275,8 +1382,13 @@ reshape_batch_matrix_multiply_nc(
             "and k=%zu.",
             xnn_operator_type_to_string(batch_matrix_multiply_op->type),
             batch_size_c, m, n, k);
-        workspace_offset =
-            round_up_po2(*workspace_size, XNN_ALLOCATION_ALIGNMENT);
+        if (!batch_matrix_safe_round_up_po2(
+                *workspace_size, XNN_ALLOCATION_ALIGNMENT, &workspace_offset)) {
+          xnn_log_error(
+              "failed to reshape %s operator: workspace offset overflows size_t",
+              xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+          return xnn_status_out_of_memory;
+        }
         size_t total_thread_workspace = 0;
         if (!xnn_safe_mul(num_threads, per_thread_workspace_size,
                           &total_thread_workspace) ||
@@ -1303,6 +1415,7 @@ reshape_batch_matrix_multiply_nc(
   }
 
   size_t a_stride = 0;
+  size_t n_stride_final;
   size_t gw_stride = 0;
   size_t cm_stride = 0;
   size_t mn = 0;
@@ -1310,8 +1423,9 @@ reshape_batch_matrix_multiply_nc(
   size_t total_input_a_bytes = 0;
   size_t total_output_c_bytes = 0;
 
-  if (!xnn_safe_mul(k, (size_t)1u << log2_input_a_element_size, &a_stride) ||
-      !xnn_safe_mul(batch_matrix_multiply_op->weights_stride, round_up(n, nr),
+  if (!xnn_safe_mul(k, (size_t) 1u << log2_input_a_element_size, &a_stride) ||
+      !batch_matrix_safe_round_up(n, nr, &n_stride_final) ||
+      !xnn_safe_mul(batch_matrix_multiply_op->weights_stride, n_stride_final,
                     &gw_stride) ||
       !xnn_safe_mul(n, (size_t)1u << log2_output_element_size, &cm_stride) ||
       !xnn_safe_mul(m, n, &mn) ||
