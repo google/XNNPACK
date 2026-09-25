@@ -63,6 +63,13 @@ def split_ukernel_name(name):
     vector_tile = False
   mr, nr = map(int, param_spec.split("x"))
   arch, isa, assembly = xnncommon.parse_target_name(target_name)
+  if (
+      isa == "wasmrelaxedsimd"
+      and name.startswith("xnn_f16_")
+      and not name.startswith("xnn_f16_f32acc_")
+  ):
+    arch = ["wasmrelaxedsimdfp16"]
+    isa = "wasmrelaxedsimdfp16"
   mr_packed = re.search(r"mstep([0-9]+)", target_name)
   if mr_packed:
     mr_packed = mr // int(mr_packed.group(1))
