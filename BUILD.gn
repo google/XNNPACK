@@ -85,6 +85,9 @@ declare_args() {
   # Enables assembly-based microkernels
   xnnpack_enable_assembly = !is_win
 
+  # Enables sparse inference mode
+  xnnpack_enable_sparse = true
+
   # Enables SSE4.1 support for x86 processors
   xnnpack_enable_sse41 =
       target_cpu == "x64" || target_cpu == "x86" || build_with_chromium
@@ -175,6 +178,13 @@ config("xnnpack_private_config") {
     # Always enable cpuinfo feature detection
     "XNN_ENABLE_CPUINFO=1",
   ]
+
+  if (xnnpack_enable_sparse) {
+    defines += [ "XNN_ENABLE_SPARSE=1" ]
+  } else {
+    defines += [ "XNN_ENABLE_SPARSE=0" ]
+  }
+
 
   if (xnnpack_enable_assembly) {
     defines += [ "XNN_ENABLE_ASSEMBLY=1" ]
