@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/mutex.h"
 #include "test/subgraph/runtime-tester.h"
 
 TEST(RUNTIME, reshape_runtime) {
@@ -59,4 +60,19 @@ TEST(RUNTIME, reshape_runtime) {
         (input0_data[i] + input1_data[i]) * (input0_data[i] + input2_data[i]);
   }
   ASSERT_EQ(expected, output);
+}
+
+TEST(MutexTest, NullMutexHandling) {
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_mutex_init(nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_mutex_lock(nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_mutex_unlock(nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_mutex_destroy(nullptr));
+}
+
+TEST(MutexTest, Lifecycle) {
+  struct xnn_mutex mutex;
+  EXPECT_EQ(xnn_status_success, xnn_mutex_init(&mutex));
+  EXPECT_EQ(xnn_status_success, xnn_mutex_lock(&mutex));
+  EXPECT_EQ(xnn_status_success, xnn_mutex_unlock(&mutex));
+  EXPECT_EQ(xnn_status_success, xnn_mutex_destroy(&mutex));
 }
