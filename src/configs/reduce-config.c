@@ -16,6 +16,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/reduce.h"
 
@@ -64,19 +65,22 @@ XNN_INIT_ONCE_GUARD(u8_rmin);
 XNN_INIT_ONCE_GUARD(qu8_rsum);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_REDUCE_UKERNEL(ukernel) \
-  (xnn_reduce_ukernel_fn) ukernel;       \
-  xnn_log_info("Using reduce microkernel '%s'.", #ukernel);
+#define XNN_INIT_REDUCE_UKERNEL(ukernel)                    \
+  (xnn_reduce_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using reduce microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(ukernel) \
-  (xnn_reduce_discontiguous_ukernel_fn) ukernel;       \
-  xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel);
+#define XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(ukernel)                    \
+  (xnn_reduce_discontiguous_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 // TODO(b/405244706): remove once all the datatypes and reductions are
 // supported.
-#define XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(ukernel) \
-  (xnn_reduce_discontiguous_ukernel_fn2) ukernel;       \
-  xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel);
+#define XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(ukernel)                   \
+  (xnn_reduce_discontiguous_ukernel_fn2) ukernel;                         \
+  xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static uint32_t pack_xint8_x4(uint8_t value) {
   uint32_t v32 = (uint32_t)value;
