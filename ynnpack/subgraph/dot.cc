@@ -979,7 +979,15 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   index_t split_n = std::min<index_t>(n, block_n);
   index_t split_m = std::min<index_t>(m, step_m);
   while (true) {
-    if (split_n * split_m >= min_area) {
+    // The starting value of `split_n` (derived in `define_pack_b()`) can be
+    // much larger than `step_m`. In cases where the starting `split_n` is
+    // already larger than the cost budget, `split_m` doesn't have a chance to
+    // grow. We end up with a task that is wider than it is tall, which does
+    // not reflect the desired aspect ratio. If we hit this case, let `split_m`
+    // grow if there is room to do so.
+    const bool wider_than_tall =
+        split_m < m && split_m < split_n && split_m * split_n < max_area;
+    if (split_n * split_m >= min_area && !wider_than_tall) {
       // We've reached the minimum tile size, should we stop?
       if ((split_m + split_n) * effective_k >= max_cost ||
           split_m * split_n >= max_area) {
@@ -1082,16 +1090,24 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   return {split_n, split_m, split_k};
 }
 
+// The extent as a constant, or `nullopt` if it is not known here.
+std::optional<size_t> as_extent(const slinky::expr& x) {
+  if (std::optional<index_t> constant = as_constant(x)) {
+    return static_cast<size_t>(*constant);
+  }
+  return std::nullopt;
+}
+
 void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
                         const ynn_value& b) {
-  shape.n = as_constant(b.extent(0)).value_or(unknown_dot_extent);
-  shape.k1 = as_constant(b.extent(1)).value_or(unknown_dot_extent);
-  shape.k2 = num_k_dims >= 2
-                 ? as_constant(b.extent(2)).value_or(unknown_dot_extent)
-                 : 1;
-  shape.k3 = num_k_dims >= 3
-                 ? as_constant(b.extent(3)).value_or(unknown_dot_extent)
-                 : 1;
+  shape.n = as_extent(b.extent(0));
+  shape.k1 = as_extent(b.extent(1));
+  // `k2` and `k3` are known to be 1 when the dot does not have those
+  // dimensions.
+  shape.k2 =
+      num_k_dims >= 2 ? as_extent(b.extent(2)) : std::optional<size_t>(1);
+  shape.k3 =
+      num_k_dims >= 3 ? as_extent(b.extent(3)) : std::optional<size_t>(1);
 }
 
 ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
