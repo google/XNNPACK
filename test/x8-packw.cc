@@ -203,7 +203,7 @@ TEST_P(XnnTestGIO, null_bias) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, k_eq_kblock) {
@@ -214,7 +214,7 @@ TEST_P(XnnTestGIO, k_eq_kblock) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, k_div_kblock) {
@@ -227,7 +227,7 @@ TEST_P(XnnTestGIO, k_div_kblock) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -243,7 +243,7 @@ TEST_P(XnnTestGIO, k_lt_kblock) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -257,7 +257,7 @@ TEST_P(XnnTestGIO, k_gt_kblock) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -272,7 +272,7 @@ TEST_P(XnnTestGIO, n_eq_1) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, n_div_nr) {
@@ -284,7 +284,7 @@ TEST_P(XnnTestGIO, n_div_nr) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -300,7 +300,7 @@ TEST_P(XnnTestGIO, n_lt_nr) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -315,7 +315,7 @@ TEST_P(XnnTestGIO, n_gt_nr) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 INSTANTIATE_TEST_SUITE_P(x8_packw_gio, XnnTestGIO,

@@ -70,8 +70,6 @@ typedef void (*xnn_f32_qc8w_gemm_ukernel_fn)(
     const void* w, float* c, size_t cm_stride, size_t cn_stride,
     const struct xnn_f32_default_params* params);
 
-
-
 // GEMM: GEneral Matrix Multiplication with Min+Max activation
 
 typedef void (*xnn_bf16_f32_gemm_minmax_ukernel_fn)(
@@ -260,9 +258,10 @@ typedef void (*xnn_packed_lhs_igemm_ukernel_fn)(
 
 typedef void (*xnn_pf32_packed_lhs_igemm_ukernel_fn)(
     size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,
-    const void* w, float* c, size_t cm_stride, const struct xnn_f32_minmax_params* params);
+    const void* w, float* c, size_t cm_stride,
+    const struct xnn_f32_minmax_params* params);
 
-    typedef void (*xnn_packed_f16_lhs_igemm_ukernel_fn)(
+typedef void (*xnn_packed_f16_lhs_igemm_ukernel_fn)(
     size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,
     const void* w, void* c, size_t cm_stride,
     const struct xnn_f16_minmax_params* params);
@@ -281,8 +280,6 @@ typedef void (*xnn_pf32_igemm_ukernel_fn)(
     size_t mr, size_t nr, size_t kc, size_t ks, const float** a, const float* w,
     float* c, size_t cm_stride, size_t cn_stride, size_t a_offset,
     const float* zero, const struct xnn_f32_default_params* params);
-
-
 
 // IGEMM: Indirect GEMM with Min+Max activation
 
@@ -621,18 +618,19 @@ typedef void (*xnn_x8_packq_f32qp8_ukernel_fn)(
 
 typedef void (*xnn_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const void* k, const void* b, const void* scale, void* packed_weights,
-    size_t extra_bytes, const void* params);
+    size_t n_stride, const void* k, const void* b, const void* scale,
+    void* packed_weights, size_t extra_bytes, const void* params);
 
 // TODO - Consolidate packing w/ per_channel and blockwise quant
 typedef void (*xnn_packw_gemm_goi_bl_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr, size_t bl,
-    const void* k, const void* b, const void* scale, void* packed_weights,
-    size_t extra_bytes_bl, size_t extra_bytes_n, const void* params);
+    size_t n_stride, const void* k, const void* b, const void* scale,
+    void* packed_weights, size_t extra_bytes_bl, size_t extra_bytes_n,
+    const void* params);
 
 typedef void (*xnn_x8_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const int8_t* k, const uint32_t* b, const void* scale,
+    size_t n_stride, const int8_t* k, const uint32_t* b, const void* scale,
     int8_t* packed_weights, size_t extra_bytes, const void* params);
 
 typedef void (*xnn_x8_packw_gemm_gio_ukernel_fn)(
@@ -642,7 +640,7 @@ typedef void (*xnn_x8_packw_gemm_gio_ukernel_fn)(
 
 typedef void (*xnn_qs8_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const int8_t* k, const int32_t* b, const void* scale,
+    size_t n_stride, const int8_t* k, const int32_t* b, const void* scale,
     int8_t* packed_weights, size_t extra_bytes, const void* params);
 
 typedef void (*xnn_qs8_packw_gemm_gio_ukernel_fn)(
@@ -652,24 +650,24 @@ typedef void (*xnn_qs8_packw_gemm_gio_ukernel_fn)(
 
 typedef void (*xnn_qs8_qc4w_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const uint8_t* k, const int32_t* b, const float* scale,
+    size_t n_stride, const uint8_t* k, const int32_t* b, const float* scale,
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params);
 
 typedef void (*xnn_qb4_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr, size_t bl,
-    const uint8_t* k, const int32_t* b, const void* scale,
+    size_t n_stride, const uint8_t* k, const int32_t* b, const void* scale,
     int8_t* packed_weights, size_t extra_bytes_bl, size_t extra_bytes,
     const void* params);
 
 typedef void (*xnn_x16_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const uint16_t* k, const uint16_t* b, const void* scale,
+    size_t n_stride, const uint16_t* k, const uint16_t* b, const void* scale,
     uint16_t* packed_weights, size_t extra_bytes, const void* params);
 
 typedef void (*xnn_x16_x32_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const uint16_t* k, const uint32_t* b, const void* scale,
+    size_t n_stride, const uint16_t* k, const uint32_t* b, const void* scale,
     uint16_t* packed_weights, size_t extra_bytes, const void* params);
 
 typedef void (*xnn_x16_x32_packw_gemm_gio_ukernel_fn)(
@@ -684,7 +682,7 @@ typedef void (*xnn_x16_packw_gemm_gio_ukernel_fn)(
 
 typedef void (*xnn_x32_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const uint32_t* k, const uint32_t* b, const void* scale,
+    size_t n_stride, const uint32_t* k, const uint32_t* b, const void* scale,
     uint32_t* packed_weights, size_t extra_bytes, const void* params);
 
 typedef void (*xnn_x32_packw_gemm_gio_ukernel_fn)(

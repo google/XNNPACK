@@ -24,6 +24,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -42,7 +43,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
 
   uint32_t* out = packed_weights;
   const uint32_t* b = bias;
-  size_t kc_bstride = kc * 4;
+  const size_t n_stride_bytes = n_stride * sizeof(uint32_t);
 
   do {
     const uint32_t* w0 = weights;
@@ -73,7 +74,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
         uint32_t* out6 = out5 + nr;
         uint32_t* out7 = out6 + nr;
         // 1 load & store can pack 8 x nr weights
-        vuint32m1x8_t v_w_m1x8 = __riscv_vlsseg8e32_v_u32m1x8(w0, kc_bstride, vlmax);
+        vuint32m1x8_t v_w_m1x8 = __riscv_vlsseg8e32_v_u32m1x8(w0, n_stride_bytes, vlmax);
         vuint32m1_t v_w0 = __riscv_vget_v_u32m1x8_u32m1(v_w_m1x8, 0);
         __riscv_vse32_v_u32m1(out0, v_w0, vlmax);
         vuint32m1_t v_w1 = __riscv_vget_v_u32m1x8_u32m1(v_w_m1x8, 1);
@@ -101,7 +102,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
         uint32_t* out2 = out1 + nr;
         uint32_t* out3 = out2 + nr;
         // 1 load & store can pack 4 x nr weights
-        vuint32m1x4_t v_w_m1x4 = __riscv_vlsseg4e32_v_u32m1x4(w0, kc_bstride, vlmax);
+        vuint32m1x4_t v_w_m1x4 = __riscv_vlsseg4e32_v_u32m1x4(w0, n_stride_bytes, vlmax);
         vuint32m1_t v_w0 = __riscv_vget_v_u32m1x4_u32m1(v_w_m1x4, 0);
         __riscv_vse32_v_u32m1(out0, v_w0, vlmax);
         vuint32m1_t v_w1 = __riscv_vget_v_u32m1x4_u32m1(v_w_m1x4, 1);
@@ -116,13 +117,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
       vlmax = __riscv_vsetvlmax_e32m1();
       // Pack nr weights
       for (; k >= 1; k -= 1) {
-        vuint32m1_t v_w = __riscv_vlse32_v_u32m1(w0, kc_bstride, vlmax);
+        vuint32m1_t v_w = __riscv_vlse32_v_u32m1(w0, n_stride_bytes, vlmax);
         __riscv_vse32_v_u32m1(out0, v_w, vlmax);
         out0 += vlmax;
         w0 += 1;
       }
       out = (uint32_t*) ((uintptr_t) out0 + extra_bytes);
-      w0 += (nr - 1) * kc;
+      w0 += (nr - 1) * n_stride + n_stride - kc;
     }
     // NC remainder: process n < NR
     if (n > 0) {
@@ -152,7 +153,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
         uint32_t* out7 = out6 + nr;
         // 1 load & store can pack 8 x n value
         size_t vl = __riscv_vsetvl_e32m1(n);
-        vuint32m1x8_t v_w_m1x8 = __riscv_vlsseg8e32_v_u32m1x8(w0, kc_bstride, vl);
+        vuint32m1x8_t v_w_m1x8 = __riscv_vlsseg8e32_v_u32m1x8(w0, n_stride_bytes, vl);
         vuint32m1_t v_w0 = __riscv_vget_v_u32m1x8_u32m1(v_w_m1x8, 0);
         __riscv_vse32_v_u32m1(out0, v_w0, vl);
         vuint32m1_t v_w1 = __riscv_vget_v_u32m1x8_u32m1(v_w_m1x8, 1);
@@ -181,7 +182,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
         uint32_t* out3 = out2 + nr;
         // 1 load & store can pack 4 x nr weights
         size_t vl = __riscv_vsetvl_e32m1(n);
-        vuint32m1x4_t v_w_m1x4 = __riscv_vlsseg4e32_v_u32m1x4(w0, kc_bstride, vl);
+        vuint32m1x4_t v_w_m1x4 = __riscv_vlsseg4e32_v_u32m1x4(w0, n_stride_bytes, vl);
         vuint32m1_t v_w0 = __riscv_vget_v_u32m1x4_u32m1(v_w_m1x4, 0);
         __riscv_vse32_v_u32m1(out0, v_w0, vl);
         vuint32m1_t v_w1 = __riscv_vget_v_u32m1x4_u32m1(v_w_m1x4, 1);
@@ -197,14 +198,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
       vl = __riscv_vsetvl_e32m1(n);
       // Pack n weights
       for (; k >= 1; k -= 1) {
-        vuint32m1_t v_w = __riscv_vlse32_v_u32m1(w0, kc_bstride, vl);
+        vuint32m1_t v_w = __riscv_vlse32_v_u32m1(w0, n_stride_bytes, vl);
         __riscv_vse32_v_u32m1(out0, v_w, vl);
         out0 += vlmax;
         w0 += 1;
       }
       out = (uint32_t*) ((uintptr_t) out0 + extra_bytes);
-      w0 += (nr - 1) * kc; 
+      w0 += (nr - 1) * n_stride + n_stride - kc; 
     }
-    weights += nc * kc;
+    weights += nc * n_stride;
   } while (--g != 0);
 }

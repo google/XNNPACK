@@ -35,11 +35,11 @@
 
 // Disable function sanitization on these compute wrappers because they
 // invoke microkernels through generic function pointers (e.g. using void*).
-// The actual microkernels often have strictly typed signatures (e.g. uint32_t*),
-// which causes -fsanitize=function to flag a type mismatch.
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_2d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t tile_i,
-                               size_t tile_j) {
+// The actual microkernels often have strictly typed signatures (e.g.
+// uint32_t*), which causes -fsanitize=function to flag a type mismatch.
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_2d(
+    struct transpose_context* restrict context, size_t i, size_t j,
+    size_t tile_i, size_t tile_j) {
   const size_t ld_input = context->input_stride[1];
   const size_t ld_output = context->output_stride[0];
   context->const_size_ukernel(
@@ -50,9 +50,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_2d(struct transpose_context
       ld_input, ld_output, tile_i, tile_j);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_3d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t tile_j,
-                               size_t tile_k) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_3d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t tile_j, size_t tile_k) {
   const size_t ld_input = context->input_stride[2];
   const size_t ld_output = context->output_stride[1];
   const void* x =
@@ -66,9 +66,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_3d(struct transpose_context
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_j, tile_k);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_4d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t l,
-                               size_t tile_k, size_t tile_l) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_4d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t tile_k, size_t tile_l) {
   const size_t ld_input = context->input_stride[3];
   const size_t ld_output = context->output_stride[2];
   const void* x =
@@ -84,9 +84,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_4d(struct transpose_context
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_k, tile_l);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_5d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t l, size_t m,
-                               size_t tile_l, size_t tile_m) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_5d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t m, size_t tile_l, size_t tile_m) {
   const size_t ld_input = context->input_stride[4];
   const size_t ld_output = context->output_stride[3];
   const void* x =
@@ -245,29 +245,29 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_gio(
   const void* scale_b = context->scale_b;
   if (scale_b != NULL) {
     scale_b = (const void*)((uintptr_t)context->scale_b +
-                                     n_block_start * context->gc_scale_stride +
-                                     batch_index * context->n_scale_stride);
+                            n_block_start * context->gc_scale_stride +
+                            batch_index * context->n_scale_stride);
   }
 
   // Zero the per-tile region first so the bias-placeholder slot is
   // well-defined when no explicit bias is provided (the const-weights path
   // memsets the whole packed buffer up front; the dynamic path uses the
   // user's workspace, which is not pre-cleared).
-  memset(packed_weights, 0, round_up(n_block_size, context->nr) * context->w_stride);
-
+  memset(packed_weights, 0,
+         round_up(n_block_size, context->nr) * context->w_stride);
 
   if (context->pack_weights_and_biases) {
-    // Mirror the layout used by `create_batch_matrix_multiply_nc_const_weights`:
-    // pass `scale_b` as `extra_data1` (the per-channel scale slot, written
-    // first) and reserve the remaining trailing bytes as `extra_data0` (the
-    // float-bias placeholder). Some packing helpers — notably the KleidiAI
-    // wrapper — read `extra_data0` as the bias and `extra_data1` as the scale,
-    // so getting these in the right slots is required for correctness.
+    // Mirror the layout used by
+    // `create_batch_matrix_multiply_nc_const_weights`: pass `scale_b` as
+    // `extra_data1` (the per-channel scale slot, written first) and reserve the
+    // remaining trailing bytes as `extra_data0` (the float-bias placeholder).
+    // Some packing helpers — notably the KleidiAI wrapper — read `extra_data0`
+    // as the bias and `extra_data1` as the scale, so getting these in the right
+    // slots is required for correctness.
     const size_t scale_size = (scale_b != NULL) ? sizeof(float) : 0;
-    const size_t bias_pad_size =
-        context->scale_b_size > scale_size
-            ? context->scale_b_size - scale_size
-            : 0;
+    const size_t bias_pad_size = context->scale_b_size > scale_size
+                                     ? context->scale_b_size - scale_size
+                                     : 0;
 
     context->pack_weights_and_biases(
         /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config, context->kc,
@@ -289,18 +289,16 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_gio(
     if (scale_b != NULL) {
       assert(context->init_scale_b != NULL);
       void* weights =
-          (void*)((uintptr_t)packed_weights + context->nr * (
-              context->w_stride - context->scale_b_size));
+          (void*)((uintptr_t)packed_weights +
+                  context->nr * (context->w_stride - context->scale_b_size));
       context->init_scale_b(n_block_size, context->nr,
-                            context->nr * context->w_stride,
-                            scale_b, weights);
+                            context->nr * context->w_stride, scale_b, weights);
     }
   }
 }
 
-void xnn_compute_packw_gemm_gio(
-    struct packw_gemm_gio_context* restrict context, size_t n_block_start,
-    size_t n_block_size) {
+void xnn_compute_packw_gemm_gio(struct packw_gemm_gio_context* restrict context,
+                                size_t n_block_start, size_t n_block_size) {
   xnn_compute_batched_packw_gemm_gio(context, /*batch_index=*/0, n_block_start,
                                      n_block_size);
 }
@@ -323,18 +321,18 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_goi(
   const void* scale_b = context->scale_b;
   if (scale_b != NULL) {
     scale_b = (const void*)((uintptr_t)context->scale_b +
-                                     n_block_start * context->gc_scale_stride +
-                                     batch_index * context->n_scale_stride);
+                            n_block_start * context->gc_scale_stride +
+                            batch_index * context->n_scale_stride);
   }
   // See the matching comment in `xnn_compute_batched_packw_gemm_gio`.
-  memset(packed_weights, 0, round_up(n_block_size, context->nr) * context->w_stride);
+  memset(packed_weights, 0,
+         round_up(n_block_size, context->nr) * context->w_stride);
 
   if (context->pack_weights_and_biases) {
     const size_t scale_size = (scale_b != NULL) ? sizeof(float) : 0;
-    const size_t bias_pad_size =
-        context->scale_b_size > scale_size
-            ? context->scale_b_size - scale_size
-            : 0;
+    const size_t bias_pad_size = context->scale_b_size > scale_size
+                                     ? context->scale_b_size - scale_size
+                                     : 0;
 
     context->pack_weights_and_biases(
         /*flags=*/0, context->gemm_config, context->kc, n_block_size,
@@ -349,15 +347,16 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_goi(
   } else {
     context->packw_gemm_goi(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
-        context->sr, kernel, bias, /*scale=*/NULL, packed_weights,
+        context->sr, /*n_stride=*/context->kc, kernel, bias, /*scale=*/NULL,
+        packed_weights,
         /*extra_bytes=*/context->nr * context->scale_b_size,
         /*params=*/context->params);
 
     if (scale_b != NULL) {
       assert(context->init_scale_b != NULL);
       void* weights =
-          (void*)((uintptr_t)packed_weights + context->nr *
-                  (context->w_stride - context->scale_b_size));
+          (void*)((uintptr_t)packed_weights +
+                  context->nr * (context->w_stride - context->scale_b_size));
       context->init_scale_b(n_block_size, context->nr,
                             context->nr * context->w_stride, scale_b, weights);
     }
@@ -389,10 +388,10 @@ static void compute_group_indices(struct gemm_context* context,
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_gemm(struct gemm_context* restrict context,
-                                  uint32_t uarch_index, size_t group_index,
-                                  size_t nr_block_start, size_t mr_block_start,
-                                  size_t nr_block_size, size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_gemm(
+    struct gemm_context* restrict context, uint32_t uarch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size) {
   const size_t k_scaled = context->k_scaled;
   const size_t a_stride = context->a_stride;
   const size_t cm_stride = context->cm_stride;
@@ -477,12 +476,10 @@ void xnn_compute_dqgemm(struct gemm_context* restrict context,
                          mr_block_start, nr_block_size, mr_block_size);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_qp8gemm(struct gemm_context* restrict context,
-                                     uint32_t uarch_index, size_t group_index,
-                                     size_t nr_block_start,
-                                     size_t mr_block_start,
-                                     size_t nr_block_size,
-                                     size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_qp8gemm(
+    struct gemm_context* restrict context, uint32_t uarch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size) {
   const size_t cm_stride = context->cm_stride;
   const size_t cn_stride = context->cn_stride;
 
@@ -529,7 +526,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_qp8gemm(struct gemm_contex
       context->qp8_ukernel.function[uarch_index](
           mr_step, nr_block_size, k_scaled, (const void*)(a + a_offset),
           packed_w, (void*)(c + mr_block_start * cm_stride), cm_stride,
-          // QP8 kernels can produce f16 or f32 outputs, so use the configured output element size.
+          // QP8 kernels can produce f16 or f32 outputs, so use the configured
+          // output element size.
           /*dst_stride_col=*/1 << context->log2_csize, context->fused_params);
     }
     mr_block_size -= mr_step;
@@ -576,8 +574,9 @@ XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_hmp_qp8gemm(
       const struct xnn_qd8_quantization_params* quantization_params = workspace;
 
       if (context->with_row_sum) {
-        const float* row_sum = (const float*)((uintptr_t)workspace +
-            mr * sizeof(struct xnn_qd8_quantization_params));
+        const float* row_sum =
+            (const float*)((uintptr_t)workspace +
+                           mr * sizeof(struct xnn_qd8_quantization_params));
         const void* packed_inputs =
             (const void*)((uintptr_t)row_sum + mr * sizeof(float));
         context->dq_qc2w_ukernel.function[uarch_index](
@@ -587,8 +586,8 @@ XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_hmp_qp8gemm(
             context->fused_params, row_sum, quantization_params);
       } else {
         const void* packed_inputs =
-          (const void*)((uintptr_t)workspace +
-                        mr * sizeof(struct xnn_qd8_quantization_params));
+            (const void*)((uintptr_t)workspace +
+                          mr * sizeof(struct xnn_qd8_quantization_params));
         context->dq_ukernel.function[uarch_index](
             mr_step, nr_block_size, k_scaled, packed_inputs,
             packed_input_stride, packed_w,
@@ -600,7 +599,8 @@ XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_hmp_qp8gemm(
           mr_step, nr_block_size, k_scaled,
           (const void*)((uintptr_t)a + a_offset), packed_w,
           (void*)((uintptr_t)c + mr_block_start * cm_stride), cm_stride,
-          // QP8 kernels can produce f16 or f32 outputs, so use the configured output element size.
+          // QP8 kernels can produce f16 or f32 outputs, so use the configured
+          // output element size.
           /*dst_stride_col=*/1 << context->log2_csize, context->fused_params);
     }
 
@@ -694,8 +694,9 @@ XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_inline_packed_qp8gemm(
           packed_lhs;
 
       if (context->with_row_sum) {
-        const float* row_sum = (const float*)((uintptr_t)packed_lhs +
-            mr * sizeof(struct xnn_qd8_quantization_params));
+        const float* row_sum =
+            (const float*)((uintptr_t)packed_lhs +
+                           mr * sizeof(struct xnn_qd8_quantization_params));
         const void* packed_inputs =
             (const void*)((uintptr_t)row_sum + mr * sizeof(float));
         context->dq_qc2w_ukernel.function[uarch_index](
@@ -807,10 +808,10 @@ void xnn_compute_dqigemm(struct igemm_context* restrict context,
                           mr_block_size);
 }
 
-void xnn_compute_inline_packed_igemm(
-    struct igemm_context* restrict context, uint32_t thread_id,
-    size_t batch_index, size_t group_index, size_t mr_block_start,
-    size_t mr_block_size) {
+void xnn_compute_inline_packed_igemm(struct igemm_context* restrict context,
+                                     uint32_t thread_id, size_t batch_index,
+                                     size_t group_index, size_t mr_block_start,
+                                     size_t mr_block_size) {
   xnn_compute_hmp_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
                                       batch_index, group_index, mr_block_start,
                                       mr_block_size);
@@ -854,7 +855,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_inline_packed_igemm(
     // Compute the iGEMM on the packed LHS data.
     context->ukernel.packed_lhs_function[uarch_index](
         mr_step, context->nc, kc_elems, ks, /*packed_lhs=*/workspace, packed_w,
-        (void*)(c + mr_block_start * cm_stride), cm_stride_kernel, &context->params);
+        (void*)(c + mr_block_start * cm_stride), cm_stride_kernel,
+        &context->params);
 
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
@@ -881,11 +883,11 @@ void xnn_compute_conv2d_igemm_indirection(
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_subconv2d(struct subconv_context* restrict context,
-                           size_t batch_index, size_t group_index,
-                           size_t subkernel_index, size_t slice_y,
-                           size_t slice_x_start, size_t nc_block_start,
-                           size_t slice_x_max, size_t nc_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_subconv2d(
+    struct subconv_context* restrict context, size_t batch_index,
+    size_t group_index, size_t subkernel_index, size_t slice_y,
+    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
+    size_t nc_block_size) {
   const struct subconvolution_params* subconvolution_params =
       &context->subconvolution_params[subkernel_index];
 
@@ -920,11 +922,11 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_subconv2d(struct subconv_context* rest
       context->zero, &context->params);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_dqsubconv2d(struct subconv_context* restrict context,
-                             size_t batch_index, size_t group_index,
-                             size_t subkernel_index, size_t slice_y,
-                             size_t slice_x_start, size_t nc_block_start,
-                             size_t slice_x_max, size_t nc_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_dqsubconv2d(
+    struct subconv_context* restrict context, size_t batch_index,
+    size_t group_index, size_t subkernel_index, size_t slice_y,
+    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
+    size_t nc_block_size) {
   const struct subconvolution_params* subconvolution_params =
       &context->subconvolution_params[subkernel_index];
 
@@ -990,9 +992,9 @@ void xnn_compute_dwconv_indirection(
       context->step_height, context->step_width, context->tile_size);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(struct dwconv_context* restrict context,
-                                size_t batch_index, size_t output_y,
-                                size_t output_c_start, size_t output_c_tile) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(
+    struct dwconv_context* restrict context, size_t batch_index,
+    size_t output_y, size_t output_c_start, size_t output_c_tile) {
   const void** indirect_input =
       (const void**)((uintptr_t)context->indirect_input +
                      output_y * context->indirect_input_height_stride);
@@ -1031,8 +1033,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv2d_chw(
                        context->input_padding_top, &context->params);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_argmax_pooling(struct argmax_pooling_context* restrict context,
-                                size_t batch_index, size_t output_y) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_argmax_pooling(
+    struct argmax_pooling_context* restrict context, size_t batch_index,
+    size_t output_y) {
   const void** indirect_input =
       (const void**)((uintptr_t)context->indirect_input +
                      output_y * context->indirect_input_height_stride);
@@ -1052,8 +1055,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_argmax_pooling(struct argmax_pooling_c
                    context->index_increment);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_max_pooling(struct max_pooling_context* restrict context,
-                             size_t batch_index, size_t output_y) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_max_pooling(
+    struct max_pooling_context* restrict context, size_t batch_index,
+    size_t output_y) {
   const void** indirect_input =
       (const void**)((uintptr_t)context->indirect_input +
                      output_y * context->indirect_input_height_stride);
@@ -1069,8 +1073,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_max_pooling(struct max_pooling_context
                    context->output_increment, &context->params);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_unpooling(struct unpooling_context* restrict context,
-                           size_t input_y, size_t input_x) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_unpooling(
+    struct unpooling_context* restrict context, size_t input_y,
+    size_t input_x) {
   const void* input = (const void*)((uintptr_t)context->input +
                                     input_y * context->input_height_stride +
                                     input_x * context->input_width_stride);
@@ -1205,7 +1210,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_pad_5d(
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_1d(struct slice_context* restrict context, size_t i) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_1d(
+    struct slice_context* restrict context, size_t i) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[0]);
   void* output =
@@ -1214,8 +1220,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_1d(struct slice_context* restric
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_2d(struct slice_context* restrict context, size_t i,
-                          size_t j) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_2d(
+    struct slice_context* restrict context, size_t i, size_t j) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[1] +
                     j * context->input_stride[0]);
@@ -1226,8 +1232,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_2d(struct slice_context* restric
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_3d(struct slice_context* restrict context, size_t i,
-                          size_t j, size_t k) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_3d(
+    struct slice_context* restrict context, size_t i, size_t j, size_t k) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[2] +
                     j * context->input_stride[1] +
@@ -1239,8 +1245,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_3d(struct slice_context* restric
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_4d(struct slice_context* restrict context, size_t i,
-                          size_t j, size_t k, size_t l) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_4d(
+    struct slice_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[3] +
                     j * context->input_stride[2] +
@@ -1416,10 +1423,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_univector_contiguous(
   context->ukernel(size, x, y, &context->params);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_contiguous_reduce(struct reduce_context* restrict context,
-                                   size_t output_idx0, size_t output_idx1,
-                                   size_t output_idx2,
-                                   size_t output2_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_contiguous_reduce(
+    struct reduce_context* restrict context, size_t output_idx0,
+    size_t output_idx1, size_t output_idx2, size_t output2_block_size) {
   const size_t* input_stride = context->input_stride;
   const size_t* output_stride = context->output_stride;
 
@@ -1458,15 +1464,16 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_contiguous_reduce(struct reduce_contex
   // Input dimension 1 is reduced.
   if (context->channels != 0) {
     for (size_t i = 0; i < input_shape1; ++i) {
-      const void* input = (const void*)((uintptr_t)context->input + input_offset);
+      const void* input =
+          (const void*)((uintptr_t)context->input + input_offset);
       // Input dimension 3 is reduced.
       for (size_t j = 0; j < input_shape3; ++j) {
         const void* input_row = input;
         // output2_block_size output elements are written.
         for (size_t k = 0; k < output2_block_size; ++k) {
           // The microkernel reduces input dimension 5.
-          context->ukernel.contiguous_reduce(context->channels, input_row, output,
-                                             &context->params);
+          context->ukernel.contiguous_reduce(context->channels, input_row,
+                                             output, &context->params);
           // input_stride[4] is the number of bytes of input which have been
           // processed by the microkernel call.
           input_row = (const void*)((uintptr_t)input_row + input_stride[4]);
@@ -1496,10 +1503,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_contiguous_reduce(struct reduce_contex
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_discontiguous_reduce(struct reduce_context* restrict context,
-                                      size_t output_idx0, size_t output_idx1,
-                                      size_t output_idx2,
-                                      size_t output2_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_discontiguous_reduce(
+    struct reduce_context* restrict context, size_t output_idx0,
+    size_t output_idx1, size_t output_idx2, size_t output2_block_size) {
   const size_t* input_stride = context->input_stride;
   const size_t* output_stride = context->output_stride;
 
@@ -1608,7 +1614,7 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_bf16_qx8_convert(
   void* output = (void*)((uintptr_t)context->y + y_stride * batch_index);
 
   xnn_bfloat16 minmax[2] = {xnn_bfloat16_from_bits(UINT16_C(0x7F80)),
-                             xnn_bfloat16_from_bits(UINT16_C(0xFF80))};
+                            xnn_bfloat16_from_bits(UINT16_C(0xFF80))};
   context->rminmax_ukernel(n, input, minmax, &context->params);
   xnn_bfloat16 bf16_scale;
   context->quantization_params[batch_index] =
@@ -1624,7 +1630,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_bf16_qx8_convert(
     // Compute and store the row sum of the quantized output.
     const size_t num_bytes = n / sizeof(xnn_bfloat16) * sizeof(int8_t);
     int32_t row_sum = 0;
-    struct xnn_qs8_rsum_params rsum_params = {0,};
+    struct xnn_qs8_rsum_params rsum_params = {
+        0,
+    };
     context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
     context->row_sum[batch_index] = (float)row_sum;
   }
@@ -1678,7 +1686,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_f16_qx8_convert(
     // Compute and store the row sum of the quantized output.
     const size_t num_bytes = n / sizeof(xnn_float16) * sizeof(int8_t);
     int32_t row_sum = 0;
-    struct xnn_qs8_rsum_params rsum_params = {0,};
+    struct xnn_qs8_rsum_params rsum_params = {
+        0,
+    };
     context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
     context->row_sum[batch_index] = (float)row_sum;
   }
@@ -1731,7 +1741,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_f32_qx8_convert(
     // Compute and store the row sum of the quantized output.
     const size_t num_bytes = n / sizeof(float) * sizeof(int8_t);
     int32_t row_sum = 0;
-    struct xnn_qs8_rsum_params rsum_params = {0,};
+    struct xnn_qs8_rsum_params rsum_params = {
+        0,
+    };
     context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
     context->row_sum[batch_index] = (float)row_sum;
   }
@@ -1757,8 +1769,9 @@ void xnn_compute_f32_qdu8_convert(
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_pack_lh(struct pack_lh_context* restrict context,
-                         size_t group_idx, size_t m_idx_start, size_t tile) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_pack_lh(
+    struct pack_lh_context* restrict context, size_t group_idx,
+    size_t m_idx_start, size_t tile) {
   const void* lhs =
       (const void*)((uintptr_t)context->lhs + group_idx * context->gi_stride +
                     m_idx_start * context->lhs_stride);
@@ -1852,8 +1865,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_vmulcaddc(
                    &context->params);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_rope(struct rope_context* restrict context, size_t batch_index,
-                      size_t head_index, size_t sequence_index) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_rope(
+    struct rope_context* restrict context, size_t batch_index,
+    size_t head_index, size_t sequence_index) {
   const size_t scaled_channels = context->scaled_channels;
   const size_t offset = batch_index * context->batch_stride +
                         head_index * context->head_stride +
@@ -1867,10 +1881,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_rope(struct rope_context* restrict con
   context->vcmul(scaled_channels, input, weights, output, NULL);
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_gemm(struct gemm_context* restrict context,
-                          uint32_t uarch_index, size_t nr_block_start,
-                          size_t mr_block_start, size_t nr_block_size,
-                          size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_gemm(
+    struct gemm_context* restrict context, uint32_t uarch_index,
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size) {
   const size_t a_stride = context->a_stride;
   const size_t cm_stride = context->cm_stride;
 
@@ -1890,10 +1904,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_gemm(struct gemm_context* restrict
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dqgemm(struct gemm_context* restrict context,
-                            uint32_t uarch_index, size_t nr_block_start,
-                            size_t mr_block_start, size_t nr_block_size,
-                            size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dqgemm(
+    struct gemm_context* restrict context, uint32_t uarch_index,
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size) {
   const size_t a_stride = context->a_stride;
   const size_t cm_stride = context->cm_stride;
 
@@ -1929,11 +1943,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dqgemm(struct gemm_context* restri
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_igemm(struct igemm_context* restrict context,
-                           uint32_t uarch_index, size_t batch_index,
-                           size_t group_index, size_t nr_block_start,
-                           size_t mr_block_start, size_t nr_block_size,
-                           size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_igemm(
+    struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t batch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 
@@ -1958,11 +1971,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_igemm(struct igemm_context* restri
   }
 }
 
-XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dqigemm(struct igemm_context* restrict context,
-                             uint32_t uarch_index, size_t batch_index,
-                             size_t group_index, size_t nr_block_start,
-                             size_t mr_block_start, size_t nr_block_size,
-                             size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dqigemm(
+    struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t batch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 

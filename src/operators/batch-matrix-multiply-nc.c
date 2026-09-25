@@ -27,8 +27,8 @@
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
-#include "src/xnnpack/pack.h"
 #include "src/xnnpack/pack-lh.h"
+#include "src/xnnpack/pack.h"
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
@@ -400,7 +400,8 @@ static struct bmm_variant qs8_variant = {
     .cleanup = cleanup_qs8,
 };
 
-XNN_NO_SANITIZE_FUNCTION enum xnn_status create_batch_matrix_multiply_nc_const_weights(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status
+create_batch_matrix_multiply_nc_const_weights(
     size_t batch_size_b, size_t k, size_t n, const void* data_b,
     size_t log2_kernel_element_size, size_t bias_element_size,
     const void* packing_params, xnn_init_scale_params_fn init_scale_b,
@@ -438,7 +439,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status create_batch_matrix_multiply_nc_const_w
           ? gemm_config->packed_stride_weights_and_biases(
                 gemm_config, k, /*block_size=*/0, k_stride, extra_bytes)
           : (k_stride << log2_kernel_element_size) + bias_element_size +
-              extra_bytes;
+                extra_bytes;
   batch_matrix_multiply_op->weights_stride = weights_stride;
 
   // If the packed data has not been cached, pack and cache it.
@@ -492,7 +493,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status create_batch_matrix_multiply_nc_const_w
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi(
-            /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b, /*bias=*/NULL,
+            /*groups=*/batch_size_b, n, k, nr, kr, sr, k, data_b, /*bias=*/NULL,
             /*scale=*/NULL, packed_data, /*extra_bytes=*/nr * extra_bytes,
             packing_params);
       } else {
@@ -544,20 +545,23 @@ enum xnn_status create_batch_matrix_multiply_nc_helper(
   XNN_IF_ERROR_GOTO(error, variant->setup_ukernels(variant, context));
   XNN_IF_ERROR_GOTO(error, variant->setup_params(variant, context));
 
-  XNN_IF_ERROR_GOTO(error, create_batch_matrix_multiply_nc(
-      context->flags, &context->params, context->params_size,
-      context->gemm_config, context->gemm_ukernels, context->operator_type,
-      context->op_out));
+  XNN_IF_ERROR_GOTO(error,
+                    create_batch_matrix_multiply_nc(
+                        context->flags, &context->params, context->params_size,
+                        context->gemm_config, context->gemm_ukernels,
+                        context->operator_type, context->op_out));
 
   XNN_IF_ERROR_GOTO(error, variant->setup_packing_params(variant, context));
 
   if (context->batch_size_b) {
-    XNN_IF_ERROR_GOTO(error, create_batch_matrix_multiply_nc_const_weights(
-        context->batch_size_b, context->k, context->n, context->data_b,
-        context->gemm_config->log2_filter_element_size,
-        context->gemm_config->bias_element_size, context->packing_params,
-        context->init_scale_b, context->scale_b, context->scale_b_size,
-        context->extra_weights_bytes, context->flags, context->op_out));
+    XNN_IF_ERROR_GOTO(
+        error,
+        create_batch_matrix_multiply_nc_const_weights(
+            context->batch_size_b, context->k, context->n, context->data_b,
+            context->gemm_config->log2_filter_element_size,
+            context->gemm_config->bias_element_size, context->packing_params,
+            context->init_scale_b, context->scale_b, context->scale_b_size,
+            context->extra_weights_bytes, context->flags, context->op_out));
   }
 
 error:
@@ -676,8 +680,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_qc8w(
       .operator_type = xnn_operator_type_batch_matrix_multiply_nc_f32_qc8w,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(&f32_qc8w_variant,
-                                                &context);
+  return create_batch_matrix_multiply_nc_helper(&f32_qc8w_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_qc8w_const_weights(
@@ -695,8 +698,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_qc8w_const_weights(
       .scale_b = scale_b,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(&f32_qc8w_variant,
-                                                &context);
+  return create_batch_matrix_multiply_nc_helper(&f32_qc8w_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
@@ -731,16 +733,15 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
-    uint32_t flags,
-    xnn_operator_t* batch_matrix_multiply_op_out) {
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
   struct bmm_context context = {
       .flags = flags,
       .gemm_config = xnn_init_qp8_f32_qc8w_gemm_config(),
       .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(
-      &qx8_f32_qc8w_variant, &context);
+  return create_batch_matrix_multiply_nc_helper(&qx8_f32_qc8w_variant,
+                                                &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w_const_weights(
@@ -758,21 +759,20 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w_const_weights(
       .scale_b = scale_b,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(
-      &qx8_f32_qc8w_variant, &context);
+  return create_batch_matrix_multiply_nc_helper(&qx8_f32_qc8w_variant,
+                                                &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w(
-    uint32_t flags,
-    xnn_operator_t* batch_matrix_multiply_op_out) {
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
   struct bmm_context context = {
       .flags = flags,
       .gemm_config = xnn_init_qdu8_f32_qc8w_gemm_config(),
       .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(
-      &qx8_f32_qc8w_variant, &context);
+  return create_batch_matrix_multiply_nc_helper(&qx8_f32_qc8w_variant,
+                                                &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w_const_weights(
@@ -790,8 +790,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w_const_weights(
       .scale_b = scale_b,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(
-      &qx8_f32_qc8w_variant, &context);
+  return create_batch_matrix_multiply_nc_helper(&qx8_f32_qc8w_variant,
+                                                &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8(
@@ -810,8 +810,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8(
       .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qs8,
       .op_out = batch_matrix_multiply_op_out,
   };
-  return create_batch_matrix_multiply_nc_helper(
-      &qs8_variant, &context);
+  return create_batch_matrix_multiply_nc_helper(&qs8_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
@@ -835,8 +834,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
       .data_b = data_b,
 
   };
-  return create_batch_matrix_multiply_nc_helper(
-      &qs8_variant, &context);
+  return create_batch_matrix_multiply_nc_helper(&qs8_variant, &context);
 }
 
 static XNN_NO_SANITIZE_FUNCTION enum xnn_status
@@ -998,7 +996,7 @@ reshape_batch_matrix_multiply_nc(
                   gemm_config, k, /*block_size=*/k_stride, k_stride,
                   extra_weights_bytes)
             : (k_stride << log2_input_b_element_size) + bias_element_size +
-                extra_weights_bytes;
+                  extra_weights_bytes;
     size_t input_b_batch_stride = 0;
     if (!xnn_safe_mul(n_stride, weights_stride, &input_b_batch_stride)) {
       xnn_log_error(
@@ -1029,7 +1027,7 @@ reshape_batch_matrix_multiply_nc(
       size_t k_scaled_b = 0;
       size_t gk_stride = 0;
       size_t gb_stride = 0;
-      if (!xnn_safe_mul(k, (size_t) 1u << log2_input_b_element_size,
+      if (!xnn_safe_mul(k, (size_t)1u << log2_input_b_element_size,
                         &k_scaled_b) ||
           !xnn_safe_mul(n, k_scaled_b, &gk_stride) ||
           !xnn_safe_mul(n, bias_element_size, &gb_stride)) {
@@ -1074,7 +1072,7 @@ reshape_batch_matrix_multiply_nc(
       size_t n_scaled_b = 0;
       size_t gk_stride = 0;
       size_t gb_stride = 0;
-      if (!xnn_safe_mul(n, (size_t) 1u << log2_input_b_element_size,
+      if (!xnn_safe_mul(n, (size_t)1u << log2_input_b_element_size,
                         &n_scaled_b) ||
           !xnn_safe_mul(k, n_scaled_b, &gk_stride) ||
           !xnn_safe_mul(n, bias_element_size, &gb_stride)) {
@@ -1162,11 +1160,9 @@ reshape_batch_matrix_multiply_nc(
   size_t ga_stride = 0;
   size_t mk = 0;
   if (!xnn_safe_mul(m, k, &mk) ||
-      !xnn_safe_mul(mk, (size_t) 1u << log2_input_a_element_size,
-                    &ga_stride)) {
-    xnn_log_error(
-        "failed to reshape %s operator: ga_stride overflows size_t",
-        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      !xnn_safe_mul(mk, (size_t)1u << log2_input_a_element_size, &ga_stride)) {
+    xnn_log_error("failed to reshape %s operator: ga_stride overflows size_t",
+                  xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_out_of_memory;
   }
   memset(&gemm_context->pack_lh, 0, sizeof(struct pack_lh_context));
@@ -1234,8 +1230,8 @@ reshape_batch_matrix_multiply_nc(
 
         size_t lhs_stride = 0;
         size_t gi_stride = 0;
-        if (!xnn_safe_mul(k,
-                (size_t) 1u << packed_lh_config->log2_input_element_size,
+        if (!xnn_safe_mul(
+                k, (size_t)1u << packed_lh_config->log2_input_element_size,
                 &lhs_stride) ||
             !xnn_safe_mul(m, lhs_stride, &gi_stride)) {
           xnn_log_error(
@@ -1295,7 +1291,7 @@ reshape_batch_matrix_multiply_nc(
             "Requesting workspace of %zu x %zu bytes for LHS packing.",
             num_threads, per_thread_workspace_size);
         log2_input_a_element_size = packed_lh_config->log2_input_element_size;
-        if (!xnn_safe_mul(mk, (size_t) 1u << log2_input_a_element_size,
+        if (!xnn_safe_mul(mk, (size_t)1u << log2_input_a_element_size,
                           &ga_stride)) {
           xnn_log_error(
               "failed to reshape %s operator: ga_stride overflows size_t",
@@ -1314,12 +1310,12 @@ reshape_batch_matrix_multiply_nc(
   size_t total_input_a_bytes = 0;
   size_t total_output_c_bytes = 0;
 
-  if (!xnn_safe_mul(k, (size_t) 1u << log2_input_a_element_size, &a_stride) ||
+  if (!xnn_safe_mul(k, (size_t)1u << log2_input_a_element_size, &a_stride) ||
       !xnn_safe_mul(batch_matrix_multiply_op->weights_stride, round_up(n, nr),
                     &gw_stride) ||
-      !xnn_safe_mul(n, (size_t) 1u << log2_output_element_size, &cm_stride) ||
+      !xnn_safe_mul(n, (size_t)1u << log2_output_element_size, &cm_stride) ||
       !xnn_safe_mul(m, n, &mn) ||
-      !xnn_safe_mul(mn, (size_t) 1u << log2_output_element_size, &gc_stride) ||
+      !xnn_safe_mul(mn, (size_t)1u << log2_output_element_size, &gc_stride) ||
       !xnn_safe_mul(batch_size_a, ga_stride, &total_input_a_bytes) ||
       !xnn_safe_mul(batch_size_c, gc_stride, &total_output_c_bytes)) {
     xnn_log_error(
@@ -1525,17 +1521,16 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qs8(
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
     size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
-      batch_matrix_multiply_op,
-      xnn_operator_type_batch_matrix_multiply_nc_qs8,
-      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n,
-      workspace_size, /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_qs8,
+      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
+      /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       &batch_matrix_multiply_op->params.qs8_qc8w_conv_minmax,
       sizeof(batch_matrix_multiply_op->params.qs8_qc8w_conv_minmax),
       &batch_matrix_multiply_op->extra_params->qs8_packing,
-      (xnn_init_scale_params_fn) xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
+      (xnn_init_scale_params_fn)xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
       &batch_matrix_multiply_op->extra_params->qs8_packing.scale_multiplier,
       /*extra_weights_bytes=*/sizeof(float), /*scale_b_batch_stride=*/0,
       /*scale_b_channel_stride=*/0, pthreadpool_get_threads_count(threadpool));
@@ -1546,9 +1541,9 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qs8_const_weights(
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
     size_t n, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
-      batch_matrix_multiply_op,
-      xnn_operator_type_batch_matrix_multiply_nc_qs8, num_batch_dims,
-      batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_qs8,
+      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n,
+      /*workspace_size=*/NULL,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
@@ -1576,8 +1571,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
       &batch_matrix_multiply_op->extra_params->qs8_packing,
-      (xnn_init_scale_params_fn) xnn_init_qs8_qc8w_scale_fp32_params,
-      scale_b, /*extra_weights_bytes=*/2 * sizeof(float),
+      (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, scale_b,
+      /*extra_weights_bytes=*/2 * sizeof(float),
       /*scale_b_batch_stride=*/n * sizeof(float),
       /*scale_b_channel_stride=*/sizeof(float),
       pthreadpool_get_threads_count(threadpool));
@@ -1605,7 +1600,6 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32_qc8w(
       /*scale_b_channel_stride=*/sizeof(float),
       pthreadpool_get_threads_count(threadpool));
 }
-
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32_qc8w_const_weights(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
@@ -1661,8 +1655,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
       &batch_matrix_multiply_op->extra_params->qs8_packing,
-      (xnn_init_scale_params_fn) xnn_init_qs8_qc8w_scale_fp32_params,
-      scale_b, /*extra_weights_bytes=*/2 * sizeof(float),
+      (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, scale_b,
+      /*extra_weights_bytes=*/2 * sizeof(float),
       /*scale_b_batch_stride=*/n * sizeof(float),
       /*scale_b_channel_stride=*/sizeof(float),
       pthreadpool_get_threads_count(threadpool));
@@ -1703,8 +1697,7 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
       &batch_matrix_multiply_op->extra_params->qs8_packing,
-      (xnn_init_scale_params_fn) xnn_init_qs8_qc8w_scale_fp32_params,
-      scale_b,
+      (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, scale_b,
       /*extra_weights_bytes=*/2 * sizeof(float),
       /*scale_b_batch_stride=*/n * sizeof(float),
       /*scale_b_channel_stride=*/sizeof(float),
@@ -1863,13 +1856,13 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_qs8(
     xnn_operator_t batch_matrix_multiply_op, void* workspace,
     const int8_t* input_a, const int8_t* input_b, int8_t* output) {
   return setup_batch_matrix_multiply_nc(
-    batch_matrix_multiply_op,
-    xnn_operator_type_batch_matrix_multiply_nc_qs8, input_a,
-    /*quantization_params=*/NULL, input_b,
-    batch_matrix_multiply_op->dynamic_context.gemm->const_weights
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_qs8,
+      input_a,
+      /*quantization_params=*/NULL, input_b,
+      batch_matrix_multiply_op->dynamic_context.gemm->const_weights
           ? packed_weights(batch_matrix_multiply_op)
           : workspace,
-    workspace, output);
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
