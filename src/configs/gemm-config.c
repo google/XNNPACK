@@ -350,6 +350,16 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.mr = 4;
       f16_gemm_config.nr = 16;
     }
+  #elif XNN_ARCH_WASMRELAXEDSIMDFP16
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x16__scalar;
+    f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4;
+    f16_gemm_config.mr = 6;
+    f16_gemm_config.nr = 16;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -366,6 +376,17 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.nr = 4 * hardware_config->vlenb / sizeof(xnn_float16);
     }
   #endif
+  if (f16_gemm_config.mr == 0) {
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x4__scalar);
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_4x4__scalar);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x4__scalar);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_4x4__scalar);
+    f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x4__scalar;
+    f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f16_gemm_goi_w;
+    f16_gemm_config.mr = 4;
+    f16_gemm_config.nr = 4;
+  }
   assert(f16_gemm_config.mr <= XNN_MAX_MR);
 }
 
@@ -6545,9 +6566,12 @@ static void init_qu8_gemm_config(void) {
 
 const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+  if (hardware_config == NULL) {
     return NULL;
   }
+  // No compatibility pre-check: init_f16_gemm_config() always falls back to a
+  // scalar kernel when no SIMD-accelerated one is available, so `mr` is
+  // always non-zero and the check below is sufficient on its own.
   XNN_INIT_ONCE(f16_gemm);
   return f16_gemm_config.mr ? &f16_gemm_config : NULL;
 }
