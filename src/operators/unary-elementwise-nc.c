@@ -421,6 +421,14 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
   if (op->lookup_table) {
     const struct xnn_x8_lut_config* lut_config = op->lut_config;
     if (is_contiguous(op)) {
+      size_t range;
+      if (!xnn_safe_mul(batch_size, channels, &range)) {
+        xnn_log_error(
+            "failed to reshape %s operator: range overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+
       op->context.lut_contiguous = (struct lut_contiguous_context) {
         .x_stride = input_stride * sizeof(uint8_t),
         .t = op->lookup_table,
@@ -428,7 +436,6 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
         .ukernel = lut_config->microkernel,
       };
 
-      const size_t range = batch_size * channels * sizeof(uint8_t);
       size_t tile = range;
       if (pthreadpool_get_threads_count(threadpool) > 1) {
         const size_t block_size = 1024;
@@ -441,6 +448,25 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       op->compute[0].range[0] = range;
       op->compute[0].tile[0] = tile;
     } else {
+      if (batch_size > 1) {
+        size_t total_input_size;
+        if (!xnn_safe_mul(input_stride, batch_size - 1, &total_input_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator: input stride * batch_size "
+              "overflows size_t",
+              xnn_operator_type_to_string_v2(op));
+          return xnn_status_out_of_memory;
+        }
+        size_t total_output_size;
+        if (!xnn_safe_mul(output_stride, batch_size - 1, &total_output_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator: output stride * batch_size "
+              "overflows size_t",
+              xnn_operator_type_to_string_v2(op));
+          return xnn_status_out_of_memory;
+        }
+      }
+
       op->context.lut_strided = (struct lut_strided_context) {
         .n = channels * sizeof(uint8_t),
         .x_stride = input_stride * sizeof(uint8_t),
@@ -457,6 +483,32 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
   } else {
     const xnn_vunary_ukernel_fn ukernel = op->unary_elementwise_config->ukernel;
     if (is_contiguous(op)) {
+      size_t total_elements;
+      if (!xnn_safe_mul(batch_size, channels, &total_elements)) {
+        xnn_log_error(
+            "failed to reshape %s operator: elements overflow size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+      size_t range;
+      if (!xnn_safe_mul(total_elements,
+                        (size_t) 1 << op->unary_elementwise.log2_input_size,
+                        &range)) {
+        xnn_log_error(
+            "failed to reshape %s operator: input range overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+      size_t output_range;
+      if (!xnn_safe_mul(total_elements,
+                        (size_t) 1 << op->unary_elementwise.log2_output_size,
+                        &output_range)) {
+        xnn_log_error(
+            "failed to reshape %s operator: output range overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+
       op->context.univector_contiguous = (struct univector_contiguous_context) {
         .log2_xsize = op->unary_elementwise.log2_input_size,
         .log2_ysize = op->unary_elementwise.log2_output_size,
@@ -464,7 +516,6 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       };
       memcpy(&op->context.univector_contiguous.params, &op->params.unary, sizeof(op->params.unary));
 
-      const size_t range = (batch_size * channels) << op->unary_elementwise.log2_input_size;
       op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
       op->compute[0].task_1d_tile_1d_dynamic =
           (pthreadpool_task_1d_tile_1d_dynamic_t)
@@ -472,10 +523,58 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       op->compute[0].range[0] = range;
       op->compute[0].tile[0] = get_tile_size(op);
     } else {
+      size_t n;
+      if (!xnn_safe_mul(channels,
+                        (size_t) 1 << op->unary_elementwise.log2_input_size,
+                        &n)) {
+        xnn_log_error(
+            "failed to reshape %s operator: channels in bytes overflows size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+      size_t x_stride;
+      if (!xnn_safe_mul(input_stride,
+                        (size_t) 1 << op->unary_elementwise.log2_input_size,
+                        &x_stride)) {
+        xnn_log_error(
+            "failed to reshape %s operator: input stride in bytes overflows "
+            "size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+      size_t y_stride;
+      if (!xnn_safe_mul(output_stride,
+                        (size_t) 1 << op->unary_elementwise.log2_output_size,
+                        &y_stride)) {
+        xnn_log_error(
+            "failed to reshape %s operator: output stride in bytes overflows "
+            "size_t",
+            xnn_operator_type_to_string_v2(op));
+        return xnn_status_out_of_memory;
+      }
+      if (batch_size > 1) {
+        size_t total_input_size;
+        if (!xnn_safe_mul(x_stride, batch_size - 1, &total_input_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator: input stride * batch_size "
+              "overflows size_t",
+              xnn_operator_type_to_string_v2(op));
+          return xnn_status_out_of_memory;
+        }
+        size_t total_output_size;
+        if (!xnn_safe_mul(y_stride, batch_size - 1, &total_output_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator: output stride * batch_size "
+              "overflows size_t",
+              xnn_operator_type_to_string_v2(op));
+          return xnn_status_out_of_memory;
+        }
+      }
+
       op->context.univector_strided = (struct univector_strided_context) {
-        .n = channels << op->unary_elementwise.log2_input_size,
-        .x_stride = input_stride << op->unary_elementwise.log2_input_size,
-        .y_stride = output_stride << op->unary_elementwise.log2_output_size,
+        .n = n,
+        .x_stride = x_stride,
+        .y_stride = y_stride,
         .ukernel = ukernel,
       };
       memcpy(&op->context.univector_strided.params, &op->params.unary, sizeof(op->params.unary));
@@ -728,16 +827,40 @@ static enum xnn_status reshape_unary_elementwise_nc(
       unary_elementwise_op->unary_elementwise_config->ukernel;
   if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) ||
       batch_size == 1) {
-    unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
-      .log2_xsize = log2_input_size,
-      .log2_ysize = log2_output_size,
-      .ukernel = ukernel,
-    };
-    if (params_size != 0) {
-      memcpy(&unary_elementwise_op->context.univector_contiguous.params, params, params_size);
+    size_t total_elements;
+    if (!xnn_safe_mul(batch_size, channels, &total_elements)) {
+      xnn_log_error(
+          "failed to reshape %s operator: elements overflow size_t",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t range;
+    if (!xnn_safe_mul(total_elements, (size_t) 1 << log2_input_size, &range)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input range overflows size_t",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t output_range;
+    if (!xnn_safe_mul(total_elements, (size_t) 1 << log2_output_size,
+                      &output_range)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output range overflows size_t",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
+      return xnn_status_out_of_memory;
     }
 
-    const size_t range = (batch_size * channels) << log2_input_size;
+    unary_elementwise_op->context.univector_contiguous =
+        (struct univector_contiguous_context){
+            .log2_xsize = log2_input_size,
+            .log2_ysize = log2_output_size,
+            .ukernel = ukernel,
+        };
+    if (params_size != 0) {
+      memcpy(&unary_elementwise_op->context.univector_contiguous.params, params,
+             params_size);
+    }
+
     unary_elementwise_op->compute[0].type =
         xnn_parallelization_type_1d_tile_1d_dynamic;
     unary_elementwise_op->compute[0].task_1d_tile_1d_dynamic =
@@ -746,14 +869,59 @@ static enum xnn_status reshape_unary_elementwise_nc(
     unary_elementwise_op->compute[0].tile[0] =
         get_tile_size(unary_elementwise_op);
   } else {
-    unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
-      .n = channels << log2_input_size,
-      .x_stride = input_stride << log2_input_size,
-      .y_stride = output_stride << log2_output_size,
-      .ukernel = ukernel,
-    };
+    size_t n;
+    if (!xnn_safe_mul(channels, (size_t) 1 << log2_input_size, &n)) {
+      xnn_log_error(
+          "failed to reshape %s operator: channels in bytes overflows size_t",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t x_stride;
+    if (!xnn_safe_mul(input_stride, (size_t) 1 << log2_input_size,
+                      &x_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride in bytes overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t y_stride;
+    if (!xnn_safe_mul(output_stride, (size_t) 1 << log2_output_size,
+                      &y_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride in bytes overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
+      return xnn_status_out_of_memory;
+    }
+    if (batch_size > 1) {
+      size_t total_input_size;
+      if (!xnn_safe_mul(x_stride, batch_size - 1, &total_input_size)) {
+        xnn_log_error(
+            "failed to reshape %s operator: input stride * batch_size "
+            "overflows size_t",
+            xnn_operator_type_to_string_v2(unary_elementwise_op));
+        return xnn_status_out_of_memory;
+      }
+      size_t total_output_size;
+      if (!xnn_safe_mul(y_stride, batch_size - 1, &total_output_size)) {
+        xnn_log_error(
+            "failed to reshape %s operator: output stride * batch_size "
+            "overflows size_t",
+            xnn_operator_type_to_string_v2(unary_elementwise_op));
+        return xnn_status_out_of_memory;
+      }
+    }
+    unary_elementwise_op->context.univector_strided =
+        (struct univector_strided_context){
+            .n = n,
+            .x_stride = x_stride,
+            .y_stride = y_stride,
+            .ukernel = ukernel,
+        };
     if (params_size != 0) {
-      memcpy(&unary_elementwise_op->context.univector_strided.params, params, params_size);
+      memcpy(&unary_elementwise_op->context.univector_strided.params, params,
+             params_size);
     }
 
     unary_elementwise_op->compute[0].type =
@@ -997,9 +1165,42 @@ enum xnn_status reshape_convert_nc_bf16_qx8(
 
   convert_op->batch_size = batch_size;
 
+  size_t n;
+  if (!xnn_safe_mul(channels, sizeof(uint16_t), &n)) {
+    xnn_log_error(
+        "failed to reshape %s operator: channels in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t x_stride;
+  if (!xnn_safe_mul(input_stride, sizeof(uint16_t), &x_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(x_stride, batch_size - 1, &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t total_output_size;
+    if (!xnn_safe_mul(output_stride, batch_size - 1, &total_output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   convert_op->context.bf16_qd8_convert = (struct bf16_qd8_convert_context) {
-    .n = channels * sizeof(uint16_t),
-    .x_stride = input_stride * sizeof(uint16_t),
+    .n = n,
+    .x_stride = x_stride,
     .y_stride = output_stride,
     .batch_size = batch_size,
     .rminmax_ukernel = convert_op->reduce_config->ukernel,
@@ -1064,9 +1265,42 @@ enum xnn_status reshape_convert_nc_f16_qx8(
 
   convert_op->batch_size = batch_size;
 
+  size_t n;
+  if (!xnn_safe_mul(channels, sizeof(uint16_t), &n)) {
+    xnn_log_error(
+        "failed to reshape %s operator: channels in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t x_stride;
+  if (!xnn_safe_mul(input_stride, sizeof(uint16_t), &x_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(x_stride, batch_size - 1, &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t total_output_size;
+    if (!xnn_safe_mul(output_stride, batch_size - 1, &total_output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   convert_op->context.f16_qd8_convert = (struct f16_qd8_convert_context) {
-    .n = channels * sizeof(uint16_t),
-    .x_stride = input_stride * sizeof(uint16_t),
+    .n = n,
+    .x_stride = x_stride,
     .y_stride = output_stride,
     .batch_size = batch_size,
     .rminmax_ukernel = convert_op->reduce_config->ukernel,
@@ -1131,9 +1365,42 @@ enum xnn_status reshape_convert_nc_f32_qx8(
 
   convert_op->batch_size = batch_size;
 
+  size_t n;
+  if (!xnn_safe_mul(channels, sizeof(float), &n)) {
+    xnn_log_error(
+        "failed to reshape %s operator: channels in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t x_stride;
+  if (!xnn_safe_mul(input_stride, sizeof(float), &x_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(x_stride, batch_size - 1, &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t total_output_size;
+    if (!xnn_safe_mul(output_stride, batch_size - 1, &total_output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   convert_op->context.f32_qd8_convert = (struct f32_qd8_convert_context) {
-    .n = channels * sizeof(float),
-    .x_stride = input_stride * sizeof(float),
+    .n = n,
+    .x_stride = x_stride,
     .y_stride = output_stride,
     .batch_size = batch_size,
     .rminmax_ukernel = convert_op->reduce_config->ukernel,
@@ -1264,13 +1531,31 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
+  size_t lhs_stride;
+  if (!xnn_safe_mul(input_stride, sizeof(float), &lhs_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: lhs stride overflows size_t",
+        xnn_operator_type_to_string_v2(convert_op));
+    return xnn_status_out_of_memory;
+  }
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(lhs_stride, batch_size - 1, &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: lhs stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(convert_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   convert_op->context.f32_qp8_convert = (struct f32_qp8_convert_context){
       .m = batch_size,
       .k = channels,
       .mr = mr_packed,
       .kr = kr,
       .sr = sr,
-      .lhs_stride = input_stride * sizeof(float),
+      .lhs_stride = lhs_stride,
       .group_stride = xnn_x8_packq_f32qp8_packed_size(batch_size, channels,
                                                       mr_packed, kr, sr),
       .packq_ukernel = (xnn_x8_packq_f32qp8_ukernel_fn)
