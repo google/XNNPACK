@@ -67,6 +67,7 @@ cc_library(
         ":debug_build": ["YNN_LOG_LEVEL=YNN_LOG_LEVEL_DEBUG"],
         "//conditions:default": ["YNN_LOG_LEVEL=YNN_LOG_LEVEL_WARNING"],
     }),
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -121,6 +122,7 @@ cc_library(
         "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],
         "//conditions:default": [],
     }),
+    visibility = ["//visibility:public"],
     deps = [
         ":log",
         "//ynnpack:ynnpack_h",
