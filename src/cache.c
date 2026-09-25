@@ -95,10 +95,26 @@ static inline void* cache_start(struct xnn_cache* cache) {
   return NULL;
 }
 
-enum xnn_status xnn_init_cache_with_size(struct xnn_cache* cache, size_t num_buckets, enum xnn_cache_type cache_type)
+enum xnn_status xnn_init_cache_with_size(
+  struct xnn_cache* cache, size_t num_buckets, enum xnn_cache_type cache_type)
 {
   memset(cache, 0, sizeof(struct xnn_cache));
-  cache->buckets = (struct xnn_cache_bucket*) xnn_allocate_zero_memory(num_buckets * sizeof(struct xnn_cache_bucket));
+  if (!is_po2(num_buckets)) {
+    xnn_log_error(
+      "fail to init cache: num_buckets %zu is not a power of 2", num_buckets);
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t buckets_bytes;
+  if (!xnn_safe_mul(
+        num_buckets, sizeof(struct xnn_cache_bucket), &buckets_bytes)) {
+    xnn_log_error(
+      "fail to init cache: num_buckets %zu causes size overflow", num_buckets);
+    return xnn_status_out_of_memory;
+  }
+
+  cache->buckets =
+    (struct xnn_cache_bucket*) xnn_allocate_zero_memory(buckets_bytes);
   if (cache->buckets == NULL) {
     xnn_log_error("fail to allocate memory for cache buckets");
     return xnn_status_out_of_memory;
@@ -111,10 +127,20 @@ enum xnn_status xnn_init_cache_with_size(struct xnn_cache* cache, size_t num_buc
 
 static bool cache_buckets_grow(struct xnn_cache* cache)
 {
-  const size_t new_num_buckets = cache->num_buckets * XNN_CACHE_GROWTH_FACTOR;
+  size_t new_num_buckets;
+  if (!xnn_safe_mul(
+        cache->num_buckets, XNN_CACHE_GROWTH_FACTOR, &new_num_buckets)) {
+    xnn_log_error(
+      "fail to grow cache: num_buckets %zu causes overflow",
+      cache->num_buckets);
+    return false;
+  }
   assert(is_po2(new_num_buckets));
   struct xnn_cache tmp_cache;
-  xnn_init_cache_with_size(&tmp_cache, new_num_buckets, cache->type);
+  if (xnn_init_cache_with_size(&tmp_cache, new_num_buckets, cache->type) !=
+      xnn_status_success) {
+    return false;
+  }
 
   for (size_t i = 0; i < cache->num_buckets; i++) {
     struct xnn_cache_bucket b = cache->buckets[i];
@@ -179,8 +205,15 @@ static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
   }
 
   // Ensure we have enough buckets to keep under our load limit.
-  if (cache->num_entries * XNN_CACHE_MAX_LOAD_ENTRIES_MULTIPLIER >
-      cache->num_buckets * XNN_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER) {
+  size_t load_entries;
+  size_t load_buckets;
+  if (!xnn_safe_mul(
+        cache->num_entries, XNN_CACHE_MAX_LOAD_ENTRIES_MULTIPLIER,
+        &load_entries) ||
+      !xnn_safe_mul(
+        cache->num_buckets, XNN_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER,
+        &load_buckets) ||
+      load_entries > load_buckets) {
     if (!cache_buckets_grow(cache)) {
       // Can't grow hash table anymore.
       xnn_log_error("failed to grow cache buckets");
@@ -230,8 +263,12 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
   }
 
   if (cache->type == xnn_cache_type_weights) {
-    // Cache miss, weights packing functions don't update buffer size, update it here.
-    cache->weights.size += size;
+    // Cache miss, weights packing functions don't update buffer size, update it
+    // here.
+    if (!xnn_safe_add(cache->weights.size, size, &cache->weights.size)) {
+      xnn_log_error("failed to update weights cache size: integer overflow");
+      return XNN_CACHE_NOT_FOUND;
+    }
   }
 
   const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
@@ -249,9 +286,10 @@ enum xnn_status xnn_internal_init_weights_cache(
   memset(cache, 0, sizeof(struct xnn_internal_weights_cache));
 
   enum xnn_status status = xnn_status_success;
-  status = xnn_init_cache_with_size(&cache->cache, num_buckets, xnn_cache_type_weights);
+  status = xnn_init_cache_with_size(
+    &cache->cache, num_buckets, xnn_cache_type_weights);
   if (status != xnn_status_success) {
-    goto error;
+    return status;
   }
 
   status = xnn_allocate_weights_memory(&cache->cache.weights, buffer_size);
@@ -267,7 +305,11 @@ enum xnn_status xnn_internal_init_weights_cache(
   return xnn_status_success;
 
 error:
-  xnn_internal_release_weights_cache(cache);
+  if (cache->cache.buckets != NULL) {
+    xnn_release_memory(cache->cache.buckets);
+    cache->cache.buckets = NULL;
+  }
+  xnn_release_weights_memory(&cache->cache.weights);
   return status;
 }
 
@@ -338,7 +380,11 @@ static inline bool cache_has_space(
   struct xnn_internal_weights_cache* cache, size_t n)
 {
   const struct xnn_weights_buffer buf = cache->cache.weights;
-  return buf.size + n <= buf.capacity;
+  size_t required_capacity;
+  if (!xnn_safe_add(buf.size, n, &required_capacity)) {
+    return false;
+  }
+  return required_capacity <= buf.capacity;
 }
 
 void* xnn_internal_reserve_space_in_weights_cache(struct xnn_internal_weights_cache* cache, size_t n)
@@ -434,9 +480,14 @@ size_t xnn_internal_weights_cache_look_up(
   return XNN_CACHE_NOT_FOUND;
 }
 
-void* xnn_internal_weights_cache_offset_to_addr(struct xnn_internal_weights_cache* weights_cache, size_t offset)
+void* xnn_internal_weights_cache_offset_to_addr(
+  struct xnn_internal_weights_cache* weights_cache, size_t offset)
 {
-  return (void*) ((uintptr_t)weights_cache->cache.weights.start + offset);
+  if (weights_cache == NULL || offset == XNN_CACHE_NOT_FOUND ||
+      offset >= weights_cache->cache.weights.capacity) {
+    return NULL;
+  }
+  return (void*) ((uintptr_t) weights_cache->cache.weights.start + offset);
 }
 
 enum xnn_status xnn_internal_delete_weights_cache(struct xnn_internal_weights_cache* weights_cache)
