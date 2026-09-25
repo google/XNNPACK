@@ -1423,6 +1423,78 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, DontElideType6ConvertWhenExternal) {
   xnn_reset_hardware_config();
 }
 
+TEST_F(Fp16ToFp32FallbackTest, OverflowOutputSizeReturnsError) {
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const std::vector<size_t> dims = {3, 4};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr,
+                             input_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  // Artificially simulate an overflowing shape on the output value so that
+  // xnn_tensor_get_size returns SIZE_MAX during rewrite.
+  subgraph->values[output_id].shape.dim[0] = SIZE_MAX;
+
+  EXPECT_EQ(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                    /*optimization_flags=*/0),
+            xnn_status_out_of_memory);
+}
+
+TEST_F(Fp16ToFp32FallbackTest, OverflowStaticInputSizeReturnsError) {
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint16_t static_data[4] = {0, 0, 0, 0};
+  const std::vector<size_t> dims = {2, 2};
+  uint32_t static_input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                static_data, XNN_INVALID_VALUE_ID, /*flags=*/0,
+                &static_input_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr,
+                             static_input_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  // Simulate an overflowing shape on the static value.
+  subgraph->values[static_input_id].shape.dim[0] = SIZE_MAX;
+
+  EXPECT_EQ(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                    /*optimization_flags=*/0),
+            xnn_status_out_of_memory);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     BinaryOps, Fp16ToFp32FallbackBinaryOpTest,
     testing::ValuesIn<BinaryOpParam>({
