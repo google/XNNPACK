@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <mutex>
 #include <string>
@@ -15,7 +16,9 @@
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/runtime.h"
+#include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 #include "slinky/builder/simplify.h"
@@ -102,6 +105,55 @@ TEST(DotSchedulingTest, NarrowTypeNoSplitK) {
 
 TEST(DotSchedulingTest, NarrowTypeLargeSplitK) {
   VerifyDotLoopOrder<bfloat16, bfloat16>({300, 16384}, {16384, 400}, true);
+}
+
+TEST(DotSchedulingTest, DefinePackA) {
+  const size_t M = 35, K = 50;
+  const size_t tile_m = 32, tile_k = 32;
+  const size_t blocks_m = 2, tiles_k = 2;
+  const uint32_t a_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  builder.AddInput(ynn_type_bf16, {M, K}, a_id)
+      .AddOutput(ynn_type_bf16, {blocks_m, tiles_k, tile_m, tile_k}, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  const uint32_t packed_a_id =
+      define_pack_a(subgraph, /*tile_m=*/tile_m, /*tile_k=*/tile_k,
+                    /*m_dim=*/1, a_id);
+  EXPECT_THAT(ProducerOf(packed_a_id, subgraph),
+              AllOf(IsPackA(tile_m, tile_k, 1), InputsAre(a_id)));
+  builder.AddCopy(packed_a_id, out_id);
+
+  TestScheduler scheduler(3);
+  Runtime runtime(builder.GetSubgraph(), &scheduler);
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+
+  Tensor<bfloat16> a({M, K});
+  Tensor<bfloat16> out({blocks_m, tiles_k, tile_m, tile_k});
+  for (size_t i = 0; i < M * K; ++i) {
+    a.data()[i] = bfloat16(static_cast<float>((i % 13) - 6));
+  }
+
+  runtime.ReshapeExternalTensor(a.extents(), a.data(), a_id)
+      .ReshapeRuntime()
+      .SetupExternalTensor(out.data(), out_id)
+      .InvokeRuntime();
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t mo = 0; mo < blocks_m; ++mo) {
+    for (size_t ko = 0; ko < tiles_k; ++ko) {
+      for (size_t mi = 0; mi < tile_m; ++mi) {
+        for (size_t ki = 0; ki < tile_k; ++ki) {
+          const size_t m = mo * tile_m + mi;
+          const size_t k = ko * tile_k + ki;
+          const float expected =
+              (m < M && k < K) ? static_cast<float>(a({m, k})) : 0.0f;
+          EXPECT_FLOAT_EQ(static_cast<float>(out({mo, ko, mi, ki})), expected);
+        }
+      }
+    }
+  }
 }
 
 }  // namespace
