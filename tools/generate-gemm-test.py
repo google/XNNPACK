@@ -681,6 +681,110 @@ std::vector<GemmTestParams> CreateTests(
 }
 """
 
+PQS8_QC2W_CREATE_TESTS_CODE = """\
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
+std::vector<GemmTestParams> CreateTests(
+    size_t k_block, size_t adj_k_block,
+    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
+    ConstantOrFunction mr_packed,
+    bool is_igemm,
+    bool unsigned_inputs,
+    uint8_t planes,
+    std::function<void(GemmMicrokernelTester& tester)> test_func,
+    uint64_t arch_flags = 0) {
+  (void) adj_k_block;
+  (void) is_igemm;
+  const size_t mr_value = mr;
+  const size_t nr_value = nr;
+  if (mr_value == 0 || nr_value == 0) {
+    // Keep the parameterized suite instantiated when this binary runs on a
+    // host without the required architecture. GemmTest checks arch_flags and
+    // skips the case before invoking the microkernel.
+    return {GemmTestParams(
+        "unsupported_hardware",
+        GemmMicrokernelTester()
+            .mr(1).nr(1).kr(kr).sr(sr).mr_packed(1)
+            .unsigned_inputs(unsigned_inputs).planes(planes).b_zero_point(0),
+        test_func, arch_flags)};
+  }
+  const GemmMicrokernelTester tester = GemmMicrokernelTester()
+      .mr(mr_value).nr(nr_value).kr(kr).sr(sr).mr_packed(mr_packed)
+      .unsigned_inputs(unsigned_inputs).planes(planes).b_zero_point(0);
+
+  std::vector<GemmTestParams> gemm_tests;
+  auto add_test = [&](const std::string& name, size_t m, size_t n, size_t k) {
+    gemm_tests.emplace_back(
+        name, tester.clone().m(m).n(n).k(k), test_func, arch_flags);
+  };
+
+  if (mr_value == 1) {
+    // The DOT/GEMV kernel has 64-column physical RHS panels on a 64-byte SVL,
+    // but advertises a preferred scheduling step of four panels. Exercise
+    // tails on both boundaries while keeping every K supported by the kernel.
+    const size_t n_values[] = {
+        nr_value - 1, nr_value, nr_value + 1,
+        4 * nr_value - 1, 4 * nr_value, 4 * nr_value + 1,
+    };
+    for (const size_t n_value : n_values) {
+      add_test("n_eq_" + std::to_string(n_value) + "_k_eq_" +
+                   std::to_string(k_block),
+               1, n_value, k_block);
+    }
+    add_test("k_eq_" + std::to_string(2 * k_block), 1, nr_value + 1,
+             2 * k_block);
+    add_test("k_eq_" + std::to_string(3 * k_block), 1, nr_value + 1,
+             3 * k_block);
+  } else {
+    // Exercise row and column tails of the packed-LHS MOPA kernel, including
+    // the single-row tail even though normal dispatch selects DOT for M=1.
+    const size_t m_values[] = {1, mr_value - 1, mr_value};
+    const size_t n_values[] = {1, nr_value - 1, nr_value, nr_value + 1};
+    for (const size_t m_value : m_values) {
+      for (const size_t n_value : n_values) {
+        add_test("m_eq_" + std::to_string(m_value) + "_n_eq_" +
+                     std::to_string(n_value),
+                 m_value, n_value, k_block);
+      }
+    }
+    add_test("m_tail_n_eq_" + std::to_string(2 * nr_value - 1),
+             mr_value - 1, 2 * nr_value - 1, k_block);
+    add_test("m_tail_n_eq_" + std::to_string(2 * nr_value + 1),
+             mr_value - 1, 2 * nr_value + 1, k_block);
+    add_test("k_eq_" + std::to_string(2 * k_block), mr_value - 1,
+             nr_value + 1, 2 * k_block);
+    add_test("k_eq_" + std::to_string(3 * k_block), mr_value - 1,
+             nr_value + 1, 3 * k_block);
+  }
+
+  gemm_tests.emplace_back(
+      "input_zero_point_min",
+      tester.clone().m(mr_value).n(nr_value + 1).k(k_block).a_zero_point(0),
+      test_func, arch_flags);
+  gemm_tests.emplace_back(
+      "input_zero_point_max",
+      tester.clone().m(mr_value).n(nr_value + 1).k(k_block).a_zero_point(255),
+      test_func, arch_flags);
+  gemm_tests.emplace_back(
+      "qmin",
+      tester.clone().m(mr_value).n(nr_value).k(k_block).qmin(128),
+      test_func, arch_flags);
+  gemm_tests.emplace_back(
+      "qmax",
+      tester.clone().m(mr_value).n(nr_value).k(k_block).qmax(128),
+      test_func, arch_flags);
+  gemm_tests.emplace_back(
+      "strided_cm",
+      tester.clone()
+          .m(mr_value)
+          .n(nr_value + 1)
+          .k(k_block)
+          .cm_stride(xnnpack::NextPrime(nr_value + 2)),
+      test_func, arch_flags);
+
+  return gemm_tests;
+}
+"""
+
 GEMM_TEST_CODE = """\
 $if CPP_CHECK:
   #if ${CPP_CHECK}
@@ -881,6 +985,8 @@ def generate_test_cases(
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if input_datatype == "qp8" and weights_datatype == "qc2w":
     test_fun_name = "Test_QP8F32QC2W"
+  elif input_datatype == "pqs8" and weights_datatype == "qc2w":
+    test_fun_name = "Test_PQS8QC2W"
   elif input_datatype == "pqs8" and weights_datatype == "qc4w":
     test_fun_name = "Test_PQS8QC4W"
   elif test_fun_name in {"QP8F32QC8W"}:
@@ -915,7 +1021,10 @@ def generate_test_cases(
       "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
   }
 
-  create_test_case = xngen.preprocess(GEMM_CREATE_TESTS_CODE, test_args)
+  create_tests_code = GEMM_CREATE_TESTS_CODE
+  if input_datatype == "pqs8" and weights_datatype == "qc2w":
+    create_tests_code = PQS8_QC2W_CREATE_TESTS_CODE
+  create_test_case = xngen.preprocess(create_tests_code, test_args)
 
   test_case = xngen.preprocess(GEMM_TEST_CODE, test_args)
 
