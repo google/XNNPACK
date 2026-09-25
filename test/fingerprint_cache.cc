@@ -127,3 +127,42 @@ TEST_F(FingerprintCacheTest, ReserveAndWrite) {
   EXPECT_THAT(fingerprint->id, Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
   EXPECT_THAT(fingerprint->value, Not(Eq(0)));
 }
+
+TEST_F(FingerprintCacheTest, FillBufferNullOrEmpty) {
+  fill_fingerprint_buffer(nullptr, 16);
+  uint8_t buffer[8] = {0};
+  fill_fingerprint_buffer(buffer, 0);
+  EXPECT_EQ(buffer[0], 0);
+}
+
+TEST_F(FingerprintCacheTest, FillBufferUnaligned) {
+  uint8_t buffer[64] = {0};
+  // Pass unaligned pointer with odd lengths.
+  fill_fingerprint_buffer(buffer + 1, 15);
+  fill_fingerprint_buffer(buffer + 3, 27);
+}
+
+TEST_F(FingerprintCacheTest, NullContextHandling) {
+  finalize_fingerprint_context(nullptr);
+  EXPECT_EQ(0, fingerprint_cache_get_fingerprint(nullptr));
+  struct xnn_weights_cache_provider null_provider = {nullptr};
+  EXPECT_EQ(0, fingerprint_cache_get_fingerprint(&null_provider));
+
+  struct fingerprint_context context =
+      create_fingerprint_context(xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
+  EXPECT_EQ(nullptr, context.cache.reserve_space(nullptr, 16));
+  EXPECT_EQ(0, context.cache.look_up_or_insert(nullptr, nullptr, nullptr, 0));
+  EXPECT_EQ(nullptr, context.cache.offset_to_addr(nullptr, 0));
+  finalize_fingerprint_context(&context);
+}
+
+TEST_F(FingerprintCacheTest, FingerprintCapacityLimit) {
+  // Test adding more than 256 fingerprints to ensure no buffer overflow occurs.
+  for (uint32_t i = 1; i <= 300; ++i) {
+    xnn_set_fingerprint(
+        (struct xnn_fingerprint){/*id=*/i, /*value=*/i * 10});
+  }
+  const struct xnn_fingerprint* fp1 = xnn_get_fingerprint(1);
+  ASSERT_THAT(fp1, NotNull());
+  EXPECT_EQ(fp1->value, 10);
+}
