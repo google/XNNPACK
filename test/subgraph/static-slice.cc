@@ -111,4 +111,107 @@ INSTANTIATE_TEST_SUITE_P(Slice, SliceQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(Slice, SliceF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Slice, SliceF32, rank_params);
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(Slice, ReshapeOverflowInputElements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[3] = {2, 2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[3] = {1, 1, 1};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const size_t offsets[3] = {0, 0, 0};
+  const size_t sizes[3] = {1, 1, 1};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_static_slice(
+          subgraph, 3, offsets, sizes, input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  runtime->values[input_id].shape.num_dims = 3;
+  runtime->values[input_id].shape.dim[0] = SIZE_MAX;
+  runtime->values[input_id].shape.dim[1] = 2;
+  runtime->values[input_id].shape.dim[2] = 2;
+
+  const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
+  EXPECT_EQ(xnn_status_invalid_parameter, reshape_status);
+}
+
+TEST(Slice, ReshapeOverflowOutputSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[3] = {2, 2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[3] = {2, 2, 2};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const int64_t begins[3] = {0, 0, 0};
+  const int64_t ends[3] = {0, 0, 0};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_static_slice_v3(
+          subgraph, 3, begins, ends, nullptr, input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  runtime->values[input_id].shape.num_dims = 3;
+  runtime->values[input_id].shape.dim[0] = (SIZE_MAX / 4) + 1;
+  runtime->values[input_id].shape.dim[1] = 1;
+  runtime->values[input_id].shape.dim[2] = 1;
+
+  const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
+  EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
+              reshape_status == xnn_status_invalid_parameter);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack

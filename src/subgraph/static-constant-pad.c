@@ -78,6 +78,15 @@ static enum xnn_status reshape_constant_pad_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   struct xnn_runtime_value* input_value = values + input_id;
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&input_value->shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), input_id);
+    return xnn_status_invalid_parameter;
+  }
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_constant_pad_nd_x8:
       status = xnn_reshape_constant_pad_nd_x8(
@@ -129,6 +138,13 @@ static enum xnn_status reshape_constant_pad_operator(
     output_value->shape.dim[i] = output_dim;
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with output ID #%" PRIu32
+      ": output tensor size overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
