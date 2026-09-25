@@ -310,56 +310,101 @@ static void init_f16_vmin_config(void) {
 }
 
 static void init_f16_vmul_config(void) {
-  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
-      f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__neonfp16arith_u16);
-      f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
-      f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
-      f16_vmul_config.element_tile = 16;
-    }
-  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
-      f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__neonfp16arith_u16);
-      f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
-      f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
-      f16_vmul_config.element_tile = 16;
-    }
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_AVX512FP16
-      if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
-        f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__avx512fp16_u64);
-        f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__avx512fp16_u64);
-        f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__avx512fp16_u64);
-        f16_vmul_config.element_tile = 64;
-      } else
-    #endif
-    #if XNN_ENABLE_F16C
+#if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void)hardware_config;  // May be unused.
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
+    f16_vmul_config.op_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__neonfp16arith_u16);
+    f16_vmul_config.opc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
+    f16_vmul_config.ropc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
+    f16_vmul_config.element_tile = 16;
+  }
+#elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void)hardware_config;  // May be unused.
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
+    f16_vmul_config.op_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__neonfp16arith_u16);
+    f16_vmul_config.opc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
+    f16_vmul_config.ropc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
+    f16_vmul_config.element_tile = 16;
+  }
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void)hardware_config;  // May be unused.
+#if XNN_ENABLE_AVX512FP16
+  if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
+    f16_vmul_config.op_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__avx512fp16_u64);
+    f16_vmul_config.opc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__avx512fp16_u64);
+    f16_vmul_config.ropc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__avx512fp16_u64);
+    f16_vmul_config.element_tile = 64;
+  } else
+#endif
+#if XNN_ENABLE_F16C
       if (hardware_config->arch_flags & xnn_arch_x86_f16c) {
-        f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__f16c_u16);
-        f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
-        f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
-        f16_vmul_config.element_tile = 16;
-      } else
-    #endif
+    f16_vmul_config.op_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__f16c_u16);
+    f16_vmul_config.opc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
+    f16_vmul_config.ropc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
+    f16_vmul_config.element_tile = 16;
+  } else
+#endif
     ;  // no f16 support
-  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
-      f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__rvvfp16arith_u8v);
-      f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__rvvfp16arith_u8v);
-      f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__rvvfp16arith_u8v);
-      f16_vmul_config.element_tile = 8 * hardware_config->vlenb / sizeof(xnn_float16);
-    }
-  #endif
+#elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+    f16_vmul_config.op_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__rvvfp16arith_u8v);
+    f16_vmul_config.opc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__rvvfp16arith_u8v);
+    f16_vmul_config.ropc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__rvvfp16arith_u8v);
+    f16_vmul_config.element_tile =
+        8 * hardware_config->vlenb / sizeof(xnn_float16);
+  }
+#elif XNN_ARCH_WASMRELAXEDSIMDFP16
+  f16_vmul_config.op_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__wasmrelaxedsimdfp16_u8);
+  f16_vmul_config.opc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__wasmrelaxedsimdfp16_u8);
+  f16_vmul_config.ropc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__wasmrelaxedsimdfp16_u8);
+  f16_vmul_config.element_tile = 8;
+#elif XNN_ARCH_WASMRELAXEDSIMD
+  f16_vmul_config.op_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_f32acc_vmul_ukernel__wasmrelaxedsimd_u8);
+  f16_vmul_config.opc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_f32acc_vmulc_ukernel__wasmrelaxedsimd_u8);
+  f16_vmul_config.ropc_ukernel =
+      XNN_INIT_BINARY_UKERNEL(xnn_f16_f32acc_vmulc_ukernel__wasmrelaxedsimd_u8);
+  f16_vmul_config.element_tile = 8;
+#endif
+  if (f16_vmul_config.op_ukernel == NULL) {
+    f16_vmul_config.op_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__scalar_u1);
+    f16_vmul_config.opc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__scalar_u1);
+    f16_vmul_config.ropc_ukernel =
+        XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__scalar_u1);
+    f16_vmul_config.element_tile = 1;
+  }
 }
 
 static void init_f16_vprelu_config(void) {
@@ -1767,12 +1812,17 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vmin_config() {
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f16_vmul_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f16_vmul);
-  return &f16_vmul_config;
+  return f16_vmul_config.op_ukernel != NULL &&
+                 f16_vmul_config.opc_ukernel != NULL &&
+                 f16_vmul_config.ropc_ukernel != NULL
+             ? &f16_vmul_config
+             : NULL;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f16_vprelu_config() {

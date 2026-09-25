@@ -1399,7 +1399,7 @@ TEST(SUBGRAPH_FP16, static_value_pack_to_fp16) {
       .AddStaticTensorF32(shape, input2_id, static_data.data(),
                           XNN_VALUE_FLAG_PACK_TO_FP16)
       .AddOutputTensor<xnn_float16>(shape, output_id)
-      .AddMultiply(input1_id, input2_id, output_id)
+      .AddDivide(input1_id, input2_id, output_id)
       .Optimize();
 
   const struct xnn_hardware_config* hardware_config =
