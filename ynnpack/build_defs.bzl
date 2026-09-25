@@ -298,17 +298,17 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "x86_amxbf16": {
         "cond": "//ynnpack:ynn_enable_x86_amxbf16",
-        "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-bf16"]),
+        "arch_copts": _copts_for_compiler(_AVX512_COPTS + ["-mamx-tile", "-mamx-bf16"]),
         "arch_flag": "amxbf16",
     },
     "x86_amxfp16": {
         "cond": "//ynnpack:ynn_enable_x86_amxfp16",
-        "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-fp16"]),
+        "arch_copts": _copts_for_compiler(_AVX512_COPTS + ["-mamx-tile", "-mamx-fp16"]),
         "arch_flag": "amxfp16",
     },
     "x86_amxint8": {
         "cond": "//ynnpack:ynn_enable_x86_amxint8",
-        "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-int8"]),
+        "arch_copts": _copts_for_compiler(_AVX512_COPTS + ["-mamx-tile", "-mamx-int8"]),
         "arch_flag": "amxint8",
     },
     "hexagon_hvx": {
