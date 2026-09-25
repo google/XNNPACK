@@ -3007,6 +3007,18 @@ static enum xnn_status optimize_common_subgraphs_min_max_to_clamp(
     // rank, so we can't replace the operator.
     return xnn_status_success;
   }
+  // `arg_value` may be a whole tensor that is merely known to be all zeros or
+  // all ones (e.g. the output of `div(x, x)`), so also make sure that it does
+  // not broadcast `input_value` up in any dimension: the `clamp` keeps
+  // `input_value`'s shape.
+  const size_t rank_diff =
+      input_value->shape.num_dims - arg_value->shape.num_dims;
+  for (size_t i = 0; i < arg_value->shape.num_dims; i++) {
+    const size_t arg_dim = arg_value->shape.dim[i];
+    if (arg_dim != 1 && arg_dim != input_value->shape.dim[i + rank_diff]) {
+      return xnn_status_success;
+    }
+  }
 
   // Extract the min/max argument.
   const float arg_as_float = (arg_value->flags & XNN_VALUE_FLAG_IS_ZERO) ? 0.0f
