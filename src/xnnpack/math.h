@@ -685,6 +685,23 @@ XNN_INLINE static bool xnn_safe_add(size_t a, size_t b, size_t* result) {
 #endif
 }
 
+XNN_INLINE static bool xnn_safe_round_up(size_t n, size_t q, size_t* result) {
+  if (q == 0) {
+    return false;
+  }
+  const size_t quotient = n / q + (n % q != 0);
+  return xnn_safe_mul(quotient, q, result);
+}
+
+XNN_INLINE static bool xnn_safe_round_up_po2(size_t n, size_t q,
+                                             size_t* result) {
+  if (!is_po2(q) || n > SIZE_MAX - (q - 1)) {
+    return false;
+  }
+  *result = round_down_po2(n + q - 1, q);
+  return true;
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
