@@ -120,8 +120,8 @@ SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
     ),
     "Cosine": SpecialValues(
         num_elements=3,
-        inputs=f"{{0.0f, {-math.pi:.8e},  {math.pi:.8e}}}",
-        expected_outputs="{1.0f, -1.0f, -1.0f}",
+        inputs=f"{{0.0f, {math.pi/2:.8e},  {-math.pi/2:.8e}}}",
+        expected_outputs="{1.0f, 0.0f, 0.0f}",
         tolerance_ulp=1,
     ),
 })
