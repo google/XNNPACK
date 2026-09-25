@@ -447,6 +447,7 @@ def ynn_cc_library(
             features = [
                 # We can't use copts with header modules...?
                 "-use_header_modules",
+                "-parse_headers",
             ] + kwargs.get("features", []),
             # Don't build this target unless explicitly requested.
             tags = ["manual", "notap"],
