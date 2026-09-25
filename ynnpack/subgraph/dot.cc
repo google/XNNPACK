@@ -979,7 +979,15 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   index_t split_n = std::min<index_t>(n, block_n);
   index_t split_m = std::min<index_t>(m, step_m);
   while (true) {
-    if (split_n * split_m >= min_area) {
+    // The starting value of `split_n` (derived in `define_pack_b()`) can be
+    // much larger than `step_m`. In cases where the starting `split_n` is
+    // already larger than the cost budget, `split_m` doesn't have a chance to
+    // grow. We end up with a task that is wider than it is tall, which does
+    // not reflect the desired aspect ratio. If we hit this case, let `split_m`
+    // grow if there is room to do so.
+    const bool wider_than_tall = split_m < m && split_m < split_n &&
+                                 split_m * split_n < max_area;
+    if (split_n * split_m >= min_area && !wider_than_tall) {
       // We've reached the minimum tile size, should we stop?
       if ((split_m + split_n) * effective_k >= max_cost ||
           split_m * split_n >= max_area) {
