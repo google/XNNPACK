@@ -37,6 +37,19 @@ cc_test(
 )
 
 cc_test(
+    name = "broadcast_partial_reduction",
+    srcs = ["broadcast_partial_reduction.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/subgraph/test:scheduler",
+        "//ynnpack/subgraph/test:subgraph_builder",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
     name = "transpose_broadcast_dot",
     srcs = ["transpose_broadcast_dot.cc"],
     linkopts = ynn_binary_linkopts(),
