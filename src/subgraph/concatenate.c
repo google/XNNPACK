@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -160,9 +161,20 @@ static enum xnn_status reshape_concatenate_operator(
   size_t output_stride = 0;
   for (size_t i = 0; i < num_inputs; ++i) {
     for (size_t j = axis; j < values[input_id[0]].shape.num_dims; j++) {
-      input_channels[i] *= values[input_id[i]].shape.dim[j];
+      if (!xnn_safe_mul(input_channels[i], values[input_id[i]].shape.dim[j],
+                        &input_channels[i])) {
+        xnn_log_error(
+            "failed to reshape %s operator: input channels overflow size_t",
+            xnn_node_type_to_string(xnn_node_type_concatenate));
+        return xnn_status_out_of_memory;
+      }
     }
-    output_stride += input_channels[i];
+    if (!xnn_safe_add(output_stride, input_channels[i], &output_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_concatenate));
+      return xnn_status_out_of_memory;
+    }
   }
 
   assert(opdata->num_outputs == 1);
@@ -182,16 +194,35 @@ static enum xnn_status reshape_concatenate_operator(
     return xnn_status_invalid_parameter;
   }
 
-  memcpy(output_value->shape.dim, input0_value->shape.dim, input0_value->shape.num_dims * sizeof(size_t));
+  memcpy(output_value->shape.dim, input0_value->shape.dim,
+         input0_value->shape.num_dims * sizeof(size_t));
   size_t concatenated_elements = 0;
   for (size_t i = 0; i < num_inputs; ++i) {
-    concatenated_elements += values[input_id[i]].shape.dim[axis];
+    if (!xnn_safe_add(concatenated_elements,
+                      values[input_id[i]].shape.dim[axis],
+                      &concatenated_elements)) {
+      xnn_log_error(
+          "failed to reshape %s operator: concatenated dimension overflows "
+          "size_t",
+          xnn_node_type_to_string(xnn_node_type_concatenate));
+      return xnn_status_out_of_memory;
+    }
   }
   output_value->shape.dim[axis] = concatenated_elements;
-  size_t batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, axis);
+  const size_t batch_size =
+      xnn_shape_multiply_leading_dims(&output_value->shape, axis);
+  if (batch_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: batch size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_concatenate));
+    return xnn_status_out_of_memory;
+  }
   const size_t old_workspace_size = opdata->workspace_size;
   for (size_t i = 0; i < num_inputs; ++i) {
-    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, batch_size, threadpool);
+    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i],
+                                                 input_channels[i],
+                                                 output_stride, batch_size,
+                                                 threadpool);
     if (status != xnn_status_success) {
       return status;
     }
@@ -217,20 +248,43 @@ static enum xnn_status setup_concatenate_operator_helper(
     if (opdata->operator_objects[i]->state == xnn_run_state_skip) {
       continue;
     }
-    channels += opdata->operator_objects[i]->channels;
+    if (!xnn_safe_add(channels, opdata->operator_objects[i]->channels,
+                      &channels)) {
+      xnn_log_error(
+          "failed to setup %s operator: output channels offset overflows "
+          "size_t",
+          xnn_node_type_to_string(xnn_node_type_concatenate));
+      return xnn_status_out_of_memory;
+    }
   }
 
   switch (opdata->operator_objects[index]->type) {
-    case xnn_operator_type_copy_nc_x16:
+    case xnn_operator_type_copy_nc_x16: {
+      size_t byte_offset;
+      if (!xnn_safe_mul(channels, sizeof(uint16_t), &byte_offset)) {
+        xnn_log_error(
+            "failed to setup %s operator: byte offset overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_concatenate));
+        return xnn_status_out_of_memory;
+      }
       return xnn_setup_copy_nc_x16(
         opdata->operator_objects[index],
         input_data,
-        (uint16_t*) output_data + channels);
-    case xnn_operator_type_copy_nc_x32:
+        (void*) ((uintptr_t) output_data + byte_offset));
+    }
+    case xnn_operator_type_copy_nc_x32: {
+      size_t byte_offset;
+      if (!xnn_safe_mul(channels, sizeof(uint32_t), &byte_offset)) {
+        xnn_log_error(
+            "failed to setup %s operator: byte offset overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_concatenate));
+        return xnn_status_out_of_memory;
+      }
       return xnn_setup_copy_nc_x32(
         opdata->operator_objects[index],
         input_data,
-        (uint32_t*) output_data + channels);
+        (void*) ((uintptr_t) output_data + byte_offset));
+    }
     case xnn_operator_type_copy_nc_x8:
       return xnn_setup_copy_nc_x8(
         opdata->operator_objects[index],
