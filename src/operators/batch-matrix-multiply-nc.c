@@ -1168,11 +1168,23 @@ reshape_batch_matrix_multiply_nc(
   memset(&gemm_context->pack_lh, 0, sizeof(struct pack_lh_context));
   if (packed_lh_config) {
     ga_stride = packed_lh_config->size_fn(m, k, mr_packed, kr, sr);
+    if (ga_stride == SIZE_MAX) {
+      xnn_log_error(
+          "failed to reshape %s operator: packed LHS size overflows size_t",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
     log2_input_a_element_size = packed_lh_config->log2_packed_element_size;
     if (inline_lhs_packing) {
       assert(workspace_size);
       const size_t per_thread_workspace_size =
           packed_lh_config->size_fn(mr, k, mr_packed, kr, sr);
+      if (per_thread_workspace_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator: packed LHS size overflows size_t",
+            xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+        return xnn_status_out_of_memory;
+      }
 
       // If the batch size of the LHS is smaller than that of the output, then
       // it does not make sense to inline the LHS packing, as this would mean
