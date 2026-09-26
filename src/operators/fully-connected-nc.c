@@ -227,32 +227,49 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   const uint32_t planes = gemm_config->planes;
 
-  const size_t n_stride = round_up(output_channels, nr);
-
-  size_t k_stride = round_up_po2(input_channels, kr * sr);
+  size_t n_stride;
+  size_t k_stride;
+  size_t kr_sr;
+  if (!xnn_safe_round_up(output_channels, nr, &n_stride) ||
+      !xnn_safe_mul((size_t)kr, (size_t)sr, &kr_sr) ||
+      !xnn_safe_round_up_po2(input_channels, kr_sr, &k_stride)) {
+    xnn_log_error(
+        "failed to create %s operator: GEMM strides overflow size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
   if (filter_is_crumb) {
     if (planes != 4) {
       xnn_log_error("planes is %u but expected to be 4 for 2 bit", planes);
       goto error;
     }
-    k_stride = round_up_po2(input_channels, kr * sr * planes);
-
-    // If filter is 2-bit, quarter k_stride (since we will scale k_stride by
-    // log2_filter_element_size, and we pass 0 for qc2).
-    k_stride = round_up_po2(k_stride, 4) >> 2;
+    size_t k_block;
+    if (!xnn_safe_mul(kr_sr, (size_t)planes, &k_block) ||
+        !xnn_safe_round_up_po2(input_channels, k_block, &k_stride) ||
+        !xnn_safe_round_up_po2(k_stride, 4, &k_stride)) {
+      xnn_log_error(
+          "failed to create %s operator: GEMM strides overflow size_t",
+          xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+    k_stride >>= 2;
   } else if (filter_is_nibble) {
-    input_channels = round_up_po2(input_channels, planes);
-
     if (planes < 1 || planes > 2) {
       xnn_log_error("planes is %u but expected to be 1 or 2 for 4 bit", planes);
       goto error;
     }
-    k_stride = round_up_po2(input_channels, kr * sr * planes);
-
-    // If filter is 4-bit, half k_stride (since we will scale k_stride by
-    // log2_filter_element_size, and we pass 0 for qc4).
-    k_stride = round_up_po2(k_stride, 2) >> 1;
+    size_t k_block;
+    if (!xnn_safe_round_up_po2(input_channels, planes, &input_channels) ||
+        !xnn_safe_mul(kr_sr, (size_t)planes, &k_block) ||
+        !xnn_safe_round_up_po2(input_channels, k_block, &k_stride) ||
+        !xnn_safe_round_up_po2(k_stride, 2, &k_stride)) {
+      xnn_log_error(
+          "failed to create %s operator: GEMM strides overflow size_t",
+          xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+    k_stride >>= 1;
   }
 
   size_t block_scale_bytes = 0;
@@ -285,6 +302,12 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
       goto error;
     }
   }
+  if (weights_stride == SIZE_MAX) {
+    xnn_log_error(
+        "failed to create %s operator: weights stride overflows size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   size_t packed_weights_size = 0;
   if (!xnn_safe_mul(n_stride, weights_stride, &packed_weights_size)) {
     xnn_log_error(
@@ -294,9 +317,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
     goto error;
   }
   fully_connected_op->weights_stride = weights_stride;
-  size_t aligned_total_weights_size =
-      round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  if (aligned_total_weights_size < packed_weights_size) {
+  size_t aligned_total_weights_size;
+  if (!xnn_safe_round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT,
+                              &aligned_total_weights_size)) {
     xnn_log_error(
         "failed to create %s operator: aligned total weights size overflows "
         "size_t",
