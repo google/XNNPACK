@@ -2296,4 +2296,38 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
           convolution_op, overflow_batch, 1, 1, &workspace_size,
           nullptr, nullptr, nullptr));
 }
+TEST(CONVOLUTION_NHWC_F32, padded_input_height_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const float kernel[1] = {1.0f};
+  const float bias[1] = {0.0f};
+  xnn_operator_t convolution_op = nullptr;
+  const xnn_status status = xnn_create_convolution2d_nhwc_f32(
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/1,
+      /*padding_left=*/0, /*kernel_height=*/1, /*kernel_width=*/1,
+      /*subsampling_height=*/1, /*subsampling_width=*/1,
+      /*dilation_height=*/1, /*dilation_width=*/1, /*groups=*/1,
+      /*group_input_channels=*/1, /*group_output_channels=*/1,
+      /*input_channel_stride=*/1, /*output_channel_stride=*/1, kernel, bias,
+      -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), /*flags=*/0,
+      /*weights_cache=*/nullptr, &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      convolution_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  size_t workspace_size = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_convolution2d_nhwc_f32(
+          convolution_op, /*batch_size=*/1, /*input_height=*/SIZE_MAX,
+          /*input_width=*/1, &workspace_size, &output_height, &output_width,
+          /*threadpool=*/nullptr));
+}
+
 }  // namespace
