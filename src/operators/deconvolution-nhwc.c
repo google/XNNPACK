@@ -213,18 +213,32 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
     goto error;
   }
 
-  const size_t input_channels = groups * group_input_channels;
+  size_t input_channels = 0;
+  if (!xnn_safe_mul(groups, group_input_channels, &input_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: "
+        "number of input channels overflows size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   if (input_pixel_stride < input_channels) {
     xnn_log_error(
         "failed to create %s operator with input pixel stride of %zu: stride "
-        "must be at least as large as the number of output channels (%" PRIu32
+        "must be at least as large as the number of input channels (%" PRIu32
         "x%zu)",
         xnn_operator_type_to_string(operator_type), input_pixel_stride, groups,
         group_input_channels);
     goto error;
   }
 
-  const size_t output_channels = groups * group_output_channels;
+  size_t output_channels = 0;
+  if (!xnn_safe_mul(groups, group_output_channels, &output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: "
+        "number of output channels overflows size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   if (output_pixel_stride < output_channels) {
     xnn_log_error(
         "failed to create %s operator with output pixel stride of %zu: stride "
@@ -1813,7 +1827,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
   }
 
   const size_t groups = deconvolution_op->convolution_op->groups;
-  const size_t output_size = output_height * output_width;
+  size_t output_size = 0;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output size overflows size_t",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
   size_t mr = deconvolution_op->ukernel.igemm->mr;
   const uint32_t nr = deconvolution_op->ukernel.igemm->nr;
   const uint32_t mr_packed = deconvolution_op->ukernel.igemm->mr_packed;
@@ -1944,6 +1964,41 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
     }
   }
 
+  size_t input_pixel_stride_bytes = 0;
+  size_t output_pixel_stride_bytes = 0;
+  size_t input_size = 0;
+  size_t ba_stride = 0;
+  size_t bc_stride = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+  size_t input_width_stride_bytes = 0;
+  size_t kernel_size_bytes = 0;
+  size_t m_stride = 0;
+  size_t groups_batch_size = 0;
+
+  if (!xnn_safe_mul(deconvolution_op->input_pixel_stride,
+                    (size_t) 1u << log2_input_element_size,
+                    &input_pixel_stride_bytes) ||
+      !xnn_safe_mul(deconvolution_op->output_pixel_stride,
+                    (size_t) 1u << log2_output_element_size,
+                    &output_pixel_stride_bytes) ||
+      !xnn_safe_mul(input_height, input_width, &input_size) ||
+      !xnn_safe_mul(input_size, input_pixel_stride_bytes, &ba_stride) ||
+      !xnn_safe_mul(output_size, output_pixel_stride_bytes, &bc_stride) ||
+      !xnn_safe_mul(batch_size, ba_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, bc_stride, &total_output_bytes) ||
+      !xnn_safe_mul(input_width, input_pixel_stride_bytes,
+                    &input_width_stride_bytes) ||
+      !xnn_safe_mul(kernel_size, sizeof(void*), &kernel_size_bytes) ||
+      !xnn_safe_add(kernel_size_bytes, input_width_stride_bytes, &m_stride) ||
+      !xnn_safe_mul(groups, batch_size, &groups_batch_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
+
   deconvolution_op->dynamic_context.igemm->igemm = (struct igemm_context){
       .ks = kernel_size,
       .ks_scaled = kernel_size * mr * sizeof(void*),
@@ -1952,17 +2007,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
       .indirect_a = deconvolution_op->convolution_op->indirection_buffer,
       .zero = deconvolution_op->zero_buffer,
       .packed_w = packed_weights(deconvolution_op),
-      .cm_stride = deconvolution_op->output_pixel_stride
-                   << log2_output_element_size,
+      .cm_stride = output_pixel_stride_bytes,
       .cn_stride = nr << log2_output_element_size,
       .ga_stride = group_input_channels << log2_input_element_size,
       .gw_stride = w_stride * round_up(group_output_channels, nr),
       .gc_stride = group_output_channels << log2_output_element_size,
-      .ba_stride =
-          input_height * input_width * deconvolution_op->input_pixel_stride
-          << log2_input_element_size,
-      .bc_stride = output_size * deconvolution_op->output_pixel_stride
-                   << log2_output_element_size,
+      .ba_stride = ba_stride,
+      .bc_stride = bc_stride,
       .log2_csize = log2_output_element_size,
       .ukernel = igemm_ukernel,
       .mr = mr,
@@ -1982,11 +2033,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
       (packed_lh_config && inline_lhs_packing)
           ? group_output_channels
           : xnn_gemm_best_tile_size(
-                groups * batch_size, /*m=*/output_size,
+                groups_batch_size, /*m=*/output_size,
                 /*n=*/group_output_channels,
-                /*m_stride=*/kernel_size * sizeof(void*) +
-                    (input_width * deconvolution_op->input_pixel_stride
-                     << log2_input_element_size),
+                /*m_stride=*/m_stride,
                 /*n_stride=*/
                 deconvolution_op->dynamic_context.igemm->igemm.w_stride,
                 /*cn_stride=*/1 << log2_output_element_size, mr, nr,
@@ -2085,16 +2134,51 @@ static enum xnn_status reshape_subconv2d_path(
       divide_round_up(output_width, stride_width);
 
   const size_t groups = deconvolution_op->convolution_op->groups;
-  const size_t output_size = output_height * output_width;
+  size_t output_size = 0;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output size overflows size_t",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
   const uint32_t nr = deconvolution_op->ukernel.igemm->nr;
   const uint32_t mr = xnn_get_heuristic_mr_igemm(
       batch_size, deconvolution_op->ukernel.igemm->mr, nr,
       deconvolution_op->ukernel.igemm->igemm_cases);
 
-  const size_t input_pixel_stride = deconvolution_op->input_pixel_stride
-                                    << log2_input_element_size;
-  const size_t output_pixel_stride = deconvolution_op->output_pixel_stride
-                                     << log2_output_element_size;
+  size_t input_pixel_stride = 0;
+  size_t output_pixel_stride = 0;
+  size_t cx_stride = 0;
+  size_t stride_height_output_width = 0;
+  size_t cy_stride = 0;
+  size_t input_size = 0;
+  size_t ba_stride = 0;
+  size_t bc_stride = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+
+  if (!xnn_safe_mul(deconvolution_op->input_pixel_stride,
+                    (size_t) 1u << log2_input_element_size,
+                    &input_pixel_stride) ||
+      !xnn_safe_mul(deconvolution_op->output_pixel_stride,
+                    (size_t) 1u << log2_output_element_size,
+                    &output_pixel_stride) ||
+      !xnn_safe_mul(stride_width, output_pixel_stride, &cx_stride) ||
+      !xnn_safe_mul(stride_height, output_width,
+                    &stride_height_output_width) ||
+      !xnn_safe_mul(stride_height_output_width, output_pixel_stride,
+                    &cy_stride) ||
+      !xnn_safe_mul(input_height, input_width, &input_size) ||
+      !xnn_safe_mul(input_size, input_pixel_stride, &ba_stride) ||
+      !xnn_safe_mul(output_size, output_pixel_stride, &bc_stride) ||
+      !xnn_safe_mul(batch_size, ba_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, bc_stride, &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
 
   const bool any_size_change =
       input_height != deconvolution_op->convolution_op->last_input_height ||
@@ -2193,7 +2277,7 @@ static enum xnn_status reshape_subconv2d_path(
         mr, deconvolution_op->convolution_op->indirection_buffer,
         deconvolution_op->convolution_op->subconvolution_buffer,
         deconvolution_op->convolution_op->input,
-        deconvolution_op->input_pixel_stride << log2_input_element_size,
+        input_pixel_stride,
         deconvolution_op->zero_buffer,
         deconvolution_op->convolution_op->input_height,
         deconvolution_op->convolution_op->input_width,
@@ -2232,14 +2316,14 @@ static enum xnn_status reshape_subconv2d_path(
           deconvolution_op->convolution_op->subconvolution_buffer,
       .kc = group_input_channels << log2_input_element_size,
       .zero = deconvolution_op->zero_buffer,
-      .cx_stride = stride_width * output_pixel_stride,
-      .cy_stride = stride_height * output_width * output_pixel_stride,
+      .cx_stride = cx_stride,
+      .cy_stride = cy_stride,
       .cn_stride = nr << log2_output_element_size,
       .ga_stride = group_input_channels << log2_input_element_size,
       .gw_stride = w_stride * round_up(group_output_channels, nr),
       .gc_stride = group_output_channels << log2_output_element_size,
-      .ba_stride = input_height * input_width * input_pixel_stride,
-      .bc_stride = output_size * output_pixel_stride,
+      .ba_stride = ba_stride,
+      .bc_stride = bc_stride,
       .log2_csize = log2_output_element_size,
       .ukernel = igemm_cases[mr - 1],
   };
