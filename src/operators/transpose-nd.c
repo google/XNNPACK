@@ -314,6 +314,11 @@ static enum xnn_status reshape_transpose_nd(
       transpose_op->compute[0].tile[1] = transpose_config->x32.tile_size;
       context->const_size_ukernel = transpose_config->x32.const_size_ukernel;
       break;
+    case 8:
+      transpose_op->compute[0].tile[0] = transpose_config->x64.tile_size;
+      transpose_op->compute[0].tile[1] = transpose_config->x64.tile_size;
+      context->const_size_ukernel = transpose_config->x64.const_size_ukernel;
+      break;
     default: {
       // Chose the tile size such that ~64k of data are processed per
       // microkernel call.
