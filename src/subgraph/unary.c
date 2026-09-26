@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -199,8 +200,15 @@ static enum xnn_status reshape_convert_operator(
 
       if (num_channels > 0 && qc8_batch_size > 0) {
         xnn_operator_t op = opdata->operator_objects[0];
-        const size_t bytes_needed =
-            num_channels * sizeof(float) * qc8_batch_size;
+        size_t bytes_needed;
+        if (!xnn_safe_mul(num_channels, sizeof(float), &bytes_needed) ||
+            !xnn_safe_mul(bytes_needed, qc8_batch_size, &bytes_needed)) {
+          xnn_log_error(
+            "failed to reshape %s operator with input ID #%" PRIu32
+            ": channelwise quantization buffer size overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_convert), input_id);
+          return xnn_status_out_of_memory;
+        }
         if (op->channelwise_quantization_buffer_capacity < bytes_needed) {
           xnn_release_memory(op->channelwise_quantization_buffer);
           op->channelwise_quantization_buffer = xnn_allocate_memory(bytes_needed);
