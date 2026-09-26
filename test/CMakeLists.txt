@@ -493,4 +493,9 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   ADD_EXECUTABLE(microkernel-utils-test microkernel-utils.cc)
   TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE xnnpack-microkernel-utils xnnpack-hardware-config xnnpack-logging GTest::gtest GTest::gtest_main pthreadpool)
+
+  ADD_EXECUTABLE(hardware-config-reset-test hardware-config-reset.cc)
+  TARGET_LINK_LIBRARIES(hardware-config-reset-test PRIVATE
+    XNNPACK pthreadpool GTest::gtest GTest::gtest_main)
+  ADD_TEST(NAME hardware-config-reset-test COMMAND hardware-config-reset-test)
 ENDIF()
