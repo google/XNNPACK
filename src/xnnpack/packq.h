@@ -30,6 +30,10 @@ inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
 inline static size_t lhs_packed_stride(size_t k, size_t mr_packed, size_t kr,
                                        size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
+  // round_up() wraps on overflow; a wrapped result is always smaller than k.
+  if (k_internal < k) {
+    return SIZE_MAX;
+  }
 
   assert((k_internal % 2) == 0);
 
@@ -38,22 +42,56 @@ inline static size_t lhs_packed_stride(size_t k, size_t mr_packed, size_t kr,
   static const size_t kai_num_bytes_per_multiplier = sizeof(float);
   static const size_t kai_num_bytes_per_offset = sizeof(int32_t);
 
-  return mr_packed * (k_internal * sizeof(int8_t) +
-                      kai_num_bytes_per_multiplier + kai_num_bytes_per_offset);
+  // Returns SIZE_MAX on overflow so callers can detect and reject the size
+  // before the wrapped value is treated as an allocation size.
+  size_t row_bytes;
+  if (!xnn_safe_mul(k_internal, sizeof(int8_t), &row_bytes) ||
+      !xnn_safe_add(row_bytes, kai_num_bytes_per_multiplier, &row_bytes) ||
+      !xnn_safe_add(row_bytes, kai_num_bytes_per_offset, &row_bytes)) {
+    return SIZE_MAX;
+  }
+  size_t stride;
+  if (!xnn_safe_mul(mr_packed, row_bytes, &stride)) {
+    return SIZE_MAX;
+  }
+  return stride;
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_offset(
     size_t m_idx, size_t k, size_t mr_packed, size_t kr, size_t sr) {
   // It always points to the beginning of the row
-  return (m_idx / mr_packed) * lhs_packed_stride(k, mr_packed, kr, sr);
+  const size_t stride = lhs_packed_stride(k, mr_packed, kr, sr);
+  if (stride == SIZE_MAX) {
+    return SIZE_MAX;
+  }
+  size_t offset;
+  if (!xnn_safe_mul(m_idx / mr_packed, stride, &offset)) {
+    return SIZE_MAX;
+  }
+  return offset;
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k,
                                                          size_t mr_packed,
                                                          size_t kr, size_t sr) {
-  const size_t num_rows = round_up(m, mr_packed) / mr_packed;
+  const size_t m_rounded = round_up(m, mr_packed);
+  // round_up() wraps on overflow; a wrapped result is always smaller than m.
+  if (m_rounded < m) {
+    return SIZE_MAX;
+  }
+  const size_t num_rows = m_rounded / mr_packed;
 
-  return num_rows * lhs_packed_stride(k, mr_packed, kr, sr);
+  const size_t stride = lhs_packed_stride(k, mr_packed, kr, sr);
+  if (stride == SIZE_MAX) {
+    return SIZE_MAX;
+  }
+  // Returns SIZE_MAX on overflow so callers can detect and reject the size
+  // before the wrapped value is treated as an allocation size.
+  size_t packed_size;
+  if (!xnn_safe_mul(num_rows, stride, &packed_size)) {
+    return SIZE_MAX;
+  }
+  return packed_size;
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(
