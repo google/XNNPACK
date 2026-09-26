@@ -129,6 +129,23 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
 
   const size_t group_size =
       pack_lh_config->size_fn(batch_size, channels, mr_packed, kr, sr);
+  if (group_size == SIZE_MAX) {
+    *output_size_bytes = SIZE_MAX;
+    xnn_log_error(
+        "failed to reshape %s operator: packed group size overflows size_t",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_out_of_memory;
+  }
+  size_t lhs_stride;
+  size_t gi_stride;
+  if (!xnn_safe_mul(channels, element_size, &lhs_stride) ||
+      !xnn_safe_mul(batch_size, lhs_stride, &gi_stride)) {
+    *output_size_bytes = SIZE_MAX;
+    xnn_log_error(
+        "failed to reshape %s operator: input strides overflow size_t",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_out_of_memory;
+  }
 
   pack_lh_op->context.pack_lh = (struct pack_lh_context){
       .m = batch_size,
@@ -136,8 +153,8 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
       .mr = mr_packed,
       .kr = kr,
       .sr = sr,
-      .lhs_stride = channels * element_size,
-      .gi_stride = batch_size * channels * element_size,
+      .lhs_stride = lhs_stride,
+      .gi_stride = gi_stride,
       .gp_stride = group_size,
       .packed_offset_fn = (xnn_pack_lh_offset_fn)pack_lh_config->offset_fn,
       .pack_lh_ukernel = (xnn_pack_lh_ukernel_fn)pack_lh_config->pack_lh_fn,
