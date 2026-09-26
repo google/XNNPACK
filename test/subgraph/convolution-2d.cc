@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+#include <memory>
 #include <random>
 #include <utility>
 #include <vector>
@@ -17,8 +18,13 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/stencil.h"
@@ -366,6 +372,10 @@ TEST(Convolution2DF16F16F32, test) {
 }
 TEST(Convolution2DF16F32, test) { TestImpl<xnn_float16, float, float>(); }
 TEST(Convolution2DF32, test) { TestImpl<float, float, float>(); }
+TEST(Convolution2DBF16, test) { TestImpl<xnn_bfloat16, xnn_bfloat16, float>(); }
+TEST(Convolution2DBF16BF16BF16, test) {
+  TestImpl<xnn_bfloat16, xnn_bfloat16, xnn_bfloat16>();
+}
 TEST(Convolution2DF32F16, test) { TestImpl<float, xnn_float16, xnn_float16>(); }
 TEST(Convolution2DQD8F16QC8W, test) {
   TestImpl<xnn_float16, qcint8, float>(
@@ -373,6 +383,93 @@ TEST(Convolution2DQD8F16QC8W, test) {
 }
 TEST(Convolution2DQD8F32QC8W, test) {
   TestImpl<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
+}
+
+// Returns the type of the operator created for the only convolution node of a
+// bf16 -> bf16 convolution runtime.
+xnn_operator_type Bf16ConvolutionOperatorType(const ConvolutionParams& params) {
+  const std::vector<size_t> input_shape = {
+      1, 5, 7, params.groups * params.group_input_channels};
+  const std::vector<size_t> output_shape = {
+      1, 5 - params.kernel.height + 1, 7 - params.kernel.width + 1,
+      params.groups * params.group_output_channels};
+  const std::vector<size_t> filter_shape = {
+      params.groups * params.group_output_channels, params.kernel.height,
+      params.kernel.width, params.group_input_channels};
+  Tensor<xnn_bfloat16> filter(filter_shape, XnnExtraBytes);
+  filter.fill(xnn_bfloat16(0.5f));
+
+  xnn_subgraph_t subgraph = nullptr;
+  EXPECT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_bf16, input_shape.size(),
+                              input_shape.data(), nullptr, 0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_bf16, filter_shape.size(),
+                              filter_shape.data(), filter.base(),
+                              XNN_INVALID_VALUE_ID, 0, &filter_id));
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_bf16, output_shape.size(),
+                              output_shape.data(), nullptr, 1,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_define_convolution_2d(
+          subgraph, 0, 0, 0, 0, params.kernel.height, params.kernel.width, 1, 1,
+          1, 1, params.groups, params.group_input_channels,
+          params.group_output_channels, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), input_id, filter_id,
+          XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  EXPECT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr, 0, &runtime));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  xnn_operator_type type = xnn_operator_type_invalid;
+  for (size_t i = 0; runtime != nullptr && i < runtime->num_ops; i++) {
+    if (runtime->opdata[i].type == xnn_node_type_convolution_2d) {
+      type = runtime->opdata[i].operator_objects[0]->type;
+    }
+  }
+  return type;
+}
+
+TEST(Convolution2DBF16, depthwise_uses_bf16_f32_operator) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  ConvolutionParams params;
+  params.kernel = {1, 4};
+  params.groups = 48;
+  params.group_input_channels = 1;
+  params.group_output_channels = 1;
+  EXPECT_EQ(Bf16ConvolutionOperatorType(params),
+            xnn_init_bf16_f32_dwconv_config() != nullptr
+                ? xnn_operator_type_convolution_nhwc_bf16_f32
+                : xnn_operator_type_convolution_nhwc_f32);
+}
+
+TEST(Convolution2DBF16, uses_bf16_f32_operator) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  ConvolutionParams params;
+  params.kernel = {3, 3};
+  params.groups = 1;
+  params.group_input_channels = 5;
+  params.group_output_channels = 17;
+  EXPECT_EQ(Bf16ConvolutionOperatorType(params),
+            xnn_init_bf16_f32_igemm_config()->mr != 0
+                ? xnn_operator_type_convolution_nhwc_bf16_f32
+                : xnn_operator_type_convolution_nhwc_f32);
 }
 
 TEST(Convolution2D, reshape_rejects_input_channel_mismatch) {

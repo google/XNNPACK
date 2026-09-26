@@ -169,6 +169,35 @@ static enum xnn_status create_convolution_operator(
     switch (output_datatype) {
       case xnn_datatype_fp32:
         switch (filter_datatype) {
+          case xnn_datatype_bf16:
+            // The bf16 fallback only keeps bf16 convolutions with a bf16
+            // input, a bf16 filter and an fp32 bias (if any) native.
+            assert(input_datatype == xnn_datatype_bf16);
+            assert(bias_datatype == xnn_datatype_invalid ||
+                   bias_datatype == xnn_datatype_fp32);
+            status = xnn_create_convolution2d_nhwc_bf16_f32(
+                node->params.convolution_2d.input_padding_top,
+                node->params.convolution_2d.input_padding_right,
+                node->params.convolution_2d.input_padding_bottom,
+                node->params.convolution_2d.input_padding_left,
+                node->params.convolution_2d.kernel_height,
+                node->params.convolution_2d.kernel_width,
+                node->params.convolution_2d.subsampling_height,
+                node->params.convolution_2d.subsampling_width,
+                node->params.convolution_2d.dilation_height,
+                node->params.convolution_2d.dilation_width,
+                node->params.convolution_2d.groups,
+                node->params.convolution_2d.group_input_channels,
+                node->params.convolution_2d.group_output_channels,
+                node->params.convolution_2d.group_input_channels *
+                    node->params.convolution_2d.groups /* input_pixel_stride */,
+                node->params.convolution_2d.group_output_channels *
+                    node->params.convolution_2d
+                        .groups /* output_pixel_stride */,
+                filter_data, bias_data, node->activation.output_min,
+                node->activation.output_max, node->flags, weights_cache,
+                &opdata->operator_objects[0]);
+            break;
           case xnn_datatype_fp16: {
             uint32_t flags = node->flags;
             if (bias_datatype == xnn_datatype_fp32) {
@@ -723,6 +752,11 @@ enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
           opdata->operator_objects[0], batch_size, input_height, input_width,
           &output_height, &output_width, threadpool);
       break;
+    case xnn_operator_type_convolution_nhwc_bf16_f32:
+      status = xnn_reshape_convolution2d_nhwc_bf16_f32(
+          opdata->operator_objects[0], batch_size, input_height, input_width,
+          &opdata->workspace_size, &output_height, &output_width, threadpool);
+      break;
     case xnn_operator_type_convolution_nhwc_f32:
       status = xnn_reshape_convolution2d_nhwc_f32(
           opdata->operator_objects[0], batch_size, input_height, input_width,
@@ -851,6 +885,11 @@ enum xnn_status setup_convolution_operator(
       return xnn_setup_convolution2d_nchw_f32(opdata->operator_objects[0],
                                               input_data, output_data);
       break;
+    case xnn_operator_type_convolution_nhwc_bf16_f32:
+      return xnn_setup_convolution2d_nhwc_bf16_f32(opdata->operator_objects[0],
+                                                   opdata->workspace,
+                                                   input_data, output_data);
+      break;
     case xnn_operator_type_convolution_nhwc_f32:
       return xnn_setup_convolution2d_nhwc_f32(opdata->operator_objects[0],
                                               opdata->workspace, input_data,
@@ -939,6 +978,15 @@ static inline bool validate_datatypes_with_bias(
     enum xnn_datatype input_datatype, enum xnn_datatype filter_datatype,
     enum xnn_datatype bias_datatype, enum xnn_datatype output_datatype) {
   switch (filter_datatype) {
+    case xnn_datatype_bf16:
+      if (input_datatype == xnn_datatype_bf16 &&
+          (bias_datatype == xnn_datatype_bf16 ||
+           bias_datatype == xnn_datatype_fp32) &&
+          (output_datatype == xnn_datatype_bf16 ||
+           output_datatype == xnn_datatype_fp32)) {
+        return true;
+      }
+      break;
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 &&
           bias_datatype == xnn_datatype_fp32 &&
@@ -1006,6 +1054,13 @@ static inline bool validate_datatypes_without_bias(
     enum xnn_datatype input_datatype, enum xnn_datatype filter_datatype,
     enum xnn_datatype output_datatype) {
   switch (filter_datatype) {
+    case xnn_datatype_bf16:
+      if (input_datatype == xnn_datatype_bf16 &&
+          (output_datatype == xnn_datatype_bf16 ||
+           output_datatype == xnn_datatype_fp32)) {
+        return true;
+      }
+      break;
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
@@ -1177,6 +1232,7 @@ enum xnn_status xnn_define_convolution_2d(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_bf16:
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
@@ -1228,6 +1284,7 @@ enum xnn_status xnn_define_convolution_2d(
   }
 
   switch (filter_value->datatype) {
+    case xnn_datatype_bf16:
     case xnn_datatype_fp32:
     case xnn_datatype_fp16:
       break;
@@ -1283,6 +1340,7 @@ enum xnn_status xnn_define_convolution_2d(
     }
 
     switch (bias_value->datatype) {
+      case xnn_datatype_bf16:
       case xnn_datatype_fp16:
       case xnn_datatype_fp32:
       case xnn_datatype_qint32:
@@ -1323,6 +1381,7 @@ enum xnn_status xnn_define_convolution_2d(
   }
 
   switch (output_value->datatype) {
+    case xnn_datatype_bf16:
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
@@ -1395,7 +1454,10 @@ enum xnn_status xnn_define_convolution_2d(
   }
   const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
   const size_t kernel_size = kernel_height * kernel_width;
-  if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
+  // bf16 fully-connected only supports an fp32 output, so 1x1 bf16
+  // convolutions stay convolutions.
+  if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding &&
+      filter_value->datatype != xnn_datatype_bf16) {
     // Check if the convolution can take the vmulcaddc path.
     if (group_input_channels + group_output_channels > 2) {
       if (input_value->datatype == xnn_datatype_qdint8) {
