@@ -829,8 +829,8 @@ void ynn_runtime::schedule() {
       // which doesn't slice its output would recompute the function on every
       // iteration of that loop.
       compute_at = 0;
-      while (compute_at < loop_nest.size()) {
-        loop_level& global_loop = global_loop_nest[loop_nest[compute_at]];
+      for (int level = 0; level < loop_nest.size(); ++level) {
+        loop_level& global_loop = global_loop_nest[loop_nest[level]];
         // Map the consumer's loop variable back to its output dimension
         // index.
         const int consumer_source_region =
@@ -840,12 +840,17 @@ void ynn_runtime::schedule() {
             find_matching_split(globals, f, loop_splits, split_matched,
                                 consumer_source_region, source_regions);
         if (matched_split == -1) {
+          if (sched->allow_skip_unmatched_loop &&
+              prove_true(global_loop.extent < 256, globals.fact_bounds,
+                         globals.fact_alignment)) {
+            continue;
+          }
           break;
         }
         split_matched[matched_split] = true;
         reconcile_step(globals, global_loop, loop_splits[matched_split],
                        loop_splits);
-        compute_at++;
+        compute_at = level + 1;
       }
       // Remove the inner part of the loop nest which we were not able to
       // match.

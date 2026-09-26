@@ -271,6 +271,16 @@ MATCHER(IsGather, "") {
   return std::holds_alternative<ynn_node::gather>(arg.op);
 }
 
+MATCHER(IsPackA, "") {
+  return std::holds_alternative<ynn_node::pack_a>(arg.op);
+}
+
+MATCHER_P3(IsPackA, tile_m, tile_k, m_dim, "") {
+  const ynn_node::pack_a* pack = std::get_if<ynn_node::pack_a>(&arg.op);
+  return pack && pack->tile_m == tile_m && pack->tile_k == tile_k &&
+         pack->m_dim == m_dim;
+}
+
 MATCHER(IsPackB, "") {
   return std::holds_alternative<ynn_node::pack_b>(arg.op);
 }
