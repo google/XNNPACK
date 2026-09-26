@@ -1409,16 +1409,37 @@ static enum xnn_status reshape_convolution2d_nchw(
   // 1 via the trailing `+ 1`, producing a phantom output for which no valid
   // receptive field exists, and the run-time kernel then addresses input
   // pixels outside the input tensor (out-of-bounds read).
-  const size_t padded_input_height = convolution_op->convolution_op->padding_top +
-      input_height + convolution_op->convolution_op->padding_bottom;
-  const size_t padded_input_width = convolution_op->convolution_op->padding_left +
-      input_width + convolution_op->convolution_op->padding_right;
-  const size_t effective_kernel_height =
-      (convolution_op->convolution_op->kernel_height - 1) *
-          convolution_op->convolution_op->dilation_height + 1;
-  const size_t effective_kernel_width =
-      (convolution_op->convolution_op->kernel_width - 1) *
-          convolution_op->convolution_op->dilation_width + 1;
+  size_t padded_input_height;
+  size_t padded_input_width;
+  size_t effective_kernel_height;
+  size_t effective_kernel_width;
+  if (convolution_op->convolution_op->kernel_height == 0 ||
+      convolution_op->convolution_op->kernel_width == 0 ||
+      !xnn_safe_add((size_t)convolution_op->convolution_op->padding_top,
+                    input_height, &padded_input_height) ||
+      !xnn_safe_add(padded_input_height,
+                    convolution_op->convolution_op->padding_bottom,
+                    &padded_input_height) ||
+      !xnn_safe_add((size_t)convolution_op->convolution_op->padding_left,
+                    input_width, &padded_input_width) ||
+      !xnn_safe_add(padded_input_width,
+                    convolution_op->convolution_op->padding_right,
+                    &padded_input_width) ||
+      !xnn_safe_mul(
+          (size_t)convolution_op->convolution_op->kernel_height - 1,
+          convolution_op->convolution_op->dilation_height,
+          &effective_kernel_height) ||
+      !xnn_safe_add(effective_kernel_height, 1, &effective_kernel_height) ||
+      !xnn_safe_mul(
+          (size_t)convolution_op->convolution_op->kernel_width - 1,
+          convolution_op->convolution_op->dilation_width,
+          &effective_kernel_width) ||
+      !xnn_safe_add(effective_kernel_width, 1, &effective_kernel_width)) {
+    xnn_log_error(
+        "failed to reshape %s operator: convolution dimensions overflow size_t",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
   if (padded_input_height < effective_kernel_height ||
       padded_input_width < effective_kernel_width) {
     xnn_log_error(
