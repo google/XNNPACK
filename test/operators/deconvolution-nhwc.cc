@@ -3559,3 +3559,41 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
     ASSERT_EQ(output[i], reference_output[i]) << "at index " << i;
   }
 }
+
+// A tiled output size that wraps to a small value yields an undersized
+// indirection buffer, which the setup path then writes past. The boundary is
+// exact: SIZE_MAX - 1 is rejected by the size guard, but SIZE_MAX wraps
+// round_up() to a small value that passes the guard.
+TEST(DECONVOLUTION_NHWC_F32, tiled_output_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::array<float, 1> kernel{{1.0f}};
+  const std::array<float, 1> bias{{0.0f}};
+  xnn_operator_t deconvolution_op = nullptr;
+  const xnn_status status = xnn_create_deconvolution2d_nhwc_f32(
+      /*output_padding_top=*/0, /*output_padding_right=*/0,
+      /*output_padding_bottom=*/0, /*output_padding_left=*/0,
+      /*kernel_height=*/1, /*kernel_width=*/1, /*stride_height=*/1,
+      /*stride_width=*/1, /*dilation_height=*/1, /*dilation_width=*/1,
+      /*groups=*/1, /*group_input_channels=*/1, /*group_output_channels=*/1,
+      /*input_pixel_stride=*/1, /*output_pixel_stride=*/1, kernel.data(),
+      bias.data(), -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), /*flags=*/0,
+      /*weights_cache=*/nullptr, &deconvolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      deconvolution_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_deconvolution2d_nhwc_f32(
+          deconvolution_op, /*batch_size=*/1, /*input_height=*/1,
+          /*input_width=*/SIZE_MAX, /*adjustment_height=*/0,
+          /*adjustment_width=*/0, &output_height, &output_width,
+          /*threadpool=*/nullptr));
+}
