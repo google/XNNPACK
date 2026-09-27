@@ -1360,7 +1360,12 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       float* packed_b = (float*)packed_weights;
-      std::fill_n(packed_b, nr, 0.0f);
+      // packed_weights is advanced a byte at a time by the 4-bit writes below,
+      // so it is not necessarily 4-byte aligned here. Zero the bias padding as
+      // bytes rather than through a float lvalue, which would require that
+      // alignment. The later packed_b accesses go through the unaligned
+      // load/store helpers and are unaffected.
+      memset(packed_weights, 0, nr * sizeof(float));
       packed_weights = (float*)packed_weights + nr;
 
       for (size_t kr_block_start = 0;
@@ -1478,7 +1483,12 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*)packed_weights;
-      std::fill_n(packed_b, nr, 0);
+      // packed_weights is advanced a byte at a time by the 4-bit writes below,
+      // so it is not necessarily 4-byte aligned here. Zero the bias padding as
+      // bytes rather than through an int32_t lvalue, which would require that
+      // alignment. The later packed_b accesses go through the unaligned
+      // load/store helpers and are unaffected.
+      memset(packed_weights, 0, nr * sizeof(int32_t));
       packed_weights = (float*)packed_weights + nr;
 
       for (size_t kr_block_start = 0;
