@@ -1498,6 +1498,11 @@ Tensor<Mixins...> Concatenation(
   }
   for (size_t i = 1; i < inputs.size(); ++i) {
     const graph::TensorInformation& input_info = *GetInfo(inputs[i].GetRaw());
+    if (axis >= static_cast<int>(input_info.shape.size())) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "Concatenation input %zu has rank %zu, which is less than axis %d.",
+          i, input_info.shape.size(), axis));
+    }
     output_info.shape[axis] += input_info.shape[axis];
   }
 
