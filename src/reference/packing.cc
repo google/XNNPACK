@@ -159,8 +159,19 @@ void xnn_pack_bf16_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      float* packed_weights_float = (float*)packed_weights;
-      copy_bias(bias, nr_block_start, nr_block_size, packed_weights_float);
+      // packed_weights advances by 2-byte xnn_bfloat16 units inside the kr
+      // block loop, so when kc and nr are both odd the running offset is 2 mod
+      // 4 and this pointer is not 4-byte aligned. Copy the bias as bytes,
+      // which has no alignment requirement. Passing an unaligned_float* to
+      // copy_bias is not enough: the aligned(1) attribute does not survive
+      // template argument deduction, so copy_bias still instantiates on
+      // float.
+      if (bias != NULL) {
+        memcpy(packed_weights, bias + nr_block_start,
+               nr_block_size * sizeof(float));
+      } else {
+        memset(packed_weights, 0, nr_block_size * sizeof(float));
+      }
       packed_weights = (void*)((uintptr_t)packed_weights + nr * sizeof(float));
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
@@ -1929,7 +1940,19 @@ void xnn_pack_bf16_f32_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      copy_bias(b, nr_block_start, nr_block_size, (float*)packed_weights);
+      // packed_weights advances by 2-byte xnn_bfloat16 units inside the kr
+      // block loop, so when kc and nr are both odd the running offset is 2 mod
+      // 4 and this pointer is not 4-byte aligned. Copy the bias as bytes,
+      // which has no alignment requirement. Passing an unaligned_float* to
+      // copy_bias is not enough: the aligned(1) attribute does not survive
+      // template argument deduction, so copy_bias still instantiates on
+      // float.
+      if (b != NULL) {
+        memcpy(packed_weights, b + nr_block_start,
+               nr_block_size * sizeof(float));
+      } else {
+        memset(packed_weights, 0, nr_block_size * sizeof(float));
+      }
       packed_weights = (float*)packed_weights + nr;
 
       // Special case for trivial packings.
