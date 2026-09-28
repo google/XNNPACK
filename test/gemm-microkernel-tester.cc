@@ -4458,7 +4458,7 @@ void GemmMicrokernelTester::Test(
   gemm_minmax(m(), n(), k() * sizeof(xnn_bfloat16),
               reinterpret_cast<const uint16_t*>(a.data()),
               a_stride() * sizeof(xnn_bfloat16), packed_w.data(), c.data(),
-              cm_stride() * sizeof(float), /*unused_cn_stride=*/0, &params);
+              cm_stride() * sizeof(float), nr() * sizeof(float), &params);
 
   // Validate micro-kernel outputs.
   for (size_t i = 0; i < m(); i++) {
@@ -4468,6 +4468,113 @@ void GemmMicrokernelTester::Test(
           << "at " << i << ", " << j << ": Mr x Nr x Kr = " << mr() << " x "
           << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n()
           << " x " << k();
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(
+    xnn_bf16_f32_igemm_minmax_ukernel_fn igemm_minmax,
+    xnn_init_f32_minmax_params_fn init_params,
+    xnn_pack_bf16_f32_igemm_fn pack) const {
+  ASSERT_LE(m(), mr());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
+                          std::ref(rng));
+
+  const size_t a_size = (mr() - 1) * a_stride() + k();
+  const size_t a_extra = XNN_EXTRA_BYTES / sizeof(xnn_bfloat16);
+  xnnpack::Buffer<xnn_bfloat16> a(a_size + a_extra);
+  xnnpack::Buffer<xnn_bfloat16> b(n() * ks() * k());
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> packed_w(
+      (ks() * packed_k() * sizeof(xnn_bfloat16) + sizeof(float)) * packed_n());
+  xnnpack::Buffer<float> bias(n());
+  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<float> c_ref(m() * n());
+  xnnpack::Buffer<xnn_bfloat16> junk(k(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<const xnn_bfloat16*> im2col(mr() * ks());
+
+  std::generate(a.begin(), a.end(), f32rng);
+  std::generate(b.begin(), b.end(), f32rng);
+  std::generate(bias.begin(), bias.end(), f32rng);
+  std::generate(junk.begin(), junk.end(), f32rng);
+  // Poison the elements past the end of the input: micro-kernels must not let
+  // them leak into the result when the number of input channels is odd.
+  std::fill(a.begin() + a_size, a.end(),
+            xnn_bfloat16_from_bits(UINT16_C(0x7FC0)));
+
+  pack(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(),
+       reinterpret_cast<const uint16_t*>(b.data()), bias.data(),
+       /*scale=*/nullptr, packed_w.data(),
+       /*extra_bytes=*/0, /*params=*/nullptr);
+
+  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+    for (size_t m_index = 0; m_index < mr(); m_index++) {
+      im2col[ks_index * mr() + m_index] =
+          a.data() + a_stride() * m_index - a_offset();
+    }
+  }
+  std::shuffle(im2col.begin(), im2col.end(), rng);
+  if (zero_index() != SIZE_MAX) {
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      im2col[ks_index * mr() + zero_index()] = a.data();
+    }
+  }
+  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+    for (size_t m_index = m(); m_index < mr(); m_index++) {
+      im2col[ks_index * mr() + m_index] = junk.data();
+    }
+  }
+
+  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+        const xnn_bfloat16* row = im2col[ks_index * mr() + m_index];
+        const size_t offset = row == a.data() ? 0 : a_offset();
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          c_ref[m_index * n() + n_index] +=
+              static_cast<float>(row[k_index + offset]) *
+              static_cast<float>(
+                  b[(n_index * ks() + ks_index) * k() + k_index]);
+        }
+      }
+      c_ref[m_index * n() + n_index] += bias[n_index];
+    }
+  }
+
+  // Prepare parameters.
+  xnn_f32_minmax_params params;
+  init_params(&params, min(), max());
+
+  for (float& c_value : c_ref) {
+    c_value = std::max(std::min(c_value, max()), min());
+  }
+
+  const xnn_bfloat16* zero_pointer =
+      (zero_index() != SIZE_MAX) ? a.data() : nullptr;
+
+  igemm_minmax(
+      m(), n(), k() * sizeof(xnn_bfloat16), ks() * mr() * sizeof(void*),
+      reinterpret_cast<const xnn_bfloat16**>(im2col.data()), packed_w.data(),
+      c.data(), cm_stride() * sizeof(float), nr() * sizeof(float),
+      a_offset() * sizeof(xnn_bfloat16), zero_pointer, &params);
+
+  // The inputs and weights are exactly representable in fp32, so the only
+  // error comes from the fp32 accumulation order.
+  const float tolerance = compute_sum_tolerance(
+      /*max_abs_product=*/1.0f, ks() * k(),
+      std::numeric_limits<float>::epsilon());
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      ASSERT_LE(c[i * cm_stride() + j], max());
+      ASSERT_GE(c[i * cm_stride() + j], min());
+      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], tolerance)
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << c[i * cm_stride() + j]
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k()
+          << " x " << ks();
     }
   }
 }

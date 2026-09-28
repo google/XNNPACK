@@ -296,6 +296,7 @@ xnnpack_cxx_library(
         ":dwconv_microkernel_tester",
     ],
 ) for (kernel, shard_count) in [
+    ("bf16_f32_dwconv_minmax", 1),
     ("f16_dwconv_minmax", 5),
     ("f32_dwconv_minmax", 5),
     ("f32_dwconv", 5),
@@ -330,6 +331,16 @@ xnnpack_unit_test(
     name = "bf16_f32_gemm_minmax_test",
     srcs = [
         "bf16-f32-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "bf16_f32_igemm_minmax_test",
+    srcs = [
+        "bf16-f32-igemm-minmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",

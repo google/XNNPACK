@@ -264,12 +264,14 @@ XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_pavgpool_config();
 
 #define XNN_MAX_F16_DWCONV_UKERNELS 4
 #define XNN_MAX_F32_DWCONV_UKERNELS 4
+#define XNN_MAX_BF16_F32_DWCONV_UKERNELS 4
 #define XNN_MAX_QC8_DWCONV_UKERNELS 3
 #define XNN_MAX_QS8_DWCONV_UKERNELS 2
 #define XNN_MAX_QU8_DWCONV_UKERNELS 2
 
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_f16_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_f32_dwconv_config();
+XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_bf16_f32_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qs8_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();
@@ -387,6 +389,7 @@ static inline bool xnn_is_hmp_igemm_ukernel(
 }
 
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(
     uint32_t flags);

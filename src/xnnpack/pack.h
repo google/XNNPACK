@@ -770,10 +770,20 @@ XNN_INTERNAL void xnn_pack_f16_conv_goki_w(
     const uint16_t* kernel, const uint16_t* bias, const void* scale,
     uint16_t* packed_weights, size_t extra_bytes, const void* params);
 
+XNN_INTERNAL void xnn_pack_bf16_f32_conv_goki_w(
+    size_t g, size_t nc, size_t ks, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint16_t* kernel, const float* bias, const void* scale,
+    void* packed_weights, size_t extra_bytes, const void* params);
+
 XNN_INTERNAL void xnn_pack_f32_to_f16_conv_goki_w(
     size_t g, size_t nc, size_t ks, size_t kc, size_t nr, size_t kr, size_t sr,
     const float* kernel, const float* bias, const void* scale,
     xnn_float16* packed_weights, size_t extra_bytes, const void* params);
+
+typedef void (*xnn_pack_bf16_f32_igemm_fn)(
+    size_t g, size_t nc, size_t ks, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint16_t* kernel, const float* bias, const void* scale,
+    void* packed_weights, size_t extra_bytes, const void* params);
 
 typedef void (*xnn_pack_qu8_igemm_fn)(
     size_t g, size_t nc, size_t ks, size_t kc, size_t nr, size_t kr, size_t sr,
@@ -813,6 +823,11 @@ XNN_INTERNAL void xnn_pack_f16_conv_kgo_w(
     size_t g, size_t nc, size_t ks, size_t nr, size_t kr, size_t sr,
     const uint16_t* kernel, const uint16_t* bias, const void* scale,
     uint16_t* packed_weights, size_t extra_bytes, const void* params);
+
+XNN_INTERNAL void xnn_pack_bf16_f32_conv_kgo_w(
+    size_t g, size_t nc, size_t ks, size_t nr, size_t kr, size_t sr,
+    const uint16_t* kernel, const float* bias, const void* scale,
+    void* packed_weights, size_t extra_bytes, const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_conv_kgo_w(
     size_t g, size_t nc, size_t ks, size_t nr, size_t kr, size_t sr,
@@ -902,6 +917,11 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
     const uint16_t* kernel, const uint16_t* bias, const void* scale,
     uint16_t* packed_weights, size_t per_tile_extra_bytes, const void* params);
 
+XNN_INTERNAL void xnn_pack_bf16_f32_dwconv_ghw_w(
+    size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
+    const uint16_t* kernel, const float* bias, const void* scale,
+    void* packed_weights, size_t per_tile_extra_bytes, const void* params);
+
 XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_ghw_w(
     size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
     const float* kernel, const float* bias, const void* scale,
@@ -935,6 +955,11 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
     size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
     const uint16_t* kernel, const uint16_t* bias, const void* scale,
     uint16_t* packed_weights, size_t per_tile_extra_bytes, const void* params);
+
+XNN_INTERNAL void xnn_pack_bf16_f32_dwconv_hwg_w(
+    size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
+    const uint16_t* kernel, const float* bias, const void* scale,
+    void* packed_weights, size_t per_tile_extra_bytes, const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_hwg_w(
     size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,

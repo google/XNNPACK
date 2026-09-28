@@ -11,6 +11,7 @@ tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/
 
 ### Tests for GEMM micro-kernels
 tools/generate-gemm-test.py --spec test/bf16-f32-gemm-minmax.yaml --output-test test/bf16-f32-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/bf16-f32-igemm-minmax.yaml --output-test test/bf16-f32-igemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/bf16-gemm-minmax.yaml --output-test test/bf16-gemm-minmax.cc &
 
@@ -204,6 +205,7 @@ tools/generate-conv-hwc2chw-test.py --spec test/f16-conv-hwc2chw.yaml --output t
 tools/generate-conv-hwc2chw-test.py --spec test/f32-conv-hwc2chw.yaml --output test/f32-conv-hwc2chw.cc &
 
 ### Tests for DWConv micro-kernels
+tools/generate-dwconv-test.py --ukernel bf16-f32-dwconv-minmax --output test/bf16-f32-dwconv-minmax.cc &
 tools/generate-dwconv-test.py --ukernel f16-dwconv-minmax --output test/f16-dwconv-minmax.cc &
 
 tools/generate-dwconv-test.py --ukernel f32-dwconv --output test/f32-dwconv.cc &
