@@ -123,7 +123,6 @@ cc_library(
         "//ynnpack/kernels/binary",
         "//ynnpack/kernels/dequantize_dot",
         "//ynnpack/kernels/dot",
-        "//ynnpack/kernels/dot:pack",
         "//ynnpack/kernels/dot:schedule",
         "//ynnpack/kernels/iota",
         "//ynnpack/kernels/lut",

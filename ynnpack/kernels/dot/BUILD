@@ -351,18 +351,6 @@ cc_library(
 )
 
 cc_library(
-    name = "pack",
-    srcs = ["pack.cc"],
-    hdrs = ["pack.h"],
-    compatible_with = _COMPATIBLE_WITH,
-    visibility = ["//ynnpack:__subpackages__"],
-    deps = [
-        "//ynnpack/base",
-        "//ynnpack/kernels/transpose",
-    ],
-)
-
-cc_library(
     name = "arm64_sme_stubs",
     srcs = ["arm64_sme_stubs.cc"],
     compatible_with = _COMPATIBLE_WITH,
@@ -371,7 +359,10 @@ cc_library(
 
 ynn_cc_library(
     name = "dot",
-    srcs = ["dot.cc"],
+    srcs = [
+        "dot.cc",
+        "pack.cc",
+    ],
     hdrs = [
         "arm64_neon_bf16_bf16_fp32.inc",
         "arm64_neon_fp32.inc",
@@ -391,6 +382,7 @@ ynn_cc_library(
         "dot.h",
         "hexagon_hvx_fp32_32x1.inc",
         "kernels.inc",
+        "pack.h",
         "wasm_simd128_fp32.inc",
         "wasm_simd128_fp64.inc",
         "wasm_simd128_int8_int8_int32.inc",
@@ -537,6 +529,7 @@ ynn_cc_library(
         "//ynnpack/base",
         "//ynnpack/base:log",
         "//ynnpack/base/simd",
+        "//ynnpack/kernels/transpose",
     ] + select({
         "//ynnpack:arm64": [":arm64_sme_stubs"],
         "//conditions:default": [],
@@ -548,7 +541,7 @@ cc_library(
     testonly = True,
     hdrs = ["pack_test_tensor.h"],
     deps = [
-        ":pack",
+        ":dot",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
@@ -566,7 +559,6 @@ cc_test(
     }),
     deps = [
         ":dot",
-        ":pack",
         ":pack_test_tensor",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
@@ -612,7 +604,7 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [
-        ":pack",
+        ":dot",
         "//ynnpack/base",
     ] + ynn_test_deps(),
 )
