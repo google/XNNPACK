@@ -52,6 +52,8 @@ XNN_ENUM_ITEM(xnn_operator_type_convert_nc_f32_qp8, "Convert (NC, F32, QP8)")
 XNN_ENUM_ITEM(xnn_operator_type_convert_nc_qs8_qc8, "Convert (NC, QS8, QC8)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nchw_f16, "Convolution (NCHW, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nchw_f32, "Convolution (NCHW, F32)")
+XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_bf16_f32,
+              "Convolution (NHWC, BF16, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_f16, "Convolution (NHWC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_f32, "Convolution (NHWC, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_pf32, "Convolution (NHWC, PF32)")

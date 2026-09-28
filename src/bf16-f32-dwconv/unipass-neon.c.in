@@ -1,0 +1,161 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 8 == 0
+$assert KERNEL_TILE >= 2
+$assert ACCUMULATORS >= 1
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/microparams.h"
+
+
+// Widens 8 bf16 values to two vectors of 4 fp32 values.
+static XNN_INLINE float32x4_t bf16_lo_to_f32(uint16x8_t v) {
+  return vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(v), 16));
+}
+
+static XNN_INLINE float32x4_t bf16_hi_to_f32(uint16x8_t v) {
+  return vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(v), 16));
+}
+
+// Packed weights layout, per block of ${CHANNEL_TILE} channels:
+//   float bias[${CHANNEL_TILE}];
+//   uint16_t kernel[${KERNEL_TILE}][${CHANNEL_TILE}];  // bf16
+void xnn_bf16_f32_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neonfma${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const xnn_bfloat16** input,
+    const void* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const xnn_bfloat16* zero,
+    const struct xnn_f32_minmax_params* restrict params) XNN_OOB_READS
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+  do {
+    $for K in range(KERNEL_TILE):
+      const uint16_t* i${K} = (const uint16_t*) input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != (const uint16_t*) zero) {
+        i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const xnn_bfloat16**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* wb = (const float*) weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      const uint16_t* wk = (const uint16_t*) (wb + ${CHANNEL_TILE});
+      $for C in range(0, CHANNEL_TILE, 4):
+        float32x4_t vacc${C}p0 = vld1q_f32(wb + ${C});
+
+      $for K in range(KERNEL_TILE):
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          const uint16x8_t vi${K}x${C} = vld1q_u16(i${K} + ${C});
+        i${K} += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          const uint16x8_t vk${K}x${C} = vld1q_u16(wk + ${K * CHANNEL_TILE + C});
+        $for C in range(0, CHANNEL_TILE, 8):
+          $for H, WIDEN in ((0, "bf16_lo_to_f32"), (4, "bf16_hi_to_f32")):
+            $if 1 <= K < ACCUMULATORS:
+              float32x4_t vacc${C + H}p${K} = vmulq_f32(${WIDEN}(vi${K}x${C}), ${WIDEN}(vk${K}x${C}));
+            $else:
+              vacc${C + H}p${K % ACCUMULATORS} = vfmaq_f32(vacc${C + H}p${K % ACCUMULATORS}, ${WIDEN}(vi${K}x${C}), ${WIDEN}(vk${K}x${C}));
+
+      wb = (const float*) (wk + ${KERNEL_TILE * CHANNEL_TILE});
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for C in range(0, CHANNEL_TILE, 4):
+                vacc${C}p${A} = vaddq_f32(vacc${C}p${A}, vacc${C}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for C in range(0, CHANNEL_TILE, 4):
+        float32x4_t vacc${C} = vmaxq_f32(vacc${C}p0, vmin);
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${C} = vminq_f32(vacc${C}, vmax);
+
+      $for C in range(0, CHANNEL_TILE, 4):
+        vst1q_f32(output + ${C}, vacc${C});
+      output += ${CHANNEL_TILE};
+    }
+    if XNN_UNLIKELY(c != 0) {
+      // Reads past the last channel are covered by XNN_EXTRA_BYTES on the
+      // inputs and by the channel tile padding of the packed weights.
+      const uint16_t* wk = (const uint16_t*) (wb + ${CHANNEL_TILE});
+      do {
+        float32x4_t vacc0p0 = vld1q_f32(wb);
+        float32x4_t vacc4p0 = vld1q_f32(wb + 4);
+        $for K in range(KERNEL_TILE):
+
+          const uint16x8_t vi${K}x0 = vld1q_u16(i${K});
+          i${K} += 8;
+          const uint16x8_t vk${K}x0 = vld1q_u16(wk + ${K * CHANNEL_TILE});
+          $for H, WIDEN in ((0, "bf16_lo_to_f32"), (4, "bf16_hi_to_f32")):
+            $if 1 <= K < ACCUMULATORS:
+              float32x4_t vacc${H}p${K} = vmulq_f32(${WIDEN}(vi${K}x0), ${WIDEN}(vk${K}x0));
+            $else:
+              vacc${H}p${K % ACCUMULATORS} = vfmaq_f32(vacc${H}p${K % ACCUMULATORS}, ${WIDEN}(vi${K}x0), ${WIDEN}(vk${K}x0));
+        wb += 8;
+        wk += 8;
+
+        $if ACCUMULATORS > 1:
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0p${A} = vaddq_f32(vacc0p${A}, vacc0p${A + ACC_SLICE});
+                vacc4p${A} = vaddq_f32(vacc4p${A}, vacc4p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        float32x4_t vacc0 = vminq_f32(vmaxq_f32(vacc0p0, vmin), vmax);
+        float32x4_t vacc4 = vminq_f32(vmaxq_f32(vacc4p0, vmin), vmax);
+
+        if XNN_LIKELY(c >= 8) {
+          vst1q_f32(output, vacc0);
+          vst1q_f32(output + 4, vacc4);
+          output += 8;
+          c -= 8;
+        } else {
+          if (c & 4) {
+            vst1q_f32(output, vacc0);
+            vacc0 = vacc4;
+            output += 4;
+          }
+          float32x2_t vacc0_lo = vget_low_f32(vacc0);
+          if (c & 2) {
+            vst1_f32(output, vacc0_lo);
+            vacc0_lo = vget_high_f32(vacc0);
+            output += 2;
+          }
+          if (c & 1) {
+            vst1_lane_f32(output, vacc0_lo, 0);
+            output += 1;
+          }
+          c = 0;
+        }
+      } while (c != 0);
+    }
+
+    input_offset += input_pixel_stride;
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}
