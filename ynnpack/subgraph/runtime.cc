@@ -514,8 +514,28 @@ int get_source_region(const source_region_map& source_regions, slinky::var buf,
   return it != source_regions.end() ? it->second : -1;
 }
 
+// The source region of the loop `loop` iterates over, or -1 if unknown.
+int loop_source_region(const slinky::loop_id& loop,
+                       const source_region_map& source_regions) {
+  auto [buf, dim] = find_output_dim(loop.func, loop.var);
+  return dim != -1 && buf.defined()
+             ? get_source_region(source_regions, buf, dim)
+             : -1;
+}
+
+// Whether `f` produces an external output of the pipeline. Such a function
+// can't be computed inside a loop of its consumers, see `external_output_syms`
+// in schedule().
+bool produces_external_output(
+    const slinky::func& f, const std::set<slinky::var>& external_output_syms) {
+  return std::any_of(f.outputs().begin(), f.outputs().end(),
+                     [&](const slinky::func::output& o) {
+                       return external_output_syms.count(o.buffer->sym()) > 0;
+                     });
+}
+
 // Sharing a loop between the function that created it and a function being
-// fused into it is two decisions, made in order by the two functions below:
+// fused into it is two decisions, made in order:
 // may this function's split cover the loop at all (find_matching_split), and
 // what step does the shared loop end up with (reconcile_step).
 
@@ -584,20 +604,30 @@ int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
       // reduction is small enough that re-reading costs nothing.
       continue;
     }
-    // Map the producer's loop variable back to its output dimension index.
-    auto [producer_buf, producer_dim] = find_output_dim(&f, split.var);
-
     // Instead of comparing forward extents (which causes false positives for
     // unrelated constant extents), we check if both loops share the exact same
     // inferred source region identifier.
-    if (producer_dim != -1 && producer_buf.defined() &&
-        get_source_region(source_regions, producer_buf, producer_dim) ==
-            consumer_source_region) {
+    if (loop_source_region({&f, split.var}, source_regions) ==
+        consumer_source_region) {
       return split_i;
     }
     out_of_order = true;
   }
   return -1;
+}
+
+// Splits with extent 1 create no loop and are unavailable for matching. Treat
+// them as already matched so they cannot block matching later splits or become
+// degenerate levels of the global loop nest.
+std::vector<bool> initial_split_matches(
+    const ynn::slinky_globals& globals,
+    const std::vector<ynn::scheduling_split>& splits) {
+  std::vector<bool> matched(splits.size());
+  for (int i = 0; i < splits.size(); ++i) {
+    matched[i] = prove_true(splits[i].extent == 1, globals.fact_bounds,
+                            globals.fact_alignment);
+  }
+  return matched;
 }
 
 // Decide the step of a loop now shared by its owner and `split`. Each side
@@ -704,7 +734,7 @@ void reconcile_step(ynn::slinky_globals& globals, loop_level& loop,
 //    func-s. This is done in a separate loop once all of the functions from
 //    the pipeline were processed.
 void ynn_runtime::schedule() {
-  // This a list of indices of consumers of a given buffer.
+  // This is a list of indices of consumers of a given buffer.
   std::map<slinky::var, std::vector<int>> consumers;
   // This is a tree representing a global loop nest of a whole pipeline so
   // far. For efficiency and convenience, it's stored as an array of nodes
@@ -781,19 +811,7 @@ void ynn_runtime::schedule() {
       std::reverse(loop_splits.begin(), loop_splits.end());
 
       std::vector<bool>& split_matched = sched_data.split_matched;
-      split_matched.assign(loop_splits.size(), false);
-
-      // Splits with a provable extent of 1 don't need a loop of their own and
-      // must not become levels of the global loop nest: a degenerate level
-      // would block the functions scheduled later from matching the loops
-      // behind it. Treat them as trivially matched, so they are neither
-      // considered for matching nor appended to the nest.
-      for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
-        if (prove_true(loop_splits[split_i].extent == 1, globals.fact_bounds,
-                       globals.fact_alignment)) {
-          split_matched[split_i] = true;
-        }
-      }
+      split_matched = initial_split_matches(globals, loop_splits);
 
       // Walk the loop nest from the outermost loop inwards, sharing each loop
       // with a split of this function that covers the same source region (see
@@ -806,12 +824,8 @@ void ynn_runtime::schedule() {
         loop_level& global_loop = global_loop_nest[loop_nest[compute_at]];
         // Map the consumer's loop variable back to its output dimension
         // index.
-        auto [consumer_buf, consumer_dim] =
-            find_output_dim(global_loop.loop_id.func, global_loop.loop_id.var);
         const int consumer_source_region =
-            consumer_dim != -1 && consumer_buf.defined()
-                ? get_source_region(source_regions, consumer_buf, consumer_dim)
-                : -1;
+            loop_source_region(global_loop.loop_id, source_regions);
 
         const int matched_split =
             find_matching_split(globals, f, loop_splits, split_matched,
@@ -832,14 +846,9 @@ void ynn_runtime::schedule() {
     // A function producing an external output cannot be fused into a loop of
     // its consumers without recomputing all of it on every iteration, see
     // `external_output_syms` above.
-    const bool produces_external_output =
-        !loop_nest.empty() &&
-        std::any_of(f.outputs().begin(), f.outputs().end(),
-                    [&](const slinky::func::output& o) {
-                      return external_output_syms.count(o.buffer->sym()) > 0;
-                    });
-
-    if ((sched && sched->force_root) || produces_external_output) {
+    if ((sched && sched->force_root) ||
+        (!loop_nest.empty() &&
+         produces_external_output(f, external_output_syms))) {
       compute_at = 0;
       if (sched) {
         sched_data.split_matched.assign(sched->loop_splits.size(), false);
