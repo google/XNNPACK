@@ -168,6 +168,8 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
             $for K in range(KR):
               out[${N*KR+K}] = v${N}x${K};
             w${N} += ${KR};
+          $for N in range((NR - 1)*KR, NR*KR, 1):
+            out[${N}] = 0;
           out += ${NR*KR};
         }
 
