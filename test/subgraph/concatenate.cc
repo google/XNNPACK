@@ -128,6 +128,7 @@ INSTANTIATE_TEST_SUITE_P(Concatenate, ConcatenateBF16, params,
 INSTANTIATE_TEST_SUITE_P(Concatenate, ConcatenateF32, params,
                          [](auto p) { return p.param.Name(); });
 
+#ifndef XNNPACK_USE_YNNPACK
 class ConcatenateTester : public SubgraphTester {
  public:
   using SubgraphTester::SubgraphTester;
@@ -234,6 +235,7 @@ TEST(ConcatenateTest, OverflowBatchSize) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
 

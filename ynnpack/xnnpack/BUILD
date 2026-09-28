@@ -26,7 +26,7 @@ cc_library(
         "xnnpack.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    defines = ["XNNPACK_USING_YNNPACK=1"],
+    defines = ["XNNPACK_USE_YNNPACK=1"],
     visibility = ["//visibility:public"],
     deps = [
         "//:xnnpack_h",
