@@ -29,7 +29,7 @@ ADD_LIBRARY(ynnpack_as_xnnpack STATIC
   workspace.cc
 )
 
-TARGET_COMPILE_DEFINITIONS(ynnpack_as_xnnpack PUBLIC XNNPACK_USING_YNNPACK=1)
+TARGET_COMPILE_DEFINITIONS(ynnpack_as_xnnpack PUBLIC XNNPACK_USE_YNNPACK=1)
 TARGET_LINK_LIBRARIES(ynnpack_as_xnnpack PUBLIC
   ynnpack_dynamic_quantization
   ynnpack_xnnpack_utils

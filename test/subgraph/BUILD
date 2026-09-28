@@ -109,10 +109,6 @@ xnnpack_cxx_library(
 xnnpack_unit_test(
     name = "unary_test",
     srcs = ["unary.cc"],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
     deps = SUBGRAPH_TEST_DEPS + ["//test:unary_ops"],
 )
 
@@ -127,10 +123,6 @@ NO_YNNPACK = [
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
     tags = ["no_ynnpack"] if operator in NO_YNNPACK else [],
     deps = SUBGRAPH_TEST_DEPS + ["//:subgraph"],
 ) for operator in [
@@ -229,10 +221,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
     srcs = ["batch-matrix-multiply.cc"],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
     shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS + [
         "//:microparams_h",
@@ -243,10 +231,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = ["convolution-2d.cc"],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -267,10 +251,6 @@ xnnpack_unit_test(
     name = "fully_connected_test",
     timeout = "moderate",
     srcs = ["fully-connected.cc"],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
     deps = SUBGRAPH_TEST_DEPS + select({
         "//ynnpack/xnnpack:use_ynnpack": [],
         "//conditions:default": [
@@ -305,10 +285,6 @@ xnnpack_unit_test(
     name = "static_transpose_test",
     timeout = "moderate",
     srcs = ["static-transpose.cc"],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
     shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS,
 )
