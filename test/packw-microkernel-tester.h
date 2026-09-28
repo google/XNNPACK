@@ -131,7 +131,7 @@ class PackWMicrokernelTester {
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
-    const xnn_qs8_packing_params packing_params = {0};
+    const xnn_qs8_packing_params packing_params = {127};
 
     // Compute reference results.
     auto* pack_function =
@@ -189,7 +189,7 @@ class PackWMicrokernelTester {
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
-    const xnn_qs8_packing_params packing_params = {0};
+    const xnn_qs8_packing_params packing_params = {127};
 
     // Compute reference results.
     auto* pack_function =
@@ -333,7 +333,7 @@ class PackWMicrokernelTester {
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_qs8_qc4w_packing_params packing_params = {
-        0, static_cast<uint8_t>(kzp())};
+        127, static_cast<uint8_t>(kzp())};
 
     // Compute reference results.
     auto reference_fn =
