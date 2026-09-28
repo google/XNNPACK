@@ -408,8 +408,12 @@ ENDIF()
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # Disable "note: parameter passing for argument of type ... changed/will change in ..."
   ADD_COMPILE_OPTIONS("-Wno-psabi")
+ENDIF()
 
-  # Don't generate fma automatically.
+# Don't generate fma automatically. The reference kernels and their tests
+# assume the multiply and the add round separately, and .bazelrc passes this
+# for every compiler, so a Clang build must round the same way GNU does.
+IF(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   ADD_COMPILE_OPTIONS("-ffp-contract=off")
 ENDIF()
 
