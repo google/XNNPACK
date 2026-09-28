@@ -1,6 +1,7 @@
 #include "ynnpack/kernels/dot/pack.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
@@ -411,6 +412,143 @@ TEST(pack_subbyte, int2_non_aligned) {
   };
 
   EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack_a, aligned_blocks) {
+  const size_t m = 4;
+  const size_t k = 6;
+  const size_t block_m = 2;
+  const size_t tile_k = 3;
+  const size_t elem_size = sizeof(int);
+
+  // Row-major M x K matrix:
+  // row 0:  0,  1,  2,  3,  4,  5
+  // row 1:  6,  7,  8,  9, 10, 11
+  // row 2: 12, 13, 14, 15, 16, 17
+  // row 3: 18, 19, 20, 21, 22, 23
+  std::vector<int> input(m * k);
+  std::iota(input.begin(), input.end(), 0);
+
+  const size_t output_m_blocks = ceil_div(m, block_m);
+  const size_t output_k_blocks = ceil_div(k, tile_k);
+  std::vector<int> output(output_k_blocks * output_m_blocks * block_m * tile_k,
+                          -1);
+
+  const size_t output_mo_stride = block_m * tile_k * elem_size;
+  const size_t output_ko_stride = output_m_blocks * output_mo_stride;
+
+  packer p(/*transpose=*/true, elem_size * 8, tile_k, block_m);
+  p.pack(k, m, k * elem_size, input.data(), output_ko_stride, output_mo_stride,
+         output.data());
+
+  // Expected layout: outer block_k_i (0..1), then block_m_i (0..1), then m_i
+  // (0..1), then k_i (0..2).
+  std::vector<int> expected = {
+      // clang-format off
+      // block_k_i = 0 (cols 0..2), block_m_i = 0 (rows 0..1)
+      0, 1, 2,
+      6, 7, 8,
+      // block_k_i = 0 (cols 0..2), block_m_i = 1 (rows 2..3)
+      12, 13, 14,
+      18, 19, 20,
+      // block_k_i = 1 (cols 3..5), block_m_i = 0 (rows 0..1)
+      3, 4, 5,
+      9, 10, 11,
+      // block_k_i = 1 (cols 3..5), block_m_i = 1 (rows 2..3)
+      15, 16, 17,
+      21, 22, 23,
+      // clang-format on
+  };
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack_a, unaligned_padding) {
+  const size_t m = 3;
+  const size_t k = 5;
+  const size_t block_m = 2;
+  const size_t tile_k = 4;
+  const size_t elem_size = sizeof(int16_t);
+
+  // Row-major 3 x 5 matrix:
+  // row 0:  1,  2,  3,  4,  5
+  // row 1:  6,  7,  8,  9, 10
+  // row 2: 11, 12, 13, 14, 15
+  std::vector<int16_t> input(m * k);
+  std::iota(input.begin(), input.end(), 1);
+
+  const size_t output_m_blocks = ceil_div(m, block_m);  // 2
+  const size_t output_k_blocks = ceil_div(k, tile_k);   // 2
+  std::vector<int16_t> output(
+      output_k_blocks * output_m_blocks * block_m * tile_k, -1);
+
+  const size_t output_mo_stride = block_m * tile_k * elem_size;
+  const size_t output_ko_stride = output_m_blocks * output_mo_stride;
+
+  packer p(/*transpose=*/true, elem_size * 8, tile_k, block_m);
+  p.pack(k, m, k * elem_size, input.data(), output_ko_stride, output_mo_stride,
+         output.data());
+
+  std::vector<int16_t> expected = {
+      // clang-format off
+      // block_k_i = 0 (cols 0..3), block_m_i = 0 (rows 0..1)
+      1, 2, 3, 4,
+      6, 7, 8, 9,
+      // block_k_i = 0 (cols 0..3), block_m_i = 1 (row 2, row 3 padded with 0)
+      11, 12, 13, 14,
+      0, 0, 0, 0,
+      // block_k_i = 1 (col 4, cols 5..7 padded with 0),
+      // block_m_i = 0 (rows 0..1)
+      5, 0, 0, 0,
+      10, 0, 0, 0,
+      // block_k_i = 1 (col 4, cols 5..7 padded with 0),
+      // block_m_i = 1 (row 2, row 3 padded)
+      15, 0, 0, 0,
+      0, 0, 0, 0,
+      // clang-format on
+  };
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack_a, amx_tile_32x32_bf16) {
+  const size_t m = 35;
+  const size_t k = 50;
+  const size_t block_m = 32;
+  const size_t tile_k = 32;
+  const size_t elem_size = sizeof(uint16_t);
+
+  std::vector<uint16_t> input(m * k);
+  for (size_t i = 0; i < m * k; ++i) {
+    input[i] = static_cast<uint16_t>((i % 251) + 1);
+  }
+
+  const size_t output_m_blocks = ceil_div(m, block_m);  // 2
+  const size_t output_k_blocks = ceil_div(k, tile_k);   // 2
+  std::vector<uint16_t> output(
+      output_k_blocks * output_m_blocks * block_m * tile_k, 0xFFFF);
+
+  const size_t output_mo_stride = block_m * tile_k * elem_size;
+  const size_t output_ko_stride = output_m_blocks * output_mo_stride;
+
+  packer p(/*transpose=*/true, elem_size * 8, tile_k, block_m);
+  p.pack(k, m, k * elem_size, input.data(), output_ko_stride, output_mo_stride,
+         output.data());
+
+  for (size_t ko = 0; ko < output_k_blocks; ++ko) {
+    for (size_t mo = 0; mo < output_m_blocks; ++mo) {
+      for (size_t mi = 0; mi < block_m; ++mi) {
+        for (size_t ki = 0; ki < tile_k; ++ki) {
+          const size_t global_m = mo * block_m + mi;
+          const size_t global_k = ko * tile_k + ki;
+          const size_t out_idx =
+              ((ko * output_m_blocks + mo) * block_m + mi) * tile_k + ki;
+          const uint16_t expected_val = (global_m < m && global_k < k)
+                                            ? input[global_m * k + global_k]
+                                            : 0;
+          EXPECT_EQ(output[out_idx], expected_val);
+        }
+      }
+    }
+  }
 }
 
 }  // namespace ynn

@@ -530,6 +530,18 @@ struct ynn_node {
       return std::tie(a.params, a.less_zero) < std::tie(b.params, b.less_zero);
     }
   };
+  struct pack_a {
+    size_t tile_m;
+    size_t tile_k;
+    int32_t m_dim;
+    friend bool operator==(const pack_a& a, const pack_a& b) {
+      return a.tile_m == b.tile_m && a.tile_k == b.tile_k && a.m_dim == b.m_dim;
+    }
+    friend bool operator<(const pack_a& a, const pack_a& b) {
+      return std::tie(a.tile_m, a.tile_k, a.m_dim) <
+             std::tie(b.tile_m, b.tile_k, b.m_dim);
+    }
+  };
   struct pack_b {
     friend bool operator==(const pack_b&, const pack_b&) { return true; }
     friend bool operator<(const pack_b&, const pack_b&) { return false; }
@@ -602,8 +614,8 @@ struct ynn_node {
                gather, split_dim, fuse_dim, fuse_dims, split_dims, stack,
                static_reshape, static_broadcast, static_pad, static_slice,
                slice_like, static_transpose, stencil_copy, unary_elementwise,
-               binary_elementwise, ternary_elementwise, dot, iota, pack_b,
-               transpose_a, get_tensor_shape, reduce, dequantize_dot,
+               binary_elementwise, ternary_elementwise, dot, iota, pack_a,
+               pack_b, transpose_a, get_tensor_shape, reduce, dequantize_dot,
                dynamic_quantization>
       op;
 

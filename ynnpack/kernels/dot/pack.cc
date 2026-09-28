@@ -4,10 +4,12 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/kernels/transpose/generic.h"
 #include "ynnpack/kernels/transpose/interleave.h"
 #include "ynnpack/kernels/transpose/transpose.h"
 
@@ -37,7 +39,7 @@ packer::packer(bool transpose, size_t elem_size_bits, size_t tile_m,
     // Since we're tiling this ourselves, we don't need the added overhead of a
     // tiled transpose.
     transpose_fn = get_transpose_kernel(elem_size_bits * tile_m);
-    assert(transpose_fn);
+    assert(transpose_fn || (elem_size_bits * tile_m) % 8 == 0);
   } else {
     // We only have (2) and (3).
     if (tile_m == 1) {
@@ -61,16 +63,6 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
     assert(m == 1 || output_stride == tile_n * elem_size_bits / 8);
     transpose_blocks_fn(ceil_div(n, tile_n), m, n * elem_size_bits / 8,
                         input_stride, input, output_block_stride, output);
-  } else if (transpose_fn) {
-    while (n > 0) {
-      const size_t n_i = std::min(n, tile_n);
-      transpose_fn(ceil_div(m, tile_m), n_i, m * elem_size_bits / 8,
-                   input_stride, input, output_stride, output);
-      size_t elem_count = std::max<size_t>(8 / elem_size_bits, 1);
-      input = offset_bytes(input, input_stride * (tile_n / elem_count));
-      output = offset_bytes(output, output_block_stride);
-      n = sub_sat(n, tile_n);
-    }
   } else if (interleave_fn) {
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
@@ -96,7 +88,32 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
       n = sub_sat(n, tile_n);
     }
   } else {
-    YNN_UNREACHABLE;
+    const size_t tile_m_bytes = tile_m * elem_size_bits / 8;
+    const size_t m_blocks = ceil_div(m, tile_m);
+    const size_t m_bytes = m * elem_size_bits / 8;
+    while (n > 0) {
+      const size_t n_i = std::min(n, tile_n);
+      if (transpose_fn) {
+        transpose_fn(m_blocks, n_i, m_bytes, input_stride, input, output_stride,
+                     output);
+      } else {
+        transpose(m_blocks, n_i, m_bytes, input_stride, input, output_stride,
+                  output, tile_m_bytes);
+      }
+      if (n_i < tile_n) {
+        const size_t row_size = n_i * tile_m_bytes;
+        const size_t padding_size = (tile_n - n_i) * tile_m_bytes;
+        void* output_i = offset_bytes(output, row_size);
+        for (size_t i = 0; i < m_blocks; ++i) {
+          memset(output_i, 0, padding_size);
+          output_i = offset_bytes(output_i, output_stride);
+        }
+      }
+      size_t elem_count = std::max<size_t>(8 / elem_size_bits, 1);
+      input = offset_bytes(input, input_stride * (tile_n / elem_count));
+      output = offset_bytes(output, output_block_stride);
+      n = sub_sat(n, tile_n);
+    }
   }
 }
 

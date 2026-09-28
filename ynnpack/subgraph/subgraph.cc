@@ -1173,6 +1173,7 @@ const char* name_of(const ynn_node::static_transpose&) {
 const char* name_of(const ynn_node::stencil_copy&) { return "stencil_copy"; }
 const char* name_of(const ynn_node::dot&) { return "dot"; }
 const char* name_of(const ynn_node::iota&) { return "iota"; }
+const char* name_of(const ynn_node::pack_a&) { return "pack_a"; }
 const char* name_of(const ynn_node::pack_b&) { return "pack_b"; }
 const char* name_of(const ynn_node::transpose_a&) { return "transpose_a"; }
 const char* name_of(const ynn_node::dequantize_dot&) {
@@ -1347,6 +1348,10 @@ void print(std::ostream& os, const ynn_node::dot& op) {
 
 void print(std::ostream& os, const ynn_node::iota& op) {}
 
+void print(std::ostream& os, const ynn_node::pack_a& op) {
+  os << "tile_m=" << op.tile_m << " tile_k=" << op.tile_k
+     << " m_dim=" << op.m_dim;
+}
 void print(std::ostream& os, const ynn_node::pack_b& op) {}
 void print(std::ostream& os, const ynn_node::transpose_a& op) {
   os << "tile_m=" << op.tile_m << " tile_k=" << op.tile_k

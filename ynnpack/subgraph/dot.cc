@@ -787,8 +787,6 @@ auto make_transpose_a_impl(int m_dim) {
     assert(output_mi.min() == 0);
     assert(output_ki.extent() == 1 || output_ki.stride() == elem_size);
     assert(output_mi.extent() == 1 || output_mi.stride() == elem_size * tile_k);
-    assert(output_mo.extent() == 1 ||
-           output_mo.stride() == elem_size * tile_k * tile_m);
 
     // We need the intersection of the input and output bounds.
     const index_t m_begin = output_mo.begin() * tile_m;
@@ -804,19 +802,22 @@ auto make_transpose_a_impl(int m_dim) {
     // We're transposing columns of the input to rows of the output, but
     // doing tile_k of them at a time.
     // TODO(b/454131137): Support already transposed inputs here.
-    packer p(/*transpose=*/true, elem_size * 8, tile_k, /*tile_n=*/m);
+    packer p(/*transpose=*/true, elem_size * 8, tile_k, tile_m);
 
     const index_t input_m_stride = input_m.stride();
+    const index_t input_k_max = input_k.max();
+    const index_t input_m_max = input_m.max();
+    const index_t output_mo_stride = output_mo.stride();
     const index_t output_ko_stride = output_ko.stride();
 
-    input.slice(0, slinky::in_bounds{k_begin});
-    input.slice(m_dim - 1, slinky::in_bounds{m_begin});
+    input.slice(0, std::min(k_begin, input_k_max));
+    input.slice(m_dim - 1, std::min(m_begin, input_m_max));
     output.slice({0, 1, 2, static_cast<size_t>(m_dim + 2)});
 
     slinky::for_each_element(
         [=, &p](void* output, const void* input) {
           p.pack(k, m, input_m_stride, input, output_ko_stride,
-                 /*output_block_stride=*/0, output);
+                 output_mo_stride, output);
         },
         output, input);
     return 0;
@@ -906,6 +907,123 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
+
+namespace {
+
+// Packing A splits and tiles (k1, m) into 2D tiles:
+// a(k1, k2..., m, batch...) =>
+//   packed_a([0, tile_k), [0, tile_m), k1/tile_k, k2..., m/tile_m, batch...)
+// Unlike `define_transpose_a` (which places `m/tile_m` inside `k1/tile_k` in
+// memory), `packed_a` is contiguous in dimension order so all k panels of one
+// m block are contiguous in memory.
+void define_pack_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
+                   index_t tile_k, int m_dim, uint32_t input_a_id,
+                   uint32_t output_id) {
+  const ynn_value& a = subgraph.value(input_a_id);
+  ynn_value& output = subgraph.get_output_value(&output_id, a.type);
+  output.type = a.type;
+
+  slinky::expr k = a.extent(0);
+  slinky::expr m = a.extent(m_dim);
+  output.extents = a.extents;
+  while (output.extents.size() <= static_cast<size_t>(m_dim)) {
+    output.extents.push_back(slinky::expr{});
+  }
+  output.extents[m_dim] =
+      slinky::simplify(slinky::ceil_div<slinky::expr>(m, tile_m));
+  output.extents[0] =
+      slinky::simplify(slinky::ceil_div<slinky::expr>(k, tile_k));
+  output.extents.insert(output.extents.begin(), {tile_k, tile_m});
+
+  node.inputs = {input_a_id};
+  node.outputs = {output.id};
+  node.op = ynn_node::pack_a{static_cast<size_t>(tile_m),
+                             static_cast<size_t>(tile_k), m_dim};
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+    const ynn_node::pack_a& op = std::get<ynn_node::pack_a>(node.op);
+    const index_t tile_m = op.tile_m;
+    const index_t tile_k = op.tile_k;
+    const int m_dim = op.m_dim;
+    ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    require_contiguous(*input.buffer, m_dim + 1);
+    output.make_buffer(runtime, input.buffer->elem_size());
+    require_contiguous(*output.buffer, m_dim + 3);
+
+    std::vector<slinky::var> dims =
+        runtime.globals.make_dims(output.buffer->rank());
+
+    slinky::var ko = dims[2];
+    slinky::var mo = dims[m_dim + 2];
+
+    slinky::func::input func_input = {input.buffer};
+    func_input.bounds.resize(input.buffer->rank());
+    func_input.bounds[0] = slinky::min_extent(ko * tile_k, tile_k);
+    for (int i = 1; i < m_dim; ++i) {
+      func_input.bounds[i] = elementwise_bounds(dims[i + 2], input.extents[i]);
+    }
+    if (static_cast<size_t>(m_dim) < func_input.bounds.size()) {
+      func_input.bounds[m_dim] = slinky::min_extent(mo * tile_m, tile_m);
+    }
+    for (size_t i = m_dim + 1; i < input.buffer->rank(); ++i) {
+      func_input.bounds[i] = elementwise_bounds(dims[i + 2], input.extents[i]);
+    }
+
+    // This packing handles padding the input up to tile_k and tile_m.
+    func_input.input_crop.resize(input.buffer->rank());
+    func_input.input_crop[0] = all_bounds(input.physical_extent(0));
+    if (static_cast<size_t>(m_dim) < func_input.input_crop.size()) {
+      func_input.input_crop[m_dim] = all_bounds(input.physical_extent(m_dim));
+    }
+
+    slinky::call_stmt::attributes attrs;
+    attrs.name = "pack_a";
+    auto func = slinky::func::make(make_transpose_a_impl(m_dim),
+                                   {std::move(func_input)},
+                                   {{output.buffer, dims}}, std::move(attrs));
+
+    // Pin ki, mi and ko to their full extents (the packing kernel produces
+    // whole ki x mi tiles and all of ko at once), and let `make_schedule` pick
+    // splits and workers for the mo and batch dimensions, so the packing is
+    // parallelized across row bands `mo` when it is not fused into a dot's loop
+    // nest (e.g. at root or when constant folded). When it is fused, the splits
+    // don't require their steps, so they adopt the loops of the dot.
+    std::vector<slinky::expr> given_splits = {output.physical_extent(0),
+                                              output.physical_extent(1),
+                                              output.physical_extent(2)};
+    auto sched =
+        runtime.make_schedule(dims, output.physical_extents(),
+                              output.buffer->elem_size(), given_splits);
+    sched->loop_splits[0].step_is_required = true;
+    sched->loop_splits[1].step_is_required = true;
+    if (m_dim > 1) {
+      sched->force_root = true;
+    }
+
+    sched->input_scheduler_bounds.resize(1);
+    sched->input_scheduler_bounds[0].resize(m_dim + 1);
+    sched->input_scheduler_bounds[0][0] = slinky::point(ko);
+    sched->input_scheduler_bounds[0][m_dim] = slinky::point(mo);
+
+    func.user_data() = sched.get();
+    runtime.scheduling_info_storage.push_back(std::move(sched));
+
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
+  };
+}
+
+}  // namespace
+
+uint32_t define_pack_a(ynn_subgraph& subgraph, index_t tile_m, index_t tile_k,
+                       int m_dim, uint32_t input_a_id) {
+  ynn_node node;
+  ynn_value& output = subgraph.new_internal_value();
+  define_pack_a(subgraph, node, tile_m, tile_k, m_dim, input_a_id, output.id);
+  subgraph.add_node(std::move(node));
+  return output.id;
 }
 
 namespace {
