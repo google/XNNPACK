@@ -467,6 +467,9 @@ void pack_qs8_qc4w_gemm_goi_w(
       } else {
         std::fill_n(packed_b, nr_block_size, 0);
       }
+      // Microkernels read all `nr` per-channel values and multiply them by
+      // the input zero point, so the padding must be initialised.
+      std::fill_n(packed_b + nr_block_size, nr - nr_block_size, 0);
       packed_weights = (int32_t*)packed_weights + nr;
 
       for (size_t kr_block_start = 0;
@@ -1046,6 +1049,9 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
       } else {
         std::fill_n(packed_b, nr_block_size, 0);
       }
+      // Microkernels read all `nr` per-channel values and multiply them by
+      // the input zero point, so the padding must be initialised.
+      std::fill_n(packed_b + nr_block_size, nr - nr_block_size, 0);
       packed_weights = (int32_t*)packed_weights + nr;
 
       size_t num_k_blocks = round_up_po2(kc, skr * 1);
@@ -1556,6 +1562,9 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
       } else {
         std::fill_n(packed_b, nr_block_size, 0);
       }
+      // Microkernels read all `nr` per-channel values and multiply them by
+      // the input zero point, so the padding must be initialised.
+      std::fill_n(packed_b + nr_block_size, nr - nr_block_size, 0);
       packed_weights = (int32_t*)packed_weights + nr;
 
       for (size_t kr_block_start = 0;
@@ -4240,6 +4249,9 @@ void xnn_pack_qs8_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
       copy_bias(b, nr_block_start, nr_block_size, packed_b);
+      // Microkernels read all `nr` per-channel values and multiply them by
+      // the input zero point, so the padding must be initialised.
+      std::fill_n(packed_b + nr_block_size, nr - nr_block_size, 0);
       packed_weights =
           (void*)((uintptr_t)packed_weights + nr * sizeof(int32_t));
 
