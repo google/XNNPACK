@@ -54,9 +54,9 @@ cc_library(
         "//litert/tensor",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:macros",
-        "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
     ],
 )
@@ -113,13 +113,13 @@ cc_library(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:macros",
-        "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/container:inlined_vector",
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:source_location",
     ],
 )
 
@@ -132,7 +132,7 @@ cc_test(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:matchers",
-        "//litert/tensor/utils:source_location",
+        "@abseil-cpp//absl/types:source_location",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -203,9 +203,9 @@ cc_test(
         ":graph_traversal",
         "//litert/tensor",
         "//litert/tensor:arithmetic",
-        "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
