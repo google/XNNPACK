@@ -247,10 +247,22 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_9p4c__scalar(
       const int64_t vextacc2 = math_mulext_s32(vacc2, vmultiplier) + vrounding;
       const int64_t vextacc3 = math_mulext_s32(vacc3, vmultiplier) + vrounding;
 
-      int32_t vout0 = (int32_t) math_asr_s64(vextacc0, vshift);
-      int32_t vout1 = (int32_t) math_asr_s64(vextacc1, vshift);
-      int32_t vout2 = (int32_t) math_asr_s64(vextacc2, vshift);
-      int32_t vout3 = (int32_t) math_asr_s64(vextacc3, vshift);
+      int64_t vout0_64 = math_asr_s64(vextacc0, vshift);
+      vout0_64 = math_max_s64(vout0_64, (int64_t) voutput_min_less_zero_point);
+      vout0_64 = math_min_s64(vout0_64, (int64_t) voutput_max_less_zero_point);
+      int32_t vout0 = (int32_t) vout0_64;
+      int64_t vout1_64 = math_asr_s64(vextacc1, vshift);
+      vout1_64 = math_max_s64(vout1_64, (int64_t) voutput_min_less_zero_point);
+      vout1_64 = math_min_s64(vout1_64, (int64_t) voutput_max_less_zero_point);
+      int32_t vout1 = (int32_t) vout1_64;
+      int64_t vout2_64 = math_asr_s64(vextacc2, vshift);
+      vout2_64 = math_max_s64(vout2_64, (int64_t) voutput_min_less_zero_point);
+      vout2_64 = math_min_s64(vout2_64, (int64_t) voutput_max_less_zero_point);
+      int32_t vout2 = (int32_t) vout2_64;
+      int64_t vout3_64 = math_asr_s64(vextacc3, vshift);
+      vout3_64 = math_max_s64(vout3_64, (int64_t) voutput_min_less_zero_point);
+      vout3_64 = math_min_s64(vout3_64, (int64_t) voutput_max_less_zero_point);
+      int32_t vout3 = (int32_t) vout3_64;
 
       vout0 = math_max_s32(vout0, voutput_min_less_zero_point);
       vout1 = math_max_s32(vout1, voutput_min_less_zero_point);
