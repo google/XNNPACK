@@ -1139,6 +1139,9 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
                                                void* param_value,
                                                size_t* param_value_size_ret)
 {
+  if (runtime == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   if (!runtime->profiling) {
     return xnn_status_invalid_state;
   }
@@ -1234,6 +1237,9 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
+  if (runtime == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   if (runtime->profiling) {
     runtime->start_ts = xnn_read_timer();
   }

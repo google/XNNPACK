@@ -60,3 +60,12 @@ TEST(RUNTIME, reshape_runtime) {
   }
   ASSERT_EQ(expected, output);
 }
+
+TEST(RUNTIME, null_runtime) {
+  size_t required_size = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_get_runtime_profiling_info(nullptr,
+                                           xnn_profile_info_num_operators, 0,
+                                           nullptr, &required_size));
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_invoke_runtime(nullptr));
+}
