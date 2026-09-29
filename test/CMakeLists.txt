@@ -122,6 +122,7 @@ SET(MICROKERNEL_UNIT_TESTS
     rdsum
     rdsum2
     rminmax
+    requantization
     rsum
     rsum2
     spmm-minmax
