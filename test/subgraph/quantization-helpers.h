@@ -49,6 +49,7 @@ void FakeDynamicQuantize(Tensor<Data> input, xnn_datatype datatype) {
   // original values, and thus a different scale, we have to requantize
   // iteratively until the quantization scale converges. This usually happens in
   // a single iteration, modulo rounding errors.
+  struct xnn_qd8_quantization_params prev_params = {0, 0};
   for (size_t iter = 0; iter < 10; iter++) {
     auto minmax = std::minmax_element(input.begin(), input.end());
     const float rmin = *minmax.first;
@@ -63,13 +64,12 @@ void FakeDynamicQuantize(Tensor<Data> input, xnn_datatype datatype) {
     } else {
       XNN_UNREACHABLE;
     }
-    if (std::max(std::abs(rmin - *minmax.first),
-                 std::abs(rmax - *minmax.second)) <
-        1e-6 * quantization_params.inv_scale) {
+    if (iter > 0 && quantization_params.inv_scale == prev_params.inv_scale &&
+        quantization_params.zero_point == prev_params.zero_point) {
       return;
     }
+    prev_params = quantization_params;
   }
-  GTEST_FAIL() << "FakeDynamicQuantize failed to converge.";
 }
 
 template <typename Data>

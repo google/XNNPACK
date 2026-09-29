@@ -24,6 +24,7 @@ limitations under the License.
 #include <cstring>
 #include <functional>
 #include <initializer_list>
+#include <iterator>
 #include <memory>
 #include <numeric>
 #include <type_traits>
@@ -143,6 +144,15 @@ class Buffer {
   // ```
   virtual bool IsA(internal::TypeId id) const = 0;
 
+  // Returns the size of the buffer in bytes.
+  //
+  // This is the size of the span returned by `Lock()` and `LockMutable()`.
+  //
+  // Note: implementations should be able to answer this **without locking**.
+  // The size is metadata that is expected to be available without making the
+  // data accessible from the CPU, which may be costly for non-CPU buffers.
+  virtual absl::StatusOr<size_t> ByteSize() const = 0;
+
   // Locks the buffer so that it's accessible from the CPU and returns an RAII
   // object that allows reading the data.
   //
@@ -214,6 +224,9 @@ class SpanCpuBuffer : public Buffer {
 
   // Checks if this instance is of the given type id.
   bool IsA(internal::TypeId id) const override { return id == TypeId(); }
+
+  // Returns the size of the buffer in bytes.
+  absl::StatusOr<size_t> ByteSize() const override { return size(); }
 
   // Locks the buffer so that it's accessible from the CPU and returns an RAII
   // object that allows reading the data.
@@ -296,6 +309,28 @@ class MutableSpanCpuBuffer : public SpanCpuBuffer {
   }
 };
 
+namespace internal {
+
+// Detects sequences that store their elements contiguously, i.e. the ones that
+// can be viewed through an `absl::Span`.
+template <class Sequence, class = void>
+struct IsContiguousSequence : std::false_type {};
+
+template <class Sequence>
+struct IsContiguousSequence<
+    Sequence, std::void_t<decltype(std::data(std::declval<const Sequence&>()))>>
+    : std::true_type {};
+
+// Detects the span type that contiguous sequences are narrowed down to before
+// the run time type dispatch happens.
+template <class Sequence>
+struct IsConstAbslSpan : std::false_type {};
+
+template <class T>
+struct IsConstAbslSpan<absl::Span<const T>> : std::true_type {};
+
+}  // namespace internal
+
 // Manages tensor data.
 class OwningCpuBuffer : public Buffer {
  protected:
@@ -338,6 +373,9 @@ class OwningCpuBuffer : public Buffer {
 
   // Checks if this instance is of the given type id.
   bool IsA(internal::TypeId id) const override { return id == TypeId(); }
+
+  // Returns the size of the buffer in bytes.
+  absl::StatusOr<size_t> ByteSize() const override { return size(); }
 
   // Locks the buffer so that it's accessible from the CPU and returns an RAII
   // object that allows reading the data.
@@ -396,6 +434,7 @@ class OwningCpuBuffer : public Buffer {
     LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I16, __VA_ARGS__);  \
     LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I32, __VA_ARGS__);  \
     LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I64, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U2, __VA_ARGS__);   \
     LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U4, __VA_ARGS__);   \
     LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U8, __VA_ARGS__);   \
     LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U16, __VA_ARGS__);  \
@@ -472,15 +511,23 @@ class OwningCpuBuffer : public Buffer {
   // with run time type dispatching.
   template <class Sequence>
   static std::shared_ptr<OwningCpuBuffer> CopyAs(Type type, Sequence&& seq) {
-    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Copy, std::forward<Sequence>(seq));
+    using DecayedSequence = std::decay_t<Sequence>;
+    if constexpr (internal::IsContiguousSequence<DecayedSequence>::value &&
+                  !internal::IsConstAbslSpan<DecayedSequence>::value) {
+      // Narrowing to a span lets contiguous containers share a single dispatch
+      // table per element type instead of instantiating one per container type.
+      return CopyAs(type, absl::MakeConstSpan(seq));
+    } else {
+      LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Copy, std::forward<Sequence>(seq));
+    }
   }
 
   // Builds an `OwningCpuBuffer` by copying the elements of the given
   // initializer list with run time dispatching.
   template <class T>
-  static std::shared_ptr<OwningCpuBuffer> CopyAs(
-      Type type, std::initializer_list<T>&& seq) {
-    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Copy, std::move(seq));
+  static std::shared_ptr<OwningCpuBuffer> CopyAs(Type type,
+                                                 std::initializer_list<T> seq) {
+    return CopyAs(type, absl::Span<const T>(seq.begin(), seq.size()));
   }
 
   // Builds an `OwningCpuBuffer` by applying the given `transform` to elements

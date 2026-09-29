@@ -16,8 +16,6 @@
 
 namespace ynn {
 
-#ifdef YNN_ARCH_X86
-
 // Enable us to refer to kernels by name instead of by function pointer.
 std::map<dot_kernel_fn, std::string> kernels = {
 #define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_m, \
@@ -35,6 +33,8 @@ const std::string& get_dot_kernel_name(
                                 /*transpose_a=*/std::nullopt, arch_flags)
                      .kernel];
 }
+
+#ifdef YNN_ARCH_X86
 
 // We use a large highly composite value when we want to test large shapes, so
 // it is unlikely that block shapes do not divide this extent.
@@ -185,6 +185,67 @@ TEST(get_dot_kernel, large_tile_k_1) {
   ASSERT_EQ(fp32_large(arch_flags_avx512), "dot_fp32_5x64x1_1x16x1_avx512");
 }
 
+TEST(dot_kernel_state, destructor) {
+  static bool destroyed = false;
+  destroyed = false;
+  {
+    dot_kernel_state state;
+    state.destroy = [](dot_kernel_state*) { destroyed = true; };
+    EXPECT_FALSE(destroyed);
+  }
+  EXPECT_TRUE(destroyed);
+}
+
 #endif  // YNN_ARCH_X86
+
+#ifdef YNN_ARCH_ARM64
+TEST(get_dot_kernel_arm, int8_int4_int32) {
+#if !defined(YNN_ARCH_ARM64_SME) || defined(YNN_DISABLE_SME)
+  GTEST_SKIP() << "SME is not enabled in this build";
+#else
+  if (!is_arch_supported(arch_flag::sme)) {
+    GTEST_SKIP() << "SME is not supported on this hardware";
+  }
+
+  dot_type int8_int4 = {ynn_type_int8, ynn_type_int4, ynn_type_int32};
+  uint64_t arch = arch_flag::neon | arch_flag::neondot | arch_flag::neoni8mm |
+                  arch_flag::sme;
+
+  EXPECT_EQ(get_dot_kernel_name(int8_int4, {512, 2048, 2048}, arch),
+            "dot_int8_int4_int32_sme");
+
+  dot_kernel k_prefill =
+      get_dot_kernel(int8_int4, {512, 2048, 2048}, {},
+                     /*required_flags=*/0, std::nullopt, arch);
+  dot_packed_shape packed_shape = {k_prefill.block_n, k_prefill.tile_k};
+  EXPECT_EQ(get_dot_kernel_name(int8_int4, {1, 2048, 2048}, arch, packed_shape),
+            "dot_int8_int4_int32_1x32x8_1x4x8_neondot");
+#endif
+}
+
+TEST(get_dot_kernel_arm, int8_int2_int32) {
+#if !defined(YNN_ARCH_ARM64_SME) || defined(YNN_DISABLE_SME)
+  GTEST_SKIP() << "SME is not enabled in this build";
+#else
+  if (!is_arch_supported(arch_flag::sme)) {
+    GTEST_SKIP() << "SME is not supported on this hardware";
+  }
+
+  dot_type int8_int2 = {ynn_type_int8, ynn_type_int2, ynn_type_int32};
+  uint64_t arch = arch_flag::neon | arch_flag::neondot | arch_flag::neoni8mm |
+                  arch_flag::sme;
+
+  EXPECT_EQ(get_dot_kernel_name(int8_int2, {512, 2048, 2048}, arch),
+            "dot_int8_int2_int32_sme");
+
+  dot_kernel k_prefill =
+      get_dot_kernel(int8_int2, {512, 2048, 2048}, {},
+                     /*required_flags=*/0, std::nullopt, arch);
+  dot_packed_shape packed_shape = {k_prefill.block_n, k_prefill.tile_k};
+  EXPECT_EQ(get_dot_kernel_name(int8_int2, {1, 2048, 2048}, arch, packed_shape),
+            "dot_int8_int2_int32_1x32x16_1x4x16_neondot");
+#endif
+}
+#endif  // YNN_ARCH_ARM64
 
 }  // namespace ynn

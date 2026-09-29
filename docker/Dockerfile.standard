@@ -27,7 +27,7 @@ ARG TARGETARCH
 
 RUN if [ "$TARGETARCH" = "amd64" ] || [ "$TARGETARCH" = "arm64" ]; then \
       apt-get update && \
-      apt-get install -y crossbuild-essential-armhf && \
+      apt-get install -y crossbuild-essential-armhf qemu-user && \
       ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3; \
     else \
       echo "Skipping crossbuild-essential-armhf for architecture: $TARGETARCH"; \

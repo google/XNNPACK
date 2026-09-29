@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019-2025 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -125,6 +126,7 @@ struct convolution2d_nhwc_context {
   size_t vmulcaddc_params_size;
   void* vmulcaddc_params_ptr;
   const struct xnn_dwconv_config* dwconv_ukernel;
+  const struct xnn_kai_dwconv_config* kai_dwconv_config;
   const struct xnn_vmulcaddc_config* vmulcaddc_config;
   bool linear_activation;
   bool relu_activation;
@@ -196,9 +198,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_vmulcaddc_path(
 
   if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
     const size_t c_stride = round_up_po2(groups, vmulcaddc_config->channel_tile);
-    const size_t packed_weights_size =
-        ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) *
-        c_stride;
+    const size_t per_channel_bytes =
+        ((size_t)1 << log2_filter_element_size) + bias_element_size;
+    size_t packed_weights_size = 0;
+    if (!xnn_safe_mul(per_channel_bytes, c_stride, &packed_weights_size)) {
+      xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                    xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
     size_t aligned_total_weights_size =
         round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
     void* weights_ptr = xnn_get_pointer_to_write_weights(
@@ -237,7 +244,7 @@ error:
   return status;
 }
 
-static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_packed_weights(
     uint32_t kernel_height, uint32_t kernel_width, uint32_t groups,
     const void* kernel, const void* bias, uint32_t flags,
     uint32_t log2_input_element_size, uint32_t log2_filter_element_size,
@@ -246,23 +253,23 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
     size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params, const void* dwconv_params,
-    size_t dwconv_params_size, const struct xnn_dwconv_config* dwconv_ukernel,
-    bool linear_activation, enum xnn_fingerprint_id fingerprint_id,
+    size_t dwconv_params_size, uint32_t channel_tile, uint8_t primary_tile,
+    enum xnn_fingerprint_id fingerprint_id,
     enum xnn_operator_type operator_type, size_t* zero_size,
     xnn_operator_t convolution_op,
     const struct convolution2d_nhwc_context* context) {
-  assert(dwconv_ukernel != NULL);
   enum xnn_status status = xnn_status_out_of_memory;
-  const uint8_t primary_tile = dwconv_ukernel->primary_tile;
   assert(primary_tile >= kernel_height * kernel_width);
   xnn_log_debug("using dwconv unipass of primary_tile %u", primary_tile);
 
   // All 1s or 0s to negate the binary representation of the cache key.
   const uint32_t use_depthwise_convolution = flags & XNN_FLAG_DEPTHWISE_CONVOLUTION ? UINT32_MAX : 0;
+  const uint32_t packed_weights_layout =
+      (uint32_t) fingerprint_id & xnn_fingerprint_id_helper_kai_dwconv_1vlx1b;
   const struct xnn_weights_cache_look_up_key cache_key = {
     .seed = primary_tile ^ kernel_height ^ kernel_width ^ groups ^
-        dwconv_ukernel->channel_tile ^ extra_weights_bytes ^
-        use_depthwise_convolution,
+      channel_tile ^ extra_weights_bytes ^
+      use_depthwise_convolution ^ packed_weights_layout,
     .kernel = get_kernel_for_cache_key(context),
     .bias = get_bias_for_cache_key(context),
     .fingerprint_id = fingerprint_id,
@@ -276,11 +283,22 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
   const bool weights_already_cached =
       convolution_op->packed_weights.offset != XNN_CACHE_NOT_FOUND;
 
-  const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
+  const size_t c_stride = round_up(groups, channel_tile);
+  size_t per_channel_bytes = 0;
+  if (!xnn_safe_mul((size_t)primary_tile, (size_t)1 << log2_filter_element_size,
+                    &per_channel_bytes) ||
+      !xnn_safe_add(per_channel_bytes, bias_element_size, &per_channel_bytes) ||
+      !xnn_safe_add(per_channel_bytes, extra_weights_bytes, &per_channel_bytes)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   size_t packed_weights_size = 0;
-  packed_weights_size = ((primary_tile << log2_filter_element_size) +
-                         bias_element_size + extra_weights_bytes) *
-                        c_stride;
+  if (!xnn_safe_mul(per_channel_bytes, c_stride, &packed_weights_size)) {
+    xnn_log_error("failed to create %s operator: packed weights size overflows size_t",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
   size_t aligned_total_weights_size =
       round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
@@ -306,29 +324,29 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
     if (use_depthwise_convolution) {
       pack_dwconv_hwg_w(
           primary_tile, kernel_height, kernel_width, groups,
-          dwconv_ukernel->channel_tile, kernel, bias, /*scale=*/NULL, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes, packing_params);
+          channel_tile, kernel, bias, /*scale=*/NULL, weights_ptr,
+          channel_tile * extra_weights_bytes, packing_params);
     } else {
       pack_dwconv_ghw_w(
           primary_tile, kernel_height, kernel_width, groups,
-          dwconv_ukernel->channel_tile, kernel, bias, /*scale=*/NULL, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes, packing_params);
+          channel_tile, kernel, bias, /*scale=*/NULL, weights_ptr,
+          channel_tile * extra_weights_bytes, packing_params);
     }
 
     if (scale_params != NULL) {
       assert(init_scale_params != NULL);
-      size_t stride = dwconv_ukernel->channel_tile *
+      size_t stride = channel_tile *
           ((primary_tile << log2_filter_element_size) +
            bias_element_size + extra_weights_bytes);
 
       init_scale_params(
           /*channels=*/groups,
-          /*channels_tile=*/dwconv_ukernel->channel_tile,
+          /*channels_tile=*/channel_tile,
           /*stride=*/stride,
           /*scale=*/scale_params,
           /*packed_w=*/
           (void*)((uintptr_t)weights_ptr +
-                  dwconv_ukernel->channel_tile *
+                  channel_tile *
                   ((primary_tile << log2_filter_element_size) +
                    bias_element_size)));
     }
@@ -340,22 +358,47 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
   }
 
   memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
+  *zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
+  return xnn_status_success;
+error:
+  return status;
+}
+
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t groups,
+    const void* kernel, const void* bias, uint32_t flags,
+    uint32_t log2_input_element_size, uint32_t log2_filter_element_size,
+    uint32_t bias_element_size, xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
+    xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w, const void* packing_params,
+    size_t extra_weights_bytes,
+    xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
+    const float* scale_params, const void* dwconv_params,
+    size_t dwconv_params_size, const struct xnn_dwconv_config* dwconv_ukernel,
+    bool linear_activation, enum xnn_fingerprint_id fingerprint_id,
+    enum xnn_operator_type operator_type, size_t* zero_size,
+    xnn_operator_t convolution_op,
+    const struct convolution2d_nhwc_context* context) {
+  const enum xnn_status status = create_dwconv_packed_weights(
+      kernel_height, kernel_width, groups, kernel, bias, flags,
+      log2_input_element_size, log2_filter_element_size, bias_element_size,
+      pack_dwconv_hwg_w, pack_dwconv_ghw_w, packing_params, extra_weights_bytes,
+      init_scale_params, scale_params, dwconv_params, dwconv_params_size,
+      dwconv_ukernel->channel_tile, dwconv_ukernel->primary_tile,
+      fingerprint_id, operator_type, zero_size, convolution_op, context);
+  if (status != xnn_status_success) {
+    return status;
+  }
 
   xnn_dwconv_ukernel_fn ukernel = dwconv_ukernel->minmax;
   if (linear_activation && dwconv_ukernel->linear != NULL) {
     ukernel = dwconv_ukernel->linear;
   }
   convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv){
+      .ukernel = ukernel,
       .channel_tile = dwconv_ukernel->channel_tile,
-      .primary_tile = primary_tile,
+      .primary_tile = dwconv_ukernel->primary_tile,
   };
-
-  convolution_op->ukernel.dwconv.ukernel = ukernel;
-
-  *zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
   return xnn_status_success;
-error:
-  return status;
 }
 
 static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_igemm(
@@ -559,10 +602,41 @@ struct convolution2d_nhwc_variant {
   bool dynamic_quantization;
 };
 
+static enum xnn_status create_kai_dwconv_path(
+    const struct convolution2d_nhwc_variant* variant,
+    const struct convolution2d_nhwc_context* context, size_t* zero_size,
+    xnn_operator_t convolution_op) {
+  assert(context->kai_dwconv_config != NULL);
+  const enum xnn_status status = create_dwconv_packed_weights(
+      context->kernel_height, context->kernel_width, context->groups,
+      context->kernel, context->bias, context->flags,
+      context->gemm_config->log2_input_element_size,
+      context->gemm_config->log2_filter_element_size,
+      context->gemm_config->bias_element_size,
+      (xnn_pack_dwconv_hwg_w_fn)xnn_pack_kai_f32_dwconv_hwg_w,
+      (xnn_pack_dwconv_ghw_w_fn)xnn_pack_kai_f32_dwconv_ghw_w,
+      context->packing_params_ptr, variant->extra_weights_bytes,
+      variant->init_scale_params, context->scale_params,
+      context->dwconv_params_ptr, context->dwconv_params_size,
+      context->kai_dwconv_config->channel_tile,
+      context->kai_dwconv_config->primary_tile, context->fingerprint_id,
+      context->operator_type, zero_size, convolution_op, context);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  convolution_op->ukernel.kai_dwconv = (struct xnn_ukernel_kai_dwconv){
+      .ukernel = context->kai_dwconv_config->ukernel,
+      .output_height_tile = context->kai_dwconv_config->output_height_tile,
+  };
+  return xnn_status_success;
+}
 
 static enum xnn_status select_microkernel_type(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
+  if (context->microkernel_type == xnn_microkernel_type_kai_dwconv) {
+    return xnn_status_success;
+  }
   size_t kernel_size;
   if (!xnn_safe_mul(context->kernel_height, context->kernel_width, &kernel_size)) {
     xnn_log_error(
@@ -580,8 +654,9 @@ static enum xnn_status select_microkernel_type(
     context->microkernel_type = xnn_microkernel_type_vmulcaddc;
   } else if (context->group_input_channels == 1 && context->group_output_channels == 1 &&
              context->dwconv_ukernel != NULL) {
-    context->microkernel_type = xnn_microkernel_type_dwconv;
-
+    if (context->microkernel_type != xnn_microkernel_type_kai_dwconv) {
+      context->microkernel_type = xnn_microkernel_type_dwconv;
+    }
   } else {
     context->microkernel_type = xnn_microkernel_type_igemm;
   }
@@ -653,7 +728,15 @@ static enum xnn_status create_convolution2d_nhwc(
     goto error;
   }
 
-  const size_t input_channels = context->groups * context->group_input_channels;
+  size_t input_channels = 0;
+  if (!xnn_safe_mul(context->groups, context->group_input_channels,
+                    &input_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: "
+        "number of input channels overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    goto error;
+  }
   if (context->input_channel_stride < input_channels) {
     xnn_log_error(
         "failed to create %s operator with input channel stride of %zu: stride "
@@ -665,7 +748,15 @@ static enum xnn_status create_convolution2d_nhwc(
     goto error;
   }
 
-  const size_t output_channels = context->groups * context->group_output_channels;
+  size_t output_channels = 0;
+  if (!xnn_safe_mul(context->groups, context->group_output_channels,
+                    &output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: "
+        "number of output channels overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    goto error;
+  }
   if (context->output_channel_stride < output_channels) {
     xnn_log_error(
         "failed to create %s operator with output channel stride of %zu: "
@@ -794,6 +885,22 @@ static enum xnn_status create_convolution2d_nhwc(
       }
       break;
     }
+    case xnn_microkernel_type_kai_dwconv: {
+      convolution_op->dynamic_context.kai_dwconv =
+          xnn_allocate_zero_simd_memory(sizeof(struct kai_dwconv_op_context));
+      if (convolution_op->dynamic_context.kai_dwconv == NULL) {
+        xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                      sizeof(struct kai_dwconv_op_context),
+                      xnn_operator_type_to_string(context->operator_type));
+        goto error;
+      }
+      status =
+          create_kai_dwconv_path(variant, context, &zero_size, convolution_op);
+      if (status != xnn_status_success) {
+        goto error;
+      }
+      break;
+    }
     case xnn_microkernel_type_igemm: {
       convolution_op->dynamic_context.igemm =
           xnn_allocate_zero_simd_memory(sizeof(struct igemm_op_context));
@@ -863,6 +970,10 @@ static enum xnn_status create_convolution2d_nhwc(
   convolution_op->flags = context->flags & ~XNN_FLAG_TENSORFLOW_SAME_PADDING;
   if (tf_same_padding) {
     convolution_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  }
+  // The planar KAI path does not use an indirection buffer or workspace.
+  if (convolution_op->ukernel.type == xnn_microkernel_type_kai_dwconv) {
+    convolution_op->flags &= ~XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
   }
 
   convolution_op->state = xnn_run_state_invalid;
@@ -1298,14 +1409,37 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
     return xnn_status_unsupported_hardware;
   }
   size_t kernel_size;
-  if (!xnn_safe_mul(context->kernel_height, context->kernel_width, &kernel_size)) {
+  if (!xnn_safe_mul(context->kernel_height, context->kernel_width,
+                    &kernel_size)) {
     return xnn_status_unsupported_parameter;
   }
-  context->dwconv_ukernel =
-      find_dwconv_ukernel(kernel_size, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
-  if XNN_LIKELY (context->dwconv_ukernel != NULL) {
-    context->dwconv_ukernel->init.f32(&context->dwconv_params.f32,
-                                      context->output_min, context->output_max);
+  const struct xnn_kai_dwconv_config* kai_dwconv_config =
+      xnn_init_kai_f32_dwconv_config();
+  // KAI derives the channel count and tensor widths from these dense strides.
+  if (context->operator_type == xnn_operator_type_convolution_nhwc_f32 &&
+      kai_dwconv_config != NULL && context->kernel_height == 3 &&
+      context->kernel_width == 3 &&
+      context->subsampling_height == 1 && context->subsampling_width == 1 &&
+      context->dilation_height == 1 && context->dilation_width == 1 &&
+      context->group_input_channels == 1 &&
+      context->group_output_channels == 1 &&
+      context->input_channel_stride == context->groups &&
+      context->output_channel_stride == context->groups) {
+    context->kai_dwconv_config = kai_dwconv_config;
+    context->microkernel_type = xnn_microkernel_type_kai_dwconv;
+    kai_dwconv_config->init(&context->dwconv_params.f32, context->output_min,
+                            context->output_max);
+  } else {
+    context->dwconv_ukernel = find_dwconv_ukernel(
+        kernel_size, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
+    if XNN_LIKELY (context->dwconv_ukernel != NULL) {
+      context->dwconv_ukernel->init.f32(
+          &context->dwconv_params.f32, context->output_min,
+          context->output_max);
+    }
+  }
+  if (context->kai_dwconv_config != NULL ||
+      context->dwconv_ukernel != NULL) {
     context->dwconv_params_size = sizeof(context->dwconv_params.f32);
     context->dwconv_params_ptr = &context->dwconv_params.f32;
   }
@@ -1621,6 +1755,10 @@ static enum xnn_status compute_fingerprint_id(
     case xnn_microkernel_type_dwconv:
       flags |= xnn_fingerprint_id_helper_dwconv;
       break;
+    case xnn_microkernel_type_kai_dwconv:
+      flags |= xnn_fingerprint_id_helper_dwconv |
+               xnn_fingerprint_id_helper_kai_dwconv_1vlx1b;
+      break;
     case xnn_microkernel_type_vmulcaddc:
       flags |= xnn_fingerprint_id_helper_vmulcaddc;
       break;
@@ -1921,6 +2059,14 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
 
   if (fingerprint_id & xnn_fingerprint_id_helper_fp32_static_weights) {
     context.flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+  }
+
+  if (fingerprint_id & xnn_fingerprint_id_helper_kai_dwconv_1vlx1b) {
+    if (xnn_init_kai_f32_dwconv_config() == NULL) {
+      return xnn_status_unsupported_hardware;
+    }
+    context.kernel_height = 3;
+    context.kernel_width = 3;
   }
 
   if (fingerprint_id & xnn_fingerprint_id_helper_vmulcaddc) {
@@ -2802,7 +2948,42 @@ static enum xnn_status reshape_igemm(
   }
   const size_t output_height = convolution_op->convolution_op->output_height;
   const size_t output_width = convolution_op->convolution_op->output_width;
-  const size_t output_size = output_height * output_width;
+  size_t output_size = 0;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output size overflows size_t",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t num_input_pixels = 0;
+  size_t input_pixel_stride_bytes = 0;
+  size_t input_width_stride_bytes = 0;
+  size_t ba_stride = 0;
+  size_t output_pixel_stride_bytes = 0;
+  size_t bc_stride = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+
+  if (!xnn_safe_mul(input_height, input_width, &num_input_pixels) ||
+      !xnn_safe_mul(convolution_op->input_pixel_stride,
+                    (size_t) 1u << log2_input_element_size,
+                    &input_pixel_stride_bytes) ||
+      !xnn_safe_mul(input_width, input_pixel_stride_bytes,
+                    &input_width_stride_bytes) ||
+      !xnn_safe_mul(num_input_pixels, input_pixel_stride_bytes, &ba_stride) ||
+      !xnn_safe_mul(convolution_op->output_pixel_stride,
+                    (size_t) 1u << log2_output_element_size,
+                    &output_pixel_stride_bytes) ||
+      !xnn_safe_mul(output_size, output_pixel_stride_bytes, &bc_stride) ||
+      !xnn_safe_mul(batch_size, ba_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, bc_stride, &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
 
   const uint32_t nr = convolution_op->ukernel.igemm->nr;
   struct xnn_hmp_igemm_ukernel* igemm_cases =
@@ -2836,8 +3017,7 @@ static enum xnn_status reshape_igemm(
     convolution_op->dynamic_context.igemm->conv2d_igemm_indirection_init =
         (struct conv2d_igemm_indirection_init_context){
             .zero_buffer = convolution_op->zero_buffer,
-            .input_pixel_stride = convolution_op->input_pixel_stride
-                                  << log2_input_element_size,
+            .input_pixel_stride = input_pixel_stride_bytes,
             .input_height = input_height,
             .input_width = input_width,
             .output_height = output_height,
@@ -2983,17 +3163,13 @@ static enum xnn_status reshape_igemm(
       .indirect_a = convolution_op->convolution_op->indirection_buffer,
       .zero = convolution_op->zero_buffer,
       .packed_w = packed_weights(convolution_op),
-      .cm_stride = convolution_op->output_pixel_stride
-                   << log2_output_element_size,
+      .cm_stride = output_pixel_stride_bytes,
       .cn_stride = nr << log2_output_element_size,
       .ga_stride = group_input_channels << log2_input_element_size,
       .gw_stride = w_stride * round_up(group_output_channels, nr),
       .gc_stride = group_output_channels << log2_output_element_size,
-      .ba_stride =
-          input_height * input_width * convolution_op->input_pixel_stride
-          << log2_input_element_size,
-      .bc_stride = output_size * convolution_op->output_pixel_stride
-                   << log2_output_element_size,
+      .ba_stride = ba_stride,
+      .bc_stride = bc_stride,
       .log2_csize = log2_output_element_size,
       .ukernel = igemm_ukernel,
       .mr = mr,
@@ -3017,8 +3193,7 @@ static enum xnn_status reshape_igemm(
                 groups * batch_size, /*m=*/output_size,
                 /*n=*/group_output_channels,
                 /*m_stride=*/kernel_size * sizeof(void*) +
-                    (input_width * convolution_op->input_pixel_stride
-                     << log2_input_element_size),
+                    input_width_stride_bytes,
                 /*n_stride=*/
                 convolution_op->dynamic_context.igemm->igemm.w_stride,
                 /*cn_stride=*/1 << log2_output_element_size, mr, nr,
@@ -3089,6 +3264,72 @@ static enum xnn_status reshape_igemm(
   return xnn_status_success;
 }
 
+static enum xnn_status reshape_kai_dwconv(xnn_operator_t convolution_op,
+                                          uint32_t log2_input_element_size,
+                                          uint32_t log2_output_element_size,
+                                          size_t* workspace_size) {
+  const size_t input_height = convolution_op->convolution_op->input_height;
+  const size_t input_width = convolution_op->convolution_op->input_width;
+  const size_t output_height = convolution_op->convolution_op->output_height;
+  const size_t output_width = convolution_op->convolution_op->output_width;
+  size_t input_batch_stride;
+  size_t input_height_stride;
+  size_t input_pixel_stride;
+  size_t output_batch_stride;
+  size_t output_height_stride;
+  size_t output_pixel_stride;
+  if (!xnn_safe_mul(convolution_op->input_pixel_stride,
+                    (size_t)1 << log2_input_element_size,
+                    &input_pixel_stride) ||
+      !xnn_safe_mul(input_width, input_pixel_stride, &input_height_stride) ||
+      !xnn_safe_mul(input_height, input_height_stride, &input_batch_stride) ||
+      !xnn_safe_mul(convolution_op->output_pixel_stride,
+                    (size_t)1 << log2_output_element_size,
+                    &output_pixel_stride) ||
+      !xnn_safe_mul(output_width, output_pixel_stride, &output_height_stride) ||
+      !xnn_safe_mul(output_height, output_height_stride,
+                    &output_batch_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: KAI byte strides overflow size_t",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_unsupported_parameter;
+  }
+
+  convolution_op->dynamic_context.kai_dwconv->dwconv =
+      (struct kai_f32_dwconv_context){
+          .ukernel = convolution_op->ukernel.kai_dwconv.ukernel,
+          .input = convolution_op->convolution_op->input,
+          .packed_weights = packed_weights(convolution_op),
+          .output = convolution_op->convolution_op->output,
+          .input_height = input_height,
+          .output_height = output_height,
+          .input_batch_stride = input_batch_stride,
+          .input_height_stride = input_height_stride,
+          .input_pixel_stride = input_pixel_stride,
+          .output_batch_stride = output_batch_stride,
+          .output_height_stride = output_height_stride,
+          .output_pixel_stride = output_pixel_stride,
+          .input_padding_top = convolution_op->convolution_op->padding_top,
+          .input_padding_left = convolution_op->convolution_op->padding_left,
+      };
+  memcpy(&convolution_op->dynamic_context.kai_dwconv->dwconv.params,
+         &convolution_op->params,
+         sizeof(convolution_op->dynamic_context.kai_dwconv->dwconv.params));
+
+  convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+  convolution_op->compute[0].context_offset =
+      offsetof(struct kai_dwconv_op_context, dwconv);
+  convolution_op->compute[0].task_2d_tile_1d =
+      (pthreadpool_task_2d_tile_1d_t)xnn_compute_kai_f32_dwconv;
+  convolution_op->compute[0].range[0] = convolution_op->batch_size;
+  convolution_op->compute[0].range[1] = output_height;
+  convolution_op->compute[0].tile[0] =
+      convolution_op->ukernel.kai_dwconv.output_height_tile;
+  convolution_op->state = xnn_run_state_needs_setup;
+  *workspace_size = 0;
+  return xnn_status_success;
+}
+
 static enum xnn_status reshape_dwconv(
     xnn_operator_t convolution_op, uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size, uint32_t extra_weights_elements_size,
@@ -3122,6 +3363,7 @@ static enum xnn_status reshape_dwconv(
   const size_t primary_tile = dwconv_ukernel.primary_tile;
   size_t total_workspace_size = 0;
 
+
   // Micro-kernel will read (tile_size - kernel_size) elements after the end of
   // indirection buffer.
   size_t indirection_buffer_elements = 0;
@@ -3138,6 +3380,43 @@ static enum xnn_status reshape_dwconv(
   const size_t indirection_buffer_size =
       round_up_po2(indirection_buffer_size_raw, XNN_ALLOCATION_ALIGNMENT);
 
+  size_t num_input_pixels_dw = 0;
+  size_t input_pixel_stride_bytes = 0;
+  size_t input_batch_stride = 0;
+  size_t output_pixel_stride_bytes = 0;
+  size_t output_height_stride = 0;
+  size_t output_batch_stride = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+
+  if (!xnn_safe_mul(input_height, input_width,
+                    &num_input_pixels_dw) ||
+      !xnn_safe_mul(convolution_op->input_pixel_stride,
+                    (size_t) 1u << log2_input_element_size,
+                    &input_pixel_stride_bytes) ||
+      !xnn_safe_mul(num_input_pixels_dw,
+                    input_pixel_stride_bytes,
+                    &input_batch_stride) ||
+      !xnn_safe_mul(convolution_op->output_pixel_stride,
+                    (size_t) 1u << log2_output_element_size,
+                    &output_pixel_stride_bytes) ||
+      !xnn_safe_mul(output_width, output_pixel_stride_bytes,
+                    &output_height_stride) ||
+      !xnn_safe_mul(output_height, output_height_stride,
+                    &output_batch_stride) ||
+      !xnn_safe_mul(convolution_op->batch_size,
+                    input_batch_stride,
+                    &total_input_bytes) ||
+      !xnn_safe_mul(convolution_op->batch_size,
+                    output_batch_stride,
+                    &total_output_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
+
   size_t dwconv_compute_index;
   const bool is_transient_indirection_buffer =
       convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
@@ -3148,8 +3427,7 @@ static enum xnn_status reshape_dwconv(
     convolution_op->dynamic_context.dwconv->dwconv_indirection_init =
         (struct dwconv_indirection_init_context){
             .zero_buffer = convolution_op->zero_buffer,
-            .input_pixel_stride = convolution_op->input_pixel_stride
-                                  << log2_input_element_size,
+            .input_pixel_stride = input_pixel_stride_bytes,
             .input_height = input_height,
             .input_width = input_width,
             .output_height = output_height,
@@ -3212,7 +3490,7 @@ static enum xnn_status reshape_dwconv(
           /*output_y_end=*/convolution_op->convolution_op->output_height,
           convolution_op->convolution_op->indirection_buffer,
           convolution_op->convolution_op->input,
-          convolution_op->input_pixel_stride << log2_input_element_size,
+          input_pixel_stride_bytes,
           convolution_op->zero_buffer,
           convolution_op->convolution_op->input_height,
           convolution_op->convolution_op->input_width,
@@ -3237,21 +3515,14 @@ static enum xnn_status reshape_dwconv(
       .indirect_input_width_stride =
           (kernel_height * step_width) * sizeof(void*),
       .indirect_input_height_stride = step_height * sizeof(void*),
-      .input_batch_stride =
-          (input_height * input_width * convolution_op->input_pixel_stride)
-          << log2_input_element_size,
+      .input_batch_stride = input_batch_stride,
       .input_channel_stride = 1 << log2_input_element_size,
       .packed_weights = packed_weights(convolution_op),
       .weights_channel_stride = (primary_tile << log2_filter_element_size) +
                                 extra_weights_elements_size,
-      .output_batch_stride =
-          (output_height * output_width * convolution_op->output_pixel_stride)
-          << log2_output_element_size,
-      .output_height_stride =
-          (output_width * convolution_op->output_pixel_stride)
-          << log2_output_element_size,
-      .output_pixel_stride = convolution_op->output_pixel_stride
-                             << log2_output_element_size,
+      .output_batch_stride = output_batch_stride,
+      .output_height_stride = output_height_stride,
+      .output_pixel_stride = output_pixel_stride_bytes,
       .output_channel_stride = 1 << log2_output_element_size,
       .output_height = output_height,
       .output_width = output_width,
@@ -3301,17 +3572,36 @@ static enum xnn_status reshape_vmulcaddc(xnn_operator_t convolution_op,
                                          uint32_t log2_output_element_size,
                                          size_t* workspace_size,
                                          size_t num_threads) {
-  const size_t batch_output_size =
-      convolution_op->batch_size *
-      convolution_op->convolution_op->output_height *
-      convolution_op->convolution_op->output_width;
+  size_t output_pixels = 0;
+  size_t batch_output_size = 0;
+  size_t x_stride = 0;
+  size_t y_stride = 0;
+  size_t total_x_bytes = 0;
+  size_t total_y_bytes = 0;
+
+  if (!xnn_safe_mul(convolution_op->convolution_op->output_height,
+                    convolution_op->convolution_op->output_width,
+                    &output_pixels) ||
+      !xnn_safe_mul(convolution_op->batch_size, output_pixels,
+                    &batch_output_size) ||
+      !xnn_safe_mul(convolution_op->input_pixel_stride,
+                    (size_t) 1u << log2_input_element_size, &x_stride) ||
+      !xnn_safe_mul(convolution_op->output_pixel_stride,
+                    (size_t) 1u << log2_output_element_size, &y_stride) ||
+      !xnn_safe_mul(batch_output_size, x_stride, &total_x_bytes) ||
+      !xnn_safe_mul(batch_output_size, y_stride, &total_y_bytes)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "integer overflow in stride calculations",
+        xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
 
   convolution_op->context.vmulcaddc = (struct vmulcaddc_context){
       .n = convolution_op->convolution_op->groups << log2_input_element_size,
-      .x_stride = convolution_op->input_pixel_stride << log2_input_element_size,
+      .x_stride = x_stride,
       .w = packed_weights(convolution_op),
-      .y_stride = convolution_op->output_pixel_stride
-                  << log2_output_element_size,
+      .y_stride = y_stride,
       .ukernel = convolution_op->ukernel.vmulcaddc.function,
   };
   memcpy(&convolution_op->context.vmulcaddc.params, &convolution_op->params,
@@ -3474,6 +3764,9 @@ static enum xnn_status reshape_convolution2d_nhwc(
           convolution_op, log2_input_element_size, log2_filter_element_size,
           extra_weights_elements_size, log2_accumulator_element_size,
           log2_output_element_size, workspace_size, num_threads);
+    case xnn_microkernel_type_kai_dwconv:
+      return reshape_kai_dwconv(convolution_op, log2_input_element_size,
+                                log2_output_element_size, workspace_size);
     case xnn_microkernel_type_vmulcaddc:
       return reshape_vmulcaddc(convolution_op, log2_input_element_size,
                                log2_output_element_size, workspace_size,
@@ -3814,6 +4107,15 @@ static enum xnn_status setup_dwconv(xnn_operator_t convolution_op,
   return xnn_status_success;
 }
 
+static enum xnn_status setup_kai_dwconv(xnn_operator_t convolution_op) {
+  convolution_op->dynamic_context.kai_dwconv->dwconv.input =
+      convolution_op->convolution_op->input;
+  convolution_op->dynamic_context.kai_dwconv->dwconv.output =
+      convolution_op->convolution_op->output;
+  convolution_op->state = xnn_run_state_ready;
+  return xnn_status_success;
+}
+
 static enum xnn_status setup_vmulcaddc(xnn_operator_t convolution_op) {
   convolution_op->context.vmulcaddc.x = convolution_op->convolution_op->input;
   convolution_op->context.vmulcaddc.y = convolution_op->convolution_op->output;
@@ -3868,6 +4170,8 @@ static enum xnn_status setup_convolution2d_nhwc(
       return setup_igemm(convolution_op, workspace, log2_input_element_size);
     case xnn_microkernel_type_dwconv:
       return setup_dwconv(convolution_op, workspace, log2_input_element_size);
+    case xnn_microkernel_type_kai_dwconv:
+      return setup_kai_dwconv(convolution_op);
     case xnn_microkernel_type_vmulcaddc:
       return setup_vmulcaddc(convolution_op);
     default:

@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(googletest
-  URL https://github.com/google/googletest/archive/d72f9c8aea6817cdf1ca0ac10887f328de7f3da2.zip
-  URL_HASH SHA256=a4cb11930215b071168811982dfbebc82a2bb0f90db0e8713245931eb742ea46
+  URL https://github.com/google/googletest/archive/8eff9e336692fc95961e096564f1044c600b881d.zip
+  URL_HASH SHA256=6e8db0498a4fdcaa0b03bc4d554d7af8d0a84f49e8d8ba3e5509a6419fa066a5
   SOURCE_DIR "${CMAKE_BINARY_DIR}/googletest-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/googletest"
   CONFIGURE_COMMAND ""

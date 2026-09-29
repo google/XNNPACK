@@ -36,6 +36,7 @@ enum xnn_arch_flags {
   xnn_arch_arm_sve2 = 1 << 13,
   xnn_arch_arm_sme = 1 << 14,
   xnn_arch_arm_sme2 = 1 << 15,
+  xnn_arch_arm_sme2p1 = 1 << 16,
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   xnn_arch_x86_sse = 1 << 0,
   xnn_arch_x86_sse2 = 1 << 1,

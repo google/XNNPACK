@@ -297,7 +297,7 @@ struct unwrap_quantized<quantized<int32_t>> {
 };
 
 template <typename T>
-ynn_type type_of() {
+constexpr ynn_type type_of() {
   if (std::is_same<T, half>::value) {
     return ynn_type_fp16;
   } else if (std::is_same<T, bfloat16>::value) {

@@ -20,10 +20,10 @@ class IsomorphicGraphMatcher {
 
   bool MatchAndExplain(xnn_subgraph_t subgraph, std::ostream* listener) const;
 
-  template <
-      class GraphHolder,
-      class = std::enable_if_t<std::is_same_v<
-          decltype(std::declval<GraphHolder>()->subgraph()), xnn_subgraph_t>>>
+  template <class GraphHolder,
+            class = std::enable_if_t<std::is_same_v<
+                decltype(std::declval<GraphHolder>()->GetSubgraph()),
+                xnn_subgraph_t>>>
   bool MatchAndExplain(const GraphHolder& subgraph,
                        std::ostream* listener) const {
     if (!subgraph) {
@@ -32,7 +32,7 @@ class IsomorphicGraphMatcher {
       }
       return false;
     }
-    return MatchAndExplain(subgraph->subgraph(), listener);
+    return MatchAndExplain(subgraph->GetSubgraph(), listener);
   }
 
   void DescribeTo(std::ostream* os) const;
@@ -46,9 +46,9 @@ IsomorphicGraphMatcher IsIsomorphicTo(xnn_subgraph_t subgraph);
 template <
     class GraphHolder,
     class = std::enable_if_t<std::is_same_v<
-        decltype(std::declval<GraphHolder>()->subgraph()), xnn_subgraph_t>>>
+        decltype(std::declval<GraphHolder>()->GetSubgraph()), xnn_subgraph_t>>>
 IsomorphicGraphMatcher IsIsomorphicTo(GraphHolder& subgraph) {
-  return IsIsomorphicTo(subgraph ? subgraph->subgraph() : nullptr);
+  return IsIsomorphicTo(subgraph ? subgraph->GetSubgraph() : nullptr);
 }
 
 }  // namespace xnnpack

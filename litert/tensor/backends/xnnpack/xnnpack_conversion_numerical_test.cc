@@ -27,6 +27,7 @@ limitations under the License.
 #include "absl/types/span.h"
 #include "litert/tensor/backends/testing/numerical_test_bridge.h"
 #include "litert/tensor/backends/testing/numerical_test_suite.h"
+#include "litert/tensor/backends/xnnpack/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
 #include "litert/tensor/runners/xnnpack/runner.h"
 #include "litert/tensor/tensor.h"

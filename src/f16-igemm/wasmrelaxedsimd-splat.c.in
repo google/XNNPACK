@@ -38,8 +38,8 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__wasmrelaxedsimd_splat(
 
   uint16_t* c0 = (uint16_t*) c;
 
-  const v128_t vmin = wasm_v128_load16_splat(&params->scalar.min);;
-  const v128_t vmax = wasm_v128_load16_splat(&params->scalar.max);;
+  const v128_t vmin = wasm_v128_load16_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load16_splat(&params->scalar.max);
 
   $for M in range(1, MR):
     uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);

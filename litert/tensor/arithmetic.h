@@ -590,16 +590,15 @@ Tensor<Mixins...> Pad(Tensor<Mixins...> a, Tensor<Mixins...> b,
     const LockedBufferSpan<const int32_t> b_lock =
         b_info.buffer->Lock().As<const int32_t>();
     if (b_lock.size() < 2 * o_info.shape.size()) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-          "Padding buffer size must be at least 2 * input rank.")));
+      return absl::InvalidArgumentError(
+          "Padding buffer size must be at least 2 * input rank.");
     }
     const int32_t* b_data = b_lock.data();
     for (int i = 0; i < o_info.shape.size(); ++i) {
       o_info.shape[i] += b_data[i * 2] + b_data[i * 2 + 1];
     }
   } else {
-    return Tensor<Mixins...>(graph::ErrorTensor(
-        absl::InvalidArgumentError("The padding tensor must have a buffer.")));
+    return absl::InvalidArgumentError("The padding tensor must have a buffer.");
   }
   graph::OpDebugger::DebugOp(*op);
   return output;
@@ -622,16 +621,15 @@ Tensor<Mixins...> PadV2(Tensor<Mixins...> a, Tensor<Mixins...> b,
     const LockedBufferSpan<const int32_t> b_lock =
         b_info.buffer->Lock().As<const int32_t>();
     if (b_lock.size() < 2 * o_info.shape.size()) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-          "Padding buffer size must be at least 2 * input rank.")));
+      return absl::InvalidArgumentError(
+          "Padding buffer size must be at least 2 * input rank.");
     }
     const int32_t* b_data = b_lock.data();
     for (int i = 0; i < o_info.shape.size(); ++i) {
       o_info.shape[i] += b_data[i * 2] + b_data[i * 2 + 1];
     }
   } else {
-    return Tensor<Mixins...>(graph::ErrorTensor(
-        absl::InvalidArgumentError("The padding tensor must have a buffer.")));
+    return absl::InvalidArgumentError("The padding tensor must have a buffer.");
   }
   graph::OpDebugger::DebugOp(*op);
   return output;
@@ -661,8 +659,7 @@ Tensor<Mixins...> ExpandDims(Tensor<Mixins...> input, Tensor<Mixins...> axis,
     }
     if (real_axis < 0 ||
         real_axis > static_cast<int>(input_info.shape.size())) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-          "The ExpandDims axis is out of range.")));
+      return absl::InvalidArgumentError("The ExpandDims axis is out of range.");
     }
     output_info.shape.insert(output_info.shape.begin() + real_axis, 1);
   }
@@ -722,11 +719,49 @@ Tensor<Mixins...> Squeeze(Tensor<Mixins...> input,
   return output;
 }
 
+// Placeholder extent for dimensions that should be inferred.
+inline constexpr int kInferredDim = -1;
+
+// Reshapes `input` to `new_shape`.
+//
+// - `new_shape` may have exactly one of its dimensions set as `kInferredDim`.
 template <class... Mixins>
 Tensor<Mixins...> Reshape(Tensor<Mixins...> input, std::vector<int> new_shape,
                           source_location loc = source_location::current()) {
   auto op = std::make_shared<graph::ReshapeOperation>();
   RegisterMixins<Mixins...>(op);
+  const graph::TensorInformation& input_info = *GetInfo(input.GetRaw());
+
+  size_t known_size = 1;
+  for (size_t i = 0; i < new_shape.size(); ++i) {
+    if (new_shape[i] == kInferredDim) {
+      if (op->inferred_axis >= 0) {
+        return absl::InvalidArgumentError(
+            absl::StrCat("At most one dimension may be inferred. Found ",
+                         op->inferred_axis, " and ", i, "."));
+      }
+      op->inferred_axis = static_cast<int>(i);
+      continue;
+    }
+    if (new_shape[i] < 0) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "Negative dimensions in the new shape are unsupported. Got ",
+          new_shape[i], " for dimension ", i, "."));
+    }
+    known_size *= new_shape[i];
+  }
+  if (op->inferred_axis >= 0) {
+    if (known_size == 0 || input_info.GetSize() % known_size != 0) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "The inferred dimension must divide the input size. "
+          "input_size: ",
+          input_info.GetSize(), " size of the other dimensions: ", known_size,
+          " input_name: ", input.GetName()));
+    }
+    new_shape[op->inferred_axis] =
+        static_cast<int>(input_info.GetSize() / known_size);
+  }
+
   op->new_shape = new_shape;
   Tensor<Mixins...> shape_tensor(
       {.type = Type::kI32,
@@ -734,17 +769,15 @@ Tensor<Mixins...> Reshape(Tensor<Mixins...> input, std::vector<int> new_shape,
        .buffer = OwningCpuBuffer::Copy<Type::kI32>(new_shape)});
   AddInputs(op, input, shape_tensor);
   Tensor<Mixins...> output = AddOutput(op, loc);
-  const graph::TensorInformation& input_info = *GetInfo(input.GetRaw());
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.shape = op->new_shape;
   output_info.type = input_info.type;
   if (input_info.GetSize() != output_info.GetSize()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        absl::StrCat("The output size must be the same as the input size. "
-                     "input_size: ",
-                     input_info.GetSize(), " output_size: ",
-                     output_info.GetSize(), " input_name: ", input.GetName(),
-                     " output_name: ", output.GetName()))));
+    return absl::InvalidArgumentError(absl::StrCat(
+        "The output size must be the same as the input size. "
+        "input_size: ",
+        input_info.GetSize(), " output_size: ", output_info.GetSize(),
+        " input_name: ", input.GetName(), " output_name: ", output.GetName()));
   }
 
   graph::OpDebugger::DebugOp(*op);
@@ -799,8 +832,8 @@ Tensor<Mixins...> Sum(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
   graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
   o_info.type = a_info.type;
   if (b_info.buffer == nullptr) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The reduction tensor must have a buffer.")));
+    return absl::InvalidArgumentError(
+        "The reduction tensor must have a buffer.");
   }
   const LockedBufferSpan<const int32_t> b_lock =
       b_info.buffer->Lock().As<const int32_t>();
@@ -811,8 +844,8 @@ Tensor<Mixins...> Sum(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
     if (b_info.shape.empty()) {
       int axis = b_data[0] < 0 ? b_data[0] + rank : b_data[0];
       if (axis < 0 || axis >= rank) {
-        return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-            "The reduction axis is out of range.")));
+        return absl::InvalidArgumentError(
+            "The reduction axis is out of range.");
       }
       o_info.shape.push_back(o_info.shape[axis]);
     } else {
@@ -877,8 +910,8 @@ Tensor<Mixins...> ReduceMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
   graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
   o_info.type = a_info.type;
   if (b_info.buffer == nullptr) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The reduction tensor must have a buffer.")));
+    return absl::InvalidArgumentError(
+        "The reduction tensor must have a buffer.");
   }
   const LockedBufferSpan<const int32_t> b_lock =
       b_info.buffer->Lock().As<const int32_t>();
@@ -889,16 +922,17 @@ Tensor<Mixins...> ReduceMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
     if (b_info.shape.empty()) {
       int axis = b_data[0] < 0 ? b_data[0] + rank : b_data[0];
       if (axis < 0 || axis >= rank) {
-        return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-            "The reduction axis is out of range.")));
+        return absl::InvalidArgumentError(
+            "The reduction axis is out of range.");
       }
       o_info.shape.push_back(o_info.shape[axis]);
     } else {
       for (int i = 0; i < b_info.shape[0]; ++i) {
         int axis = b_data[i] < 0 ? b_data[i] + rank : b_data[i];
         if (axis < 0 || axis >= rank) {
-          return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-              "The reduction axis is out of range.")));
+          return Tensor<Mixins...>(
+              graph::ErrorTensor(absl::InvalidArgumentError(
+                  "The reduction axis is out of range.")));
         }
         o_info.shape[axis] = 1;
       }
@@ -953,8 +987,8 @@ Tensor<Mixins...> Mean(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
   graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
   o_info.type = a_info.type;
   if (b_info.buffer == nullptr) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The reduction tensor must have a buffer.")));
+    return absl::InvalidArgumentError(
+        "The reduction tensor must have a buffer.");
   }
   const LockedBufferSpan<const int32_t> b_lock =
       b_info.buffer->Lock().As<const int32_t>();
@@ -965,16 +999,17 @@ Tensor<Mixins...> Mean(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
     if (b_info.shape.empty()) {
       int axis = b_data[0] < 0 ? b_data[0] + rank : b_data[0];
       if (axis < 0 || axis >= rank) {
-        return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-            "The reduction axis is out of range.")));
+        return absl::InvalidArgumentError(
+            "The reduction axis is out of range.");
       }
       o_info.shape.push_back(o_info.shape[axis]);
     } else {
       for (int i = 0; i < b_info.shape[0]; ++i) {
         int axis = b_data[i] < 0 ? b_data[i] + rank : b_data[i];
         if (axis < 0 || axis >= rank) {
-          return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-              "The reduction axis is out of range.")));
+          return Tensor<Mixins...>(
+              graph::ErrorTensor(absl::InvalidArgumentError(
+                  "The reduction axis is out of range.")));
         }
         o_info.shape[axis] = 1;
       }
@@ -1030,8 +1065,8 @@ Tensor<Mixins...> ArgMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
   graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
   o_info.type = output_type;
   if (b_info.buffer == nullptr) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The reduction tensor must have a buffer.")));
+    return absl::InvalidArgumentError(
+        "The reduction tensor must have a buffer.");
   }
   const LockedBufferSpan<const int32_t> b_lock =
       b_info.buffer->Lock().As<const int32_t>();
@@ -1112,11 +1147,11 @@ Tensor<Mixins...> BatchMatMul(
     int y_dim = (y_idx >= 0) ? y_shape[y_idx] : 1;
 
     if (x_dim != y_dim && x_dim != 1 && y_dim != 1) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+      return absl::InvalidArgumentError(
           absl::StrCat("The batch dimensions of the input tensors must be "
                        "broadcastable. x_shape: ",
                        absl::StrJoin(x_info.shape, ","),
-                       " y_shape: ", absl::StrJoin(y_info.shape, ",")))));
+                       " y_shape: ", absl::StrJoin(y_info.shape, ",")));
     }
     output_info.shape[out_idx] = std::max(x_dim, y_dim);
   }
@@ -1150,12 +1185,12 @@ Tensor<Mixins...> FullyConnected(
   const graph::TensorInformation& weights_info = *GetInfo(weights.GetRaw());
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   if (input_info.shape.empty()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "FullyConnected input must have rank >= 1.")));
+    return absl::InvalidArgumentError(
+        "FullyConnected input must have rank >= 1.");
   }
   if (weights_info.shape.empty()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "FullyConnected weights must have rank >= 1.")));
+    return absl::InvalidArgumentError(
+        "FullyConnected weights must have rank >= 1.");
   }
   if (keep_num_dims) {
     output_info.shape = input_info.shape;
@@ -1217,6 +1252,10 @@ Tensor<Mixins...> AveragePool2D(
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (input_info.shape.size() < 4) {
+    return absl::InvalidArgumentError(
+        "AveragePool2D input must be rank 4 (NHWC).");
+  }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
 
@@ -1257,6 +1296,9 @@ Tensor<Mixins...> MaxPool2D(Tensor<Mixins...> input, int filter_height,
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (input_info.shape.size() < 4) {
+    return absl::InvalidArgumentError("MaxPool2D input must be rank 4 (NHWC).");
+  }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
 
@@ -1302,6 +1344,10 @@ TensorHandle Conv2DImpl(Tensor<Mixins...> input, Tensor<Mixins...> filter,
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (input_info.shape.size() < 4 || filter_info.shape.size() < 4) {
+    return TensorHandle(graph::ErrorTensor(absl::InvalidArgumentError(
+        "Conv2D input and filter must be rank 4 (NHWC).")));
+  }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
   const int filter_h = filter_info.shape[1];
@@ -1376,6 +1422,10 @@ Tensor<Mixins...> DepthwiseConv2DImpl(
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (input_info.shape.size() < 4 || filter_info.shape.size() < 4) {
+    return absl::InvalidArgumentError(
+        "DepthwiseConv2D input and filter must be rank 4 (NHWC).");
+  }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
   const int filter_h = filter_info.shape[1];
@@ -1443,8 +1493,8 @@ Tensor<Mixins...> Concatenation(
   output_info.type = first_input_info.type;
   output_info.shape = first_input_info.shape;
   if (axis < 0 || axis >= static_cast<int>(first_input_info.shape.size())) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The Concatenation axis is out of range.")));
+    return absl::InvalidArgumentError(
+        "The Concatenation axis is out of range.");
   }
   for (size_t i = 1; i < inputs.size(); ++i) {
     const graph::TensorInformation& input_info = *GetInfo(inputs[i].GetRaw());
@@ -1473,8 +1523,7 @@ Tensor<Mixins...> Pack(absl::Span<Tensor<Mixins...>> inputs, int axis,
   AddInputs(op, inputs);
   Tensor<Mixins...> output = AddOutput(op, loc);
   if (inputs.empty()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(
-        absl::InvalidArgumentError("Pack requires at least one input.")));
+    return absl::InvalidArgumentError("Pack requires at least one input.");
   }
   const graph::TensorInformation& first_input_info =
       *GetInfo(inputs[0].GetRaw());
@@ -1482,8 +1531,7 @@ Tensor<Mixins...> Pack(absl::Span<Tensor<Mixins...>> inputs, int axis,
   output_info.type = first_input_info.type;
   output_info.shape = first_input_info.shape;
   if (axis < 0 || axis > static_cast<int>(first_input_info.shape.size())) {
-    return Tensor<Mixins...>(graph::ErrorTensor(
-        absl::InvalidArgumentError("The Pack axis is out of range.")));
+    return absl::InvalidArgumentError("The Pack axis is out of range.");
   }
   output_info.shape.insert(output_info.shape.begin() + axis, inputs.size());
 
@@ -1515,8 +1563,8 @@ std::vector<Tensor<Mixins...>> Unpack(
   outputs.reserve(num);
   const graph::TensorInformation& input_info = GetInfo(input.GetRaw()).value();
   if (axis < 0 || axis >= static_cast<int>(input_info.shape.size())) {
-    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The Unpack axis is out of range.")))};
+    return {Tensor<Mixins...>(graph::ErrorTensor(
+        absl::InvalidArgumentError("The Unpack axis is out of range.")))};
   }
   std::vector<int> output_shape = input_info.shape;
   output_shape.erase(output_shape.begin() + axis);
@@ -1562,9 +1610,10 @@ std::vector<Tensor<Mixins...>> Split(
     axis_val += input_info.shape.size();
   }
 
-  if (axis_val < 0 || static_cast<size_t>(axis_val) >= input_info.shape.size()) {
-    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The Split axis is out of range.")))};
+  if (axis_val < 0 ||
+      static_cast<size_t>(axis_val) >= input_info.shape.size()) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(
+        absl::InvalidArgumentError("The Split axis is out of range.")))};
   }
 
   if (input_info.shape[axis_val] % num_splits != 0) {
@@ -1665,15 +1714,15 @@ Tensor<Mixins...> Transpose(Tensor<Mixins...> input, Tensor<Mixins...> perm,
     const auto perm_data = perm_info.buffer->Lock().As<const int32_t>();
     const auto& input_shape = input_info.shape;
     if (perm_data.size() != input_shape.size()) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-          "Transpose permutation length must equal input rank.")));
+      return absl::InvalidArgumentError(
+          "Transpose permutation length must equal input rank.");
     }
     output_info.shape.resize(input_shape.size());
     for (size_t i = 0; i < perm_data.size(); ++i) {
       if (perm_data.data()[i] < 0 ||
           static_cast<size_t>(perm_data.data()[i]) >= input_shape.size()) {
-        return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-            "Transpose permutation value is out of range.")));
+        return absl::InvalidArgumentError(
+            "Transpose permutation value is out of range.");
       }
       output_info.shape[i] = input_shape[perm_data.data()[i]];
     }
@@ -1751,8 +1800,8 @@ Tensor<Mixins...> Tile(Tensor<Mixins...> input, Tensor<Mixins...> multiples,
         multiples_info.buffer->Lock().As<const int32_t>();
     const auto& input_shape = input_info.shape;
     if (multiples_data.size() != input_shape.size()) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-          "Tile multiples length must equal input rank.")));
+      return absl::InvalidArgumentError(
+          "Tile multiples length must equal input rank.");
     }
     output_info.shape.resize(input_shape.size());
     for (size_t i = 0; i < multiples_data.size(); ++i) {
@@ -1855,22 +1904,21 @@ Tensor<Mixins...> Select(Tensor<Mixins...> condition, Tensor<Mixins...> a,
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
 
   if (a_info.shape != b_info.shape) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+    return absl::InvalidArgumentError(
         absl::StrCat("Shapes of a and b must match for Select. a: ",
                      absl::StrJoin(a_info.shape, ","),
-                     " b: ", absl::StrJoin(b_info.shape, ",")))));
+                     " b: ", absl::StrJoin(b_info.shape, ",")));
   }
   // In TFLite, Select condition can be a 1D tensor with length matching the
   // first dimension of the inputs, or match the inputs completely.
   if (condition_info.shape != a_info.shape) {
-    if (condition_info.shape.size() != 1 ||
-        a_info.shape.empty() ||
+    if (condition_info.shape.size() != 1 || a_info.shape.empty() ||
         condition_info.shape[0] != a_info.shape[0]) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+      return absl::InvalidArgumentError(
           absl::StrCat("Shape of condition must match a and b or be 1D with "
                        "length matching the first dimension. condition: ",
                        absl::StrJoin(condition_info.shape, ","),
-                       " a: ", absl::StrJoin(a_info.shape, ",")))));
+                       " a: ", absl::StrJoin(a_info.shape, ",")));
     }
   }
 
@@ -1896,11 +1944,11 @@ Tensor<Mixins...> SelectV2(Tensor<Mixins...> condition, Tensor<Mixins...> a,
 
   auto broadcast_ab = BroadcastShapes(a_info.shape, b_info.shape);
   if (!broadcast_ab.ok()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(broadcast_ab.status()));
+    return broadcast_ab.status();
   }
   auto final_shape = BroadcastShapes(condition_info.shape, *broadcast_ab);
   if (!final_shape.ok()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(final_shape.status()));
+    return final_shape.status();
   }
 
   output_info.shape = *final_shape;
@@ -1925,8 +1973,8 @@ Tensor<Mixins...> Slice(Tensor<Mixins...> input, Tensor<Mixins...> begin,
   if (size_info.buffer) {
     const auto size_data = size_info.buffer->Lock().As<const int32_t>();
     if (size_data.size() != input_info.shape.size()) {
-      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-          "Slice size tensor length must equal input rank.")));
+      return absl::InvalidArgumentError(
+          "Slice size tensor length must equal input rank.");
     }
     output_info.shape.assign(size_data.begin(), size_data.end());
     for (size_t i = 0; i < output_info.shape.size(); ++i) {
@@ -1976,8 +2024,8 @@ Tensor<Mixins...> EmbeddingLookup(
   output_info.type = output_type;
 
   if (value_info.shape.empty()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "EmbeddingLookup value must have rank >= 1.")));
+    return absl::InvalidArgumentError(
+        "EmbeddingLookup value must have rank >= 1.");
   }
   output_info.shape = ids_info.shape;
   output_info.shape.push_back(value_info.shape.back());
@@ -2140,8 +2188,8 @@ std::vector<Tensor<Mixins...>> TopK(
             Tensor<Mixins...>(graph::ErrorTensor(error))};
   }
   if (GetInfo(k.GetRaw())->buffer == nullptr) {
-    auto error = absl::InvalidArgumentError(
-        "TopK k tensor must have a buffer.");
+    auto error =
+        absl::InvalidArgumentError("TopK k tensor must have a buffer.");
     return {Tensor<Mixins...>(graph::ErrorTensor(error)),
             Tensor<Mixins...>(graph::ErrorTensor(error))};
   }
@@ -2246,14 +2294,12 @@ Tensor<Mixins...> Gather(Tensor<Mixins...> input, Tensor<Mixins...> indices,
   }
   if (resolved_axis < 0 ||
       resolved_axis >= static_cast<int>(input_info.shape.size())) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The Gather axis is out of range.")));
+    return absl::InvalidArgumentError("The Gather axis is out of range.");
   }
   op->axis = resolved_axis;
   if (batch_dims < 0 ||
       batch_dims > static_cast<int>(indices_info.shape.size())) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The Gather batch_dims is out of range.")));
+    return absl::InvalidArgumentError("The Gather batch_dims is out of range.");
   }
   int i = 0;
   for (; i < resolved_axis; ++i) {
@@ -2262,8 +2308,8 @@ Tensor<Mixins...> Gather(Tensor<Mixins...> input, Tensor<Mixins...> indices,
   output_info.shape.insert(output_info.shape.end(),
                            indices_info.shape.begin() + batch_dims,
                            indices_info.shape.end());
-  for (i = resolved_axis + 1;
-       i < static_cast<int>(input_info.shape.size()); ++i) {
+  for (i = resolved_axis + 1; i < static_cast<int>(input_info.shape.size());
+       ++i) {
     output_info.shape.push_back(input_info.shape[i]);
   }
 
@@ -2303,8 +2349,7 @@ Tensor<Mixins...> OneHot(Tensor<Mixins...> indices, Tensor<Mixins...> depth,
   }
   if (resolved_axis < 0 ||
       resolved_axis > static_cast<int>(indices_info.shape.size())) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "The OneHot axis is out of range.")));
+    return absl::InvalidArgumentError("The OneHot axis is out of range.");
   }
   output_info.shape.insert(output_info.shape.begin() + resolved_axis,
                            depth_val);
@@ -2330,13 +2375,11 @@ Tensor<Mixins...> GatherNd(Tensor<Mixins...> input, Tensor<Mixins...> indices,
   int indices_ndims = indices_info.shape.size();
   int input_ndims = input_info.shape.size();
   if (indices_info.shape.empty()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "GatherNd indices must have rank >= 1.")));
+    return absl::InvalidArgumentError("GatherNd indices must have rank >= 1.");
   }
   int index_depth = indices_info.shape.back();
   if (index_depth < 0 || index_depth > input_ndims) {
-    return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
-        "GatherNd index depth is out of range.")));
+    return absl::InvalidArgumentError("GatherNd index depth is out of range.");
   }
   int outer_dims = indices_ndims - 1;
 
@@ -2361,7 +2404,7 @@ Tensor<Mixins...> Quantize(Tensor<Mixins...> a, Type type,
   RegisterMixins<Mixins...>(op);
   auto status = CheckUnaryElementwiseOp(a.GetRaw());
   if (!status.ok()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(status, loc));
+    return {status, loc};
   }
   op->inputs = {a.GetRaw()};
   auto out_group = graph::NewTensorGroup(1, loc);
@@ -2391,7 +2434,7 @@ Tensor<Mixins...> Dequantize(Tensor<Mixins...> a,
   RegisterMixins<Mixins...>(op);
   auto status = CheckUnaryElementwiseOp(a.GetRaw());
   if (!status.ok()) {
-    return Tensor<Mixins...>(graph::ErrorTensor(status, loc));
+    return {status, loc};
   }
   op->inputs = {a.GetRaw()};
   auto out_group = graph::NewTensorGroup(1, loc);

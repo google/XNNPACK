@@ -247,7 +247,11 @@ static enum xnn_status initialize_workspace_values(
     return xnn_status_success;
   }
   // Sparse microkernels can read up to 2 * XNN_EXTRA_BYTES beyond array bounds.
-  mem_arena_size += 2 * XNN_EXTRA_BYTES;
+  if (!xnn_safe_add(mem_arena_size, 2 * XNN_EXTRA_BYTES, &mem_arena_size)) {
+    xnn_log_error(
+        "failed to allocate runtime workspace: size overflows size_t");
+    return xnn_status_out_of_memory;
+  }
 
   // Records how much the workspace has moved by due to allocating a larger workspace.
   ptrdiff_t workspace_data_delta = 0;
@@ -859,10 +863,46 @@ enum xnn_status xnn_plan_memory(
 
     if (value->allocation_type == xnn_allocation_type_workspace) {
       // Value is purely internal to the runtime, and must be allocated in its workspace.
+      if (value->size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to plan memory: tensor #%" PRIu32 " size overflows size_t",
+            i);
+        status = xnn_status_out_of_memory;
+        goto error;
+      }
       size_t tensor_size = xnn_tensor_get_rounded_size(value);
-      if (value->datatype == xnn_datatype_qdint8 || value->datatype == xnn_datatype_qduint8) {
-        tensor_size += xnn_tensor_get_rounded_dynamic_quant_param_size(value);
-        tensor_size += xnn_tensor_get_rounded_row_sum_size(value);
+      if (tensor_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to plan memory: tensor #%" PRIu32
+            " rounded size overflows size_t",
+            i);
+        status = xnn_status_out_of_memory;
+        goto error;
+      }
+      if (value->datatype == xnn_datatype_qdint8 ||
+          value->datatype == xnn_datatype_qduint8) {
+        const size_t dq_size =
+            xnn_tensor_get_rounded_dynamic_quant_param_size(value);
+        if (dq_size == SIZE_MAX ||
+            !xnn_safe_add(tensor_size, dq_size, &tensor_size)) {
+          xnn_log_error(
+              "failed to plan memory: tensor #%" PRIu32
+              " dynamic quant param size overflows size_t",
+              i);
+          status = xnn_status_out_of_memory;
+          goto error;
+        }
+        const size_t row_sum_size =
+            xnn_tensor_get_rounded_row_sum_size(value);
+        if (row_sum_size == SIZE_MAX ||
+            !xnn_safe_add(tensor_size, row_sum_size, &tensor_size)) {
+          xnn_log_error(
+              "failed to plan memory: tensor #%" PRIu32
+              " row sum size overflows size_t",
+              i);
+          status = xnn_status_out_of_memory;
+          goto error;
+        }
       }
       xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
     }
@@ -870,9 +910,19 @@ enum xnn_status xnn_plan_memory(
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
+    const size_t rounded_workspace_size =
+        xnn_get_rounded_size(opdata->workspace_size);
+    if (rounded_workspace_size == SIZE_MAX) {
+      xnn_log_error(
+          "failed to plan memory: operator #%" PRIu32
+          " workspace size overflows size_t",
+          opdata_id);
+      status = xnn_status_out_of_memory;
+      goto error;
+    }
     xnn_add_operator_workspace_allocation_tracker(
-        &mem_alloc_tracker, runtime->num_values + opdata_id, xnn_get_rounded_size(opdata->workspace_size),
-        opdata_id);
+        &mem_alloc_tracker, runtime->num_values + opdata_id,
+        rounded_workspace_size, opdata_id);
   }
 
   optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);

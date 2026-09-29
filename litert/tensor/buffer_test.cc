@@ -28,6 +28,7 @@ limitations under the License.
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "absl/algorithm/container.h"
+#include "absl/types/span.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/matchers.h"
 #include "litert/tensor/internal/type_id.h"
@@ -215,6 +216,48 @@ TEST(OwningCpuBuffer, CopyFromSequence) {
               ElementsAreArray(reference_data));
 }
 
+TEST(OwningCpuBuffer, CopyAsFromContiguousSequence) {
+  const std::vector<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kI32, reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsFromSpan) {
+  const std::vector<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  // Spans are already the narrowed form `CopyAs` dispatches on, so they must
+  // reach the type switch directly instead of being narrowed again.
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kI32, absl::MakeConstSpan(reference_data));
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsFromNonContiguousSequence) {
+  const std::list<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kI32, reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsConvertsFromNonContiguousSequence) {
+  const std::list<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kFP32, reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<float>(),
+              ElementsAreArray(reference_data));
+}
+
 TEST(OwningCpuBuffer, CopyFromInitializerList) {
   std::initializer_list<float> reference_data{1, 2, 3, 4, 5};
 
@@ -343,6 +386,44 @@ TEST(LockedBufferSpanTest, GettersCannotBeCalledFromTemporaryValues) {
                                      const LockedBufferSpan<std::byte>&&>);
 
   SUCCEED();
+}
+
+TEST(ByteSizeTest, SpanCpuBufferReportsTheViewedSize) {
+  const std::vector<float> data = {1.f, 2.f, 3.f, 4.f};
+  SpanCpuBuffer buffer(reinterpret_cast<const std::byte*>(data.data()),
+                       data.size() * sizeof(float));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(data.size() * sizeof(float)));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(buffer.Lock().size()));
+}
+
+TEST(ByteSizeTest, MutableSpanCpuBufferReportsTheViewedSize) {
+  std::vector<float> data = {1.f, 2.f, 3.f, 4.f};
+  MutableSpanCpuBuffer buffer(reinterpret_cast<std::byte*>(data.data()),
+                              data.size() * sizeof(float));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(data.size() * sizeof(float)));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(buffer.Lock().size()));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(buffer.LockMutable().size()));
+}
+
+TEST(ByteSizeTest, OwningCpuBufferReportsTheAllocatedSize) {
+  constexpr size_t kAllocCount = 4;
+  const std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::Allocate<Type::kFP32>(kAllocCount);
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(kAllocCount * sizeof(float)));
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(buffer->Lock().size()));
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(buffer->LockMutable().size()));
+}
+
+TEST(ByteSizeTest, IsReachableThroughTheBaseInterface) {
+  constexpr size_t kAllocCount = 4;
+  const std::shared_ptr<Buffer> buffer =
+      OwningCpuBuffer::Allocate<Type::kFP32>(kAllocCount);
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(kAllocCount * sizeof(float)));
+}
+
+TEST(ByteSizeTest, AnEmptyBufferReportsZero) {
+  const SpanCpuBuffer buffer;
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(size_t{0}));
 }
 
 }  // namespace

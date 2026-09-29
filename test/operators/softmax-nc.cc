@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "test/operators/softmax-operator-tester.h"
@@ -287,3 +288,51 @@ TEST(SOFTMAX_NC_QU8, strided_batch_with_input_and_output_stride) {
         .TestQU8();
   }
 }
+
+TEST(SOFTMAX_NC_F32, overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_softmax_nc_f32(/*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_softmax_nc_f32(
+                op, /*channels=*/10, /*input_stride=*/SIZE_MAX / 2,
+                /*output_stride=*/10, /*batch_size=*/1,
+                /*threadpool=*/nullptr));
+}
+
+TEST(SOFTMAX_NC_F32, overflow_batch_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_softmax_nc_f32(/*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_softmax_nc_f32(
+                op, /*channels=*/10, /*input_stride=*/100,
+                /*output_stride=*/100, /*batch_size=*/SIZE_MAX / 50,
+                /*threadpool=*/nullptr));
+}
+
+TEST(SOFTMAX_NC_QU8, overflow_batch_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_softmax_nc_qu8(
+                /*input_scale=*/1.0f, /*output_zero_point=*/0,
+                /*output_scale=*/1.0f / 256.0f, /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_softmax_nc_qu8(
+                op, /*channels=*/10, /*input_stride=*/100,
+                /*output_stride=*/100, /*batch_size=*/SIZE_MAX / 50,
+                /*threadpool=*/nullptr));
+}
+

@@ -70,6 +70,25 @@ static enum xnn_status reshape_binary_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
+  const size_t num_input1_elements =
+      xnn_shape_multiply_all_dims(&values[input1_id].shape);
+  if (num_input1_elements == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with input1 ID #%" PRIu32
+        ": input shape overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_binary_elementwise), input1_id);
+    return xnn_status_invalid_parameter;
+  }
+  const size_t num_input2_elements =
+      xnn_shape_multiply_all_dims(&values[input2_id].shape);
+  if (num_input2_elements == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with input2 ID #%" PRIu32
+        ": input shape overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_binary_elementwise), input2_id);
+    return xnn_status_invalid_parameter;
+  }
+
   struct xnn_shape shape2;
   opdata->shape1.num_dims = values[input1_id].shape.num_dims;
   shape2.num_dims = values[input2_id].shape.num_dims;

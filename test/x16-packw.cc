@@ -49,6 +49,19 @@ TEST_P(XnnTest, k_eq_kblock) {
       .Test(GetParam().ukernel);
 }
 
+TEST_P(XnnTest, n_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+      .g(2)
+      .n(GetParam().nr * GetParam().nr_scale * 2 + 2)
+      .k(GetParam().kblock + 1)
+      .n_stride(GetParam().kblock + 17)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .Test(GetParam().ukernel);
+}
+
 TEST_P(XnnTest, k_div_kblock) {
   if (GetParam().kblock <= 1) {
     GTEST_SKIP();
@@ -284,7 +297,7 @@ TEST_P(XnnTestGIO, k_eq_kblock) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, null_bias) {
@@ -296,7 +309,7 @@ TEST_P(XnnTestGIO, null_bias) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, n_lt_nr) {
@@ -308,7 +321,7 @@ TEST_P(XnnTestGIO, n_lt_nr) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -317,4 +330,3 @@ INSTANTIATE_TEST_SUITE_P(x16_packw_gio, XnnTestGIO,
                          GetTestGIOName);
 
 }  // namespace
-

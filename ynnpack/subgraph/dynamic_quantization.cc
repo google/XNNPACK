@@ -5,9 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -15,12 +13,10 @@
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
-#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "ynnpack/subgraph/utils.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
@@ -31,28 +27,21 @@ namespace {
 
 // This is a near-duplicate of that found in src/xnnpack/quantization.h
 template <typename T>
-std::pair<float, int32_t> compute_qd8_params(T min, T max) {
-  constexpr float qmin = std::numeric_limits<uint8_t>::min();
-  constexpr float qmax = std::numeric_limits<uint8_t>::max();
-  const float rmin = std::min<float>(0.0f, min);
-  const float rmax = std::max<float>(0.0f, max);
-  const float scale = rmin == rmax ? 1.f : (qmax - qmin) / (rmax - rmin);
-  const float inv_scale = rmin == rmax ? 1.f : (rmax - rmin) / (qmax - qmin);
-  const float descaled_min = rmin * scale;
-  const float descaled_max = rmax * scale;
-  const float zero_point_from_min_error = qmin + descaled_min;
-  const float zero_point_from_max_error = qmax + descaled_max;
-  float zero_point = zero_point_from_min_error + zero_point_from_max_error > 0
-                         ? qmin - descaled_min
-                         : qmax - descaled_max;
-  zero_point = std::max<float>(zero_point, qmin);
-  zero_point = std::min<float>(zero_point, qmax);
-  assert(zero_point >= std::numeric_limits<uint8_t>::min());
-  assert(zero_point <= std::numeric_limits<uint8_t>::max());
+inline std::pair<float, int32_t> compute_qd8_params(
+    T min, T max, int32_t output_zero_point = 0) {
+  const float rmin = std::min(0.0f, static_cast<float>(min));
+  const float rmax = std::max(0.0f, static_cast<float>(max));
+  const float rdiff = rmax - rmin;
+  if (rdiff == 0.0f) {
+    return {1.0f, output_zero_point - 128};
+  }
+  const float scale = 255.0f / rdiff;
+  const float inv_scale = rdiff / 255.0f;
+  const float zero_point = std::clamp(-rmin * scale, 0.0f, 255.0f);
   // We compute the zero point for uint8, but we want the result to be for int8.
   // This means we can assume the (float) zero point is positive.
   const int32_t nudged_zero_point =
-      static_cast<int32_t>(zero_point + 0.5f) - 128;
+      static_cast<int32_t>(zero_point + 0.5f) + (output_zero_point - 128);
   return {inv_scale, nudged_zero_point};
 }
 
@@ -82,14 +71,14 @@ auto make_compute_qd8_params_impl(int32_t output_zero_point) {
     const slinky::index_t n = scale_n[0].extent();
 
     slinky::for_each_element(
-        [&](void* scale, void* zero_point, const void* min_max) {
+        [=](void* scale, void* zero_point, const void* min_max) {
+          float* scale_ptr = reinterpret_cast<float*>(scale);
+          int32_t* zero_point_ptr = reinterpret_cast<int32_t*>(zero_point);
+          const T* min_ptr = reinterpret_cast<const T*>(min_max);
+          const T* max_ptr = min_ptr + index_stride;
           for (slinky::index_t i = 0; i < n; ++i) {
-            float& scale_i = reinterpret_cast<float*>(scale)[i];
-            int32_t& zero_point_i = reinterpret_cast<int32_t*>(zero_point)[i];
-            const T* min_max_i = reinterpret_cast<const T*>(min_max) + i;
-            std::tie(scale_i, zero_point_i) =
-                compute_qd8_params(min_max_i[0], min_max_i[index_stride]);
-            zero_point_i += output_zero_point;
+            std::tie(scale_ptr[i], zero_point_ptr[i]) =
+                compute_qd8_params(min_ptr[i], max_ptr[i], output_zero_point);
           }
         },
         scale, zero_point, min_max);

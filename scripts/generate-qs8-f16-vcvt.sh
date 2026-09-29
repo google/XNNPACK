@@ -10,3 +10,10 @@ tools/xngen src/qs8-f16-vcvt/avx2.c.in -D BATCH_TILE=16 -o src/qs8-f16-vcvt/gen/
 tools/xngen src/qs8-f16-vcvt/avx2.c.in -D BATCH_TILE=24 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u24.c &
 tools/xngen src/qs8-f16-vcvt/avx2.c.in -D BATCH_TILE=32 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u32.c &
 tools/xngen src/qs8-f16-vcvt/avx2.c.in -D BATCH_TILE=64 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u64.c &
+
+############################# RISC-V Vector ###################################
+tools/xngen src/qs8-f16-vcvt/rvvfp16arith.c.in -D LMUL=1 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-rvvfp16arith-u1v.c &
+tools/xngen src/qs8-f16-vcvt/rvvfp16arith.c.in -D LMUL=2 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-rvvfp16arith-u2v.c &
+tools/xngen src/qs8-f16-vcvt/rvvfp16arith.c.in -D LMUL=4 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-rvvfp16arith-u4v.c &
+
+wait

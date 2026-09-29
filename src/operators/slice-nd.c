@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/normalization.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -152,7 +153,15 @@ static enum xnn_status reshape_slice_nd(
     return xnn_status_unsupported_parameter;
   }
 
+  size_t num_input_elements = 1;
   for (size_t i = 0; i < num_dims; i++) {
+    if (!xnn_safe_mul(num_input_elements, input_shape[i],
+                      &num_input_elements)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input size overflows size_t",
+          xnn_operator_type_to_string_v2(slice_op));
+      return xnn_status_out_of_memory;
+    }
     if (sizes[i] == 0) {
       slice_op->state = xnn_run_state_skip;
       return xnn_status_success;
@@ -172,7 +181,9 @@ static enum xnn_status reshape_slice_nd(
           input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
-    if (offsets[i] + sizes[i] > input_shape[i]) {
+    size_t offset_plus_size = 0;
+    if (!xnn_safe_add(offsets[i], sizes[i], &offset_plus_size) ||
+        offset_plus_size > input_shape[i]) {
       xnn_log_error(
           "failed to reshape %s operator with %zu offsets[%zu] and %zu "
           "sizes[%zu]: offset + size <= %zu",
@@ -205,18 +216,56 @@ static enum xnn_status reshape_slice_nd(
 
   // TODO(b/246969669): move strides calculation into normalization to simplify code here.
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
-    slice_op->context.slice.offsets[i] = normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - i];
+    slice_op->context.slice.offsets[i] =
+        normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
-  slice_op->context.slice.offsets[0] <<= log2_element_size;
+  if (!xnn_safe_mul(slice_op->context.slice.offsets[0],
+                    (size_t) 1u << log2_element_size,
+                    &slice_op->context.slice.offsets[0])) {
+    xnn_log_error(
+        "failed to reshape %s operator: offset in bytes overflows size_t",
+        xnn_operator_type_to_string_v2(slice_op));
+    return xnn_status_out_of_memory;
+  }
   size_t input_stride = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
   size_t output_stride = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1];
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
-    slice_op->context.slice.input_stride[i - 1] = input_stride << log2_element_size;
-    slice_op->context.slice.output_stride[i - 1] = output_stride << log2_element_size;
-    input_stride *= normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
-    output_stride *= normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    size_t input_stride_bytes = 0;
+    size_t output_stride_bytes = 0;
+    if (!xnn_safe_mul(input_stride, (size_t) 1u << log2_element_size,
+                      &input_stride_bytes) ||
+        !xnn_safe_mul(output_stride, (size_t) 1u << log2_element_size,
+                      &output_stride_bytes) ||
+        !xnn_safe_mul(input_stride,
+                      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i],
+                      &input_stride) ||
+        !xnn_safe_mul(output_stride,
+                      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i],
+                      &output_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: stride overflows size_t",
+          xnn_operator_type_to_string_v2(slice_op));
+      return xnn_status_out_of_memory;
+    }
+    slice_op->context.slice.input_stride[i - 1] = input_stride_bytes;
+    slice_op->context.slice.output_stride[i - 1] = output_stride_bytes;
+    size_t offset_input_stride = 0;
+    if (!xnn_safe_mul(slice_op->context.slice.offsets[i], input_stride_bytes,
+                      &offset_input_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: offset input stride overflows size_t",
+          xnn_operator_type_to_string_v2(slice_op));
+      return xnn_status_out_of_memory;
+    }
   }
-  slice_op->context.slice.contiguous_size = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] << log2_element_size;
+  if (!xnn_safe_mul(normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1],
+                    (size_t) 1u << log2_element_size,
+                    &slice_op->context.slice.contiguous_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: contiguous size overflows size_t",
+        xnn_operator_type_to_string_v2(slice_op));
+    return xnn_status_out_of_memory;
+  }
 
   switch (num_normalized_dims) {
     case 1:

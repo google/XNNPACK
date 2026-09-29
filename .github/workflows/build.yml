@@ -120,6 +120,10 @@ jobs:
           ccache -M 500M
           ccache -z
 
+      - name: Install QEMU
+        run: |
+          which qemu-arm >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install -y qemu-user; }
+
       - name: Configure and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
 
