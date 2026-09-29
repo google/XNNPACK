@@ -437,6 +437,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
     "neonsme2": _create_params(
         cond = "//:arm_sme2_enabled",
         extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//:common",
+            "@KleidiAI//kai/ukernels/dwconv:dwconv",
+            "@KleidiAI//kai/ukernels/dwconv:interface",
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),

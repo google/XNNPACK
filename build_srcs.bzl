@@ -313,6 +313,7 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/gemm.h",
     "src/xnnpack/ibilinear.h",
     "src/xnnpack/igemm.h",
+    "src/xnnpack/kai-dwconv.h",
     "src/xnnpack/lut.h",
     "src/xnnpack/maxpool.h",
     "src/xnnpack/packb.h",
