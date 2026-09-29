@@ -180,7 +180,84 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
       XNN_OP_ACTION_CASE(node_type, global_sum_pooling_2d, f32acc_rsum);
       XNN_OP_ACTION_CASE(node_type, static_reduce_max, rmax);
       XNN_OP_ACTION_CASE(node_type, static_reduce_min, rmin);
-    case xnn_node_type_fully_connected:
+    case xnn_node_type_fully_connected: {
+      const xnn_value& input = subgraph->values[node.inputs[0]];
+      const xnn_value& filter = subgraph->values[node.inputs[1]];
+      const bool inline_lhs_packing = node.flags & XNN_FLAG_INLINE_LHS_PACKING;
+      const xnn_datatype packed_input_datatype =
+          inline_lhs_packing ? node.packed_input_datatype : input.datatype;
+      switch (filter.datatype) {
+        case xnn_datatype_fp16:
+        case xnn_datatype_fp32:
+          if (inline_lhs_packing ? IsValid(xnn_init_pf16_gemm_config())
+                                 : IsValid(xnn_init_f16_gemm_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_datatype_qcint8:
+          switch (packed_input_datatype) {
+            case xnn_datatype_qdint8:
+              if (IsValid(xnn_init_qd8_f16_qc8w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            case xnn_datatype_qduint8:
+              if (IsValid(xnn_init_qdu8_f16_qc8w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            case xnn_datatype_qpint8:
+              if (IsValid(xnn_init_qp8_f16_qc8w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        case xnn_datatype_qcint4:
+          switch (packed_input_datatype) {
+            case xnn_datatype_qdint8:
+              if (IsValid(xnn_init_qd8_f16_qc4w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            case xnn_datatype_qduint8:
+              if (IsValid(xnn_init_qdu8_f16_qc4w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        case xnn_datatype_qbint4:
+          if (packed_input_datatype == xnn_datatype_qdint8 &&
+              IsValid(xnn_init_qd8_f16_qb4w_gemm_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_datatype_qcint2:
+          switch (packed_input_datatype) {
+            case xnn_datatype_qdint8:
+              if (IsValid(xnn_init_qd8_f16_qc2w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            case xnn_datatype_qduint8:
+              if (IsValid(xnn_init_qdu8_f16_qc2w_gemm_config())) {
+                return OpAction::kTransparent;
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          break;
+      }
+      break;
+    }
     case xnn_node_type_batch_matrix_multiply:
     case xnn_node_type_deconvolution_2d: {
       if (node.flags & XNN_FLAG_INLINE_LHS_PACKING) {

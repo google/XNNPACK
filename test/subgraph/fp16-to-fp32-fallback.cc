@@ -86,14 +86,14 @@ TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   //                           │
   //      (weights)            ▼
   // ┌─────────────────┐     ┌─────────────────────────┐
-  // │ 002: FP16[2, 4] │     │  #000: Fully Connected  │
-  // │                 │ ──▶ │ (FP16, FP16, FP16, goi) │
+  // │ 002: FP16[1, 4] │     │  #000: Binary Divide    │
+  // │                 │ ──▶ │  (FP16, FP16 -> FP16)   │
   // └─────────────────┘     └─────────────────────────┘
   //                           │
   //                           │
   //                           ▼
   //                         ┌─────────────────────────┐
-  //                         │     001: FP16[3, 2]     │
+  //                         │     001: FP16[3, 4]     │
   //                         └─────────────────────────┘
   //
   //
@@ -112,11 +112,11 @@ TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   // (statically converted     │ v004: FP32[3, 4]
   //       weights)            ▼
   // ┌─────────────────┐     ┌─────────────────────────┐
-  // │ 005: FP32[2, 4] │     │  #001: Fully Connected  │
-  // │                 │ ──▶ │ (FP32, FP32, FP32, goi) │
+  // │ 005: FP32[1, 4] │     │  #001: Binary Divide    │
+  // │                 │ ──▶ │  (FP32, FP32 -> FP32)   │
   // └─────────────────┘     └─────────────────────────┘
   //                           │
-  //                           │ v003: FP32[3, 2]
+  //                           │ v003: FP32[3, 4]
   //                           ▼
   //                         ┌─────────────────────────┐
   //                         │ #002: Unary Elementwise │
@@ -126,17 +126,17 @@ TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   //                           │
   //                           ▼
   //                         ┌─────────────────────────┐
-  //                         │     001: FP16[3, 2]     │
+  //                         │     001: FP16[3, 4]     │
   //                         └─────────────────────────┘
 
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
-    XnnTensor weights({.type = Type::kFP16,
-                       .shape = {2, 4},
-                       .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
-                           {1, 2, 3, 4, 5, 6, 7, 8})});
-    XnnTensor output = FullyConnected(input, weights);
+    XnnTensor weights(
+        {.type = Type::kFP16,
+         .shape = {1, 4},
+         .buffer = OwningCpuBuffer::Copy<Type::kFP16>({1, 2, 3, 4})});
+    XnnTensor output = Div(input, weights);
 
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
@@ -145,11 +145,11 @@ TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
     input = Cast(input, Type::kFP32);
-    XnnTensor weights({.type = Type::kFP32,
-                       .shape = {2, 4},
-                       .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
-                           {1, 2, 3, 4, 5, 6, 7, 8})});
-    XnnTensor output = FullyConnected(input, weights);
+    XnnTensor weights(
+        {.type = Type::kFP32,
+         .shape = {1, 4},
+         .buffer = OwningCpuBuffer::Copy<Type::kFP32>({1, 2, 3, 4})});
+    XnnTensor output = Div(input, weights);
     output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
@@ -548,6 +548,8 @@ TEST_F(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
 }
 
 TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
+  // FullyConnected has a scalar FP16 fallback and will therefore not be
+  // converted.
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
@@ -566,17 +568,14 @@ TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
   std::unique_ptr<XnnpackGraph> expected_graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
-    input = Cast(input, Type::kFP32);
-    XnnTensor weights({.type = Type::kFP32,
+    XnnTensor weights({.type = Type::kFP16,
                        .shape = {2, 4},
-                       .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                       .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
                            {1, 2, 3, 4, 5, 6, 7, 8})});
-    XnnTensor bias(
-        {.type = Type::kFP32,
-         .shape = {2},
-         .buffer = OwningCpuBuffer::Copy<Type::kFP32>({1.0f, 2.0f})});
+    XnnTensor bias({.type = Type::kFP16,
+                    .shape = {2},
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP16>({1, 2})});
     XnnTensor output = FullyConnected(input, weights, bias);
-    output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
@@ -589,6 +588,8 @@ TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
 }
 
 TEST_F(Fp16ToFp32FallbackTest, BatchMatMul) {
+  // BatchMatMul has a scalar FP16 fallback and will therefore not be
+  // converted.
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
@@ -601,10 +602,7 @@ TEST_F(Fp16ToFp32FallbackTest, BatchMatMul) {
   {
     XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
     XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
-    XnnTensor x_fp32 = Cast(x, Type::kFP32);
-    XnnTensor y_fp32 = Cast(y, Type::kFP32);
-    XnnTensor output = BatchMatMul(x_fp32, y_fp32);
-    output = Cast(output, Type::kFP16);
+    XnnTensor output = BatchMatMul(x, y);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
@@ -617,6 +615,8 @@ TEST_F(Fp16ToFp32FallbackTest, BatchMatMul) {
 }
 
 TEST_F(Fp16ToFp32FallbackTest, TransposeConv2D) {
+  // TransposeConv2D (deconvolution_2d + add) has scalar FP16 fallbacks and will
+  // therefore not be converted.
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor filter({.type = Type::kFP32,
@@ -641,15 +641,13 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeConv2D) {
                       .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
                           std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
     XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
-    XnnTensor input_fp32 = Cast(input, Type::kFP32);
-    XnnTensor bias({.type = Type::kFP32,
+    XnnTensor bias({.type = Type::kFP16,
                     .shape = {8},
-                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
                         std::vector<float>(8, 1.0f))});
-    XnnTensor output = TransposeConv2D(filter, input_fp32, bias, {1, 5, 5, 8},
+    XnnTensor output = TransposeConv2D(filter, input, bias, {1, 5, 5, 8},
                                        litert::tensor::kPaddingSame,
                                        /*stride_h=*/1, /*stride_w=*/1);
-    output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
