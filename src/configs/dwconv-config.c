@@ -1029,7 +1029,8 @@ static void init_kai_f32_dwconv_config(void) {
     kai_f32_dwconv_config.ukernel =
         xnn_kai_f32_dwconv_minmax_ukernel_9pvc__neonsme2;
     kai_f32_dwconv_config.init = xnn_init_f32_minmax_scalar_params;
-    kai_f32_dwconv_config.channel_tile = xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile();
+    kai_f32_dwconv_config.channel_tile =
+        xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile();
     kai_f32_dwconv_config.primary_tile = 9;
     kai_f32_dwconv_config.output_height_tile =
         xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_output_height_tile();
