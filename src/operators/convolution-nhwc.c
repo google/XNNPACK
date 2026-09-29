@@ -1415,7 +1415,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
   }
   const struct xnn_kai_dwconv_config* kai_dwconv_config =
       xnn_init_kai_f32_dwconv_config();
-  // KAI derives the channel count and tensor widths from these dense strides.
+  // KAI derives the channel count and tensor widths from these dense strides,
+  // and its 3x3s1 SME2 kernel requires at least 2 - min(pad_left, 2) input
+  // columns (guaranteed unless pad_left == 0 and pad_right > 1).
   if (context->operator_type == xnn_operator_type_convolution_nhwc_f32 &&
       kai_dwconv_config != NULL && context->kernel_height == 3 &&
       context->kernel_width == 3 &&
@@ -1424,7 +1426,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
       context->group_input_channels == 1 &&
       context->group_output_channels == 1 &&
       context->input_channel_stride == context->groups &&
-      context->output_channel_stride == context->groups) {
+      context->output_channel_stride == context->groups &&
+      (context->input_padding_left > 0 || context->input_padding_right <= 1 ||
+       (context->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0)) {
     context->kai_dwconv_config = kai_dwconv_config;
     context->microkernel_type = xnn_microkernel_type_kai_dwconv;
     kai_dwconv_config->init(&context->dwconv_params.f32, context->output_min,

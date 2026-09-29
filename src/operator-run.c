@@ -1021,11 +1021,13 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(
 void xnn_compute_kai_f32_dwconv(struct kai_f32_dwconv_context* restrict context,
                                 size_t batch_index, size_t output_y,
                                 size_t output_y_tile) {
-  const size_t input_y_start = output_y < context->input_padding_top ? 0
+  const size_t input_y_start = output_y < context->input_padding_top
+                                   ? 0
                                    : output_y - context->input_padding_top;
   const size_t input_y = min(input_y_start, context->input_height);
   const size_t pad_top = output_y < context->input_padding_top
-                             ? context->input_padding_top - output_y : 0;
+                             ? context->input_padding_top - output_y
+                             : 0;
   const size_t valid_input_rows =
       input_y < context->input_height ? context->input_height - input_y : 0;
   const size_t valid_output_rows =

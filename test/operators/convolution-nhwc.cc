@@ -1281,7 +1281,31 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
       .padding(1, 1)
       .kernel_size(3, 3)
       .groups(groups)
+      .input_channel_stride(groups)
+      .output_channel_stride(groups)
+      .depthwise_layout(true)
+      .TestNHWCxF32(
+          /*expected_workspace_size=*/0,
+          /*expected_microkernel_type=*/xnn_microkernel_type_kai_dwconv);
+  ConvolutionOperatorTester()
+      .input_size(15, 14)
+      .padding(1, 1)
+      .kernel_size(3, 3)
+      .groups(groups)
       .input_channel_stride(groups + 1)
+      .output_channel_stride(groups)
+      .TestNHWCxF32(
+          /*expected_workspace_size=*/SIZE_MAX,
+          /*expected_microkernel_type=*/xnn_microkernel_type_dwconv);
+  ConvolutionOperatorTester()
+      .input_size(3, 1)
+      .padding_top(1)
+      .padding_bottom(1)
+      .padding_left(0)
+      .padding_right(2)
+      .kernel_size(3, 3)
+      .groups(groups)
+      .input_channel_stride(groups)
       .output_channel_stride(groups)
       .TestNHWCxF32(
           /*expected_workspace_size=*/SIZE_MAX,
