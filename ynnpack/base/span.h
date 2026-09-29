@@ -12,6 +12,8 @@ namespace ynn {
 
 // slinky's span is designed to be compatible with C++20's span, use it until
 // we can depend on C++20.
+using slinky::mutable_span;
+using slinky::permute;
 using slinky::span;
 
 }  // namespace ynn

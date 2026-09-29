@@ -3,6 +3,8 @@
 //
 // Copyright 2019 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -26,6 +28,13 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/requantization.h"
 #include "test/next_prime.h"
+
+typedef void (*xnn_x32_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
+                                           size_t kr, size_t sr,
+                                           size_t m_idx_start,
+                                           const float* lhs,
+                                           size_t lhs_stride,
+                                           void* lhs_packed);
 
 class GemmMicrokernelTester {
  public:
@@ -350,6 +359,12 @@ class GemmMicrokernelTester {
             xnn_pack_weights_and_biases_fn pack,
             xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+  void Test_QP8F32QC2W(
+      xnn_qp8_f32_qc2w_gemm_minmax_ukernel_fn gemm,
+      xnn_init_f32_minmax_params_fn init_minmax_params,
+      xnn_pack_weights_and_biases_fn pack,
+      xnn_packed_stride_weights_and_biases_fn packed_stride);
+
   void Test_QP8F32QC8W(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_fn gemm,
                        xnn_init_f32_minmax_params_fn init_minmax_params,
                        xnn_pack_weights_and_biases_fn pack,
@@ -362,6 +377,8 @@ class GemmMicrokernelTester {
 
   void Test_PF32(xnn_pf32_gemm_minmax_ukernel_fn gemm,
                  xnn_init_f32_minmax_params_fn init_minmax_params,
+                 xnn_x32_pack_lh_ukernel_fn pack_lh_fn,
+                 xnn_pack_lh_size_fn pack_lh_size_fn,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
@@ -390,6 +407,12 @@ class GemmMicrokernelTester {
                  xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
+  void Test_PQS8QC4W(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                     xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                     xnn_pack_weights_and_biases_fn pack,
+                     xnn_packed_stride_weights_and_biases_fn packed_stride,
+                     xnn_qs8_requantize_fn requantize) const;
 
   void Test_PQS8(xnn_packed_lhs_igemm_ukernel_fn packed_igemm,
                  xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,

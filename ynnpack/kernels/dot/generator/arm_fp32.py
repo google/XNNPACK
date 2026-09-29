@@ -54,6 +54,7 @@ class arm64_neon_fp32(arm_neon_fp32):
 generate_dot_kernels(
     arm64_neon_fp32(),
     [
+        (1, 64, 4),
         (1, 32, 4),
         (2, 32, 4),
         (3, 32, 4),

@@ -1,6 +1,8 @@
 #!/bin/sh
 # Copyright 2019 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -27,6 +29,7 @@ tools/generate-gemm-test.py --spec test/pf32-gemm-minmax.yaml     --output-test 
 tools/generate-gemm-test.py --spec test/pf16-gemm-minmax.yaml     --output-test test/pf16-gemm-minmax.cc --output-bench bench/pf16-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/pqs8-qc8w-gemm-minmax.yaml     --output-test test/pqs8-qc8w-gemm-minmax.cc --output-bench bench/pqs8-qc8w-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/pqs8-qc4w-gemm-minmax.yaml     --output-test test/pqs8-qc4w-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml --output-test test/qu8-gemm-minmax-rndnu16.cc
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output-test test/qu8-gemm-minmax-fp32.cc --output-test test/qu8-gemm-minmax-fp32-2.cc --output-bench bench/qu8-gemm-fp32.cc &
@@ -41,6 +44,7 @@ tools/generate-gemm-test.py --spec test/qd8-f32-qb4w-gemm-minmax.yaml --output-t
 tools/generate-gemm-test.py --spec test/qd8-f32-qc2w-gemm-minmax.yaml --output-test test/qd8-f32-qc2w-gemm-minmax.cc --output-bench bench/qd8-f32-qc2w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qd8-f16-qc2w-gemm-minmax.yaml --output-test test/qd8-f16-qc2w-gemm-minmax.cc --output-bench bench/qd8-f16-qc2w-gemm.cc &
 
+tools/generate-gemm-test.py --spec test/qp8-f32-qc2w-gemm-minmax.yaml --output-test test/qp8-f32-qc2w-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qc4w-gemm-minmax.yaml --output-test test/qp8-f32-qc4w-gemm-minmax.cc --output-bench bench/qp8-f32-qc4w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qc8w-gemm-minmax.yaml --output-test test/qp8-f32-qc8w-gemm-minmax.cc --output-bench bench/qp8-f32-qc8w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qb4w-gemm-minmax.yaml --output-test test/qp8-f32-qb4w-gemm-minmax.cc --output-bench bench/qp8-f32-qb4w-gemm.cc &
@@ -140,6 +144,9 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel qu8-
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vpreluc  --output test/qu8-vpreluc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vrpreluc  --output test/qu8-vrpreluc.cc &
 ### Tests for VUnary micro-kernels
+tools/generate-vunary-test.py --ukernel bf16-vrsqrt --output test/bf16-vrsqrt.cc &
+tools/generate-vunary-test.py --ukernel bf16-vsigmoid --output test/bf16-vsigmoid.cc &
+tools/generate-vunary-test.py --ukernel bf16-vsqr --output test/bf16-vsqr.cc &
 tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &
 tools/generate-vunary-test.py --ukernel f16-vapproxgelu --output test/f16-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
@@ -250,7 +257,7 @@ tools/xngen test/simd/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON 
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/f16-simd-scalar.cc &
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO=XNN_ARCH_ARM64 -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_fp16_arith)" -o test/simd/f16-simd-neonfp16arith.cc &
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=avx512fp16 -D ARCH_MACRO="(XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16)" -o test/simd/f16-simd-avx512fp16.cc &
-tools/xngen test/simd/f16-simd.cc.in -D ARCH=wasmrelaxedsimd -D ARCH_MACRO="XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/f16-simd-wasmrelaxedsimd.cc &
+tools/xngen test/simd/f16-simd.cc.in -D ARCH=wasmrelaxedsimd -D ARCH_MACRO="XNN_ARCH_WASMRELAXEDSIMDFP16" -D TEST_REQUIRES="" -o test/simd/f16-simd-wasmrelaxedsimd.cc &
 
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s16-simd-scalar.cc &
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s16-simd-neon.cc &

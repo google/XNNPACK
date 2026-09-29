@@ -284,8 +284,10 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_kai_f32_weights_and_biases,
-                        xnn_packed_stride_kai_f32_weights_and_biases);
+                        xnn_x32_pack_lh_ukernel__neonsme2,
+                        xnn_x32_pack_lh_size__neonsme2,
+                        xnn_pack_kai_f32_weights_and_biases_sme2,
+                        xnn_packed_stride_kai_f32_weights_and_biases_sme2);
           },
           xnn_arch_arm_sme2)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -333,8 +335,10 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_kai_f32_weights_and_biases,
-                        xnn_packed_stride_kai_f32_weights_and_biases);
+                        xnn_x32_pack_lh_ukernel__neonsme2,
+                        xnn_x32_pack_lh_size__neonsme2,
+                        xnn_pack_kai_f32_weights_and_biases_sme2,
+                        xnn_packed_stride_kai_f32_weights_and_biases_sme2);
           },
           xnn_arch_arm_sme2)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -387,8 +391,10 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_kai_f32_weights_and_biases,
-                        xnn_packed_stride_kai_f32_weights_and_biases);
+                        xnn_x32_pack_lh_ukernel__neonsme,
+                        xnn_x32_pack_lh_size__neonsme,
+                        xnn_pack_kai_f32_weights_and_biases_sme,
+                        xnn_packed_stride_kai_f32_weights_and_biases_sme);
           },
           xnn_arch_arm_sme)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -436,8 +442,10 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_kai_f32_weights_and_biases,
-                        xnn_packed_stride_kai_f32_weights_and_biases);
+                        xnn_x32_pack_lh_ukernel__neonsme,
+                        xnn_x32_pack_lh_size__neonsme,
+                        xnn_pack_kai_f32_weights_and_biases_sme,
+                        xnn_packed_stride_kai_f32_weights_and_biases_sme);
           },
           xnn_arch_arm_sme)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {

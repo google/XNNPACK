@@ -30,6 +30,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint16_t* weights,
   const uint16_t* bias,
   const void* scale,
@@ -67,21 +68,21 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
       }
       packed_w += 16;
 
-      const uint16_t* w1 = w0 + kc;
-      const uint16_t* w2 = w1 + kc;
-      const uint16_t* w3 = w2 + kc;
-      const uint16_t* w4 = w3 + kc;
-      const uint16_t* w5 = w4 + kc;
-      const uint16_t* w6 = w5 + kc;
-      const uint16_t* w7 = w6 + kc;
-      const uint16_t* w8 = w7 + kc;
-      const uint16_t* w9 = w8 + kc;
-      const uint16_t* w10 = w9 + kc;
-      const uint16_t* w11 = w10 + kc;
-      const uint16_t* w12 = w11 + kc;
-      const uint16_t* w13 = w12 + kc;
-      const uint16_t* w14 = w13 + kc;
-      const uint16_t* w15 = w14 + kc;
+      const uint16_t* w1 = w0 + n_stride;
+      const uint16_t* w2 = w1 + n_stride;
+      const uint16_t* w3 = w2 + n_stride;
+      const uint16_t* w4 = w3 + n_stride;
+      const uint16_t* w5 = w4 + n_stride;
+      const uint16_t* w6 = w5 + n_stride;
+      const uint16_t* w7 = w6 + n_stride;
+      const uint16_t* w8 = w7 + n_stride;
+      const uint16_t* w9 = w8 + n_stride;
+      const uint16_t* w10 = w9 + n_stride;
+      const uint16_t* w11 = w10 + n_stride;
+      const uint16_t* w12 = w11 + n_stride;
+      const uint16_t* w13 = w12 + n_stride;
+      const uint16_t* w14 = w13 + n_stride;
+      const uint16_t* w15 = w14 + n_stride;
       xnn_prefetch_to_l1((const int8_t*) w0);
       xnn_prefetch_to_l1((const int8_t*) w0 + 64);
       xnn_prefetch_to_l1((const int8_t*) w1);
@@ -204,38 +205,38 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
         const __m256i w14 = _mm256_unpacklo_epi64(u11, u15);
         const __m256i w15 = _mm256_unpackhi_epi64(u11, u15);
 
-        _mm_storeu_si128((__m128i*) (packed_w + 0), _mm256_castsi256_si128(w0));
-        _mm_storeu_si128((__m128i*) (packed_w + 128), _mm256_extracti128_si256(w0, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 8), _mm256_castsi256_si128(w8));
-        _mm_storeu_si128((__m128i*) (packed_w + 136), _mm256_extracti128_si256(w8, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 16), _mm256_castsi256_si128(w1));
-        _mm_storeu_si128((__m128i*) (packed_w + 144), _mm256_extracti128_si256(w1, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 24), _mm256_castsi256_si128(w9));
-        _mm_storeu_si128((__m128i*) (packed_w + 152), _mm256_extracti128_si256(w9, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 32), _mm256_castsi256_si128(w2));
-        _mm_storeu_si128((__m128i*) (packed_w + 160), _mm256_extracti128_si256(w2, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 40), _mm256_castsi256_si128(w10));
-        _mm_storeu_si128((__m128i*) (packed_w + 168), _mm256_extracti128_si256(w10, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 48), _mm256_castsi256_si128(w3));
-        _mm_storeu_si128((__m128i*) (packed_w + 176), _mm256_extracti128_si256(w3, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 56), _mm256_castsi256_si128(w11));
-        _mm_storeu_si128((__m128i*) (packed_w + 184), _mm256_extracti128_si256(w11, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 64), _mm256_castsi256_si128(w4));
-        _mm_storeu_si128((__m128i*) (packed_w + 192), _mm256_extracti128_si256(w4, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 72), _mm256_castsi256_si128(w12));
-        _mm_storeu_si128((__m128i*) (packed_w + 200), _mm256_extracti128_si256(w12, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 80), _mm256_castsi256_si128(w5));
-        _mm_storeu_si128((__m128i*) (packed_w + 208), _mm256_extracti128_si256(w5, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 88), _mm256_castsi256_si128(w13));
-        _mm_storeu_si128((__m128i*) (packed_w + 216), _mm256_extracti128_si256(w13, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 96), _mm256_castsi256_si128(w6));
-        _mm_storeu_si128((__m128i*) (packed_w + 224), _mm256_extracti128_si256(w6, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 104), _mm256_castsi256_si128(w14));
-        _mm_storeu_si128((__m128i*) (packed_w + 232), _mm256_extracti128_si256(w14, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 112), _mm256_castsi256_si128(w7));
-        _mm_storeu_si128((__m128i*) (packed_w + 240), _mm256_extracti128_si256(w7, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 120), _mm256_castsi256_si128(w15));
-        _mm_storeu_si128((__m128i*) (packed_w + 248), _mm256_extracti128_si256(w15, 1));
+        const __m256i out_0_0 = _mm256_permute2x128_si256(w0, w8, 0x20);
+        const __m256i out_0_8 = _mm256_permute2x128_si256(w0, w8, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 0), out_0_0);
+        _mm256_storeu_si256((__m256i*) (packed_w + 128), out_0_8);
+        const __m256i out_0_1 = _mm256_permute2x128_si256(w1, w9, 0x20);
+        const __m256i out_0_9 = _mm256_permute2x128_si256(w1, w9, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 16), out_0_1);
+        _mm256_storeu_si256((__m256i*) (packed_w + 144), out_0_9);
+        const __m256i out_0_2 = _mm256_permute2x128_si256(w2, w10, 0x20);
+        const __m256i out_0_10 = _mm256_permute2x128_si256(w2, w10, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 32), out_0_2);
+        _mm256_storeu_si256((__m256i*) (packed_w + 160), out_0_10);
+        const __m256i out_0_3 = _mm256_permute2x128_si256(w3, w11, 0x20);
+        const __m256i out_0_11 = _mm256_permute2x128_si256(w3, w11, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 48), out_0_3);
+        _mm256_storeu_si256((__m256i*) (packed_w + 176), out_0_11);
+        const __m256i out_0_4 = _mm256_permute2x128_si256(w4, w12, 0x20);
+        const __m256i out_0_12 = _mm256_permute2x128_si256(w4, w12, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 64), out_0_4);
+        _mm256_storeu_si256((__m256i*) (packed_w + 192), out_0_12);
+        const __m256i out_0_5 = _mm256_permute2x128_si256(w5, w13, 0x20);
+        const __m256i out_0_13 = _mm256_permute2x128_si256(w5, w13, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 80), out_0_5);
+        _mm256_storeu_si256((__m256i*) (packed_w + 208), out_0_13);
+        const __m256i out_0_6 = _mm256_permute2x128_si256(w6, w14, 0x20);
+        const __m256i out_0_14 = _mm256_permute2x128_si256(w6, w14, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 96), out_0_6);
+        _mm256_storeu_si256((__m256i*) (packed_w + 224), out_0_14);
+        const __m256i out_0_7 = _mm256_permute2x128_si256(w7, w15, 0x20);
+        const __m256i out_0_15 = _mm256_permute2x128_si256(w7, w15, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 112), out_0_7);
+        _mm256_storeu_si256((__m256i*) (packed_w + 240), out_0_15);
         packed_w += 256;
       }
 
@@ -545,7 +546,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
         }
       }
       packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
-      w0 = w15;
+      w0 = w15 + n_stride - kc;
     }
 
     // NC remainder (1..15)
@@ -566,59 +567,59 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
       }
 
       // NR remainder has less than 16 rows so last row is not loaded
-      const uint16_t* w1 = w0 + kc;
+      const uint16_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint16_t* w2 = w1 + kc;
+      const uint16_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const uint16_t* w3 = w2 + kc;
+      const uint16_t* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const uint16_t* w4 = w3 + kc;
+      const uint16_t* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const uint16_t* w5 = w4 + kc;
+      const uint16_t* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const uint16_t* w6 = w5 + kc;
+      const uint16_t* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
-      const uint16_t* w7 = w6 + kc;
+      const uint16_t* w7 = w6 + n_stride;
       if XNN_UNPREDICTABLE(n < 8) {
         w7 = w6;
       }
-      const uint16_t* w8 = w7 + kc;
+      const uint16_t* w8 = w7 + n_stride;
       if XNN_UNPREDICTABLE(n <= 8) {
         w8 = w7;
       }
-      const uint16_t* w9 = w8 + kc;
+      const uint16_t* w9 = w8 + n_stride;
       if XNN_UNPREDICTABLE(n < 10) {
         w9 = w8;
       }
-      const uint16_t* w10 = w9 + kc;
+      const uint16_t* w10 = w9 + n_stride;
       if XNN_UNPREDICTABLE(n <= 10) {
         w10 = w9;
       }
-      const uint16_t* w11 = w10 + kc;
+      const uint16_t* w11 = w10 + n_stride;
       if XNN_UNPREDICTABLE(n < 12) {
         w11 = w10;
       }
-      const uint16_t* w12 = w11 + kc;
+      const uint16_t* w12 = w11 + n_stride;
       if XNN_UNPREDICTABLE(n <= 12) {
         w12 = w11;
       }
-      const uint16_t* w13 = w12 + kc;
+      const uint16_t* w13 = w12 + n_stride;
       if XNN_UNPREDICTABLE(n < 14) {
         w13 = w12;
       }
-      const uint16_t* w14 = w13 + kc;
+      const uint16_t* w14 = w13 + n_stride;
       if XNN_UNPREDICTABLE(n <= 14) {
         w14 = w13;
       }
@@ -711,38 +712,38 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
         const __m256i w14 = _mm256_unpacklo_epi64(u11, u15);
         const __m256i w15 = _mm256_unpackhi_epi64(u11, u15);
 
-        _mm_storeu_si128((__m128i*) (packed_w + 0), _mm256_castsi256_si128(w0));
-        _mm_storeu_si128((__m128i*) (packed_w + 128), _mm256_extracti128_si256(w0, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 8), _mm256_castsi256_si128(w8));
-        _mm_storeu_si128((__m128i*) (packed_w + 136), _mm256_extracti128_si256(w8, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 16), _mm256_castsi256_si128(w1));
-        _mm_storeu_si128((__m128i*) (packed_w + 144), _mm256_extracti128_si256(w1, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 24), _mm256_castsi256_si128(w9));
-        _mm_storeu_si128((__m128i*) (packed_w + 152), _mm256_extracti128_si256(w9, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 32), _mm256_castsi256_si128(w2));
-        _mm_storeu_si128((__m128i*) (packed_w + 160), _mm256_extracti128_si256(w2, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 40), _mm256_castsi256_si128(w10));
-        _mm_storeu_si128((__m128i*) (packed_w + 168), _mm256_extracti128_si256(w10, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 48), _mm256_castsi256_si128(w3));
-        _mm_storeu_si128((__m128i*) (packed_w + 176), _mm256_extracti128_si256(w3, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 56), _mm256_castsi256_si128(w11));
-        _mm_storeu_si128((__m128i*) (packed_w + 184), _mm256_extracti128_si256(w11, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 64), _mm256_castsi256_si128(w4));
-        _mm_storeu_si128((__m128i*) (packed_w + 192), _mm256_extracti128_si256(w4, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 72), _mm256_castsi256_si128(w12));
-        _mm_storeu_si128((__m128i*) (packed_w + 200), _mm256_extracti128_si256(w12, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 80), _mm256_castsi256_si128(w5));
-        _mm_storeu_si128((__m128i*) (packed_w + 208), _mm256_extracti128_si256(w5, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 88), _mm256_castsi256_si128(w13));
-        _mm_storeu_si128((__m128i*) (packed_w + 216), _mm256_extracti128_si256(w13, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 96), _mm256_castsi256_si128(w6));
-        _mm_storeu_si128((__m128i*) (packed_w + 224), _mm256_extracti128_si256(w6, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 104), _mm256_castsi256_si128(w14));
-        _mm_storeu_si128((__m128i*) (packed_w + 232), _mm256_extracti128_si256(w14, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 112), _mm256_castsi256_si128(w7));
-        _mm_storeu_si128((__m128i*) (packed_w + 240), _mm256_extracti128_si256(w7, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 120), _mm256_castsi256_si128(w15));
-        _mm_storeu_si128((__m128i*) (packed_w + 248), _mm256_extracti128_si256(w15, 1));
+        const __m256i out_0_0 = _mm256_permute2x128_si256(w0, w8, 0x20);
+        const __m256i out_0_8 = _mm256_permute2x128_si256(w0, w8, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 0), out_0_0);
+        _mm256_storeu_si256((__m256i*) (packed_w + 128), out_0_8);
+        const __m256i out_0_1 = _mm256_permute2x128_si256(w1, w9, 0x20);
+        const __m256i out_0_9 = _mm256_permute2x128_si256(w1, w9, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 16), out_0_1);
+        _mm256_storeu_si256((__m256i*) (packed_w + 144), out_0_9);
+        const __m256i out_0_2 = _mm256_permute2x128_si256(w2, w10, 0x20);
+        const __m256i out_0_10 = _mm256_permute2x128_si256(w2, w10, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 32), out_0_2);
+        _mm256_storeu_si256((__m256i*) (packed_w + 160), out_0_10);
+        const __m256i out_0_3 = _mm256_permute2x128_si256(w3, w11, 0x20);
+        const __m256i out_0_11 = _mm256_permute2x128_si256(w3, w11, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 48), out_0_3);
+        _mm256_storeu_si256((__m256i*) (packed_w + 176), out_0_11);
+        const __m256i out_0_4 = _mm256_permute2x128_si256(w4, w12, 0x20);
+        const __m256i out_0_12 = _mm256_permute2x128_si256(w4, w12, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 64), out_0_4);
+        _mm256_storeu_si256((__m256i*) (packed_w + 192), out_0_12);
+        const __m256i out_0_5 = _mm256_permute2x128_si256(w5, w13, 0x20);
+        const __m256i out_0_13 = _mm256_permute2x128_si256(w5, w13, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 80), out_0_5);
+        _mm256_storeu_si256((__m256i*) (packed_w + 208), out_0_13);
+        const __m256i out_0_6 = _mm256_permute2x128_si256(w6, w14, 0x20);
+        const __m256i out_0_14 = _mm256_permute2x128_si256(w6, w14, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 96), out_0_6);
+        _mm256_storeu_si256((__m256i*) (packed_w + 224), out_0_14);
+        const __m256i out_0_7 = _mm256_permute2x128_si256(w7, w15, 0x20);
+        const __m256i out_0_15 = _mm256_permute2x128_si256(w7, w15, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 112), out_0_7);
+        _mm256_storeu_si256((__m256i*) (packed_w + 240), out_0_15);
         packed_w += 256;
       }
 
@@ -1049,6 +1050,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm(
       }
       packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
-    weights += nc * kc;
+    weights += nc * n_stride;
   } while (--g != 0);
 }

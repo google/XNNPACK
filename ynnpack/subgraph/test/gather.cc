@@ -75,18 +75,6 @@ void TestGather(std::vector<int32_t> axes, std::vector<size_t> input_shape,
 }
 
 template <typename T, typename IndexType>
-void TestGather(int32_t axis, std::vector<size_t> input_shape,
-                std::vector<T> input_data, std::vector<size_t> index_shape,
-                std::vector<int32_t> index_data,
-                std::vector<size_t> expected_output_shape,
-                std::vector<T> expected_output_data,
-                bool expect_success = true) {
-  TestGather<T, IndexType>(std::vector<int32_t>{axis}, input_shape, input_data,
-                           index_shape, index_data, expected_output_shape,
-                           expected_output_data, expect_success);
-}
-
-template <typename T, typename IndexType>
 constexpr bool is_supported_sub_byte() {
   if constexpr (type_info<IndexType>::element_count() == 1) {
     return true;
@@ -127,7 +115,7 @@ TYPED_TEST(GatherTest, Index0D) {
 
   // 4. 1D input, 0D index
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{}, /*index_data=*/{1},
       /*expected_output_shape=*/{}, /*expected_output_data=*/{2});
@@ -143,7 +131,7 @@ TYPED_TEST(GatherTest, Index1D) {
 
   // 1D input, 1D index (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{4}, /*index_data=*/{1, 2, 0, 1},
       /*expected_output_shape=*/{4}, /*expected_output_data=*/{2, 3, 1, 2});
@@ -159,7 +147,7 @@ TYPED_TEST(GatherTest, Index2D) {
 
   // 1D input, 2D index (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{2, 4}, /*index_data=*/{1, 2, 0, 2, 0, 1, 1, 2},
       /*expected_output_shape=*/{2, 4},
@@ -177,7 +165,7 @@ TYPED_TEST(GatherTest, Input2DIndex2D) {
 
   // 2D input, 2D index, axis = 0 (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 1, 4},
       /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
       /*index_shape=*/{2, 3, 4},
@@ -200,7 +188,7 @@ TYPED_TEST(GatherTest, IndexBroadcasting) {
 
   // Index broadcasting (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 2, 4},
       /*input_data=*/
       {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
@@ -222,7 +210,7 @@ TYPED_TEST(GatherTest, InputBroadcasting) {
 
   // Input broadcasting (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 1, 4},
       /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
       /*index_shape=*/{2, 3, 4},
@@ -245,7 +233,7 @@ TYPED_TEST(GatherTest, OutOfBounds) {
   // 1D input, 1D index (aligned). Fast path (scalar gather) if axis is 0.
   // input_shape = {3}, valid indexes are 0, 1, 2.
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{4}, /*index_data=*/{1, 3, 0, 1},  // 3 is out of bounds
       /*expected_output_shape=*/{4}, /*expected_output_data=*/{},
@@ -253,7 +241,7 @@ TYPED_TEST(GatherTest, OutOfBounds) {
 
   if constexpr (std::is_signed_v<IndexType>) {
     TestGather<T, IndexType>(
-        /*axis=*/0,
+        /*axes=*/{0},
         /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
         /*index_shape=*/{4},
         /*index_data=*/{-1, 1, 0, 1},  // -1 is out of bounds
@@ -274,7 +262,7 @@ TYPED_TEST(GatherTest, OutOfBounds2D) {
   // 2D input, 2D index, axis = 0 (aligned).
   // input_shape = {3, 1, 4}, valid indexes for axis 0 are 0, 1, 2.
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 1, 4},
       /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
       /*index_shape=*/{2, 2, 4},
@@ -286,7 +274,7 @@ TYPED_TEST(GatherTest, OutOfBounds2D) {
   // 2D input, 2D index, axis = 1 (aligned).
   // input_shape = {3, 3, 4}, valid indexes for axis 1 are 0, 1, 2.
   TestGather<T, IndexType>(
-      /*axis=*/1,
+      /*axes=*/{1},
       /*input_shape=*/{3, 3, 4},
       /*input_data=*/
       {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18,
@@ -339,6 +327,44 @@ TYPED_TEST(GatherTest, NumAxes1NotOmitted) {
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{1, 4}, /*index_data=*/{2, 0, 1, 2},
       /*expected_output_shape=*/{4}, /*expected_output_data=*/{3, 1, 2, 3});
+}
+
+TEST(GatherTestStandalone, IntermediateInputAndOutputPermutation) {
+  // Graph: input -> Negate -> temp1 -> Gather -> temp2 -> Abs -> output
+  uint32_t temp1_id = YNN_INVALID_VALUE_ID;
+  uint32_t temp2_id = YNN_INVALID_VALUE_ID;
+  const uint32_t input_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t output_id = 2;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, {4}, input_id)
+      .AddInput(ynn_type_int32, {4}, index_id)
+      .AddTensor(ynn_type_fp32, 1, temp1_id)
+      .AddTensor(ynn_type_fp32, 1, temp2_id)
+      .AddOutput(ynn_type_fp32, {4}, output_id);
+
+  subgraph.AddUnary(ynn_unary_negate, input_id, temp1_id);
+  subgraph.AddGather({0}, /*output_rank=*/1, temp1_id, index_id, temp2_id);
+  subgraph.AddUnary(ynn_unary_abs, temp2_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<float> input_data = {10.0f, 20.0f, 30.0f, 40.0f};
+  std::vector<int32_t> index_data = {3, 2, 1, 0};
+  runtime.ReshapeExternalTensor({4}, input_data.data(), input_id);
+  runtime.ReshapeExternalTensor({4}, index_data.data(), index_id);
+
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<float> output_data(4);
+  runtime.SetupExternalTensor(output_data.data(), output_id).InvokeRuntime();
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<float> expected_output = {40.0f, 30.0f, 20.0f, 10.0f};
+  EXPECT_THAT(output_data, testing::ElementsAreArray(expected_output));
 }
 
 }  // namespace

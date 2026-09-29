@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <optional>
 #include <ostream>
-#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -100,8 +102,11 @@ struct KernelInfo {
 };
 
 template <typename AT, typename BT, typename CT>
-void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
-                bool init_zero = false) {
+void TestMatMul(
+    AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
+    bool init_zero = false,
+    std::optional<typename type_info<AT>::element_type> init_a = std::nullopt,
+    std::optional<typename type_info<BT>::element_type> init_b = std::nullopt) {
   ReplicableRandomDevice rng;
 
   const size_t tile_m = kernel.tile_m;
@@ -113,7 +118,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   const bool pack_a = kernel.flags & dot_flag::transpose_a;
   const bool unpacked_b = kernel.flags & dot_flag::unaligned_b;
 
-  const float max_abs_value = 10.0f;
+  float max_abs_value = 10.0f;
 
   Tensor<AT> a({m, k});
   Tensor<BT> b({k, n},
@@ -121,8 +126,6 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   Tensor<CT> c({m, n});
   Tensor<CT> expected;
 
-  fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
-  fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
   if (init_zero) {
     expected = Tensor<CT>({m, n});
     expected.fill(0);
@@ -130,16 +133,33 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
     fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
     expected = c.deep_copy();
   }
+  if (init_a) {
+    a.fill(*init_a);
+    max_abs_value =
+        std::max(max_abs_value, std::abs(static_cast<float>(*init_a)));
+  } else {
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+  }
+  if (init_b) {
+    b.fill(*init_b);
+    max_abs_value =
+        std::max(max_abs_value, std::abs(static_cast<float>(*init_b)));
+  } else {
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+  }
 
   // dot kernels require B's k and n dimensions to be aligned to tile_k,
   // tile_n. The kernel might also require b to be packed (tile_k > 1).
   Tensor<BT> packed_b = unpacked_b ? b : pack_b(b, tile_k, tile_n);
   Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
+  dot_kernel_state kernel_state = {};
+
   kernel.kernel(m, n, 1, 1, k, packed_a.stride_bytes(0) / (pack_a ? tile_k : 1),
                 0, 0, packed_a.base(), 0, 0, packed_b.stride_bytes(0) / tile_k,
                 packed_b.base(), c.stride_bytes(0),
-                init_zero ? nullptr : c.base(), c.stride_bytes(0), c.base());
+                init_zero ? nullptr : c.base(), c.stride_bytes(0), c.base(),
+                &kernel_state);
 
   // Verify results.
   Reference(a, b, expected);
@@ -235,12 +255,14 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     // tile_n. The kernel might also require b to be packed (tile_k > 1).
     Tensor<BT> packed_b = pack_b(b, tile_k, tile_n);
 
+    dot_kernel_state kernel_state = {};
+
     kernel.kernel(
         w, co, kh, kw, ci, packed_a.stride_bytes(0) / (pack_a ? tile_k : 1),
         packed_a.stride_bytes(1), packed_a.stride_bytes(2), packed_a.base(),
         packed_b.stride_bytes(0), packed_b.stride_bytes(1),
         packed_b.stride_bytes(2) / tile_k, packed_b.base(), c.stride_bytes(0),
-        c.base(), c.stride_bytes(0), c.base());
+        c.base(), c.stride_bytes(0), c.base(), &kernel_state);
 
     // Verify results.
     a = make_stencil_dim(a, 1, kw).transpose({2, 0, 1, 3});
@@ -258,6 +280,26 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   }
 }
 
+template <typename AT, typename BT, typename CT>
+void TestMatMulOverflow(AT, BT, CT, const DotShape& shape,
+                        const KernelInfo& kernel) {
+  auto a_min = type_info<AT>::min();
+  auto a_max = type_info<AT>::max();
+  auto b_max = type_info<BT>::max();
+  auto b_min = type_info<BT>::min();
+  if (kernel.flags & dot_flag::symmetric_b) {
+    b_min = -b_max;
+  }
+  TestMatMul(AT{}, BT{}, CT{}, shape, kernel, /*init_zero=*/false, a_min,
+             b_min);
+  TestMatMul(AT{}, BT{}, CT{}, shape, kernel, /*init_zero=*/false, a_min,
+             b_max);
+  TestMatMul(AT{}, BT{}, CT{}, shape, kernel, /*init_zero=*/false, a_max,
+             b_min);
+  TestMatMul(AT{}, BT{}, CT{}, shape, kernel, /*init_zero=*/false, a_max,
+             b_max);
+}
+
 const char* to_string(const KernelInfo& param) { return ""; }
 
 class Dot : public ::testing::TestWithParam<KernelInfo> {};
@@ -268,6 +310,15 @@ TEST_P(Dot, Block) {
   const DotShape& block_shape = kernel.block_shape;
   SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
     TestMatMul(a_type, b_type, c_type, block_shape, kernel);
+  });
+}
+
+TEST_P(Dot, BlockOverflow) {
+  KernelInfo kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  const DotShape& block_shape = kernel.block_shape;
+  SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
+    TestMatMulOverflow(a_type, b_type, c_type, block_shape, kernel);
   });
 }
 

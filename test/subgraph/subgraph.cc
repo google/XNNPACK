@@ -6,6 +6,7 @@
 #include "src/xnnpack/subgraph.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -78,6 +79,42 @@ TEST(SUBGRAPH, even_split3_first_two_outputs_optimized_away) {
   auto output = tester.RunWithFusion<float>();
   xnnpack::Buffer<float> expected = {6, 7, 8};
   ASSERT_EQ(expected, output);
+}
+
+TEST(SUBGRAPH, create_subgraph_invalid_external_value_ids) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  xnn_subgraph_t subgraph = nullptr;
+  EXPECT_EQ(xnn_create_subgraph(XNN_INVALID_VALUE_ID, /*flags=*/0, &subgraph),
+            xnn_status_invalid_parameter);
+  EXPECT_EQ(subgraph, nullptr);
+}
+
+TEST(SUBGRAPH, reserve_values_overflow) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/1, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+  EXPECT_EQ(xnn_subgraph_reserve_values(subgraph, SIZE_MAX),
+            xnn_status_out_of_memory);
+  EXPECT_EQ(xnn_subgraph_reserve_values(
+                subgraph, static_cast<size_t>(XNN_INVALID_VALUE_ID)),
+            xnn_status_out_of_memory);
+  ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
+TEST(SUBGRAPH, reserve_nodes_overflow) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/1, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+  EXPECT_EQ(xnn_subgraph_reserve_nodes(subgraph, SIZE_MAX),
+            xnn_status_out_of_memory);
+  EXPECT_EQ(xnn_subgraph_reserve_nodes(
+                subgraph, static_cast<size_t>(XNN_INVALID_NODE_ID)),
+            xnn_status_out_of_memory);
+  ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
 }
 
 }  // namespace xnnpack

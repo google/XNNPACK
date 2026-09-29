@@ -11,7 +11,7 @@ set -e
 BINARY="$1"
 
 # Run a simple configuration.
-"${BINARY}" dot_fp32_1x128x1_1x1x1 64x128x256
+"${BINARY}" dot_fp32_1xNx1_1x1x1 64x128x256
 
 # Run a configuration with loop specifiers.
-"${BINARY}" dot_fp32_1x128x1_1x1x1 100x300x200 m16 n128 k32
+"${BINARY}" dot_fp32_1xNx1_1x1x1 100x300x200 m16 n128 k32

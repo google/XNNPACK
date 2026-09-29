@@ -30,6 +30,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint16_t* weights,
   const uint16_t* bias,
   const void* scale,
@@ -64,13 +65,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
       }
       packed_w += 8;
 
-      const uint16_t* w1 = w0 + kc;
-      const uint16_t* w2 = w1 + kc;
-      const uint16_t* w3 = w2 + kc;
-      const uint16_t* w4 = w3 + kc;
-      const uint16_t* w5 = w4 + kc;
-      const uint16_t* w6 = w5 + kc;
-      const uint16_t* w7 = w6 + kc;
+      const uint16_t* w1 = w0 + n_stride;
+      const uint16_t* w2 = w1 + n_stride;
+      const uint16_t* w3 = w2 + n_stride;
+      const uint16_t* w4 = w3 + n_stride;
+      const uint16_t* w5 = w4 + n_stride;
+      const uint16_t* w6 = w5 + n_stride;
+      const uint16_t* w7 = w6 + n_stride;
       xnn_prefetch_to_l1((const int8_t*) w0);
       xnn_prefetch_to_l1((const int8_t*) w0 + 64);
       xnn_prefetch_to_l1((const int8_t*) w1);
@@ -135,22 +136,22 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
         const __m256i w6 = _mm256_unpacklo_epi64(u3, u7);
         const __m256i w7 = _mm256_unpackhi_epi64(u3, u7);
 
-        _mm_storeu_si128((__m128i*) (packed_w + 0), _mm256_castsi256_si128(w0));
-        _mm_storeu_si128((__m128i*) (packed_w + 64), _mm256_extracti128_si256(w0, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 8), _mm256_castsi256_si128(w1));
-        _mm_storeu_si128((__m128i*) (packed_w + 72), _mm256_extracti128_si256(w1, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 16), _mm256_castsi256_si128(w2));
-        _mm_storeu_si128((__m128i*) (packed_w + 80), _mm256_extracti128_si256(w2, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 24), _mm256_castsi256_si128(w3));
-        _mm_storeu_si128((__m128i*) (packed_w + 88), _mm256_extracti128_si256(w3, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 32), _mm256_castsi256_si128(w4));
-        _mm_storeu_si128((__m128i*) (packed_w + 96), _mm256_extracti128_si256(w4, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 40), _mm256_castsi256_si128(w5));
-        _mm_storeu_si128((__m128i*) (packed_w + 104), _mm256_extracti128_si256(w5, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 48), _mm256_castsi256_si128(w6));
-        _mm_storeu_si128((__m128i*) (packed_w + 112), _mm256_extracti128_si256(w6, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 56), _mm256_castsi256_si128(w7));
-        _mm_storeu_si128((__m128i*) (packed_w + 120), _mm256_extracti128_si256(w7, 1));
+        const __m256i out_0 = _mm256_permute2x128_si256(w0, w1, 0x20);
+        const __m256i out_8 = _mm256_permute2x128_si256(w0, w1, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 0), out_0);
+        _mm256_storeu_si256((__m256i*) (packed_w + 64), out_8);
+        const __m256i out_2 = _mm256_permute2x128_si256(w2, w3, 0x20);
+        const __m256i out_10 = _mm256_permute2x128_si256(w2, w3, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 16), out_2);
+        _mm256_storeu_si256((__m256i*) (packed_w + 80), out_10);
+        const __m256i out_4 = _mm256_permute2x128_si256(w4, w5, 0x20);
+        const __m256i out_12 = _mm256_permute2x128_si256(w4, w5, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 32), out_4);
+        _mm256_storeu_si256((__m256i*) (packed_w + 96), out_12);
+        const __m256i out_6 = _mm256_permute2x128_si256(w6, w7, 0x20);
+        const __m256i out_14 = _mm256_permute2x128_si256(w6, w7, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 48), out_6);
+        _mm256_storeu_si256((__m256i*) (packed_w + 112), out_14);
         packed_w += 128;
       }
 
@@ -322,7 +323,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
         }
       }
       packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
-      w0 = w7;
+      w0 = w7 + n_stride - kc;
     }
 
     // NC remainder (1..7)
@@ -342,27 +343,27 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
-      const uint16_t* w1 = w0 + kc;
+      const uint16_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint16_t* w2 = w1 + kc;
+      const uint16_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const uint16_t* w3 = w2 + kc;
+      const uint16_t* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const uint16_t* w4 = w3 + kc;
+      const uint16_t* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const uint16_t* w5 = w4 + kc;
+      const uint16_t* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const uint16_t* w6 = w5 + kc;
+      const uint16_t* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
@@ -413,22 +414,22 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
         const __m256i w6 = _mm256_unpacklo_epi64(u3, u7);
         const __m256i w7 = _mm256_unpackhi_epi64(u3, u7);
 
-        _mm_storeu_si128((__m128i*) (packed_w + 0), _mm256_castsi256_si128(w0));
-        _mm_storeu_si128((__m128i*) (packed_w + 64), _mm256_extracti128_si256(w0, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 8), _mm256_castsi256_si128(w1));
-        _mm_storeu_si128((__m128i*) (packed_w + 72), _mm256_extracti128_si256(w1, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 16), _mm256_castsi256_si128(w2));
-        _mm_storeu_si128((__m128i*) (packed_w + 80), _mm256_extracti128_si256(w2, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 24), _mm256_castsi256_si128(w3));
-        _mm_storeu_si128((__m128i*) (packed_w + 88), _mm256_extracti128_si256(w3, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 32), _mm256_castsi256_si128(w4));
-        _mm_storeu_si128((__m128i*) (packed_w + 96), _mm256_extracti128_si256(w4, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 40), _mm256_castsi256_si128(w5));
-        _mm_storeu_si128((__m128i*) (packed_w + 104), _mm256_extracti128_si256(w5, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 48), _mm256_castsi256_si128(w6));
-        _mm_storeu_si128((__m128i*) (packed_w + 112), _mm256_extracti128_si256(w6, 1));
-        _mm_storeu_si128((__m128i*) (packed_w + 56), _mm256_castsi256_si128(w7));
-        _mm_storeu_si128((__m128i*) (packed_w + 120), _mm256_extracti128_si256(w7, 1));
+        const __m256i out_0 = _mm256_permute2x128_si256(w0, w1, 0x20);
+        const __m256i out_8 = _mm256_permute2x128_si256(w0, w1, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 0), out_0);
+        _mm256_storeu_si256((__m256i*) (packed_w + 64), out_8);
+        const __m256i out_2 = _mm256_permute2x128_si256(w2, w3, 0x20);
+        const __m256i out_10 = _mm256_permute2x128_si256(w2, w3, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 16), out_2);
+        _mm256_storeu_si256((__m256i*) (packed_w + 80), out_10);
+        const __m256i out_4 = _mm256_permute2x128_si256(w4, w5, 0x20);
+        const __m256i out_12 = _mm256_permute2x128_si256(w4, w5, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 32), out_4);
+        _mm256_storeu_si256((__m256i*) (packed_w + 96), out_12);
+        const __m256i out_6 = _mm256_permute2x128_si256(w6, w7, 0x20);
+        const __m256i out_14 = _mm256_permute2x128_si256(w6, w7, 0x31);
+        _mm256_storeu_si256((__m256i*) (packed_w + 48), out_6);
+        _mm256_storeu_si256((__m256i*) (packed_w + 112), out_14);
         packed_w += 128;
       }
 
@@ -597,6 +598,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm(
       }
       packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
-    weights += nc * kc;
+    weights += nc * n_stride;
   } while (--g != 0);
 }

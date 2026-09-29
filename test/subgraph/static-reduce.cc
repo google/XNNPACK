@@ -304,63 +304,72 @@ void TestSubgraphRewrite(const Param& p) {
       Tensor<T> input(input_shape, xnnpack::XnnExtraBytes);
       input.generate([&]() { return input_generator(rng); });
 
-      subgraph.AddInputTensor(input_shape, xnn_datatype_of<T>(), input_id);
-      subgraph.AddOutputTensor(output_shape.size(), xnn_datatype_of<T>(),
+      const bool use_multiply = rng() % 2;
+      auto build_subgraph = [&](SubgraphTester& tester) {
+        tester.AddInputTensor(input_shape, xnn_datatype_of<T>(), input_id);
+        tester.AddOutputTensor(output_shape.size(), xnn_datatype_of<T>(),
                                output_id);
 
-      // Generate the reduce_sum(sqr(x)) or reduce_sum(mul(x, x)) nodes.
+        // Generate the reduce_sum(sqr(x)) or reduce_sum(mul(x, x)) nodes.
 
-      // b = mul(a, a) or b = sqr(a).
-      uint32_t squared_id = XNN_INVALID_VALUE_ID;
-      subgraph.AddInternalDynamicTensor(input_shape, xnn_datatype_of<T>(),
+        // b = mul(a, a) or b = sqr(a).
+        uint32_t squared_id = XNN_INVALID_VALUE_ID;
+        tester.AddInternalDynamicTensor(input_shape, xnn_datatype_of<T>(),
                                         &squared_id,
                                         /*flags=*/0);
-      if (rng() % 2) {
-        subgraph.AddMultiply(input_id, input_id, squared_id);
-      } else {
-        subgraph.AddUnary(xnn_unary_square, /*params=*/nullptr, input_id,
+        if (use_multiply) {
+          tester.AddMultiply(input_id, input_id, squared_id);
+        } else {
+          tester.AddUnary(xnn_unary_square, /*params=*/nullptr, input_id,
                           squared_id);
-      }
+        }
 
-      // c = reduce_sum(b).
-      subgraph.AddReduce(xnn_reduce_sum, reduction_axes, squared_id, output_id,
+        // c = reduce_sum(b).
+        tester.AddReduce(xnn_reduce_sum, reduction_axes, squared_id, output_id,
                          /*flags=*/keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
+      };
+
+      SubgraphTester subgraph_original(num_external_values);
+      build_subgraph(subgraph_original);
 
       // Evaluate once with `XNN_FLAG_NO_OPERATOR_FUSION` enabled to
       // prevent the subgraph replacement.
-      xnn_status status = subgraph.CreateRuntime(
+      xnn_status status = subgraph_original.CreateRuntime(
           /*threadpool=*/nullptr,
           xnn_test_runtime_flags() | XNN_FLAG_NO_OPERATOR_FUSION);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
         return;
       }
-      if (subgraph.NumNodes() == 0) {
+      if (subgraph_original.NumNodes() == 0) {
         // If there are zero nodes, we aren't using XNNPACK's internal
         // implementation, don't try to use it.
         GTEST_SKIP();
         return;
       }
-      ASSERT_GT(subgraph.NumNodes(), 1);
+      ASSERT_GT(subgraph_original.NumNodes(), 1);
 
       // Reshape the subgraph.
-      subgraph.ReshapeExternalTensor(input_shape, input.data(), input_id);
-      subgraph.ReshapeRuntime();
+      subgraph_original.ReshapeExternalTensor(input_shape, input.data(),
+                                              input_id);
+      subgraph_original.ReshapeRuntime();
 
       // Set up the input/output tensors.
       Tensor<T> output_original(output_shape, xnnpack::XnnExtraBytes);
-      subgraph.SetupExternalTensor(output_original.base(), output_id);
-      subgraph.SetupRuntime();
-      ASSERT_EQ(normalize_shape(subgraph.GetExternalTensorShape(output_id)),
-                normalize_shape(output_shape))
+      subgraph_original.SetupExternalTensor(output_original.base(), output_id);
+      subgraph_original.SetupRuntime();
+      ASSERT_EQ(
+          normalize_shape(subgraph_original.GetExternalTensorShape(output_id)),
+          normalize_shape(output_shape))
           << "input_shape=" << to_string(input_shape)
           << ", reduction_axes=" << to_string(reduction_axes);
 
       // Run the subgraph.
-      subgraph.InvokeRuntime();
+      subgraph_original.InvokeRuntime();
 
-      // Re-create the runtime and evaluate again and check that the subgraph
-      // was replaced.
+      // Create the runtime on a fresh subgraph with fusion enabled and check
+      // that the subgraph was replaced.
+      build_subgraph(subgraph);
       ASSERT_EQ(subgraph.CreateRuntime(), xnn_status_success);
 
       // Some rewrites may introduce other nodes. We check that the fused reduce

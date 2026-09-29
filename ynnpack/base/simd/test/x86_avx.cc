@@ -103,6 +103,24 @@ TEST_SQRT(x86_avx, f64, 4);
 TEST_ABS(x86_avx, f32, 8);
 TEST_ABS(x86_avx, f64, 4);
 
+TEST_COPYSIGN(x86_avx, f32, 8);
+TEST_COPYSIGN(x86_avx, f64, 4);
+
+TEST_COMPARISONS(x86_avx, f32, 8);
+TEST_COMPARISONS(x86_avx, f64, 4);
+TEST_ISNAN(x86_avx, f32, 8);
+TEST_ISNAN(x86_avx, f64, 4);
+TEST_ISFINITE(x86_avx, f32, 8);
+TEST_ISFINITE(x86_avx, f64, 4);
+
+TEST_ANY(x86_avx, s8, 32);
+TEST_ANY(x86_avx, s16, 16);
+TEST_ANY(x86_avx, s32, 8);
+
+TEST_ALL(x86_avx, s8, 32);
+TEST_ALL(x86_avx, s16, 16);
+TEST_ALL(x86_avx, s32, 8);
+
 TEST_EXTRACT(x86_avx, s32x8, 4);
 TEST_EXTRACT(x86_avx, f32x8, 4);
 TEST_EXTRACT(x86_avx, bf16x16, 8);
@@ -139,10 +157,10 @@ TEST_UNARY(x86_avx, erf, f32, 8, std::erf, 2);
 TEST_UNARY(x86_avx, erf, f64, 4, std::erf, 3);
 TEST_UNARY(x86_avx, tanh, f32, 8, std::tanh, 2);
 TEST_UNARY(x86_avx, tanh, f64, 4, std::tanh, 4);
-TEST_UNARY_RANGE(x86_avx, sin, f32, 4, std::sin, 3, -1e4, 1e4);
-TEST_UNARY_RANGE(x86_avx, sin, f64, 2, std::sin, 2, -1e7, 1e7);
-TEST_UNARY_RANGE(x86_avx, cos, f32, 4, std::cos, 3, -1e4, 1e4);
-TEST_UNARY_RANGE(x86_avx, cos, f64, 2, std::cos, 2, -1e7, 1e7);
+TEST_UNARY(x86_avx, sin, f32, 8, std::sin, 3);
+TEST_UNARY(x86_avx, sin, f64, 4, std::sin, 2);
+TEST_UNARY(x86_avx, cos, f32, 8, std::cos, 3);
+TEST_UNARY(x86_avx, cos, f64, 4, std::cos, 2);
 
 TEST_UNARY(x86_avx, approx_erf, f32, 8, std::erf, 5);
 TEST_UNARY(x86_avx, approx_tanh, f32, 8, std::tanh, 5);

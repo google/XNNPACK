@@ -28,6 +28,7 @@ limitations under the License.
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "absl/algorithm/container.h"
+#include "absl/types/span.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/matchers.h"
 #include "litert/tensor/internal/type_id.h"
@@ -40,6 +41,7 @@ using ::litert::tensor::IsOk;
 using ::testing::Address;
 using ::testing::Contains;
 using ::testing::Each;
+using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::Not;
@@ -80,6 +82,47 @@ TEST(LockedBufferSpanTest, CanBeCastAndUsedAsAContainer) {
               ElementsAreArray(Lockable::kData));
   EXPECT_THAT(const_cast<const LockedBufferSpan<int>&>(span),
               SizeIs(std::size(Lockable::kData)));
+}
+
+TEST(LockedBufferSpanTest, SharedOwnershipAcrossCopies) {
+  Lockable l;
+  ASSERT_EQ(l.i, 0);
+  {
+    LockedBufferSpan<std::byte> span1 = l.LockMutable();
+    ASSERT_EQ(l.i, 1);
+    {
+      LockedBufferSpan<std::byte> span2 = span1;
+      LockedBufferSpan<int> span3 = span1.As<int>();
+      ASSERT_EQ(l.i, 1);
+    }
+    ASSERT_EQ(l.i, 1);
+  }
+  ASSERT_EQ(l.i, 0);
+}
+
+TEST(LockedBufferSpanTest, SubSpan) {
+  const int data[] = {10, 20, 30, 40, 50};
+  LockedBufferSpan<const int> span(data, [](const int*) {}, std::size(data));
+
+  LockedBufferSpan<const int> sub1 = span.SubSpan(1, 3);
+  EXPECT_THAT(sub1, ElementsAre(20, 30, 40));
+  EXPECT_EQ(sub1.size(), 3);
+
+  LockedBufferSpan<const int> sub2 = span.SubSpan(2);
+  EXPECT_THAT(sub2, ElementsAre(30, 40, 50));
+  EXPECT_EQ(sub2.size(), 3);
+
+  LockedBufferSpan<const int> sub_oob = span.SubSpan(10);
+  EXPECT_EQ(sub_oob.size(), 0);
+}
+
+TEST(LockedBufferSpanTest, ConstructFromUniquePtr) {
+  auto ptr = std::make_unique<int[]>(3);
+  ptr[0] = 100;
+  ptr[1] = 200;
+  ptr[2] = 300;
+  LockedBufferSpan<int> span(std::move(ptr), 3);
+  EXPECT_THAT(span, ElementsAre(100, 200, 300));
 }
 
 TEST(SpanCpuBufferTest, BuildFromRawData) {
@@ -170,6 +213,48 @@ TEST(OwningCpuBuffer, CopyFromSequence) {
       OwningCpuBuffer::Copy<Type::kI32>(reference_data);
   ASSERT_THAT(buffer, NotNull());
   ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsFromContiguousSequence) {
+  const std::vector<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kI32, reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsFromSpan) {
+  const std::vector<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  // Spans are already the narrowed form `CopyAs` dispatches on, so they must
+  // reach the type switch directly instead of being narrowed again.
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kI32, absl::MakeConstSpan(reference_data));
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsFromNonContiguousSequence) {
+  const std::list<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kI32, reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int32_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyAsConvertsFromNonContiguousSequence) {
+  const std::list<int32_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::CopyAs(Type::kFP32, reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<float>(),
               ElementsAreArray(reference_data));
 }
 
@@ -301,6 +386,44 @@ TEST(LockedBufferSpanTest, GettersCannotBeCalledFromTemporaryValues) {
                                      const LockedBufferSpan<std::byte>&&>);
 
   SUCCEED();
+}
+
+TEST(ByteSizeTest, SpanCpuBufferReportsTheViewedSize) {
+  const std::vector<float> data = {1.f, 2.f, 3.f, 4.f};
+  SpanCpuBuffer buffer(reinterpret_cast<const std::byte*>(data.data()),
+                       data.size() * sizeof(float));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(data.size() * sizeof(float)));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(buffer.Lock().size()));
+}
+
+TEST(ByteSizeTest, MutableSpanCpuBufferReportsTheViewedSize) {
+  std::vector<float> data = {1.f, 2.f, 3.f, 4.f};
+  MutableSpanCpuBuffer buffer(reinterpret_cast<std::byte*>(data.data()),
+                              data.size() * sizeof(float));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(data.size() * sizeof(float)));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(buffer.Lock().size()));
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(buffer.LockMutable().size()));
+}
+
+TEST(ByteSizeTest, OwningCpuBufferReportsTheAllocatedSize) {
+  constexpr size_t kAllocCount = 4;
+  const std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::Allocate<Type::kFP32>(kAllocCount);
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(kAllocCount * sizeof(float)));
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(buffer->Lock().size()));
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(buffer->LockMutable().size()));
+}
+
+TEST(ByteSizeTest, IsReachableThroughTheBaseInterface) {
+  constexpr size_t kAllocCount = 4;
+  const std::shared_ptr<Buffer> buffer =
+      OwningCpuBuffer::Allocate<Type::kFP32>(kAllocCount);
+  EXPECT_THAT(buffer->ByteSize(), IsOkAndHolds(kAllocCount * sizeof(float)));
+}
+
+TEST(ByteSizeTest, AnEmptyBufferReportsZero) {
+  const SpanCpuBuffer buffer;
+  EXPECT_THAT(buffer.ByteSize(), IsOkAndHolds(size_t{0}));
 }
 
 }  // namespace

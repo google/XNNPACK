@@ -36,9 +36,52 @@ enum {
 
   // This kernel supports an unaligned B
   unaligned_b = 1 << 2,
+
+  // This kernel assumes that the values in B do not include the most negative
+  // value, i.e. -b does not overflow.
+  symmetric_b = 1 << 3,
 };
 
 }  // namespace dot_flag
+
+// Generic stack storage for kernel-specific execution state (e.g. AMX
+// configuration). Kernels should set the `destroy` function if they allocate
+// resources that need to be freed when the state is destroyed.
+struct dot_kernel_state {
+  using destroy_fn = void (*)(dot_kernel_state*);
+  destroy_fn destroy = nullptr;
+
+  static constexpr size_t kStorageAlignment = 64;
+  static constexpr size_t kStorageSize = 64;
+
+  alignas(kStorageAlignment) std::byte storage[kStorageSize] = {};
+
+  dot_kernel_state() = default;
+  ~dot_kernel_state() {
+    if (destroy) {
+      destroy(this);
+    }
+  }
+
+  dot_kernel_state(const dot_kernel_state&) = delete;
+  dot_kernel_state(dot_kernel_state&&) = delete;
+  dot_kernel_state& operator=(const dot_kernel_state&) = delete;
+  dot_kernel_state& operator=(dot_kernel_state&&) = delete;
+
+  template <typename T>
+  T* as() {
+    static_assert(sizeof(T) <= kStorageSize);
+    static_assert(kStorageAlignment >= alignof(T));
+    return reinterpret_cast<T*>(storage);
+  }
+
+  template <typename T>
+  const T* as() const {
+    static_assert(sizeof(T) <= kStorageSize);
+    static_assert(kStorageAlignment >= alignof(T));
+    return reinterpret_cast<const T*>(storage);
+  }
+};
 
 // Dot kernels compute the following:
 //
@@ -53,7 +96,8 @@ typedef void (*dot_kernel_fn)(size_t m, size_t n, size_t k3, size_t k2,
                               size_t b_stride_k3, size_t b_stride_k2,
                               size_t b_stride_k1, const void* b,
                               size_t c_in_stride_m, const void* c_in,
-                              size_t c_out_stride_m, void* c_out);
+                              size_t c_out_stride_m, void* c_out,
+                              dot_kernel_state* state);
 
 #define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
                        tile_k, transpose_a, type_a, type_b, type_c)           \
@@ -61,7 +105,8 @@ typedef void (*dot_kernel_fn)(size_t m, size_t n, size_t k3, size_t k2,
             size_t a_stride_m, size_t a_stride_k3, size_t a_stride_k2,        \
             const void* a, size_t b_stride_k3, size_t b_stride_k2,            \
             size_t b_stride_k1, const void* b, size_t c_in_stride_m,          \
-            const void* c_in, size_t c_out_stride_m, void* c_out);
+            const void* c_in, size_t c_out_stride_m, void* c_out,             \
+            dot_kernel_state* state = nullptr);
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
 
@@ -92,29 +137,38 @@ struct dot_kernel {
   // values from `K` rows of B are adjacent in memory.
   // - Kernels often assume that the memory of B is aligned such that the each
   // tile beings on a memory address aligned to the size of the tile.
-  int block_m = 0;
-  int block_n = 0;
-  int block_k = 0;
-  int tile_n = 0;
-  int tile_k = 0;
-  uint32_t flags = 0;
+  int block_m : 8;
+  int block_n : 8;
+  int block_k : 8;
+  int tile_m : 8;
+  int tile_n : 8;
+  int tile_k : 8;
+  uint32_t flags;
   float cost = std::numeric_limits<float>::infinity();
+
+  // If not specifically known, this is the maximum `block_n` value that could
+  // be returned by another compatible call to `get_dot_kernel`.
+  int max_block_n;
 };
 
+// If we don't know the shape of a dot, just assume it's big.
+inline constexpr size_t unknown_dot_extent = 2048;
+
 struct dot_shape {
-  std::optional<size_t> m;
-  std::optional<size_t> n;
-  std::optional<size_t> k1;
-  std::optional<size_t> k2;
-  std::optional<size_t> k3;
+  size_t m = unknown_dot_extent;
+  size_t n = unknown_dot_extent;
+  size_t k1 = unknown_dot_extent;
+  size_t k2 = unknown_dot_extent;
+  size_t k3 = unknown_dot_extent;
 };
 
 // Compute an estimate of the cost of a dot operation. This number has no
 // absolute meaning, it is only comparable to other return values of this
 // function.
-float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
-                        size_t block_n, size_t block_k, size_t tile_m,
-                        size_t tile_n, size_t tile_k, int b_elem_count = 1);
+float estimate_dot_cost(size_t m, size_t n, size_t k, uint32_t block_m,
+                        uint32_t block_n, uint32_t block_k, uint32_t tile_m,
+                        uint32_t tile_n, uint32_t tile_k,
+                        uint32_t b_elem_count = 1);
 
 struct dot_packed_shape {
   int block_n = 0;
@@ -127,7 +181,7 @@ struct dot_packed_shape {
 // not `nullopt`, the chosen kernel will have the flag `dot_flag::transpose_a`
 // if *transpose_a is true.
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape = {},
-                          const dot_packed_shape* dot_packed_shape = nullptr,
+                          dot_packed_shape dot_packed_shape = {},
                           uint32_t required_flags = 0,
                           std::optional<bool> transpose_a = std::nullopt,
                           uint64_t arch_flags = get_supported_arch_flags());

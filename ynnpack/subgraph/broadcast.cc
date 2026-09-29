@@ -53,11 +53,9 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
       continue;
     }
 
-    node.checks.push_back({
-        input.extents[d] == 1,
-        {"For node 'broadcast', invalid broadcast in dimension ", d, " of ",
-         ynn_node::input_idx{0}},
-    });
+    node.add_check(input.extents[d] == 1,
+                   {"For node 'broadcast', invalid broadcast in dimension ", d,
+                    " of ", ynn_node::input_idx{0}});
   }
 
   if (!axes_set.any() && *output_id == YNN_INVALID_VALUE_ID) {

@@ -113,7 +113,7 @@ CC=clang-19 CXX=clang++-19 bazel test -c fastbuild --local_test_jobs=HOST_CPUS /
 | Linux    | x64 | Clang 19.1.7 | `fastbuild` |   ✅  |     ❌    | |
 | Linux    | x64 | Clang 19.1.7 |       `opt` |   ✅  |     ❌    | |
 | Linux    | x64 | Clang 18     | `fastbuild` |   ✅  |     ✅    | |
-| Linux    | x64 | GCC 9        | `fastbuild` |       |     ✅    | With [appropriate defines](.github/workflows/build.yml). |
+| Linux    | x64 | GCC 10       | `fastbuild` |       |     ✅    | With [appropriate defines](.github/workflows/build.yml). |
 | Linux    | AArch64 | Clang 18 | `fastbuild` |       |     ✅    | |
 | Linux    | AArch64 | Clang 20 | `fastbuild` |       |     ✅    | |
 | Linux    | AArch64 | GCC 13   | `fastbuild` |       |     ✅    | |
@@ -234,3 +234,45 @@ adb shell /data/local/tmp/xnnpack_operators_test
     `is_component_build=true` is not supported.
 
 Tests which involve YNNPACK are not supported yet.
+
+## Comparing builds
+
+When adding or modifying build configurations (such as standalone GN or CMake),
+you can verify feature flag and source file parity by comparing the exported
+`compile_commands.json` files using `scripts/compare-compile-commands.py`.
+
+### Generating `compile_commands.json`
+
+#### CMake
+Generate `compile_commands.json` by configuring CMake with
+`-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`:
+
+```sh
+# Using the build-local.sh helper:
+scripts/build-local.sh -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+# Or configuring CMake directly:
+cmake -B build/local -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DXNNPACK_BUILD_BENCHMARKS=ON -DXNNPACK_BUILD_TESTS=ON -GNinja
+```
+This produces `build/local/compile_commands.json`.
+
+#### GN
+Generate `compile_commands.json` by running `gn gen` with
+`--export-compile-commands`:
+
+```sh
+gn gen out/Default --export-compile-commands
+```
+This produces `out/Default/compile_commands.json`.
+
+### Running the comparison script
+
+Pass the paths to the two `compile_commands.json` files:
+
+```sh
+python3 scripts/compare-compile-commands.py out/Default/compile_commands.json build/local/compile_commands.json
+```
+
+The script outputs missing source files and different build configuration in a
+machine-readable format (with `--jsonl`), returning 0 on success.
+

@@ -11,6 +11,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/memory-planner.h"
 #include "src/xnnpack/subgraph.h"
 
@@ -241,18 +242,43 @@ enum xnn_status xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tr
   for (size_t i = 0; i < num_values_to_alloc; ++i) {
     size_t num_live_mem_blocks = 0;
     struct xnn_usage_record* current = sorted_usage[i];
+    if (current->tensor_size == SIZE_MAX) {
+      xnn_log_error("failed to plan memory: tensor size overflows size_t");
+      xnn_release_memory(sorted_usage);
+      xnn_release_memory(current_live_mem_blocks);
+      return xnn_status_out_of_memory;
+    }
     for (size_t j = 0; j < i; ++j) {
       const struct xnn_usage_record* allocated = sorted_usage[j];
       if (value_lifecycle_overlap(current, allocated)) {
+        size_t allocated_end;
+        if (!xnn_safe_add(allocated->alloc_offset, allocated->tensor_size,
+                          &allocated_end)) {
+          xnn_log_error(
+              "failed to plan memory: allocated block end overflows size_t");
+          xnn_release_memory(sorted_usage);
+          xnn_release_memory(current_live_mem_blocks);
+          return xnn_status_out_of_memory;
+        }
         current_live_mem_blocks[num_live_mem_blocks++] = (struct memory_block){
             .start = allocated->alloc_offset,
-            .end = allocated->alloc_offset + allocated->tensor_size,
+            .end = allocated_end,
         };
       }
     }
-    current->alloc_offset = find_value_alloc_offset(current_live_mem_blocks, num_live_mem_blocks, current->tensor_size);
-    if (mem_arena_size < current->alloc_offset + current->tensor_size) {
-      mem_arena_size = current->alloc_offset + current->tensor_size;
+    current->alloc_offset = find_value_alloc_offset(
+        current_live_mem_blocks, num_live_mem_blocks, current->tensor_size);
+    size_t current_end;
+    if (!xnn_safe_add(current->alloc_offset, current->tensor_size,
+                      &current_end)) {
+      xnn_log_error(
+          "failed to plan memory: memory arena size overflows size_t");
+      xnn_release_memory(sorted_usage);
+      xnn_release_memory(current_live_mem_blocks);
+      return xnn_status_out_of_memory;
+    }
+    if (mem_arena_size < current_end) {
+      mem_arena_size = current_end;
     }
   }
 

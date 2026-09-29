@@ -238,16 +238,507 @@ __arm_new("za") __arm_locally_streaming void sme_dot(
   }
 }
 
+__arm_new("za") __arm_locally_streaming void sme_dot_int8_int4_int32(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  assert(M > 0);
+  assert(N > 0);
+  assert(K3 > 0);
+  assert(K2 > 0);
+  assert(K1 > 0);
+  const size_t svl = svcnts(int32_t{});
+  assert(M <= svl);
+
+  constexpr size_t dot_factor = 8;
+  const svbool_t m_mask_ab =
+      svwhilelt(static_cast<int64_t>(0), static_cast<int64_t>(M * 4), int8_t{});
+  const svbool_t n_mask_ab = svptrue(int8_t{});
+  const svbool_t ptrue = svptrue(int8_t{});
+
+  ptrdiff_t n = N;
+  while (n >= static_cast<ptrdiff_t>(svl * 4)) {
+    if (C_in) {
+      svbool_t n_mask = svptrue(int32_t{});
+      for (size_t m = 0; m < M; ++m) {
+        const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
+        svld1_hor_za32(0, m, n_mask,
+                       offset_bytes(C_in_m, 0 * svl * sizeof(int32_t)));
+        svld1_hor_za32(1, m, n_mask,
+                       offset_bytes(C_in_m, 1 * svl * sizeof(int32_t)));
+        svld1_hor_za32(2, m, n_mask,
+                       offset_bytes(C_in_m, 2 * svl * sizeof(int32_t)));
+        svld1_hor_za32(3, m, n_mask,
+                       offset_bytes(C_in_m, 3 * svl * sizeof(int32_t)));
+      }
+    } else {
+      svzero_za();
+    }
+
+    const void* B_k3 = B;
+    const void* A_k3 = A;
+    size_t k3 = K3;
+    do {
+      const void* B_k2 = B_k3;
+      const void* A_k2 = A_k3;
+      size_t k2 = K2;
+      do {
+        const void* B_k1 = B_k2;
+        const void* A_k1 = A_k2;
+        ptrdiff_t k1 = K1;
+        while (k1 > 0) {
+          auto a_w = svld2_s8(m_mask_ab, reinterpret_cast<const int8_t*>(A_k1));
+          auto a_even = svget2(a_w, 0);
+          auto a_odd = svget2(a_w, 1);
+
+          const int8_t* b_ptr = reinterpret_cast<const int8_t*>(B_k1);
+          svint8_t b_raw_0 = svld1_s8(n_mask_ab, b_ptr + 0 * svl * 4);
+          svint8_t b_0_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 4), 4);
+          svint8_t b_1_0 = svasr_n_s8_x(ptrue, b_raw_0, 4);
+          svmopa<0>(m_mask_ab, n_mask_ab, a_even, b_0_0);
+          svmopa<0>(m_mask_ab, n_mask_ab, a_odd, b_1_0);
+
+          svint8_t b_raw_1 = svld1_s8(n_mask_ab, b_ptr + 1 * svl * 4);
+          svint8_t b_0_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 4), 4);
+          svint8_t b_1_1 = svasr_n_s8_x(ptrue, b_raw_1, 4);
+          svmopa<1>(m_mask_ab, n_mask_ab, a_even, b_0_1);
+          svmopa<1>(m_mask_ab, n_mask_ab, a_odd, b_1_1);
+
+          svint8_t b_raw_2 = svld1_s8(n_mask_ab, b_ptr + 2 * svl * 4);
+          svint8_t b_0_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 4), 4);
+          svint8_t b_1_2 = svasr_n_s8_x(ptrue, b_raw_2, 4);
+          svmopa<2>(m_mask_ab, n_mask_ab, a_even, b_0_2);
+          svmopa<2>(m_mask_ab, n_mask_ab, a_odd, b_1_2);
+
+          svint8_t b_raw_3 = svld1_s8(n_mask_ab, b_ptr + 3 * svl * 4);
+          svint8_t b_0_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 4), 4);
+          svint8_t b_1_3 = svasr_n_s8_x(ptrue, b_raw_3, 4);
+          svmopa<3>(m_mask_ab, n_mask_ab, a_even, b_0_3);
+          svmopa<3>(m_mask_ab, n_mask_ab, a_odd, b_1_3);
+
+          k1 -= dot_factor;
+          B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
+          A_k1 = offset_bytes(A_k1, A_stride_m * dot_factor);
+        }
+        k2 -= 1;
+        B_k2 = offset_bytes(B_k2, B_stride_k2);
+        A_k2 = offset_bytes(A_k2, A_stride_k2);
+      } while (k2 > 0);
+      k3 -= 1;
+      B_k3 = offset_bytes(B_k3, B_stride_k3);
+      A_k3 = offset_bytes(A_k3, A_stride_k3);
+    } while (k3 > 0);
+
+    svbool_t n_mask = svptrue(int32_t{});
+    for (size_t m = 0; m < M; ++m) {
+      void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
+      svst1_hor_za32(0, m, n_mask,
+                     offset_bytes(C_out_m, 0 * svl * sizeof(int32_t)));
+      svst1_hor_za32(1, m, n_mask,
+                     offset_bytes(C_out_m, 1 * svl * sizeof(int32_t)));
+      svst1_hor_za32(2, m, n_mask,
+                     offset_bytes(C_out_m, 2 * svl * sizeof(int32_t)));
+      svst1_hor_za32(3, m, n_mask,
+                     offset_bytes(C_out_m, 3 * svl * sizeof(int32_t)));
+    }
+    C_in = C_in ? offset_bytes(C_in, svl * sizeof(int32_t) * 4) : nullptr;
+    C_out = offset_bytes(C_out, svl * sizeof(int32_t) * 4);
+    B = offset_bytes(B, svl * 16);
+    n -= svl * 4;
+  }
+  if (n > 0) {
+    if (C_in) {
+      svbool_t n_mask0 = svwhilelt(0 * svl, n, int32_t{});
+      svbool_t n_mask1 = svwhilelt(1 * svl, n, int32_t{});
+      svbool_t n_mask2 = svwhilelt(2 * svl, n, int32_t{});
+      svbool_t n_mask3 = svwhilelt(3 * svl, n, int32_t{});
+      for (size_t m = 0; m < M; ++m) {
+        const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
+        svld1_hor_za32(0, m, n_mask0,
+                       offset_bytes(C_in_m, 0 * svl * sizeof(int32_t)));
+        svld1_hor_za32(1, m, n_mask1,
+                       offset_bytes(C_in_m, 1 * svl * sizeof(int32_t)));
+        svld1_hor_za32(2, m, n_mask2,
+                       offset_bytes(C_in_m, 2 * svl * sizeof(int32_t)));
+        svld1_hor_za32(3, m, n_mask3,
+                       offset_bytes(C_in_m, 3 * svl * sizeof(int32_t)));
+      }
+    } else {
+      svzero_za();
+    }
+
+    svbool_t n_mask_ab0 = svwhilelt(static_cast<int64_t>(0 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+    svbool_t n_mask_ab1 = svwhilelt(static_cast<int64_t>(1 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+    svbool_t n_mask_ab2 = svwhilelt(static_cast<int64_t>(2 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+    svbool_t n_mask_ab3 = svwhilelt(static_cast<int64_t>(3 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+
+    const void* B_k3 = B;
+    const void* A_k3 = A;
+    size_t k3 = K3;
+    do {
+      const void* B_k2 = B_k3;
+      const void* A_k2 = A_k3;
+      size_t k2 = K2;
+      do {
+        const void* B_k1 = B_k2;
+        const void* A_k1 = A_k2;
+        ptrdiff_t k1 = K1;
+        while (k1 > 0) {
+          auto a_w = svld2_s8(m_mask_ab, reinterpret_cast<const int8_t*>(A_k1));
+          auto a_even = svget2(a_w, 0);
+          auto a_odd = svget2(a_w, 1);
+
+          const int8_t* b_ptr = reinterpret_cast<const int8_t*>(B_k1);
+          svint8_t b_raw_0 = svld1_s8(n_mask_ab0, b_ptr + 0 * svl * 4);
+          svint8_t b_0_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 4), 4);
+          svint8_t b_1_0 = svasr_n_s8_x(ptrue, b_raw_0, 4);
+          svmopa<0>(m_mask_ab, n_mask_ab0, a_even, b_0_0);
+          svmopa<0>(m_mask_ab, n_mask_ab0, a_odd, b_1_0);
+
+          svint8_t b_raw_1 = svld1_s8(n_mask_ab1, b_ptr + 1 * svl * 4);
+          svint8_t b_0_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 4), 4);
+          svint8_t b_1_1 = svasr_n_s8_x(ptrue, b_raw_1, 4);
+          svmopa<1>(m_mask_ab, n_mask_ab1, a_even, b_0_1);
+          svmopa<1>(m_mask_ab, n_mask_ab1, a_odd, b_1_1);
+
+          svint8_t b_raw_2 = svld1_s8(n_mask_ab2, b_ptr + 2 * svl * 4);
+          svint8_t b_0_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 4), 4);
+          svint8_t b_1_2 = svasr_n_s8_x(ptrue, b_raw_2, 4);
+          svmopa<2>(m_mask_ab, n_mask_ab2, a_even, b_0_2);
+          svmopa<2>(m_mask_ab, n_mask_ab2, a_odd, b_1_2);
+
+          svint8_t b_raw_3 = svld1_s8(n_mask_ab3, b_ptr + 3 * svl * 4);
+          svint8_t b_0_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 4), 4);
+          svint8_t b_1_3 = svasr_n_s8_x(ptrue, b_raw_3, 4);
+          svmopa<3>(m_mask_ab, n_mask_ab3, a_even, b_0_3);
+          svmopa<3>(m_mask_ab, n_mask_ab3, a_odd, b_1_3);
+
+          k1 -= dot_factor;
+          B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
+          A_k1 = offset_bytes(A_k1, A_stride_m * dot_factor);
+        }
+        k2 -= 1;
+        B_k2 = offset_bytes(B_k2, B_stride_k2);
+        A_k2 = offset_bytes(A_k2, A_stride_k2);
+      } while (k2 > 0);
+      k3 -= 1;
+      B_k3 = offset_bytes(B_k3, B_stride_k3);
+      A_k3 = offset_bytes(A_k3, A_stride_k3);
+    } while (k3 > 0);
+
+    svbool_t n_mask0 = svwhilelt(0 * svl, n, int32_t{});
+    svbool_t n_mask1 = svwhilelt(1 * svl, n, int32_t{});
+    svbool_t n_mask2 = svwhilelt(2 * svl, n, int32_t{});
+    svbool_t n_mask3 = svwhilelt(3 * svl, n, int32_t{});
+    for (size_t m = 0; m < M; ++m) {
+      void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
+      svst1_hor_za32(0, m, n_mask0,
+                     offset_bytes(C_out_m, 0 * svl * sizeof(int32_t)));
+      svst1_hor_za32(1, m, n_mask1,
+                     offset_bytes(C_out_m, 1 * svl * sizeof(int32_t)));
+      svst1_hor_za32(2, m, n_mask2,
+                     offset_bytes(C_out_m, 2 * svl * sizeof(int32_t)));
+      svst1_hor_za32(3, m, n_mask3,
+                     offset_bytes(C_out_m, 3 * svl * sizeof(int32_t)));
+    }
+  }
+}
+
+__arm_new("za") __arm_locally_streaming void sme_dot_int8_int2_int32(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  assert(M > 0);
+  assert(N > 0);
+  assert(K3 > 0);
+  assert(K2 > 0);
+  assert(K1 > 0);
+  const size_t svl = svcnts(int32_t{});
+  assert(M <= svl);
+
+  constexpr size_t dot_factor = 16;
+  const svbool_t m_mask_ab =
+      svwhilelt(static_cast<int64_t>(0), static_cast<int64_t>(M * 4), int8_t{});
+  const svbool_t n_mask_ab = svptrue(int8_t{});
+  const svbool_t ptrue = svptrue(int8_t{});
+
+  ptrdiff_t n = N;
+  while (n >= static_cast<ptrdiff_t>(svl * 4)) {
+    if (C_in) {
+      svbool_t n_mask = svptrue(int32_t{});
+      for (size_t m = 0; m < M; ++m) {
+        const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
+        svld1_hor_za32(0, m, n_mask,
+                       offset_bytes(C_in_m, 0 * svl * sizeof(int32_t)));
+        svld1_hor_za32(1, m, n_mask,
+                       offset_bytes(C_in_m, 1 * svl * sizeof(int32_t)));
+        svld1_hor_za32(2, m, n_mask,
+                       offset_bytes(C_in_m, 2 * svl * sizeof(int32_t)));
+        svld1_hor_za32(3, m, n_mask,
+                       offset_bytes(C_in_m, 3 * svl * sizeof(int32_t)));
+      }
+    } else {
+      svzero_za();
+    }
+
+    const void* B_k3 = B;
+    const void* A_k3 = A;
+    size_t k3 = K3;
+    do {
+      const void* B_k2 = B_k3;
+      const void* A_k2 = A_k3;
+      size_t k2 = K2;
+      do {
+        const void* B_k1 = B_k2;
+        const void* A_k1 = A_k2;
+        ptrdiff_t k1 = K1;
+        while (k1 > 0) {
+          auto a_w = svld4_s8(m_mask_ab, reinterpret_cast<const int8_t*>(A_k1));
+          auto a_0 = svget4(a_w, 0);
+          auto a_1 = svget4(a_w, 1);
+          auto a_2 = svget4(a_w, 2);
+          auto a_3 = svget4(a_w, 3);
+
+          const int8_t* b_ptr = reinterpret_cast<const int8_t*>(B_k1);
+          svint8_t b_raw_0 = svld1_s8(n_mask_ab, b_ptr + 0 * svl * 4);
+          svint8_t b_0_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 6), 6);
+          svint8_t b_1_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 4), 6);
+          svint8_t b_2_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 2), 6);
+          svint8_t b_3_0 = svasr_n_s8_x(ptrue, b_raw_0, 6);
+          svmopa<0>(m_mask_ab, n_mask_ab, a_0, b_0_0);
+          svmopa<0>(m_mask_ab, n_mask_ab, a_1, b_1_0);
+          svmopa<0>(m_mask_ab, n_mask_ab, a_2, b_2_0);
+          svmopa<0>(m_mask_ab, n_mask_ab, a_3, b_3_0);
+
+          svint8_t b_raw_1 = svld1_s8(n_mask_ab, b_ptr + 1 * svl * 4);
+          svint8_t b_0_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 6), 6);
+          svint8_t b_1_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 4), 6);
+          svint8_t b_2_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 2), 6);
+          svint8_t b_3_1 = svasr_n_s8_x(ptrue, b_raw_1, 6);
+          svmopa<1>(m_mask_ab, n_mask_ab, a_0, b_0_1);
+          svmopa<1>(m_mask_ab, n_mask_ab, a_1, b_1_1);
+          svmopa<1>(m_mask_ab, n_mask_ab, a_2, b_2_1);
+          svmopa<1>(m_mask_ab, n_mask_ab, a_3, b_3_1);
+
+          svint8_t b_raw_2 = svld1_s8(n_mask_ab, b_ptr + 2 * svl * 4);
+          svint8_t b_0_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 6), 6);
+          svint8_t b_1_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 4), 6);
+          svint8_t b_2_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 2), 6);
+          svint8_t b_3_2 = svasr_n_s8_x(ptrue, b_raw_2, 6);
+          svmopa<2>(m_mask_ab, n_mask_ab, a_0, b_0_2);
+          svmopa<2>(m_mask_ab, n_mask_ab, a_1, b_1_2);
+          svmopa<2>(m_mask_ab, n_mask_ab, a_2, b_2_2);
+          svmopa<2>(m_mask_ab, n_mask_ab, a_3, b_3_2);
+
+          svint8_t b_raw_3 = svld1_s8(n_mask_ab, b_ptr + 3 * svl * 4);
+          svint8_t b_0_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 6), 6);
+          svint8_t b_1_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 4), 6);
+          svint8_t b_2_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 2), 6);
+          svint8_t b_3_3 = svasr_n_s8_x(ptrue, b_raw_3, 6);
+          svmopa<3>(m_mask_ab, n_mask_ab, a_0, b_0_3);
+          svmopa<3>(m_mask_ab, n_mask_ab, a_1, b_1_3);
+          svmopa<3>(m_mask_ab, n_mask_ab, a_2, b_2_3);
+          svmopa<3>(m_mask_ab, n_mask_ab, a_3, b_3_3);
+
+          k1 -= dot_factor;
+          B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
+          A_k1 = offset_bytes(A_k1, A_stride_m * dot_factor);
+        }
+        k2 -= 1;
+        B_k2 = offset_bytes(B_k2, B_stride_k2);
+        A_k2 = offset_bytes(A_k2, A_stride_k2);
+      } while (k2 > 0);
+      k3 -= 1;
+      B_k3 = offset_bytes(B_k3, B_stride_k3);
+      A_k3 = offset_bytes(A_k3, A_stride_k3);
+    } while (k3 > 0);
+
+    svbool_t n_mask = svptrue(int32_t{});
+    for (size_t m = 0; m < M; ++m) {
+      void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
+      svst1_hor_za32(0, m, n_mask,
+                     offset_bytes(C_out_m, 0 * svl * sizeof(int32_t)));
+      svst1_hor_za32(1, m, n_mask,
+                     offset_bytes(C_out_m, 1 * svl * sizeof(int32_t)));
+      svst1_hor_za32(2, m, n_mask,
+                     offset_bytes(C_out_m, 2 * svl * sizeof(int32_t)));
+      svst1_hor_za32(3, m, n_mask,
+                     offset_bytes(C_out_m, 3 * svl * sizeof(int32_t)));
+    }
+    C_in = C_in ? offset_bytes(C_in, svl * sizeof(int32_t) * 4) : nullptr;
+    C_out = offset_bytes(C_out, svl * sizeof(int32_t) * 4);
+    B = offset_bytes(B, svl * 16);
+    n -= svl * 4;
+  }
+  if (n > 0) {
+    if (C_in) {
+      svbool_t n_mask0 = svwhilelt(0 * svl, n, int32_t{});
+      svbool_t n_mask1 = svwhilelt(1 * svl, n, int32_t{});
+      svbool_t n_mask2 = svwhilelt(2 * svl, n, int32_t{});
+      svbool_t n_mask3 = svwhilelt(3 * svl, n, int32_t{});
+      for (size_t m = 0; m < M; ++m) {
+        const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
+        svld1_hor_za32(0, m, n_mask0,
+                       offset_bytes(C_in_m, 0 * svl * sizeof(int32_t)));
+        svld1_hor_za32(1, m, n_mask1,
+                       offset_bytes(C_in_m, 1 * svl * sizeof(int32_t)));
+        svld1_hor_za32(2, m, n_mask2,
+                       offset_bytes(C_in_m, 2 * svl * sizeof(int32_t)));
+        svld1_hor_za32(3, m, n_mask3,
+                       offset_bytes(C_in_m, 3 * svl * sizeof(int32_t)));
+      }
+    } else {
+      svzero_za();
+    }
+
+    svbool_t n_mask_ab0 = svwhilelt(static_cast<int64_t>(0 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+    svbool_t n_mask_ab1 = svwhilelt(static_cast<int64_t>(1 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+    svbool_t n_mask_ab2 = svwhilelt(static_cast<int64_t>(2 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+    svbool_t n_mask_ab3 = svwhilelt(static_cast<int64_t>(3 * svl * 4),
+                                    static_cast<int64_t>(n * 4), int8_t{});
+
+    const void* B_k3 = B;
+    const void* A_k3 = A;
+    size_t k3 = K3;
+    do {
+      const void* B_k2 = B_k3;
+      const void* A_k2 = A_k3;
+      size_t k2 = K2;
+      do {
+        const void* B_k1 = B_k2;
+        const void* A_k1 = A_k2;
+        ptrdiff_t k1 = K1;
+        while (k1 > 0) {
+          auto a_w = svld4_s8(m_mask_ab, reinterpret_cast<const int8_t*>(A_k1));
+          auto a_0 = svget4(a_w, 0);
+          auto a_1 = svget4(a_w, 1);
+          auto a_2 = svget4(a_w, 2);
+          auto a_3 = svget4(a_w, 3);
+
+          const int8_t* b_ptr = reinterpret_cast<const int8_t*>(B_k1);
+          svint8_t b_raw_0 = svld1_s8(n_mask_ab0, b_ptr + 0 * svl * 4);
+          svint8_t b_0_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 6), 6);
+          svint8_t b_1_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 4), 6);
+          svint8_t b_2_0 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_0, 2), 6);
+          svint8_t b_3_0 = svasr_n_s8_x(ptrue, b_raw_0, 6);
+          svmopa<0>(m_mask_ab, n_mask_ab0, a_0, b_0_0);
+          svmopa<0>(m_mask_ab, n_mask_ab0, a_1, b_1_0);
+          svmopa<0>(m_mask_ab, n_mask_ab0, a_2, b_2_0);
+          svmopa<0>(m_mask_ab, n_mask_ab0, a_3, b_3_0);
+
+          svint8_t b_raw_1 = svld1_s8(n_mask_ab1, b_ptr + 1 * svl * 4);
+          svint8_t b_0_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 6), 6);
+          svint8_t b_1_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 4), 6);
+          svint8_t b_2_1 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_1, 2), 6);
+          svint8_t b_3_1 = svasr_n_s8_x(ptrue, b_raw_1, 6);
+          svmopa<1>(m_mask_ab, n_mask_ab1, a_0, b_0_1);
+          svmopa<1>(m_mask_ab, n_mask_ab1, a_1, b_1_1);
+          svmopa<1>(m_mask_ab, n_mask_ab1, a_2, b_2_1);
+          svmopa<1>(m_mask_ab, n_mask_ab1, a_3, b_3_1);
+
+          svint8_t b_raw_2 = svld1_s8(n_mask_ab2, b_ptr + 2 * svl * 4);
+          svint8_t b_0_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 6), 6);
+          svint8_t b_1_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 4), 6);
+          svint8_t b_2_2 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_2, 2), 6);
+          svint8_t b_3_2 = svasr_n_s8_x(ptrue, b_raw_2, 6);
+          svmopa<2>(m_mask_ab, n_mask_ab2, a_0, b_0_2);
+          svmopa<2>(m_mask_ab, n_mask_ab2, a_1, b_1_2);
+          svmopa<2>(m_mask_ab, n_mask_ab2, a_2, b_2_2);
+          svmopa<2>(m_mask_ab, n_mask_ab2, a_3, b_3_2);
+
+          svint8_t b_raw_3 = svld1_s8(n_mask_ab3, b_ptr + 3 * svl * 4);
+          svint8_t b_0_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 6), 6);
+          svint8_t b_1_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 4), 6);
+          svint8_t b_2_3 =
+              svasr_n_s8_x(ptrue, svlsl_n_s8_x(ptrue, b_raw_3, 2), 6);
+          svint8_t b_3_3 = svasr_n_s8_x(ptrue, b_raw_3, 6);
+          svmopa<3>(m_mask_ab, n_mask_ab3, a_0, b_0_3);
+          svmopa<3>(m_mask_ab, n_mask_ab3, a_1, b_1_3);
+          svmopa<3>(m_mask_ab, n_mask_ab3, a_2, b_2_3);
+          svmopa<3>(m_mask_ab, n_mask_ab3, a_3, b_3_3);
+
+          k1 -= dot_factor;
+          B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
+          A_k1 = offset_bytes(A_k1, A_stride_m * dot_factor);
+        }
+        k2 -= 1;
+        B_k2 = offset_bytes(B_k2, B_stride_k2);
+        A_k2 = offset_bytes(A_k2, A_stride_k2);
+      } while (k2 > 0);
+      k3 -= 1;
+      B_k3 = offset_bytes(B_k3, B_stride_k3);
+      A_k3 = offset_bytes(A_k3, A_stride_k3);
+    } while (k3 > 0);
+
+    svbool_t n_mask0 = svwhilelt(0 * svl, n, int32_t{});
+    svbool_t n_mask1 = svwhilelt(1 * svl, n, int32_t{});
+    svbool_t n_mask2 = svwhilelt(2 * svl, n, int32_t{});
+    svbool_t n_mask3 = svwhilelt(3 * svl, n, int32_t{});
+    for (size_t m = 0; m < M; ++m) {
+      void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
+      svst1_hor_za32(0, m, n_mask0,
+                     offset_bytes(C_out_m, 0 * svl * sizeof(int32_t)));
+      svst1_hor_za32(1, m, n_mask1,
+                     offset_bytes(C_out_m, 1 * svl * sizeof(int32_t)));
+      svst1_hor_za32(2, m, n_mask2,
+                     offset_bytes(C_out_m, 2 * svl * sizeof(int32_t)));
+      svst1_hor_za32(3, m, n_mask3,
+                     offset_bytes(C_out_m, 3 * svl * sizeof(int32_t)));
+    }
+  }
+}
+
 }  // namespace
 
 void dot_fp32_sme(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
                   size_t A_stride_m, size_t A_stride_k3, size_t A_stride_k2,
                   const void* A, size_t B_stride_k3, size_t B_stride_k2,
                   size_t B_stride_k1, const void* B, size_t C_in_stride_m,
-                  const void* C_in, size_t C_out_stride_m, void* C_out) {
+                  const void* C_in, size_t C_out_stride_m, void* C_out,
+                  dot_kernel_state* /*state*/) {
   sme_dot<float, float>(M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2,
-                         A, B_stride_k3, B_stride_k2, B_stride_k1, B,
-                         C_in_stride_m, C_in, C_out_stride_m, C_out);
+                        A, B_stride_k3, B_stride_k2, B_stride_k1, B,
+                        C_in_stride_m, C_in, C_out_stride_m, C_out);
 }
 
 void dot_bf16_bf16_fp32_sme(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
@@ -256,7 +747,8 @@ void dot_bf16_bf16_fp32_sme(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
                             size_t B_stride_k3, size_t B_stride_k2,
                             size_t B_stride_k1, const void* B,
                             size_t C_in_stride_m, const void* C_in,
-                            size_t C_out_stride_m, void* C_out) {
+                            size_t C_out_stride_m, void* C_out,
+                            dot_kernel_state* /*state*/) {
   sme_dot<bfloat16_t, float>(
       M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
@@ -268,7 +760,8 @@ void dot_fp16_fp16_fp32_sme(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
                             size_t B_stride_k3, size_t B_stride_k2,
                             size_t B_stride_k1, const void* B,
                             size_t C_in_stride_m, const void* C_in,
-                            size_t C_out_stride_m, void* C_out) {
+                            size_t C_out_stride_m, void* C_out,
+                            dot_kernel_state* /*state*/) {
   sme_dot<float16_t, float>(
       M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
@@ -280,10 +773,37 @@ void dot_int8_int8_int32_sme(size_t M, size_t N, size_t K3, size_t K2,
                              size_t B_stride_k3, size_t B_stride_k2,
                              size_t B_stride_k1, const void* B,
                              size_t C_in_stride_m, const void* C_in,
-                             size_t C_out_stride_m, void* C_out) {
+                             size_t C_out_stride_m, void* C_out,
+                             dot_kernel_state* /*state*/) {
   sme_dot<int8_t, int32_t>(
       M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
+}
+
+void dot_int8_int4_int32_sme(size_t M, size_t N, size_t K3, size_t K2,
+                             size_t K1, size_t A_stride_m, size_t A_stride_k3,
+                             size_t A_stride_k2, const void* A,
+                             size_t B_stride_k3, size_t B_stride_k2,
+                             size_t B_stride_k1, const void* B,
+                             size_t C_in_stride_m, const void* C_in,
+                             size_t C_out_stride_m, void* C_out,
+                             dot_kernel_state* /*state*/) {
+  sme_dot_int8_int4_int32(M, N, K3, K2, K1, A_stride_m, A_stride_k3,
+                          A_stride_k2, A, B_stride_k3, B_stride_k2, B_stride_k1,
+                          B, C_in_stride_m, C_in, C_out_stride_m, C_out);
+}
+
+void dot_int8_int2_int32_sme(size_t M, size_t N, size_t K3, size_t K2,
+                             size_t K1, size_t A_stride_m, size_t A_stride_k3,
+                             size_t A_stride_k2, const void* A,
+                             size_t B_stride_k3, size_t B_stride_k2,
+                             size_t B_stride_k1, const void* B,
+                             size_t C_in_stride_m, const void* C_in,
+                             size_t C_out_stride_m, void* C_out,
+                             dot_kernel_state* /*state*/) {
+  sme_dot_int8_int2_int32(M, N, K3, K2, K1, A_stride_m, A_stride_k3,
+                          A_stride_k2, A, B_stride_k3, B_stride_k2, B_stride_k1,
+                          B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 }
 
 }  // namespace ynn

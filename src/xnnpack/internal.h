@@ -1,5 +1,7 @@
 // Copyright 2024-2025 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -87,7 +89,36 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
     xnn_weights_cache_t weights_cache,  //
     xnn_operator_t* fully_connected_op_out);
 
+enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc2w(
+    size_t input_channels,              //
+    size_t output_channels,             //
+    size_t input_stride,                //
+    size_t output_stride,               //
+    const float* kernel_zero_point,     //
+    const float* kernel_scale,          //
+    const void* kernel,                 //
+    const float* bias,                  //
+    float output_min,                   //
+    float output_max,                   //
+    uint32_t flags,                     //
+    xnn_weights_cache_t weights_cache,  //
+    xnn_operator_t* fully_connected_op_out);
+
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
+    size_t input_channels,              //
+    size_t output_channels,             //
+    size_t input_stride,                //
+    size_t output_stride,               //
+    const float* kernel_scale,          //
+    const void* kernel,                 //
+    const float* bias,                  //
+    float output_min,                   //
+    float output_max,                   //
+    uint32_t flags,                     //
+    xnn_weights_cache_t weights_cache,  //
+    xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_create_fully_connected_nc_qp8_f16_qc8w(
     size_t input_channels,              //
     size_t output_channels,             //
     size_t input_stride,                //
@@ -107,7 +138,19 @@ enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc4w(
     float* output,                      //
     void* workspace);
 
+enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc2w(
+    xnn_operator_t fully_connected_op,  //
+    const int8_t* input,                //
+    float* output,                      //
+    void* workspace);
+
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc8w(
+    xnn_operator_t fully_connected_op,  //
+    const int8_t* input,                //
+    float* output,                      //
+    void* workspace);
+
+enum xnn_status xnn_setup_fully_connected_nc_qp8_f16_qc8w(
     xnn_operator_t fully_connected_op,  //
     const int8_t* input,                //
     float* output,                      //
@@ -120,11 +163,23 @@ enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
                                         //
     pthreadpool_t threadpool);
 
+enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc2w(
+    xnn_operator_t fully_connected_op,  //
+    size_t batch_size,                  //
+    size_t* workspace_size,             //
+    pthreadpool_t threadpool);
+
 enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc8w(
     xnn_operator_t fully_connected_op,  //
     size_t batch_size,                  //
     size_t* workspace_size,             //
                                         //
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qp8_f16_qc8w(
+    xnn_operator_t fully_connected_op,  //
+    size_t batch_size,                  //
+    size_t* workspace_size,             //
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
@@ -626,11 +681,27 @@ enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out);
 
+enum xnn_status xnn_create_fully_connected_nc_pqs8_qc4w(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, int8_t input_zero_point, float input_scale,
+    uint8_t kernel_zero_point, const float* kernel_scale, const void* kernel,
+    const int32_t* bias, int8_t output_zero_point, float output_scale,
+    int8_t output_min, int8_t output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out);
+
 enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc8w(
     xnn_operator_t fully_connected_op, size_t batch_size,
     size_t* workspace_size, pthreadpool_t threadpool);
 
+enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc4w(
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool);
+
 enum xnn_status xnn_setup_fully_connected_nc_pqs8_qc8w(
+    xnn_operator_t fully_connected_op, const int8_t* input, int8_t* output,
+    void* workspace);
+
+enum xnn_status xnn_setup_fully_connected_nc_pqs8_qc4w(
     xnn_operator_t fully_connected_op, const int8_t* input, int8_t* output,
     void* workspace);
 

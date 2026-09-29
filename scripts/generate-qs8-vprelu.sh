@@ -43,6 +43,17 @@ tools/xngen src/qs8-vprelu/avx2.c.in -D BATCH_TILE=16 -D AVX=1 -D DATATYPE=QS8 -
 
 tools/xngen src/qs8-vprelu/avx2.c.in -D BATCH_TILE=16 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vprelu/gen/qu8-vprelu-avx2-u16.c &
 
+#################################### RVV ####################################
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vprelu/gen/qs8-vprelu-rvv-u1v.c &
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vprelu/gen/qs8-vprelu-rvv-u2v.c &
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=4 -D DATATYPE=QS8 -o src/qs8-vprelu/gen/qs8-vprelu-rvv-u4v.c &
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=8 -D DATATYPE=QS8 -o src/qs8-vprelu/gen/qs8-vprelu-rvv-u8v.c &
+
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vprelu/gen/qu8-vprelu-rvv-u1v.c &
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vprelu/gen/qu8-vprelu-rvv-u2v.c &
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=4 -D DATATYPE=QU8 -o src/qu8-vprelu/gen/qu8-vprelu-rvv-u4v.c &
+tools/xngen src/qs8-vprelu/rvv.c.in -D LMUL=8 -D DATATYPE=QU8 -o src/qu8-vprelu/gen/qu8-vprelu-rvv-u8v.c &
+
 
 wait
 

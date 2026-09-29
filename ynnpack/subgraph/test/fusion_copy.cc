@@ -131,6 +131,7 @@ TEST(fusion, transpose_stencil_copy) {
   // m_dim = 1. (Dimension of size 8).
   ynn_node transpose_node;
   transpose_node.op = ynn_node::transpose_a{
+      .tile_m = 1,
       .tile_k = 4,
       .m_dim = 1,
   };
@@ -143,7 +144,7 @@ TEST(fusion, transpose_stencil_copy) {
 
   EXPECT_THAT(ProducerOf(z_id, subgraph),
               AllOf(IsStencilCopy(std::vector<ynn_node::stencil_copy::stencil>{
-                        {/*axis=*/2, /*new_axis=*/3, /*extent=*/3,
+                        {/*axis=*/3, /*new_axis=*/4, /*extent=*/3,
                          /*stride=*/1, /*dilation=*/1}}),
                     InputsAre(y_id, YNN_INVALID_VALUE_ID)));
 
@@ -186,6 +187,7 @@ TEST(fusion, transpose_stencil_copy_grouped) {
   // m_dim = 2. (Dimension of size 1).
   ynn_node transpose_node;
   transpose_node.op = ynn_node::transpose_a{
+      .tile_m = 1,
       .tile_k = 4,
       .m_dim = 1,
   };
@@ -345,6 +347,88 @@ TEST(fusion, keep_static_broadcast_multiple_consumers) {
   EXPECT_THAT(
       ProducerOf(out_id, subgraph),
       AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
+}
+
+TEST(fusion, move_static_broadcast_to_output_transpose) {
+  // rewrite transpose(static_broadcast(x)) -> static_broadcast(transpose(x))
+  // where the transpose permutes the broadcasted dimension.
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddOutput(ynn_type_fp32, {10, 5}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddTranspose({1, 0}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
+  uint32_t transpose_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(transpose_out_id, subgraph),
+              AllOf(IsStaticTranspose(), InputsAre(x_id)));
+}
+
+TEST(fusion, do_not_move_broadcast_like_to_output_transpose) {
+  // transpose(broadcast_like(x, y)) should not be rewritten to
+  // broadcast_like(transpose(x), y) when the transpose permutes the broadcasted
+  // dimension, because y is not transposed.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {5, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {10, 5}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddBroadcastLike({0}, x_id, y_id, broadcast_x_id)
+      .AddTranspose({1, 0}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticTranspose());
+  EXPECT_THAT(ProducerOf(broadcast_x_id, subgraph), IsBroadcastLike());
+}
+
+TEST(fusion, move_broadcast_like_to_output_transpose) {
+  // transpose(broadcast_like(x, y)) should be rewritten to
+  // broadcast_like(transpose(x), y) when the transpose does not permute the
+  // broadcasted dimension.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 2, 3}, x_id)
+      .AddInput(ynn_type_fp32, {5, 2, 3}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 3, 2}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 2, 3}, broadcast_x_id);
+
+  builder.AddBroadcastLike({0}, x_id, y_id, broadcast_x_id)
+      .AddTranspose({0, 2, 1}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsBroadcastLike());
+  uint32_t transpose_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(transpose_out_id, subgraph),
+              AllOf(IsStaticTranspose(), InputsAre(x_id)));
 }
 
 TEST(fusion, reshape_to_expand_dims) {
@@ -580,6 +664,135 @@ TEST(fusion, move_broadcast_to_output_topological_order) {
   EXPECT_THAT(subgraph.nodes[0], IsUnary(ynn_unary_abs));
   EXPECT_THAT(subgraph.nodes[1], IsBinary(ynn_binary_add));
   EXPECT_THAT(subgraph.nodes[2], IsStaticBroadcast());
+}
+
+TEST(fusion, pack_b_gather) {
+  const uint32_t a_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  // a: [4, 1, 16] (tokens: batch=4, M=1, K=16)
+  // static weights: [8, 16, 32] (E=8, K=16, N=32)
+  // index: [4, 1, 1] (indices of experts for the 4 rows)
+  // gathered weights: [4, 16, 32]
+  // dot: a @ gathered -> out [4, 1, 32]
+  std::vector<float> weight_data(8 * 16 * 32, 1.0f);
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_w_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {4, 1, 16}, a_id)
+      .AddInput(ynn_type_int32, {4, 1, 1}, index_id)
+      .AddTensor(ynn_type_fp32, {8, 16, 32}, w_id, weight_data.data())
+      .AddTensor(ynn_type_fp32, {4, 16, 32}, gathered_w_id)
+      .AddOutput(ynn_type_fp32, {4, 1, 32}, out_id);
+
+  builder.AddGather({0}, 3, w_id, index_id, gathered_w_id)
+      .AddDot(1, a_id, gathered_w_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // After fusion, the dot's input_b (packed_b) should be produced by a gather
+  // node, and the pack_b node should have input w_id (the static weights).
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(dot_node, IsDot());
+  uint32_t packed_gathered_id = dot_node.inputs[1];
+  const ynn_node& gather_node = ProducerOf(packed_gathered_id, subgraph);
+  EXPECT_THAT(gather_node, IsGather());
+  uint32_t packed_w_id = gather_node.inputs[0];
+  const ynn_node& pack_b_node = ProducerOf(packed_w_id, subgraph);
+  EXPECT_THAT(pack_b_node, IsPackB());
+  EXPECT_EQ(pack_b_node.inputs[0], w_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> a_data(4 * 1 * 16, 2.0f);
+  std::vector<int32_t> index_data = {0, 1, 2, 3};
+  std::vector<float> out_data(4 * 1 * 32, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({4, 1, 16}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({4, 1, 1}), index_data.data(),
+                             index_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (float v : out_data) {
+    EXPECT_FLOAT_EQ(v, 32.0f);
+  }
+}
+
+TEST(fusion, pack_b_gather_multiple_consumers) {
+  const uint32_t a_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t out_id = 2;
+  const uint32_t abs_out_id = 3;
+  SubgraphBuilder builder(4);
+
+  // Same as above, but the gathered weights have a second consumer, so the
+  // rewrite has to leave the gather in place and pack `w` with a new node.
+  std::vector<float> weight_data(8 * 16 * 32, 1.0f);
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_w_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {4, 1, 16}, a_id)
+      .AddInput(ynn_type_int32, {4, 1, 1}, index_id)
+      .AddTensor(ynn_type_fp32, {8, 16, 32}, w_id, weight_data.data())
+      .AddTensor(ynn_type_fp32, {4, 16, 32}, gathered_w_id)
+      .AddOutput(ynn_type_fp32, {4, 1, 32}, out_id)
+      .AddOutput(ynn_type_fp32, {4, 16, 32}, abs_out_id);
+
+  builder.AddGather({0}, 3, w_id, index_id, gathered_w_id)
+      .AddDot(1, a_id, gathered_w_id, YNN_INVALID_VALUE_ID, out_id)
+      .AddUnary(ynn_unary_abs, gathered_w_id, abs_out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The dot's input_b is still a gather of the packed weights.
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(dot_node, IsDot());
+  const ynn_node& packed_gather_node =
+      ProducerOf(dot_node.inputs[1], subgraph);
+  EXPECT_THAT(packed_gather_node, IsGather());
+  EXPECT_THAT(ProducerOf(packed_gather_node.inputs[0], subgraph),
+              AllOf(IsPackB(), InputsAre(w_id)));
+
+  // The original gather is untouched, feeding its other consumer.
+  const ynn_node& abs_node = ProducerOf(abs_out_id, subgraph);
+  EXPECT_THAT(abs_node, IsUnary(ynn_unary_abs));
+  EXPECT_THAT(ProducerOf(abs_node.inputs[0], subgraph),
+              AllOf(IsGather(), InputsAre(w_id, index_id)));
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> a_data(4 * 1 * 16, 2.0f);
+  std::vector<int32_t> index_data = {0, 1, 2, 3};
+  std::vector<float> out_data(4 * 1 * 32, 0.0f);
+  std::vector<float> abs_out_data(4 * 16 * 32, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({4, 1, 16}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({4, 1, 1}), index_data.data(),
+                             index_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id)
+      .SetupExternalTensor(abs_out_data.data(), abs_out_id)
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (float v : out_data) {
+    EXPECT_FLOAT_EQ(v, 32.0f);
+  }
+  for (float v : abs_out_data) {
+    EXPECT_FLOAT_EQ(v, 1.0f);
+  }
 }
 
 }  // namespace ynn

@@ -36,15 +36,15 @@ void xnn_f32_bf16_vcvt_ukernel__avx512bf16_u32(
     const __m512 vf1 = _mm512_loadu_ps(input + 16);
     input += 32;
 
-    _mm256_storeu_si256((__m256i*) o, (__m256i) _mm512_cvtneps_pbh(vf0));
-    _mm256_storeu_si256((__m256i*) (o + 16), (__m256i) _mm512_cvtneps_pbh(vf1));
+    _mm256_storeu_si256((__m256i*) o, _mm512_cvtneps_pbh(vf0));
+    _mm256_storeu_si256((__m256i*) (o + 16), _mm512_cvtneps_pbh(vf1));
     o += 32;
   }
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vf = _mm512_loadu_ps(input);
     input += 16;
 
-    _mm256_storeu_si256((__m256i*) o, (__m256i) _mm512_cvtneps_pbh(vf));
+    _mm256_storeu_si256((__m256i*) o, _mm512_cvtneps_pbh(vf));
     o += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -56,7 +56,6 @@ void xnn_f32_bf16_vcvt_ukernel__avx512bf16_u32(
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vf = _mm512_maskz_loadu_ps(vmask, input);
-    const __m256i vbf = (__m256i) _mm512_cvtneps_pbh(vf);
-    _mm256_mask_storeu_epi16(o, vmask, vbf);
+    _mm256_mask_storeu_epi16(o, vmask, _mm512_cvtneps_pbh(vf));
   }
 }

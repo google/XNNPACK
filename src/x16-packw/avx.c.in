@@ -29,6 +29,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint16_t* weights,
   const uint16_t* bias,
   const void* scale,
@@ -66,7 +67,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
       packed_w += ${NR};
 
       $for N in range(1, NR):
-        const uint16_t* w${N} = w${N-1} + kc;
+        const uint16_t* w${N} = w${N-1} + n_stride;
       $if PREFETCH:
         $for N in range(0, NR):
           xnn_prefetch_to_l1((const int8_t*) w${N});
@@ -100,10 +101,19 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
           const __m256i w${N+6} = _mm256_unpacklo_epi64(u${N+3}, u${N+7});
           const __m256i w${N+7} = _mm256_unpackhi_epi64(u${N+3}, u${N+7});
 
-        $for K in range(8):
-          $for N in range(0, NR, 8):
-            _mm_storeu_si128((__m128i*) (packed_w + ${N + K*NR}), _mm256_castsi256_si128(w${N+K}));
-            _mm_storeu_si128((__m128i*) (packed_w + ${N + (K+8)*NR}), _mm256_extracti128_si256(w${N+K}, 1));
+        $if NR >= 16:
+          $for N in range(0, NR, 16):
+            $for K in range(8):
+              const __m256i out_${N}_${K} = _mm256_permute2x128_si256(w${N+K}, w${N+8+K}, 0x20);
+              const __m256i out_${N}_${K+8} = _mm256_permute2x128_si256(w${N+K}, w${N+8+K}, 0x31);
+              _mm256_storeu_si256((__m256i*) (packed_w + ${N + K*NR}), out_${N}_${K});
+              _mm256_storeu_si256((__m256i*) (packed_w + ${N + (K+8)*NR}), out_${N}_${K+8});
+        $else:
+          $for K in range(0, 8, 2):
+            const __m256i out_${K} = _mm256_permute2x128_si256(w${K}, w${K+1}, 0x20);
+            const __m256i out_${K+8} = _mm256_permute2x128_si256(w${K}, w${K+1}, 0x31);
+            _mm256_storeu_si256((__m256i*) (packed_w + ${K*NR}), out_${K});
+            _mm256_storeu_si256((__m256i*) (packed_w + ${(K+8)*NR}), out_${K+8});
         packed_w += ${NR * KBLOCK};
       }
 
@@ -213,7 +223,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
         }
       }
       packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
-      w0 = w${NR-1};
+      w0 = w${NR-1} + n_stride - kc;
     }
 
     // NC remainder (1..${NR-1})
@@ -235,7 +245,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
 
       // NR remainder has less than ${NR} rows so last row is not loaded
       $for N in range(1, NR-1):
-        const uint16_t* w${N} = w${N-1} + kc;
+        const uint16_t* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};
@@ -276,10 +286,19 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
           const __m256i w${N+6} = _mm256_unpacklo_epi64(u${N+3}, u${N+7});
           const __m256i w${N+7} = _mm256_unpackhi_epi64(u${N+3}, u${N+7});
 
-        $for K in range(8):
-          $for N in range(0, NR, 8):
-            _mm_storeu_si128((__m128i*) (packed_w + ${N + K*NR}), _mm256_castsi256_si128(w${N+K}));
-            _mm_storeu_si128((__m128i*) (packed_w + ${N + (K+8)*NR}), _mm256_extracti128_si256(w${N+K}, 1));
+        $if NR >= 16:
+          $for N in range(0, NR, 16):
+            $for K in range(8):
+              const __m256i out_${N}_${K} = _mm256_permute2x128_si256(w${N+K}, w${N+8+K}, 0x20);
+              const __m256i out_${N}_${K+8} = _mm256_permute2x128_si256(w${N+K}, w${N+8+K}, 0x31);
+              _mm256_storeu_si256((__m256i*) (packed_w + ${N + K*NR}), out_${N}_${K});
+              _mm256_storeu_si256((__m256i*) (packed_w + ${N + (K+8)*NR}), out_${N}_${K+8});
+        $else:
+          $for K in range(0, 8, 2):
+            const __m256i out_${K} = _mm256_permute2x128_si256(w${K}, w${K+1}, 0x20);
+            const __m256i out_${K+8} = _mm256_permute2x128_si256(w${K}, w${K+1}, 0x31);
+            _mm256_storeu_si256((__m256i*) (packed_w + ${K*NR}), out_${K});
+            _mm256_storeu_si256((__m256i*) (packed_w + ${(K+8)*NR}), out_${K+8});
         packed_w += ${NR * KBLOCK};
       }
 
@@ -402,6 +421,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH
       }
       packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
-    weights += nc * kc;
+    weights += nc * n_stride;
   } while (--g != 0);
 }

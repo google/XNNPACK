@@ -77,6 +77,10 @@ static XNN_INTRINSIC __m256 _mm256_zextps128_ps256(__m128 v) {
     (defined(_MSC_VER) && !defined(__clang__) && !defined(__GNUC__) &&         \
      (_MSC_VER <= 1916))
 
+static XNN_INTRINSIC __mmask8 _cvtu32_mask8(unsigned int mask) {
+  return (__mmask8)mask;
+}
+
 static XNN_INTRINSIC __mmask16 _cvtu32_mask16(unsigned int mask) {
   return (__mmask16)mask;
 }
@@ -199,6 +203,22 @@ static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_madd(__m512i i32,
   const __m512i v = _mm512_madd_epi16(i12, vminus_one);  // convert 16 bits to 32 bits
   return _mm512_sub_epi32(i32, v);
 }
+
+#if defined(__AVX512BF16__)
+#if defined(__GNUC__) || defined(__clang__)
+#define _mm512_cvtneps_pbh(a) ((__m256i) (_mm512_cvtneps_pbh)(a))
+#endif
+#else
+static XNN_INTRINSIC __m256i _mm512_cvtneps_pbh_emu(__m512 a) {
+  const __m512i i = _mm512_castps_si512(a);
+  const __m512i lsb =
+      _mm512_and_si512(_mm512_srli_epi32(i, 16), _mm512_set1_epi32(1));
+  const __m512i bias = _mm512_add_epi32(_mm512_set1_epi32(0x7FFF), lsb);
+  const __m512i rounded = _mm512_add_epi32(i, bias);
+  return _mm512_cvtepi32_epi16(_mm512_srli_epi32(rounded, 16));
+}
+#define _mm512_cvtneps_pbh _mm512_cvtneps_pbh_emu
+#endif  // !defined(__AVX512BF16__)
 #endif  // __AVX512BW__
 #endif  // __AVX512F__
 

@@ -5,9 +5,13 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
 #include <utility>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
 #include "test/operators/slice-operator-tester.h"
 
 constexpr size_t kDim1 = 4;
@@ -461,4 +465,74 @@ TEST(SLICE_ND_X32, slice_6d) {
       }
     }
   }
+}
+
+TEST(SLICE_ND_X32, reshape_overflow_input_shape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t slice_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_slice_nd_x32(0, &slice_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      slice_op, xnn_delete_operator);
+
+  const size_t input_shape[2] = {SIZE_MAX / 2, 3};
+  const size_t offsets[2] = {0, 0};
+  const size_t sizes[2] = {1, 1};
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 2, input_shape, offsets, sizes, nullptr));
+}
+
+TEST(SLICE_ND_X32, reshape_overflow_offset_size) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t slice_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_slice_nd_x32(0, &slice_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      slice_op, xnn_delete_operator);
+
+  const size_t input_shape[1] = {100};
+  const size_t offsets[1] = {SIZE_MAX - 5};
+  const size_t sizes[1] = {10};
+  EXPECT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 1, input_shape, offsets, sizes, nullptr));
+}
+
+TEST(SLICE_ND_X32, reshape_overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t slice_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_slice_nd_x32(0, &slice_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      slice_op, xnn_delete_operator);
+
+  const size_t large_dim = (SIZE_MAX / sizeof(float)) + 1;
+  const size_t input_shape[2] = {1, large_dim};
+  const size_t offsets[2] = {0, 0};
+  const size_t sizes[2] = {1, 1};
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 2, input_shape, offsets, sizes, nullptr));
+}
+
+TEST(SLICE_ND_X32, reshape_overflow_contiguous_size) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t slice_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_slice_nd_x32(0, &slice_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      slice_op, xnn_delete_operator);
+
+  const size_t large_size = (SIZE_MAX / sizeof(float)) + 1;
+  const size_t input_shape[1] = {large_size};
+  const size_t offsets[1] = {0};
+  const size_t sizes[1] = {large_size};
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 1, input_shape, offsets, sizes, nullptr));
 }

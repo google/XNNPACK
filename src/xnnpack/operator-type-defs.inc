@@ -1,5 +1,7 @@
 // Copyright 2024 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -127,6 +129,8 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
               "Fully Connected (NC, QD8, F16, QB4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qd8_bf16_qb4w,
               "Fully Connected (NC, QD8, BF16, QB4W)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w,
+              "Fully Connected (NC, QDU8, BF16, QB4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
               "Fully Connected (NC, QD8, F16, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qd8_f32_qc2w,
@@ -151,10 +155,14 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
               "Fully Connected (NC, QD8, F32, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
               "Fully Connected (NC, QDU8, F32, QC8W)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qc2w,
+              "Fully Connected (NC, QP8, F32, QC2W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
               "Fully Connected (NC, QP8, F32, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
               "Fully Connected (NC, QP8, F32, QC8W)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f16_qc8w,
+              "Fully Connected (NC, QP8, F16, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,
               "Fully Connected (NC, QP8, F32, QB4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8,
@@ -165,6 +173,8 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8_qc4w,
               "Fully Connected (NC, QS8, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8_qc8w,
               "Fully Connected (NC, QS8, QC8W)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pqs8_qc4w,
+              "Fully Connected (NC, PQS8, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pqs8_qc8w,
               "Fully Connected (NC, PQS8, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qu8,

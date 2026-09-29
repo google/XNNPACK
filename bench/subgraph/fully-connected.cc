@@ -38,9 +38,12 @@ struct int2x4 {
   int2x4(uint8_t value) : value(value) {}
 };
 
+struct blockwise {};
+
 using qcint8 = xnnpack::quantized<int8_t, xnnpack::channelwise>;
 using qcint4 = xnnpack::quantized<int4x2, xnnpack::channelwise>;
 using qcint2 = xnnpack::quantized<int2x4, xnnpack::channelwise>;
+using qbint4 = xnnpack::quantized<int4x2, blockwise>;
 
 namespace xnnpack {
 template <>
@@ -50,6 +53,11 @@ struct unwrap_quantized<qcint4> {
 
 template <>
 struct unwrap_quantized<qcint2> {
+  using type = uint8_t;
+};
+
+template <>
+struct unwrap_quantized<qbint4> {
   using type = uint8_t;
 };
 }  // namespace xnnpack
@@ -62,6 +70,11 @@ inline xnn_datatype xnn_datatype_of<qcint4>() {
 template <>
 inline xnn_datatype xnn_datatype_of<qcint2>() {
   return xnn_datatype_qcint2;
+}
+
+template <>
+inline xnn_datatype xnn_datatype_of<qbint4>() {
+  return xnn_datatype_qbint4;
 }
 
 namespace models {
@@ -128,7 +141,8 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
     static std::vector<Wunpacked> w1_data;
     w1_data.resize(XNN_PAD_EXTRA_BYTES(k * n, Wunpacked));
 
-    if (datatype_w == xnn_datatype_qcint4 ||
+    if (datatype_w == xnn_datatype_qbint4 ||
+        datatype_w == xnn_datatype_qcint4 ||
         datatype_w == xnn_datatype_qcint2) {
       auto u8rng =
           std::bind(std::uniform_int_distribution<int>(0, 255), std::ref(rng));
@@ -142,7 +156,23 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
                     [&]() { return static_cast<Wunpacked>(f32rng()); });
     }
 
-    if (datatype_w == xnn_datatype_qcint2 && dynamically_quantize_lhs) {
+    if (xnn_datatype_is_blockwise_quantized(datatype_w)) {
+      const size_t block_size = 32;
+      if (k % block_size != 0) {
+        return nullptr;
+      }
+      const size_t num_blocks = k / block_size;
+      static std::vector<xnn_bfloat16> w1_scale;
+      w1_scale.resize(n * num_blocks);
+      std::fill(w1_scale.begin(), w1_scale.end(),
+                static_cast<xnn_bfloat16>(1.0f));
+      status = xnn_define_blockwise_quantized_tensor_value_v2(
+          subgraph.get(), datatype_w, /*zero_point=*/0,
+          /*scale=*/w1_scale.data(), dims_w.size(), /*channel_dim=*/0,
+          block_size, dims_w.data(),
+          /*data=*/w1_data.data(), /*external_id=*/XNN_INVALID_VALUE_ID,
+          /*flags=*/0, xnn_datatype_of<xnn_bfloat16>(), &weights_id);
+    } else if (datatype_w == xnn_datatype_qcint2 && dynamically_quantize_lhs) {
       static std::vector<float> w1_scale;
       w1_scale.resize(n);
       std::fill(w1_scale.begin(), w1_scale.end(), 1.0f);
@@ -289,7 +319,16 @@ static void QS8QC2WFullyConnected(benchmark::State& state) {
   });
 }
 
+static void QD8F32QB4WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<float, qbint4>(
+        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        /*dynamically_quantize_lhs=*/true);
+  });
+}
+
 static void FullyConnectedArgs(benchmark::Benchmark* b);
+static void BlockwiseFullyConnectedArgs(benchmark::Benchmark* b);
 
 BENCHMARK(FP32FullyConnected)
     ->Unit(benchmark::kMicrosecond)
@@ -321,6 +360,12 @@ BENCHMARK(QD8F32QC2WFullyConnected)
     ->UseRealTime()
     ->Apply(FullyConnectedArgs);
 
+BENCHMARK(QD8F32QB4WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(BlockwiseFullyConnectedArgs);
+
 BENCHMARK(QS8QC4WFullyConnected)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
@@ -333,13 +378,12 @@ BENCHMARK(QS8QC2WFullyConnected)
     ->UseRealTime()
     ->Apply(FullyConnectedArgs);
 
-static void FullyConnectedArgs(benchmark::Benchmark* b) {
+static void FullyConnectedArgsWithMinK(benchmark::Benchmark* b, int64_t min_k) {
   b->ArgNames({"M", "K", "N"});
 
   static const std::array<int64_t, 17> kDims = {
       1,   2,   4,    8,    16,   32,   64,    128,
       256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
-  const int64_t kMinK = 8;
   const int64_t kMaxSmall = 16;
   const int64_t kMinHuge = 1024;
   const int64_t kMinFLOPs = (int64_t)1 << 16;
@@ -347,7 +391,7 @@ static void FullyConnectedArgs(benchmark::Benchmark* b) {
 
   for (int64_t m : kDims) {
     for (int64_t k : kDims) {
-      if (k < kMinK) {
+      if (k < min_k) {
         continue;
       }
       for (int64_t n : kDims) {
@@ -365,4 +409,12 @@ static void FullyConnectedArgs(benchmark::Benchmark* b) {
       }
     }
   }
+}
+
+static void FullyConnectedArgs(benchmark::Benchmark* b) {
+  FullyConnectedArgsWithMinK(b, /*min_k=*/8);
+}
+
+static void BlockwiseFullyConnectedArgs(benchmark::Benchmark* b) {
+  FullyConnectedArgsWithMinK(b, /*min_k=*/32);
 }

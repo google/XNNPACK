@@ -49,11 +49,10 @@ ynn_status ynn_define_stack(ynn_subgraph_t subgraph, int32_t axis,
       return ynn_status_invalid_parameter;
     }
     for (int d = 0; d < input0.rank(); ++d) {
-      node.checks.push_back(
-          {input_i.extents[d] == input0.extents[d],
-           {"mismatch in dimension ", d, " of ", ynn_node::input_idx{0}, " (",
-            input0.extents[d], ") and ", ynn_node::input_idx{i}, " (",
-            input_i.extents[d], ")"}});
+      node.add_check(input_i.extents[d] == input0.extents[d],
+                     {"mismatch in dimension ", d, " of ",
+                      ynn_node::input_idx{0}, " (", input0.extents[d], ") and ",
+                      ynn_node::input_idx{i}, " (", input_i.extents[d], ")"});
     }
   }
 

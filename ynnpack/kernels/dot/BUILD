@@ -222,8 +222,12 @@ ynn_generate_srcs(
     output_srcs = [
         "x86_avx2_int8_int8_int32.cc",
         "x86_avx2_int8_int8_int32.inc",
+        "x86_avx2_int8_int8_int32_symmetric_b.cc",
+        "x86_avx2_int8_int8_int32_symmetric_b.inc",
         "x86_avx512_int8_int8_int32.cc",
         "x86_avx512_int8_int8_int32.inc",
+        "x86_avx512_int8_int8_int32_symmetric_b.cc",
+        "x86_avx512_int8_int8_int32_symmetric_b.inc",
     ],
 )
 
@@ -397,6 +401,7 @@ ynn_cc_library(
         "x86_avx2_fp32_k2.inc",
         "x86_avx2_int8_int8_int32.inc",
         "x86_avx2_int8_int8_int32_k1.inc",
+        "x86_avx2_int8_int8_int32_symmetric_b.inc",
         "x86_avx2_uint8_int2_int32.inc",
         "x86_avx2_uint8_int4_int32.inc",
         "x86_avx512_bf16_bf16_fp32.inc",
@@ -409,6 +414,7 @@ ynn_cc_library(
         "x86_avx512_int8_int8_int32.inc",
         "x86_avx512_int8_int8_int32_k1.inc",
         "x86_avx512_int8_int8_int32_k16.inc",
+        "x86_avx512_int8_int8_int32_symmetric_b.inc",
         "x86_avx512_uint8_int2_int32.inc",
         "x86_avx512_uint8_int4_int32.inc",
         "x86_avx512bf16_bf16_bf16_fp32.inc",
@@ -472,6 +478,7 @@ ynn_cc_library(
         ],
         "x86_avx2": [
             "x86_avx2_int8_int8_int32.cc",
+            "x86_avx2_int8_int8_int32_symmetric_b.cc",
             "x86_avx2_int8_int8_int32_k1.cc",
             "x86_avx2_fp32_k2.cc",
             "x86_avx2_uint8_int2_int32.cc",
@@ -494,6 +501,7 @@ ynn_cc_library(
             "x86_avx512_int8_int8_int32.cc",
             "x86_avx512_int8_int8_int32_k1.cc",
             "x86_avx512_int8_int8_int32_k16.cc",
+            "x86_avx512_int8_int8_int32_symmetric_b.cc",
             "x86_avx512_uint8_int2_int32.cc",
             "x86_avx512_uint8_int4_int32.cc",
         ],

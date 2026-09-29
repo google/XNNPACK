@@ -572,6 +572,13 @@ enum xnn_status xnn_define_static_expand_dims(
 enum xnn_status xnn_define_fuse_dims(
     xnn_subgraph_t subgraph, size_t axis, size_t axes_count,
     uint32_t input_id, uint32_t output_id, uint32_t flags) {
+  if (axes_count == 0) {
+    xnn_log_error(
+        "failed to define %s operator with %zu axes_count: axes_count must "
+        "be non-zero",
+        xnn_node_type_to_string(xnn_node_type_fuse_dims), axes_count);
+    return xnn_status_invalid_parameter;
+  }
   if (axis > XNN_MAX_TENSOR_DIMS || axes_count > XNN_MAX_TENSOR_DIMS ||
       axis + axes_count > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
@@ -596,6 +603,13 @@ enum xnn_status xnn_define_split_dim(xnn_subgraph_t subgraph,
                                              uint32_t input_id,
                                              uint32_t output_id,
                                              uint32_t flags) {
+  if (num_splits == 0) {
+    xnn_log_error(
+        "failed to define %s operator with %zu num_splits: num_splits must "
+        "be non-zero",
+        xnn_node_type_to_string(xnn_node_type_split_dims), num_splits);
+    return xnn_status_invalid_parameter;
+  }
   if (axis > XNN_MAX_TENSOR_DIMS || num_splits > XNN_MAX_TENSOR_DIMS ||
       axis + num_splits > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(

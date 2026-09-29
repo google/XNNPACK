@@ -21,6 +21,18 @@
 extern "C" {
 #endif
 
+// XNN_ARCH_HEXAGON is also defined by src/xnnpack/common.h, but that is an
+// internal header and is not installed. Define it here as well, deriving it from the same compiler builtin
+// so both expansions are identical. If common.h is included first this block is
+// skipped. Keep the two in sync.
+#ifndef XNN_ARCH_HEXAGON
+#if defined(__hexagon__)
+#define XNN_ARCH_HEXAGON 1
+#else
+#define XNN_ARCH_HEXAGON 0
+#endif
+#endif  // XNN_ARCH_HEXAGON
+
 /// The number of bytes XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra bytes after the tensor data passed to XNNPACK.
 ///
@@ -4383,6 +4395,35 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_bf16_qb4w(
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_bf16_qb4w(
+    xnn_operator_t fully_connected_op,
+    const int8_t* input,
+    void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params);
+
+enum xnn_status xnn_create_fully_connected_nc_qdu8_bf16_qb4w(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const uint16_t* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    size_t* workspace_size,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_qdu8_bf16_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,

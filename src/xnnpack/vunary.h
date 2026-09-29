@@ -31,6 +31,14 @@ extern "C" {
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
                     params_type, init_params)                               \
+  DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type);
+#include "src/bf16-vrsqrt/bf16-vrsqrt.inc"
+#include "src/bf16-vsigmoid/bf16-vsigmoid.inc"
+#include "src/bf16-vsqr/bf16-vsqr.inc"
+#undef XNN_UKERNEL
+
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
   XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y,           \
                             const struct xnn_s8_minmax_params* params);
 #include "src/s8-vclamp/s8-vclamp.inc"

@@ -45,6 +45,16 @@ YNN_ALWAYS_INLINE __mmask64 concat(__mmask32 lo, __mmask32 hi) {
   return ((__mmask64)hi << 32) | lo;
 }
 
+YNN_ALWAYS_INLINE bool any(__mmask8 m) { return m != 0; }
+YNN_ALWAYS_INLINE bool any(__mmask16 m) { return m != 0; }
+YNN_ALWAYS_INLINE bool any(__mmask32 m) { return m != 0; }
+YNN_ALWAYS_INLINE bool any(__mmask64 m) { return m != 0; }
+
+YNN_ALWAYS_INLINE bool all(__mmask8 m) { return m == 0xFF; }
+YNN_ALWAYS_INLINE bool all(__mmask16 m) { return m == 0xFFFF; }
+YNN_ALWAYS_INLINE bool all(__mmask32 m) { return m == 0xFFFFFFFF; }
+YNN_ALWAYS_INLINE bool all(__mmask64 m) { return m == 0xFFFFFFFFFFFFFFFFULL; }
+
 #endif  // YNN_ARCH_X86_AVX512
 
 template <>
@@ -255,6 +265,10 @@ YNN_ALWAYS_INLINE s32x4 load_aligned(const int32_t* ptr, decltype(s32x4::N),
                                      s32x4 = {}) {
   return s32x4{_mm_load_si128(reinterpret_cast<const __m128i*>(ptr))};
 }
+YNN_ALWAYS_INLINE s64x2 load_aligned(const int64_t* ptr, decltype(s64x2::N),
+                                     s64x2 = {}) {
+  return s64x2{_mm_load_si128(reinterpret_cast<const __m128i*>(ptr))};
+}
 YNN_ALWAYS_INLINE bf16x8 load_aligned(const bfloat16* ptr, decltype(bf16x8::N),
                                       bf16x8 = {}) {
   return bf16x8{_mm_load_si128(reinterpret_cast<const __m128i*>(ptr))};
@@ -308,6 +322,10 @@ YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x4 b,
                                      decltype(s32x4::N) = {}) {
   _mm_store_si128(reinterpret_cast<__m128i*>(ptr), b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(int64_t* ptr, s64x2 b,
+                                     decltype(s64x2::N) = {}) {
+  _mm_store_si128(reinterpret_cast<__m128i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x16 b,
                                      decltype(u8x16::N) = {}) {
   _mm_store_si128(reinterpret_cast<__m128i*>(ptr), b.v);
@@ -323,6 +341,10 @@ YNN_ALWAYS_INLINE f64x2 load(const double* ptr,
 }
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{_mm_loadu_ps(ptr)};
+}
+YNN_ALWAYS_INLINE s64x2 load(const int64_t* ptr, decltype(s64x2::N),
+                             s64x2 = {}) {
+  return s64x2{_mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr))};
 }
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, decltype(s32x4::N),
                              s32x4 = {}) {
@@ -357,6 +379,9 @@ YNN_ALWAYS_INLINE void store(double* ptr, f64x2 b, decltype(f64x2::N) = {}) {
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, decltype(f32x4::N) = {}) {
   _mm_storeu_ps(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store(int64_t* ptr, s64x2 b, decltype(s64x2::N) = {}) {
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x4 b, decltype(u32x4::N) = {}) {
   _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), b.v);
@@ -1553,6 +1578,44 @@ YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
   return u8x16{
       _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
 }
+#endif  // YNN_ARCH_X86_SSE41
+
+#ifdef YNN_ARCH_X86_SSE41
+YNN_ALWAYS_INLINE bool any(s8x16 x) { return !_mm_testz_si128(x.v, x.v); }
+YNN_ALWAYS_INLINE bool any(s16x8 x) { return !_mm_testz_si128(x.v, x.v); }
+YNN_ALWAYS_INLINE bool any(s32x4 x) { return !_mm_testz_si128(x.v, x.v); }
+YNN_ALWAYS_INLINE bool any(s64x2 x) { return !_mm_testz_si128(x.v, x.v); }
+
+YNN_ALWAYS_INLINE bool all(s8x16 x) {
+  return _mm_testc_si128(x.v, _mm_set1_epi32(-1));
+}
+YNN_ALWAYS_INLINE bool all(s16x8 x) {
+  return _mm_testc_si128(x.v, _mm_set1_epi32(-1));
+}
+YNN_ALWAYS_INLINE bool all(s32x4 x) {
+  return _mm_testc_si128(x.v, _mm_set1_epi32(-1));
+}
+YNN_ALWAYS_INLINE bool all(s64x2 x) {
+  return _mm_testc_si128(x.v, _mm_set1_epi32(-1));
+}
+#else
+YNN_ALWAYS_INLINE bool any(s8x16 x) {
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(x.v, _mm_setzero_si128())) != 0xFFFF;
+}
+YNN_ALWAYS_INLINE bool any(s16x8 x) {
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(x.v, _mm_setzero_si128())) != 0xFFFF;
+}
+YNN_ALWAYS_INLINE bool any(s32x4 x) {
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(x.v, _mm_setzero_si128())) != 0xFFFF;
+}
+YNN_ALWAYS_INLINE bool any(s64x2 x) {
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(x.v, _mm_setzero_si128())) != 0xFFFF;
+}
+
+YNN_ALWAYS_INLINE bool all(s8x16 x) { return _mm_movemask_epi8(x.v) == 0xFFFF; }
+YNN_ALWAYS_INLINE bool all(s16x8 x) { return _mm_movemask_epi8(x.v) == 0xFFFF; }
+YNN_ALWAYS_INLINE bool all(s32x4 x) { return _mm_movemask_epi8(x.v) == 0xFFFF; }
+YNN_ALWAYS_INLINE bool all(s64x2 x) { return _mm_movemask_epi8(x.v) == 0xFFFF; }
 #endif  // YNN_ARCH_X86_SSE41
 
 #ifdef YNN_ARCH_FP16_ARITHMETIC

@@ -47,6 +47,9 @@
 
 #if XNN_ARCH_PPC64
   #include <sys/auxv.h>
+  #if defined(__FreeBSD__)
+    #include <machine/cpu.h>
+  #endif
 #endif
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -254,6 +257,7 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_arm_sve2, cpuinfo_has_arm_sve2());
   set_arch_flag(xnn_arch_arm_sme, cpuinfo_has_arm_sme());
   set_arch_flag(xnn_arch_arm_sme2, cpuinfo_has_arm_sme2());
+  set_arch_flag(xnn_arch_arm_sme2p1, cpuinfo_has_arm_sme2p1());
 #endif
 
 #if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_CPUINFO
@@ -357,8 +361,14 @@ static void init_hardware_config(void) {
   #endif
 
   #if XNN_ARCH_PPC64
-    const unsigned long HWCAPs = getauxval(AT_HWCAP);
-    const unsigned long HWCAPs_2 = getauxval(AT_HWCAP2);
+    #if defined(__FreeBSD__)
+      unsigned long HWCAPs = 0, HWCAPs_2 = 0;
+      elf_aux_info(AT_HWCAP, &HWCAPs, sizeof(HWCAPs));
+      elf_aux_info(AT_HWCAP2, &HWCAPs_2, sizeof(HWCAPs_2));
+    #else
+      const unsigned long HWCAPs = getauxval(AT_HWCAP);
+      const unsigned long HWCAPs_2 = getauxval(AT_HWCAP2);
+    #endif
     if (HWCAPs & PPC_FEATURE_HAS_VSX) {
       set_arch_flag(xnn_arch_vsx, 1);
     }

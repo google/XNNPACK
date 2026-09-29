@@ -133,11 +133,12 @@ class x86_avx512_uint8_int4_int32(x86_uint8_int4_int32, x86_avx512):
 namespace {
 
 YNN_INTRINSIC __m512i _mm512_hadd_epi32(__m512i a, __m512i b) {
-  __m512i t0 = _mm512_unpacklo_epi64(a, b);
-  __m512i t1 = _mm512_unpackhi_epi64(a, b);
-  __m512i even = _mm512_add_epi32(t0, _mm512_srli_epi64(t0, 32));
-  __m512i odd = _mm512_add_epi32(t1, _mm512_slli_epi64(t1, 32));
-  return _mm512_mask_blend_epi32(0xAAAA, even, odd);
+    a = _mm512_add_epi32(a, _mm512_shuffle_epi32(a, _MM_SHUFFLE(2, 3, 0, 1)));
+    b = _mm512_add_epi32(b, _mm512_shuffle_epi32(b, _MM_SHUFFLE(2, 3, 0, 1)));
+    return _mm512_permutex2var_epi32(a,
+        _mm512_setr_epi32(0, 2, 16, 18, 4, 6, 20, 22, 8, 10, 24, 26, 12, 14, 28, 30),
+        b
+    );
 }
 
 }  // namespace

@@ -326,6 +326,27 @@ ynn_node* ynn_subgraph::get_producer(uint32_t id) {
   return nullptr;
 }
 
+size_t ynn_subgraph::count_consumers(uint32_t id) const {
+  if (id == YNN_INVALID_VALUE_ID) return 0;
+
+  size_t count = 0;
+  for (const ynn_node& node : nodes) {
+    if (!node.is_valid()) continue;
+    for (uint32_t i : node.inputs) {
+      if (i == id) {
+        ++count;
+      }
+    }
+  }
+
+  if (value(id).is_external_output()) {
+    // Treat external outputs as having a consumer.
+    ++count;
+  }
+
+  return count;
+}
+
 uint32_t ynn_subgraph::get_scalar_value_id(ynn_type type, float value_f32) {
   return get_static_value_id(type, /*rank=*/0, /*dims=*/nullptr, &value_f32);
 }
@@ -362,12 +383,11 @@ void ynn_subgraph::infer_elementwise_shape(ynn_node& node, int input_idx,
   slinky::expr& output_i = output.extents[output_dim];
   if (output_i.defined()) {
     // If we already have an extent here, it must match the new extent.
-    node.checks.push_back(ynn_node::check{
+    node.add_check(
         output_i == input_i,
         {"dimension ", output_dim, " (", output_i, ") of ",
          ynn_node::output_idx{output_idx}, " does not match dimension ",
-         input_dim, " (", input_i, ") of ", ynn_node::input_idx{input_idx}},
-    });
+         input_dim, " (", input_i, ") of ", ynn_node::input_idx{input_idx}});
   }
   if (!output_i.defined() || !as_constant(output_i)) {
     // We don't have an extent, or it wasn't constant. Maybe the new extent is
@@ -388,15 +408,15 @@ std::optional<size_t> index_of(const C& container, const T& value) {
 }
 
 size_t static_size_of_value(const ynn_value& value) {
-  size_t size = ynn::type_size_bytes(value.type);
-  for (const auto& extent : value.extents) {
-    if (auto extent_c = as_constant(extent)) {
-      size *= *extent_c;
+  size_t n = 1;
+  for (size_t i = 0; i < value.extents.size(); ++i) {
+    if (auto extent_c = as_constant(value.extent(i))) {
+      n *= *extent_c;
     } else {
       return 0;
     }
   }
-  return size;
+  return ynn::type_size_bytes(value.type, n);
 }
 
 size_t static_size_of_inputs(const ynn_subgraph& subgraph,
@@ -1329,7 +1349,8 @@ void print(std::ostream& os, const ynn_node::iota& op) {}
 
 void print(std::ostream& os, const ynn_node::pack_b& op) {}
 void print(std::ostream& os, const ynn_node::transpose_a& op) {
-  os << "tile_k=" << op.tile_k << " m_dim=" << op.m_dim;
+  os << "tile_m=" << op.tile_m << " tile_k=" << op.tile_k
+     << " m_dim=" << op.m_dim;
 }
 
 void print(std::ostream& os, const ynn_node::dequantize_dot& op) {}
@@ -1370,6 +1391,14 @@ std::string ynn_node::to_string() const {
   ss << name() << " ";
   std::visit([&](const auto& op) { print(ss, op); }, op);
   return ss.str();
+}
+
+void ynn_node::add_check(slinky::expr condition,
+                         std::vector<check::message_part> message) {
+  condition = slinky::simplify(condition);
+  if (!slinky::is_true(condition)) {
+    checks.push_back({std::move(condition), std::move(message)});
+  }
 }
 
 void ynn_subgraph::dump(std::ostream& os) const {

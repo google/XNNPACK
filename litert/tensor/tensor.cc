@@ -37,6 +37,16 @@ limitations under the License.
 
 namespace litert::tensor {
 
+namespace internal {
+
+template <class T>
+struct IsVector : std::false_type {};
+
+template <class T>
+struct IsVector<std::vector<T>> : std::true_type {};
+
+}  // namespace internal
+
 TensorHandle::TensorHandle(source_location loc)
     : impl_(graph::NewTensor(std::move(loc))) {}
 
@@ -75,10 +85,7 @@ TensorHandle& TensorHandle::Set(TensorInit init, source_location loc) & {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, std::shared_ptr<Buffer>>) {
           info.buffer = std::forward<decltype(arg)>(arg);
-        } else if constexpr (std::is_same_v<T, std::vector<float>> ||
-                             std::is_same_v<T, std::vector<int32_t>> ||
-                             std::is_same_v<T, std::vector<int8_t>> ||
-                             std::is_same_v<T, std::vector<int4_t>>) {
+        } else if constexpr (internal::IsVector<T>::value) {
           info.type = info.type == Type::kUnknown
                           ? ApiType<typename T::value_type>::value
                           : info.type;
@@ -199,6 +206,16 @@ absl::StatusOr<Buffer&> TensorHandle::GetBuffer() const {
   // temporarily remove the const qualifier. The underlying graph::GetBuffer
   // should ideally be updated to accept const graph::Tensor&.
   return graph::GetBuffer(const_cast<graph::Tensor&>(GetRaw()));
+}
+
+std::shared_ptr<Buffer> TensorHandle::GetBufferPtr() const {
+  absl::StatusOr<const graph::TensorInformation&> info =
+      graph::GetInfo(GetRaw());
+  if (!info.ok()) {
+    ABSL_LOG(ERROR) << "Error when getting tensor info: " << info.status();
+    return nullptr;
+  }
+  return info->buffer;
 }
 
 TensorHandle& TensorHandle::SetShape(Shape shape) & {

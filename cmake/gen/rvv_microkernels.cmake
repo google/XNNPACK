@@ -128,6 +128,9 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u2v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c
+  src/qu8-vprelu/gen/qu8-vprelu-rvv-u8v.c
+  src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u8v.c
+  src/qu8-vrpreluc/gen/qu8-vrpreluc-rvv-u8v.c
   src/s8-maxpool/gen/s8-maxpool-9p-minmax-rvv-u2v.c
   src/s8-rdminmax/gen/s8-rdmax-2p2x-rvv-u8v.c
   src/s8-rdminmax/gen/s8-rdmin-2p2x-rvv-u8v.c
@@ -146,7 +149,8 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x4-rvv.c
   src/x32-transposec/gen/x32-transposec-8x8-rvv.c
   src/x32-transposec/gen/x32-transposec-16x8-rvv.c
-  src/x32-transposec/gen/x32-transposec-32x8-rvv.c)
+  src/x32-transposec/gen/x32-transposec-32x8-rvv.c
+  src/xx-pad/xx-pad-rvv-u4v.c)
 
 SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-1x1.c
@@ -337,6 +341,18 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u1v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c
+  src/qs8-vprelu/gen/qs8-vprelu-rvv-u1v.c
+  src/qs8-vprelu/gen/qs8-vprelu-rvv-u2v.c
+  src/qs8-vprelu/gen/qs8-vprelu-rvv-u4v.c
+  src/qs8-vprelu/gen/qs8-vprelu-rvv-u8v.c
+  src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u1v.c
+  src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u2v.c
+  src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u4v.c
+  src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u8v.c
+  src/qs8-vrpreluc/gen/qs8-vrpreluc-rvv-u1v.c
+  src/qs8-vrpreluc/gen/qs8-vrpreluc-rvv-u2v.c
+  src/qs8-vrpreluc/gen/qs8-vrpreluc-rvv-u4v.c
+  src/qs8-vrpreluc/gen/qs8-vrpreluc-rvv-u8v.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u1v.c
   src/qu8-gemm/gen/qu8-gemm-7x1v-minmax-fp32-rvv.c
   src/qu8-igemm/gen/qu8-igemm-7x1v-minmax-fp32-rvv.c
@@ -349,6 +365,15 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c
+  src/qu8-vprelu/gen/qu8-vprelu-rvv-u1v.c
+  src/qu8-vprelu/gen/qu8-vprelu-rvv-u2v.c
+  src/qu8-vprelu/gen/qu8-vprelu-rvv-u4v.c
+  src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u1v.c
+  src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u2v.c
+  src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u4v.c
+  src/qu8-vrpreluc/gen/qu8-vrpreluc-rvv-u1v.c
+  src/qu8-vrpreluc/gen/qu8-vrpreluc-rvv-u2v.c
+  src/qu8-vrpreluc/gen/qu8-vrpreluc-rvv-u4v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u1v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u2v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u8v.c

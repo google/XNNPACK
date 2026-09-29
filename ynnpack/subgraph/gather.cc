@@ -102,7 +102,7 @@ auto make_gather_impl(std::vector<int32_t> gathered_axes, size_t output_rank,
         slinky::buffer<const void, max_tensor_rank> input_slice = input;
 
         for (int i = output.rank - 1; i >= 0; --i) {
-          if (index.dim(i).is_broadcast()) {
+          if (is_broadcast(index, i)) {
             // The index is a broadcast, we should handle it with slinky::copy.
             output.slice(i);
             index.slice(i);
@@ -158,6 +158,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
   node.outputs = {output_id};
 
   // Infer output shape.
+  output.extents.clear();
   output.extents.resize(output_rank);
   for (size_t d = 0; d < output_rank; ++d) {
     subgraph.infer_elementwise_shape(node, /*input_idx=*/1,
@@ -220,7 +221,9 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
     if (kernel) {
       slinky::call_stmt::attributes attrs;
       attrs.name = "lut";
-      attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
+      if (allow_in_place(node.inputs[1], node.outputs[0], *runtime.subgraph)) {
+        attrs.allow_in_place = (1 << 1);
+      }
       func = slinky::func::make(make_lut_impl(kernel),
                                 {{input.buffer, std::move(input_bounds)},
                                  {index.buffer, std::move(index_bounds)}},
@@ -228,7 +231,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
     } else {
       slinky::call_stmt::attributes attrs;
       attrs.name = "gather";
-      attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
+      attrs.allow_in_place = 0;
       func = slinky::func::make(make_gather_impl(axes, output_rank, index.type),
                                 {{input.buffer, std::move(input_bounds)},
                                  {index.buffer, std::move(index_bounds)}},

@@ -129,6 +129,11 @@ struct loop_level {
   // The number of workers the loop should use, computed by compute_workers()
   // once the whole nest is built.
   slinky::expr workers = slinky::loop::serial;
+  // A finer step for this loop, proposed by a function fused into it. Set by
+  // reconcile_step(); compute_workers() decides whether to use it, because
+  // that depends on the rest of the loop nest, which isn't built yet when
+  // functions are matched.
+  slinky::expr proposed_step;
 };
 
 struct scheduling_data {
@@ -186,7 +191,9 @@ std::pair<slinky::var, int> find_output_dim(const slinky::func* f,
 // If the LCM overflows, it clamps at the max index_t value.
 slinky::expr lcm_sat(ynn::slinky_globals& globals, slinky::expr a,
                      slinky::expr b) {
-  if (slinky::prove_true(a == b)) return a;
+  if (slinky::prove_true(a == b, globals.fact_bounds, globals.fact_alignment)) {
+    return a;
+  }
   auto impl = [](const slinky::call* op,
                  slinky::eval_context& ctx) -> slinky::index_t {
     slinky::index_t a_val = slinky::evaluate(op->args[0], ctx);
@@ -323,38 +330,386 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
   return source_regions;
 }
 
+// If `e` is a global let variable, return the let's value (an existing,
+// shared expression -- nothing is constructed); otherwise return `e`
+// unchanged. One level is enough for the analyses below: loop steps are let
+// variables whose immediate values expose the min/max caps the constant
+// bounds need (variables remaining inside them are simply unknowns to the
+// bounds evaluator), and loop extents are stored in raw form. This
+// deliberately avoids substituting lets into expressions: full expansion
+// can grow combinatorially when let values nest.
+slinky::expr resolve_let_var(const ynn::slinky_globals& globals,
+                             const slinky::expr& e) {
+  if (auto v = slinky::as_variable(e)) {
+    for (const auto& let : globals.lets) {
+      if (let.first == *v) return let.second;
+    }
+  }
+  return e;
+}
+
+// The condition under which `l` runs exactly one full-extent iteration, i.e.
+// whoever created it made no real splitting decision for this dimension:
+// make_split_factors() hands out a cache-sized tile area and returns the whole
+// extent for any dimension that fits in what is left of it. This is the
+// weakest claim a function can make on a loop step. Such a loop can be folded
+// away entirely, it can take a finer step from a function fused into it, and
+// it cannot be the loop that parallelizes the nest.
+//
+// The step is resolved one let level deep and the extent simplified before
+// comparing: split factors are usually `min(...)` expressions the simplifier
+// already reduced to the extent itself, but hidden behind a let variable the
+// prover can't see through.
+slinky::expr is_single_iteration(const ynn::slinky_globals& globals,
+                                 const loop_level& l) {
+  if (!l.extent.defined() || !l.step.defined()) return slinky::expr();
+  return slinky::simplify(l.extent) <= resolve_let_var(globals, l.step);
+}
+
 // Decide how many workers each loop of the global nest should use. This must
 // run after the whole nest is built (and all the steps are final): after
 // fusion, a function's loops can end up inside loops of other functions, so
 // the number of tasks produced outside each loop is only known once the nest
 // is complete.
+//
+// `funcs_in_level[i]` is the number of functions whose body executes inside
+// loop level `i`. A loop whose ancestors provably always produce enough tasks
+// can never run more than one worker, so its
+// `select(w > 1, parallel, serial)` is folded to `serial`. If such a loop
+// also contains a single function and its step is not required (no alignment
+// constraint), the loop is pure overhead: one kernel call per tile with
+// nothing to interleave or parallelize. Setting its step to the full extent
+// makes it a provable single iteration, which slinky then folds away,
+// leaving one kernel call over the whole range.
 void compute_workers(ynn::slinky_globals& globals, int max_threads,
-                     std::vector<loop_level>& global_loop_nest) {
+                     std::vector<loop_level>& global_loop_nest,
+                     const std::vector<int>& funcs_in_level) {
   // Enough tasks to have good load balancing.
   const slinky::index_t target_task_count =
       max_threads > 1 ? max_threads * 2 : 1;
 
+  // A guaranteed lower bound of the number of iterations of loop level `l`:
+  // ceil_div(lower bound of extent, upper bound of step), or 1 when either
+  // bound is unknown (a scheduled loop runs at least one iteration).
+  auto min_iterations = [&](const loop_level& l) -> slinky::index_t {
+    std::optional<slinky::index_t> extent_lb =
+        slinky::evaluate_constant_lower_bound(l.extent);
+    std::optional<slinky::index_t> step_ub =
+        slinky::evaluate_constant_upper_bound(resolve_let_var(globals, l.step));
+    if (extent_lb && step_ub && *step_ub > 0) {
+      return std::max<slinky::index_t>(slinky::ceil_div(*extent_lb, *step_ub),
+                                       1);
+    }
+    return 1;
+  };
+
+  // For each loop, whether any of its descendants can be parallelized: a pure
+  // or partial-reduction ("r") loop that is not provably a single iteration.
+  // Serial reduction ("k") loops never count, they run inside one task by
+  // construction. Loops are appended after their parent, so a single backward
+  // pass propagates each loop's answer up to its parent.
+  std::vector<bool> parallel_in_subtree(global_loop_nest.size(), false);
+  for (int i = global_loop_nest.size() - 1; i >= 0; --i) {
+    const loop_level& l = global_loop_nest[i];
+    const slinky::expr once = is_single_iteration(globals, l);
+    const bool is_parallel =
+        !globals.is_reduction_dim(l.loop_id.var) && once.defined() &&
+        !slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment);
+    if (l.parent >= 0 && (is_parallel || parallel_in_subtree[i])) {
+      parallel_in_subtree[l.parent] = true;
+    }
+  }
+
   // The number of tasks the loops from the root down to (and including) each
   // loop can produce. Serial loops (reductions) run their iterations within
-  // one task, so they don't contribute to this count.
+  // one task, so they don't contribute to this count. `tasks_lb` is a
+  // guaranteed constant lower bound of the same quantity.
   std::vector<slinky::expr> tasks(global_loop_nest.size());
+  std::vector<slinky::index_t> tasks_lb(global_loop_nest.size());
   for (size_t i = 0; i < global_loop_nest.size(); ++i) {
     loop_level& l = global_loop_nest[i];
     assert(l.parent < static_cast<int>(i));
     slinky::expr tasks_above = l.parent >= 0 ? tasks[l.parent] : 1;
-    if (max_threads == 1 || globals.is_reduction_dim(l.loop_id.var)) {
+    const slinky::index_t tasks_above_lb =
+        l.parent >= 0 ? tasks_lb[l.parent] : 1;
+    // Take the finer step a fused function proposed for this loop, if this
+    // loop is where the nest has to get its parallelism. It isn't if the
+    // ancestors already produce enough tasks, or if the subtree below has a
+    // level that can be parallelized instead - splitting here would then cost
+    // parallelism rather than add it, because the extra outer tasks push the
+    // inner levels past the task target and turn them serial. The inner
+    // levels are also the better place to split: finer tasks over contiguous
+    // memory.
+    if (l.proposed_step.defined() && max_threads > 1 &&
+        !parallel_in_subtree[i] && tasks_above_lb < target_task_count) {
+      // Behind a global so per-task closures reference a variable evaluated
+      // once per invoke, not the whole select tree.
+      l.step =
+          globals.get(slinky::simplify(l.proposed_step, globals.fact_bounds,
+                                       globals.fact_alignment),
+                      "s");
+    }
+    // A loop that provably runs exactly one iteration is identical for any
+    // number of functions inside it (required steps are excluded). Replacing
+    // its step with the extent expression lets slinky prove the single
+    // iteration and fold the loop away entirely.
+    const bool elide_allowed =
+        !l.step_is_required && globals.is_pure_dim(l.loop_id.var);
+    // Serial reduction ("k") dims additionally qualify for the
+    // single-iteration elision below (but not for the widening elisions):
+    // with provably one iteration there is no accumulation blocking to
+    // preserve.
+    const bool single_iteration_elide_allowed =
+        elide_allowed ||
+        (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
+    const slinky::expr once = single_iteration_elide_allowed
+                                  ? is_single_iteration(globals, l)
+                                  : slinky::expr();
+    if (once.defined() &&
+        slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment)) {
+      l.step = slinky::max(slinky::simplify(l.extent), 1);
       l.workers = slinky::loop::serial;
       tasks[i] = tasks_above;
+      tasks_lb[i] = tasks_above_lb;
+    } else if (max_threads == 1 || globals.is_reduction_dim(l.loop_id.var)) {
+      l.workers = slinky::loop::serial;
+      // Reduction loops are left alone even when they contain a single
+      // function: their step controls accumulation blocking, not just task
+      // granularity.
+      if (elide_allowed && i < funcs_in_level.size() &&
+          funcs_in_level[i] <= 1) {
+        l.step = slinky::max(l.extent, 1);
+      }
+      tasks[i] = tasks_above;
+      tasks_lb[i] = tasks_above_lb;
     } else {
-      slinky::expr w =
-          slinky::ceil_div(slinky::expr(target_task_count), tasks_above);
-      w = globals.get(w, "w");
-      l.workers = slinky::simplify(slinky::select::make(
-          w > 1, slinky::loop::parallel, slinky::loop::serial));
+      // The loop is provably serial iff the loops above it always produce
+      // enough tasks: w = ceil_div(target, tasks_above) <= 1 iff
+      // tasks_above >= target.
+      if (tasks_above_lb >= target_task_count) {
+        l.workers = slinky::loop::serial;
+        if (elide_allowed && i < funcs_in_level.size() &&
+            funcs_in_level[i] <= 1) {
+          l.step = slinky::max(l.extent, 1);
+        }
+      } else {
+        slinky::expr w = globals.get(
+            slinky::ceil_div(slinky::expr(target_task_count), tasks_above),
+            "w");
+        l.workers = slinky::simplify(slinky::select::make(
+            w > 1, slinky::loop::parallel, slinky::loop::serial));
+      }
       tasks[i] =
           slinky::simplify(tasks_above * slinky::ceil_div(l.extent, l.step));
+      tasks_lb[i] = tasks_above_lb * min_iterations(l);
     }
   }
+}
+
+using source_region_map = std::map<std::pair<slinky::var, int>, int>;
+
+int get_source_region(const source_region_map& source_regions, slinky::var buf,
+                      int dim) {
+  auto it = source_regions.find(std::make_pair(buf, dim));
+  return it != source_regions.end() ? it->second : -1;
+}
+
+// The source region of the loop `loop` iterates over, or -1 if unknown.
+int loop_source_region(const slinky::loop_id& loop,
+                       const source_region_map& source_regions) {
+  auto [buf, dim] = find_output_dim(loop.func, loop.var);
+  return dim != -1 && buf.defined()
+             ? get_source_region(source_regions, buf, dim)
+             : -1;
+}
+
+// Whether `f` produces an external output of the pipeline. Such a function
+// can't be computed inside a loop of its consumers, see `external_output_syms`
+// in schedule().
+bool produces_external_output(
+    const slinky::func& f, const std::set<slinky::var>& external_output_syms) {
+  return std::any_of(f.outputs().begin(), f.outputs().end(),
+                     [&](const slinky::func::output& o) {
+                       return external_output_syms.count(o.buffer->sym()) > 0;
+                     });
+}
+
+// Sharing a loop between the function that created it and a function being
+// fused into it is two decisions, made in order:
+// may this function's split cover the loop at all (find_matching_split), and
+// what step does the shared loop end up with (reconcile_step).
+
+// Find the split of `f` that covers `consumer_source_region`, or -1 if none
+// does. `split_matched` marks the splits already used by outer loops.
+//
+// The splits don't have to be matched in their declared order: loops over pure
+// dims carry no state across iterations, so they can be freely reordered, and
+// splits which are not matched simply remain the function's own inner loops.
+// Non-pure (reduction) splits do carry state across iterations (they
+// accumulate into the same output), so they act as a fence: nothing is matched
+// at or beyond the first one.
+int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
+                        const std::vector<ynn::scheduling_split>& loop_splits,
+                        const std::vector<bool>& split_matched,
+                        int consumer_source_region,
+                        const source_region_map& source_regions) {
+  if (consumer_source_region == -1) return -1;
+
+  // Whether the search has passed over an unmatched (and non-trivial) split,
+  // i.e. matching a later split would reorder the function's loops.
+  bool out_of_order = false;
+
+  // Whether matching `split_i` here preserves this function's required
+  // blocking order, i.e. no required split before it is still unmatched.
+  auto keeps_required_order = [&](int split_i) {
+    for (int prev = 0; prev < split_i; ++prev) {
+      if (!split_matched[prev] && loop_splits[prev].step_is_required) {
+        return false;
+      }
+    }
+    return true;
+  };
+  // Whether the product of this function's reduction extents is provably below
+  // a threshold. The value works for the benchmarks we have; it may well need
+  // tuning, or replacing by something derived from the shapes.
+  constexpr slinky::index_t small_reduction_threshold = 256;
+  auto has_small_reduction = [&]() {
+    slinky::index_t k_product = 1;
+    for (const auto& out : f.outputs()) {
+      for (int d = 0; d < static_cast<int>(out.dims.size()); ++d) {
+        if (globals.is_pure_dim(out.dims[d])) continue;
+        auto c = slinky::as_constant(
+            slinky::simplify(out.buffer->dim(d).bounds.extent()));
+        if (!c) return false;
+        k_product *= *c;
+      }
+    }
+    return k_product <= small_reduction_threshold;
+  };
+
+  for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
+    if (split_matched[split_i]) continue;
+    const ynn::scheduling_split& split = loop_splits[split_i];
+    if (!globals.is_pure_dim(split.var)) {
+      // We don't want to fuse a reduction dimension because it is likely being
+      // broadcasted here, and we don't reorder other splits across it either.
+      break;
+    }
+    if (split.step_is_required && out_of_order &&
+        !(keeps_required_order(split_i) || has_small_reduction())) {
+      // Matching a required split out of order is fine for any step, but it
+      // must not reorder the function's required loops relative to each
+      // other: that blocking was chosen deliberately, and inverting it makes
+      // the function re-read its inputs. The exception is a function whose
+      // reduction is small enough that re-reading costs nothing.
+      continue;
+    }
+    // Instead of comparing forward extents (which causes false positives for
+    // unrelated constant extents), we check if both loops share the exact same
+    // inferred source region identifier.
+    if (loop_source_region({&f, split.var}, source_regions) ==
+        consumer_source_region) {
+      return split_i;
+    }
+    out_of_order = true;
+  }
+  return -1;
+}
+
+// Splits with extent 1 create no loop and are unavailable for matching. Treat
+// them as already matched so they cannot block matching later splits or become
+// degenerate levels of the global loop nest.
+std::vector<bool> initial_split_matches(
+    const ynn::slinky_globals& globals,
+    const std::vector<ynn::scheduling_split>& splits) {
+  std::vector<bool> matched(splits.size());
+  for (int i = 0; i < splits.size(); ++i) {
+    matched[i] = prove_true(splits[i].extent == 1, globals.fact_bounds,
+                            globals.fact_alignment);
+  }
+  return matched;
+}
+
+// Decide the step of a loop now shared by its owner and `split`. Each side
+// makes a claim on the step, and the stronger claim wins:
+//
+//   required + required : reconcile with the lcm, so the loop is an integer
+//                         number of *both* tiles (two producers can require
+//                         different tiles for a shared loop, e.g. the two
+//                         attention matmuls pick different query tiles).
+//   required + anything : the required step, which is a kernel's blocking.
+//   chosen   + no claim : propose the chosen step, see below.
+//   otherwise           : keep the loop's step. When both sides computed a
+//                         real split, each is only meaningful within its own
+//                         cache-budget allocation, so combining them (e.g. by
+//                         taking the min) degenerates to tiny steps.
+//
+// "No claim" means the loop runs a single full-extent iteration, see
+// is_single_iteration(). `loop_splits` are all of the matching function's
+// splits, used to size its iteration space.
+void reconcile_step(ynn::slinky_globals& globals, loop_level& loop,
+                    const ynn::scheduling_split& split,
+                    const std::vector<ynn::scheduling_split>& loop_splits) {
+  if (split.step_is_required) {
+    if (loop.step_is_required &&
+        !prove_true(split.step == loop.step, globals.fact_bounds,
+                    globals.fact_alignment)) {
+      // If the LCM overflows, it clamps at max index_t (assuming no
+      // splitting).
+      loop.step = lcm_sat(globals, loop.step, split.step);
+    } else {
+      if (std::optional<slinky::var> v = slinky::as_variable(loop.step)) {
+        // This is a special variable which defines partial reduction bounds,
+        // so we need to override to match the loop step.
+        if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
+          globals.update_let(*v, split.step);
+        }
+      }
+      loop.step = split.step;
+    }
+    loop.step_is_required = true;
+    // A required step is a kernel's blocking, so it outranks any step an
+    // earlier function proposed for this loop.
+    loop.proposed_step = slinky::expr();
+    return;
+  }
+  if (loop.step_is_required || !loop.step.defined() || !split.step.defined()) {
+    return;
+  }
+  // Only a pure dim's step is free to change. A partial reduction's "r" loop
+  // is steppable, but its step is coupled to the reduction buffer's
+  // fold_factor (the kernel's accumulation chunk), so a different step would
+  // desync the accumulation and corrupt results.
+  if (!globals.is_pure_dim(split.var) ||
+      !globals.is_pure_dim(loop.loop_id.var)) {
+    return;
+  }
+  // This function computed a real split for a loop its owner left as a single
+  // task. Propose the split, so that a producer fused into the loop keeps its
+  // parallelism instead of running serially - without this, a norm's reduce
+  // stages serialize the whole chain they fuse into.
+  //
+  // Several functions can match the same loop, and the last proposal wins. A
+  // function whose split is already the loop's step is asking for nothing, so
+  // drop it rather than let it displace an earlier real proposal.
+  if (prove_true(split.step == loop.step, globals.fact_bounds,
+                 globals.fact_alignment)) {
+    return;
+  }
+  // The function's splits span its whole iteration space, so their extent
+  // product is the work that would be divided up. Below this threshold the
+  // extra task dispatches cost more than the split saves; the value was found
+  // experimentally.
+  constexpr slinky::index_t min_work_per_split = 128 * 1024;
+  slinky::expr work = 1;
+  for (const ynn::scheduling_split& ls : loop_splits) {
+    work = work * ls.extent;
+  }
+  // Both conditions can depend on the runtime shape, so they go into the
+  // proposal as a select, which folds away for static shapes.
+  loop.proposed_step = slinky::select(
+      is_single_iteration(globals, loop) && min_work_per_split <= work,
+      split.step, loop.step);
 }
 
 }  // namespace
@@ -379,7 +734,7 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
 //    func-s. This is done in a separate loop once all of the functions from
 //    the pipeline were processed.
 void ynn_runtime::schedule() {
-  // This a list of indices of consumers of a given buffer.
+  // This is a list of indices of consumers of a given buffer.
   std::map<slinky::var, std::vector<int>> consumers;
   // This is a tree representing a global loop nest of a whole pipeline so
   // far. For efficiency and convenience, it's stored as an array of nodes
@@ -390,14 +745,7 @@ void ynn_runtime::schedule() {
 
   // Maps {buffer_sym, dim_index} to its inferred source region unique
   // identifier.
-  std::map<std::pair<slinky::var, int>, int> source_regions =
-      infer_source_regions(funcs);
-
-  auto get_source_region = [&](slinky::var buf, int dim) {
-    auto key = std::make_pair(buf, dim);
-    auto it = source_regions.find(key);
-    return it != source_regions.end() ? it->second : -1;
-  };
+  source_region_map source_regions = infer_source_regions(funcs);
 
   // Slinky doesn't allocate the pipeline's output buffers, and as a result it
   // also never crops them to the region a loop iteration needs. Fusing the
@@ -463,112 +811,31 @@ void ynn_runtime::schedule() {
       std::reverse(loop_splits.begin(), loop_splits.end());
 
       std::vector<bool>& split_matched = sched_data.split_matched;
-      split_matched.assign(loop_splits.size(), false);
+      split_matched = initial_split_matches(globals, loop_splits);
 
-      // Splits with a provable extent of 1 don't need a loop of their own and
-      // must not become levels of the global loop nest: a degenerate level
-      // would block the functions scheduled later from matching the loops
-      // behind it. Treat them as trivially matched, so they are neither
-      // considered for matching nor appended to the nest.
-      for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
-        if (prove_true(loop_splits[split_i].extent == 1)) {
-          split_matched[split_i] = true;
-        }
-      }
-
-      // Walk the loop nest from the outermost loop inwards. For each loop,
-      // find a split of this function which covers the same source region.
-      // The splits don't have to be matched in their declared order: loops
-      // over pure dims carry no state across iterations, so they can be
-      // freely reordered, and splits which were not matched simply remain the
-      // function's own inner loops. Non-pure (reduction) splits do carry
-      // state across iterations (they accumulate into the same output), so
-      // they act as a fence: nothing is matched at or beyond the first one.
-      // We must stop at the first loop of the nest we can't cover: computing
-      // the function inside a loop which doesn't slice its output would
-      // recompute the function on every iteration of that loop.
+      // Walk the loop nest from the outermost loop inwards, sharing each loop
+      // with a split of this function that covers the same source region (see
+      // find_matching_split and reconcile_step). We must stop at the first
+      // loop of the nest we can't cover: computing the function inside a loop
+      // which doesn't slice its output would recompute the function on every
+      // iteration of that loop.
       compute_at = 0;
       while (compute_at < loop_nest.size()) {
         loop_level& global_loop = global_loop_nest[loop_nest[compute_at]];
         // Map the consumer's loop variable back to its output dimension
         // index.
-        auto [consumer_buf, consumer_dim] =
-            find_output_dim(global_loop.loop_id.func, global_loop.loop_id.var);
         const int consumer_source_region =
-            consumer_dim != -1 && consumer_buf.defined()
-                ? get_source_region(consumer_buf, consumer_dim)
-                : -1;
+            loop_source_region(global_loop.loop_id, source_regions);
 
-        int matched_split = -1;
-        if (consumer_source_region != -1) {
-          // Whether the search has passed over an unmatched (and non-trivial)
-          // split, i.e. matching a later split would reorder the function's
-          // loops.
-          bool out_of_order = false;
-          for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
-            if (split_matched[split_i]) continue;
-            const ynn::scheduling_split& split = loop_splits[split_i];
-            if (!globals.is_pure_dim(split.var)) {
-              // We don't want to fuse a reduction dimension because it is
-              // likely being broadcasted here, and we don't reorder other
-              // splits across it either.
-              break;
-            }
-            if (split.step_is_required && out_of_order) {
-              // A required step means the function deliberately chose the
-              // blocking of this loop, and the loop order is likely a part of
-              // the same deliberate choice. Matching it out of order would
-              // impose that blocking on a nest built for a different order
-              // (e.g. pull a dot under the loops of its elementwise consumer,
-              // overriding the consumer's steps with the dot's tiles), so we
-              // only allow such splits to be matched in their declared order.
-              continue;
-            }
-            // Map the producer's loop variable back to its output dimension
-            // index.
-            auto [producer_buf, producer_dim] = find_output_dim(&f, split.var);
-
-            // Instead of comparing forward extents (which causes false
-            // positives for unrelated constant extents), we check if both
-            // loops share the exact same inferred source region identifier.
-            if (producer_dim != -1 && producer_buf.defined() &&
-                get_source_region(producer_buf, producer_dim) ==
-                    consumer_source_region) {
-              matched_split = split_i;
-              break;
-            }
-            out_of_order = true;
-          }
-        }
-
+        const int matched_split =
+            find_matching_split(globals, f, loop_splits, split_matched,
+                                consumer_source_region, source_regions);
         if (matched_split == -1) {
           break;
         }
         split_matched[matched_split] = true;
-
-        const ynn::scheduling_split& split = loop_splits[matched_split];
-        if (split.step_is_required) {
-          if (global_loop.step_is_required &&
-              !prove_true(split.step == global_loop.step)) {
-            // Two producers require different tiles for this shared loop (e.g.
-            // the two attention matmuls pick different query tiles). Use their
-            // least common multiple so the loop is an integer number of *both*
-            // tiles, keeping it a multiple of each kernel's m/n block. If the
-            // LCM overflows, it clamps at max index_t (assuming no splitting).
-            global_loop.step = lcm_sat(globals, global_loop.step, split.step);
-          } else {
-            if (std::optional<slinky::var> v =
-                    slinky::as_variable(global_loop.step)) {
-              // This is a special variable which defines partial reduction
-              // bounds, so we need to override to match the loop step.
-              if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
-                globals.update_let(*v, split.step);
-              }
-            }
-            global_loop.step = split.step;
-          }
-          global_loop.step_is_required = true;
-        }
+        reconcile_step(globals, global_loop, loop_splits[matched_split],
+                       loop_splits);
         compute_at++;
       }
       // Remove the inner part of the loop nest which we were not able to
@@ -579,14 +846,9 @@ void ynn_runtime::schedule() {
     // A function producing an external output cannot be fused into a loop of
     // its consumers without recomputing all of it on every iteration, see
     // `external_output_syms` above.
-    const bool produces_external_output =
-        !loop_nest.empty() &&
-        std::any_of(f.outputs().begin(), f.outputs().end(),
-                    [&](const slinky::func::output& o) {
-                      return external_output_syms.count(o.buffer->sym()) > 0;
-                    });
-
-    if ((sched && sched->force_root) || produces_external_output) {
+    if ((sched && sched->force_root) ||
+        (!loop_nest.empty() &&
+         produces_external_output(f, external_output_syms))) {
       compute_at = 0;
       if (sched) {
         sched_data.split_matched.assign(sched->loop_splits.size(), false);
@@ -632,7 +894,17 @@ void ynn_runtime::schedule() {
   // would be scheduled serially, and every other size would be sized one
   // worker short.
   const int max_threads = threadpool() ? threadpool()->thread_count() + 1 : 1;
-  compute_workers(globals, max_threads, global_loop_nest);
+  // A function executes inside every loop of its (final) loop nest, so the
+  // number of functions inside a loop level is the number of loop nests it
+  // appears in. A count of 1 means the level only contains the function that
+  // created it.
+  std::vector<int> funcs_in_level(global_loop_nest.size(), 0);
+  for (const scheduling_data& sched_data : func_scheduling_data) {
+    for (int level : sched_data.loop_nest) {
+      funcs_in_level[level]++;
+    }
+  }
+  compute_workers(globals, max_threads, global_loop_nest, funcs_in_level);
 
   // Use previously computed information to actually schedule the functions.
   for (int i = funcs.size() - 1; i >= 0; --i) {
@@ -651,21 +923,7 @@ void ynn_runtime::schedule() {
             global_loop_nest[loop_nest[compute_at - 1]].loop_id;
         f.compute_at(lid);
       }
-      if (!sched || sched->scheduled_buffers.empty()) {
-        f.store_outputs_innermost();
-      } else {
-        for (auto& b : sched->scheduled_buffers) {
-          if (b.store_at_min_depth == 0) {
-            b.buffer->store_at({&funcs[i], slinky::var()});
-          } else if (b.store_at_min_depth < loop_nest.size()) {
-            const slinky::loop_id& lid =
-                global_loop_nest[loop_nest[b.store_at_min_depth - 1]].loop_id;
-            b.buffer->store_at(lid);
-          } else {
-            b.buffer->store_root();
-          }
-        }
-      }
+      f.store_outputs_innermost();
     }
 
     if (sched && !sched->loop_splits.empty()) {
@@ -757,14 +1015,9 @@ auto make_reshape_impl(ynn_runtime* runtime) {
       if (i.is_external_output()) {
         assert(i.data);
         assert(i.data->rank == i.rank());
-        std::vector<slinky::expr> phys_extents = i.physical_extents();
         for (size_t d = 0; d < i.rank(); ++d) {
-          slinky::expr extent_d = i.physical_extent(d);
-          if (extent_d.defined()) {
-            i.data->mutable_dim(d).set_min_extent(0, evaluate(extent_d, ctx));
-          } else {
-            i.data->mutable_dim(d).set_min_extent(0, 1);
-          }
+          slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
+          i.data->dims[d].set_min_extent(0, extent_d);
         }
         ynn::init_buffer_strides(*i.data);
       }
@@ -789,6 +1042,10 @@ bool ynn_traceme_enabled() {
 }
 #endif
 
+// Slinky will automatically place allocates on the stack if the allocation is
+// smaller than this threshold.
+constexpr size_t auto_stack_threshold = 64 * 1024;
+
 }  // namespace
 
 extern "C" {
@@ -796,12 +1053,6 @@ extern "C" {
 ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
                          slinky::thread_pool* threadpool, uint32_t flags)
     : subgraph(subgraph), flags(flags), globals(subgraph->globals) {
-  // Implement our required alignment for heap allocations.
-  eval_config.allocate = [](slinky::var sym, slinky::raw_buffer* buffer) {
-    return buffer->allocate(YNN_ALLOCATION_ALIGNMENT);
-  };
-  eval_config.free = [](slinky::var sym, slinky::raw_buffer* buffer,
-                        void* ptr) { std::free(ptr); };
   eval_config.thread_pool = threadpool;
   // Slinky's default check failure handler calls std::abort(), don't let that
   // happen here.
@@ -809,9 +1060,12 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
     YNN_LOG_ERROR() << "Check failed";
   };
   eval_config.call_failed = [](const slinky::call_stmt* c) {
-    YNN_LOG_ERROR() << c->attrs.name << " failed";
+    // This output can be restored after we update slinky past
+    // https://github.com/dsharlet/slinky/pull/874
+    // YNN_LOG_ERROR() << c->attrs->name << " failed";
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
+  eval_config.auto_stack_threshold = auto_stack_threshold;
 
 #ifdef YNN_ENABLE_PERFETTO
   if (ynn::perfetto_session::global()) {
@@ -943,6 +1197,9 @@ ynn_status ynn_runtime::build() {
   }
 
   slinky::build_options options;
+  if ((flags & YNN_FLAG_ENABLE_SLINKY_TRACE) != 0) {
+    options.trace = true;
+  }
 #ifdef YNN_ENABLE_PERFETTO
   options.trace = options.trace || get_trace_filename() != nullptr;
 #endif
@@ -1023,8 +1280,10 @@ ynn_status ynn_runtime::invoke() {
     // This pipeline is a no-op.
     return ynn_status_success;
   }
-  return pipeline.evaluate(eval_context) ? ynn_status_error
-                                         : ynn_status_success;
+  slinky::index_t result = pipeline.evaluate(eval_context, /*is_set_up=*/true);
+  // Heap blocks are reused within an evaluation, but not kept between invokes.
+  eval_context.free_pool();
+  return result ? ynn_status_error : ynn_status_success;
 }
 
 ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
@@ -1080,14 +1339,21 @@ int32_t get_max_concurrency(const ynn_runtime& runtime) {
   // return `max_int32`. Otherwise, we return 1.
   class visitor : public slinky::recursive_node_visitor {
    public:
+    explicit visitor(const ynn_runtime& runtime) : runtime_(runtime) {}
+
     int32_t result = 1;
     void visit(const slinky::loop* op) override {
-      if (!slinky::prove_true(op->max_workers == 1)) {
+      if (!slinky::prove_true(op->max_workers == 1,
+                              runtime_.globals.fact_bounds,
+                              runtime_.globals.fact_alignment)) {
         result = std::numeric_limits<int32_t>::max();
       }
       slinky::recursive_node_visitor::visit(op);
     }
-  } v;
+
+   private:
+    const ynn_runtime& runtime_;
+  } v(runtime);
   if (runtime.pipeline.body.defined()) {
     runtime.pipeline.body.accept(&v);
   }

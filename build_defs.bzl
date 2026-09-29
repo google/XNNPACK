@@ -14,6 +14,18 @@ def xnnpack_select_if(cond = None, val_true = [], val_false = []):
     else:
         return val_true
 
+def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
+    return select({
+        "//:kleidiai_enabled": enabled,
+        "//conditions:default": not_enabled,
+    })
+
+def xnnpack_kleidiai_defines():
+    return xnnpack_if_kleidiai_enabled(
+        enabled = ["XNN_ENABLE_KLEIDIAI=1"],
+        not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
+    )
+
 def xnnpack_configurable_defines():
     return xnnpack_select_if(
         "//:cpuinfo_enabled",
@@ -147,11 +159,7 @@ def xnnpack_configurable_defines():
         "//:hvx_enabled",
         ["XNN_ENABLE_HVX=1"],
         ["XNN_ENABLE_HVX=0"],
-    ) + xnnpack_select_if(
-        "//:kleidiai_enabled",
-        ["XNN_ENABLE_KLEIDIAI=1"],
-        ["XNN_ENABLE_KLEIDIAI=0"],
-    ) + xnnpack_select_if(
+    ) + xnnpack_kleidiai_defines() + xnnpack_select_if(
         "//:arm_sme_enabled",
         ["XNN_ENABLE_ARM_SME=1"],
         ["XNN_ENABLE_ARM_SME=0"],
@@ -202,8 +210,8 @@ def xnnpack_std_c_defines():
     return ["_DARWIN_C_SOURCE=1", "_POSIX_C_SOURCE=199309L"]
 
 def xnnpack_test_deps_for_library():
-    """Depencies needed for a library to use gunit."""
-    return ["@com_google_googletest//:gtest_main"]
+    """Dependencies needed for a library to use gunit."""
+    return ["@com_google_googletest//:gtest"]
 
 def xnnpack_optional_ruy_copts():
     """Compiler flags to optionally enable Ruy benchmarks."""
@@ -236,18 +244,6 @@ def xnnpack_optional_tflite_deps():
 def xnnpack_optional_dnnl_deps():
     """Optional Intel DNNL dependencies."""
     return []
-
-def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
-    return select({
-        "//:kleidiai_enabled": enabled,
-        "//conditions:default": not_enabled,
-    })
-
-def xnnpack_kleidiai_defines():
-    return xnnpack_if_kleidiai_enabled(
-        enabled = ["XNN_ENABLE_KLEIDIAI=1"],
-        not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
-    )
 
 def xnnpack_slow_benchmark_tags():
     return ["manual"]

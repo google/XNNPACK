@@ -8,11 +8,14 @@
 
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
@@ -803,6 +806,140 @@ static vec<half, N> approx_tanh(vec<half, N> x) {
 
 namespace internal {
 
+// Returns {y, k} where x is in [-pi, pi] and k is the quadrant such that
+// k*pi + y = x.
+// TODO: b/521359111 - Move this to a non-inline definition if it works for XLA.
+inline std::pair<double, int64_t> payne_hanek(double x) {
+  // This function is 100% AI generated code.
+  if (!std::isfinite(x)) {
+    return {std::numeric_limits<double>::quiet_NaN(), 0};
+  }
+  if (std::abs(x) <= 0.7853981633974483096) {
+    return {x, 0};
+  }
+
+  static const uint32_t two_over_pi[] = {
+      0x0,        0x28be60db, 0x24e44152, 0x27f09d5f, 0x11f534dd, 0x3036d8a5,
+      0x1993c439, 0x107f945,  0x23abdebb, 0x31586dc9, 0x6e3a424,  0x374b8019,
+      0x92eea09,  0x3464873f, 0x21deb1cb, 0x4a69cfb,  0x288235f5, 0xbaed121,
+      0xe99c702,  0x1ad17df9, 0x13991d6,  0xe60d4ce,  0x1f49c845, 0x3e2ef7e4,
+      0x283b1ff8, 0x25fff781, 0x1980fef2, 0x3c462d68, 0xa6d1f6d,  0xd9fb3c9,
+      0x3cb09b74, 0x3d18fd9a, 0x1e5fea2d, 0x1d49eeb1, 0x3ebe5f17, 0x2cf41ce7,
+      0x378a5292, 0x3a9afed7, 0x3b11f8d5, 0x3421580c, 0x3046fc7b, 0x1aeafc33,
+      0x3bc209af, 0x10d876a7, 0x2391615e, 0x3986c219, 0x199855f1, 0x1281a102,
+      0xdffd880,  0x135cc9cc, 0x10606155};
+
+  static const uint32_t pi_over_two[] = {0x1,        0x2487ed51, 0x42d1846,
+                                         0x26263314, 0x1701b839, 0x28948127};
+
+  constexpr int radix = 30;
+  constexpr int digits = 6;
+
+  int sign = std::signbit(x) ? -1 : 1;
+  double ax = std::abs(x);
+
+  int exp;
+  std::frexp(ax, &exp);
+  int hi_bit = exp - 1;
+  int index = (hi_bit >= 0) ? (hi_bit / 30) : ((hi_bit - 29) / 30);
+  double scaled_x = std::ldexp(ax, -30 * index);
+
+  uint32_t X[3] = {0, 0, 0};
+  constexpr double tp_pradix = 1073741824.0;
+  for (int i = 0; i < 3 && scaled_x != 0.0; ++i) {
+    X[i] = static_cast<uint32_t>(scaled_x);
+    scaled_x = (scaled_x - static_cast<double>(X[i])) * tp_pradix;
+  }
+
+  uint64_t result[digits + 2];
+  for (int i = 0; i < (digits + 2); i++) {
+    result[i] = 0;
+    if (index + i - 0 >= 0)
+      result[i] += uint64_t(two_over_pi[index + i - 0]) * uint64_t(X[0]);
+    if (index + i - 1 >= 0)
+      result[i] += uint64_t(two_over_pi[index + i - 1]) * uint64_t(X[1]);
+    if (index + i - 2 >= 0)
+      result[i] += uint64_t(two_over_pi[index + i - 2]) * uint64_t(X[2]);
+  }
+
+  for (int i = digits + 2 - 1; i > 0; i--) {
+    uint64_t tmp = result[i] >> radix;
+    result[i - 1] += tmp;
+    result[i] -= (tmp << radix);
+  }
+
+  unsigned int N_val = static_cast<unsigned int>(result[0]);
+  int r_sign = 1;
+  if (result[1] > (uint64_t(1) << (radix - 1))) {
+    for (int i = 1; i < (digits + 2); i++) {
+      result[i] = (~(static_cast<unsigned int>(result[i])) & 0x3fffffff);
+    }
+    N_val += 1;
+    r_sign = -1;
+  }
+
+  int ind = 1;
+  for (int i = 1; i < (digits + 2); i++) {
+    if (result[i] != 0) break;
+    ind++;
+  }
+
+  uint64_t r_limbs[digits - 1];
+  for (int i = 0; i < (digits - 1); i++) {
+    r_limbs[i] = 0;
+    for (int j = 0; j <= i; j++) {
+      r_limbs[i] += (result[ind + i - j] * uint64_t(pi_over_two[j]));
+    }
+  }
+  for (int i = (digits - 2); i > 0; i--) {
+    uint64_t tmp = r_limbs[i] >> radix;
+    r_limbs[i - 1] += tmp;
+    r_limbs[i] -= (tmp << radix);
+  }
+  uint64_t tmp_top = r_limbs[0] >> radix;
+  r_limbs[0] -= (tmp_top << radix);
+
+  int res_index;
+  uint32_t res_X[3];
+  if (tmp_top != 0) {
+    res_index = -ind + 1;
+    res_X[0] = static_cast<uint32_t>(tmp_top);
+    res_X[1] = static_cast<uint32_t>(r_limbs[0]);
+    res_X[2] = static_cast<uint32_t>(r_limbs[1]);
+  } else {
+    res_index = -ind;
+    res_X[0] = static_cast<uint32_t>(r_limbs[0]);
+    res_X[1] = static_cast<uint32_t>(r_limbs[1]);
+    res_X[2] = static_cast<uint32_t>(r_limbs[2]);
+  }
+
+  double y_val = 0.0;
+  y_val += std::ldexp(static_cast<double>(res_X[0]), (res_index - 0) * radix);
+  y_val += std::ldexp(static_cast<double>(res_X[1]), (res_index - 1) * radix);
+  y_val += std::ldexp(static_cast<double>(res_X[2]), (res_index - 2) * radix);
+  y_val = std::copysign(y_val, static_cast<double>(sign * r_sign));
+
+  int64_t quadrant = ((sign * static_cast<int>(N_val)) % 4 + 4) % 4;
+  return {y_val, quadrant};
+}
+
+inline std::pair<float, int32_t> payne_hanek(float x) {
+  return payne_hanek(static_cast<double>(x));
+}
+
+template <typename Int, typename T>
+YNN_NO_INLINE void range_reduce_large(T half_pi_max_x, T* x, Int* k,
+                                      size_t n) {
+  for (size_t i = 0; i < n; ++i) {
+    T val = x[i];
+    if (std::isinf(val)) {
+      x[i] = std::numeric_limits<T>::quiet_NaN();
+    } else if (std::abs(val) > half_pi_max_x) {
+      std::tie(x[i], k[i]) = payne_hanek(val);
+    }
+  }
+}
+
 // Returns the range reduced `x` in [-pi/2, pi/2] such that sin(x) computes
 // {sin(x), cos(x)}
 //
@@ -813,19 +950,30 @@ namespace internal {
 // and so on.
 template <typename Int, typename T, size_t N, size_t M>
 YNN_ALWAYS_INLINE std::array<vec<T, N>, 2> range_reduce(vec<T, N> x,
-                                                        const T (&half_pi)[M]) {
-  constexpr T pi = 3.1415926535897932384;
-  constexpr T two_over_pi = 2.0 / pi;
-
-  // Find the integer k such that x = k*pi/2 + x' and x' is in [-pi/4, pi/4].
-  auto k = x * broadcast<N>(two_over_pi);
+                                                        const T (&half_pi)[M],
+                                                        T half_pi_max_x) {
+  vec<Int, N> k_sin{0};
+  if (any(abs(x) > broadcast<N>(half_pi_max_x))) {
+    // This slow path is for exceptionally large values.
+    alignas(vec<T, N>) T x_lanes[N];
+    alignas(vec<Int, N>) Int k_lanes[N];
+    store_aligned(x_lanes, x);
+    store_aligned(k_lanes, k_sin);
+    range_reduce_large(half_pi_max_x, x_lanes, k_lanes, N);
+    x = load_aligned(x_lanes, std::integral_constant<size_t, N>{});
+    k_sin = load_aligned(k_lanes, std::integral_constant<size_t, N>{});
+  }
 
   // See `round_small` for an explanation of this. We aren't using that helper
   // because we want to get the intermediate integer value for use below.
   const auto magic =
       broadcast<N>(static_cast<T>(1.5f * (1ull << mantissa_bits(T{}))));
-  k += magic;
-  auto k_sin = bit_cast<vec<Int, N>>(k);
+
+  // Find the integer k such that x = k*pi/2 + x' and x' is in [-pi/4, pi/4].
+  constexpr T pi = 3.141592653589793238462643383279502884;
+  constexpr T two_over_pi = 2.0 / pi;
+  auto k = multiply_add(x, broadcast<N>(two_over_pi), magic);
+  k_sin += bit_cast<vec<Int, N>>(k);
   k -= magic;
 
   // Use the high precision value of half_pi to compute x in [-pi/4, pi/4]
@@ -876,7 +1024,12 @@ YNN_ALWAYS_INLINE static std::array<vec<float, N>, 2> sincos(vec<float, N> x) {
       -6.12574227e-17f,
 #endif
   };
-  auto x_sin_cos = range_reduce<int32_t>(x, half_pi);
+#ifdef YNN_HAVE_FMA
+  constexpr float half_pi_max_x = 1e6f;
+#else
+  constexpr float half_pi_max_x = 1e4f;
+#endif
+  auto x_sin_cos = range_reduce<int32_t>(x, half_pi, half_pi_max_x);
 
   std::array<float, 5> P = {
       2.6052248359e-06f,
@@ -907,7 +1060,12 @@ YNN_ALWAYS_INLINE static std::array<vec<double, N>, 2> sincos(
       -4.3359050802648101e-35,
 #endif
   };
-  auto x_sin_cos = range_reduce<int64_t>(x, half_pi);
+#ifdef YNN_HAVE_FMA
+  constexpr double half_pi_max_x = 1e12;
+#else
+  constexpr double half_pi_max_x = 1e7;
+#endif
+  auto x_sin_cos = range_reduce<int64_t>(x, half_pi, half_pi_max_x);
 
   std::array<double, 9> P = {
       2.765834900803161893e-15,

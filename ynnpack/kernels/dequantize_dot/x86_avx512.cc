@@ -12,7 +12,7 @@ namespace ynn {
 
 YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_f32_avx512, float,
                                  /*n=*/16,
-                                 /*unroll=*/4);
+                                 /*unroll=*/2);
 YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_bf16_avx512, bfloat16,
                                  /*n=*/32,
                                  /*unroll=*/2);

@@ -27,6 +27,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -64,13 +65,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
       }
       packed_w += 8;
 
-      const float* w1 = w0 + kc;
-      const float* w2 = w1 + kc;
-      const float* w3 = w2 + kc;
-      const float* w4 = w3 + kc;
-      const float* w5 = w4 + kc;
-      const float* w6 = w5 + kc;
-      const float* w7 = w6 + kc;
+      const float* w1 = w0 + n_stride;
+      const float* w2 = w1 + n_stride;
+      const float* w3 = w2 + n_stride;
+      const float* w4 = w3 + n_stride;
+      const float* w5 = w4 + n_stride;
+      const float* w6 = w5 + n_stride;
+      const float* w7 = w6 + n_stride;
       xnn_prefetch_to_l1((const int8_t*) w0);
       xnn_prefetch_to_l1((const int8_t*) w0 + 64);
       xnn_prefetch_to_l1((const int8_t*) w1);
@@ -407,7 +408,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         packed_w += 32;
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
-      w0 = w7;
+      w0 = w7 + n_stride - kc;
     }
 
     // NC remainder (1..7)
@@ -428,27 +429,27 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
-      const float* w1 = w0 + kc;
+      const float* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const float* w2 = w1 + kc;
+      const float* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const float* w3 = w2 + kc;
+      const float* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const float* w4 = w3 + kc;
+      const float* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const float* w5 = w4 + kc;
+      const float* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const float* w6 = w5 + kc;
+      const float* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
@@ -759,6 +760,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
     }
-    weights += nc * kc;
+    weights += nc * n_stride;
   } while (--g != 0);
 }

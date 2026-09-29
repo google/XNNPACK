@@ -65,27 +65,27 @@ bool type_is_floating_point(ynn_type t) {
   return false;
 }
 
-size_t type_size_bits(ynn_type t) {
+size_t type_size_bits(ynn_type t, size_t n) {
   switch (t) {
     case ynn_type_int2:
     case ynn_type_uint2:
-      return 2;
+      return 2 * n;
     case ynn_type_int4:
     case ynn_type_uint4:
-      return 4;
+      return 4 * n;
     case ynn_type_int8:
     case ynn_type_uint8:
     case ynn_type_fp8_e5m2:
     case ynn_type_fp8_e4m3:
-      return 8;
+      return 8 * n;
     case ynn_type_fp16:
     case ynn_type_bf16:
-      return 16;
+      return 16 * n;
     case ynn_type_int32:
     case ynn_type_fp32:
-      return 32;
+      return 32 * n;
     case ynn_type_fp64:
-      return 64;
+      return 64 * n;
     case ynn_type_invalid:
       break;
   }
@@ -93,7 +93,9 @@ size_t type_size_bits(ynn_type t) {
   return 0;
 }
 
-size_t type_size_bytes(ynn_type t) { return (type_size_bits(t) + 7) / 8; }
+size_t type_size_bytes(ynn_type t, size_t n) {
+  return (type_size_bits(t, n) + 7) / 8;
+}
 
 size_t type_mantissa_bits(ynn_type t) {
   switch (t) {

@@ -209,6 +209,48 @@ TEST(Slice, slice_and_subtract) {
   ASSERT_THAT(output, testing::ElementsAre(1.0f, -2.0f));
 }
 
+TEST(Slice, slice_keep_dims_and_multiply) {
+  Tensor<float> input({2, 3});
+  std::iota(input.data(), input.data() + input.size(), 1.0f);
+
+  Tensor<float> vec({2, 1});
+  vec(0, 0) = 10.0f;
+  vec(1, 0) = 20.0f;
+
+  Tensor<float> output({2, 1});
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, input.shape(), 0)
+      .AddInput(ynn_type_fp32, vec.shape(), 1)
+      .AddOutput(ynn_type_fp32, output.shape(), 2);
+
+  uint32_t slice_output_id = YNN_INVALID_VALUE_ID;
+  subgraph.AddTensor(ynn_type_fp32, 2, slice_output_id);
+
+  // Slicing axis 1 with extent 1 (keep_dims=true) creates a tensor of shape {2,
+  // 1}.
+  subgraph
+      .AddSlice(/*axes=*/{0, 1}, /*begins=*/{0, 1}, /*ends=*/{2, 2},
+                /*strides=*/{1, 1}, /*input_id=*/0, slice_output_id)
+      .AddBinary(ynn_binary_multiply, slice_output_id, 1, 2);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(input.shape(), input.base(), 0)
+      .ReshapeExternalTensor(vec.shape(), vec.base(), 1)
+      .ReshapeRuntime();
+
+  runtime.SetupExternalTensor(output.base(), 2).InvokeRuntime();
+
+  // input is:
+  // [1.0, 2.0, 3.0]
+  // [4.0, 5.0, 6.0]
+  // slice axis 1 at index 1 is [2.0, 5.0]
+  // [2.0, 5.0] * [10.0, 20.0] = [20.0, 100.0]
+  ASSERT_THAT(output, testing::ElementsAre(20.0f, 100.0f));
+}
+
 // This operation should work for arbitrary rank and this upper bound should
 // cover all code paths.
 constexpr int max_rank_for_testing = 4;

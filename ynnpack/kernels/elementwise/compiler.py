@@ -1512,13 +1512,13 @@ class Target:
         byte_lanes = tile_width * b.ty.size // 8
         if is_rem_width:
           str_args.append(f"ceil_div(j * {b.ty.size}, 8)")
-          str_args.append(f"simd::undef<{byte_lanes}>()")
+          str_args.append(f"simd::zeros<{byte_lanes}>()")
         else:
           str_args.append(f"simd::vec<int8_t, {byte_lanes}>::N")
       else:
         if is_rem_width:
           str_args.append("j")
-          str_args.append(f"simd::undef<{op.ty.lanes}>()")
+          str_args.append(f"simd::zeros<{op.ty.lanes}>()")
         else:
           str_args.append(f"{self.legalize_type(op.ty)}::N")
     elif is_store:

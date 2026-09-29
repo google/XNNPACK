@@ -24,6 +24,8 @@
 #include "slinky/runtime/pipeline.h"
 #include "slinky/runtime/stmt.h"
 
+#define YNN_FLAG_ENABLE_SLINKY_TRACE (1 << 31)
+
 struct ynn_runtime_value : public ynn_value {
   explicit ynn_runtime_value(const ynn_value& value) : ynn_value(value) {}
   ynn_runtime_value() = default;

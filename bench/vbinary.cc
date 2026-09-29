@@ -109,6 +109,14 @@ struct ParamsWrapper<xnn_qu8_mul_minmax_params> {
       &quantization);
 };
 
+template <>
+struct ParamsWrapper<xnn_qs8_vprelu_scalar_params> {
+  xnn_qs8_vprelu_scalar_params params =
+      make_params<xnn_qs8_vprelu_scalar_params>(
+          xnn_init_qs8_vprelu_scalar_params, &quantization, &quantization,
+          &quantization);
+};
+
 // Microkernel function, templated on the `params` type.
 template <typename T, typename UKernelParams>
 using UKernelFn = void (*)(size_t, const T*, const T*, T*,
@@ -207,12 +215,19 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
 #include "src/qs8-vmul/qs8-vmul-minmax-rndnu.inc"
 #include "src/qs8-vmulc/qs8-vmulc-minmax-fp32.inc"
 #include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.inc"
+#include "src/qs8-vprelu/qs8-vprelu.inc"
+#include "src/qs8-vpreluc/qs8-vpreluc.inc"
+#include "src/qs8-vrpreluc/qs8-vrpreluc.inc"
 #include "src/qu8-vadd/qu8-vadd-minmax.inc"
 #include "src/qu8-vaddc/qu8-vaddc-minmax.inc"
 #include "src/qu8-vmul/qu8-vmul-minmax-fp32.inc"
 #include "src/qu8-vmul/qu8-vmul-minmax-rndnu.inc"
 #include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.inc"
 #include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.inc"
+#include "src/qu8-vprelu/qu8-vprelu.inc"
+#include "src/qu8-vpreluc/qu8-vpreluc.inc"
+#include "src/qu8-vrpreluc/qu8-vrpreluc.inc"
+
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

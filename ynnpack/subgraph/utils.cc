@@ -188,8 +188,7 @@ bool allow_in_place(uint32_t input_id, uint32_t output_id,
     return false;
   }
 
-  if (type_size_bytes(a.type) != type_size_bytes(x.type) ||
-      type_element_count(a.type) != type_element_count(x.type)) {
+  if (type_size_bits(a.type) != type_size_bits(x.type)) {
     // The types are not the same size, we can't compute in place.
     return false;
   }

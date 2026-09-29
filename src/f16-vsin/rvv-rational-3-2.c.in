@@ -50,7 +50,10 @@ void xnn_f16_v${FUN.lower()}_ukernel__rvvfp16arith_rational_3_2_div_u${LMUL}v(
   const xnn_float16 vpi = 3.140625f;  // M_PI
   const xnn_float16 v2pi_inv = 0.15917969f; // 0.5 / M_PI
   $if FUN == "COS":
-    const xnn_float16 vpi_half = 1.5703125f;  // M_PI / 2
+    // The following two values sum to Pi/2 with ~22 bits of accuracy. We use
+    // them to accurately subtract inputs from Pi/2.
+    const xnn_float16 vpi_half_hi = 1.5703125f;     // M_PI / 2 (first 11 bits of mantissa)
+    const xnn_float16 vpi_half_lo = 4.837513e-4f;   // M_PI / 2 (remaining bits)
 
   // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
   // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -78,7 +81,7 @@ void xnn_f16_v${FUN.lower()}_ukernel__rvvfp16arith_rational_3_2_div_u${LMUL}v(
     vx = __riscv_vfnmsac(vx, v2pi_hi, vx_div_2pi, vl);
     vx = __riscv_vfnmsac(vx, v2pi_lo, vx_div_2pi, vl);
     $if FUN == "COS":
-      vx = __riscv_vfrsub(vx, vpi_half, vl);
+      vx = __riscv_vfadd(__riscv_vfrsub(vx, vpi_half_hi, vl), vpi_half_lo, vl);
     vx = __riscv_vfmin(vx, __riscv_vfrsub(vx, vpi, vl), vl);
     vx = __riscv_vfmax(vx, __riscv_vfrsub(vx, -vpi, vl), vl);
     vx = __riscv_vfmin(vx, __riscv_vfrsub(vx, vpi, vl), vl);

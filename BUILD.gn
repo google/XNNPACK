@@ -44,6 +44,7 @@ import("gen/neonfp16_microkernels.bzl")
 import("gen/neonfp16arith_aarch64_microkernels.bzl")
 import("gen/neonfp16arith_microkernels.bzl")
 import("gen/neoni8mm_microkernels.bzl")
+import("gen/neoni8mmbf16_microkernels.bzl")
 import("gen/neonsme2_microkernels.bzl")
 import("gen/neonsme_microkernels.bzl")
 import("gen/neonv8_microkernels.bzl")
@@ -81,6 +82,9 @@ import("build_srcs.bzl")
 # The values (and what they're currently set to) can be viewed with
 # `gn args --list out/Default`
 declare_args() {
+  # Enables assembly-based microkernels
+  xnnpack_enable_assembly = !is_win
+
   # Enables SSE4.1 support for x86 processors
   xnnpack_enable_sse41 =
       target_cpu == "x64" || target_cpu == "x86" || build_with_chromium
@@ -109,17 +113,17 @@ declare_args() {
   # Experimental: import external kernels from KleidiAI
   xnnpack_enable_arm_kleidiai = false
 
-  # Seperate out some of the architecture features that KleidiAI brings,
-  # so that we can test/bring up each individually. Implicitly enables
-  # the i8mm kernels to start with.
-  # Experimental: use Arm Scalable Matrix Extension (SME)
-  xnnpack_enable_arm_sme = false
+  # Enables Arm Scalable Matrix Extension (SME)
+  xnnpack_enable_arm_sme = target_cpu == "arm64"
 
-  # Experimental: use Arm Scalable Matrix Extension (SME 2)
-  xnnpack_enable_arm_sme2 = false
+  # Enables Arm Scalable Matrix Extension (SME2)
+  xnnpack_enable_arm_sme2 = target_cpu == "arm64"
 
-  # Experimental: use Arm's Neon Dot Product extension
-  xnnpack_enable_arm_dotprod = false
+  # Enable Arm's Neon Dot Product extension
+  xnnpack_enable_arm_dotprod = target_cpu == "arm64" || target_cpu == "arm"
+
+  # Enables Armv8.6-A 8-bit integer matrix multiply accumulate (I8MM) extension
+  xnnpack_enable_arm_i8mm = target_cpu == "arm64"
 }
 
 assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86" ||
@@ -128,12 +132,17 @@ assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86" ||
 
 assert(!xnnpack_enable_arm_kleidiai || target_cpu == "arm64",
        "xnnpack_enable_arm_kleidiai requires target_cpu='arm64'")
-assert(!xnnpack_enable_arm_sme || xnnpack_enable_arm_kleidiai,
-       "xnnpack_enable_arm_sme requires xnnpack_enable_arm_kleidiai")
-assert(!xnnpack_enable_arm_sme2 || xnnpack_enable_arm_kleidiai,
-       "xnnpack_enable_arm_sme2 requires xnnpack_enable_arm_kleidiai")
-assert(!xnnpack_enable_arm_dotprod || xnnpack_enable_arm_kleidiai,
-       "xnnpack_enable_arm_dotprod requires xnnpack_enable_arm_kleidiai")
+assert(!xnnpack_enable_arm_sme || target_cpu == "arm64",
+       "xnnpack_enable_arm_sme requires target_cpu='arm64'")
+assert(!xnnpack_enable_arm_sme2 || xnnpack_enable_arm_sme,
+       "xnnpack_enable_arm_sme2 requires xnnpack_enable_arm_sme")
+assert(
+    !xnnpack_enable_arm_dotprod || target_cpu == "arm64" || target_cpu == "arm",
+    "xnnpack_enable_arm_dotprod requires target_cpu='arm64' or target_cpu='arm'")
+assert(!xnnpack_enable_arm_i8mm || target_cpu == "arm64",
+       "xnnpack_enable_arm_i8mm requires target_cpu='arm64'")
+assert(!xnnpack_enable_arm_i8mm || xnnpack_enable_arm_dotprod,
+       "xnnpack_enable_arm_i8mm requires xnnpack_enable_arm_dotprod")
 
 # Various #defines and cflags that should stay internal to XNNPACK.
 config("xnnpack_private_config") {
@@ -160,9 +169,6 @@ config("xnnpack_private_config") {
   ]
 
   defines = [
-    # Always enable XNNPACK's assembly kernels
-    "XNN_ENABLE_ASSEMBLY=1",
-
     # TODO: decide if we want to always enable this, or parameterize it
     "XNN_ENABLE_SPARSE=0",
 
@@ -170,16 +176,26 @@ config("xnnpack_private_config") {
     "XNN_ENABLE_CPUINFO=1",
   ]
 
+  if (xnnpack_enable_assembly) {
+    defines += [ "XNN_ENABLE_ASSEMBLY=1" ]
+  } else {
+    defines += [ "XNN_ENABLE_ASSEMBLY=0" ]
+  }
+
   # Define support for all features on every platform possible,
   # unless there's a good reason to switch them off.
   if (current_cpu == "arm64") {
     # Define the core Armv8
     defines += [
       "XNN_ENABLE_ARM_BF16=1",
-      "XNN_ENABLE_ARM_I8MM=1",
-      "XNN_ENABLE_ASSEMBLY=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
+      "XNN_ENABLE_ARM_FP16_SCALAR=1",
     ]
+    if (xnnpack_enable_arm_i8mm) {
+      defines += [ "XNN_ENABLE_ARM_I8MM=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_ARM_I8MM=0" ]
+    }
     if (xnnpack_enable_arm_kleidiai) {
       defines += [ "XNN_ENABLE_KLEIDIAI=1" ]
     } else {
@@ -207,7 +223,6 @@ config("xnnpack_private_config") {
       "XNN_ENABLE_ARM_DOTPROD=1",
       "XNN_ENABLE_ARM_FP16_SCALAR=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
-      "XNN_ENABLE_ASSEMBLY=1",
     ]
   } else if (current_cpu == "x64" || current_cpu == "x86") {
     # x64 support baseline, which is SSSE3 and below to match Chromium.
@@ -520,6 +535,7 @@ if (current_cpu == "arm64") {
     sources = ALL_NEONFP16_MICROKERNEL_SRCS
     sources += ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
     sources += ALL_NEONFP16ARITH_MICROKERNEL_SRCS
+    sources += ALL_FP16ARITH_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -548,6 +564,32 @@ if (current_cpu == "arm64") {
       "-target-feature",
       "-Xclang",
       "+fullfp16",
+    ]
+  }
+
+  xnnpack_source_set("neon_i8mmbf16_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
+    sources = ALL_NEONI8MMBF16_MICROKERNEL_SRCS
+
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+i8mm",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+bf16",
     ]
   }
 
@@ -1007,11 +1049,18 @@ template("xnnpack_library") {
       sources += ALL_NEONV8_MICROKERNEL_SRCS
       deps += [
         ":neon_aarch64_microkernels",
-        ":neon_asm_microkernels",
         ":neon_bf16_microkernels",
         ":neon_fullfp16_microkernels",
-        ":neon_i8mm_microkernels",
       ]
+      if (xnnpack_enable_assembly) {
+        deps += [ ":neon_asm_microkernels" ]
+      }
+      if (xnnpack_enable_arm_i8mm) {
+        deps += [
+          ":neon_i8mm_microkernels",
+          ":neon_i8mmbf16_microkernels",
+        ]
+      }
       if (xnnpack_enable_arm_dotprod) {
         deps += [
           ":neon_dotprod_microkernels",
@@ -1026,7 +1075,6 @@ template("xnnpack_library") {
       }
     } else if (current_cpu == "arm") {
       deps += [
-        ":aarch32_asm_microkernels",
         ":armsimd32_microkernels",
         ":fp16arith_microkernels",
         ":neon_bf16_microkernels",
@@ -1038,6 +1086,9 @@ template("xnnpack_library") {
         ":neonfp16arith_microkernels",
         ":neonv8_microkernels",
       ]
+      if (xnnpack_enable_assembly) {
+        deps += [ ":aarch32_asm_microkernels" ]
+      }
     } else if (current_cpu == "x64" || current_cpu == "x86") {
       if (xnnpack_enable_avx) {
         deps += [ ":avx_microkernels" ]
@@ -1054,7 +1105,7 @@ template("xnnpack_library") {
       if (xnnpack_enable_avx512) {
         deps += [ ":avx512_microkernels" ]
       }
-      if (!is_win) {
+      if (xnnpack_enable_assembly && current_cpu == "x64") {
         sources += AMD64_ASM_MICROKERNEL_SRCS
       }
       sources += ALL_SSE_MICROKERNEL_SRCS
@@ -1078,15 +1129,10 @@ template("xnnpack_library") {
   }
 }
 
-xnnpack_source_set("litert_tensor_api") {
+xnnpack_source_set("litert_tensor_api_core") {
   sources = [
     "litert/tensor/arithmetic.h",
     "litert/tensor/arithmetic_graph.h",
-    "litert/tensor/backends/xnnpack/arithmetic.cc",
-    "litert/tensor/backends/xnnpack/arithmetic.h",
-    "litert/tensor/backends/xnnpack/conversion.cc",
-    "litert/tensor/backends/xnnpack/conversion.h",
-    "litert/tensor/backends/xnnpack/utils.h",
     "litert/tensor/buffer.cc",
     "litert/tensor/buffer.h",
     "litert/tensor/datatypes.h",
@@ -1104,8 +1150,6 @@ xnnpack_source_set("litert_tensor_api") {
     "litert/tensor/internal/shape.cc",
     "litert/tensor/internal/shape.h",
     "litert/tensor/internal/utils.h",
-    "litert/tensor/runners/xnnpack/runner.cc",
-    "litert/tensor/runners/xnnpack/runner.h",
     "litert/tensor/tensor.cc",
     "litert/tensor/tensor.h",
     "litert/tensor/utils/macros.h",
@@ -1113,6 +1157,74 @@ xnnpack_source_set("litert_tensor_api") {
     "litert/tensor/utils/source_location.h",
   ]
   public_deps = [
+    ":xnnpack_headers",
+    "//third_party/abseil-cpp/absl/algorithm:container",
+    "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/base:no_destructor",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/container:inlined_vector",
+    "//third_party/abseil-cpp/absl/hash",
+    "//third_party/abseil-cpp/absl/log:absl_check",
+    "//third_party/abseil-cpp/absl/log:absl_log",
+    "//third_party/abseil-cpp/absl/random",
+    "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/strings:str_format",
+    "//third_party/abseil-cpp/absl/strings:string_view",
+    "//third_party/abseil-cpp/absl/types:optional",
+    "//third_party/abseil-cpp/absl/types:span",
+  ]
+}
+
+xnnpack_source_set("litert_tensor_api_common_nnpack") {
+  sources = [
+    "litert/tensor/backends/common_nnpack/conversion.cc",
+    "litert/tensor/backends/common_nnpack/conversion.h",
+    "litert/tensor/backends/common_nnpack/graph.cc",
+    "litert/tensor/backends/common_nnpack/graph.h",
+    "litert/tensor/backends/common_nnpack/utils.cc",
+    "litert/tensor/backends/common_nnpack/utils.h",
+    "litert/tensor/runners/common_nnpack/runner.h",
+  ]
+  public_deps = [
+    ":litert_tensor_api_core",
+    ":xnnpack_headers",
+    "//third_party/abseil-cpp/absl/algorithm:container",
+    "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/base:no_destructor",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/container:inlined_vector",
+    "//third_party/abseil-cpp/absl/hash",
+    "//third_party/abseil-cpp/absl/log:absl_check",
+    "//third_party/abseil-cpp/absl/log:absl_log",
+    "//third_party/abseil-cpp/absl/random",
+    "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/strings:str_format",
+    "//third_party/abseil-cpp/absl/strings:string_view",
+    "//third_party/abseil-cpp/absl/types:optional",
+    "//third_party/abseil-cpp/absl/types:span",
+  ]
+}
+
+xnnpack_source_set("litert_tensor_api") {
+  sources = [
+    "litert/tensor/backends/xnnpack/arithmetic.cc",
+    "litert/tensor/backends/xnnpack/arithmetic.h",
+    "litert/tensor/backends/xnnpack/conversion.cc",
+    "litert/tensor/backends/xnnpack/conversion.h",
+    "litert/tensor/backends/xnnpack/graph.h",
+    "litert/tensor/backends/xnnpack/utils.h",
+    "litert/tensor/runners/xnnpack/runner.cc",
+    "litert/tensor/runners/xnnpack/runner.h",
+  ]
+  public_deps = [
+    ":litert_tensor_api_common_nnpack",
+    ":litert_tensor_api_core",
     ":xnnpack_headers",
     "//third_party/abseil-cpp/absl/algorithm:container",
     "//third_party/abseil-cpp/absl/base",
@@ -1222,6 +1334,10 @@ GEMM_MICROKERNEL_TESTS = [
   "test/pf16-f16-igemm-minmax.cc",
   "test/f16-f32acc-igemm-minmax.cc",
   "test/f16-igemm-minmax.cc",
+  "test/f32-gemm.cc",
+  "test/f32-gemm-2.cc",
+  "test/f32-gemm-minmax.cc",
+  "test/f32-gemm-minmax-2.cc",
   "test/f32-igemm.cc",
   "test/f32-igemm-2.cc",
   "test/f32-igemm-minmax.cc",
@@ -1249,11 +1365,13 @@ GEMM_MICROKERNEL_TESTS = [
   "test/qd8-f32-qc4w-gemm-minmax-2.cc",
   "test/qd8-f32-qc4w-gemm-minmax-3.cc",
   "test/qd8-f32-qc4w-gemm-minmax-4.cc",
+  "test/qd8-bf16-qb4w-gemm-minmax.cc",
   "test/qd8-f16-qb4w-gemm-minmax.cc",
   "test/qd8-f32-qb4w-gemm-minmax.cc",
   "test/qp8-f32-qc4w-gemm-minmax.cc",
   "test/qp8-f32-qb4w-gemm-minmax.cc",
   "test/qp8-f32-qc8w-gemm-minmax.cc",
+  "test/qs8-qc2w-gemm-minmax-fp32.cc",
   "test/qs8-qc4w-gemm-minmax-fp32.cc",
   "test/qs8-qc8w-gemm-minmax-fp32.cc",
   "test/qs8-qc8w-gemm-minmax-fp32-2.cc",
@@ -1533,12 +1651,23 @@ if (!build_with_chromium) {
     "bench/f16-conv-hwc2chw.cc",
     "bench/f16-dwconv.cc",
     "bench/f16-dwconv2d-chw.cc",
+    "bench/f16-f32acc-gemm.cc",
+    "bench/f16-f32acc-igemm.cc",
+    "bench/f16-gemm.cc",
+    "bench/f16-gemm-minmax.cc",
+    "bench/f16-igemm.cc",
     "bench/f16-raddstoreexpminusmax.cc",
     "bench/f16-vcmul.cc",
+    "bench/f32-bgemm.cc",
     "bench/f32-conv-hwc.cc",
     "bench/f32-conv-hwc2chw.cc",
     "bench/f32-dwconv.cc",
     "bench/f32-dwconv2d-chw.cc",
+    "bench/f32-gemm.cc",
+    "bench/f32-gemm-minmax.cc",
+    "bench/f32-igemm.cc",
+    "bench/f32-qc4w-gemm.cc",
+    "bench/f32-qc8w-gemm.cc",
     "bench/f32-raddexpminusmax.cc",
     "bench/f32-raddextexp.cc",
     "bench/f32-raddstoreexpminusmax.cc",
@@ -1550,6 +1679,7 @@ if (!build_with_chromium) {
     "bench/pf32-gemm-minmax.cc",
     "bench/pqs8-qc8w-gemm-minmax.cc",
     "bench/qb4-packw.cc",
+    "bench/qd8-bf16-qb4w-gemm.cc",
     "bench/qd8-f16-qb4w-gemm.cc",
     "bench/qd8-f16-qc4w-gemm.cc",
     "bench/qd8-f16-qc8w-gemm.cc",
@@ -1578,7 +1708,6 @@ if (!build_with_chromium) {
     "bench/rsum.cc",
     "bench/rsum2.cc",
     "bench/spmm.cc",
-    "bench/spmm.h",
     "bench/vbinary.cc",
     "bench/vunary.cc",
     "bench/x16-packw.cc",

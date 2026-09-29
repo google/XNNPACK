@@ -29,6 +29,7 @@ limitations under the License.
 #include "include/xnnpack.h"
 #include "absl/status/status.h"
 #include "litert/tensor/arithmetic.h"
+#include "litert/tensor/backends/common_nnpack/graph.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
@@ -65,16 +66,16 @@ TEST(ArithmeticXnnpackTest, AddBuildsExternalFlags) {
   EXPECT_EQ(graph->values().size(), 3);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t input_index, graph->Lookup(input));
-  const XnnpackValue& input_value = graph->values()[input_index];
+  const NnpackValue& input_value = graph->values()[input_index];
   EXPECT_NE(input_value.flags & XNN_VALUE_FLAG_EXTERNAL_INPUT, 0);
   EXPECT_EQ(input_value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT, 0);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t bias_index, graph->Lookup(bias));
-  const XnnpackValue& bias_value = graph->values()[bias_index];
+  const NnpackValue& bias_value = graph->values()[bias_index];
   EXPECT_EQ(bias_value.flags, 0);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t output_index, graph->Lookup(output));
-  const XnnpackValue& output_value = graph->values()[output_index];
+  const NnpackValue& output_value = graph->values()[output_index];
   EXPECT_NE(output_value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT, 0);
 }
 
@@ -596,6 +597,34 @@ TEST(ArithmeticXnnpackTest, DequantizeQuantizedTensorWorks) {
   ASSERT_THAT(runner.Run(), IsOk());
   EXPECT_THAT(runner.ReadOutputAs<float>(output),
               IsOkAndHolds(Pointwise(FloatEq(), {-1, 0, 1, 2})));
+}
+
+TEST(ArithmeticXnnpackTest, FullyConnectedWithPerChannelInt2WeightsWorks) {
+  XnnTensor input({.name = "input", .type = Type::kFP32, .shape = {1, 4}});
+  // Quantized matrix is:
+  //   1,  0,  0, 0
+  //   0, -1,  0, 0
+  //   0,  0, -2, 0
+  //   1,  0,  0, 1
+  XnnTensor weights(
+      {.name = "weights",
+       .type = Type::kI2,
+       .shape = {4, 4},
+       .buffer = OwningCpuBuffer::Copy<Type::kI8>({0x01, 0x0C, 0x20, 0x41}),
+       .quantization = std::make_shared<PerChannelAffineQuantization>(
+           std::vector<float>{1.0f, 0.5f, 2.0f, 0.25f},
+           std::vector<int64_t>{0, 0, 0, 0}, /*quantized_dimension=*/0)});
+  XnnTensor output = FullyConnected(input, weights);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
+  const std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
+  ASSERT_THAT(runner.SetInputAsCopy(input, input_data), IsOk());
+  ASSERT_THAT(runner.Run(), IsOk());
+
+  // The input is dynamically quantized to int8, hence the loose tolerance.
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(2e-2), {1.0f, -1.0f, -12.0f, 1.25f})));
 }
 
 }  // namespace

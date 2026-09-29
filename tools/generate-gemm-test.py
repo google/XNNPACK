@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # Copyright 2019 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -61,6 +63,13 @@ def split_ukernel_name(name):
     vector_tile = False
   mr, nr = map(int, param_spec.split("x"))
   arch, isa, assembly = xnncommon.parse_target_name(target_name)
+  if (
+      isa == "wasmrelaxedsimd"
+      and name.startswith("xnn_f16_")
+      and not name.startswith("xnn_f16_f32acc_")
+  ):
+    arch = ["wasmrelaxedsimdfp16"]
+    isa = "wasmrelaxedsimdfp16"
   mr_packed = re.search(r"mstep([0-9]+)", target_name)
   if mr_packed:
     mr_packed = mr // int(mr_packed.group(1))
@@ -602,6 +611,31 @@ std::vector<GemmTestParams> CreateTests(
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
           , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pqs8" and WEIGHTS_DATATYPE == "qc4w":
+        gemm_tests.push_back(GemmTestParams(
+            "signed_weights",
+            tester.clone()
+                .m(mr).n(nr).k(k_block)
+                .b_zero_point(0)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_32",
+            tester.clone()
+                .m(mr).n(nr).k(32)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_128",
+            tester.clone()
+                .m(mr).n(nr).k(128)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_signed",
+            tester.clone()
+                .m(mr).n(nr).k(128)
+                .b_zero_point(0)
+            , test_func, arch_flags));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",
@@ -727,6 +761,7 @@ def generate_test_cases(
     is_pipelined,
     cpp_check,
     isa,
+    arch_flags,
 ):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -760,6 +795,7 @@ def generate_test_cases(
       micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
+    arch_flags: CPU feature flags required to run the micro-kernel.
 
   Returns:
     Code for the test case.
@@ -850,7 +886,11 @@ def generate_test_cases(
         "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % nr_type
     }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
-  if test_fun_name in {"QP8F32QC8W"}:
+  if input_datatype == "qp8" and weights_datatype == "qc2w":
+    test_fun_name = "Test_QP8F32QC2W"
+  elif input_datatype == "pqs8" and weights_datatype == "qc4w":
+    test_fun_name = "Test_PQS8QC4W"
+  elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
   elif input_datatype in {"pf32", "pf16", "pqs8"}:
     test_fun_name = "_".join(["Test", input_datatype.upper()])
@@ -875,7 +915,7 @@ def generate_test_cases(
       "NR_SCALE": nr_scale,
       "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
       "IS_PIPELINED": is_pipelined,
-      "ARCH_FLAGS": xnncommon.get_arch_flags(isa),
+      "ARCH_FLAGS": arch_flags,
       "next_prime": next_prime,
       "CPP_CHECK": cpp_check,
       "OUTPUT_DATATYPE": output_datatype,
@@ -904,7 +944,7 @@ def generate_test_cases(
           "SR": sr,
           "MR_PACKED": mr_packed,
           "NR_SCALE": nr_scale,
-          "ARCH_FLAGS": xnncommon.get_arch_flags(isa),
+          "ARCH_FLAGS": arch_flags,
           "CPP_CHECK": cpp_check,
           "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
       },
@@ -1048,6 +1088,9 @@ namespace {{
           isa,
           assembly,
       ) = split_ukernel_name(name)
+      arch_flags = ukernel_spec.get(
+          "arch-flags", xnncommon.get_arch_flags(isa)
+      )
 
       if k_block < kr * sr:
         print(f"Error: k_block ({k_block}) must be >= kr * sr ({kr} * {sr}) for kernel {name} in {options.spec}")
@@ -1073,6 +1116,7 @@ namespace {{
           pipelined,
           cpp_check,
           isa,
+          arch_flags,
       )
 
       # Store or reuse the `CreateTests` function?

@@ -271,12 +271,60 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
 // Is this op supported when bf16 hardware is missing (allow-list).
 //
 // bf16 has very few native microkernels, so most ops fall back to fp32. The
-// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32) and the bf16
-// reductions, which are kept native when their configs are available.
+// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32), reductions, and
+// selected unary operators, which are kept native when their configs are
+// available.
 OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
+    case xnn_node_type_fully_connected: {
+      const xnn_value& filter = subgraph->values[node.inputs[1]];
+      if (filter.datatype == xnn_datatype_qbint4) {
+        const xnn_value& input = subgraph->values[node.inputs[0]];
+        const xnn_value& output = subgraph->values[node.outputs[0]];
+        const bool inline_lhs_packing = node.flags & XNN_FLAG_INLINE_LHS_PACKING;
+        const xnn_datatype packed_input_datatype =
+            inline_lhs_packing ? node.packed_input_datatype : input.datatype;
+        switch (packed_input_datatype) {
+          case xnn_datatype_qduint8:
+            if (xnn_init_qdu8_bf16_qb4w_gemm_config() != nullptr) {
+              return OpAction::kTransparent;
+            }
+            break;
+          case xnn_datatype_qdint8: {
+            const xnn_gemm_config* config =
+                xnn_init_qd8_bf16_qb4w_gemm_config();
+            if (config != nullptr && config->arch != 0 &&
+                output.datatype == xnn_datatype_bf16 &&
+                filter.quantization.scale_type == xnn_datatype_bf16 &&
+                (!inline_lhs_packing ||
+                 input.datatype == xnn_datatype_bf16)) {
+              return OpAction::kTransparent;
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      break;
+    }
     case xnn_node_type_unary_elementwise:
       switch (node.unary_operator) {
+        case xnn_unary_reciprocal_square_root:
+          if (IsValid(xnn_init_bf16_rsqrt_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_unary_sigmoid:
+          if (IsValid(xnn_init_bf16_sigmoid_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_unary_square:
+          if (IsValid(xnn_init_bf16_sqr_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
         case xnn_unary_convert: {
           const xnn_value& output = subgraph->values[node.outputs[0]];
           const xnn_value& input = subgraph->values[node.inputs[0]];
@@ -482,13 +530,22 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
                                      "Failed to clone value.");
             from_value.datatype = from_dt;
             from_value.size = xnn_tensor_get_size(&from_value);
+            if (from_value.size == SIZE_MAX) {
+              xnn_log_error("failed to get size for %s value",
+                            xnn_datatype_to_string(from_dt));
+              return xnn_status_out_of_memory;
+            }
             from_value.allocation_type = xnn_allocation_type_workspace;
             xnn_log_debug("Adding a convert[fp32, %s](%d, %d) node.",
                           xnn_datatype_to_string(from_dt), value.id,
                           from_value.id);
-            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                             value.id, from_value.id,
-                             /*flags=*/0);
+            const xnn_status status =
+                xnn_define_unary(subgraph, xnn_unary_convert,
+                                 /*params=*/nullptr, value.id,
+                                 from_value.id, /*flags=*/0);
+            if (status != xnn_status_success) {
+              return status;
+            }
             fp32_id_to_from_id[value.id] = from_value.id;
             ++changes;
           } else {
@@ -630,6 +687,12 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
                                  "Failed to clone value");
         fp32_value.datatype = xnn_datatype_fp32;
         fp32_value.size = xnn_tensor_get_size(&fp32_value);
+        if (fp32_value.size == SIZE_MAX) {
+          xnn_log_error(
+              "failed to get size for %s fp32 fallback output buffer",
+              xnn_datatype_to_string(from_dt));
+          return xnn_status_out_of_memory;
+        }
         RemoveFlag(
             fp32_value.flags,
             XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
@@ -637,8 +700,20 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
 
         if (fp32_value.data != nullptr) {
           fp32_value.to_fp32_fallback.original_data = fp32_value.data;
-          fp32_value.data =
-              xnn_allocate_zero_memory(fp32_value.size + XNN_EXTRA_BYTES);
+          size_t allocation_size = 0;
+          if (!xnn_safe_add(fp32_value.size, XNN_EXTRA_BYTES,
+                            &allocation_size)) {
+            return xnn_status_out_of_memory;
+          }
+          fp32_value.data = xnn_allocate_zero_memory(allocation_size);
+          if (fp32_value.data == nullptr) {
+            xnn_log_error(
+                "failed to allocate %zu bytes for %s fp32 fallback output "
+                "buffer",
+                allocation_size,
+                xnn_datatype_to_string(from_dt));
+            return xnn_status_out_of_memory;
+          }
           fp32_value.flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
         } else {
           fp32_value.allocation_type = xnn_allocation_type_workspace;
@@ -661,15 +736,23 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
         xnn_log_debug("Adding a convert[fp32, %s](%d, %d) node.",
                       xnn_datatype_to_string(from_dt), fp32_value.id,
                       value->id);
-        xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                         fp32_value.id, value->id,
-                         /*flags=*/0);
+        const xnn_status status =
+            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                             fp32_value.id, value->id, /*flags=*/0);
+        if (status != xnn_status_success) {
+          return status;
+        }
       } else {
         xnn_value& value = subgraph->values[CurrentNode().outputs[i]];
         xnn_log_debug("Overriding value %d from %s to fp32.", value.id,
                       xnn_datatype_to_string(from_dt));
         value.datatype = xnn_datatype_fp32;
         value.size = xnn_tensor_get_size(&value);
+        if (value.size == SIZE_MAX) {
+          xnn_log_error("failed to get size for %s value",
+                        xnn_datatype_to_string(from_dt));
+          return xnn_status_out_of_memory;
+        }
         value.to_fp32_fallback.was_overwritten = true;
       }
       ++changes;
@@ -692,6 +775,13 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
                                    "Failed to clone value.");
           fp32_value.datatype = xnn_datatype_fp32;
           fp32_value.size = xnn_tensor_get_size(&fp32_value);
+          if (fp32_value.size == SIZE_MAX) {
+            xnn_log_error(
+                "failed to get size for %s fp32 fallback static "
+                "conversion buffer",
+                xnn_datatype_to_string(from_dt));
+            return xnn_status_out_of_memory;
+          }
           RemoveFlag(
               fp32_value.flags,
               XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
@@ -700,26 +790,56 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
                           value.id, fp32_value.id);
             // We convert static values directly to the new value without
             // inserting a convert node.
-            fp32_value.data =
-                xnn_allocate_zero_memory(fp32_value.size + XNN_EXTRA_BYTES);
+            size_t allocation_size = 0;
+            if (!xnn_safe_add(fp32_value.size, XNN_EXTRA_BYTES,
+                              &allocation_size)) {
+              return xnn_status_out_of_memory;
+            }
+            fp32_value.data = xnn_allocate_zero_memory(allocation_size);
+            if (fp32_value.data == nullptr) {
+              xnn_log_error(
+                  "failed to allocate %zu bytes for %s fp32 fallback static "
+                  "conversion buffer",
+                  allocation_size,
+                  xnn_datatype_to_string(from_dt));
+              return xnn_status_out_of_memory;
+            }
             fp32_value.flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
             fp32_value.to_fp32_fallback.original_data = value.data;
-            xnn_run_unary_elementwise_nc(
+            const size_t batch_size =
+                xnn_shape_multiply_all_dims(&value.shape);
+            if (batch_size == SIZE_MAX) {
+              xnn_log_error(
+                  "overflow computing batch size for %s fp32 fallback static "
+                  "conversion",
+                  xnn_datatype_to_string(from_dt));
+              return xnn_status_out_of_memory;
+            }
+            const xnn_status status = xnn_run_unary_elementwise_nc(
                 xnn_unary_convert, from_dt, xnn_datatype_fp32,
                 /*params=*/nullptr, /*input_quantization=*/nullptr,
                 /*output_quantization=*/nullptr, /*flags=*/0,
-                /*batch_size=*/xnn_shape_multiply_all_dims(&value.shape),
+                /*batch_size=*/batch_size,
                 /*channels=*/1,
-                /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr,
+                /*input_stride=*/1, /*output_stride=*/1,
+                /*threadpool=*/nullptr,
                 /*input=*/value.data, /*output=*/fp32_value.data);
+            if (status != xnn_status_success) {
+              return status;
+            }
           } else {
             xnn_log_debug("Adding a convert[%s, fp32](%d, %d) node.",
                           xnn_datatype_to_string(from_dt), value.id,
                           fp32_value.id);
             fp32_value.allocation_type = xnn_allocation_type_workspace;
-            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                             value.id, fp32_value.id,
-                             /*flags=*/0);
+            const xnn_status status =
+                xnn_define_unary(subgraph, xnn_unary_convert,
+                                 /*params=*/nullptr,
+                                 value.id, fp32_value.id,
+                                 /*flags=*/0);
+            if (status != xnn_status_success) {
+              return status;
+            }
           }
           from_id_to_fp32_id[value.id] = fp32_value.id;
         }

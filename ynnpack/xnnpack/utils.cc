@@ -385,11 +385,59 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
   return ynn_status_success;
 }
 
+ynn_status define_xnn_dot_blockwise(xnn_subgraph_t subgraph, size_t num_k_dims,
+                                    uint32_t a_id, uint32_t b_id,
+                                    uint32_t bias_id, uint32_t output_id,
+                                    size_t block_size) {
+  uint32_t a_zp_id = get_zero_point_id(subgraph, a_id);
+  uint32_t a_scale_id = get_scale_id(subgraph, a_id);
+  uint32_t b_zp_id = get_zero_point_id(subgraph, b_id);
+  uint32_t b_scale_id = get_scale_id(subgraph, b_id);
+
+  if (bias_id != YNN_INVALID_VALUE_ID) {
+    if (type_is_integral(type_of_value(subgraph, bias_id)) &&
+        get_scale_id(subgraph, bias_id) != YNN_INVALID_VALUE_ID) {
+      uint32_t dequant_bias_id = YNN_INVALID_VALUE_ID;
+      ynn_status status = ynn_define_dequantize(
+          subgraph->ynn, bias_id, get_zero_point_id(subgraph, bias_id),
+          get_scale_id(subgraph, bias_id), ynn_type_fp32, &dequant_bias_id, 0);
+      if (status != ynn_status_success) return status;
+      bias_id = dequant_bias_id;
+    }
+  }
+
+  uint32_t dot_output_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn::define_blockwise_dot(
+      subgraph->ynn, a_id, a_zp_id, a_scale_id, b_id, b_zp_id, b_scale_id,
+      block_size, bias_id, ynn_type_fp32, dot_output_id, /*flags=*/0);
+  if (status != ynn_status_success) return status;
+
+  if (output_id != YNN_INVALID_VALUE_ID && dot_output_id != output_id) {
+    if (type_is_integral(type_of_value(subgraph, output_id))) {
+      status = ynn_define_quantize(
+          subgraph->ynn, dot_output_id, type_of_value(subgraph, output_id),
+          get_zero_point_id(subgraph, output_id),
+          get_scale_id(subgraph, output_id), &output_id, /*flags=*/0);
+    } else {
+      status = ynn_define_convert(subgraph->ynn, dot_output_id,
+                                  type_of_value(subgraph, output_id),
+                                  &output_id, /*flags=*/0);
+    }
+    if (status != ynn_status_success) return status;
+  }
+  return ynn_status_success;
+}
+
 }  // namespace
 
 ynn_status define_xnn_dot(xnn_subgraph_t subgraph, size_t num_k_dims,
                           uint32_t a_id, uint32_t b_id, uint32_t bias_id,
                           uint32_t output_id) {
+  size_t block_size = get_block_size(subgraph, b_id);
+  if (block_size > 0) {
+    return define_xnn_dot_blockwise(subgraph, num_k_dims, a_id, b_id, bias_id,
+                                    output_id, block_size);
+  }
   if (type_is_integral(type_of_value(subgraph, a_id))) {
     return define_xnn_dot_quantized(subgraph, num_k_dims, a_id, b_id, bias_id,
                                     output_id);
@@ -745,6 +793,14 @@ uint32_t get_scale_id(xnn_subgraph_t subgraph, uint32_t id) {
   return YNN_INVALID_VALUE_ID;
 }
 
+size_t get_block_size(xnn_subgraph_t subgraph, uint32_t id) {
+  auto it = subgraph->block_sizes.find(id);
+  if (it != subgraph->block_sizes.end()) {
+    return it->second;
+  }
+  return 0;
+}
+
 void copy_quantization(xnn_subgraph_t subgraph, uint32_t from_id,
                        uint32_t to_id) {
   if (subgraph->zero_point_ids.count(from_id)) {
@@ -752,6 +808,9 @@ void copy_quantization(xnn_subgraph_t subgraph, uint32_t from_id,
   }
   if (subgraph->scale_ids.count(from_id)) {
     subgraph->scale_ids[to_id] = subgraph->scale_ids[from_id];
+  }
+  if (subgraph->block_sizes.count(from_id)) {
+    subgraph->block_sizes[to_id] = subgraph->block_sizes[from_id];
   }
 }
 

@@ -5,7 +5,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "litert/tensor/arithmetic.h"
+#include "litert/tensor/backends/xnnpack/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
+#include "litert/tensor/backends/xnnpack/graph.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/tensor.h"
 #include "litert/tensor/utils/matchers.h"

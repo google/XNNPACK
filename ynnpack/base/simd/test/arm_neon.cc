@@ -165,6 +165,14 @@ TEST_HORIZONTAL_MAX(arm_neon, s16, 8);
 TEST_HORIZONTAL_MAX(arm_neon, f32, 4);
 TEST_HORIZONTAL_MAX(arm_neon, s32, 4);
 
+TEST_ANY(arm_neon, s8, 16);
+TEST_ANY(arm_neon, s16, 8);
+TEST_ANY(arm_neon, s32, 4);
+
+TEST_ALL(arm_neon, s8, 16);
+TEST_ALL(arm_neon, s16, 8);
+TEST_ALL(arm_neon, s32, 4);
+
 TEST_CAST(arm_neon, s32, s8x16);
 TEST_CAST(arm_neon, s32, u8x16);
 TEST_CAST(arm_neon, s32, s16x8);
@@ -207,8 +215,8 @@ TEST_UNARY(arm_neon, tanh, f32, 4, std::tanh, 2);
 #else
 // TODO: b/515053903 - 32-bit ARM does something weird here.
 #endif
-TEST_UNARY_RANGE(arm_neon, sin, f32, 4, std::sin, 3, -1e4, 1e4);
-TEST_UNARY_RANGE(arm_neon, cos, f32, 4, std::cos, 3, -1e4, 1e4);
+TEST_UNARY(arm_neon, sin, f32, 4, std::sin, 3);
+TEST_UNARY(arm_neon, cos, f32, 4, std::cos, 3);
 
 TEST_UNARY(arm_neon, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neon, approx_tanh, f32, 4, std::tanh, 5);

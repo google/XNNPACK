@@ -1,4 +1,7 @@
 // Copyright 2022 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -26,6 +29,7 @@ XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f16_cmul_config();
 XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f32_cmul_config();
 
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_qp8_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_qp8_f16_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x8_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x16_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x32_pack_lh_config();
@@ -84,6 +88,12 @@ xnn_init_qu8_vprelu_config();
 
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_bf16_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_rsqrt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_sigmoid_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_sqr_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
@@ -261,6 +271,8 @@ XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_pavgpool_config();
 
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_f16_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_f32_dwconv_config();
+XNN_INTERNAL const struct xnn_kai_dwconv_config*
+xnn_init_kai_f32_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qs8_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();
@@ -388,11 +400,13 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf32_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_bf16_qb4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_bf16_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_igemm_config();
@@ -401,8 +415,10 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f32_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qc8w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f16_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc8w_gemm_config();

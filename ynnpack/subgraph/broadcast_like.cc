@@ -41,7 +41,7 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
   ynn::axes_set axes_set;
   for (size_t i = 0; i < num_axes; ++i) {
     const int axis = axis_to_slinky_dim(input.rank(), axes[i]);
-    if (axis < template_value.rank()) {
+    if (axis >= 0 && axis < template_value.rank()) {
       axes_set[axis] = true;
     }
   }
@@ -85,11 +85,9 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
       output_extent = subgraph->globals.get(
           select(template_extent > 1, template_extent, output_extent), "b");
 
-      node.checks.push_back({
-          template_extent == 1 || output_extent == template_extent,
-          {"invalid broadcast in dimension ", d, " of ", ynn_node::input_idx{0},
-           " and ", ynn_node::input_idx{1}},
-      });
+      node.add_check(template_extent == 1 || output_extent == template_extent,
+                     {"invalid broadcast in dimension ", d, " of ",
+                      ynn_node::input_idx{0}, " and ", ynn_node::input_idx{1}});
     }
   }
 

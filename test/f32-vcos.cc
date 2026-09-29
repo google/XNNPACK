@@ -38,8 +38,8 @@ using TestInfo = Cosine;
 TEST(ukernel, special_values) {                                                                                         \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
-    /*inputs=*/{0.0f, 1.57079633e+00,  -1.57079633e+00},                                                                \
-    /*outputs=*/{1.0f, 0.0f, 0.0f},                                                                                     \
+    /*inputs=*/{0.0f, -3.14159265e+00,  3.14159265e+00},                                                                \
+    /*outputs=*/{1.0f, -1.0f, -1.0f},                                                                                   \
     /*tolerance_ulp=*/1);                                                                                               \
 }
 #include "src/f32-vcos/f32-vcos.inc"

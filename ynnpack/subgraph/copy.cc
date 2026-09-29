@@ -79,16 +79,12 @@ void deduce_reshape_extent(ynn_node& node, int input_idx,
           subgraph.globals.get(deduced_extent, "deduced_extent");
     }
 
-    node.checks.push_back({
-        num_elements % current_elements == 0,
-        {"invalid deduced reshape in dimension ", deduce_dim, " of ",
-         ynn_node::input_idx{input_idx}},
-    });
+    node.add_check(num_elements % current_elements == 0,
+                   {"invalid deduced reshape in dimension ", deduce_dim, " of ",
+                    ynn_node::input_idx{input_idx}});
   } else {
-    node.checks.push_back({
-        num_elements == current_elements,
-        {"invalid reshape of ", ynn_node::input_idx{input_idx}},
-    });
+    node.add_check(num_elements == current_elements,
+                   {"invalid reshape of ", ynn_node::input_idx{input_idx}});
   }
 }
 
@@ -251,11 +247,9 @@ void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
       noop = false;
       output_extents[d] = new_dim_d;
       if (d < input.rank() && input.extents[d].defined()) {
-        node.checks.push_back({
-            input.extents[d] == 1 || input.extents[d] == new_dim_d,
-            {"invalid broadcast in dimension ", d, " of ",
-             ynn_node::input_idx{0}},
-        });
+        node.add_check(input.extents[d] == 1 || input.extents[d] == new_dim_d,
+                       {"invalid broadcast in dimension ", d, " of ",
+                        ynn_node::input_idx{0}});
       }
     }
   }
@@ -610,11 +604,9 @@ ynn_status ynn_define_split_dims(ynn_subgraph_t subgraph, size_t num_axes,
   for (const ynn_node::split_dims::split& split : op.splits) {
     slinky::expr extent = output.extent(split.axis);
     output.extents.insert(output.extents.begin() + split.axis, split.factor);
-    node.checks.push_back({
-        extent % split.factor == 0,
-        {"invalid split by ", split.factor, " in dimension ", split.axis, " (",
-         extent, ") of ", ynn_node::input_idx{0}},
-    });
+    node.add_check(extent % split.factor == 0,
+                   {"invalid split by ", split.factor, " in dimension ",
+                    split.axis, " (", extent, ") of ", ynn_node::input_idx{0}});
     output.extents[split.axis + 1] = extent / split.factor;
   }
 

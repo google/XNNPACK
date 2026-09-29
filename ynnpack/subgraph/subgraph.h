@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "ynnpack/base/ref_count.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
@@ -29,6 +30,7 @@
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/slinky.h"
+#include "slinky/base/arithmetic.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -56,6 +58,17 @@ struct axes_set : std::bitset<max_tensor_rank> {
 
 inline bool operator<(const axes_set& a, const axes_set& b) {
   return a.to_ulong() < b.to_ulong();
+}
+
+inline axes_set permute(span<const int32_t> p, const axes_set& x) {
+  axes_set result;
+  for (size_t i = 0; i < p.size(); ++i) {
+    int32_t src_i = p[i];
+    if (src_i >= 0 && static_cast<size_t>(src_i) < x.size()) {
+      result[i] = x[src_i];
+    }
+  }
+  return result;
 }
 
 // Validation helpers for public APIs.
@@ -522,13 +535,15 @@ struct ynn_node {
     friend bool operator<(const pack_b&, const pack_b&) { return false; }
   };
   struct transpose_a {
+    size_t tile_m;
     size_t tile_k;
     int32_t m_dim;
     friend bool operator==(const transpose_a& a, const transpose_a& b) {
-      return a.tile_k == b.tile_k && a.m_dim == b.m_dim;
+      return a.tile_m == b.tile_m && a.tile_k == b.tile_k && a.m_dim == b.m_dim;
     }
     friend bool operator<(const transpose_a& a, const transpose_a& b) {
-      return std::tie(a.tile_k, a.m_dim) < std::tie(b.tile_k, b.m_dim);
+      return std::tie(a.tile_m, a.tile_k, a.m_dim) <
+             std::tie(b.tile_m, b.tile_k, b.m_dim);
     }
   };
   struct get_tensor_shape {
@@ -614,13 +629,18 @@ struct ynn_node {
     // A condition that must evaluate to true.
     slinky::expr condition;
 
+    using message_part =
+        std::variant<const char*, slinky::expr, input_idx, output_idx>;
+
     // The error message to emit if the condition is not true. The message is
     // formed by concatenating all of the parts of the message, evaluating the
     // expressions if needed.
-    std::vector<std::variant<const char*, slinky::expr, input_idx, output_idx>>
-        message;
+    std::vector<message_part> message;
   };
   std::vector<check> checks;
+
+  void add_check(slinky::expr condition,
+                 std::vector<check::message_part> message);
 };
 
 struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
@@ -664,6 +684,9 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   // Find the node that produces `id`.
   const ynn_node* get_producer(uint32_t id) const;
   ynn_node* get_producer(uint32_t id);
+
+  // Returns the number of nodes that consume `id`.
+  size_t count_consumers(uint32_t id) const;
 
   // If `output_id` is `YNN_INVALID_VALUE_ID`, makes a new value like
   // `template_value`, and updates `output_id` with the new value ID.

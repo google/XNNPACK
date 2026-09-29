@@ -68,8 +68,27 @@ static enum xnn_status reshape_softmax_operator(
       xnn_node_type_to_string(xnn_node_type_softmax), input_id, num_input_dims);
     return xnn_status_invalid_parameter;
   }
+
+  const size_t num_input_elements =
+      xnn_shape_multiply_all_dims(&values[input_id].shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape overflows size_t",
+      xnn_node_type_to_string(xnn_node_type_softmax), input_id);
+    return xnn_status_invalid_parameter;
+  }
+
   const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
-  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  const size_t batch_size =
+      xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  if (batch_size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": batch dimensions overflow size_t",
+      xnn_node_type_to_string(xnn_node_type_softmax), input_id);
+    return xnn_status_invalid_parameter;
+  }
 
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;

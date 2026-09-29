@@ -59,11 +59,12 @@ cc_test(
     srcs = ["buffer_test.cc"],
     deps = [
         ":buffer",
-        "//litert/tensor:datatypes",
+        ":datatypes",
         "//litert/tensor/internal:matchers",
         "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

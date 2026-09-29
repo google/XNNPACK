@@ -106,6 +106,8 @@ class dot_base:
 
 namespace ynn {
 
+struct dot_kernel_state;
+
 namespace {
 
 YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
@@ -137,7 +139,8 @@ void {func_name}(
     std::size_t M, std::size_t N, std::size_t K3, std::size_t K2, std::size_t K1,
     std::size_t A_stride_m, std::size_t A_stride_k3, std::size_t A_stride_k2, const void* A,
     std::size_t B_stride_k3, std::size_t B_stride_k2, std::size_t B_stride_k1, const void* B,
-    std::size_t C_in_stride_m, const void* C_in, std::size_t C_out_stride_m, void* C_out) {{
+    std::size_t C_in_stride_m, const void* C_in, std::size_t C_out_stride_m, void* C_out,
+    dot_kernel_state* = nullptr) {{
   assert(M > 0);
   assert(N > 0);
   assert(K3 > 0);

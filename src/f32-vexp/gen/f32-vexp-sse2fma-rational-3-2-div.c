@@ -48,14 +48,14 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u4(
   assert(output != NULL);
   assert(xnn_simd_size_f32 == 4);
 
-  // The monomial coefficients of the numerator polynomial (`valpha_0` = 1.0).
-  XNN_SIMD_CONST_F32(valpha_1, 4.1594290733e-01f);
-  XNN_SIMD_CONST_F32(valpha_2, 7.2068706155e-02f);
-  XNN_SIMD_CONST_F32(valpha_3, 5.5380910635e-03f);
+  // The monomial coefficients of the numerator polynomial (`valpha_0` = 0.0).
+  XNN_SIMD_CONST_F32(valpha_1, 6.9314718246e-01f);
+  XNN_SIMD_CONST_F32(valpha_2, 4.8078041524e-02f);
+  XNN_SIMD_CONST_F32(valpha_3, 5.5375634693e-03f);
 
-  // The monomial coefficients of the denominator polynomial (`vbeta_01 = 1.0).
-  XNN_SIMD_CONST_F32(vbeta_1, -2.7720427513e-01f);
-  XNN_SIMD_CONST_F32(vbeta_2, 2.3986088112e-02f);
+  // The monomial coefficients of the denominator polynomial (`vbeta_0` = 1.0).
+  XNN_SIMD_CONST_F32(vbeta_1, -2.7721086144e-01f);
+  XNN_SIMD_CONST_F32(vbeta_2, 2.3987604305e-02f);
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(vlog2e, 1.44269504089f);
@@ -78,17 +78,17 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u4(
     // Compute 2^z.
     const xnn_simd_f32_t v2z = xnn_setexp_f32(vz);
 
-    // Evaluate the numerator polynomial p(f).
+    // Evaluate the numerator polynomial p(r).
     xnn_simd_f32_t vp = xnn_fmadd_f32(vr, valpha_3, valpha_2);
     vp = xnn_fmadd_f32(vr, vp, valpha_1);
-    vp = xnn_fmadd_f32(vr, vp, vone);
+    vp = xnn_mul_f32(vr, vp);
 
     // Evaluate the denominator polynomial q(r).
     xnn_simd_f32_t vq = xnn_fmadd_f32(vr, vbeta_2, vbeta_1);
     vq = xnn_fmadd_f32(vr, vq, vone);
 
-    // Divide the numerator by the denominator, obtaining 2^r.
-    const xnn_simd_f32_t v2r =  xnn_div_f32(vp, vq);
+    // Divide the numerator by the denominator, obtaining 2^r - 1, and add 1 to obtain 2^r.
+    const xnn_simd_f32_t v2r =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
 
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
@@ -110,17 +110,17 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u4(
     // Compute 2^z.
     const xnn_simd_f32_t v2z = xnn_setexp_f32(vz);
 
-    // Evaluate the numerator polynomial p(f).
+    // Evaluate the numerator polynomial p(r).
     xnn_simd_f32_t vp = xnn_fmadd_f32(vr, valpha_3, valpha_2);
     vp = xnn_fmadd_f32(vr, vp, valpha_1);
-    vp = xnn_fmadd_f32(vr, vp, vone);
+    vp = xnn_mul_f32(vr, vp);
 
     // Evaluate the denominator polynomial q(r).
     xnn_simd_f32_t vq = xnn_fmadd_f32(vr, vbeta_2, vbeta_1);
     vq = xnn_fmadd_f32(vr, vq, vone);
 
-    // Divide the numerator by the denominator, obtaining 2^r.
-    const xnn_simd_f32_t v2r =  xnn_div_f32(vp, vq);
+    // Divide the numerator by the denominator, obtaining 2^r - 1, and add 1 to obtain 2^r.
+    const xnn_simd_f32_t v2r =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
 
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
@@ -141,14 +141,14 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u8(
   assert(output != NULL);
   assert(xnn_simd_size_f32 == 4);
 
-  // The monomial coefficients of the numerator polynomial (`valpha_0` = 1.0).
-  XNN_SIMD_CONST_F32(valpha_1, 4.1594290733e-01f);
-  XNN_SIMD_CONST_F32(valpha_2, 7.2068706155e-02f);
-  XNN_SIMD_CONST_F32(valpha_3, 5.5380910635e-03f);
+  // The monomial coefficients of the numerator polynomial (`valpha_0` = 0.0).
+  XNN_SIMD_CONST_F32(valpha_1, 6.9314718246e-01f);
+  XNN_SIMD_CONST_F32(valpha_2, 4.8078041524e-02f);
+  XNN_SIMD_CONST_F32(valpha_3, 5.5375634693e-03f);
 
-  // The monomial coefficients of the denominator polynomial (`vbeta_01 = 1.0).
-  XNN_SIMD_CONST_F32(vbeta_1, -2.7720427513e-01f);
-  XNN_SIMD_CONST_F32(vbeta_2, 2.3986088112e-02f);
+  // The monomial coefficients of the denominator polynomial (`vbeta_0` = 1.0).
+  XNN_SIMD_CONST_F32(vbeta_1, -2.7721086144e-01f);
+  XNN_SIMD_CONST_F32(vbeta_2, 2.3987604305e-02f);
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(vlog2e, 1.44269504089f);
@@ -177,13 +177,13 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u8(
     const xnn_simd_f32_t v2z_0 = xnn_setexp_f32(vz_0);
     const xnn_simd_f32_t v2z_1 = xnn_setexp_f32(vz_1);
 
-    // Evaluate the numerator polynomial p(f).
+    // Evaluate the numerator polynomial p(r).
     xnn_simd_f32_t vp_0 = xnn_fmadd_f32(vr_0, valpha_3, valpha_2);
     xnn_simd_f32_t vp_1 = xnn_fmadd_f32(vr_1, valpha_3, valpha_2);
     vp_0 = xnn_fmadd_f32(vr_0, vp_0, valpha_1);
     vp_1 = xnn_fmadd_f32(vr_1, vp_1, valpha_1);
-    vp_0 = xnn_fmadd_f32(vr_0, vp_0, vone);
-    vp_1 = xnn_fmadd_f32(vr_1, vp_1, vone);
+    vp_0 = xnn_mul_f32(vr_0, vp_0);
+    vp_1 = xnn_mul_f32(vr_1, vp_1);
 
     // Evaluate the denominator polynomial q(r).
     xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vr_0, vbeta_2, vbeta_1);
@@ -191,9 +191,9 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u8(
     vq_0 = xnn_fmadd_f32(vr_0, vq_0, vone);
     vq_1 = xnn_fmadd_f32(vr_1, vq_1, vone);
 
-    // Divide the numerator by the denominator, obtaining 2^r.
-    const xnn_simd_f32_t v2r_0 =  xnn_div_f32(vp_0, vq_0);
-    const xnn_simd_f32_t v2r_1 =  xnn_div_f32(vp_1, vq_1);
+    // Divide the numerator by the denominator, obtaining 2^r - 1, and add 1 to obtain 2^r.
+    const xnn_simd_f32_t v2r_0 =  xnn_add_f32(xnn_div_f32(vp_0, vq_0), vone);
+    const xnn_simd_f32_t v2r_1 =  xnn_add_f32(xnn_div_f32(vp_1, vq_1), vone);
 
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(v2z_0, v2r_0);
@@ -218,17 +218,17 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u8(
     // Compute 2^z.
     const xnn_simd_f32_t v2z = xnn_setexp_f32(vz);
 
-    // Evaluate the numerator polynomial p(f).
+    // Evaluate the numerator polynomial p(r).
     xnn_simd_f32_t vp = xnn_fmadd_f32(vr, valpha_3, valpha_2);
     vp = xnn_fmadd_f32(vr, vp, valpha_1);
-    vp = xnn_fmadd_f32(vr, vp, vone);
+    vp = xnn_mul_f32(vr, vp);
 
     // Evaluate the denominator polynomial q(r).
     xnn_simd_f32_t vq = xnn_fmadd_f32(vr, vbeta_2, vbeta_1);
     vq = xnn_fmadd_f32(vr, vq, vone);
 
-    // Divide the numerator by the denominator, obtaining 2^r.
-    const xnn_simd_f32_t v2r =  xnn_div_f32(vp, vq);
+    // Divide the numerator by the denominator, obtaining 2^r - 1, and add 1 to obtain 2^r.
+    const xnn_simd_f32_t v2r =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
 
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
@@ -250,17 +250,17 @@ void xnn_f32_vexp_ukernel__sse2fma_rational_3_2_div_u8(
     // Compute 2^z.
     const xnn_simd_f32_t v2z = xnn_setexp_f32(vz);
 
-    // Evaluate the numerator polynomial p(f).
+    // Evaluate the numerator polynomial p(r).
     xnn_simd_f32_t vp = xnn_fmadd_f32(vr, valpha_3, valpha_2);
     vp = xnn_fmadd_f32(vr, vp, valpha_1);
-    vp = xnn_fmadd_f32(vr, vp, vone);
+    vp = xnn_mul_f32(vr, vp);
 
     // Evaluate the denominator polynomial q(r).
     xnn_simd_f32_t vq = xnn_fmadd_f32(vr, vbeta_2, vbeta_1);
     vq = xnn_fmadd_f32(vr, vq, vone);
 
-    // Divide the numerator by the denominator, obtaining 2^r.
-    const xnn_simd_f32_t v2r =  xnn_div_f32(vp, vq);
+    // Divide the numerator by the denominator, obtaining 2^r - 1, and add 1 to obtain 2^r.
+    const xnn_simd_f32_t v2r =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
 
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);

@@ -50,6 +50,13 @@ YNN_INTRINSIC int8x16_t vqtbl1q_s8(int8x16_t a, uint8x16_t b) {
     result += """
   const uint8_t shuf_a_data[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
   const uint8x16_t shuf_a = vld1q_u8(shuf_a_data);
+#ifdef YNN_ARCH_ARM64
+  const int8_t sign_lut_x0_data[] = {0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1};
+  const int8_t sign_lut_x4_data[] = {0, 0, 0, 0, 1, 1, 1, 1, -2, -2, -2, -2, -1, -1, -1, -1};
+  const int8x16_t sign_lut_x0 = vld1q_s8(sign_lut_x0_data);
+  const int8x16_t sign_lut_x4 = vld1q_s8(sign_lut_x4_data);
+  const uint8x16_t mask = vdupq_n_u8(0x0f);
+#endif
 """
     return result
 
@@ -61,11 +68,21 @@ int8x16_t a_{i}_{k} = vqtbl1q_s8(a_raw_{i}_{k}, shuf_a);
 
   def load_b_tile(self, k, j):
     return f"""
+#ifdef YNN_ARCH_ARM64
+uint8x16_t ub_{k+0}_{j} = vld1q_u8({self.b_ptr(k, j, "uint8_t")});
+uint8x16_t ub_{k+2}_{j} = vshrq_n_u8(ub_{k+0}_{j}, 4);
+ub_{k+0}_{j} = vandq_u8(ub_{k+0}_{j}, mask);
+int8x16_t b_{k+0}_{j} = vqtbl1q_s8(sign_lut_x0, ub_{k+0}_{j});
+int8x16_t b_{k+1}_{j} = vqtbl1q_s8(sign_lut_x4, ub_{k+0}_{j});
+int8x16_t b_{k+2}_{j} = vqtbl1q_s8(sign_lut_x0, ub_{k+2}_{j});
+int8x16_t b_{k+3}_{j} = vqtbl1q_s8(sign_lut_x4, ub_{k+2}_{j});
+#else
 int8x16_t b_{k}_{j} = vld1q_s8({self.b_ptr(k, j, "int8_t")});
 int8x16_t b_{k+3}_{j} = vshrq_n_s8(b_{k}_{j}, 6);
 int8x16_t b_{k+2}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 2), 6);
 int8x16_t b_{k+1}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 4), 6);
 b_{k}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 6), 6);
+#endif
 """
 
   def product(self, i, j, k):

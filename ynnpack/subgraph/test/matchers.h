@@ -171,6 +171,13 @@ MATCHER_P2(IsTransposeA, tile_k, m_dim, "") {
   return transpose && transpose->tile_k == tile_k && transpose->m_dim == m_dim;
 }
 
+MATCHER_P3(IsTransposeA, tile_m, tile_k, m_dim, "") {
+  const ynn_node::transpose_a* transpose =
+      std::get_if<ynn_node::transpose_a>(&arg.op);
+  return transpose && transpose->tile_m == tile_m &&
+         transpose->tile_k == tile_k && transpose->m_dim == m_dim;
+}
+
 // Checks that the given node is a stencil copy with the given stencils.
 //
 // Example:
@@ -259,6 +266,14 @@ MATCHER_P(IsDynamicQuantization, output_zero_point, "") {
 // Example:
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDot());
 MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
+
+MATCHER(IsGather, "") {
+  return std::holds_alternative<ynn_node::gather>(arg.op);
+}
+
+MATCHER(IsPackB, "") {
+  return std::holds_alternative<ynn_node::pack_b>(arg.op);
+}
 
 // Checks that the given node is an iota.
 //

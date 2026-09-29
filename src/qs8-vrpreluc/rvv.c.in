@@ -1,0 +1,106 @@
+// Copyright 2026 Léandre Le Duc
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+$assert DATATYPE in ["QS8", "QU8"]
+$LMUL_8 = {1: "f4", 2: "f2", 4: "1", 8: "2"}[LMUL]
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$U = {"QS8": "", "QU8": "u"}[DATATYPE]
+$IU = {"QS8": "i", "QU8": "u"}[DATATYPE]
+
+#include <assert.h>
+#include <riscv_vector.h>
+
+#include "src/xnnpack/vbinary.h"
+
+void xnn_${DATATYPE.lower()}_vrpreluc_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const ${XINT8_T}* input_a,
+    const ${XINT8_T}* input_b,
+    ${XINT8_T}* output,
+    const union xnn_qs8_vprelu_scalar_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const int32_t slope = (int32_t) *input_b - params->scalar.slope_zero_point;
+
+  const int32_t output_zero_point = params->scalar.output_zero_point;
+  const float output_min_less_zero_point =
+      (int32_t) params->scalar.output_min - output_zero_point;
+  const float output_max_less_zero_point =
+      (int32_t) params->scalar.output_max - output_zero_point;
+
+  // The branch is loop invariant: it depends on the broadcast slope only.
+  if (slope >= 0) {
+    const size_t vlmax = __riscv_vsetvlmax_e32m${LMUL}();
+    vfloat32m${LMUL}_t vfpacc = __riscv_vfmul_vf_f32m${LMUL}(
+        __riscv_vfcvt_f_x_v_f32m${LMUL}(
+            __riscv_vmv_v_x_i32m${LMUL}(slope, vlmax), vlmax),
+        params->scalar.rprelu_positive_multiplier, vlmax);
+    vfpacc =
+        __riscv_vfmax_vf_f32m${LMUL}(vfpacc, output_min_less_zero_point, vlmax);
+    vfpacc =
+        __riscv_vfmin_vf_f32m${LMUL}(vfpacc, output_max_less_zero_point, vlmax);
+
+    const vint32m${LMUL}_t vacc = __riscv_vadd_vx_i32m${LMUL}(
+        __riscv_vfcvt_x_f_v_i32m${LMUL}(vfpacc, vlmax), output_zero_point,
+        vlmax);
+    $if DATATYPE == "QS8":
+      const vint32m${LMUL}_t vout32 = vacc;
+    $else:
+      const vuint32m${LMUL}_t vout32 =
+          __riscv_vreinterpret_v_i32m${LMUL}_u32m${LMUL}(vacc);
+    const v${U}int8m${LMUL_8}_t vout8 =
+        __riscv_vncvt_x(__riscv_vncvt_x(vout32, vlmax), vlmax);
+
+    for (size_t vl; batch > 0; batch -= vl, output += vl) {
+      vl = __riscv_vsetvl_e8m${LMUL_8}(batch);
+      __riscv_vse8_v_${IU}8m${LMUL_8}(output, vout8, vl);
+    }
+    return;
+  }
+
+  const int32_t input_zero_point = params->scalar.input_zero_point;
+  const float negative_multiplier = params->scalar.negative_multiplier;
+
+  for (size_t vl; batch > 0; batch -= vl, input_a += vl, output += vl) {
+    vl = __riscv_vsetvl_e32m${LMUL}(batch);
+
+    const v${U}int8m${LMUL_8}_t va8 = __riscv_vle8_v_${IU}8m${LMUL_8}(input_a, vl);
+    $if DATATYPE == "QS8":
+      vint32m${LMUL}_t va32 = __riscv_vsext_vf4_i32m${LMUL}(va8, vl);
+    $else:
+      vint32m${LMUL}_t va32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(
+          __riscv_vzext_vf4_u32m${LMUL}(va8, vl));
+    va32 = __riscv_vsub_vx_i32m${LMUL}(va32, input_zero_point, vl);
+
+    vint32m${LMUL}_t vacc = __riscv_vmul_vx_i32m${LMUL}(va32, slope, vl);
+
+    vfloat32m${LMUL}_t vfpacc = __riscv_vfmul_vf_f32m${LMUL}(
+        __riscv_vfcvt_f_x_v_f32m${LMUL}(vacc, vl), negative_multiplier, vl);
+
+    vfpacc = __riscv_vfmax_vf_f32m${LMUL}(vfpacc, output_min_less_zero_point, vl);
+    vfpacc = __riscv_vfmin_vf_f32m${LMUL}(vfpacc, output_max_less_zero_point, vl);
+
+    vacc = __riscv_vfcvt_x_f_v_i32m${LMUL}(vfpacc, vl);
+    $if DATATYPE == "QS8":
+      const vint32m${LMUL}_t vout32 =
+          __riscv_vadd_vx_i32m${LMUL}(vacc, output_zero_point, vl);
+    $else:
+      const vuint32m${LMUL}_t vout32 = __riscv_vreinterpret_v_i32m${LMUL}_u32m${LMUL}(
+          __riscv_vadd_vx_i32m${LMUL}(vacc, output_zero_point, vl));
+
+    // Clamped to [output_min, output_max] above, so the narrowing cannot overflow.
+    const v${U}int8m${LMUL_8}_t vout8 =
+        __riscv_vncvt_x(__riscv_vncvt_x(vout32, vl), vl);
+    __riscv_vse8_v_${IU}8m${LMUL_8}(output, vout8, vl);
+  }
+}

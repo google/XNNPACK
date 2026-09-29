@@ -56,6 +56,8 @@ using bf16 = bfloat16;
 using f32 = float;
 using u32 = uint32_t;
 using s32 = int32_t;
+using u64 = uint64_t;
+using s64 = int64_t;
 using f64 = double;
 
 template <typename scalar, size_t N>
@@ -909,6 +911,41 @@ void test_horizontal_max() {
   }
 
 template <typename scalar, size_t N>
+void test_any() {
+  using vector = vec<scalar, N>;
+
+  scalar a[N * 2] = {};
+  a[N] = 1;
+  ASSERT_FALSE(any(load(&a[0], vector::N)));
+  for (int i = 1; i <= N; ++i) {
+    ASSERT_TRUE(any(load(&a[i], vector::N)));
+  }
+}
+
+#define TEST_ANY(test_class, type, N) \
+  TEST_F(test_class, any_##type##x##N) { test_any<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_all() {
+  using vector = vec<scalar, N>;
+
+  scalar a[N * 3] = {};
+  for (int i = N; i < 2 * N; ++i) {
+    a[i] = ~scalar(0);
+  }
+  for (int i = 0; i < N; ++i) {
+    ASSERT_FALSE(all(load(&a[i], vector::N)));
+  }
+  ASSERT_TRUE(all(load(&a[N], vector::N)));
+  for (int i = N + 1; i < 2 * N; ++i) {
+    ASSERT_FALSE(all(load(&a[i], vector::N)));
+  }
+}
+
+#define TEST_ALL(test_class, type, N) \
+  TEST_F(test_class, all_##type##x##N) { test_all<type, N>(); }
+
+template <typename scalar, size_t N>
 void test_fma() {
   using vector = vec<scalar, N>;
 
@@ -1053,14 +1090,6 @@ void test_unary(F f, Ref ref, float epsilons,
         [](vec<type, N> x) { return op(x); },                                  \
         [](type x) { return static_cast<type>(ref(static_cast<double>(x))); }, \
         epsilons);                                                             \
-  }
-
-#define TEST_UNARY_RANGE(test_class, op, type, N, ref, epsilons, min, max)     \
-  TEST_F(test_class, op##_##type##x##N) {                                      \
-    test_unary<type, N>(                                                       \
-        [](vec<type, N> x) { return op(x); },                                  \
-        [](type x) { return static_cast<type>(ref(static_cast<double>(x))); }, \
-        epsilons, min, max);                                                   \
   }
 
 }  // namespace simd

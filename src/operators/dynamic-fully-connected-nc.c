@@ -441,12 +441,22 @@ reshape_dynamic_fully_connected_nc(
   const size_t k_stride = round_up_po2(input_channels, kr * sr);
   const struct xnn_gemm_config* gemm_config =
       dynamic_fully_connected_op->gemm_config;
-  const size_t weights_stride =
-      gemm_config->packed_stride_weights_and_biases
-          ? gemm_config->packed_stride_weights_and_biases(
-                gemm_config, input_channels, /*block_size=*/k_stride, k_stride,
-                /*extra_bytes=*/0)
-          : (k_stride << log2_filter_element_size) + bias_element_size;
+  size_t weights_stride;
+  if (gemm_config->packed_stride_weights_and_biases) {
+    weights_stride = gemm_config->packed_stride_weights_and_biases(
+        gemm_config, input_channels, /*block_size=*/k_stride, k_stride,
+        /*extra_bytes=*/0);
+  } else {
+    size_t k_scaled;
+    if (!xnn_safe_mul(k_stride, (size_t) 1 << log2_filter_element_size,
+                      &k_scaled) ||
+        !xnn_safe_add(k_scaled, bias_element_size, &weights_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: weights stride overflows size_t",
+          xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+      return xnn_status_out_of_memory;
+    }
+  }
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
 
   // Clear the operator's compute data to avoid accidentally reusing values from
@@ -492,12 +502,20 @@ reshape_dynamic_fully_connected_nc(
         offsetof(struct gemm_op_context, packw_gemm_gio);
   } else {
     assert(ukernel->packw_gemm_goi || gemm_config->pack_weights_and_biases);
+    size_t packw_k_stride;
+    if (!xnn_safe_mul(input_channels, (size_t) 1 << log2_input_element_size,
+                      &packw_k_stride)) {
+      xnn_log_error(
+          "failed to reshape %s operator: packw k_stride overflows size_t",
+          xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+      return xnn_status_out_of_memory;
+    }
     gemm_context->packw_gemm_goi = (struct packw_gemm_goi_context){
         .kc = input_channels,
         .nr = nr,
         .kr = kr,
         .sr = sr,
-        .k_stride = input_channels << log2_input_element_size,
+        .k_stride = packw_k_stride,
         .b_stride = bias_element_size,
         .w_stride = weights_stride,
         .packw_gemm_goi = ukernel->packw_gemm_goi,
@@ -585,20 +603,33 @@ reshape_dynamic_fully_connected_nc(
                   "threads");
 
         // Allocate a workspace for the entire LHS.
-        *workspace_size =
-            workspace_offset + packed_lh_config->size_fn(batch_size,
-                                                         /*k=*/input_channels,
-                                                         mr_packed, kr, sr);
+        size_t lhs_size = packed_lh_config->size_fn(
+            batch_size, /*k=*/input_channels, mr_packed, kr, sr);
+        if (!xnn_safe_add(workspace_offset, lhs_size, workspace_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator: workspace size overflows size_t",
+              xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+          return xnn_status_out_of_memory;
+        }
 
         // Set up the LHS packing as a separate compute.
+        size_t lhs_stride;
+        if (!xnn_safe_mul(
+                input_channels,
+                (size_t) 1 << packed_lh_config->log2_input_element_size,
+                &lhs_stride)) {
+          xnn_log_error(
+              "failed to reshape %s operator: lhs stride overflows size_t",
+              xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+          return xnn_status_out_of_memory;
+        }
         gemm_context->pack_lh = (struct pack_lh_context){
             .m = batch_size,
             .k = input_channels,
             .mr = mr_packed,
             .kr = kr,
             .sr = sr,
-            .lhs_stride = input_channels
-                          << packed_lh_config->log2_input_element_size,
+            .lhs_stride = lhs_stride,
             .packed_offset_fn = packed_lh_config->offset_fn,
             .pack_lh_ukernel = packed_lh_config->pack_lh_fn,
             .workspace_offset = workspace_offset,
@@ -623,8 +654,15 @@ reshape_dynamic_fully_connected_nc(
             batch_size, output_channels, input_channels);
         const size_t per_thread_workspace_size = packed_lh_config->size_fn(
             mr, /*k=*/input_channels, mr_packed, kr, sr);
-        *workspace_size =
-            workspace_offset + num_threads * per_thread_workspace_size;
+        size_t total_lh_size;
+        if (!xnn_safe_mul(num_threads, per_thread_workspace_size,
+                          &total_lh_size) ||
+            !xnn_safe_add(workspace_offset, total_lh_size, workspace_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator: workspace size overflows size_t",
+              xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+          return xnn_status_out_of_memory;
+        }
         xnn_log_debug(
             "Requesting workspace of %zu x %zu bytes for LHS packing.",
             pthreadpool_get_threads_count(threadpool),
@@ -634,11 +672,57 @@ reshape_dynamic_fully_connected_nc(
     }
   }
 
+  size_t k_scaled;
+  if (!xnn_safe_mul(input_channels, (size_t) 1 << log2_input_element_size,
+                    &k_scaled)) {
+    xnn_log_error(
+        "failed to reshape %s operator: k_scaled overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t a_stride;
+  if (!xnn_safe_mul(input_stride, (size_t) 1 << log2_input_element_size,
+                    &a_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
+
+  size_t cm_stride;
+  if (!xnn_safe_mul(output_stride, (size_t) 1 << log2_output_element_size,
+                    &cm_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output stride overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
+
+  if (batch_size > 1) {
+    size_t total_input_size;
+    if (!xnn_safe_mul(a_stride, batch_size - 1, &total_input_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: input stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+      return xnn_status_out_of_memory;
+    }
+    size_t total_output_size;
+    if (!xnn_safe_mul(cm_stride, batch_size - 1, &total_output_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output stride * batch_size overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+      return xnn_status_out_of_memory;
+    }
+  }
+
   gemm_context->gemm = (struct gemm_context){
-      .k_scaled = input_channels << log2_input_element_size,
+      .k_scaled = k_scaled,
       .w_stride = weights_stride,
-      .a_stride = input_stride << log2_input_element_size,
-      .cm_stride = output_stride << log2_output_element_size,
+      .a_stride = a_stride,
+      .cm_stride = cm_stride,
       .cn_stride = nr << log2_output_element_size,
       .log2_csize = log2_output_element_size,
       .ukernel = gemm_ukernel,

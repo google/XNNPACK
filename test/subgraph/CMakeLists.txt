@@ -51,6 +51,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       even-split
       fully-connected
       max-pooling-2d
+      pack-lh
       rewrites
       rope
       softmax

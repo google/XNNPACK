@@ -1,8 +1,8 @@
 # Copyright (C) 2024 Intel Corporation
-#  
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright notice,
 #    this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
@@ -11,7 +11,7 @@
 # 3. Neither the name of the copyright holder nor the names of its contributors
 #    may be used to endorse or promote products derived from this software
 #    without specific prior written permission.
-#  
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -23,8 +23,8 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#  
-#  
+#
+#
 # SPDX-License-Identifier: BSD-3-Clause
 
 #################################### Scalar ###################################
@@ -32,7 +32,7 @@ tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/q
 tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-scalar-u2.c &
 tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-scalar-u4.c &
 tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-scalar-u8.c &
- 
+
 tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-scalar-u1.c &
 tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-scalar-u2.c &
 tools/xngen src/qs8-vpreluc/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-scalar-u4.c &
@@ -43,6 +43,15 @@ tools/xngen src/qs8-vpreluc/avx2.c.in -D BATCH_TILE=16 -D AVX=1 -D DATATYPE=QS8 
 
 tools/xngen src/qs8-vpreluc/avx2.c.in -D BATCH_TILE=16 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-avx2-u16.c &
 
+#################################### RVV ####################################
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u1v.c &
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u2v.c &
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=4 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u4v.c &
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=8 -D DATATYPE=QS8 -o src/qs8-vpreluc/gen/qs8-vpreluc-rvv-u8v.c &
+
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u1v.c &
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u2v.c &
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=4 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u4v.c &
+tools/xngen src/qs8-vpreluc/rvv.c.in -D LMUL=8 -D DATATYPE=QU8 -o src/qu8-vpreluc/gen/qu8-vpreluc-rvv-u8v.c &
 
 wait
-

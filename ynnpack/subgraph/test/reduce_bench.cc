@@ -167,11 +167,8 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
     state.SkipWithError("Incorrect result");
   }
 
-  const size_t input_bytes = (input_size * type_size_bytes(type_of<Input>())) /
-                             type_element_count(type_of<Input>());
-  const size_t output_bytes =
-      (output_size * type_size_bytes(type_of<Output>())) /
-      type_element_count(type_of<Output>());
+  const size_t input_bytes = type_size_bytes(type_of<Input>(), input_size);
+  const size_t output_bytes = type_size_bytes(type_of<Output>(), output_size);
   const size_t total_bytes = input_bytes + output_bytes;
 
   state.counters["Bytes"] = benchmark::Counter(state.iterations() * total_bytes,

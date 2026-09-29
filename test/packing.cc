@@ -1,10 +1,14 @@
 // Copyright 2022 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 // clang-format off
 
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -12,17 +16,40 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "src/xnnpack/params.h"
 
 namespace {
 
 using testing::ElementsAreArray;
 using testing::Matcher;
 using testing::_;
+
+static void set_packed_i2(std::vector<uint8_t>& data, size_t byte_offset,
+                          size_t index, uint8_t value) {
+  const size_t shift = (index & 3) * 2;
+  uint8_t& byte = data[byte_offset + (index >> 2)];
+  byte = static_cast<uint8_t>((byte & ~(UINT8_C(0x3) << shift)) |
+                              ((value & UINT8_C(0x3)) << shift));
+}
+
+static void set_packed_i4(std::vector<uint8_t>& data, size_t byte_offset,
+                          size_t index, uint8_t value) {
+  uint8_t& byte = data[byte_offset + (index >> 1)];
+  if ((index & 1) == 0) {
+    byte = (byte & 0xF0) | (value & 0x0F);
+  } else {
+    byte = (byte & 0x0F) | ((value & 0x0F) << 4);
+  }
+}
 
 // QS8-QC2W GEMM packing tests.
 
@@ -47,7 +74,7 @@ TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
       (sizeof(float) + round_up_po2(kc, kr * sr) / 4));
   auto a = xnn_qs8_qc2w_packing_params{ 1, kernel_zero_point };
   xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
-    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -120,7 +147,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
   auto a = xnn_qd8_qc2w_packing_params{ 1, kernel_zero_point.data() };
   xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
-    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -158,7 +185,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kernel_zero_point_zero) {
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
   auto a = xnn_qd8_qc2w_packing_params{ 1, nullptr };
   xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
-    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -270,7 +297,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4) {
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   xnnpack::Buffer<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/kc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<Matcher<uint8_t>> expected = {
@@ -322,6 +349,401 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+TEST(PACK_KAI_QS2_WEIGHTS_AND_BIASES_SME2, groups_and_optional_bias) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+
+  constexpr size_t groups = 2;
+  constexpr size_t output_channels = 3;
+  constexpr size_t input_channels = 64;
+  constexpr size_t weights_row_stride = input_channels / 4;
+  constexpr size_t weights_group_stride =
+      output_channels * weights_row_stride;
+
+  std::vector<uint8_t> weights(groups * weights_group_stride);
+  for (size_t group = 0; group < groups; group++) {
+    for (size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
+      for (size_t input_channel = 0; input_channel < input_channels;
+           input_channel++) {
+        const size_t byte_offset =
+            group * weights_group_stride +
+            output_channel * weights_row_stride;
+        // Exercise every signed two-bit code. The QP8 path interprets these
+        // bit patterns as {0, 1, -2, -1}.
+        set_packed_i2(weights, byte_offset, input_channel,
+                      static_cast<uint8_t>(group + output_channel +
+                                           input_channel));
+      }
+    }
+  }
+
+  std::vector<float> bias(groups * output_channels);
+  std::iota(bias.begin(), bias.end(), -3.0f);
+  std::vector<float> scale(groups * output_channels);
+  std::iota(scale.begin(), scale.end(), 0.5f);
+
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr =
+      xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
+  gemm_config.log2_kr = 2;
+  gemm_config.log2_sr = 0;
+
+  const size_t packed_stride =
+      xnn_packed_stride_kai_qs2_weights_and_biases_sme2(
+          &gemm_config, input_channels, /*unused_block_size=*/0,
+          /*unused_k_stride=*/input_channels, /*extra_bytes=*/0);
+  const size_t packed_group_size =
+      round_up(output_channels, gemm_config.nr) * packed_stride;
+  std::vector<uint8_t> grouped_packed_weights(
+      groups * packed_group_size, UINT8_C(0xA5));
+  std::vector<uint8_t> expected_packed_weights(
+      groups * packed_group_size, UINT8_C(0xA5));
+
+  xnn_pack_kai_qs2_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels,
+      /*accumulator_init=*/bias.data(), weights.data(),
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+      /*extra_data0_element_size=*/0,
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/scale.data(),
+      /*extra_data1_element_size=*/sizeof(float),
+      grouped_packed_weights.data(), /*params=*/nullptr);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs2_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0,
+        /*k_stride=*/input_channels,
+        /*accumulator_init=*/bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+        /*extra_data0_element_size=*/0,
+        /*init_extra_data1_fn=*/nullptr,
+        /*extra_data1=*/scale.data() + group * output_channels,
+        /*extra_data1_element_size=*/sizeof(float),
+        expected_packed_weights.data() + group * packed_group_size,
+        /*params=*/nullptr);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+
+  constexpr int32_t signed_i2_lut[4] = {0, 1, -2, -1};
+  const size_t packed_weights_bytes =
+      gemm_config.nr * (input_channels / 4);
+  for (size_t group = 0; group < groups; group++) {
+    const uint8_t* packed_group =
+        grouped_packed_weights.data() + group * packed_group_size;
+    const int32_t* packed_sums = reinterpret_cast<const int32_t*>(
+        packed_group + packed_weights_bytes);
+    const float* packed_scales = reinterpret_cast<const float*>(
+        packed_sums + gemm_config.nr);
+    const float* packed_biases = packed_scales + gemm_config.nr;
+    for (size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
+      int32_t expected_sum = 0;
+      for (size_t input_channel = 0; input_channel < input_channels;
+           input_channel++) {
+        const size_t code =
+            (group + output_channel + input_channel) & 3;
+        expected_sum += signed_i2_lut[code];
+      }
+      EXPECT_EQ(packed_sums[output_channel], expected_sum);
+      EXPECT_FLOAT_EQ(packed_scales[output_channel],
+                      scale[group * output_channels + output_channel]);
+      EXPECT_FLOAT_EQ(packed_biases[output_channel],
+                      bias[group * output_channels + output_channel]);
+    }
+  }
+
+  // A missing fully-connected bias is represented as a null pointer. KleidiAI
+  // must pack it identically to an explicit all-zero bias.
+  std::vector<float> zero_bias(groups * output_channels, 0.0f);
+  std::fill(grouped_packed_weights.begin(), grouped_packed_weights.end(),
+            UINT8_C(0xA5));
+  std::fill(expected_packed_weights.begin(), expected_packed_weights.end(),
+            UINT8_C(0xA5));
+  xnn_pack_kai_qs2_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels,
+      /*accumulator_init=*/nullptr, weights.data(),
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+      /*extra_data0_element_size=*/0,
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/scale.data(),
+      /*extra_data1_element_size=*/sizeof(float),
+      grouped_packed_weights.data(), /*params=*/nullptr);
+  xnn_pack_kai_qs2_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels,
+      /*accumulator_init=*/zero_bias.data(), weights.data(),
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+      /*extra_data0_element_size=*/0,
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/scale.data(),
+      /*extra_data1_element_size=*/sizeof(float),
+      expected_packed_weights.data(), /*params=*/nullptr);
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+}
+
+TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2, groups_gt_1_goi_w) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  const size_t groups = 2;
+  const size_t output_channels = 3;
+  const size_t input_channels = 5;
+  const size_t input_channel_stride = input_channels;
+  const size_t weights_row_stride = (input_channel_stride + 1) / 2;
+  const size_t weights_group_stride = output_channels * weights_row_stride;
+
+  std::vector<uint8_t> weights(groups * weights_group_stride, 0x88);
+  for (size_t group = 0; group < groups; group++) {
+    for (size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
+      for (size_t input_channel = 0; input_channel < input_channels;
+           input_channel++) {
+        const size_t byte_offset =
+            group * weights_group_stride + output_channel * weights_row_stride;
+        const uint8_t value =
+            static_cast<uint8_t>(group * 7 + output_channel * 3 +
+                                 input_channel);
+        set_packed_i4(weights, byte_offset, input_channel, value);
+      }
+    }
+  }
+
+  std::vector<int32_t> bias(groups * output_channels);
+  std::iota(bias.begin(), bias.end(), 10);
+  std::vector<int32_t> zero_bias(groups * output_channels);
+  std::vector<float> scale(groups * output_channels);
+  std::iota(scale.begin(), scale.end(), 1.0f);
+
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr =
+      xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr();
+  gemm_config.log2_kr = 2;
+  gemm_config.log2_sr = 0;
+
+  const size_t packed_stride =
+      xnn_packed_stride_kai_qs8_qc4w_weights_and_biases_sme2(
+          &gemm_config, input_channels, /*unused_block_size=*/0,
+          input_channel_stride, /*extra_bytes=*/0);
+  const size_t packed_group_size =
+      round_up(output_channels, gemm_config.nr) * packed_stride;
+  const size_t packed_size = groups * packed_group_size;
+  std::vector<uint8_t> grouped_packed_weights(packed_size, 0xA5);
+  std::vector<uint8_t> expected_packed_weights(packed_size, 0xA5);
+  auto params = xnn_qs8_qc4w_packing_params{1, 0x8};
+
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, input_channel_stride, bias.data(),
+      weights.data(), /*init_extra_data0_fn=*/nullptr, scale.data(),
+      sizeof(float), /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, grouped_packed_weights.data(), &params);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0, input_channel_stride,
+        bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        scale.data() + group * output_channels, sizeof(float),
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0,
+        expected_packed_weights.data() + group * packed_group_size, &params);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+
+  std::fill(grouped_packed_weights.begin(), grouped_packed_weights.end(), 0xA5);
+  std::fill(expected_packed_weights.begin(), expected_packed_weights.end(),
+            0xA5);
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, input_channel_stride,
+      /*accumulator_init=*/zero_bias.data(), weights.data(),
+      /*init_extra_data0_fn=*/nullptr, scale.data(), sizeof(float),
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, grouped_packed_weights.data(), &params);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0, input_channel_stride,
+        /*accumulator_init=*/zero_bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        scale.data() + group * output_channels, sizeof(float),
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0,
+        expected_packed_weights.data() + group * packed_group_size, &params);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+
+  params.kernel_zero_point = 0;
+  std::fill(grouped_packed_weights.begin(), grouped_packed_weights.end(), 0xA5);
+  std::fill(expected_packed_weights.begin(), expected_packed_weights.end(),
+            0xA5);
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, input_channel_stride, bias.data(),
+      weights.data(), /*init_extra_data0_fn=*/nullptr, scale.data(),
+      sizeof(float), /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, grouped_packed_weights.data(), &params);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0, input_channel_stride,
+        bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        scale.data() + group * output_channels, sizeof(float),
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0,
+        expected_packed_weights.data() + group * packed_group_size, &params);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+}
+
+TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2,
+     rejects_invalid_kernel_zero_point) {
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr = 1;
+  gemm_config.log2_kr = 0;
+  gemm_config.log2_sr = 0;
+
+  const int32_t bias = 0;
+  const uint8_t weights = 0;
+  const float scale = 1.0f;
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+  const auto params = xnn_qs8_qc4w_packing_params{
+      /*input_zero_point=*/0, /*kernel_zero_point=*/7};
+
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, /*input_channels=*/1,
+      /*output_channels=*/1, /*groups=*/1, /*unused_block_size=*/0,
+      /*k_stride=*/1, &bias, &weights, /*init_extra_data0_fn=*/nullptr, &scale,
+      sizeof(float), /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, packed_weights.data(), &params);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+
+#if XNN_ENABLE_KLEIDIAI
+class FailingAllocatorGuard {
+ public:
+  explicit FailingAllocatorGuard(size_t fail_threshold_bytes)
+      : saved_allocator_(xnn_params.allocator),
+        fail_threshold_bytes_(fail_threshold_bytes) {
+    xnn_params.allocator = xnn_default_allocator;
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.allocate = Allocate;
+    xnn_params.allocator.deallocate = Deallocate;
+  }
+  ~FailingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+  FailingAllocatorGuard(const FailingAllocatorGuard&) = delete;
+  FailingAllocatorGuard& operator=(const FailingAllocatorGuard&) = delete;
+
+ private:
+  static void* Allocate(void* context, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (size >= self->fail_threshold_bytes_) {
+      return nullptr;
+    }
+    return xnn_default_allocator.allocate(xnn_default_allocator.context, size);
+  }
+  static void Deallocate(void* context, void* pointer) {
+    xnn_default_allocator.deallocate(xnn_default_allocator.context, pointer);
+  }
+
+  const struct xnn_allocator saved_allocator_;
+  const size_t fail_threshold_bytes_;
+};
+
+TEST(PACK_KAI_F16_CONV_GOKI_W_SME, null_bias_oom) {
+  FailingAllocatorGuard allocator_guard(/*fail_threshold_bytes=*/1u << 20);
+  constexpr size_t g = 1u << 20;
+  constexpr size_t nc = 1;
+  constexpr size_t ks = 1;
+  constexpr size_t kc = 1;
+  const uint16_t kernel[1] = {0x3800};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+
+  xnn_pack_kai_f16_conv_goki_w_sme(
+      g, nc, ks, kc, /*nr=*/16, /*kr=*/1, /*sr=*/1, kernel, /*b=*/nullptr,
+      /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0,
+      /*params=*/nullptr);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+
+TEST(PACK_KAI_QS8_CONV_GOKI_W_SME, null_bias_oom) {
+  FailingAllocatorGuard allocator_guard(/*fail_threshold_bytes=*/1u << 20);
+  constexpr size_t g = 1u << 20;
+  constexpr size_t nc = 1;
+  constexpr size_t ks = 1;
+  constexpr size_t kc = 1;
+  const int8_t kernel[1] = {1};
+  const float scale[1] = {1.0f};
+  const xnn_qs8_packing_params params = {/*input_zero_point=*/0};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+
+  xnn_pack_kai_qs8_conv_goki_w_sme(
+      g, nc, ks, kc, /*nr=*/16, /*kr=*/1, /*sr=*/1, kernel, /*b=*/nullptr,
+      scale, packed_weights.data(), /*extra_bytes=*/0, &params);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+
+TEST(PACK_KAI_PF32_CONV_GOKI_W_SME, null_bias_oom) {
+  FailingAllocatorGuard allocator_guard(/*fail_threshold_bytes=*/1u << 20);
+  constexpr size_t g = 1u << 20;
+  constexpr size_t nc = 1;
+  constexpr size_t ks = 1;
+  constexpr size_t kc = 1;
+  const float kernel[1] = {0.5f};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+
+  xnn_pack_kai_pf32_conv_goki_w_sme(
+      g, nc, ks, kc, /*nr=*/16, /*kr=*/1, /*sr=*/1, kernel, /*b=*/nullptr,
+      /*scale=*/nullptr, reinterpret_cast<float*>(packed_weights.data()),
+      /*extra_bytes=*/0, /*params=*/nullptr);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+
+TEST(PACK_KAI_F32_WEIGHTS_AND_BIASES_SME2, null_bias_oom) {
+  FailingAllocatorGuard allocator_guard(/*fail_threshold_bytes=*/1u << 20);
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr = 16;
+  gemm_config.log2_kr = 0;
+  gemm_config.log2_sr = 0;
+  const float weights[1] = {0.5f};
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+
+  xnn_pack_kai_f32_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, /*input_channels=*/1,
+      /*output_channels=*/1u << 18, /*groups=*/1, /*unused_block_size=*/0,
+      /*k_stride=*/1, /*accumulator_init=*/nullptr, weights,
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+      /*extra_data0_element_size=*/0, /*init_extra_data1_fn=*/nullptr,
+      /*extra_data1=*/nullptr, /*extra_data1_element_size=*/0,
+      packed_weights.data(), /*params=*/nullptr);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+#endif  // XNN_ENABLE_KLEIDIAI
+
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   size_t g = 1;
   size_t nc = 2;
@@ -337,7 +759,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   xnnpack::Buffer<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/kc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<Matcher<uint8_t>> expected = {
@@ -365,7 +787,7 @@ TEST(PACK_QD8_F32_QC4UW_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   xnnpack::Buffer<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/kc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<Matcher<uint8_t>> expected = {
@@ -431,7 +853,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
 
-  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
+  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl, /*n_stride=*/kc,
     k.data(), /*bias=*/nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
   size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
@@ -503,7 +925,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
-  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
+  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl, /*n_stride=*/kc,
     k.data(), nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
     size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
@@ -576,7 +998,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
-  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
+  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl, /*n_stride=*/kc,
     k.data(), /*bias=*/nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
     size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
@@ -2445,6 +2867,58 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
+TEST(PACK_KAI_F32_DWCONV_GHW_W, non_power_of_two_channel_tile) {
+  constexpr size_t primary_tile = 9;
+  constexpr size_t h = 3;
+  constexpr size_t w = 3;
+  constexpr size_t channel_tile = 12;
+  constexpr size_t guard_elements = 16;
+  constexpr float guard_value = -1.0f;
+
+  for (const size_t channels : std::array<size_t, 6>{11, 12, 13, 23, 24, 25}) {
+    std::vector<float> bias(channels);
+    std::iota(bias.begin(), bias.end(), 0.0f);
+    std::vector<float> kernel(channels * h * w);
+    std::iota(kernel.begin(), kernel.end(), 100.0f);
+    const size_t packed_elements =
+        (primary_tile + 1) * round_up(channels, channel_tile);
+    std::vector<float> packed_weights(
+        packed_elements + guard_elements, guard_value);
+
+    xnn_pack_kai_f32_dwconv_ghw_w(
+        primary_tile, h, w, channels, channel_tile, kernel.data(), bias.data(),
+        /*scale=*/nullptr, packed_weights.data(), /*per_tile_extra_bytes=*/0,
+        /*params=*/nullptr);
+
+    for (size_t channel_block = 0; channel_block < channels;
+         channel_block += channel_tile) {
+      const size_t block_offset =
+          (primary_tile + 1) * channel_block;
+      for (size_t channel_offset = 0; channel_offset < channel_tile;
+           channel_offset++) {
+        const size_t channel = channel_block + channel_offset;
+        const bool valid_channel = channel < channels;
+        EXPECT_EQ(packed_weights[block_offset + channel_offset],
+                  valid_channel ? bias[channel] : 0.0f)
+            << "channels = " << channels << ", channel = " << channel;
+        for (size_t kernel_index = 0; kernel_index < h * w;
+             kernel_index++) {
+          EXPECT_EQ(
+              packed_weights[block_offset + channel_tile * (kernel_index + 1) +
+                             channel_offset],
+              valid_channel ? kernel[channel * h * w + kernel_index] : 0.0f)
+              << "channels = " << channels << ", channel = " << channel
+              << ", kernel index = " << kernel_index;
+        }
+      }
+    }
+    for (size_t i = packed_elements; i < packed_weights.size(); i++) {
+      EXPECT_EQ(packed_weights[i], guard_value)
+          << "channels = " << channels << ", guard index = " << i;
+    }
+  }
+}
+
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
   const size_t primary_tile = 3;
   const size_t h = 3;
@@ -3385,4 +3859,221 @@ TEST(PACK_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
+// ----------------------------------------------------------------------------
+// Strided (n_stride > kc) tests for GOI layout packing
+// ----------------------------------------------------------------------------
+
+TEST(PACK_F32_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 4;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 elements + 2 padding elements per row
+
+  std::vector<float> b = {10.0f, 20.0f};
+  std::vector<float> k = {
+    1.0f, 2.0f, 3.0f, 4.0f, -99.0f, -99.0f,  // Row 0 + padding
+    5.0f, 6.0f, 7.0f, 8.0f, -99.0f, -99.0f,  // Row 1 + padding
+  };
+  xnnpack::Buffer<float> packed_w(nc + nc * kc);
+
+  xnn_pack_f32_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                          k.data(), b.data(), /*scale=*/nullptr,
+                          packed_w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<float> expected = {
+    // 2 biases
+    10.0f, 20.0f,
+    // Block 0 (k=0..1): w0[0..1], w1[0..1]
+    1.0f, 2.0f, 5.0f, 6.0f,
+    // Block 1 (k=2..3): w0[2..3], w1[2..3]
+    3.0f, 4.0f, 7.0f, 8.0f,
+  };
+  EXPECT_THAT(packed_w, ElementsAreArray(expected));
+}
+
+TEST(PACK_F16_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 4;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 elements + 2 padding elements per row
+
+  std::vector<uint16_t> b = {10, 20};
+  std::vector<uint16_t> k = {
+    1, 2, 3, 4, 0xDEAD, 0xDEAD,  // Row 0 + padding
+    5, 6, 7, 8, 0xDEAD, 0xDEAD,  // Row 1 + padding
+  };
+  xnnpack::Buffer<uint16_t> packed_w(nc + nc * kc);
+
+  xnn_pack_f16_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                          k.data(), b.data(), /*scale=*/nullptr,
+                          packed_w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<uint16_t> expected = {
+    // 2 biases
+    10, 20,
+    // Block 0 (k=0..1)
+    1, 2, 5, 6,
+    // Block 1 (k=2..3)
+    3, 4, 7, 8,
+  };
+  EXPECT_THAT(packed_w, ElementsAreArray(expected));
+}
+
+TEST(PACK_QS8_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 4;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 elements + 2 padding elements per row
+
+  std::vector<int32_t> b = {10, 20};
+  std::vector<int8_t> k = {
+    1, 2, 3, 4, 127, 127,  // Row 0 + padding
+    5, 6, 7, 8, 127, 127,  // Row 1 + padding
+  };
+  xnnpack::Buffer<int8_t> packed_w(nc * sizeof(int32_t) + nc * kc);
+  const struct xnn_qs8_packing_params params = {0};
+
+  xnn_pack_qs8_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                          k.data(), b.data(), /*scale=*/nullptr,
+                          packed_w.data(), /*extra_bytes=*/0, &params);
+
+  int32_t* packed_b = (int32_t*)packed_w.data();
+  EXPECT_EQ(packed_b[0], 10);
+  EXPECT_EQ(packed_b[1], 20);
+
+  const int8_t* packed_k = packed_w.data() + nc * sizeof(int32_t);
+  const std::vector<int8_t> expected_weights = {
+    1, 2, 5, 6,
+    3, 4, 7, 8,
+  };
+  for (size_t i = 0; i < expected_weights.size(); i++) {
+    EXPECT_EQ(packed_k[i], expected_weights[i]);
+  }
+}
+
+TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 8;
+  const size_t nr = 2;
+  const size_t kr = 4;
+  const size_t sr = 1;
+  const size_t n_stride = 12;  // 8 nibbles (4 bytes) + 4 padding nibbles (2 bytes) per row
+
+  std::vector<int32_t> b = {0, 1};
+  std::vector<uint8_t> k = {
+    0x98, 0xBA, 0xDC, 0xFE, 0xFF, 0xFF,  // Row 0 + padding
+    0x10, 0x32, 0x54, 0x76, 0xFF, 0xFF,  // Row 1 + padding
+  };
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
+  auto a = xnn_qs8_qc4w_packing_params{0, 0x8};
+
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                               k.data(), b.data(), /*scale=*/nullptr,
+                               packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<Matcher<uint8_t>> expected = {
+    // 2 bias.
+    0x00, 0x00, 0x00, 0x00,
+    0x10, 0x00, 0x00, 0x00,
+    0x40, 0x51, 0x62, 0x73,
+    0xC8, 0xD9, 0xEA, 0xFB,
+  };
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 1;
+  const size_t kc = 16;
+  const size_t nr = 1;
+  const size_t kr = 4;
+  const size_t sr = 1;
+  const size_t n_stride = 32;  // 16 crumbs (4 bytes) + 16 padding crumbs (4 bytes)
+
+  std::vector<int32_t> b = {0};
+  float kernel_zero_point = 0;
+  std::vector<uint8_t> k = {
+    0x00, 0x55, 0xAA, 0xFF, 0xEE, 0xEE, 0xEE, 0xEE,  // Row 0 + padding
+  };
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) *
+      (sizeof(float) + round_up_po2(kc, kr * sr) / 4));
+  auto a = xnn_qs8_qc2w_packing_params{1, kernel_zero_point};
+
+  xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+                               /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/n_stride,
+                               k.data(), b.data(), /*scale=*/nullptr,
+                               packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 1 bias.
+    0x00, 0x00, 0x00, 0x00,
+    // weights
+    0xE4, 0xE4, 0xE4, 0xE4,
+  };
+  int* i2_ptr = (int*)expected.data();
+  i2_ptr[0] = 8;
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+TEST(PACK_QS8_QC4W_GEMM_GOI_W_NON_PLANAR, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 8;
+  const size_t kc = 4;
+  const size_t nr = 8;
+  const size_t kr = 4;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 nibbles (2 bytes) + 2 padding nibbles (1 byte) per row
+
+  std::vector<int32_t> b = {0, 1, 2, 3, 4, 5, 6, 7};
+  std::vector<uint8_t> k = {
+    0x10, 0x32, 0xFF,  // Row 0 + padding
+    0x10, 0x32, 0xFF,  // Row 1 + padding
+    0x10, 0x32, 0xFF,  // Row 2 + padding
+    0x10, 0x32, 0xFF,  // Row 3 + padding
+    0x54, 0x76, 0xFF,  // Row 4 + padding
+    0x54, 0x76, 0xFF,  // Row 5 + padding
+    0x54, 0x76, 0xFF,  // Row 6 + padding
+    0x54, 0x76, 0xFF,  // Row 7 + padding
+  };
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
+  auto a = xnn_qs8_qc4w_packing_params{0, 0x8};
+
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(
+      g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+      k.data(), b.data(), /*scale=*/nullptr,
+      packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<Matcher<uint8_t>> expected = {
+    // 8 bias (scaled by 16)
+    0x00, 0x00, 0x00, 0x00,
+    0x10, 0x00, 0x00, 0x00,
+    0x20, 0x00, 0x00, 0x00,
+    0x30, 0x00, 0x00, 0x00,
+    0x40, 0x00, 0x00, 0x00,
+    0x50, 0x00, 0x00, 0x00,
+    0x60, 0x00, 0x00, 0x00,
+    0x70, 0x00, 0x00, 0x00,
+    // Interleaved non-planar weights: low nibble from row 0-3, high nibble from row 4-7
+    0xC8, 0xD9, 0xEA, 0xFB,
+    0xC8, 0xD9, 0xEA, 0xFB,
+    0xC8, 0xD9, 0xEA, 0xFB,
+    0xC8, 0xD9, 0xEA, 0xFB,
+  };
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
 }  // namespace
+

@@ -181,6 +181,13 @@ static enum xnn_status reshape_fully_connected_operator(
     return xnn_status_invalid_parameter;
   }
   const size_t num_input_elements = xnn_shape_multiply_all_dims(input_shape);
+  if (num_input_elements == SIZE_MAX) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": input shape overflows size_t",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
+                  input_id);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = num_input_elements / input_channels;
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;

@@ -1,5 +1,7 @@
 // Copyright 2020-2025 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -136,13 +138,27 @@ enum xnn_status xnn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
     goto error;
   }
 
+  if (external_value_ids >= XNN_INVALID_VALUE_ID) {
+    xnn_log_error(
+        "failed to create subgraph: external_value_ids (%zu) exceeds maximum "
+        "allowed",
+        (size_t)external_value_ids);
+    status = xnn_status_invalid_parameter;
+    goto error;
+  }
+  size_t values_size;
+  if (!xnn_safe_mul(external_value_ids, sizeof(struct xnn_value),
+                    &values_size)) {
+    xnn_log_error("failed to create subgraph: values size overflows size_t");
+    goto error;
+  }
+
   subgraph->external_value_ids = external_value_ids;
 
-  subgraph->values =
-      xnn_allocate_zero_memory(external_value_ids * sizeof(struct xnn_value));
+  subgraph->values = xnn_allocate_zero_memory(values_size);
   if (subgraph->values == NULL) {
     xnn_log_error("failed to allocate %zu bytes for subgraph values",
-                  (size_t)external_value_ids * sizeof(struct xnn_value));
+                  values_size);
     goto error;
   }
   for (size_t i = 0; i < external_value_ids; i++) {
@@ -164,15 +180,35 @@ enum xnn_status xnn_subgraph_reserve_values(xnn_subgraph_t subgraph,
   struct xnn_value* values = subgraph->values;
   const size_t size = subgraph->num_values;
   const size_t capacity = subgraph->num_reserved_values;
-  if (capacity < size + num_values) {
-    const size_t new_capacity =
+  size_t required_capacity;
+  if (!xnn_safe_add(size, num_values, &required_capacity)) {
+    xnn_log_error(
+        "failed to reserve subgraph values: capacity overflows size_t");
+    return xnn_status_out_of_memory;
+  }
+  if (required_capacity >= XNN_INVALID_VALUE_ID) {
+    xnn_log_error(
+        "failed to reserve subgraph values: value count exceeds maximum "
+        "allowed");
+    return xnn_status_out_of_memory;
+  }
+  if (capacity < required_capacity) {
+    size_t new_capacity =
         max(min(capacity * 2, capacity + 512), capacity + max(num_values, 64));
-    assert(new_capacity >= size + num_values);
-    values =
-        xnn_reallocate_memory(values, new_capacity * sizeof(struct xnn_value));
+    if (new_capacity < required_capacity) {
+      new_capacity = required_capacity;
+    }
+    size_t bytes_needed;
+    if (!xnn_safe_mul(new_capacity, sizeof(struct xnn_value), &bytes_needed)) {
+      xnn_log_error(
+          "failed to reserve subgraph values: allocation size overflows "
+          "size_t");
+      return xnn_status_out_of_memory;
+    }
+    values = xnn_reallocate_memory(values, bytes_needed);
     if (values == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subgraph values",
-                    new_capacity * sizeof(struct xnn_value));
+                    bytes_needed);
       return xnn_status_out_of_memory;
     }
 
@@ -275,16 +311,35 @@ enum xnn_status xnn_subgraph_reserve_nodes(xnn_subgraph_t subgraph,
   struct xnn_node* nodes = subgraph->nodes;
   const size_t size = subgraph->num_nodes;
   const size_t capacity = subgraph->num_reserved_nodes;
+  size_t required_capacity;
+  if (!xnn_safe_add(size, num_nodes, &required_capacity)) {
+    xnn_log_error(
+        "failed to reserve subgraph nodes: capacity overflows size_t");
+    return xnn_status_out_of_memory;
+  }
+  if (required_capacity >= XNN_INVALID_NODE_ID) {
+    xnn_log_error(
+        "failed to reserve subgraph nodes: node count exceeds maximum allowed");
+    return xnn_status_out_of_memory;
+  }
 
-  if (capacity < size + num_nodes) {
-    const size_t new_capacity =
+  if (capacity < required_capacity) {
+    size_t new_capacity =
         max(min(capacity * 2, capacity + 512), capacity + max(num_nodes, 64));
-    assert(new_capacity >= size + num_nodes);
-    nodes =
-        xnn_reallocate_memory(nodes, new_capacity * sizeof(struct xnn_node));
+    if (new_capacity < required_capacity) {
+      new_capacity = required_capacity;
+    }
+    size_t bytes_needed;
+    if (!xnn_safe_mul(new_capacity, sizeof(struct xnn_node), &bytes_needed)) {
+      xnn_log_error(
+          "failed to reserve subgraph nodes: allocation size overflows "
+          "size_t");
+      return xnn_status_out_of_memory;
+    }
+    nodes = xnn_reallocate_memory(nodes, bytes_needed);
     if (nodes == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subgraph nodes",
-                    new_capacity * sizeof(struct xnn_node));
+                    bytes_needed);
       return xnn_status_out_of_memory;
     }
 
@@ -1205,9 +1260,15 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
              value->datatype == xnn_datatype_pfp32);
       if (xnn_value_is_static(value->allocation_type)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
-        const size_t fp16_size =
-            xnn_tensor_get_size(value) / 2 + XNN_EXTRA_BYTES;
-        value->fp16_rewrite.fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
+        const size_t tensor_size = xnn_tensor_get_size(value);
+        if (tensor_size == SIZE_MAX) {
+          xnn_log_error(
+              "FP16 rewrite aborted: static tensor size overflows size_t");
+          goto error;
+        }
+        const size_t fp16_size = tensor_size / 2 + XNN_EXTRA_BYTES;
+        value->fp16_rewrite.fp16_temp_data =
+            xnn_allocate_zero_memory(fp16_size);
         if (value->fp16_rewrite.fp16_temp_data == NULL) {
           xnn_log_error("failed to allocate %zu bytes for fp16 tensor data",
                         (size_t)fp16_size);
@@ -1318,6 +1379,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       if (xnn_value_is_static(value->allocation_type)) {
         assert(value->datatype == xnn_datatype_fp32);
         const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
+        if (num_elements == SIZE_MAX) {
+          xnn_log_error(
+              "FP16 rewrite aborted: number of elements overflows size_t");
+          goto error;
+        }
         xnn_run_unary_elementwise_nc(
             xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
             /*params=*/NULL, /*input_quantization=*/NULL,
@@ -2210,9 +2276,17 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
   // Compact the nodes and sort them hierarchically (stably), if needed. The
   // temporary memory needed for `nodes_map` and `values_ready` is allocated as
   // a single block to reduce overheads.
-  uint32_t* nodes_map =
-      xnn_allocate_memory(sizeof(uint32_t) * subgraph->num_nodes +
-                          sizeof(bool) * subgraph->num_values);
+  size_t nodes_map_size;
+  size_t values_ready_size;
+  size_t total_scratch_size;
+  if (!xnn_safe_mul(sizeof(uint32_t), subgraph->num_nodes, &nodes_map_size) ||
+      !xnn_safe_mul(sizeof(bool), subgraph->num_values, &values_ready_size) ||
+      !xnn_safe_add(nodes_map_size, values_ready_size, &total_scratch_size)) {
+    xnn_log_error(
+        "failed to allocate nodes_map scratch buffer: size overflows size_t");
+    return;
+  }
+  uint32_t* nodes_map = xnn_allocate_memory(total_scratch_size);
   if (nodes_map == NULL) {
     xnn_log_error("failed to allocate nodes_map scratch buffer");
     return;
@@ -2345,6 +2419,11 @@ static bool convert_gemm_to_qduint8(
         default:
           XNN_UNREACHABLE;
       }
+    }
+  } else if (input_datatype == xnn_datatype_bf16) {
+    if (consumer_weights_type == xnn_datatype_qbint4) {
+      original_config = xnn_init_qd8_bf16_qb4w_gemm_config();
+      unsigned_config = xnn_init_qdu8_bf16_qb4w_gemm_config();
     }
   }
   // If the `qduint8` config is better than the `qdint8` config, use it
@@ -2741,17 +2820,35 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
     const size_t* old_shape = input_value->shape.dim;
     const size_t* new_shape = node->params.static_reshape.new_shape.dim;
     size_t num_elements = 1;
+    bool overflow = false;
     for (uint32_t k = 0; k < num_dims; k++) {
       shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
                      ? 1
                      : new_shape[k];
-      num_elements *= shape[k];
+      if (!xnn_safe_mul(num_elements, shape[k], &num_elements)) {
+        overflow = true;
+        break;
+      }
+    }
+
+    size_t alloc_size = 0;
+    if (overflow ||
+        !xnn_safe_mul(num_elements,
+                      xnn_datatype_size_bytes(input_value->datatype),
+                      &alloc_size) ||
+        !xnn_safe_add(alloc_size, XNN_EXTRA_BYTES, &alloc_size)) {
+      xnn_log_error(
+          "failed to elide static reshape: allocation size overflows size_t");
+      return xnn_status_out_of_memory;
     }
 
     // Create a static right-hand side value filled with zeros.
-    void* data = xnn_allocate_zero_memory(
-        num_elements * xnn_datatype_size_bytes(input_value->datatype) +
-        XNN_EXTRA_BYTES);
+    void* data = xnn_allocate_zero_memory(alloc_size);
+    if (data == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for zero tensor data",
+                    alloc_size);
+      return xnn_status_out_of_memory;
+    }
     uint32_t new_value_id;
     XNN_RETURN_IF_ERROR(
         xnn_datatype_is_quantized(input_value->datatype)
@@ -3205,7 +3302,7 @@ static void propagate_constants(xnn_subgraph_t subgraph, uint32_t node_id) {
 
         // The following ops preserve only ones.
         case xnn_unary_reciprocal_square_root:
-          output_value->flags |= (input_value->flags & XNN_VALUE_FLAG_IS_ZERO);
+          output_value->flags |= (input_value->flags & XNN_VALUE_FLAG_IS_ONE);
           break;
 
         // The following ops flip zeros to ones.
@@ -3345,6 +3442,13 @@ static void propagate_constants(xnn_subgraph_t subgraph, uint32_t node_id) {
           break;
 
         case xnn_binary_modulus:
+          // fmod(0, b) == 0, but fmod(1, b) is not 1 in general (e.g. fmod(1,1)==0),
+          // so modulus preserves only zeros, unlike prelu below.
+          if (a_is_zero) {
+            output_value->flags |= XNN_VALUE_FLAG_IS_ZERO;
+          }
+          break;
+
         case xnn_binary_prelu:
           if (a_is_zero) {
             output_value->flags |= XNN_VALUE_FLAG_IS_ZERO;
@@ -3991,10 +4095,26 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             }
             break;
           case xnn_datatype_qint8:
-            if (input_datatype == output_datatype &&
-                kernel_datatype == xnn_datatype_qcint8) {
-              if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
-                assumed_datatype = xnn_datatype_pqint8;
+            if (input_datatype == output_datatype) {
+              switch (kernel_datatype) {
+                case xnn_datatype_qcint4:
+                  if ((kernel_value->quantization.zero_point == 0 ||
+                       kernel_value->quantization.zero_point == 8) &&
+                      node->type == xnn_node_type_fully_connected &&
+                      (optimization_flags &
+                       XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
+                      (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
+                      (gemm_config = xnn_init_pqs8_qc4w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_pqint8;
+                  }
+                  break;
+                case xnn_datatype_qcint8:
+                  if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_pqint8;
+                  }
+                  break;
+                default:
+                  break;
               }
             }
             break;
@@ -4002,7 +4122,25 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             // We may inline the `qdint8` packing regardless of whether we have
             // a specialized `qpint8` kernel or not.
             assumed_datatype = xnn_datatype_qdint8;
-            if (output_datatype == xnn_datatype_fp32) {
+            if (output_datatype == xnn_datatype_fp16) {
+              // The QP8/F16 packer consumes the convert's original FP16 input.
+              if (input_value->producer != XNN_INVALID_NODE_ID) {
+                const struct xnn_node* producer =
+                    &subgraph->nodes[input_value->producer];
+                const bool converts_from_fp16 =
+                    producer->type == xnn_node_type_convert &&
+                    subgraph->values[producer->inputs[0]].datatype ==
+                        xnn_datatype_fp16;
+                const bool has_qc8w_weights =
+                    kernel_datatype == xnn_datatype_qcint8 &&
+                    (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0;
+                if (converts_from_fp16 && has_qc8w_weights &&
+                    (gemm_config = xnn_init_qp8_f16_qc8w_gemm_config()) !=
+                        NULL) {
+                  assumed_datatype = xnn_datatype_qpint8;
+                }
+              }
+            } else if (output_datatype == xnn_datatype_fp32) {
               switch (kernel_datatype) {
                 case xnn_datatype_qbint4:
                   // The qp8_f32_qb4w kernels only support unsigned 4-bit
@@ -4012,6 +4150,37 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                     assumed_datatype = xnn_datatype_qpint8;
                   }
                   break;
+                case xnn_datatype_qcint2: {
+                  bool zero_points_are_zero = true;
+                  const float* zero_points =
+                      kernel_value->quantization.channelwise_zero_point;
+                  if (zero_points == NULL) {
+                    zero_points_are_zero =
+                        kernel_value->quantization.zero_point == 0;
+                  } else {
+                    const size_t channels = kernel_value->shape.dim[
+                        kernel_value->quantization.channel_dimension];
+                    for (size_t channel = 0; channel < channels; channel++) {
+                      if (zero_points[channel] != 0.0f) {
+                        zero_points_are_zero = false;
+                        break;
+                      }
+                    }
+                  }
+                  const size_t input_channels = input_value->shape.dim[
+                      input_value->shape.num_dims - 1];
+                  if (node->type == xnn_node_type_fully_connected &&
+                      (optimization_flags &
+                       XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
+                      (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
+                      input_channels != 0 && input_channels % 32 == 0 &&
+                      zero_points_are_zero &&
+                      (gemm_config =
+                           xnn_init_qp8_f32_qc2w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_qpint8;
+                  }
+                  break;
+                }
                 case xnn_datatype_qcint4:
                   if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
                     assumed_datatype = xnn_datatype_qpint8;
@@ -4492,8 +4661,15 @@ static void replace_in_set(uint32_t* set, uint32_t size, uint32_t old_value,
 //
 // [SSA]. https://en.wikipedia.org/wiki/Static_single-assignment_form
 void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
-  bool* values_written =
-      (bool*)xnn_allocate_memory(sizeof(bool) * subgraph->num_values);
+  size_t values_written_size;
+  if (!xnn_safe_mul(sizeof(bool), subgraph->num_values,
+                    &values_written_size)) {
+    xnn_log_error(
+        "failed to allocate values_written scratch buffer: size overflows "
+        "size_t");
+    return;
+  }
+  bool* values_written = (bool*)xnn_allocate_memory(values_written_size);
   if (values_written == NULL) {
     xnn_log_error("failed to allocate values_written scratch buffer");
     return;
@@ -4588,7 +4764,14 @@ enum xnn_status xnn_subgraph_pack_static_values_to_fp16(
         return xnn_status_invalid_parameter;
       }
 
-      const size_t fp16_size = xnn_tensor_get_size(value) / 2 + XNN_EXTRA_BYTES;
+      const size_t tensor_size = xnn_tensor_get_size(value);
+      if (tensor_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to pack value #%" PRIu32 " to FP16: size overflows size_t",
+            n);
+        return xnn_status_out_of_memory;
+      }
+      const size_t fp16_size = tensor_size / 2 + XNN_EXTRA_BYTES;
       void* fp16_data = xnn_allocate_zero_memory(fp16_size);
       if (fp16_data == NULL) {
         xnn_log_error(
@@ -4598,6 +4781,14 @@ enum xnn_status xnn_subgraph_pack_static_values_to_fp16(
       }
 
       const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
+      if (num_elements == SIZE_MAX) {
+        xnn_release_memory(fp16_data);
+        xnn_log_error(
+            "failed to pack value #%" PRIu32
+            " to FP16: number of elements overflows size_t",
+            n);
+        return xnn_status_out_of_memory;
+      }
       enum xnn_status status = xnn_run_unary_elementwise_nc(
           xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
           /*params=*/NULL, /*input_quantization=*/NULL,

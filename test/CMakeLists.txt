@@ -3,6 +3,8 @@
 #
 # Copyright 2019 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -208,6 +210,7 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     pf16-gemm-minmax
     pf16-f16-igemm-minmax
     pf32-gemm-minmax
+    pqs8-qc4w-gemm-minmax
     pqs8-qc8w-gemm-minmax
     qd8-bf16-qb4w-gemm-minmax
     qd8-f16-qb4w-gemm-minmax
@@ -220,6 +223,7 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     qd8-f32-qc8w-gemm-minmax
     qd8-f32-qc8w-igemm-minmax
     qp8-f32-qb4w-gemm-minmax
+    qp8-f32-qc2w-gemm-minmax
     qp8-f32-qc4w-gemm-minmax
     qp8-f32-qc8w-gemm-minmax
     qs8-qc8w-gemm-minmax-fp32
@@ -382,6 +386,9 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
 ENDIF()
 
 SET(MICROKERNEL_VUNARY_TESTS
+    bf16-vrsqrt
+    bf16-vsigmoid
+    bf16-vsqr
     f16-vabs
     f16-vapproxgelu
     f16-vclamp

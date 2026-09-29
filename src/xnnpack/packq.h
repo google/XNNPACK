@@ -148,6 +148,11 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
 
 #undef XNN_UKERNEL
 
+XNN_INTERNAL void xnn_x8_packq_f16qp8_ukernel__aarch64_neon_u2(
+    size_t m, size_t k, size_t mr_packed, size_t kr, size_t sr,
+    size_t m_idx_start, const void* XNN_RESTRICT lhs, size_t lhs_stride,
+    void* XNN_RESTRICT lhs_packed);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
