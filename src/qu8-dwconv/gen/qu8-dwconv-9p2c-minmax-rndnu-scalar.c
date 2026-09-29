@@ -245,7 +245,10 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_9p2c__scalar(
       vacc += vi8 * vk8;
 
       const int64_t vextacc = math_mulext_s32(vacc, vmultiplier) + vrounding;
-      int32_t vout = (int32_t) math_asr_s64(vextacc, vshift);
+      int64_t vout_64 = math_asr_s64(vextacc, vshift);
+      vout_64 = math_max_s64(vout_64, (int64_t) voutput_min_less_zero_point);
+      vout_64 = math_min_s64(vout_64, (int64_t) voutput_max_less_zero_point);
+      int32_t vout = (int32_t) vout_64;
       vout = math_max_s32(vout, voutput_min_less_zero_point);
       vout = math_min_s32(vout, voutput_max_less_zero_point);
       vout += voutput_zero_point;
