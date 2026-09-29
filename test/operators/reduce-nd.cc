@@ -621,3 +621,91 @@ std::vector<TestParam> GenerateTests() {
 
 INSTANTIATE_TEST_SUITE_P(ND, ReduceNDTest, testing::ValuesIn(GenerateTests()),
                          TestParam::GetName);
+
+TEST(REDUCE_ND, overflow_output_elements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_sum, xnn_datatype_fp32, /*input_quantization=*/nullptr,
+      /*output_quantization=*/nullptr, /*flags=*/0, &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const std::array<size_t, 3> shape = {SIZE_MAX / 2, 2, 3};
+  const std::array<int64_t, 1> axes = {1};
+  size_t workspace_size = 0;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_reduce_nd(op, axes.size(), axes.data(), shape.size(),
+                                  shape.data(), &workspace_size,
+                                  /*threadpool=*/nullptr));
+}
+
+TEST(REDUCE_ND, overflow_reduction_elements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_sum, xnn_datatype_fp32, /*input_quantization=*/nullptr,
+      /*output_quantization=*/nullptr, /*flags=*/0, &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const std::array<size_t, 3> shape = {SIZE_MAX / 2, 2, 3};
+  const std::array<int64_t, 2> axes = {0, 2};
+  size_t workspace_size = 0;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_reduce_nd(op, axes.size(), axes.data(), shape.size(),
+                                  shape.data(), &workspace_size,
+                                  /*threadpool=*/nullptr));
+}
+
+TEST(REDUCE_ND, overflow_workspace_size) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  const struct xnn_quantization_params quant = {0, 1.0f};
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_sum, xnn_datatype_qint8, &quant, &quant, /*flags=*/0, &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const std::array<size_t, 2> shape = {2, SIZE_MAX / 2};
+  const std::array<int64_t, 1> axes = {0};
+  size_t workspace_size = 0;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_reduce_nd(op, axes.size(), axes.data(), shape.size(),
+                                  shape.data(), &workspace_size,
+                                  /*threadpool=*/nullptr));
+}
+
+TEST(REDUCE_ND, overflow_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_sum, xnn_datatype_fp32, /*input_quantization=*/nullptr,
+      /*output_quantization=*/nullptr, /*flags=*/0, &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const std::array<size_t, 1> shape = {SIZE_MAX};
+  const std::array<int64_t, 1> axes = {0};
+  size_t workspace_size = 0;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_reduce_nd(op, axes.size(), axes.data(), shape.size(),
+                                  shape.data(), &workspace_size,
+                                  /*threadpool=*/nullptr));
+}
