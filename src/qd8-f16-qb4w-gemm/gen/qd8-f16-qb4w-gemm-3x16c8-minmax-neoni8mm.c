@@ -111,20 +111,18 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x16c8__neoni8mm(
       uint64x2x2_t va01x0123456789ABCDEF;
       va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
       va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-      uint64x2x2_t va23x0123456789ABCDEF;
-      va23x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va23x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
 
       while (k >= 16 * sizeof(int8_t)) {
         // Load a 3x16 block of activations.
         va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
-        va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a2, va23x0123456789ABCDEF, 0); a2 += 16;
         va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
+        // Row 3 does not exist and its half of each SMMLA operand is ignored, so load row 2
+        // with 64-bit loads, which zero the upper half, instead of inserting lanes.
+        const int8x16_t va23x01234567 = vcombine_s8(vld1_s8(a2), vdup_n_s8(0));
+        const int8x16_t va23x89ABCDEF = vcombine_s8(vld1_s8(a2 + 8), vdup_n_s8(0)); a2 += 16;
 
         const int8x16_t va01x01234567 = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]);
         const int8x16_t va01x89ABCDEF = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]);
-        const int8x16_t va23x01234567 = vreinterpretq_s8_u64(va23x0123456789ABCDEF.val[0]);
-        const int8x16_t va23x89ABCDEF = vreinterpretq_s8_u64(va23x0123456789ABCDEF.val[1]);
 
         // Load a 16x16 block of weights.
         const int8x16_t vb01x0123456789ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;

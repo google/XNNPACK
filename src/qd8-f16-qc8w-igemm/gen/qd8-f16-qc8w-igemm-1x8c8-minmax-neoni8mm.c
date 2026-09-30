@@ -71,16 +71,15 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__neoni8mm(
       }
       a += 1;
 
-      uint64x2x2_t va01x0123456789ABCDEF;
-      va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-
       // Inner accumulation loop along the 8 columns.
       size_t k = kc;
       // 2x partial unrolled loop to load 8 bytes at a time.
       while (k >= 16 * sizeof(int8_t)) {
         // Load a 1x16 block of activations.
-        va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
+        // Row 1 does not exist and its half of each SMMLA operand is ignored, so load row 0
+        // with 64-bit loads, which zero the upper half, instead of inserting lanes.
+        const int8x16_t va01x01234567 = vcombine_s8(vld1_s8(a0), vdup_n_s8(0));
+        const int8x16_t va01x89ABCDEF = vcombine_s8(vld1_s8(a0 + 8), vdup_n_s8(0)); a0 += 16;
 
         // Load a 16x8 block of weights.
         const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -93,14 +92,14 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__neoni8mm(
         const int8x16_t vb67x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
 
         // Multiply-accumulate: 1x16 * 16x8 --> 1x8.
-        vacc01x01 = vmmlaq_s32(vacc01x01, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]), vb01x01234567);
-        vacc01x23 = vmmlaq_s32(vacc01x23, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]), vb23x01234567);
-        vacc01x45 = vmmlaq_s32(vacc01x45, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]), vb45x01234567);
-        vacc01x67 = vmmlaq_s32(vacc01x67, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]), vb67x01234567);
-        vacc01x01 = vmmlaq_s32(vacc01x01, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]), vb01x89ABCDEF);
-        vacc01x23 = vmmlaq_s32(vacc01x23, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]), vb23x89ABCDEF);
-        vacc01x45 = vmmlaq_s32(vacc01x45, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]), vb45x89ABCDEF);
-        vacc01x67 = vmmlaq_s32(vacc01x67, vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]), vb67x89ABCDEF);
+        vacc01x01 = vmmlaq_s32(vacc01x01, va01x01234567, vb01x01234567);
+        vacc01x23 = vmmlaq_s32(vacc01x23, va01x01234567, vb23x01234567);
+        vacc01x45 = vmmlaq_s32(vacc01x45, va01x01234567, vb45x01234567);
+        vacc01x67 = vmmlaq_s32(vacc01x67, va01x01234567, vb67x01234567);
+        vacc01x01 = vmmlaq_s32(vacc01x01, va01x89ABCDEF, vb01x89ABCDEF);
+        vacc01x23 = vmmlaq_s32(vacc01x23, va01x89ABCDEF, vb23x89ABCDEF);
+        vacc01x45 = vmmlaq_s32(vacc01x45, va01x89ABCDEF, vb45x89ABCDEF);
+        vacc01x67 = vmmlaq_s32(vacc01x67, va01x89ABCDEF, vb67x89ABCDEF);
 
         k -= 16 * sizeof(int8_t);
       }

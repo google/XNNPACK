@@ -48,7 +48,7 @@ $PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xn
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float", "QB4_F16": "xnn_float16", "QB4_F32": "float", "QB4_BF16": "xnn_bfloat16", "QS8": "int8_t", "QS8_QC4": "int8_t"}[DATATYPE]
 $BLOCKWISE = True if DATATYPE in ["QB4_F16", "QB4_F32", "QB4_BF16"] else False
 $ISA = "neoni8mmbf16" if DATATYPE == "QB4_BF16" else "neoni8mm"
-$PAIRED_MR = MR - MR % 2 if DATATYPE == "QS8_QC4" else MR
+$PAIRED_MR = MR - MR % 2
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c8__${ISA}(
     size_t mr,
     size_t nc,
