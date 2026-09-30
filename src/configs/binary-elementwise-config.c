@@ -116,7 +116,8 @@ static void init_f16_vadd_config(void) {
     ;  // no f16 support
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+    if (hardware_config != NULL && hardware_config->vlenb > 0 &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith)) {
       f16_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vadd_ukernel__rvvfp16arith_u8v);
       f16_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__rvvfp16arith_u8v);
       f16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__rvvfp16arith_u8v);
@@ -194,7 +195,8 @@ static void init_f16_vdiv_config(void) {
     ;  // no f16 support
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+    if (hardware_config != NULL && hardware_config->vlenb > 0 &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith)) {
       f16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdiv_ukernel__rvvfp16arith_u8v);
       f16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdivc_ukernel__rvvfp16arith_u8v);
       f16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrdivc_ukernel__rvvfp16arith_u8v);
