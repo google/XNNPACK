@@ -140,7 +140,10 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
             out += sizeof(${BTYPE});
           } while (--nb != 0);
         }
-        out += (${NR} - n) * sizeof(${BTYPE});
+        for (size_t i = n; i < ${NR}; ++i) {
+          *((${BTYPE}*) out) = 0;
+          out += sizeof(${BTYPE});
+        }
 
         $if NR > 2:
           // NR remainder has less than ${NR} rows so last row is not loaded
@@ -168,6 +171,8 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
             $for K in range(KR):
               out[${N*KR+K}] = v${N}x${K};
             w${N} += ${KR};
+          $for N in range((NR - 1)*KR, NR*KR, 1):
+            out[${N}] = 0;
           out += ${NR*KR};
         }
 
@@ -317,6 +322,9 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
           for (size_t i = 0; i < n; ++i) {
             packed_b[i] = 0;
           }
+        }
+        for (size_t i = n; i < ${NR}; ++i) {
+          packed_b[i] = 0;
         }
         out += ${NR} * sizeof(int32_t);
 

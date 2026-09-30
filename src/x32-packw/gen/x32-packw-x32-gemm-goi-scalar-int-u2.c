@@ -401,7 +401,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x32__scalar_int_u2(
           *out++ = 0;
         } while (--nb != 0);
       }
-      out += (32 - n);
+      for (size_t i = n; i < 32; ++i) {
+        *out++ = 0;
+      }
 
       // NR remainder has less than 32 rows so last row is not loaded
       const uint32_t* w1 = w0 + n_stride;
@@ -652,6 +654,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x32__scalar_int_u2(
         out[28] = v280;
         out[29] = v290;
         out[30] = v300;
+        out[31] = 0;
         out[32] = v01;
         out[33] = v11;
         out[34] = v21;
@@ -683,6 +686,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x32__scalar_int_u2(
         out[60] = v281;
         out[61] = v291;
         out[62] = v301;
+        out[63] = 0;
         out += 64;
       }
 
@@ -750,6 +754,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x32__scalar_int_u2(
         out[29] = v29;
         const uint32_t v30 = *w30++;
         out[30] = v30;
+        out[31] = 0;
         out += 32;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);

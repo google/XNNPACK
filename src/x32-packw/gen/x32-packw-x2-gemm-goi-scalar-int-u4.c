@@ -109,7 +109,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int_u4(
           *out++ = 0;
         } while (--nb != 0);
       }
-      out += (2 - n);
+      for (size_t i = n; i < 2; ++i) {
+        *out++ = 0;
+      }
 
 
       // KC main loop multiple of 2x4
@@ -121,9 +123,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int_u4(
         const uint32_t v03 = w0[3];
         w0 += 4;
         out[0] = v00;
+        out[1] = 0;
         out[2] = v01;
+        out[3] = 0;
         out[4] = v02;
+        out[5] = 0;
         out[6] = v03;
+        out[7] = 0;
         out += 8;
       }
 
@@ -131,6 +137,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int_u4(
       for (; k != 0; --k) {
         const uint32_t v0 = *w0++;
         out[0] = v0;
+        out[1] = 0;
         out += 2;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);

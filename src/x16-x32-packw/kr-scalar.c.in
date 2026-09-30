@@ -106,7 +106,10 @@ void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
             out += sizeof(${BTYPE}) / sizeof(${TYPE});
         } while (--nb != 0);
       }
-      out += (${NR} - n) * sizeof(${BTYPE}) / sizeof(${TYPE});
+      for (size_t i = n; i < ${NR}; ++i) {
+        *((${BTYPE}*) out) = 0;
+        out += sizeof(${BTYPE}) / sizeof(${TYPE});
+      }
 
      $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
@@ -130,6 +133,8 @@ void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
           $for K in range(KR):
             out[${N*KR+K}] = v${N}x${K};
           w${N} += ${KR};
+        $for N in range((NR - 1)*KR, NR*KR, 1):
+          out[${N}] = 0;
         out += ${NR*KR};
       }
 
@@ -144,6 +149,8 @@ void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
           $for K in range(1, KR):
             out[${N*KR+K}] = v${N}x${K};
           w${N} += k;
+        $for N in range((NR - 1)*KR, NR*KR, 1):
+          out[${N}] = 0;
         out += ${NR*KR};
       }
 

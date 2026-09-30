@@ -131,6 +131,9 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       } else {
         memset(out, 0, n * sizeof(${BTYPE}));
       }
+      memset(
+        (uint8_t*) out + n * sizeof(${BTYPE}), 0,
+        (${NR} - n) * sizeof(${BTYPE}));
       $if BTYPE == TYPE:
         out += ${NR};
       $else:
@@ -194,6 +197,10 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
           out[N*${KR}] = v0;
           $for K in range(1, KR):
             out[N*${KR} + ${K}] = v${K};
+        }
+        for (size_t N = n; N < ${NR}; ++N) {
+          $for K in range(KR):
+            out[N*${KR} + ${K}] = 0;
         }
         $for K in range(KR):
           w${K} += k * k_stride;

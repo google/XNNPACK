@@ -349,7 +349,10 @@ void xnn_x16_x32_packw_gemm_gio_ukernel_x32c2__scalar(
           out += sizeof(uint32_t)/sizeof(uint16_t);
         } while (--nb != 0);
       }
-      out += (32 - n) * sizeof(uint32_t) / sizeof(uint16_t);
+      for (size_t i = n; i < 32; ++i) {
+        *((uint32_t*) out) = 0;
+        out += sizeof(uint32_t) / sizeof(uint16_t);
+      }
 
      // NR remainder has less than 32 rows so last row is not loaded
       const uint16_t* w1 = w0 + k_stride;
@@ -540,6 +543,10 @@ void xnn_x16_x32_packw_gemm_gio_ukernel_x32c2__scalar(
           const uint16_t v1x30 = w1[30];
           out[60] = v0x30;
           out[61] = v1x30;
+        }
+        for (size_t N = n; N < 32; ++N) {
+          out[N*2 + 0] = 0;
+          out[N*2 + 1] = 0;
         }
         w0 += 2 * k_stride;
         w1 += 2 * k_stride;
@@ -734,6 +741,10 @@ void xnn_x16_x32_packw_gemm_gio_ukernel_x32c2__scalar(
           const uint16_t v1x30 = 1 < k ? w1[30] : 0;
           out[60] = v0x30;
           out[61] = v1x30;
+        }
+        for (size_t N = n; N < 32; ++N) {
+          out[N*2 + 0] = 0;
+          out[N*2 + 1] = 0;
         }
         w0 += k * k_stride;
         w1 += k * k_stride;

@@ -138,10 +138,13 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
             out += sizeof(${BTYPE});
         } while (--nb != 0);
       }
-      $if BTYPE == TYPE:
-        out += (${NR} - n);
-      $else:
-        out += (${NR} - n) * sizeof(${BTYPE});
+      for (size_t i = n; i < ${NR}; ++i) {
+        $if BTYPE == TYPE:
+          *out++ = 0;
+        $else:
+          *((${BTYPE}*) out) = 0;
+          out += sizeof(${BTYPE});
+      }
 
       $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
@@ -171,6 +174,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
         $for K in range(KBLOCK):
           $for N in range(NR-1):
             out[${N+K*NR}] = v${N}${K};
+          out[${NR-1+K*NR}] = 0;
         out += ${NR*KBLOCK};
       }
 
@@ -181,6 +185,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
           $if BITS == 8:
             ksum${N} += (uint32_t) v${N};
           out[${N}] = v${N};
+        out[${NR-1}] = 0;
         out += ${NR};
       }
       $if BITS == 8:

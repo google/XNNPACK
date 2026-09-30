@@ -123,7 +123,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x3__scalar_float_u4(
           *out++ = 0;
         } while (--nb != 0);
       }
-      out += (3 - n);
+      for (size_t i = n; i < 3; ++i) {
+        *out++ = 0;
+      }
 
       // NR remainder has less than 3 rows so last row is not loaded
       const float* w1 = w0 + n_stride;
@@ -146,12 +148,16 @@ void xnn_x32_packw_gemm_goi_ukernel_x3__scalar_float_u4(
         w1 += 4;
         out[0] = v00;
         out[1] = v10;
+        out[2] = 0;
         out[3] = v01;
         out[4] = v11;
+        out[5] = 0;
         out[6] = v02;
         out[7] = v12;
+        out[8] = 0;
         out[9] = v03;
         out[10] = v13;
+        out[11] = 0;
         out += 12;
       }
 
@@ -161,6 +167,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x3__scalar_float_u4(
         out[0] = v0;
         const float v1 = *w1++;
         out[1] = v1;
+        out[2] = 0;
         out += 3;
       }
       out = (float*) ((uintptr_t) out + extra_bytes);
