@@ -1616,6 +1616,11 @@ std::vector<Tensor<Mixins...>> Split(
         absl::InvalidArgumentError("The Split axis is out of range.")))};
   }
 
+  if (num_splits <= 0) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+        "Split num_splits must be > 0.")))};
+  }
+
   if (input_info.shape[axis_val] % num_splits != 0) {
     return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
         "Number of splits must evenly divide the dimension.")))};
@@ -1660,6 +1665,10 @@ Tensor<Mixins...> SpaceToDepth(
   output_info.type = input_info.type;
 
   // TFLite space_to_depth supports 4D input [batch, height, width, depth]
+  if (block_size <= 0) {
+    return graph::ErrorTensor(absl::InvalidArgumentError(
+        "SpaceToDepth block_size must be > 0."));
+  }
   if (input_info.shape.size() == 4) {
     output_info.shape = {input_info.shape[0], input_info.shape[1] / block_size,
                          input_info.shape[2] / block_size,
@@ -1686,6 +1695,10 @@ Tensor<Mixins...> DepthToSpace(
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (block_size <= 0) {
+    return graph::ErrorTensor(absl::InvalidArgumentError(
+        "DepthToSpace block_size must be > 0."));
+  }
   if (input_info.shape.size() == 4) {
     output_info.shape = {input_info.shape[0], input_info.shape[1] * block_size,
                          input_info.shape[2] * block_size,
