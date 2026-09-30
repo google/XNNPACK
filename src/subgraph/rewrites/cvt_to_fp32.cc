@@ -180,7 +180,61 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
       XNN_OP_ACTION_CASE(node_type, global_sum_pooling_2d, f32acc_rsum);
       XNN_OP_ACTION_CASE(node_type, static_reduce_max, rmax);
       XNN_OP_ACTION_CASE(node_type, static_reduce_min, rmin);
-    case xnn_node_type_fully_connected:
+    case xnn_node_type_fully_connected: {
+      const xnn_value& input = subgraph->values[node.inputs[0]];
+      const xnn_value& filter = subgraph->values[node.inputs[1]];
+      const xnn_datatype input_datatype =
+          node.flags & XNN_FLAG_INLINE_LHS_PACKING ? node.packed_input_datatype
+                                                  : input.datatype;
+      if (filter.datatype != xnn_datatype_fp16 &&
+          filter.datatype != xnn_datatype_fp32) {
+        const xnn_gemm_config* config = nullptr;
+        switch (input_datatype) {
+          case xnn_datatype_qdint8:
+            switch (filter.datatype) {
+              case xnn_datatype_qcint2:
+                config = xnn_init_qd8_f16_qc2w_gemm_config();
+                break;
+              case xnn_datatype_qcint4:
+                config = xnn_init_qd8_f16_qc4w_gemm_config();
+                break;
+              case xnn_datatype_qbint4:
+                config = xnn_init_qd8_f16_qb4w_gemm_config();
+                break;
+              case xnn_datatype_qcint8:
+                config = xnn_init_qd8_f16_qc8w_gemm_config();
+                break;
+              default:
+                break;
+            }
+            break;
+          case xnn_datatype_qduint8:
+            switch (filter.datatype) {
+              case xnn_datatype_qcint2:
+                config = xnn_init_qdu8_f16_qc2w_gemm_config();
+                break;
+              case xnn_datatype_qcint4:
+                config = xnn_init_qdu8_f16_qc4w_gemm_config();
+                break;
+              case xnn_datatype_qcint8:
+                config = xnn_init_qdu8_f16_qc8w_gemm_config();
+                break;
+              default:
+                break;
+            }
+            break;
+          case xnn_datatype_qpint8:
+            if (filter.datatype == xnn_datatype_qcint8) {
+              config = xnn_init_qp8_f16_qc8w_gemm_config();
+            }
+            break;
+          default:
+            break;
+        }
+        return IsValid(config) ? OpAction::kTransparent : OpAction::kRewrite;
+      }
+      [[fallthrough]];
+    }
     case xnn_node_type_batch_matrix_multiply:
     case xnn_node_type_deconvolution_2d: {
       if (node.flags & XNN_FLAG_INLINE_LHS_PACKING) {
