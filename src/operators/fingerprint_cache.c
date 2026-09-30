@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
@@ -62,8 +63,9 @@ void xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
     }
   }
   if (i >= fingerprint_vector_size) {
-    assert(fingerprint_vector_size < XNN_FINGERPRINT_MAX_COUNT);
-    fingerprint_vector[fingerprint_vector_size++] = fingerprint;
+    if (fingerprint_vector_size < XNN_FINGERPRINT_MAX_COUNT) {
+      fingerprint_vector[fingerprint_vector_size++] = fingerprint;
+    }
   }
   xnn_mutex_unlock(&mutex);
 }
@@ -90,7 +92,9 @@ static size_t fingerprint_cache_look_up(
 
 static void* fingerprint_cache_reserve_space(void* const context, size_t n) {
   struct fingerprint_cache_context* const ctx = context;
-  assert(ctx);
+  if (ctx == NULL) {
+    return NULL;
+  }
   if (ctx->buffer && ctx->bytes < n) {
     xnn_release_simd_memory(ctx->buffer);
     ctx->buffer = NULL;
@@ -105,7 +109,9 @@ static void* fingerprint_cache_reserve_space(void* const context, size_t n) {
 static size_t fingerprint_cache_look_up_or_insert(
     void* context, const struct xnn_weights_cache_look_up_key* cache_key,
     void* ptr, size_t size) {
-  assert(context);
+  if (context == NULL || ptr == NULL || size == 0) {
+    return 0;
+  }
   struct fingerprint_cache_context* const ctx = context;
   ctx->hash = murmur_hash3(ptr, size, /*seed=*/ctx->hash);
   return 0;
@@ -114,7 +120,9 @@ static size_t fingerprint_cache_look_up_or_insert(
 static bool fingerprint_cache_is_finalized(void* context) { return false; }
 
 static void* fingerprint_cache_offset_to_addr(void* context, size_t offset) {
-  assert(context);
+  if (context == NULL) {
+    return NULL;
+  }
   struct fingerprint_cache_context* const ctx = context;
   return ctx->buffer;
 }
@@ -169,7 +177,9 @@ static XNN_NO_SANITIZE_FUNCTION void free_fingerprint_cache_provider(
 }
 
 void finalize_fingerprint_context(struct fingerprint_context* const context) {
-  assert(context);
+  if (context == NULL) {
+    return;
+  }
   if (context->status == xnn_status_uninitialized) {
     xnn_set_fingerprint((struct xnn_fingerprint){
         .id = context->fingerprint_id,
@@ -183,8 +193,9 @@ void finalize_fingerprint_context(struct fingerprint_context* const context) {
 
 uint32_t fingerprint_cache_get_fingerprint(
     const struct xnn_weights_cache_provider* const provider) {
-  assert(provider);
-  assert(provider->context);
+  if (provider == NULL || provider->context == NULL) {
+    return 0;
+  }
   return ((struct fingerprint_cache_context*)provider->context)->hash;
 }
 
@@ -222,14 +233,18 @@ static struct Xorshift128PlusState xorshift128plus_init(uint64_t seed) {
 }
 
 void fill_fingerprint_buffer(uint8_t* data, size_t bytes) {
+  if (data == NULL || bytes == 0) {
+    return;
+  }
   struct Xorshift128PlusState prng_state = xorshift128plus_init(0xafb69024c);
   while (bytes >= sizeof(uint64_t)) {
-    *((uint64_t*)(data)) = xorshift128plus_next(&prng_state);
+    const uint64_t val = xorshift128plus_next(&prng_state);
+    memcpy(data, &val, sizeof(uint64_t));
     bytes -= sizeof(uint64_t);
     data += sizeof(uint64_t);
   }
   const uint64_t tail = xorshift128plus_next(&prng_state);
-  for (int i = 0; i < bytes; ++i) {
-    data[i] = tail >> (i * 8);
+  for (size_t i = 0; i < bytes; ++i) {
+    data[i] = (uint8_t) (tail >> (i * 8));
   }
 }
