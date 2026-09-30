@@ -229,7 +229,10 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni(
           out += sizeof(int32_t);
         } while (--nb != 0);
       }
-      out += (8 - n) * sizeof(int32_t);
+      for (size_t i = n; i < 8; ++i) {
+        *((int32_t*) out) = 0;
+        out += sizeof(int32_t);
+      }
 
      const int8_t* w1 = w0 + k_stride;
      const int8_t* w2 = w1 + k_stride;

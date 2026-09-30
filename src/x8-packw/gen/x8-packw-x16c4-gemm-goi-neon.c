@@ -436,6 +436,9 @@ void xnn_x8_packw_gemm_goi_ukernel_x16c4__neon(
           ((uint32_t*) out)[i] = 0;
         }
       }
+      for (size_t i = n; i < 16; ++i) {
+        ((uint32_t*) out)[i] = 0;
+      }
       out = (int8_t*) ((uintptr_t) out + 16 * sizeof(uint32_t));
 
 
