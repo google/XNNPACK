@@ -1051,6 +1051,132 @@ TEST(ArithmeticTest, NonMaxSuppressionV5DynamicMaxOutputSizeFails) {
   }
 }
 
+TEST(ArithmeticTest, AveragePool2DFailsWithInvalidStridesAndFilter) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 5, 5, 1}});
+  Tensor b = AveragePool2D(a, 0, 2, 2, 2, kPaddingSame);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+  Tensor c = AveragePool2D(a, 2, 2, 0, 2, kPaddingSame);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+  Tensor d = AveragePool2D(a, 2, 2, -1, 2, kPaddingSame);
+  EXPECT_THAT(GetStatus(d.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, MaxPool2DFailsWithInvalidStridesAndFilter) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 5, 5, 1}});
+  Tensor b = MaxPool2D(a, 2, 0, 2, 2, kPaddingSame);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+  Tensor c = MaxPool2D(a, 2, 2, 2, 0, kPaddingSame);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+  Tensor d = MaxPool2D(a, 2, 2, 2, -1, kPaddingSame);
+  EXPECT_THAT(GetStatus(d.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, Conv2DFailsWithInvalidStridesAndDilations) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 5, 5, 1}});
+  Tensor filter({.type = Type::kFP32, .shape = {1, 3, 3, 1}});
+  Tensor bias({.type = Type::kFP32, .shape = {1}});
+  Tensor b = Conv2D(a, filter, bias, 0, 2, kPaddingSame);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+  Tensor c = Conv2D(a, filter, bias, 2, 2, kPaddingSame, 0, 1);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, DepthwiseConv2DFailsWithInvalidParams) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 5, 5, 1}});
+  Tensor filter({.type = Type::kFP32, .shape = {1, 3, 3, 1}});
+  Tensor bias({.type = Type::kFP32, .shape = {1}});
+  Tensor b = DepthwiseConv2D(a, filter, bias, 2, 0, kPaddingSame);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+  Tensor c = DepthwiseConv2D(a, filter, bias, 2, 2, kPaddingSame, 1, 0);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+  Tensor d = DepthwiseConv2D(a, filter, bias, 2, 2, kPaddingSame, 1, 1, 0);
+  EXPECT_THAT(GetStatus(d.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, TransposeConvFailsWithInvalidStrides) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 5, 5, 1}});
+  Tensor filter({.type = Type::kFP32, .shape = {1, 3, 3, 1}});
+  Tensor bias({.type = Type::kFP32, .shape = {1}});
+  Tensor b =
+      TransposeConv(filter, a, bias, {1, 10, 10, 1}, kPaddingSame, 0, 2);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+  Tensor c =
+      TransposeConv2D(filter, a, bias, {1, 10, 10, 1}, kPaddingSame, 2, 0);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, ConcatenationFailsWithEmptyOrMismatchedInputs) {
+  std::vector<Tensor<>> empty_inputs;
+  Tensor a = Concatenation(absl::MakeSpan(empty_inputs), 0);
+  EXPECT_THAT(GetStatus(a.GetRaw()), ::testing::Not(IsOk()));
+
+  Tensor t1({.type = Type::kFP32, .shape = {2, 3}});
+  Tensor t2({.type = Type::kFP32, .shape = {2, 3, 4}});
+  Tensor b = Concatenation({t1, t2}, 0);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+
+  Tensor t3({.type = Type::kFP32, .shape = {2, 4}});
+  Tensor t4({.type = Type::kFP32, .shape = {3, 4}});
+  Tensor c = Concatenation({t3, t4}, 1);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, PackFailsWithMismatchedInputs) {
+  std::vector<Tensor<>> empty_inputs;
+  Tensor a = Pack(absl::MakeSpan(empty_inputs), 0);
+  EXPECT_THAT(GetStatus(a.GetRaw()), ::testing::Not(IsOk()));
+
+  Tensor t1({.type = Type::kFP32, .shape = {2, 3}});
+  Tensor t2({.type = Type::kFP32, .shape = {2, 4}});
+  Tensor b = Pack({t1, t2}, 0);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, UnpackFailsWithInvalidNumOrMismatchedAxis) {
+  Tensor a({.type = Type::kFP32, .shape = {2, 3, 4}});
+  auto b = Unpack(a, 0, 0);
+  ASSERT_EQ(b.size(), 1);
+  EXPECT_THAT(GetStatus(b[0].GetRaw()), ::testing::Not(IsOk()));
+
+  auto c = Unpack(a, 3, 0);
+  ASSERT_EQ(c.size(), 1);
+  EXPECT_THAT(GetStatus(c[0].GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, SplitFailsWithNonPositiveSplits) {
+  Tensor a({.type = Type::kFP32, .shape = {2, 4, 6}});
+  auto b = Split(a, 1, 0);
+  ASSERT_EQ(b.size(), 1);
+  EXPECT_THAT(GetStatus(b[0].GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, SpaceToDepthFailsWithInvalidBlockSize) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 5, 5, 1}});
+  Tensor b = SpaceToDepth(a, 0);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+
+  Tensor c = SpaceToDepth(a, 2);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, DepthToSpaceFailsWithInvalidBlockSize) {
+  Tensor a({.type = Type::kFP32, .shape = {1, 2, 2, 4}});
+  Tensor b = DepthToSpace(a, 0);
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+
+  Tensor c = DepthToSpace(a, 3);
+  EXPECT_THAT(GetStatus(c.GetRaw()), ::testing::Not(IsOk()));
+
+  Tensor d = DepthToSpace(a, 50000);
+  EXPECT_THAT(GetStatus(d.GetRaw()), ::testing::Not(IsOk()));
+}
+
+TEST(ArithmeticTest, ReshapeFailsWithOverflowDimensions) {
+  Tensor a({.type = Type::kFP32, .shape = {10}});
+  Tensor b = Reshape(a, {1000000000, 1000000000, 1000000000, -1});
+  EXPECT_THAT(GetStatus(b.GetRaw()), ::testing::Not(IsOk()));
+}
+
 struct DummyOperation : graph::Operation {
   absl::string_view GetName() const override { return "Dummy"; }
   LRT_TENSOR_DEFINE_OPERATION_TYPE_IDENTIFICATION

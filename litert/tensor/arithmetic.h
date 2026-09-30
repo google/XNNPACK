@@ -20,6 +20,7 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -748,6 +749,11 @@ Tensor<Mixins...> Reshape(Tensor<Mixins...> input, std::vector<int> new_shape,
           "Negative dimensions in the new shape are unsupported. Got ",
           new_shape[i], " for dimension ", i, "."));
     }
+    if (new_shape[i] > 0 &&
+        known_size > std::numeric_limits<size_t>::max() /
+            static_cast<size_t>(new_shape[i])) {
+      return absl::InvalidArgumentError("Reshape dimension size overflow.");
+    }
     known_size *= new_shape[i];
   }
   if (op->inferred_axis >= 0) {
@@ -1256,6 +1262,14 @@ Tensor<Mixins...> AveragePool2D(
     return absl::InvalidArgumentError(
         "AveragePool2D input must be rank 4 (NHWC).");
   }
+  if (filter_height <= 0 || filter_width <= 0) {
+    return absl::InvalidArgumentError(
+        "AveragePool2D filter dimensions must be > 0.");
+  }
+  if (stride_h <= 0 || stride_w <= 0) {
+    return absl::InvalidArgumentError(
+        "AveragePool2D stride dimensions must be > 0.");
+  }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
 
@@ -1298,6 +1312,14 @@ Tensor<Mixins...> MaxPool2D(Tensor<Mixins...> input, int filter_height,
 
   if (input_info.shape.size() < 4) {
     return absl::InvalidArgumentError("MaxPool2D input must be rank 4 (NHWC).");
+  }
+  if (filter_height <= 0 || filter_width <= 0) {
+    return absl::InvalidArgumentError(
+        "MaxPool2D filter dimensions must be > 0.");
+  }
+  if (stride_h <= 0 || stride_w <= 0) {
+    return absl::InvalidArgumentError(
+        "MaxPool2D stride dimensions must be > 0.");
   }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
@@ -1347,6 +1369,14 @@ TensorHandle Conv2DImpl(Tensor<Mixins...> input, Tensor<Mixins...> filter,
   if (input_info.shape.size() < 4 || filter_info.shape.size() < 4) {
     return TensorHandle(graph::ErrorTensor(absl::InvalidArgumentError(
         "Conv2D input and filter must be rank 4 (NHWC).")));
+  }
+  if (stride_h <= 0 || stride_w <= 0) {
+    return TensorHandle(graph::ErrorTensor(absl::InvalidArgumentError(
+        "Conv2D stride dimensions must be > 0.")));
+  }
+  if (dilation_h_factor <= 0 || dilation_w_factor <= 0) {
+    return TensorHandle(graph::ErrorTensor(absl::InvalidArgumentError(
+        "Conv2D dilation factors must be > 0.")));
   }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
@@ -1426,6 +1456,18 @@ Tensor<Mixins...> DepthwiseConv2DImpl(
     return absl::InvalidArgumentError(
         "DepthwiseConv2D input and filter must be rank 4 (NHWC).");
   }
+  if (stride_h <= 0 || stride_w <= 0) {
+    return absl::InvalidArgumentError(
+        "DepthwiseConv2D stride dimensions must be > 0.");
+  }
+  if (dilation_h_factor <= 0 || dilation_w_factor <= 0) {
+    return absl::InvalidArgumentError(
+        "DepthwiseConv2D dilation factors must be > 0.");
+  }
+  if (depth_multiplier <= 0) {
+    return absl::InvalidArgumentError(
+        "DepthwiseConv2D depth_multiplier must be > 0.");
+  }
   const int input_h = input_info.shape[1];
   const int input_w = input_info.shape[2];
   const int filter_h = filter_info.shape[1];
@@ -1487,6 +1529,10 @@ Tensor<Mixins...> Concatenation(
   op->activation = activation;
   AddInputs(op, inputs);
   Tensor<Mixins...> output = AddOutput(op, loc);
+  if (inputs.empty()) {
+    return absl::InvalidArgumentError(
+        "Concatenation requires at least one input.");
+  }
   const graph::TensorInformation& first_input_info =
       *GetInfo(inputs[0].GetRaw());
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
@@ -1498,6 +1544,17 @@ Tensor<Mixins...> Concatenation(
   }
   for (size_t i = 1; i < inputs.size(); ++i) {
     const graph::TensorInformation& input_info = *GetInfo(inputs[i].GetRaw());
+    if (input_info.shape.size() != first_input_info.shape.size()) {
+      return absl::InvalidArgumentError(
+          "All Concatenation inputs must have the same rank.");
+    }
+    for (size_t d = 0; d < input_info.shape.size(); ++d) {
+      if (static_cast<int>(d) != axis &&
+          input_info.shape[d] != first_input_info.shape[d]) {
+        return absl::InvalidArgumentError(
+            "Concatenation inputs must match along non-concatenated axes.");
+      }
+    }
     output_info.shape[axis] += input_info.shape[axis];
   }
 
@@ -1533,6 +1590,13 @@ Tensor<Mixins...> Pack(absl::Span<Tensor<Mixins...>> inputs, int axis,
   if (axis < 0 || axis > static_cast<int>(first_input_info.shape.size())) {
     return absl::InvalidArgumentError("The Pack axis is out of range.");
   }
+  for (size_t i = 1; i < inputs.size(); ++i) {
+    const graph::TensorInformation& input_info = *GetInfo(inputs[i].GetRaw());
+    if (input_info.shape != first_input_info.shape) {
+      return absl::InvalidArgumentError(
+          "All Pack inputs must have the same shape.");
+    }
+  }
   output_info.shape.insert(output_info.shape.begin() + axis, inputs.size());
 
   graph::OpDebugger::DebugOp(*op);
@@ -1551,6 +1615,10 @@ template <class... Mixins>
 std::vector<Tensor<Mixins...>> Unpack(
     Tensor<Mixins...> input, int num, int axis,
     source_location loc = source_location::current()) {
+  if (num <= 0) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(
+        absl::InvalidArgumentError("Unpack num must be > 0.")))};
+  }
   auto op = std::make_shared<graph::UnpackOperation>();
   RegisterMixins<Mixins...>(op);
   op->num = num;
@@ -1565,6 +1633,10 @@ std::vector<Tensor<Mixins...>> Unpack(
   if (axis < 0 || axis >= static_cast<int>(input_info.shape.size())) {
     return {Tensor<Mixins...>(graph::ErrorTensor(
         absl::InvalidArgumentError("The Unpack axis is out of range.")))};
+  }
+  if (input_info.shape[axis] != num) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+        "Unpack num must match dimension size at axis.")))};
   }
   std::vector<int> output_shape = input_info.shape;
   output_shape.erase(output_shape.begin() + axis);
@@ -1583,6 +1655,10 @@ template <class... Mixins>
 std::vector<Tensor<Mixins...>> Split(
     Tensor<Mixins...> input, Tensor<Mixins...> axis, int num_splits,
     source_location loc = source_location::current()) {
+  if (num_splits <= 0) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+        "Split num_splits must be > 0.")))};
+  }
   auto op = std::make_shared<graph::SplitOperation>();
   RegisterMixins<Mixins...>(op);
   op->num_splits = num_splits;
@@ -1659,8 +1735,17 @@ Tensor<Mixins...> SpaceToDepth(
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (block_size <= 0) {
+    return absl::InvalidArgumentError(
+        "SpaceToDepth block_size must be > 0.");
+  }
   // TFLite space_to_depth supports 4D input [batch, height, width, depth]
   if (input_info.shape.size() == 4) {
+    if (input_info.shape[1] % block_size != 0 ||
+        input_info.shape[2] % block_size != 0) {
+      return absl::InvalidArgumentError(
+          "SpaceToDepth input spatial dimensions must divide by block_size.");
+    }
     output_info.shape = {input_info.shape[0], input_info.shape[1] / block_size,
                          input_info.shape[2] / block_size,
                          input_info.shape[3] * block_size * block_size};
@@ -1686,10 +1771,23 @@ Tensor<Mixins...> DepthToSpace(
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
   output_info.type = input_info.type;
 
+  if (block_size <= 0) {
+    return absl::InvalidArgumentError(
+        "DepthToSpace block_size must be > 0.");
+  }
+  if (block_size > 46340) {
+    return absl::InvalidArgumentError(
+        "DepthToSpace block_size is too large.");
+  }
   if (input_info.shape.size() == 4) {
+    const int block_size_sq = block_size * block_size;
+    if (input_info.shape[3] % block_size_sq != 0) {
+      return absl::InvalidArgumentError(
+          "DepthToSpace input depth must divide by block_size squared.");
+    }
     output_info.shape = {input_info.shape[0], input_info.shape[1] * block_size,
                          input_info.shape[2] * block_size,
-                         input_info.shape[3] / (block_size * block_size)};
+                         input_info.shape[3] / block_size_sq};
   } else {
     output_info.shape = input_info.shape;
   }
@@ -2659,6 +2757,10 @@ Tensor<Mixins...> TransposeConv(
     const std::vector<int>& output_shape, Padding padding, int stride_h,
     int stride_w, FusedActivation activation = kActNone,
     source_location loc = source_location::current()) {
+  if (stride_h <= 0 || stride_w <= 0) {
+    return absl::InvalidArgumentError(
+        "TransposeConv stride dimensions must be > 0.");
+  }
   Tensor<Mixins...> output_shape_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(output_shape.size())},
@@ -2692,6 +2794,10 @@ Tensor<Mixins...> TransposeConv2D(
     const std::vector<int>& output_shape, Padding padding, int stride_h,
     int stride_w, FusedActivation activation = kActNone,
     source_location loc = source_location::current()) {
+  if (stride_h <= 0 || stride_w <= 0) {
+    return absl::InvalidArgumentError(
+        "TransposeConv2D stride dimensions must be > 0.");
+  }
   Tensor<Mixins...> output_shape_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(output_shape.size())},
