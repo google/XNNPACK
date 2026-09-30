@@ -31,6 +31,7 @@ void xnn_qs8_vcvt_ukernel__neon_u16(
 
   const int16x8_t vinput_zero_point = vdupq_n_s16(params->scalar.input_zero_point);
   const int16x8_t vmultiplier = vdupq_n_s16(-params->scalar.multiplier);
+  const int16x8_t vshift = vdupq_n_s16(params->scalar.shift);
   const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const int8x16_t vx0 = vld1q_s8(input); input += 16;
@@ -38,14 +39,14 @@ void xnn_qs8_vcvt_ukernel__neon_u16(
     int16x8_t vacc0 = vsubw_s8(vinput_zero_point, vget_low_s8(vx0));
     int16x8_t vacc1 = vsubw_s8(vinput_zero_point, vget_high_s8(vx0));
 
-    vacc0 = vshlq_n_s16(vacc0, 7);
-    vacc1 = vshlq_n_s16(vacc1, 7);
+    vacc0 = vshlq_s16(vacc0, vshift);
+    vacc1 = vshlq_s16(vacc1, vshift);
 
     vacc0 = vqrdmulhq_s16(vacc0, vmultiplier);
     vacc1 = vqrdmulhq_s16(vacc1, vmultiplier);
 
-    vacc0 = vqaddq_s16(vacc0, voutput_zero_point);
-    vacc1 = vqaddq_s16(vacc1, voutput_zero_point);
+    vacc0 = vaddq_s16(vacc0, voutput_zero_point);
+    vacc1 = vaddq_s16(vacc1, voutput_zero_point);
 
     const int8x16_t vy0 = vcombine_s8(vqmovn_s16(vacc0), vqmovn_s16(vacc1));
 
@@ -54,9 +55,9 @@ void xnn_qs8_vcvt_ukernel__neon_u16(
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     const int8x8_t vx = vld1_s8(input); input += 8;
     int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
+    vacc = vshlq_s16(vacc, vshift);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
+    vacc = vaddq_s16(vacc, voutput_zero_point);
     const int8x8_t vy = vqmovn_s16(vacc);
     vst1_s8(output, vy); output += 8;
   }
@@ -66,9 +67,9 @@ void xnn_qs8_vcvt_ukernel__neon_u16(
 
     const int8x8_t vx = vld1_s8(input);
     int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
+    vacc = vshlq_s16(vacc, vshift);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
+    vacc = vaddq_s16(vacc, voutput_zero_point);
     int8x8_t vy = vqmovn_s16(vacc);
 
     if (batch & (4 * sizeof(int8_t))) {
