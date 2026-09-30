@@ -408,6 +408,18 @@ TEST(WEIGHTS_CACHE, insert_into_finalized_cache_soft) {
   ASSERT_EQ(nullptr, xnn_internal_reserve_space_in_weights_cache(
                          &cache, big_string.length()));
 
+  // Reserve valid space (which locks mutex), then attempt get_or_insert with
+  // excessive size. Verify it does not deadlock subsequent operations.
+  void* ptr = xnn_internal_reserve_space_in_weights_cache(&cache, 4);
+  ASSERT_NE(nullptr, ptr);
+  ASSERT_EQ(XNN_CACHE_NOT_FOUND,
+            xnn_internal_get_or_insert_weights_cache(
+                &cache, nullptr, ptr, cache.cache.weights.capacity + 1));
+  // Mutex must have been unlocked, so another reserve should succeed.
+  ASSERT_NE(nullptr, xnn_internal_reserve_space_in_weights_cache(&cache, 4));
+  ASSERT_EQ(XNN_CACHE_NOT_FOUND,
+            xnn_internal_get_or_insert_weights_cache(&cache, nullptr, ptr, 4));
+
   ASSERT_EQ(xnn_status_success, xnn_internal_release_weights_cache(&cache));
 }
 

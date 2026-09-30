@@ -184,6 +184,94 @@ TEST(EvenSplitTest, OverflowInputStride) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+TEST(EvenSplitTest, InvalidAxisDuringReshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id = 0;
+  uint32_t output_id1 = 1;
+  uint32_t output_id2 = 2;
+  std::vector<uint32_t> output_ids = {output_id1, output_id2};
+
+  EvenSplitTester tester(3);
+  tester.AddInputTensorF32(TensorShape({10, 10}), input_id)
+      .AddOutputTensorF32(TensorShape({5, 10}), output_id1)
+      .AddOutputTensorF32(TensorShape({5, 10}), output_id2)
+      .AddEvenSplit(/*axis=*/-2, input_id, output_ids)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  // If input shape changes to 1D, axis=-2 is out of range [-1, 1)
+  runtime->values[input_id].shape.num_dims = 1;
+  runtime->values[input_id].shape.dim[0] = 10;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
+
+TEST(EvenSplitTest, ScalarInputDuringReshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id = 0;
+  uint32_t output_id1 = 1;
+  uint32_t output_id2 = 2;
+  std::vector<uint32_t> output_ids = {output_id1, output_id2};
+
+  EvenSplitTester tester(3);
+  tester.AddInputTensorF32(TensorShape({10, 10}), input_id)
+      .AddOutputTensorF32(TensorShape({5, 10}), output_id1)
+      .AddOutputTensorF32(TensorShape({5, 10}), output_id2)
+      .AddEvenSplit(/*axis=*/0, input_id, output_ids)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  // If input shape changes to scalar (0D)
+  runtime->values[input_id].shape.num_dims = 0;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
+
+TEST(EvenSplitTest, NullOutputIds) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[1] = {10};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, dims,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &input_id));
+
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_even_split(subgraph, 0, input_id, 2, nullptr, 0));
+}
+
+TEST(EvenSplitTest, ZeroOutputs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[1] = {10};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, dims,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &input_id));
+
+  const uint32_t output_ids[1] = {1};
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_even_split(subgraph, 0, input_id, 0, output_ids, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
