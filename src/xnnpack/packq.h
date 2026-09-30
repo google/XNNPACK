@@ -24,6 +24,9 @@ extern "C" {
 inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
   // Round up k to be a multiple of 32.
   size_t kai_k_multiple_of = 32;
+  if (k > SIZE_MAX - (kai_k_multiple_of - 1)) {
+    return SIZE_MAX;
+  }
   return round_up(k, kai_k_multiple_of);
 }
 
@@ -31,6 +34,9 @@ inline static size_t lhs_packed_stride(size_t k, size_t mr_packed, size_t kr,
                                        size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
 
+  if (k_internal == SIZE_MAX || mr_packed == 0) {
+    return SIZE_MAX;
+  }
   assert((k_internal % 2) == 0);
 
   // Assuming the same sizeof() for kai_num_bytes_per_offset and
@@ -38,22 +44,49 @@ inline static size_t lhs_packed_stride(size_t k, size_t mr_packed, size_t kr,
   static const size_t kai_num_bytes_per_multiplier = sizeof(float);
   static const size_t kai_num_bytes_per_offset = sizeof(int32_t);
 
-  return mr_packed * (k_internal * sizeof(int8_t) +
-                      kai_num_bytes_per_multiplier + kai_num_bytes_per_offset);
+  size_t bytes_per_row;
+  size_t stride;
+  if (!xnn_safe_mul(k_internal, sizeof(int8_t), &bytes_per_row) ||
+      !xnn_safe_add(bytes_per_row, kai_num_bytes_per_multiplier,
+                    &bytes_per_row) ||
+      !xnn_safe_add(bytes_per_row, kai_num_bytes_per_offset, &bytes_per_row) ||
+      !xnn_safe_mul(mr_packed, bytes_per_row, &stride)) {
+    return SIZE_MAX;
+  }
+  return stride;
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_offset(
     size_t m_idx, size_t k, size_t mr_packed, size_t kr, size_t sr) {
-  // It always points to the beginning of the row
-  return (m_idx / mr_packed) * lhs_packed_stride(k, mr_packed, kr, sr);
+  if (mr_packed == 0) {
+    return SIZE_MAX;
+  }
+  const size_t stride = lhs_packed_stride(k, mr_packed, kr, sr);
+  if (stride == SIZE_MAX) {
+    return SIZE_MAX;
+  }
+  size_t offset;
+  if (!xnn_safe_mul(m_idx / mr_packed, stride, &offset)) {
+    return SIZE_MAX;
+  }
+  return offset;
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k,
                                                          size_t mr_packed,
                                                          size_t kr, size_t sr) {
-  const size_t num_rows = round_up(m, mr_packed) / mr_packed;
-
-  return num_rows * lhs_packed_stride(k, mr_packed, kr, sr);
+  if (mr_packed == 0) {
+    return SIZE_MAX;
+  }
+  if (m == 0) {
+    return 0;
+  }
+  const size_t num_rows = divide_round_up(m, mr_packed);
+  size_t size;
+  if (!xnn_safe_mul(num_rows, lhs_packed_stride(k, mr_packed, kr, sr), &size)) {
+    return SIZE_MAX;
+  }
+  return size;
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(
