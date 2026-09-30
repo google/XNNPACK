@@ -1154,7 +1154,6 @@ xnnpack_source_set("litert_tensor_api_core") {
     "litert/tensor/tensor.h",
     "litert/tensor/utils/macros.h",
     "litert/tensor/utils/matchers.h",
-    "litert/tensor/utils/source_location.h",
   ]
   public_deps = [
     ":xnnpack_headers",
@@ -1174,6 +1173,7 @@ xnnpack_source_set("litert_tensor_api_core") {
     "//third_party/abseil-cpp/absl/strings:str_format",
     "//third_party/abseil-cpp/absl/strings:string_view",
     "//third_party/abseil-cpp/absl/types:optional",
+    "//third_party/abseil-cpp/absl/types:source_location",
     "//third_party/abseil-cpp/absl/types:span",
   ]
 }

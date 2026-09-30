@@ -25,7 +25,7 @@
 #include "absl/log/absl_log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "litert/tensor/utils/source_location.h"
+#include "absl/types/source_location.h"
 
 // Returns the result of `expr` if it represents an error status.
 //
@@ -97,8 +97,8 @@ class ErrorStatusBuilder {
   struct ErrorConversion;
 
   template <class T>
-  explicit ErrorStatusBuilder(T&& error,
-                              source_location loc = source_location::current())
+  explicit ErrorStatusBuilder(
+      T&& error, absl::SourceLocation loc = absl::SourceLocation::current())
       : error_(AsError(std::forward<T>(error))), loc_(loc) {}
 
   // NOLINTBEGIN(*-explicit-constructor): This class transparently converts to
@@ -169,7 +169,7 @@ class ErrorStatusBuilder {
   }
 
   absl::Status error_;
-  source_location loc_;
+  absl::SourceLocation loc_;
   std::unique_ptr<std::stringstream> extra_log_;
 };
 
