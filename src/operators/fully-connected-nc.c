@@ -3474,6 +3474,12 @@ reshape_fully_connected_nc_with_pack_lh_config(
       assert(workspace_size);
       const size_t per_thread_workspace_size = packed_lh_config->size_fn(
           mr, /*k=*/input_channels, mr_packed, kr, sr);
+      if (per_thread_workspace_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator: packed LHS size overflows size_t",
+            xnn_operator_type_to_string_v2(fully_connected_op));
+        return xnn_status_out_of_memory;
+      }
 
       // If `xnn_gemm_best_tile_size` suggests an `nc` that is smaller than `n`,
       // i.e. it suggests splitting along `output_channels`, then it's probably
@@ -3512,6 +3518,12 @@ reshape_fully_connected_nc_with_pack_lh_config(
         // Allocate a workspace for the entire LHS.
         *workspace_size = packed_lh_config->size_fn(
             batch_size, /*k=*/input_channels, mr_packed, kr, sr);
+        if (*workspace_size == SIZE_MAX) {
+          xnn_log_error(
+              "failed to reshape %s operator: packed LHS size overflows size_t",
+              xnn_operator_type_to_string_v2(fully_connected_op));
+          return xnn_status_out_of_memory;
+        }
 
         // Set up the LHS packing as a separate compute.
         size_t lhs_stride;
