@@ -214,9 +214,14 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
         } while (--nb != 0);
       }
       $if BTYPE == TYPE:
-        out += (${NR} - n);
+        for (size_t i = n; i < ${NR}; ++i) {
+          *out++ = 0;
+        }
       $else:
-        out += (${NR} - n) * sizeof(${BTYPE});
+        for (size_t i = n; i < ${NR}; ++i) {
+          *((${BTYPE}*) out) = 0;
+          out += sizeof(${BTYPE});
+        }
 
      $if NR > 2:
       $for K in range(1, KR):

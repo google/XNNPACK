@@ -242,8 +242,12 @@ void xnn_x8_packw_gemm_goi_ukernel_x8c8__avx256skx(
           ((uint32_t*) out)[nb] = b[nb];
         }
         b += n;
+        for (size_t i = n; i < 8; ++i) {
+          ((uint32_t*) out)[i] = 0;
+        }
       } else {
-        _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 0), _mm256_setzero_si256());
       }
       out += 8 * sizeof(uint32_t);
 

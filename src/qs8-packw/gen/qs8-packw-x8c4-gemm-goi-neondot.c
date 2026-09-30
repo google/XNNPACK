@@ -348,6 +348,9 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot(
           ((int32_t*) out)[i] = 0;
         }
       }
+      for (size_t i = n; i < 8; ++i) {
+        ((int32_t*) out)[i] = 0;
+      }
       out = (int8_t*) ((uintptr_t) out + 8 * sizeof(int32_t));
 
       int32x4_t vacc0 = vdupq_n_s32(0);

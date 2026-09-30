@@ -1105,29 +1105,26 @@ void xnn_qs8_packw_gemm_goi_ukernel_x64c4__avx256vnni_prfm(
           ((int32_t*) out)[nb] = b[nb];
         }
         b += n;
+        for (size_t i = n; i < 64; ++i) {
+          ((int32_t*) out)[i] = 0;
+        }
       } else {
-        _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
-        if (n > 8) {
-          _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
-        }
-        if (n > 16) {
-          _mm256_storeu_si256((__m256i*) (out + 64), _mm256_setzero_si256());
-        }
-        if (n > 24) {
-          _mm256_storeu_si256((__m256i*) (out + 96), _mm256_setzero_si256());
-        }
-        if (n > 32) {
-          _mm256_storeu_si256((__m256i*) (out + 128), _mm256_setzero_si256());
-        }
-        if (n > 40) {
-          _mm256_storeu_si256((__m256i*) (out + 160), _mm256_setzero_si256());
-        }
-        if (n > 48) {
-          _mm256_storeu_si256((__m256i*) (out + 192), _mm256_setzero_si256());
-        }
-        if (n > 56) {
-          _mm256_storeu_si256((__m256i*) (out + 224), _mm256_setzero_si256());
-        }
+        _mm256_storeu_si256(
+          (__m256i*) (out + 0), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 32), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 64), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 96), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 128), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 160), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 192), _mm256_setzero_si256());
+        _mm256_storeu_si256(
+          (__m256i*) (out + 224), _mm256_setzero_si256());
       }
       out += 64 * sizeof(int32_t);
 

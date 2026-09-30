@@ -320,14 +320,16 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
             ((${BTYPE}*) out)[nb] = b[nb];
         }
         b += n;
+        for (size_t i = n; i < ${NR}; ++i) {
+          $if DATATYPE in ["QS4"]:
+            ((uint32_t*) out)[i] = 0;
+          $else:
+            ((${BTYPE}*) out)[i] = 0;
+        }
       } else {
         $for N in range(0, NR, 8):
-          $if N == 0:
-            _mm256_storeu_si256((__m256i*) (out + ${N*4}), _mm256_setzero_si256());
-          $else:
-            if (n > ${N}) {
-              _mm256_storeu_si256((__m256i*) (out + ${N*4}), _mm256_setzero_si256());
-            }
+          _mm256_storeu_si256(
+            (__m256i*) (out + ${N*4}), _mm256_setzero_si256());
       }
       out += ${NR} * sizeof(${BTYPE});
 

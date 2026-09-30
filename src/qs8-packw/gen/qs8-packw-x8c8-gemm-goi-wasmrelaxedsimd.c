@@ -249,7 +249,10 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__wasmrelaxedsimd(
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }
-      out += (8 - n) * sizeof(uint32_t);
+      for (size_t i = n; i < 8; ++i) {
+        *((uint32_t*) out) = 0;
+        out += sizeof(uint32_t);
+      }
 
       const int8_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
