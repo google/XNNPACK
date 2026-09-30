@@ -503,6 +503,9 @@ void xnn_qs8_packw_gemm_gio_ukernel_x64c4__scalar(
       } else {
         memset(out, 0, n * sizeof(int32_t));
       }
+      memset(
+        (uint8_t*) out + n * sizeof(int32_t), 0,
+        (64 - n) * sizeof(int32_t));
       out += 64 * sizeof(int32_t);
 
      // NR remainder has less than 64 rows so last row is not loaded
@@ -750,6 +753,12 @@ void xnn_qs8_packw_gemm_gio_ukernel_x64c4__scalar(
           out[N*4 + 1] = v1;
           out[N*4 + 2] = v2;
           out[N*4 + 3] = v3;
+        }
+        for (size_t N = n; N < 64; ++N) {
+          out[N*4 + 0] = 0;
+          out[N*4 + 1] = 0;
+          out[N*4 + 2] = 0;
+          out[N*4 + 3] = 0;
         }
         w0 += k * k_stride;
         w1 += k * k_stride;

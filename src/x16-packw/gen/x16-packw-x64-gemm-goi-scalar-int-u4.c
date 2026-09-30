@@ -977,7 +977,9 @@ void xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4(
           *out++ = 0;
         } while (--nb != 0);
       }
-      out += (64 - n);
+      for (size_t i = n; i < 64; ++i) {
+        *out++ = 0;
+      }
 
       // NR remainder has less than 64 rows so last row is not loaded
       const uint16_t* w1 = w0 + n_stride;
@@ -1610,6 +1612,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4(
         out[60] = v600;
         out[61] = v610;
         out[62] = v620;
+        out[63] = 0;
         out[64] = v01;
         out[65] = v11;
         out[66] = v21;
@@ -1673,6 +1676,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4(
         out[124] = v601;
         out[125] = v611;
         out[126] = v621;
+        out[127] = 0;
         out[128] = v02;
         out[129] = v12;
         out[130] = v22;
@@ -1736,6 +1740,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4(
         out[188] = v602;
         out[189] = v612;
         out[190] = v622;
+        out[191] = 0;
         out[192] = v03;
         out[193] = v13;
         out[194] = v23;
@@ -1799,6 +1804,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4(
         out[252] = v603;
         out[253] = v613;
         out[254] = v623;
+        out[255] = 0;
         out += 256;
       }
 
@@ -1930,6 +1936,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4(
         out[61] = v61;
         const uint16_t v62 = *w62++;
         out[62] = v62;
+        out[63] = 0;
         out += 64;
       }
       out = (uint16_t*) ((uintptr_t) out + extra_bytes);

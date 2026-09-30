@@ -139,7 +139,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_u4(
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }
-      out += (4 - n) * sizeof(uint32_t);
+      for (size_t i = n; i < 4; ++i) {
+        unaligned_store_s32(out, 0);
+        out += sizeof(uint32_t);
+      }
 
       // NR remainder has less than 4 rows so last row is not loaded
       const int8_t* w1 = w0 + n_stride;
@@ -172,15 +175,19 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_u4(
         out[0] = v00;
         out[1] = v10;
         out[2] = v20;
+        out[3] = 0;
         out[4] = v01;
         out[5] = v11;
         out[6] = v21;
+        out[7] = 0;
         out[8] = v02;
         out[9] = v12;
         out[10] = v22;
+        out[11] = 0;
         out[12] = v03;
         out[13] = v13;
         out[14] = v23;
+        out[15] = 0;
         out += 16;
       }
 
@@ -192,6 +199,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_u4(
         out[1] = v1;
         const int8_t v2 = *w2++;
         out[2] = v2;
+        out[3] = 0;
         out += 4;
       }
       out = (int8_t*) ((uintptr_t) out + extra_bytes);

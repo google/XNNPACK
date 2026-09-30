@@ -809,6 +809,9 @@ void xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__scalar(
           packed_b[i] = 0;
         }
       }
+      for (size_t i = n; i < 16; ++i) {
+        packed_b[i] = 0;
+      }
       out += 16 * sizeof(int32_t);
 
       // Clamp weight pointers

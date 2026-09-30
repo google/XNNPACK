@@ -111,7 +111,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u4(
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }
-      out += (2 - n) * sizeof(uint32_t);
+      for (size_t i = n; i < 2; ++i) {
+        unaligned_store_s32(out, 0);
+        out += sizeof(uint32_t);
+      }
 
 
       // KC main loop multiple of 2x4
@@ -123,9 +126,13 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u4(
         const int8_t v03 = w0[3];
         w0 += 4;
         out[0] = v00;
+        out[1] = 0;
         out[2] = v01;
+        out[3] = 0;
         out[4] = v02;
+        out[5] = 0;
         out[6] = v03;
+        out[7] = 0;
         out += 8;
       }
 
@@ -133,6 +140,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u4(
       for (; k != 0; --k) {
         const int8_t v0 = *w0++;
         out[0] = v0;
+        out[1] = 0;
         out += 2;
       }
       out = (int8_t*) ((uintptr_t) out + extra_bytes);
