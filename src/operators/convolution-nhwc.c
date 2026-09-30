@@ -443,12 +443,39 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_igemm(
   const bool weights_already_cached =
       convolution_op->packed_weights.offset != XNN_CACHE_NOT_FOUND;
 
-  const size_t packed_group_weights_size =
-      ((kernel_size * k_stride << log2_filter_element_size) +
-       bias_element_size + extra_weights_bytes) *
-      n_stride;
-  const size_t aligned_total_weights_size = round_up_po2(
-      packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
+  size_t packed_group_weights_size = 0;
+  {
+    size_t filter_bytes = 0;
+    size_t weights_bytes = 0;
+    if (!xnn_safe_mul(kernel_size, k_stride, &filter_bytes) ||
+        !xnn_safe_mul(filter_bytes, (size_t)1 << log2_filter_element_size,
+                      &filter_bytes) ||
+        !xnn_safe_add(filter_bytes, bias_element_size, &weights_bytes) ||
+        !xnn_safe_add(weights_bytes, extra_weights_bytes, &weights_bytes) ||
+        !xnn_safe_mul(weights_bytes, n_stride, &packed_group_weights_size)) {
+      xnn_log_error(
+          "failed to create %s operator: packed weights size overflows size_t",
+          xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+  }
+  size_t total_weights_size = 0;
+  if (!xnn_safe_mul(packed_group_weights_size, groups, &total_weights_size)) {
+    xnn_log_error(
+        "failed to create %s operator: total packed weights size overflows "
+        "size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  const size_t aligned_total_weights_size =
+      round_up_po2(total_weights_size, XNN_ALLOCATION_ALIGNMENT);
+  if (aligned_total_weights_size < total_weights_size) {
+    xnn_log_error(
+        "failed to create %s operator: aligned total weights size overflows "
+        "size_t",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
   void* weights_ptr = NULL;
 
   if (!weights_already_cached) {
@@ -2996,7 +3023,15 @@ static enum xnn_status reshape_igemm(
 
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
-  const size_t tiled_output_size = round_up(output_size, mr);
+  size_t tiled_output_size = 0;
+  if (!xnn_safe_add(output_size, (size_t)(mr - 1), &tiled_output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: tiled output size overflows size_t "
+        "(output_size=%zu, mr=%" PRIu32 ")",
+        xnn_operator_type_to_string_v2(convolution_op), output_size, mr);
+    return xnn_status_out_of_memory;
+  }
+  tiled_output_size &= -(size_t)mr;
   size_t indirection_buffer_size = 0;
   if (!xnn_safe_mul(kernel_size, tiled_output_size, &indirection_buffer_size) ||
       !xnn_safe_mul(indirection_buffer_size, sizeof(void*),
