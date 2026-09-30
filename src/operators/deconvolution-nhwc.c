@@ -1826,6 +1826,16 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
 
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
+  // round_up(output_size, mr) wraps to a small value when output_size is
+  // within mr - 1 of SIZE_MAX. The wrapped value passes the size guard below
+  // and yields an undersized indirection buffer, which setup then writes past.
+  if (mr == 0 || output_size > SIZE_MAX - (mr - 1)) {
+    xnn_log_error(
+        "failed to reshape %s operator: tiled output size overflows for "
+        "output size %zu and mr %zu",
+        xnn_operator_type_to_string_v2(deconvolution_op), output_size, mr);
+    return xnn_status_out_of_memory;
+  }
   const size_t tiled_output_size = round_up(output_size, mr);
   size_t indirection_buffer_size = 0;
   if (!xnn_safe_mul(kernel_size, tiled_output_size, &indirection_buffer_size) ||
@@ -2155,8 +2165,17 @@ static enum xnn_status reshape_subconv2d_path(
   }
 
   if (any_size_change) {
-    const size_t rounded_output_width =
-      round_up(divide_round_up(output_width, stride_width), mr);
+    const size_t output_width_per_stride =
+        divide_round_up(output_width, stride_width);
+    if (mr == 0 || output_width_per_stride > SIZE_MAX - (mr - 1)) {
+      xnn_log_error(
+          "failed to reshape %s operator: rounded output width overflows for "
+          "output width %zu, stride width %zu and mr %zu",
+          xnn_operator_type_to_string_v2(deconvolution_op), output_width,
+          stride_width, mr);
+      return xnn_status_out_of_memory;
+    }
+    const size_t rounded_output_width = round_up(output_width_per_stride, mr);
   size_t indirection_buffer_size = 0;
   if (!xnn_safe_mul(kernel_size, output_height, &indirection_buffer_size) ||
       !xnn_safe_mul(indirection_buffer_size, stride_width, &indirection_buffer_size) ||
