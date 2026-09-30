@@ -150,16 +150,31 @@ static enum xnn_status reshape_even_split_operator(
   assert(input_id < num_values);
   const struct xnn_runtime_value* input_value = values + input_id;
 
+  if (input_value->shape.num_dims == 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: input cannot be a 0D tensor",
+        xnn_node_type_to_string(xnn_node_type_even_split));
+    return xnn_status_invalid_parameter;
+  }
+
   int32_t axis = opdata->axis;
   if (axis < 0) {
-    axis += input_value->shape.num_dims;
+    axis += (int32_t) input_value->shape.num_dims;
   }
-  // Check that the split dimension can be evenly split into outputs.
-  if (axis >= input_value->shape.num_dims) {
+  if (axis < 0 || (size_t) axis >= input_value->shape.num_dims) {
     xnn_log_error(
-        "failed to reshape Even Split operator with the input ID #%" PRIu32
-        ": split dimension (%d) exceeds the number of dimensions (%zu)",
-        input_id, axis, input_value->shape.num_dims);
+        "failed to reshape %s operator with the input ID #%" PRIu32
+        ": split dimension (%d) is outside the valid range [-%zu, %zu)",
+        xnn_node_type_to_string(xnn_node_type_even_split), input_id,
+        opdata->axis, input_value->shape.num_dims, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
+  const size_t num_splits = opdata->num_outputs;
+  if (num_splits == 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: number of outputs must be non-zero",
+        xnn_node_type_to_string(xnn_node_type_even_split));
     return xnn_status_invalid_parameter;
   }
   const size_t batch_size =
@@ -171,7 +186,6 @@ static enum xnn_status reshape_even_split_operator(
     return xnn_status_out_of_memory;
   }
 
-  size_t num_splits = opdata->num_outputs;
   if (input_value->shape.dim[axis] % num_splits != 0) {
     xnn_log_error(
         "failed to reshape %s operator with the input ID #%" PRIu32
@@ -376,9 +390,6 @@ enum xnn_status xnn_define_even_split(
   const uint32_t* output_ids,
   uint32_t flags)
 {
-  assert(num_outputs >= 1);
-  assert(num_outputs <= XNN_MAX_OUTPUTS);
-
   enum xnn_node_type node_type = xnn_node_type_even_split;
   enum xnn_status status;
   if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
@@ -406,6 +417,13 @@ enum xnn_status xnn_define_even_split(
     xnn_log_error(
       "failed to define %s operator with %zu outputs: number of outputs exceeds the supported maximum (%zu)",
       xnn_node_type_to_string(node_type), num_outputs, (size_t) XNN_MAX_OUTPUTS);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_ids == NULL) {
+    xnn_log_error(
+      "failed to define %s operator: output_ids must be non-NULL",
+      xnn_node_type_to_string(node_type));
     return xnn_status_invalid_parameter;
   }
 
