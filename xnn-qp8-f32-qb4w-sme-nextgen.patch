@@ -1,0 +1,708 @@
+diff --git a/bench/gemm-benchmark.cc b/bench/gemm-benchmark.cc
+index 5f3ea13b9c..66a23136ce 100644
+--- a/bench/gemm-benchmark.cc
++++ b/bench/gemm-benchmark.cc
+@@ -1710,7 +1710,8 @@ void GEMMBenchmark(benchmark::State& state,
+                    xnn_init_f32_qb4w_minmax_params_fn init_params,
+                    xnn_pack_weights_and_biases_fn pack_weights,
+                    xnn_packed_stride_weights_and_biases_fn packed_stride,
+-                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
++                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
++                   size_t sr, ConstantOrFunction mr_packed,
+                    uint64_t arch_flags) {
+   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+     return;
+diff --git a/bench/gemm-benchmark.h b/bench/gemm-benchmark.h
+index 615af39ac9..a325429032 100644
+--- a/bench/gemm-benchmark.h
++++ b/bench/gemm-benchmark.h
+@@ -168,7 +168,8 @@ void GEMMBenchmark(benchmark::State& state,
+                    xnn_init_f32_qb4w_minmax_params_fn init_params,
+                    xnn_pack_weights_and_biases_fn pack_weights,
+                    xnn_packed_stride_weights_and_biases_fn packed_stride,
+-                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
++                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
++                   size_t sr, ConstantOrFunction mr_packed,
+                    uint64_t arch_flags = 0);
+ 
+ void GEMMBenchmark(benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,
+diff --git a/bench/qp8-f32-qb4w-gemm.cc b/bench/qp8-f32-qb4w-gemm.cc
+index 913f8e9d1e..c5da9bd7d9 100644
+--- a/bench/qp8-f32-qb4w-gemm.cc
++++ b/bench/qp8-f32-qb4w-gemm.cc
+@@ -127,6 +127,91 @@ namespace {
+ #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
+ 
+ 
++#if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
++  #if XNN_ENABLE_KLEIDIAI
++  static void qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme(benchmark::State& state) {
++    GEMMBenchmark(state,
++      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme,
++      xnn_init_f32_qb4w_minmax_scalar_params,
++      xnn_pack_kai_qb4_weights_and_biases_sme,
++      xnn_packed_stride_kai_qb4_weights_and_biases_sme,
++      /*mr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  , /*nr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_nr();
++        } else {
++          return 0;
++        }
++      }
++  , /*kr=*/4, /*sr=*/1,
++      /*mr_packed=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  ,
++      /*arch_flags=*/xnn_arch_arm_sme);
++  }
++
++  BENCHMARK_GEMM(qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme)
++
++  static void qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme(benchmark::State& state) {
++    GEMMBenchmark(state,
++      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme,
++      xnn_init_f32_qb4w_minmax_scalar_params,
++      xnn_pack_kai_qb4_weights_and_biases_sme,
++      xnn_packed_stride_kai_qb4_weights_and_biases_sme,
++      /*mr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  , /*nr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_nr();
++        } else {
++          return 0;
++        }
++      }
++  , /*kr=*/4, /*sr=*/1,
++      /*mr_packed=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  ,
++      /*arch_flags=*/xnn_arch_arm_sme);
++  }
++
++  BENCHMARK_GEMM(qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme)
++  #endif  // XNN_ENABLE_KLEIDIAI
++#endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
++
++
+ }  // namespace
+ 
+ #ifndef XNNPACK_BENCHMARK_NO_MAIN
+diff --git a/cmake/gen/neonsme_microkernels.cmake b/cmake/gen/neonsme_microkernels.cmake
+index b18b7e152a..6f9e535e0f 100644
+--- a/cmake/gen/neonsme_microkernels.cmake
++++ b/cmake/gen/neonsme_microkernels.cmake
+@@ -18,6 +18,8 @@ SET(PROD_NEONSME_MICROKERNEL_SRCS
+   src/pf32-igemm/pf32-igemm-32x32-minmax-neonsme.c
+   src/pqs8-f32-qc8w-igemm/pqs8-f32-qc8w-igemm-32x32c4-minmax-neonsme.c
+   src/pqs8-qc8w-gemm/pqs8-qc8w-gemm-32x32c4-minmax-neonsme.c
++  src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x64c4-neonsme.c
++  src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-16x64c4-neonsme.c
+   src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x64c4-neonsme.c
+   src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-16x64c4-neonsme.c
+   src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-1x64c4-neonsme.c
+diff --git a/gen/neonsme_microkernels.bzl b/gen/neonsme_microkernels.bzl
+index b5d8e9c6e5..846bf1e428 100644
+--- a/gen/neonsme_microkernels.bzl
++++ b/gen/neonsme_microkernels.bzl
+@@ -14,6 +14,8 @@ PROD_NEONSME_MICROKERNEL_SRCS = [
+     "src/pf32-igemm/pf32-igemm-32x32-minmax-neonsme.c",
+     "src/pqs8-f32-qc8w-igemm/pqs8-f32-qc8w-igemm-32x32c4-minmax-neonsme.c",
+     "src/pqs8-qc8w-gemm/pqs8-qc8w-gemm-32x32c4-minmax-neonsme.c",
++    "src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x64c4-neonsme.c",
++    "src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-16x64c4-neonsme.c",
+     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x64c4-neonsme.c",
+     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-16x64c4-neonsme.c",
+     "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-1x64c4-neonsme.c",
+diff --git a/src/configs/gemm-config.c b/src/configs/gemm-config.c
+index 1765aa10ab..51f337c502 100644
+--- a/src/configs/gemm-config.c
++++ b/src/configs/gemm-config.c
+@@ -3206,7 +3206,22 @@ static void init_qp8_f32_qb4w_gemm_config(void) {
+     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+     assert(hardware_config != NULL);
+     (void) hardware_config;  // May be unused.
+-    if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
++    if (XNN_ENABLE_ARM_SME && (hardware_config->arch_flags & xnn_arch_arm_sme)) {
++      #if XNN_ENABLE_ARM_SME
++        const size_t mr = xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr();
++        const size_t nr = xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_nr();
++        qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme);
++        qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme);
++        qp8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
++        qp8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qb4_weights_and_biases_sme;
++        qp8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qb4_weights_and_biases_sme;
++        qp8_f32_qb4w_gemm_config.mr = mr;
++        qp8_f32_qb4w_gemm_config.nr = nr;
++        qp8_f32_qb4w_gemm_config.log2_kr = 2;
++        qp8_f32_qb4w_gemm_config.planes = 2;
++        qp8_f32_qb4w_gemm_config.mr_packed = mr;
++      #endif  // XNN_ENABLE_ARM_SME
++    } else if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
+       #if XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
+         qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot);
+         qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(16)] = XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4);
+diff --git a/src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-16x64c4-neonsme.c b/src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-16x64c4-neonsme.c
+new file mode 100644
+index 0000000000..c8c544c038
+--- /dev/null
++++ b/src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-16x64c4-neonsme.c
+@@ -0,0 +1,91 @@
++// Copyright 2026 Google LLC
++//
++// This source code is licensed under the BSD-style license found in the
++// LICENSE file in the root directory of this source tree.
++
++#include <assert.h>
++#include <stddef.h>
++
++#include "src/xnnpack/common.h"
++#include "src/xnnpack/microparams.h"
++
++#if XNN_ENABLE_KLEIDIAI
++#include "kai/ukernels/matmul/kai_matmul.h"
++#endif  // XNN_ENABLE_KLEIDIAI
++
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr(void) {
++#if XNN_ENABLE_KLEIDIAI
++  const struct kai_matmul_uker_api api =
++      kai_matmul_clamp_f32_qai8dxp4vsx4_qsi4c32p16vsx4_4vsx16vs_sme_mopa();
++  return api.get_step(NULL).m;
++#else
++  assert(
++      "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
++      "`XNN_ENABLE_KLEIDIAI`." &&
++      0);
++  return 0;
++#endif  // XNN_ENABLE_KLEIDIAI
++}
++
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_nr(void) {
++#if XNN_ENABLE_KLEIDIAI
++  const struct kai_matmul_uker_api api =
++      kai_matmul_clamp_f32_qai8dxp4vsx4_qsi4c32p16vsx4_4vsx16vs_sme_mopa();
++  return api.get_step(NULL).n;
++#else
++  assert(
++      "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
++      "`XNN_ENABLE_KLEIDIAI`." &&
++      0);
++  return 0;
++#endif  // XNN_ENABLE_KLEIDIAI
++}
++
++// Wraps the
++// `kai_matmul_clamp_f32_qai8dxp4vsx4_qsi4c32p16vsx4_4vsx16vs_sme_mopa` GEMM
++// microkernel with a name that is compatible with our tooling.
++void xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme(
++    size_t m, size_t n, size_t k, const void* lhs_packed,
++    const void* rhs_packed, float* dst, size_t dst_stride_row,
++    size_t dst_stride_col, const void* params) {
++#if XNN_ENABLE_KLEIDIAI
++  assert(dst_stride_col == sizeof(float));
++  (void)dst_stride_col;
++
++  const struct xnn_f32_qb4w_minmax_params* minmax_params = params;
++  const float min = minmax_params->scalar.min;
++  const float max = minmax_params->scalar.max;
++
++  struct kai_matmul_uker_config config = {0};
++  config.format.bl = minmax_params->scalar.blocksize;
++
++  const struct kai_matmul_uker_api api =
++      kai_matmul_clamp_f32_qai8dxp4vsx4_qsi4c32p16vsx4_4vsx16vs_sme_mopa();
++
++  // The microkernel reads the LHS and RHS row strides from the arguments, so
++  // query them from the microkernel itself rather than recomputing them here.
++  const struct kai_matmul_uker_lhs_dim_args lhs_shape = {.m = m, .k = k};
++  const struct kai_matmul_uker_rhs_dim_args rhs_shape = {.n = n, .k = k};
++
++  struct kai_matmul_uker_args args = {0};
++  args.flags = KAI_MATMUL_UKER_FLAGS_ARGS_CLAMP;
++  args.shape.m = m;
++  args.shape.n = n;
++  args.shape.k = k;
++  args.operand.lhs.ptr = lhs_packed;
++  args.operand.lhs.stride = api.get_lhs_stride(&config, &lhs_shape);
++  args.operand.rhs.ptr = rhs_packed;
++  args.operand.rhs.stride = api.get_rhs_stride(&config, &rhs_shape);
++  args.operand.dst.ptr = dst;
++  args.operand.dst.stride.m = dst_stride_row;
++  args.activation.clamp.min_ptr = &min;
++  args.activation.clamp.max_ptr = &max;
++
++  api.run(&config, &args);
++#else
++  assert(
++      "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
++      "`XNN_ENABLE_KLEIDIAI`." &&
++      0);
++#endif  // XNN_ENABLE_KLEIDIAI
++}
+diff --git a/src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x64c4-neonsme.c b/src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x64c4-neonsme.c
+new file mode 100644
+index 0000000000..bce41bf646
+--- /dev/null
++++ b/src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x64c4-neonsme.c
+@@ -0,0 +1,90 @@
++// Copyright 2026 Google LLC
++//
++// This source code is licensed under the BSD-style license found in the
++// LICENSE file in the root directory of this source tree.
++
++#include <assert.h>
++#include <stddef.h>
++
++#include "src/xnnpack/common.h"
++#include "src/xnnpack/microparams.h"
++
++#if XNN_ENABLE_KLEIDIAI
++#include "kai/ukernels/matmul/kai_matmul.h"
++#endif  // XNN_ENABLE_KLEIDIAI
++
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_mr(void) {
++#if XNN_ENABLE_KLEIDIAI
++  const struct kai_matmul_uker_api api =
++      kai_matmul_clamp_f32_qai8dxp1x4_qsi4c32p16vsx4_1x16vs_sme_dot();
++  return api.get_step(NULL).m;
++#else
++  assert(
++      "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
++      "`XNN_ENABLE_KLEIDIAI`." &&
++      0);
++  return 0;
++#endif  // XNN_ENABLE_KLEIDIAI
++}
++
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_nr(void) {
++#if XNN_ENABLE_KLEIDIAI
++  const struct kai_matmul_uker_api api =
++      kai_matmul_clamp_f32_qai8dxp1x4_qsi4c32p16vsx4_1x16vs_sme_dot();
++  return api.get_step(NULL).n;
++#else
++  assert(
++      "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
++      "`XNN_ENABLE_KLEIDIAI`." &&
++      0);
++  return 0;
++#endif  // XNN_ENABLE_KLEIDIAI
++}
++
++// Wraps the `kai_matmul_clamp_f32_qai8dxp1x4_qsi4c32p16vsx4_1x16vs_sme_dot`
++// GEMV microkernel with a name that is compatible with our tooling.
++void xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme(
++    size_t m, size_t n, size_t k, const void* lhs_packed,
++    const void* rhs_packed, float* dst, size_t dst_stride_row,
++    size_t dst_stride_col, const void* params) {
++#if XNN_ENABLE_KLEIDIAI
++  assert(dst_stride_col == sizeof(float));
++  (void)dst_stride_col;
++
++  const struct xnn_f32_qb4w_minmax_params* minmax_params = params;
++  const float min = minmax_params->scalar.min;
++  const float max = minmax_params->scalar.max;
++
++  struct kai_matmul_uker_config config = {0};
++  config.format.bl = minmax_params->scalar.blocksize;
++
++  const struct kai_matmul_uker_api api =
++      kai_matmul_clamp_f32_qai8dxp1x4_qsi4c32p16vsx4_1x16vs_sme_dot();
++
++  // The microkernel reads the LHS and RHS row strides from the arguments, so
++  // query them from the microkernel itself rather than recomputing them here.
++  const struct kai_matmul_uker_lhs_dim_args lhs_shape = {.m = m, .k = k};
++  const struct kai_matmul_uker_rhs_dim_args rhs_shape = {.n = n, .k = k};
++
++  struct kai_matmul_uker_args args = {0};
++  args.flags = KAI_MATMUL_UKER_FLAGS_ARGS_CLAMP;
++  args.shape.m = m;
++  args.shape.n = n;
++  args.shape.k = k;
++  args.operand.lhs.ptr = lhs_packed;
++  args.operand.lhs.stride = api.get_lhs_stride(&config, &lhs_shape);
++  args.operand.rhs.ptr = rhs_packed;
++  args.operand.rhs.stride = api.get_rhs_stride(&config, &rhs_shape);
++  args.operand.dst.ptr = dst;
++  args.operand.dst.stride.m = dst_stride_row;
++  args.activation.clamp.min_ptr = &min;
++  args.activation.clamp.max_ptr = &max;
++
++  api.run(&config, &args);
++#else
++  assert(
++      "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
++      "`XNN_ENABLE_KLEIDIAI`." &&
++      0);
++#endif  // XNN_ENABLE_KLEIDIAI
++}
+diff --git a/src/reference/packing.cc b/src/reference/packing.cc
+index 6da5516016..69c94c5f45 100644
+--- a/src/reference/packing.cc
++++ b/src/reference/packing.cc
+@@ -3675,6 +3675,134 @@ void xnn_pack_kai_qb4_weights_and_biases(
+   }
+ }
+ 
++// The KleidiAI SME blockwise INT4 RHS packing microkernels are exposed through
++// the "NextGen" micro-kernel API, where the NxK and KxN variants differ only in
++// which source stride they consume.
++static struct kai_matmul_pack_rhs_uker_api xnn_kleidiai_qb4_rhs_pack_api_sme(
++    uint32_t flags) {
++  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
++    return kai_matmul_pack_rhs_kxn_qsi4c32p16vsx4s4s0_qsu4c32_f32_bf16_sme();
++  }
++  return kai_matmul_pack_rhs_nxk_qsi4c32p16vsx4s4s0_qsu4c32_f32_bf16_sme();
++}
++
++size_t xnn_packed_stride_kai_qb4_weights_and_biases_sme(
++    const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
++    size_t unused_k_stride, size_t extra_bytes) {
++  // The NxK and KxN variants produce identical packed layouts, so either one
++  // can be used to query the packed stride.
++  struct kai_matmul_pack_rhs_uker_config config = {};
++  config.format.nr = gemm_config->nr;
++  config.format.kr = UINT32_C(1) << gemm_config->log2_kr;
++  config.format.sr = UINT32_C(1) << gemm_config->log2_sr;
++  config.format.bl = block_size;
++  const struct kai_matmul_pack_rhs_uker_api api =
++      kai_matmul_pack_rhs_nxk_qsi4c32p16vsx4s4s0_qsu4c32_f32_bf16_sme();
++  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args shape = {};
++  shape.k = k;
++  // KleidiAI reports the stride of a whole `n_step`-wide block of rows, but
++  // XNNPACK wants the per-output-channel stride.
++  const size_t n_step = api.get_step(&config).n;
++  return api.get_rhs_packed_stride(&config, &shape).n / n_step;
++}
++
++void xnn_pack_kai_qb4_weights_and_biases_sme(
++    uint32_t flags, const struct xnn_gemm_config* gemm_config,
++    size_t input_channels, size_t output_channels, size_t groups,
++    size_t block_size, size_t k_stride, const void* accumulator_init,
++    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
++    const void* extra_data0, size_t extra_data0_element_size,
++    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
++    size_t extra_data1_element_size, void* packed_weights_ptr,
++    const void* params) {
++  // The blockwise BF16 scales arrive in `extra_data1` and the FP32 bias in
++  // `accumulator_init`. `extra_data0` holds the per-channel scale, which is
++  // unused for blockwise quantization.
++  (void)init_extra_data0_fn;
++  (void)extra_data0;
++  (void)extra_data0_element_size;
++  (void)init_extra_data1_fn;
++  (void)extra_data1_element_size;
++
++  const struct xnn_qs8_qc4w_packing_params* xnn_params =
++      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
++
++  // The packing microkernels bake in an RHS zero point of 8 (unsigned INT4
++  // weights) and an LHS zero point of 1.
++  if (xnn_params->kernel_zero_point != 8) {
++    xnn_log_error(
++        "KleidiAI QP8 F32 QB4W SME RHS packing requires a kernel zero point "
++        "of 8 (unsigned weights)");
++    return;
++  }
++  if (xnn_params->input_zero_point != 1) {
++    xnn_log_error(
++        "KleidiAI QP8 F32 QB4W SME RHS packing requires an input zero point "
++        "of 1");
++    return;
++  }
++  if (extra_data1 == NULL) {
++    xnn_log_error(
++        "KleidiAI QP8 F32 QB4W SME RHS packing requires blockwise scale data");
++    return;
++  }
++
++  struct kai_matmul_pack_rhs_uker_config config = {};
++  config.format.nr = gemm_config->nr;
++  config.format.kr = UINT32_C(1) << gemm_config->log2_kr;
++  config.format.sr = UINT32_C(1) << gemm_config->log2_sr;
++  config.format.bl = block_size;
++
++  const struct kai_matmul_pack_rhs_uker_api api =
++      xnn_kleidiai_qb4_rhs_pack_api_sme(flags);
++
++  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args packed_shape = {};
++  packed_shape.n = output_channels;
++  packed_shape.k = input_channels;
++  const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args packed_stride =
++      api.get_rhs_packed_stride(&config, &packed_shape);
++  const size_t packed_group_size =
++      api.get_rhs_packed_size(&config, &packed_shape, &packed_stride);
++
++  struct kai_matmul_pack_rhs_uker_scale_nk_dim_args scale_shape = {};
++  scale_shape.n = output_channels;
++  scale_shape.k = input_channels;
++  const struct kai_matmul_pack_rhs_uker_scale_nk_stride_args scale_stride =
++      api.get_scale_nk_stride(&config, &scale_shape);
++
++  // Two INT4 weights share a byte along the minor dimension, which is K for
++  // NxK weights and N for KxN weights.
++  const size_t rhs_row_stride = (k_stride + 1) / 2;
++  const size_t rhs_rows =
++      (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? input_channels : output_channels;
++  const size_t rhs_group_stride = rhs_rows * rhs_row_stride;
++  const size_t scale_group_stride = output_channels * scale_stride.n;
++
++  for (size_t group = 0; group < groups; ++group) {
++    struct kai_matmul_pack_rhs_uker_args args = {};
++    args.shape.n = output_channels;
++    args.shape.k = input_channels;
++    args.operand.rhs.ptr = (const uint8_t*)weights + group * rhs_group_stride;
++    if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
++      args.operand.rhs.stride.k = rhs_row_stride;
++    } else {
++      args.operand.rhs.stride.n = rhs_row_stride;
++    }
++    args.operand.rhs_packed.ptr =
++        (uint8_t*)packed_weights_ptr + group * packed_group_size;
++    args.operand.rhs_packed.stride = packed_stride;
++    // A null bias is zero-filled by the packing microkernel.
++    args.operand.bias_n.ptr =
++        accumulator_init == NULL
++            ? NULL
++            : (const float*)accumulator_init + group * output_channels;
++    args.operand.scale_nk.ptr =
++        (const uint8_t*)extra_data1 + group * scale_group_stride;
++    args.operand.scale_nk.stride = scale_stride;
++    api.run(&config, &args);
++  }
++}
++
+ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
+                                       size_t nr, size_t kr, size_t sr,
+                                       const uint16_t* k, const uint16_t* b,
+diff --git a/src/xnnpack/gemm.h b/src/xnnpack/gemm.h
+index a589e2176a..321d8884df 100644
+--- a/src/xnnpack/gemm.h
++++ b/src/xnnpack/gemm.h
+@@ -4179,6 +4179,11 @@ DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+ DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+     xnn_qp8_f16_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2)
+ 
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_mr(void);
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_nr(void);
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr(void);
++size_t xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_nr(void);
++
+ #define DECLARE_QP8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+   XNN_INTERNAL void fn_name(                                       \
+       size_t m, size_t n, size_t k, const void* lhs_packed,        \
+@@ -4200,6 +4205,10 @@ DECLARE_QP8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
+     xnn_qp8_f32_qb4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2)
+ DECLARE_QP8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
+     xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4)
++DECLARE_QP8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
++    xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme)
++DECLARE_QP8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
++    xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme)
+ 
+ #define DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)       \
+   XNN_INTERNAL void fn_name(                                             \
+diff --git a/src/xnnpack/pack.h b/src/xnnpack/pack.h
+index 4ba3c459c9..3e3d9b1f5e 100644
+--- a/src/xnnpack/pack.h
++++ b/src/xnnpack/pack.h
+@@ -632,6 +632,32 @@ XNN_INTERNAL size_t xnn_packed_stride_kai_qb4_weights_and_biases(
+     size_t k_stride,                            //
+     size_t extra_bytes);
+ 
++XNN_INTERNAL void xnn_pack_kai_qb4_weights_and_biases_sme(
++    uint32_t flags,                                //
++    const struct xnn_gemm_config* gemm_config,     //
++    size_t input_channels,                         //
++    size_t output_channels,                        //
++    size_t groups,                                 //
++    size_t block_size,                             //
++    size_t k_stride,                               //
++    const void* accumulator_init,                  //
++    const void* weights,                           //
++    xnn_init_scale_params_fn init_extra_data0_fn,  //
++    const void* extra_data0,                       //
++    size_t extra_data0_element_size,               //
++    xnn_init_scale_params_fn init_extra_data1_fn,  //
++    const void* extra_data1,                       //
++    size_t extra_data1_element_size,               //
++    void* packed_weights_ptr,                      //
++    const void* params);
++
++XNN_INTERNAL size_t xnn_packed_stride_kai_qb4_weights_and_biases_sme(
++    const struct xnn_gemm_config* gemm_config,  //
++    size_t k,                                   //
++    size_t block_size,                          //
++    size_t k_stride,                            //
++    size_t extra_bytes);
++
+ XNN_INTERNAL void xnn_pack_kai_f16_conv_goki_w_sme(size_t g,              //
+                                                    size_t nc,             //
+                                                    size_t ks,             //
+diff --git a/test/qp8-f32-qb4w-gemm-minmax.cc b/test/qp8-f32-qb4w-gemm-minmax.cc
+index 41c8c8e281..35e0c35d2a 100644
+--- a/test/qp8-f32-qb4w-gemm-minmax.cc
++++ b/test/qp8-f32-qb4w-gemm-minmax.cc
+@@ -279,4 +279,107 @@ std::vector<GemmTestParams> CreateTests1(
+ #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+ 
+ 
++#if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
++  #if XNN_ENABLE_KLEIDIAI
++  INSTANTIATE_TEST_SUITE_P(
++      QP8_F32_QB4W_GEMM_MINMAX_1X64C4__NEONSME, GemmTest,
++      testing::ValuesIn(CreateTests1(
++          /*k_block=*/32,
++          /*adj_k_block=*/32,
++          /*mr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  , /*nr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_nr();
++        } else {
++          return 0;
++        }
++      }
++  , /*kr=*/4, /*sr=*/1,
++          /*mr_packed=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  ,
++          /*is_igemm=*/false,
++          /*unsigned_inputs=*/false,
++          /*planes=*/1,
++          [](GemmMicrokernelTester& tester) {
++            tester.Test(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme,
++                        xnn_init_f32_qb4w_minmax_scalar_params,
++                        xnn_pack_kai_qb4_weights_and_biases_sme,
++                        xnn_packed_stride_kai_qb4_weights_and_biases_sme);
++          },
++          xnn_arch_arm_sme)),
++      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
++        return info.param.test_name;
++      });
++
++
++  INSTANTIATE_TEST_SUITE_P(
++      QP8_F32_QB4W_GEMM_MINMAX_16X64C4__NEONSME, GemmTest,
++      testing::ValuesIn(CreateTests1(
++          /*k_block=*/32,
++          /*adj_k_block=*/32,
++          /*mr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  , /*nr=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_nr();
++        } else {
++          return 0;
++        }
++      }
++  , /*kr=*/4, /*sr=*/1,
++          /*mr_packed=*/[]() -> size_t {
++        const struct xnn_hardware_config* hardware_config =
++              xnn_init_hardware_config();
++        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
++          return xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme_get_mr();
++        } else {
++          return 0;
++        }
++      }
++  ,
++          /*is_igemm=*/false,
++          /*unsigned_inputs=*/false,
++          /*planes=*/1,
++          [](GemmMicrokernelTester& tester) {
++            tester.Test(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme,
++                        xnn_init_f32_qb4w_minmax_scalar_params,
++                        xnn_pack_kai_qb4_weights_and_biases_sme,
++                        xnn_packed_stride_kai_qb4_weights_and_biases_sme);
++          },
++          xnn_arch_arm_sme)),
++      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
++        return info.param.test_name;
++      });
++
++  #endif  // XNN_ENABLE_KLEIDIAI
++#endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
++
++
+ }  // namespace
+diff --git a/test/qp8-f32-qb4w-gemm-minmax.yaml b/test/qp8-f32-qb4w-gemm-minmax.yaml
+index 31c0eae41c..eb7a99f1cd 100644
+--- a/test/qp8-f32-qb4w-gemm-minmax.yaml
++++ b/test/qp8-f32-qb4w-gemm-minmax.yaml
+@@ -52,3 +52,17 @@
+   packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases
+   k-block: 32
+   cpp-check: XNN_ENABLE_KLEIDIAI
++
++- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x64c4__neonsme
++  init: xnn_init_f32_qb4w_minmax_scalar_params
++  pack: xnn_pack_kai_qb4_weights_and_biases_sme
++  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases_sme
++  k-block: 32
++  cpp-check: XNN_ENABLE_KLEIDIAI
++
++- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x64c4__neonsme
++  init: xnn_init_f32_qb4w_minmax_scalar_params
++  pack: xnn_pack_kai_qb4_weights_and_biases_sme
++  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases_sme
++  k-block: 32
++  cpp-check: XNN_ENABLE_KLEIDIAI
