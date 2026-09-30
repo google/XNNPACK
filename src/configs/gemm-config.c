@@ -6482,6 +6482,14 @@ static void init_qu8_gemm_config(void) {
         qu8_gemm_config.mr = 7;
         qu8_gemm_config.nr = 16;
         qu8_gemm_config.log2_kr = 3;
+        #if XNN_ENABLE_AVX2
+          qu8_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qu8_packw_gemm_goi_ukernel_x16c8__avx2_madd;
+        #endif
+        #if XNN_ENABLE_AVX256VNNI
+          if (hardware_config->arch_flags & xnn_arch_x86_avx256vnni) {
+            qu8_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni;
+          }
+        #endif
       } else
     #endif
     #if XNN_ENABLE_AVX2
@@ -6494,6 +6502,7 @@ static void init_qu8_gemm_config(void) {
         qu8_gemm_config.mr = 3;
         qu8_gemm_config.nr = 8;
         qu8_gemm_config.log2_kr = 3;
+        qu8_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qu8_packw_gemm_goi_ukernel_x8c8__avx2_madd;
       } else
     #endif
     #if XNN_ENABLE_AVX

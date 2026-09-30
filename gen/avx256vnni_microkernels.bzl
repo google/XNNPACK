@@ -22,6 +22,7 @@ PROD_AVX256VNNI_MICROKERNEL_SRCS = [
     "src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-avx256vnni.c",
     "src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avx256vnni.c",
     "src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avx256vnni.c",
+    "src/qu8-packw/gen/qu8-packw-x16c8-gemm-goi-avx256vnni.c",
 ]
 
 NON_PROD_AVX256VNNI_MICROKERNEL_SRCS = [

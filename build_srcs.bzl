@@ -252,6 +252,7 @@ MICROKERNEL_DEFS = [
     "src/qu8-dwconv/qu8-dwconv-minmax-fp32.inc",
     "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.inc",
     "src/qu8-f32-vcvt/qu8-f32-vcvt.inc",
+    "src/qu8-packw/qu8-packw.inc",
     "src/qu8-rdsum/qu8-rdsum.inc",
     "src/qu8-rsum/qu8-rsum.inc",
     "src/qu8-vadd/qu8-vadd-minmax.inc",

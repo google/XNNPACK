@@ -117,6 +117,7 @@ SET(MICROKERNEL_UNIT_TESTS
     qb4-packw
     qs8-packw
     qs8-qc4w-packw
+    qu8-packw
     qu8-vlrelu
     rdminmax
     rdsum

@@ -507,6 +507,17 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qu8_packw_bench",
+    srcs = [
+        "qu8-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qs8_qc4w_packw_bench",
     srcs = [
         "qs8-qc4w-packw.cc",

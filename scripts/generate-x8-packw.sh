@@ -156,6 +156,11 @@ tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYP
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avx256vnni.c &
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
 
+### QU8 C8 packing
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QU8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=MADD -D PREFETCH=0 -o src/qu8-packw/gen/qu8-packw-x8c8-gemm-goi-avx2-madd.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QU8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=MADD -D PREFETCH=0 -o src/qu8-packw/gen/qu8-packw-x16c8-gemm-goi-avx2-madd.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QU8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qu8-packw/gen/qu8-packw-x16c8-gemm-goi-avx256vnni.c &
+
 ### Wasm Relaxed SIMD
 ### C8 packing
 tools/xngen src/x8-packw/kr-wasmdot.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-wasmrelaxedsimd.c &

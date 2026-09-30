@@ -175,6 +175,78 @@ class PackWMicrokernelTester {
     }
   }
 
+  void Test(xnn_qu8_packw_gemm_goi_ukernel_fn packw) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> u8dist(0, 255);
+    std::uniform_int_distribution<int32_t> bdist(-10000, 10000);
+
+    xnnpack::Buffer<uint8_t> weights(n() * n_stride());
+    xnnpack::Buffer<int32_t> bias(n());
+    const size_t packed_size =
+        packed_n() * packed_k() + packed_n() * sizeof(int32_t);
+    xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_size);
+    xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(
+        packed_size);
+
+    std::generate(weights.begin(), weights.end(),
+                  [&]() { return static_cast<uint8_t>(u8dist(rng)); });
+    std::generate(bias.begin(), bias.end(), [&]() { return bdist(rng); });
+    const int32_t* bias_data = nullbias() ? nullptr : bias.data();
+
+    // {input_zero_point, kernel_zero_point}
+    const xnn_qu8_packing_params zero_points[] = {
+        {0, 0}, {127, 127}, {128, 1}, {3, 250}, {255, 255}};
+    for (const xnn_qu8_packing_params& packing_params : zero_points) {
+      std::fill(packed_w.begin(), packed_w.end(), UINT8_C(0));
+      std::fill(packed_w_ref.begin(), packed_w_ref.end(), UINT8_C(0x7B));
+
+      // Compute reference results.
+      xnn_pack_qu8_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(), n_stride(),
+                              weights.data(), bias_data, /*scale=*/nullptr,
+                              packed_w_ref.data(), /*extra_bytes=*/0,
+                              &packing_params);
+
+      // Call optimized micro-kernel.
+      packw(/*g=*/1, n(), k(), nr(), kr(), sr(), n_stride(), weights.data(),
+            bias_data, /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
+            &packing_params);
+
+      // Verify bias and packed weights, block by block. Columns beyond n()
+      // are not written by the reference, so only the first n() columns of
+      // each block are compared.
+      const size_t block_size = nr() * sizeof(int32_t) + nr() * packed_k();
+      for (size_t nb = 0; nb < n(); nb += nr()) {
+        const size_t block_n = std::min(n() - nb, nr());
+        const uint8_t* block = packed_w.data() + (nb / nr()) * block_size;
+        const uint8_t* block_ref =
+            packed_w_ref.data() + (nb / nr()) * block_size;
+        for (size_t ni = 0; ni < block_n; ni++) {
+          int32_t b, b_ref;
+          std::memcpy(&b, block + ni * sizeof(int32_t), sizeof(b));
+          std::memcpy(&b_ref, block_ref + ni * sizeof(int32_t), sizeof(b));
+          EXPECT_EQ(b, b_ref)
+              << "bias at n " << nb + ni << " of " << n() << ", k " << k()
+              << ", izp " << (int)packing_params.input_zero_point << ", kzp "
+              << (int)packing_params.kernel_zero_point;
+        }
+        const uint8_t* w = block + nr() * sizeof(int32_t);
+        const uint8_t* w_ref = block_ref + nr() * sizeof(int32_t);
+        for (size_t kb = 0; kb < packed_k(); kb += kr() * sr()) {
+          for (size_t i = 0; i < nr() * kr() * sr(); i++) {
+            const size_t ni = i / kr() % nr();
+            if (ni < block_n) {
+              EXPECT_EQ((int32_t)w[kb * nr() + i],
+                        (int32_t)w_ref[kb * nr() + i])
+                  << "weight at n " << nb + ni << " of " << n() << ", k block "
+                  << kb << " of " << packed_k() << ", kzp "
+                  << (int)packing_params.kernel_zero_point;
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestGIO(xnn_qs8_packw_gemm_gio_ukernel_fn packw) const {
     xnnpack::Buffer<int8_t> weights(n() * k());
     xnnpack::Buffer<int32_t> bias(n());

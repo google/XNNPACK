@@ -286,6 +286,68 @@ static void qs8_packw(benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
+static void qu8_packw(benchmark::State& state,
+                      xnn_qu8_packw_gemm_goi_ukernel_fn packw, size_t nr,
+                      size_t kr, size_t sr, uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t batch = state.range(0);  // batch is g parameter for packw
+  const size_t dim_n = state.range(2);  // dim_n is nc parameter
+  const size_t dim_k = state.range(3);  // dim_k is kc parameter
+
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+  const size_t rounded_size =
+      rounded_n * rounded_k + rounded_n * sizeof(uint32_t);
+
+  xnnpack::ReplicableRandomDevice rng;
+
+  // Computer num_buffers that fit cache with source weights + packed_weights.
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(uint8_t) * batch * (dim_n * dim_k + rounded_size));
+
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> weights(
+      num_buffers * batch * dim_n * dim_k);
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * rounded_size);
+
+  const xnn_qu8_packing_params params = {127, 127};
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
+          weights.data() + buffer_index * batch * dim_n * dim_k,
+          /*bias=*/nullptr, /*scale=*/nullptr,
+          packed_weights.data() + buffer_index * batch * rounded_size,
+          /*extra_bytes=*/0, &params);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = batch * dim_n * dim_k;
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration =
+      (elements_per_iteration + batch * rounded_size);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
+}
+
 static void qs8_gio_packw(benchmark::State& state,
                           xnn_qs8_packw_gemm_gio_ukernel_fn packw, size_t nr,
                           size_t kr, size_t sr, uint64_t arch_flags = 0) {
@@ -867,6 +929,50 @@ static void qs8_packw_x16c8__reference(benchmark::State& state) {
 
 BENCHMARK_BGEMM(qs8_packw_x8c8__reference)
 BENCHMARK_BGEMM(qs8_packw_x16c8__reference)
+
+static void qu8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
+                                 size_t nr, size_t kr, size_t sr,
+                                 size_t n_stride, const uint8_t* weights,
+                                 const int32_t* bias, const void* scale,
+                                 void* packed_weights, size_t extra_bytes,
+                                 const void* params) {
+  xnn_pack_qu8_gemm_goi_w(
+      batch, dim_n, dim_k, nr, kr, sr, n_stride, weights, bias, scale,
+      packed_weights, extra_bytes,
+      static_cast<const struct xnn_qu8_packing_params*>(params));
+}
+
+static void qu8_packw_x8__reference(benchmark::State& state) {
+  qu8_packw(state, qu8_packw__reference,
+            /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
+static void qu8_packw_x16__reference(benchmark::State& state) {
+  qu8_packw(state, qu8_packw__reference,
+            /*nr=*/16, /*kr=*/1, /*sr=*/1);
+}
+static void qu8_packw_x4c8__reference(benchmark::State& state) {
+  qu8_packw(state, qu8_packw__reference,
+            /*nr=*/4, /*kr=*/8, /*sr=*/1);
+}
+static void qu8_packw_x8c8__reference(benchmark::State& state) {
+  qu8_packw(state, qu8_packw__reference,
+            /*nr=*/8, /*kr=*/8, /*sr=*/1);
+}
+static void qu8_packw_x16c8__reference(benchmark::State& state) {
+  qu8_packw(state, qu8_packw__reference,
+            /*nr=*/16, /*kr=*/8, /*sr=*/1);
+}
+static void qu8_packw_x4c2s4__reference(benchmark::State& state) {
+  qu8_packw(state, qu8_packw__reference,
+            /*nr=*/4, /*kr=*/2, /*sr=*/4);
+}
+
+BENCHMARK_BGEMM(qu8_packw_x8__reference)
+BENCHMARK_BGEMM(qu8_packw_x16__reference)
+BENCHMARK_BGEMM(qu8_packw_x4c8__reference)
+BENCHMARK_BGEMM(qu8_packw_x8c8__reference)
+BENCHMARK_BGEMM(qu8_packw_x16c8__reference)
+BENCHMARK_BGEMM(qu8_packw_x4c2s4__reference)
 
 static void qs8_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
                                      size_t nr, size_t kr, size_t sr,

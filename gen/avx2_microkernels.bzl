@@ -79,6 +79,8 @@ PROD_AVX2_MICROKERNEL_SRCS = [
     "src/qu8-gemm/gen/qu8-gemm-3x8c8-minmax-fp32-avx2.c",
     "src/qu8-igemm/gen/qu8-igemm-1x8c8-minmax-fp32-avx2.c",
     "src/qu8-igemm/gen/qu8-igemm-3x8c8-minmax-fp32-avx2.c",
+    "src/qu8-packw/gen/qu8-packw-x8c8-gemm-goi-avx2-madd.c",
+    "src/qu8-packw/gen/qu8-packw-x16c8-gemm-goi-avx2-madd.c",
     "src/qu8-rsum/gen/qu8-rsum-avx2-u64-acc2.c",
     "src/qu8-vadd/gen/qu8-vadd-minmax-avx2-mul32-ld64-u16.c",
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-avx2-mul32-ld64-u16.c",
