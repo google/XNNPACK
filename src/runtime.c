@@ -616,10 +616,17 @@ enum xnn_status xnn_create_runtime_v4(
 
   runtime->flags = flags;
 
-  runtime->opdata = xnn_allocate_zero_memory(sizeof(struct xnn_operator_data) * subgraph->num_nodes);
-  if (runtime->opdata == NULL) {
+  size_t opdata_size = 0;
+  if (!xnn_safe_mul(sizeof(struct xnn_operator_data), subgraph->num_nodes,
+                    &opdata_size)) {
+    xnn_log_error(
+        "failed to allocate opdata descriptors: size overflows size_t");
+    goto error;
+  }
+  runtime->opdata = xnn_allocate_zero_memory(opdata_size);
+  if (runtime->opdata == NULL && subgraph->num_nodes != 0) {
     xnn_log_error("failed to allocate %zu bytes for opdata descriptors",
-      sizeof(struct xnn_operator_data) * (size_t) subgraph->num_nodes);
+                  opdata_size);
     goto error;
   }
   if (flags & XNN_FLAG_BASIC_PROFILING) {
@@ -689,10 +696,19 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
-  runtime->values = xnn_allocate_zero_memory(sizeof(struct xnn_runtime_value) * subgraph->num_values);
-  if (runtime->values == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for runtime's value descriptors",
-      sizeof(struct xnn_runtime_value) * (size_t) subgraph->num_values);
+  size_t values_size = 0;
+  if (!xnn_safe_mul(sizeof(struct xnn_runtime_value), subgraph->num_values,
+                    &values_size)) {
+    xnn_log_error(
+        "failed to allocate runtime's value descriptors: size overflows "
+        "size_t");
+    goto error;
+  }
+  runtime->values = xnn_allocate_zero_memory(values_size);
+  if (runtime->values == NULL && subgraph->num_values != 0) {
+    xnn_log_error(
+        "failed to allocate %zu bytes for runtime's value descriptors",
+        values_size);
     goto error;
   }
 
@@ -848,6 +864,16 @@ enum xnn_status xnn_create_runtime_with_threadpool(
 
 enum xnn_status xnn_plan_memory(
     xnn_runtime_t runtime) {
+  size_t total_values_and_ops = 0;
+  if (!xnn_safe_add(runtime->num_values, runtime->num_ops,
+                    &total_values_and_ops) ||
+      total_values_and_ops >= XNN_INVALID_VALUE_ID) {
+    xnn_log_error(
+        "failed to plan memory: total values and operators exceeds maximum "
+        "allowed");
+    return xnn_status_out_of_memory;
+  }
+
   enum xnn_status status = xnn_status_invalid_state;
   struct xnn_value_allocation_tracker mem_alloc_tracker;
   status = xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
@@ -1281,36 +1307,36 @@ enum xnn_status xnn_delete_runtime(
         xnn_release_memory(runtime->opdata[i].end_ts);
       }
       xnn_release_memory(runtime->opdata);
+    }
 
-      if (runtime->values != NULL) {
-        // Release buffers created during rewrites.
-        for (size_t i = 0; i < runtime->num_values; i++) {
-          struct xnn_runtime_value* value = &runtime->values[i];
-          if (value->allocation_type == xnn_allocation_type_dynamic ||
-              value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
-            xnn_release_memory(value->data);
-          }
+    if (runtime->values != NULL) {
+      // Release buffers created during rewrites.
+      for (size_t i = 0; i < runtime->num_values; i++) {
+        struct xnn_runtime_value* value = &runtime->values[i];
+        if (value->allocation_type == xnn_allocation_type_dynamic ||
+            value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
+          xnn_release_memory(value->data);
         }
-        xnn_release_memory(runtime->values);
       }
+      xnn_release_memory(runtime->values);
+    }
 
-      if (runtime->workspace != NULL) {
-        // Remove this runtime from the list of users of the workspace.
-        assert(runtime->workspace->first_user != NULL);
-        if (runtime->workspace->first_user == runtime) {
-          runtime->workspace->first_user = runtime->next_workspace_user;
-        } else {
-          xnn_runtime_t prev = runtime->workspace->first_user;
-          xnn_runtime_t curr = prev->next_workspace_user;
-          while (curr != runtime) {
-            prev = curr;
-            curr = curr->next_workspace_user;
-          }
-          assert(curr == runtime);
-          prev->next_workspace_user = curr->next_workspace_user;
+    if (runtime->workspace != NULL) {
+      // Remove this runtime from the list of users of the workspace.
+      assert(runtime->workspace->first_user != NULL);
+      if (runtime->workspace->first_user == runtime) {
+        runtime->workspace->first_user = runtime->next_workspace_user;
+      } else {
+        xnn_runtime_t prev = runtime->workspace->first_user;
+        xnn_runtime_t curr = prev->next_workspace_user;
+        while (curr != runtime) {
+          prev = curr;
+          curr = curr->next_workspace_user;
         }
-        xnn_release_workspace(runtime->workspace);
+        assert(curr == runtime);
+        prev->next_workspace_user = curr->next_workspace_user;
       }
+      xnn_release_workspace(runtime->workspace);
     }
 
     if (runtime->threadpool &&

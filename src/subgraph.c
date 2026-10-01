@@ -1266,7 +1266,12 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
               "FP16 rewrite aborted: static tensor size overflows size_t");
           goto error;
         }
-        const size_t fp16_size = tensor_size / 2 + XNN_EXTRA_BYTES;
+        size_t fp16_size = 0;
+        if (!xnn_safe_add(tensor_size / 2, XNN_EXTRA_BYTES, &fp16_size)) {
+          xnn_log_error(
+              "FP16 rewrite aborted: static tensor size overflows size_t");
+          goto error;
+        }
         value->fp16_rewrite.fp16_temp_data =
             xnn_allocate_zero_memory(fp16_size);
         if (value->fp16_rewrite.fp16_temp_data == NULL) {
@@ -2619,16 +2624,30 @@ static enum xnn_status optimize_common_subgraphs_binary_to_const(
   return xnn_status_success;
 }
 
-static void convert_static_value_to_fp32(struct xnn_value* value) {
+static enum xnn_status convert_static_value_to_fp32(struct xnn_value* value) {
   assert(xnn_value_is_static(value->allocation_type));
-  if (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
-    xnn_release_memory(value->data);
+  float data = 0.0f;
+  if (value->flags & XNN_VALUE_FLAG_IS_ZERO) {
+    data = 0.0f;
+  } else if (value->flags & XNN_VALUE_FLAG_IS_ONE) {
+    data = 1.0f;
+  } else {
+    data = get_scalar_value_as_float(value);
   }
-  value->data = xnn_allocate_memory(sizeof(float));
-  float data = get_scalar_value_as_float(value);
-  memcpy(value->data, &data, sizeof(float));
+  float* new_data = (float*)xnn_allocate_memory(sizeof(float));
+  if (new_data == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for fp32 static value",
+                  sizeof(float));
+    return xnn_status_out_of_memory;
+  }
+  *new_data = data;
+  if (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
+    xnn_release_memory((void*)value->data);
+  }
+  value->data = new_data;
   value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
   value->datatype = xnn_datatype_fp32;
+  return xnn_status_success;
 }
 
 // Replace `mul(reduce_sum(x), 1/n)`, `div(reduce_sum(x), n)`  or
@@ -2637,9 +2656,6 @@ static void convert_static_value_to_fp32(struct xnn_value* value) {
 static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
                                                uint32_t node_id,
                                                size_t* changes) {
-  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
-  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
-
   struct xnn_node* node = &subgraph->nodes[node_id];
 
   if (node->type != xnn_node_type_binary_elementwise ||
@@ -2678,9 +2694,16 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
     return xnn_status_success;
   }
 
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+  node = &subgraph->nodes[node_id];
+  reduced_value = &subgraph->values[node->inputs[0]];
+  arg_value = &subgraph->values[node->inputs[1]];
+  reduce_node = &subgraph->nodes[reduced_value->producer];
+
   // Rewrite the internal values to this subgraph to be fp32.
   reduced_value->datatype = xnn_datatype_fp32;
-  convert_static_value_to_fp32(arg_value);
+  XNN_RETURN_IF_ERROR(convert_static_value_to_fp32(arg_value));
 
   uint32_t output_id = node->outputs[0];
   struct xnn_value* output_value = &subgraph->values[output_id];
@@ -2693,6 +2716,7 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
   if (status != xnn_status_success) {
     return status;
   }
+  node = &subgraph->nodes[node_id];
   node->outputs[0] = output_fp32_id;
 
   status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/NULL,
@@ -2700,8 +2724,11 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
   if (status != xnn_status_success) {
     return status;
   }
-  move_last_node_to(subgraph, node_id);
 
+  node = &subgraph->nodes[node_id];
+  reduced_value = &subgraph->values[node->inputs[0]];
+  arg_value = &subgraph->values[node->inputs[1]];
+  reduce_node = &subgraph->nodes[reduced_value->producer];
   xnn_log_info(
       "Converted %s[#%u](reduce_sum%s[#%u](v%03u), v%03u) to "
       "fp32.",
@@ -2850,7 +2877,7 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
       return xnn_status_out_of_memory;
     }
     uint32_t new_value_id;
-    XNN_RETURN_IF_ERROR(
+    const enum xnn_status define_status =
         xnn_datatype_is_quantized(input_value->datatype)
             ? xnn_define_quantized_tensor_value(
                   subgraph, input_value->datatype,
@@ -2865,8 +2892,11 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
                                       /*external_id=*/XNN_INVALID_VALUE_ID,
                                       /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP |
                                           XNN_VALUE_FLAG_IS_ZERO,
-                                      &new_value_id),
-        "Failed to create static zero tensor.");
+                                      &new_value_id);
+    if (define_status != xnn_status_success) {
+      xnn_release_memory(data);
+      return define_status;
+    }
 
     // Replace the broadcast node with a binary add.
     XNN_RETURN_IF_ERROR(
@@ -4779,7 +4809,13 @@ enum xnn_status xnn_subgraph_pack_static_values_to_fp16(
             n);
         return xnn_status_out_of_memory;
       }
-      const size_t fp16_size = tensor_size / 2 + XNN_EXTRA_BYTES;
+      size_t fp16_size = 0;
+      if (!xnn_safe_add(tensor_size / 2, XNN_EXTRA_BYTES, &fp16_size)) {
+        xnn_log_error(
+            "failed to pack value #%" PRIu32 " to FP16: size overflows size_t",
+            n);
+        return xnn_status_out_of_memory;
+      }
       void* fp16_data = xnn_allocate_zero_memory(fp16_size);
       if (fp16_data == NULL) {
         xnn_log_error(

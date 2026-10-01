@@ -69,3 +69,43 @@ TEST(RUNTIME, null_runtime) {
                                            nullptr, &required_size));
   EXPECT_EQ(xnn_status_invalid_parameter, xnn_invoke_runtime(nullptr));
 }
+
+#if SIZE_MAX <= UINT32_MAX
+TEST(RUNTIME, create_runtime_overflow_num_nodes) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(1, 0, &subgraph));
+  subgraph->num_nodes = static_cast<uint32_t>(
+      SIZE_MAX / sizeof(struct xnn_operator_data) + 1);
+  xnn_runtime_t runtime = nullptr;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_create_runtime_v2(subgraph, nullptr, 0, &runtime));
+  EXPECT_EQ(nullptr, runtime);
+  subgraph->num_nodes = 0;
+  xnn_delete_subgraph(subgraph);
+}
+
+TEST(RUNTIME, create_runtime_overflow_num_values) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(1, 0, &subgraph));
+  subgraph->num_values = static_cast<uint32_t>(
+      SIZE_MAX / sizeof(struct xnn_runtime_value) + 1);
+  xnn_runtime_t runtime = nullptr;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_create_runtime_v2(subgraph, nullptr, 0, &runtime));
+  EXPECT_EQ(nullptr, runtime);
+  subgraph->num_values = 1;
+  xnn_delete_subgraph(subgraph);
+}
+#endif  // SIZE_MAX <= UINT32_MAX
+
+extern "C" enum xnn_status xnn_plan_memory(xnn_runtime_t runtime);
+
+TEST(RUNTIME, plan_memory_total_values_and_ops_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime = {};
+  runtime.num_values = XNN_INVALID_VALUE_ID;
+  runtime.num_ops = 1;
+  EXPECT_EQ(xnn_status_out_of_memory, xnn_plan_memory(&runtime));
+}
