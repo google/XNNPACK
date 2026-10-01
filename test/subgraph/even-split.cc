@@ -184,6 +184,68 @@ TEST(EvenSplitTest, OverflowInputStride) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+TEST(EvenSplitTest, MatchingInputAndOutputIdRejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[3] = {10, 10, 10};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[3] = {5, 10, 10};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const uint32_t output_ids[2] = {input_id, output_id};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_even_split(
+          subgraph, /*split_dim=*/0, input_id, 2, output_ids, 0));
+}
+
+TEST(EvenSplitTest, DuplicateOutputIdsRejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[3] = {10, 10, 10};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[3] = {5, 10, 10};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, output_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const uint32_t output_ids[2] = {output_id, output_id};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_even_split(
+          subgraph, /*split_dim=*/0, input_id, 2, output_ids, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
