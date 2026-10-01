@@ -51,7 +51,10 @@ static enum xnn_status create_slice_operator(
   }
 
   if (status == xnn_status_success) {
-    const int num_dims = node->params.slice.num_dims;
+    memset(opdata->begins, 0, sizeof(opdata->begins));
+    memset(opdata->ends, 0, sizeof(opdata->ends));
+    const size_t num_dims = node->params.slice.num_dims;
+    opdata->num_slice_dims = num_dims;
     memcpy(opdata->begins, node->params.slice.begins, num_dims * sizeof(int64_t));
     memcpy(opdata->ends, node->params.slice.ends, num_dims * sizeof(int64_t));
   }
@@ -71,6 +74,14 @@ static enum xnn_status reshape_slice_operator(
   assert(output_id < num_values);
   struct xnn_runtime_value* output_value = values + output_id;
   struct xnn_runtime_value* input_value = values + input_id;
+  if (input_value->shape.num_dims != opdata->num_slice_dims) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape rank (%zu) does not match slice rank (%zu)",
+      xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
+      input_value->shape.num_dims, opdata->num_slice_dims);
+    return xnn_status_invalid_parameter;
+  }
   const size_t num_dims = input_value->shape.num_dims;
   const size_t num_input_elements =
       xnn_shape_multiply_all_dims(&input_value->shape);

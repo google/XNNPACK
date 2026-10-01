@@ -403,6 +403,9 @@ reshape_dynamic_fully_connected_nc(
   }
 
   if (batch_size == 0) {
+    if (workspace_size != NULL) {
+      *workspace_size = 0;
+    }
     dynamic_fully_connected_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
@@ -473,6 +476,13 @@ reshape_dynamic_fully_connected_nc(
       dynamic_fully_connected_op->dynamic_context.gemm;
 
   // TODO(zhin): fast path to query workspace size when workspace_size != NULL?
+  if (workspace_size == NULL) {
+    xnn_log_error(
+        "failed to reshape %s operator: workspace_size must be non-null",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_invalid_parameter;
+  }
+
   if (!xnn_safe_mul(n_stride, weights_stride, workspace_size)) {
     xnn_log_error(
         "failed to reshape %s operator: workspace size overflows size_t",

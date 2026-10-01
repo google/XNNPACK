@@ -327,3 +327,24 @@ TEST(DYNAMIC_FULLY_CONNECTED_NC_F32, overflow_batch_stride) {
                 /*threadpool=*/nullptr));
 }
 
+TEST(DYNAMIC_FULLY_CONNECTED_NC_F32, zero_batch_workspace) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_dynamic_fully_connected_nc_f32(
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  size_t workspace_size = SIZE_MAX;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_dynamic_fully_connected_nc_f32(
+                op, /*batch_size=*/0, /*input_channels=*/10,
+                /*output_channels=*/10, /*input_stride=*/10,
+                /*output_stride=*/10, &workspace_size,
+                /*threadpool=*/nullptr));
+  EXPECT_EQ(workspace_size, 0);
+}
+
