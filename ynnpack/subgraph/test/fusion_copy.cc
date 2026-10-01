@@ -431,6 +431,36 @@ TEST(fusion, move_broadcast_like_to_output_transpose) {
               AllOf(IsStaticTranspose(), InputsAre(x_id)));
 }
 
+TEST(fusion, static_broadcast_1_to_1) {
+  // Static broadcast of 1 to 1 should be treated as a no-op broadcast and not
+  // create a spurious broadcast node with new_dims.
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 8}, x_id)
+      .AddOutput(ynn_type_fp32, {8}, out_id)
+      .AddTensor(ynn_type_fp32, {1, 8}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({1, 8}, x_id, broadcast_x_id)
+      .AddReshape({8}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The no-op broadcast should not become a non-empty static_broadcast.
+  for (const auto& node : subgraph.nodes) {
+    if (node.is_valid()) {
+      if (const auto* b = std::get_if<ynn_node::static_broadcast>(&node.op)) {
+        EXPECT_TRUE(b->new_dims.empty());
+      }
+    }
+  }
+}
+
 TEST(fusion, reshape_to_expand_dims) {
   const uint32_t x_id = 0;
   const uint32_t out_id = 1;

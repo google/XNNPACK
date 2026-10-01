@@ -235,27 +235,36 @@ void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   bool noop = true;
   for (size_t d = 0; d < std::min(output_extents.size(), op.new_dims.size());
        ++d) {
-    if (slinky::prove_true(output_extents[d] ==
-                           static_cast<slinky::index_t>(op.new_dims[d]))) {
+    const slinky::index_t new_dim_d = op.new_dims[d];
+    if (new_dim_d == 0) {
+      continue;
+    }
+    if ((!output_extents[d].defined() && new_dim_d == 1) ||
+        slinky::prove_true(output_extents[d] == new_dim_d)) {
       // This dimension is a no-op.
       op.new_dims[d] = 0;
       continue;
     }
 
-    const slinky::index_t new_dim_d = op.new_dims[d];
-    if (new_dim_d != 0) {
-      noop = false;
+    noop = false;
+    if (new_dim_d == 1) {
+      output_extents[d] = slinky::expr{};
+    } else {
       output_extents[d] = new_dim_d;
-      if (d < input.rank() && input.extents[d].defined()) {
-        node.add_check(input.extents[d] == 1 || input.extents[d] == new_dim_d,
-                       {"invalid broadcast in dimension ", d, " of ",
-                        ynn_node::input_idx{0}});
-      }
+    }
+    if (d < input.rank() && input.extents[d].defined()) {
+      node.add_check(input.extents[d] == 1 || input.extents[d] == new_dim_d,
+                     {"invalid broadcast in dimension ", d, " of ",
+                      ynn_node::input_idx{0}});
     }
   }
   for (size_t d = output_extents.size(); d < op.new_dims.size(); ++d) {
     // This is a new trailing dimension.
-    output_extents.push_back(op.new_dims[d]);
+    if (op.new_dims[d] == 1) {
+      output_extents.push_back(slinky::expr{});
+    } else {
+      output_extents.push_back(op.new_dims[d]);
+    }
     noop = false;
   }
 
