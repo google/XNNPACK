@@ -494,4 +494,7 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   ADD_EXECUTABLE(microkernel-utils-test microkernel-utils.cc)
   TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE xnnpack-microkernel-utils xnnpack-hardware-config xnnpack-logging GTest::gtest GTest::gtest_main pthreadpool)
+
+  ADD_EXECUTABLE(reference-utils-test reference-utils-test.cc)
+  TARGET_LINK_LIBRARIES(reference-utils-test PRIVATE xnnpack-test)
 ENDIF()
