@@ -198,15 +198,21 @@ static enum xnn_status reshape_slice_nd(
   size_t normalized_output_shape[XNN_MAX_TENSOR_DIMS];
   size_t num_normalized_dims;
 
-  xnn_normalize_slice(
-      num_dims,
-      offsets,
-      sizes,
-      input_shape,
-      normalized_offsets,
-      normalized_input_shape,
-      normalized_output_shape,
-      &num_normalized_dims);
+  if (!xnn_normalize_slice(
+          num_dims,
+          offsets,
+          sizes,
+          input_shape,
+          normalized_offsets,
+          normalized_input_shape,
+          normalized_output_shape,
+          &num_normalized_dims)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "normalized dimension product overflows size_t",
+        xnn_operator_type_to_string_v2(slice_op));
+    return xnn_status_out_of_memory;
+  }
   assert(num_normalized_dims <= XNN_MAX_TENSOR_DIMS);
 
   slice_op->context.slice = (struct slice_context) {

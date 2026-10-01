@@ -3,7 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <climits>
+#include <cstddef>
+
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
+#include "src/xnnpack/normalization.h"
 #include "test/operators/slice-normalization-tester.h"
 
 TEST(SLICE_NORMALIZATION_TEST, normalize_1d_full_slice) {
@@ -214,4 +219,40 @@ TEST(SLICE_NORMALIZATION_TEST, normalize_6d_remove_size_1) {
       .expected_input_shape({3, 6720})
       .expected_output_shape({2, 2})
       .Test();
+}
+
+// Overflow regression tests: xnn_normalize_slice must return false when
+// merging dimensions would overflow size_t.
+TEST(SLICE_NORMALIZATION_TEST, overflow_merged_dim_returns_false) {
+  // Two adjacent full-slice dims whose product overflows size_t.
+  constexpr size_t kHalf = (SIZE_MAX / 2) + 2;
+  size_t offsets[2] = {0, 0};
+  size_t sizes[2] = {kHalf, kHalf};
+  size_t input_shape[2] = {kHalf, kHalf};
+  size_t normalized_offsets[XNN_MAX_TENSOR_DIMS];
+  size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
+  size_t normalized_output_shape[XNN_MAX_TENSOR_DIMS];
+  size_t num_normalized_dims = 0;
+  EXPECT_FALSE(xnn_normalize_slice(
+      2, offsets, sizes, input_shape,
+      normalized_offsets, normalized_input_shape,
+      normalized_output_shape, &num_normalized_dims));
+}
+
+TEST(SLICE_NORMALIZATION_TEST, overflow_size1_merge_returns_false) {
+  // Inner dim has size 1 (triggers first-pass merge path) with overflow.
+  constexpr size_t kHalf = (SIZE_MAX / 2) + 2;
+  // Three dims: [kHalf, kHalf, 1] — sizes [kHalf, kHalf, 1].
+  // The innermost size-1 dim triggers a merge of the first two.
+  size_t offsets[3] = {0, 0, 0};
+  size_t sizes[3] = {kHalf, kHalf, 1};
+  size_t input_shape[3] = {kHalf, kHalf, 1};
+  size_t normalized_offsets[XNN_MAX_TENSOR_DIMS];
+  size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
+  size_t normalized_output_shape[XNN_MAX_TENSOR_DIMS];
+  size_t num_normalized_dims = 0;
+  EXPECT_FALSE(xnn_normalize_slice(
+      3, offsets, sizes, input_shape,
+      normalized_offsets, normalized_input_shape,
+      normalized_output_shape, &num_normalized_dims));
 }
