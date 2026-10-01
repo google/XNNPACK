@@ -466,4 +466,48 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16Rewrite, params3,
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32Rewrite, params3,
                          [](auto p) { return p.param.Name(); });
 
+// Expose the internal runtime pointer so tests can forge dimension values that
+// bypass xnn_reshape_external_value's shape-product guard.
+class StaticReduceTester : public SubgraphTester {
+ public:
+  using SubgraphTester::SubgraphTester;
+  xnn_runtime_t Runtime() const { return runtime_.get(); }
+};
+
+// Forge a giant non-reduced dimension directly into the runtime value to bypass
+// xnn_reshape_external_value's shape-product guard, confirming that
+// reshape_reduce_operator catches the overflow and returns
+// xnn_status_out_of_memory rather than silently storing a SIZE_MAX allocation.
+TEST(StaticReduce, OverflowOutputTensorSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // Reduce axis 0 of a 2-D tensor [4, 4] → output [4].
+  const std::vector<int64_t> reduction_axes = {0};
+
+  Tensor<float> input({4, 4}, XnnExtraBytes);
+  Tensor<float> output({4});
+
+  StaticReduceTester tester(2);
+  tester.AddInputTensor(input.shape(), input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.shape(), output.data(), /*external_id=*/1)
+      .AddReduce(xnn_reduce_sum, reduction_axes, /*input_id=*/0,
+                 /*output_id=*/1, /*flags=*/0);
+
+  xnn_status status = tester.CreateRuntime();
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(status, xnn_status_success);
+
+  xnn_runtime_t rt = tester.Runtime();
+  ASSERT_NE(rt, nullptr);
+
+  // Forge a huge non-reduced dimension (dim[1]): the output element count
+  // equals dim[1] (after reducing dim[0]), so xnn_runtime_tensor_get_size
+  // will overflow and return SIZE_MAX.
+  rt->values[0].shape.dim[1] = SIZE_MAX / 2;
+
+  EXPECT_EQ(xnn_reshape_runtime(rt), xnn_status_out_of_memory);
+}
+
 }  // namespace xnnpack

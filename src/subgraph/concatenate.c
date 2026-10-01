@@ -228,6 +228,12 @@ static enum xnn_status reshape_concatenate_operator(
     }
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_concatenate));
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
