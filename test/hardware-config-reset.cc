@@ -46,4 +46,15 @@ TEST(HardwareConfigResetTest, HardwareConfigResetAndInitialization) {
   xnn_reset_hardware_config();
 }
 
+TEST(HardwareConfigResetTest, KleidiAiGemmConfigBoundsCheck) {
+  xnn_hardware_config mock_no_sme{};
+  xnn_set_hardware_config(&mock_no_sme);
+
+  EXPECT_EQ(xnn_init_pf16_gemm_config(), nullptr);
+  EXPECT_EQ(xnn_init_pf32_gemm_config(), nullptr);
+  EXPECT_EQ(xnn_init_pqs8_qc8w_gemm_config(), nullptr);
+
+  xnn_reset_hardware_config();
+}
+
 }  // namespace
