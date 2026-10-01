@@ -235,15 +235,25 @@ enum xnn_status xnn_define_static_transpose(
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
       "failed to define %s operator with %zu num_dims: num_dims must be <= %d",
-      xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims, XNN_MAX_TENSOR_DIMS);
+      xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims,
+      XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (perm == NULL) {
+    xnn_log_error(
+      "failed to define %s operator: perm cannot be NULL",
+      xnn_node_type_to_string(xnn_node_type_static_transpose));
     return xnn_status_invalid_parameter;
   }
 
   for (size_t i = 0; i < num_dims; ++i) {
     if (perm[i] >= num_dims) {
       xnn_log_error(
-          "failed to define %s operator with %zu perm and %zu num_dims: 0 <= perm < num_dims",
-          xnn_node_type_to_string(xnn_node_type_static_transpose), perm[i], num_dims);
+        "failed to define %s operator with %zu perm and %zu num_dims: "
+        "0 <= perm < num_dims",
+        xnn_node_type_to_string(xnn_node_type_static_transpose),
+        perm[i], num_dims);
       return xnn_status_invalid_parameter;
     }
   }

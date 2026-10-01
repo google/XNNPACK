@@ -376,22 +376,10 @@ enum xnn_status xnn_define_even_split(
   const uint32_t* output_ids,
   uint32_t flags)
 {
-  assert(num_outputs >= 1);
-  assert(num_outputs <= XNN_MAX_OUTPUTS);
-
   enum xnn_node_type node_type = xnn_node_type_even_split;
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
-    return status;
-  }
-
-  if ((status = xnn_subgraph_check_input_node_id(node_type, input_id, subgraph->num_values)) != xnn_status_success) {
-    return status;
-  }
-
-  const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_input_type_dense(node_type, input_id, input_value);
-  if (status != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) !=
+      xnn_status_success) {
     return status;
   }
 
@@ -404,14 +392,38 @@ enum xnn_status xnn_define_even_split(
 
   if (num_outputs > XNN_MAX_OUTPUTS) {
     xnn_log_error(
-      "failed to define %s operator with %zu outputs: number of outputs exceeds the supported maximum (%zu)",
-      xnn_node_type_to_string(node_type), num_outputs, (size_t) XNN_MAX_OUTPUTS);
+      "failed to define %s operator with %zu outputs: "
+      "number of outputs exceeds the supported maximum (%zu)",
+      xnn_node_type_to_string(node_type), num_outputs,
+      (size_t) XNN_MAX_OUTPUTS);
     return xnn_status_invalid_parameter;
   }
 
+  if (output_ids == NULL) {
+    xnn_log_error(
+      "failed to define %s operator: output_ids array cannot be NULL",
+      xnn_node_type_to_string(node_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  status = xnn_subgraph_check_input_node_id(
+    node_type, input_id, subgraph->num_values);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  const struct xnn_value* input_value = &subgraph->values[input_id];
+  status = xnn_subgraph_check_input_type_dense(
+    node_type, input_id, input_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   for (size_t i = 0; i < num_outputs; ++i) {
-    XNN_RETURN_IF_ERROR(check_output_value(subgraph, split_dim, input_id, output_ids[i], "Nth", node_type));
-    XNN_RETURN_IF_ERROR(check_datatype_copyable(subgraph, input_id, output_ids[i], "Nth", node_type));
+    XNN_RETURN_IF_ERROR(check_output_value(
+      subgraph, split_dim, input_id, output_ids[i], "Nth", node_type));
+    XNN_RETURN_IF_ERROR(check_datatype_copyable(
+      subgraph, input_id, output_ids[i], "Nth", node_type));
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
