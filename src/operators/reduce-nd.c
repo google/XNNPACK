@@ -204,9 +204,15 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
   assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
   memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
 
-  xnn_normalize_reduction(
-    &num_reduction_axes, normalized_reduction_axes,
-    &num_input_dims, normalized_input_shape);
+  if (!xnn_normalize_reduction(
+          &num_reduction_axes, normalized_reduction_axes,
+          &num_input_dims, normalized_input_shape)) {
+    xnn_log_error(
+        "failed to reshape %s operator: "
+        "normalized dimension product overflows size_t",
+        xnn_operator_type_to_string_v2(reduce_op));
+    return xnn_status_out_of_memory;
+  }
 
   size_t num_output_elements = 1;
   size_t reduction_axis_index = 0;
