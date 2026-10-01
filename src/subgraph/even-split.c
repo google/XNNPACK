@@ -410,6 +410,21 @@ enum xnn_status xnn_define_even_split(
   }
 
   for (size_t i = 0; i < num_outputs; ++i) {
+    if (output_ids[i] == input_id) {
+      xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32
+        ": output ID must not match input ID #%" PRIu32,
+        xnn_node_type_to_string(node_type), output_ids[i], input_id);
+      return xnn_status_invalid_parameter;
+    }
+    for (size_t j = 0; j < i; ++j) {
+      if (output_ids[i] == output_ids[j]) {
+        xnn_log_error(
+          "failed to define %s operator with duplicate output ID #%" PRIu32,
+          xnn_node_type_to_string(node_type), output_ids[i]);
+        return xnn_status_invalid_parameter;
+      }
+    }
     XNN_RETURN_IF_ERROR(check_output_value(subgraph, split_dim, input_id, output_ids[i], "Nth", node_type));
     XNN_RETURN_IF_ERROR(check_datatype_copyable(subgraph, input_id, output_ids[i], "Nth", node_type));
   }

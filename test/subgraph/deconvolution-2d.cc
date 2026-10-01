@@ -520,6 +520,48 @@ TEST(Deconvolution2D, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(Deconvolution2D, NonZeroFilterZeroPointRejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t input_dims[] = {1, 2, 2, 1};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/0,
+                /*scale=*/0.75f, /*num_dims=*/4, input_dims,
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  const size_t filter_dims[] = {1, 1, 1, 1};
+  int8_t filter_data[1] = {0};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/1,
+                /*scale=*/0.5f, /*num_dims=*/4, filter_dims, filter_data,
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &filter_id));
+
+  const size_t output_dims[] = {1, 2, 2, 1};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/0,
+                /*scale=*/0.25f, /*num_dims=*/4, output_dims,
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_deconvolution_2d(
+          subgraph, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -128.0f,
+          127.0f, input_id, filter_id, XNN_INVALID_VALUE_ID, output_id, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
