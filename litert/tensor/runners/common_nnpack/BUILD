@@ -70,7 +70,6 @@ cc_library(
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
-        "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest",  # lib test only
     ],
 )

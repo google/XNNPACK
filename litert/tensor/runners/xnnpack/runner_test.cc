@@ -16,11 +16,16 @@ limitations under the License.
 #include "litert/tensor/runners/xnnpack/runner.h"
 
 #include <cstdint>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "absl/status/status.h"
+#include "litert/tensor/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
+#include "litert/tensor/datatypes.h"
 #include "litert/tensor/runners/common_nnpack/runner_test_suite.h"
+#include "litert/tensor/tensor.h"
 
 namespace litert::tensor {
 
@@ -36,8 +41,20 @@ struct XnnpackTestTraits {
   static constexpr bool kSupportsDepthwiseConv2D = true;
   static constexpr bool kSupportsTransposeConv2D = true;
   static constexpr bool kSupportsResize = true;
+  static constexpr bool kSupportsSoftmaxBeta = false;
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(Xnnpack, NnpackRunnerTest, XnnpackTestTraits);
+
+TEST(XnnpackRunnerTest, SoftmaxRejectsBetaNotEqualToOne) {
+  Tensor<XnnpackMixinTag> input({.name = "input",
+                                 .type = Type::kFP32,
+                                 .shape = {2},
+                                 .buffer = std::vector<float>{0.f, 0.f}});
+  Tensor<XnnpackMixinTag> output = Softmax(input, /*beta=*/2.0f);
+
+  auto runner = XnnpackRunner::Create({output});
+  EXPECT_TRUE(absl::IsUnimplemented(runner.status()));
+}
 
 }  // namespace litert::tensor
