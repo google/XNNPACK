@@ -49,6 +49,9 @@ XNN_INTERNAL void xnn_init_once_impl(struct xnn_init_guard* guard,
                                      void (*init_fn)(void));
 #endif
 
+// Public config wrappers (xnn_init_*_config) must verify that
+// xnn_init_hardware_config() returned non-NULL before invoking XNN_INIT_ONCE.
+// Architecture-specific config initializers rely on this invariant.
 #if XNN_PLATFORM_WINDOWS || XNN_HAS_PTHREADS
 #define XNN_INIT_ONCE_GUARD(name)                             \
   static void init_##name##_config(void);                     \

@@ -184,10 +184,19 @@ static void init_f32_spmm4_config(void) {
     f32_spmm4_config.nr = 4;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    f32_spmm4_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_4vx4__rvv);
-    f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    f32_spmm4_config.mr = 4 * hardware_config->vlenb / sizeof(float);
-    f32_spmm4_config.nr = 4;
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      f32_spmm4_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_4vx4__rvv);
+      f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm4_config.mr = 4 * hardware_config->vlenb / sizeof(float);
+      f32_spmm4_config.nr = 4;
+    } else {
+      f32_spmm4_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x4__scalar);
+      f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm4_config.mr = 8;
+      f32_spmm4_config.nr = 4;
+    }
   #else
     f32_spmm4_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x4__scalar);
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
