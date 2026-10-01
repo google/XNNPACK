@@ -414,16 +414,43 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     average_pooling_op->convolution_op->padding_bottom = total_padding_height - average_pooling_op->convolution_op->padding_top;
     average_pooling_op->convolution_op->padding_right = total_padding_width - average_pooling_op->convolution_op->padding_left;
   } else {
-    average_pooling_op->convolution_op->output_height = xnn_compute_convolution_output_dimension(
-        average_pooling_op->convolution_op->padding_top + input_height + average_pooling_op->convolution_op->padding_bottom,
-        average_pooling_op->convolution_op->kernel_height,
-        1,
-        average_pooling_op->convolution_op->stride_height);
-    average_pooling_op->convolution_op->output_width = xnn_compute_convolution_output_dimension(
-        average_pooling_op->convolution_op->padding_left + input_width + average_pooling_op->convolution_op->padding_right,
-        average_pooling_op->convolution_op->kernel_width,
-        1,
-        average_pooling_op->convolution_op->stride_width);
+    // The kernel must fit inside the padded input. Otherwise
+    // xnn_compute_convolution_output_dimension() clamps the spilled dimension
+    // to 1 via the trailing `+ 1`, producing a phantom output for which no
+    // valid receptive field exists, and the indirection buffer then addresses
+    // input pixels outside the input tensor (out-of-bounds read at run time).
+    const size_t padded_input_height =
+        average_pooling_op->convolution_op->padding_top + input_height +
+        average_pooling_op->convolution_op->padding_bottom;
+    const size_t padded_input_width =
+        average_pooling_op->convolution_op->padding_left + input_width +
+        average_pooling_op->convolution_op->padding_right;
+    const size_t kernel_height =
+        average_pooling_op->convolution_op->kernel_height;
+    const size_t kernel_width =
+        average_pooling_op->convolution_op->kernel_width;
+    if (padded_input_height < kernel_height ||
+        padded_input_width < kernel_width) {
+      xnn_log_error(
+          "failed to reshape %s operator with %zux%zu input: the padded input "
+          "(%zux%zu) is smaller than the kernel (%zux%zu)",
+          xnn_operator_type_to_string_v2(average_pooling_op), input_width,
+          input_height, padded_input_width, padded_input_height,
+          kernel_width, kernel_height);
+      return xnn_status_invalid_parameter;
+    }
+    average_pooling_op->convolution_op->output_height =
+        xnn_compute_convolution_output_dimension(
+            padded_input_height,
+            kernel_height,
+            1,
+            average_pooling_op->convolution_op->stride_height);
+    average_pooling_op->convolution_op->output_width =
+        xnn_compute_convolution_output_dimension(
+            padded_input_width,
+            kernel_width,
+            1,
+            average_pooling_op->convolution_op->stride_width);
   }
 
   if (output_height_out != NULL) {

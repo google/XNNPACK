@@ -225,12 +225,30 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     argmax_pooling_op->convolution_op->padding_bottom = padding_height - argmax_pooling_op->convolution_op->padding_top;
     argmax_pooling_op->convolution_op->padding_right = padding_width - argmax_pooling_op->convolution_op->padding_left;
   } else {
-    argmax_pooling_op->convolution_op->output_height = compute_output_dimension(
-        argmax_pooling_op->convolution_op->padding_top + input_height + argmax_pooling_op->convolution_op->padding_bottom,
-        argmax_pooling_op->convolution_op->kernel_height);
-    argmax_pooling_op->convolution_op->output_width = compute_output_dimension(
-        argmax_pooling_op->convolution_op->padding_left + input_width + argmax_pooling_op->convolution_op->padding_right,
-        argmax_pooling_op->convolution_op->kernel_width);
+    // The pooling window must fit inside the padded input. Otherwise
+    // compute_output_dimension() produces 0, which would lead to underflow in
+    // indirection buffer step calculations (e.g. output_width - 1).
+    const size_t padded_input_height =
+        argmax_pooling_op->convolution_op->padding_top + input_height +
+        argmax_pooling_op->convolution_op->padding_bottom;
+    const size_t padded_input_width =
+        argmax_pooling_op->convolution_op->padding_left + input_width +
+        argmax_pooling_op->convolution_op->padding_right;
+    if (padded_input_height < pooling_height ||
+        padded_input_width < pooling_width) {
+      xnn_log_error(
+          "failed to reshape %s operator with %zux%zu input: the padded input "
+          "(%zux%zu) is smaller than the pooling size (%zux%zu)",
+          xnn_operator_type_to_string(
+              xnn_operator_type_argmax_pooling_nhwc_f32),
+          input_width, input_height, padded_input_width, padded_input_height,
+          pooling_width, pooling_height);
+      return xnn_status_invalid_parameter;
+    }
+    argmax_pooling_op->convolution_op->output_height =
+        compute_output_dimension(padded_input_height, pooling_height);
+    argmax_pooling_op->convolution_op->output_width =
+        compute_output_dimension(padded_input_width, pooling_width);
   }
 
   const size_t output_height = argmax_pooling_op->convolution_op->output_height;
