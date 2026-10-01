@@ -291,3 +291,19 @@ TEST(TRANSPOSE_ND_X64, transpose_6D) {
         .TestX64();
   } while (std::next_permutation(perm.begin(), perm.end()));
 }
+
+TEST(TRANSPOSE_ND_X32, null_shape_or_perm_rejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_transpose_nd_x32(0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[2] = {2, 3};
+  const size_t perm[2] = {1, 0};
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_transpose_nd_x32(op, 2, nullptr, perm, nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_transpose_nd_x32(op, 2, shape, nullptr, nullptr));
+}
+
