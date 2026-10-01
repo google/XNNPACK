@@ -235,6 +235,33 @@ TEST(ConcatenateTest, OverflowBatchSize) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+TEST(ConcatenateTest, InvalidAxisDuringReshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id1 = 1;
+  uint32_t input_id2 = 2;
+  uint32_t output_id = 0;
+  std::vector<uint32_t> input_ids = {input_id1, input_id2};
+
+  ConcatenateTester tester(3);
+  tester.AddOutputTensorF32(TensorShape({2, 10}), output_id)
+      .AddInputTensorF32(TensorShape({1, 10}), input_id1)
+      .AddInputTensorF32(TensorShape({1, 10}), input_id2)
+      .AddConcatenate(/*axis=*/-2, input_ids, output_id)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  // If input shape changes to 1D, axis=-2 becomes -2 + 1 = -1 < 0 (invalid)
+  runtime->values[input_id1].shape.num_dims = 1;
+  runtime->values[input_id1].shape.dim[0] = 10;
+  runtime->values[input_id2].shape.num_dims = 1;
+  runtime->values[input_id2].shape.dim[0] = 10;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

@@ -2390,3 +2390,22 @@ TEST(RESIZE_BILINEAR_NHWC_F32, batch_stride_overflow) {
                 &workspace_size, /*threadpool=*/nullptr));
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F32, zero_batch_workspace) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t resize_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_resize_bilinear2d_nhwc(
+                xnn_datatype_fp32, /*output_height=*/1, /*output_width=*/1,
+                /*flags=*/0, &resize_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      resize_op, xnn_delete_operator);
+  size_t workspace_size = SIZE_MAX;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_resize_bilinear2d_nhwc(
+                resize_op, /*batch_size=*/0,
+                /*input_height=*/1, /*input_width=*/1, /*channels=*/1,
+                /*input_pixel_stride=*/1, /*output_pixel_stride=*/1,
+                &workspace_size, /*threadpool=*/nullptr));
+  EXPECT_EQ(workspace_size, 0);
+}
+
