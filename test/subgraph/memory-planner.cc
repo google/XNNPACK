@@ -1095,4 +1095,42 @@ TEST(MemoryPlanner, LiveMemoryBlocksOverflow) {
   xnn_release_value_allocation_tracker(&tracker);
 }
 
+TEST(MemoryPlanner, InitValueAllocationTrackerAdditionOverflow) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 1;
+  runtime.num_values = SIZE_MAX;
+  struct xnn_value_allocation_tracker tracker;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_init_value_allocation_tracker(&tracker, &runtime));
+}
+
+TEST(MemoryPlanner, InitValueAllocationTrackerMultiplicationOverflow) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = SIZE_MAX / sizeof(struct xnn_usage_record) + 1;
+  struct xnn_value_allocation_tracker tracker;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_init_value_allocation_tracker(&tracker, &runtime));
+}
+
+TEST(MemoryPlanner, PlanValueAllocationTrackerRangeOverflow) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_value_allocation_tracker tracker = {};
+  tracker.min_value_id = 0;
+  tracker.max_value_id = SIZE_MAX;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_plan_value_allocation_tracker(&tracker));
+}
+
+TEST(MemoryPlanner, PlanValueAllocationTrackerMultiplicationOverflow) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_value_allocation_tracker tracker = {};
+  tracker.min_value_id = 0;
+  tracker.max_value_id = SIZE_MAX / sizeof(struct xnn_usage_record*) + 1;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_plan_value_allocation_tracker(&tracker));
+}
+
 }  // namespace xnnpack
