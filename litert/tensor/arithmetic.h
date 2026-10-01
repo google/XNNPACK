@@ -36,6 +36,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/optional.h"
+#include "absl/types/source_location.h"
 #include "absl/types/span.h"
 #include "litert/tensor/arithmetic_graph.h"  // IWYU pragma: export
 #include "litert/tensor/buffer.h"
@@ -44,7 +45,6 @@ limitations under the License.
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/tensor.h"
 #include "litert/tensor/utils/macros.h"
-#include "litert/tensor/utils/source_location.h"
 
 namespace litert::tensor {
 
@@ -91,7 +91,7 @@ template <class... Mixins, typename TensorLike>
 Tensor<Mixins...> CreateStableHLOCompositeOutputLike(
     const TensorLike& traced_output,
     std::shared_ptr<graph::StableHLOCompositeOperation>& op,
-    source_location loc) {
+    absl::SourceLocation loc) {
   TensorHandle traced_handle(traced_output);
   Tensor<Mixins...> output = AddOutput(op, loc);
   graph::TensorInformation& output_info = *GetInfo(output.GetRaw());
@@ -106,7 +106,7 @@ template <class... Mixins, typename Tuple, size_t... Is>
 auto CreateStableHLOCompositeOutputTupleLike(
     const Tuple& traced_outputs,
     std::shared_ptr<graph::StableHLOCompositeOperation>& op,
-    source_location loc, std::index_sequence<Is...>) {
+    absl::SourceLocation loc, std::index_sequence<Is...>) {
   std::vector<Tensor<Mixins...>> outputs;
   outputs.reserve(sizeof...(Is));
   (outputs.push_back(CreateStableHLOCompositeOutputLike<Mixins...>(
@@ -119,7 +119,7 @@ template <class... Mixins, typename Outputs>
 auto CreateStableHLOCompositeOutputsLike(
     const Outputs& traced_outputs,
     std::shared_ptr<graph::StableHLOCompositeOperation>& op,
-    source_location loc) {
+    absl::SourceLocation loc) {
   if constexpr (IsTuple<std::decay_t<Outputs>>::value) {
     return CreateStableHLOCompositeOutputTupleLike<Mixins...>(
         traced_outputs, op, loc,
@@ -146,7 +146,7 @@ template <class... Mixins>
 Tensor<Mixins...> Add(
     Tensor<Mixins...> a, Tensor<Mixins...> b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::AddOperation, Mixins...>(loc, a, b);
   return output;
@@ -156,7 +156,7 @@ template <class... Mixins>
 Tensor<Mixins...> Add(
     Tensor<Mixins...> a, float b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> b_tensor(
       {.type = Type::kFP32,
        .shape = {},
@@ -168,7 +168,7 @@ template <class... Mixins>
 Tensor<Mixins...> Mul(
     Tensor<Mixins...> a, Tensor<Mixins...> b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::MulOperation, Mixins...>(loc, a, b);
   return output;
@@ -178,7 +178,7 @@ template <class... Mixins>
 Tensor<Mixins...> Mul(
     Tensor<Mixins...> a, float b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> b_tensor(
       {.type = Type::kFP32,
        .shape = {},
@@ -190,7 +190,7 @@ template <class... Mixins>
 Tensor<Mixins...> Sub(
     Tensor<Mixins...> a, Tensor<Mixins...> b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return ElementwiseOp<graph::SubOperation, Mixins...>(loc, a, b);
 }
 
@@ -198,7 +198,7 @@ template <class... Mixins>
 Tensor<Mixins...> Sub(
     float a, Tensor<Mixins...> b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> a_tensor(
       {.type = Type::kFP32,
        .shape = {},
@@ -210,7 +210,7 @@ template <class... Mixins>
 Tensor<Mixins...> Div(
     Tensor<Mixins...> a, Tensor<Mixins...> b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::DivOperation, Mixins...>(loc, a, b);
   return output;
@@ -220,7 +220,7 @@ template <class... Mixins>
 Tensor<Mixins...> Div(
     Tensor<Mixins...> a, float b,
     FusedActivation fused_activation = FusedActivation::kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> b_tensor(
       {.type = Type::kFP32,
        .shape = {1},
@@ -229,56 +229,63 @@ Tensor<Mixins...> Div(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Abs(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Abs(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::AbsOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Relu(Tensor<Mixins...> a,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Relu(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::ReluOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Relu6(Tensor<Mixins...> a,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Relu6(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::Relu6Operation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ReluN1To1(Tensor<Mixins...> a,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> ReluN1To1(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::ReluN1To1Operation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ZerosLike(Tensor<Mixins...> a,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> ZerosLike(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::ZerosLikeOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Relu0To1(Tensor<Mixins...> a,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> Relu0To1(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::Relu0To1Operation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> LeakyRelu(Tensor<Mixins...> a, float alpha = 0.2f,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> LeakyRelu(
+    Tensor<Mixins...> a, float alpha = 0.2f,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::LeakyReluOperation>();
   RegisterMixins<Mixins...>(op);
   op->alpha = alpha;
@@ -293,24 +300,27 @@ Tensor<Mixins...> LeakyRelu(Tensor<Mixins...> a, float alpha = 0.2f,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Elu(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Elu(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::EluOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> HardSwish(Tensor<Mixins...> a,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> HardSwish(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::HardSwishOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> PRelu(Tensor<Mixins...> a, Tensor<Mixins...> alpha,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> PRelu(
+    Tensor<Mixins...> a, Tensor<Mixins...> alpha,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::PReluOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, a, alpha);
@@ -325,7 +335,8 @@ Tensor<Mixins...> PRelu(Tensor<Mixins...> a, Tensor<Mixins...> alpha,
 
 template <class... Mixins>
 Tensor<Mixins...> L2Normalization(
-    Tensor<Mixins...> input, source_location loc = source_location::current()) {
+    Tensor<Mixins...> input,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::L2NormalizationOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input);
@@ -339,56 +350,63 @@ Tensor<Mixins...> L2Normalization(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Square(Tensor<Mixins...> a,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Square(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::SquareOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Rsqrt(Tensor<Mixins...> a,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Rsqrt(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::RsqrtOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Pow(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Pow(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::PowOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Neg(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Neg(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::NegOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Sqrt(Tensor<Mixins...> a,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Sqrt(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::SqrtOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Less(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Less(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LessOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Greater(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Greater(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::GreaterOperation, Mixins...>(loc, a, b);
   return output;
@@ -397,15 +415,16 @@ Tensor<Mixins...> Greater(Tensor<Mixins...> a, Tensor<Mixins...> b,
 template <class... Mixins>
 Tensor<Mixins...> GreaterEqual(
     Tensor<Mixins...> a, Tensor<Mixins...> b,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::GreaterEqualOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Equal(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Equal(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::EqualOperation, Mixins...>(loc, a, b);
   graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
@@ -414,8 +433,9 @@ Tensor<Mixins...> Equal(Tensor<Mixins...> a, Tensor<Mixins...> b,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> NotEqual(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> NotEqual(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::NotEqualOperation, Mixins...>(loc, a, b);
   graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
@@ -424,160 +444,180 @@ Tensor<Mixins...> NotEqual(Tensor<Mixins...> a, Tensor<Mixins...> b,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Minimum(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Minimum(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::MinimumOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Maximum(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Maximum(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::MaximumOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> LogicalAnd(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> LogicalAnd(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LogicalAndOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> LogicalOr(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> LogicalOr(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LogicalOrOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> LogicalNot(Tensor<Mixins...> a,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> LogicalNot(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LogicalNotOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> BitwiseXor(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> BitwiseXor(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::BitwiseXorOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> RightShift(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> RightShift(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::RightShiftOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Cos(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Cos(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::CosOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Sin(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Sin(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::SinOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Exp(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Exp(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::ExpOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Log(Tensor<Mixins...> a,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Log(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LogOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Ceil(Tensor<Mixins...> a,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Ceil(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::CeilOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Floor(Tensor<Mixins...> a,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Floor(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::FloorOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> FloorDiv(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> FloorDiv(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::FloorDivOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> FloorMod(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> FloorMod(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::FloorModOperation, Mixins...>(loc, a, b);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Sign(Tensor<Mixins...> a,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Sign(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::SignOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Round(Tensor<Mixins...> a,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Round(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::RoundOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Logistic(Tensor<Mixins...> a,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> Logistic(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LogisticOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Tanh(Tensor<Mixins...> a,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Tanh(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::TanhOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Pad(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Pad(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::PadOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, a, b);
@@ -606,9 +646,9 @@ Tensor<Mixins...> Pad(Tensor<Mixins...> a, Tensor<Mixins...> b,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> PadV2(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                        Tensor<Mixins...> c,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> PadV2(
+    Tensor<Mixins...> a, Tensor<Mixins...> b, Tensor<Mixins...> c,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::PadV2Operation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, a, b, c);
@@ -637,8 +677,9 @@ Tensor<Mixins...> PadV2(Tensor<Mixins...> a, Tensor<Mixins...> b,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ExpandDims(Tensor<Mixins...> input, Tensor<Mixins...> axis,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> ExpandDims(
+    Tensor<Mixins...> input, Tensor<Mixins...> axis,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ExpandDimsOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input, axis);
@@ -670,8 +711,9 @@ Tensor<Mixins...> ExpandDims(Tensor<Mixins...> input, Tensor<Mixins...> axis,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ExpandDims(Tensor<Mixins...> input, int axis,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> ExpandDims(
+    Tensor<Mixins...> input, int axis,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axis_tensor(
       {.type = Type::kI32,
        .shape = {1},
@@ -680,9 +722,9 @@ Tensor<Mixins...> ExpandDims(Tensor<Mixins...> input, int axis,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Squeeze(Tensor<Mixins...> input,
-                          std::vector<int> squeeze_dims = {},
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Squeeze(
+    Tensor<Mixins...> input, std::vector<int> squeeze_dims = {},
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::SqueezeOperation>();
   RegisterMixins<Mixins...>(op);
   op->squeeze_dims = squeeze_dims;
@@ -727,8 +769,9 @@ inline constexpr int kInferredDim = -1;
 //
 // - `new_shape` may have exactly one of its dimensions set as `kInferredDim`.
 template <class... Mixins>
-Tensor<Mixins...> Reshape(Tensor<Mixins...> input, std::vector<int> new_shape,
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Reshape(
+    Tensor<Mixins...> input, std::vector<int> new_shape,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ReshapeOperation>();
   RegisterMixins<Mixins...>(op);
   const graph::TensorInformation& input_info = *GetInfo(input.GetRaw());
@@ -791,8 +834,9 @@ Tensor<Mixins...> Reshape(Tensor<Mixins...> input, std::vector<int> new_shape,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Softmax(Tensor<Mixins...> a, float beta = 1,
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Softmax(
+    Tensor<Mixins...> a, float beta = 1,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto operation = std::make_shared<graph::SoftmaxOperation>();
   RegisterMixins<Mixins...>(operation);
   operation->beta = beta;
@@ -807,17 +851,18 @@ Tensor<Mixins...> Softmax(Tensor<Mixins...> a, float beta = 1,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> LogSoftmax(Tensor<Mixins...> a,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> LogSoftmax(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LogSoftmaxOperation, Mixins...>(loc, a);
   return output;
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Sum(Tensor<Mixins...> a, std::vector<int> axes,
-                      bool keep_dims,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Sum(
+    Tensor<Mixins...> a, std::vector<int> axes, bool keep_dims,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axes_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(axes.size())},
@@ -826,8 +871,9 @@ Tensor<Mixins...> Sum(Tensor<Mixins...> a, std::vector<int> axes,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Sum(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
-                      source_location loc = source_location::current()) {
+Tensor<Mixins...> Sum(
+    Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::SumOperation>();
   RegisterMixins<Mixins...>(op);
   op->keep_dims = keep_dims;
@@ -892,9 +938,9 @@ Tensor<Mixins...> Sum(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ReduceMax(Tensor<Mixins...> a, std::vector<int> axes,
-                            bool keep_dims,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> ReduceMax(
+    Tensor<Mixins...> a, std::vector<int> axes, bool keep_dims,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axes_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(axes.size())},
@@ -903,9 +949,9 @@ Tensor<Mixins...> ReduceMax(Tensor<Mixins...> a, std::vector<int> axes,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ReduceMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                            bool keep_dims,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> ReduceMax(
+    Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ReduceMaxOperation>();
   RegisterMixins<Mixins...>(op);
   op->keep_dims = keep_dims;
@@ -970,9 +1016,9 @@ Tensor<Mixins...> ReduceMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Mean(Tensor<Mixins...> a, std::vector<int> axes,
-                       bool keep_dims,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Mean(
+    Tensor<Mixins...> a, std::vector<int> axes, bool keep_dims,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axes_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(axes.size())},
@@ -981,8 +1027,9 @@ Tensor<Mixins...> Mean(Tensor<Mixins...> a, std::vector<int> axes,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Mean(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Mean(
+    Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::MeanOperation>();
   RegisterMixins<Mixins...>(op);
   op->keep_dims = keep_dims;
@@ -1047,9 +1094,9 @@ Tensor<Mixins...> Mean(Tensor<Mixins...> a, Tensor<Mixins...> b, bool keep_dims,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ArgMax(Tensor<Mixins...> a, int axis,
-                         Type output_type = Type::kI64,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> ArgMax(
+    Tensor<Mixins...> a, int axis, Type output_type = Type::kI64,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axis_tensor(
       {.type = Type::kI32,
        .shape = {1},
@@ -1058,9 +1105,9 @@ Tensor<Mixins...> ArgMax(Tensor<Mixins...> a, int axis,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> ArgMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
-                         Type output_type = Type::kI64,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> ArgMax(
+    Tensor<Mixins...> a, Tensor<Mixins...> b, Type output_type = Type::kI64,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ArgMaxOperation>();
   RegisterMixins<Mixins...>(op);
   op->output_type = output_type;
@@ -1095,7 +1142,8 @@ Tensor<Mixins...> ArgMax(Tensor<Mixins...> a, Tensor<Mixins...> b,
 template <class... Mixins>
 Tensor<Mixins...> BatchMatMul(
     Tensor<Mixins...> x, Tensor<Mixins...> y, bool adj_x = false,
-    bool adj_y = false, source_location loc = source_location::current()) {
+    bool adj_y = false,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::BatchMatMulOperation>();
   RegisterMixins<Mixins...>(op);
   op->adj_x = adj_x;
@@ -1175,7 +1223,7 @@ Tensor<Mixins...> FullyConnected(
     FusedActivation activation = kActNone, bool keep_num_dims = true,
     bool asymmetric_quantize_inputs = false,
     FullyConnectedWeightsFormat weights_format = kWeightsFormatDefault,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::FullyConnectedOperation>();
   RegisterMixins<Mixins...>(op);
   op->activation = activation;
@@ -1220,7 +1268,7 @@ Tensor<Mixins...> FullyConnected(
     FusedActivation activation = kActNone, bool keep_num_dims = true,
     bool asymmetric_quantize_inputs = false,
     FullyConnectedWeightsFormat weights_format = kWeightsFormatDefault,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return FullyConnected(input, weights, std::optional(std::move(bias)),
                         activation, keep_num_dims, asymmetric_quantize_inputs,
                         weights_format, loc);
@@ -1232,7 +1280,7 @@ Tensor<Mixins...> FullyConnected(
     FusedActivation activation = kActNone, bool keep_num_dims = true,
     bool asymmetric_quantize_inputs = false,
     FullyConnectedWeightsFormat weights_format = kWeightsFormatDefault,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return FullyConnected(input, weights,
                         /*bias=*/std::optional<Tensor<Mixins...>>(std::nullopt),
                         activation, keep_num_dims, asymmetric_quantize_inputs,
@@ -1243,7 +1291,7 @@ template <class... Mixins>
 Tensor<Mixins...> AveragePool2D(
     Tensor<Mixins...> input, int filter_height, int filter_width, int stride_h,
     int stride_w, Padding padding, FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::AveragePool2DOperation>();
   RegisterMixins<Mixins...>(op);
   op->filter_height = filter_height;
@@ -1291,11 +1339,10 @@ Tensor<Mixins...> AveragePool2D(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> MaxPool2D(Tensor<Mixins...> input, int filter_height,
-                            int filter_width, int stride_h, int stride_w,
-                            Padding padding,
-                            FusedActivation activation = kActNone,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> MaxPool2D(
+    Tensor<Mixins...> input, int filter_height, int filter_width, int stride_h,
+    int stride_w, Padding padding, FusedActivation activation = kActNone,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::MaxPool2DOperation>();
   RegisterMixins<Mixins...>(op);
   op->filter_height = filter_height;
@@ -1342,11 +1389,12 @@ Tensor<Mixins...> MaxPool2D(Tensor<Mixins...> input, int filter_height,
 }
 
 template <class... Mixins>
-TensorHandle Conv2DImpl(Tensor<Mixins...> input, Tensor<Mixins...> filter,
-                        absl::optional<Tensor<Mixins...>> bias, int stride_h,
-                        int stride_w, Padding padding, int dilation_h_factor,
-                        int dilation_w_factor, FusedActivation activation,
-                        source_location loc = source_location::current()) {
+TensorHandle Conv2DImpl(
+    Tensor<Mixins...> input, Tensor<Mixins...> filter,
+    absl::optional<Tensor<Mixins...>> bias, int stride_h, int stride_w,
+    Padding padding, int dilation_h_factor, int dilation_w_factor,
+    FusedActivation activation,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::Conv2DOperation>();
   RegisterMixins<Mixins...>(op);
   op->stride_h = stride_h;
@@ -1404,23 +1452,22 @@ TensorHandle Conv2DImpl(Tensor<Mixins...> input, Tensor<Mixins...> filter,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Conv2D(Tensor<Mixins...> input, Tensor<Mixins...> filter,
-                         Tensor<Mixins...> bias, int stride_h, int stride_w,
-                         Padding padding, int dilation_h_factor = 1,
-                         int dilation_w_factor = 1,
-                         FusedActivation activation = kActNone,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Conv2D(
+    Tensor<Mixins...> input, Tensor<Mixins...> filter, Tensor<Mixins...> bias,
+    int stride_h, int stride_w, Padding padding, int dilation_h_factor = 1,
+    int dilation_w_factor = 1, FusedActivation activation = kActNone,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return Conv2DImpl(input, filter, absl::optional(bias), stride_h, stride_w,
                     padding, dilation_h_factor, dilation_w_factor, activation,
                     loc);
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Conv2D(Tensor<Mixins...> input, Tensor<Mixins...> filter,
-                         int stride_h, int stride_w, Padding padding,
-                         int dilation_h_factor = 1, int dilation_w_factor = 1,
-                         FusedActivation activation = kActNone,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Conv2D(
+    Tensor<Mixins...> input, Tensor<Mixins...> filter, int stride_h,
+    int stride_w, Padding padding, int dilation_h_factor = 1,
+    int dilation_w_factor = 1, FusedActivation activation = kActNone,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return Conv2DImpl(input, filter, absl::optional<Tensor<Mixins...>>(),
                     stride_h, stride_w, padding, dilation_h_factor,
                     dilation_w_factor, activation, loc);
@@ -1431,7 +1478,8 @@ Tensor<Mixins...> DepthwiseConv2DImpl(
     Tensor<Mixins...> input, Tensor<Mixins...> filter,
     absl::optional<Tensor<Mixins...>> bias, int stride_h, int stride_w,
     Padding padding, int dilation_h_factor, int dilation_w_factor,
-    int depth_multiplier, FusedActivation activation, source_location loc) {
+    int depth_multiplier, FusedActivation activation,
+    absl::SourceLocation loc) {
   auto op = std::make_shared<graph::DepthwiseConv2DOperation>();
   RegisterMixins<Mixins...>(op);
   op->stride_h = stride_h;
@@ -1499,7 +1547,7 @@ Tensor<Mixins...> DepthwiseConv2D(
     int stride_h, int stride_w, Padding padding, int dilation_h_factor = 1,
     int dilation_w_factor = 1, int depth_multiplier = 1,
     FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return DepthwiseConv2DImpl(
       input, filter, absl::optional(bias), stride_h, stride_w, padding,
       dilation_h_factor, dilation_w_factor, depth_multiplier, activation, loc);
@@ -1511,7 +1559,7 @@ Tensor<Mixins...> DepthwiseConv2D(
     int stride_w, Padding padding, int dilation_h_factor = 1,
     int dilation_w_factor = 1, int depth_multiplier = 1,
     FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   return DepthwiseConv2DImpl(input, filter, absl::optional<Tensor<Mixins...>>(),
                              stride_h, stride_w, padding, dilation_h_factor,
                              dilation_w_factor, depth_multiplier, activation,
@@ -1522,7 +1570,7 @@ template <class... Mixins>
 Tensor<Mixins...> Concatenation(
     absl::Span<Tensor<Mixins...>> inputs, int axis,
     FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ConcatenationOperation>();
   RegisterMixins<Mixins...>(op);
   op->axis = axis;
@@ -1566,14 +1614,15 @@ template <class... Mixins>
 Tensor<Mixins...> Concatenation(
     std::initializer_list<Tensor<Mixins...>> inputs, int axis,
     FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   std::vector input_storage(inputs);
   return Concatenation(absl::MakeSpan(input_storage), axis, activation, loc);
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Pack(absl::Span<Tensor<Mixins...>> inputs, int axis,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Pack(
+    absl::Span<Tensor<Mixins...>> inputs, int axis,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::PackOperation>();
   RegisterMixins<Mixins...>(op);
   op->axis = axis;
@@ -1604,9 +1653,9 @@ Tensor<Mixins...> Pack(absl::Span<Tensor<Mixins...>> inputs, int axis,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Pack(std::initializer_list<Tensor<Mixins...>> inputs,
-                       int axis,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Pack(
+    std::initializer_list<Tensor<Mixins...>> inputs, int axis,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   std::vector input_storage(inputs);
   return Pack(absl::MakeSpan(input_storage), axis, loc);
 }
@@ -1614,7 +1663,7 @@ Tensor<Mixins...> Pack(std::initializer_list<Tensor<Mixins...>> inputs,
 template <class... Mixins>
 std::vector<Tensor<Mixins...>> Unpack(
     Tensor<Mixins...> input, int num, int axis,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   if (num <= 0) {
     return {Tensor<Mixins...>(graph::ErrorTensor(
         absl::InvalidArgumentError("Unpack num must be > 0.")))};
@@ -1654,7 +1703,7 @@ std::vector<Tensor<Mixins...>> Unpack(
 template <class... Mixins>
 std::vector<Tensor<Mixins...>> Split(
     Tensor<Mixins...> input, Tensor<Mixins...> axis, int num_splits,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   if (num_splits <= 0) {
     return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
         "Split num_splits must be > 0.")))};
@@ -1714,7 +1763,7 @@ std::vector<Tensor<Mixins...>> Split(
 template <class... Mixins>
 std::vector<Tensor<Mixins...>> Split(
     Tensor<Mixins...> input, int axis, int num_splits,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axis_tensor(
       {.type = Type::kI32,
        .shape = {},
@@ -1725,7 +1774,7 @@ std::vector<Tensor<Mixins...>> Split(
 template <class... Mixins>
 Tensor<Mixins...> SpaceToDepth(
     Tensor<Mixins...> input, int block_size,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::SpaceToDepthOperation>();
   RegisterMixins<Mixins...>(op);
   op->block_size = block_size;
@@ -1761,7 +1810,7 @@ Tensor<Mixins...> SpaceToDepth(
 template <class... Mixins>
 Tensor<Mixins...> DepthToSpace(
     Tensor<Mixins...> input, int block_size,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::DepthToSpaceOperation>();
   RegisterMixins<Mixins...>(op);
   op->block_size = block_size;
@@ -1797,8 +1846,9 @@ Tensor<Mixins...> DepthToSpace(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Transpose(Tensor<Mixins...> input, Tensor<Mixins...> perm,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> Transpose(
+    Tensor<Mixins...> input, Tensor<Mixins...> perm,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   const graph::TensorInformation& input_info = *GetInfo(input.GetRaw());
   const graph::TensorInformation& perm_info = *GetInfo(perm.GetRaw());
   ABSL_CHECK_EQ(perm_info.type, Type::kI32)
@@ -1871,9 +1921,9 @@ Tensor<Mixins...> Transpose(Tensor<Mixins...> input, Tensor<Mixins...> perm,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Transpose(Tensor<Mixins...> input,
-                            const std::vector<int>& perm,
-                            source_location loc = source_location::current()) {
+Tensor<Mixins...> Transpose(
+    Tensor<Mixins...> input, const std::vector<int>& perm,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> perm_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(perm.size())},
@@ -1882,8 +1932,9 @@ Tensor<Mixins...> Transpose(Tensor<Mixins...> input,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Tile(Tensor<Mixins...> input, Tensor<Mixins...> multiples,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Tile(
+    Tensor<Mixins...> input, Tensor<Mixins...> multiples,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   const graph::TensorInformation& input_info = *GetInfo(input.GetRaw());
   const graph::TensorInformation& multiples_info = *GetInfo(multiples.GetRaw());
   ABSL_CHECK_EQ(multiples_info.type, Type::kI32)
@@ -1917,9 +1968,9 @@ Tensor<Mixins...> Tile(Tensor<Mixins...> input, Tensor<Mixins...> multiples,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Tile(Tensor<Mixins...> input,
-                       const std::vector<int>& multiples,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Tile(
+    Tensor<Mixins...> input, const std::vector<int>& multiples,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> multiples_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(multiples.size())},
@@ -1928,8 +1979,9 @@ Tensor<Mixins...> Tile(Tensor<Mixins...> input,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Gelu(Tensor<Mixins...> input, bool approximate = false,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Gelu(
+    Tensor<Mixins...> input, bool approximate = false,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::GeluOperation>();
   RegisterMixins<Mixins...>(op);
   op->approximate = approximate;
@@ -1945,8 +1997,9 @@ Tensor<Mixins...> Gelu(Tensor<Mixins...> input, bool approximate = false,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Cast(Tensor<Mixins...> input, Type to,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Cast(
+    Tensor<Mixins...> input, Type to,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   if (input.GetType() == to) {
     return input;
   }
@@ -1989,9 +2042,9 @@ inline absl::StatusOr<std::vector<int>> BroadcastShapes(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Select(Tensor<Mixins...> condition, Tensor<Mixins...> a,
-                         Tensor<Mixins...> b,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Select(
+    Tensor<Mixins...> condition, Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::SelectOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, condition, a, b);
@@ -2028,9 +2081,9 @@ Tensor<Mixins...> Select(Tensor<Mixins...> condition, Tensor<Mixins...> a,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> SelectV2(Tensor<Mixins...> condition, Tensor<Mixins...> a,
-                           Tensor<Mixins...> b,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> SelectV2(
+    Tensor<Mixins...> condition, Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::SelectV2Operation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, condition, a, b);
@@ -2057,9 +2110,9 @@ Tensor<Mixins...> SelectV2(Tensor<Mixins...> condition, Tensor<Mixins...> a,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Slice(Tensor<Mixins...> input, Tensor<Mixins...> begin,
-                        Tensor<Mixins...> size,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Slice(
+    Tensor<Mixins...> input, Tensor<Mixins...> begin, Tensor<Mixins...> size,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::SliceOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input, begin, size);
@@ -2091,9 +2144,10 @@ Tensor<Mixins...> Slice(Tensor<Mixins...> input, Tensor<Mixins...> begin,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Slice(Tensor<Mixins...> input, const std::vector<int>& begin,
-                        const std::vector<int>& size,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Slice(
+    Tensor<Mixins...> input, const std::vector<int>& begin,
+    const std::vector<int>& size,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> begin_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(begin.size())},
@@ -2109,7 +2163,7 @@ template <class... Mixins>
 Tensor<Mixins...> EmbeddingLookup(
     Tensor<Mixins...> ids, Tensor<Mixins...> value,
     Type output_type = Type::kFP32,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::EmbeddingLookupOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, ids, value);
@@ -2135,7 +2189,7 @@ Tensor<Mixins...> EmbeddingLookup(
 template <class... Mixins>
 Tensor<Mixins...> EmbeddingLookup(
     const std::vector<int>& ids, Tensor<Mixins...> value,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> ids_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(ids.size())},
@@ -2147,7 +2201,7 @@ template <class... Mixins>
 Tensor<Mixins...> DynamicUpdateSlice(
     Tensor<Mixins...> operand, Tensor<Mixins...> update,
     Tensor<Mixins...> start_indices,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::DynamicUpdateSliceOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, operand, update, start_indices);
@@ -2166,7 +2220,7 @@ template <class... Mixins>
 Tensor<Mixins...> DynamicUpdateSlice(
     Tensor<Mixins...> operand, Tensor<Mixins...> update,
     const std::vector<int>& start_indices,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> start_indices_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(start_indices.size())},
@@ -2180,7 +2234,7 @@ std::vector<Tensor<Mixins...>> Custom(
     std::vector<uint8_t> custom_options,
     const std::vector<std::vector<int>>& output_shapes,
     const std::vector<Type>& output_types,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::CustomOperation>();
   RegisterMixins<Mixins...>(op);
   op->custom_code = std::move(custom_code);
@@ -2208,7 +2262,7 @@ std::vector<Tensor<Mixins...>> Custom(
     std::vector<uint8_t> custom_options,
     const std::vector<std::vector<int>>& output_shapes,
     const std::vector<Type>& output_types,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   std::vector input_storage(inputs);
   return Custom(absl::MakeSpan(input_storage), std::move(custom_code),
                 std::move(custom_options), output_shapes, output_types, loc);
@@ -2250,7 +2304,7 @@ auto StableHLOComposite(StableHLOCompositeOptions options,
 
   AddInputs(op, first_input, remaining_inputs...);
   auto outputs = internal::CreateStableHLOCompositeOutputsLike<Mixins...>(
-      decomposition_outputs, op, source_location::current());
+      decomposition_outputs, op, absl::SourceLocation::current());
   graph::OpDebugger::DebugOp(*op);
   return outputs;
 }
@@ -2267,7 +2321,7 @@ auto StableHLOComposite(std::string name, Lambda&& decomposition,
 template <class... Mixins>
 std::vector<Tensor<Mixins...>> TopK(
     Tensor<Mixins...> input, Tensor<Mixins...> k,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::TopKOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input, k);
@@ -2317,7 +2371,7 @@ std::vector<Tensor<Mixins...>> TopK(
 template <class... Mixins>
 std::vector<Tensor<Mixins...>> TopK(
     Tensor<Mixins...> input, int k,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> k_tensor(
       {.type = Type::kI32,
        .shape = {},
@@ -2326,9 +2380,10 @@ std::vector<Tensor<Mixins...>> TopK(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Cumsum(Tensor<Mixins...> input, Tensor<Mixins...> axis,
-                         bool exclusive = false, bool reverse = false,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Cumsum(
+    Tensor<Mixins...> input, Tensor<Mixins...> axis, bool exclusive = false,
+    bool reverse = false,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::CumsumOperation>();
   RegisterMixins<Mixins...>(op);
   op->exclusive = exclusive;
@@ -2345,9 +2400,10 @@ Tensor<Mixins...> Cumsum(Tensor<Mixins...> input, Tensor<Mixins...> axis,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Cumsum(Tensor<Mixins...> input, int axis,
-                         bool exclusive = false, bool reverse = false,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Cumsum(
+    Tensor<Mixins...> input, int axis, bool exclusive = false,
+    bool reverse = false,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> axis_tensor(
       {.type = Type::kI32,
        .shape = {},
@@ -2356,8 +2412,9 @@ Tensor<Mixins...> Cumsum(Tensor<Mixins...> input, int axis,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Reverse(Tensor<Mixins...> input, Tensor<Mixins...> axes,
-                          source_location loc = source_location::current()) {
+Tensor<Mixins...> Reverse(
+    Tensor<Mixins...> input, Tensor<Mixins...> axes,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ReverseOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input, axes);
@@ -2372,9 +2429,10 @@ Tensor<Mixins...> Reverse(Tensor<Mixins...> input, Tensor<Mixins...> axes,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Gather(Tensor<Mixins...> input, Tensor<Mixins...> indices,
-                         int axis, int batch_dims = 0,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> Gather(
+    Tensor<Mixins...> input, Tensor<Mixins...> indices, int axis,
+    int batch_dims = 0,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::GatherOperation>();
   RegisterMixins<Mixins...>(op);
   op->axis = axis;
@@ -2416,10 +2474,10 @@ Tensor<Mixins...> Gather(Tensor<Mixins...> input, Tensor<Mixins...> indices,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> OneHot(Tensor<Mixins...> indices, Tensor<Mixins...> depth,
-                         Tensor<Mixins...> on_value,
-                         Tensor<Mixins...> off_value, int axis = -1,
-                         source_location loc = source_location::current()) {
+Tensor<Mixins...> OneHot(
+    Tensor<Mixins...> indices, Tensor<Mixins...> depth,
+    Tensor<Mixins...> on_value, Tensor<Mixins...> off_value, int axis = -1,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::OneHotOperation>();
   RegisterMixins<Mixins...>(op);
   op->axis = axis;
@@ -2457,8 +2515,9 @@ Tensor<Mixins...> OneHot(Tensor<Mixins...> indices, Tensor<Mixins...> depth,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> GatherNd(Tensor<Mixins...> input, Tensor<Mixins...> indices,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> GatherNd(
+    Tensor<Mixins...> input, Tensor<Mixins...> indices,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::GatherNdOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input, indices);
@@ -2494,10 +2553,10 @@ Tensor<Mixins...> GatherNd(Tensor<Mixins...> input, Tensor<Mixins...> indices,
 
 // Performs an element-wise `Quantize` operation.
 template <class... Mixins>
-Tensor<Mixins...> Quantize(Tensor<Mixins...> a, Type type,
-                           std::vector<float> scale,
-                           std::vector<int64_t> zero_point,
-                           source_location loc = source_location::current()) {
+Tensor<Mixins...> Quantize(
+    Tensor<Mixins...> a, Type type, std::vector<float> scale,
+    std::vector<int64_t> zero_point,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::QuantizeOperation>();
   RegisterMixins<Mixins...>(op);
   auto status = CheckUnaryElementwiseOp(a.GetRaw());
@@ -2526,8 +2585,9 @@ Tensor<Mixins...> Quantize(Tensor<Mixins...> a, Type type,
 
 // Performs an element-wise `Dequantize` operation.
 template <class... Mixins>
-Tensor<Mixins...> Dequantize(Tensor<Mixins...> a,
-                             source_location loc = source_location::current()) {
+Tensor<Mixins...> Dequantize(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::DequantizeOperation>();
   RegisterMixins<Mixins...>(op);
   auto status = CheckUnaryElementwiseOp(a.GetRaw());
@@ -2551,8 +2611,9 @@ Tensor<Mixins...> Dequantize(Tensor<Mixins...> a,
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Probe(Tensor<Mixins...> a,
-                        source_location loc = source_location::current()) {
+Tensor<Mixins...> Probe(
+    Tensor<Mixins...> a,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::ProbeOperation, Mixins...>(loc, a);
   if (auto producer = graph::GetProducer(output.GetRaw());
@@ -2566,7 +2627,7 @@ template <class... Mixins>
 Tensor<Mixins...> ResizeBilinear(
     Tensor<Mixins...> input, Tensor<Mixins...> size, bool align_corners = false,
     bool half_pixel_centers = false,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ResizeBilinearOperation>();
   RegisterMixins<Mixins...>(op);
   op->align_corners = align_corners;
@@ -2595,7 +2656,7 @@ template <class... Mixins>
 Tensor<Mixins...> ResizeBilinear(
     Tensor<Mixins...> input, const std::vector<int>& size,
     bool align_corners = false, bool half_pixel_centers = false,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> size_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(size.size())},
@@ -2608,7 +2669,7 @@ template <class... Mixins>
 Tensor<Mixins...> ResizeNearestNeighbor(
     Tensor<Mixins...> input, Tensor<Mixins...> size, bool align_corners = false,
     bool half_pixel_centers = false,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::ResizeNearestNeighborOperation>();
   RegisterMixins<Mixins...>(op);
   op->align_corners = align_corners;
@@ -2635,7 +2696,7 @@ template <class... Mixins>
 Tensor<Mixins...> ResizeNearestNeighbor(
     Tensor<Mixins...> input, const std::vector<int>& size,
     bool align_corners = false, bool half_pixel_centers = false,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> size_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(size.size())},
@@ -2649,7 +2710,7 @@ std::vector<Tensor<Mixins...>> NonMaxSuppressionV5(
     Tensor<Mixins...> boxes, Tensor<Mixins...> scores,
     Tensor<Mixins...> max_output_size, Tensor<Mixins...> iou_threshold,
     Tensor<Mixins...> score_threshold, Tensor<Mixins...> soft_nms_sigma,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   // max_output_size must be a constant tensor to ensure static output shapes.
   if (graph::GetInfo(max_output_size.GetRaw())->buffer == nullptr) {
     auto error = absl::InvalidArgumentError(
@@ -2707,7 +2768,7 @@ std::vector<Tensor<Mixins...>> NonMaxSuppressionV5(
     Tensor<Mixins...> boxes, Tensor<Mixins...> scores, int max_output_size,
     Tensor<Mixins...> iou_threshold, Tensor<Mixins...> score_threshold,
     Tensor<Mixins...> soft_nms_sigma,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> max_output_size_tensor(
       {.type = Type::kI32,
        .shape = {},
@@ -2720,7 +2781,7 @@ std::vector<Tensor<Mixins...>> NonMaxSuppressionV5(
 template <class... Mixins>
 std::vector<Tensor<Mixins...>> Lstm(
     Tensor<Mixins...> intermediate, Tensor<Mixins...> prev_state,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::LstmOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, intermediate, prev_state);
@@ -2756,7 +2817,7 @@ Tensor<Mixins...> TransposeConv(
     Tensor<Mixins...> filter, Tensor<Mixins...> input, Tensor<Mixins...> bias,
     const std::vector<int>& output_shape, Padding padding, int stride_h,
     int stride_w, FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   if (stride_h <= 0 || stride_w <= 0) {
     return absl::InvalidArgumentError(
         "TransposeConv stride dimensions must be > 0.");
@@ -2793,7 +2854,7 @@ Tensor<Mixins...> TransposeConv2D(
     Tensor<Mixins...> filter, Tensor<Mixins...> input, Tensor<Mixins...> bias,
     const std::vector<int>& output_shape, Padding padding, int stride_h,
     int stride_w, FusedActivation activation = kActNone,
-    source_location loc = source_location::current()) {
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   if (stride_h <= 0 || stride_w <= 0) {
     return absl::InvalidArgumentError(
         "TransposeConv2D stride dimensions must be > 0.");
@@ -2825,8 +2886,9 @@ Tensor<Mixins...> TransposeConv2D(
 }
 
 template <class... Mixins>
-Tensor<Mixins...> Rope(Tensor<Mixins...> input, Tensor<Mixins...> weights,
-                       source_location loc = source_location::current()) {
+Tensor<Mixins...> Rope(
+    Tensor<Mixins...> input, Tensor<Mixins...> weights,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
   auto op = std::make_shared<graph::RopeOperation>();
   RegisterMixins<Mixins...>(op);
   AddInputs(op, input, weights);

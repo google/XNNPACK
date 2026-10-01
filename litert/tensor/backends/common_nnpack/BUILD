@@ -100,11 +100,11 @@ cc_test(
         "//litert/tensor/internal:graph",
         "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:matchers",
-        "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
