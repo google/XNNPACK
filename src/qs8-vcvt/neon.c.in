@@ -24,6 +24,7 @@ $XINT16X8_T = {"QS8": "int16x8_t", "QU8": "uint16x8_t"}[DATATYPE]
 $VLD1_X8 = {"QS8": "vld1_s8", "QU8": "vld1_u8"}[DATATYPE]
 $VLD1Q_X8 = {"QS8": "vld1q_s8", "QU8": "vld1q_u8"}[DATATYPE]
 $VDUPQ_N_X16 = {"QS8": "vdupq_n_s16", "QU8": "vdupq_n_u16"}[DATATYPE]
+$VADDQ_S16 = {"QS8": "vaddq_s16", "QU8": "vqaddq_s16"}[DATATYPE]
 $VQMOVXN_S16 = {"QS8": "vqmovn_s16", "QU8": "vqmovun_s16"}[DATATYPE]
 $VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
 $VGET_HIGH_X8 = {"QS8": "vget_high_s8", "QU8": "vget_high_u8"}[DATATYPE]
@@ -47,6 +48,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
 
   const ${XINT16X8_T} vinput_zero_point = ${VDUPQ_N_X16}(params->scalar.input_zero_point);
   const int16x8_t vmultiplier = vdupq_n_s16(-params->scalar.multiplier);
+  const int16x8_t vshift = vdupq_n_s16(params->scalar.shift);
   const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
@@ -62,13 +64,13 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
           int16x8_t vacc${ABC[2*N+1]} = vsubw_s8(vinput_zero_point, ${VGET_HIGH_X8}(vx${ABC[N]}));
 
       $for N in range(2*SIMD_TILE):
-        vacc${ABC[N]} = vshlq_n_s16(vacc${ABC[N]}, 7);
+        vacc${ABC[N]} = vshlq_s16(vacc${ABC[N]}, vshift);
 
       $for N in range(2*SIMD_TILE):
         vacc${ABC[N]} = vqrdmulhq_s16(vacc${ABC[N]}, vmultiplier);
 
       $for N in range(2*SIMD_TILE):
-        vacc${ABC[N]} = vqaddq_s16(vacc${ABC[N]}, voutput_zero_point);
+        vacc${ABC[N]} = ${VADDQ_S16}(vacc${ABC[N]}, voutput_zero_point);
 
       $for N in range(SIMD_TILE):
         const ${XINT8X16_T} vy${ABC[N]} = ${VCOMBINE_X8}(${VQMOVXN_S16}(vacc${ABC[2*N]}), ${VQMOVXN_S16}(vacc${ABC[2*N+1]}));
@@ -82,9 +84,9 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
       int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     $else:
       int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
+    vacc = vshlq_s16(vacc, vshift);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
+    vacc = ${VADDQ_S16}(vacc, voutput_zero_point);
     const ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
     ${VST1_X8}(output, vy); output += 8;
   }
@@ -97,9 +99,9 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
       int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     $else:
       int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
-    vacc = vshlq_n_s16(vacc, 7);
+    vacc = vshlq_s16(vacc, vshift);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
-    vacc = vqaddq_s16(vacc, voutput_zero_point);
+    vacc = ${VADDQ_S16}(vacc, voutput_zero_point);
     ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
 
     if (batch & (4 * sizeof(${XINT8_T}))) {

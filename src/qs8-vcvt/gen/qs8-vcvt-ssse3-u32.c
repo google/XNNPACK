@@ -33,9 +33,11 @@ void xnn_qs8_vcvt_ukernel__ssse3_u32(
 
   const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
   const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
+  const __m128i vshift = _mm_cvtsi32_si128((int) params->scalar.shift);
   const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
   XNN_FORCE_REALIZATION(vinput_zero_point);
   XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vshift);
   XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
@@ -54,10 +56,10 @@ void xnn_qs8_vcvt_ukernel__ssse3_u32(
     vacc2 = _mm_sub_epi16(vinput_zero_point, vacc2);
     vacc3 = _mm_sub_epi16(vinput_zero_point, vacc3);
 
-    vacc0 = _mm_slli_epi16(vacc0, 7);
-    vacc1 = _mm_slli_epi16(vacc1, 7);
-    vacc2 = _mm_slli_epi16(vacc2, 7);
-    vacc3 = _mm_slli_epi16(vacc3, 7);
+    vacc0 = _mm_sll_epi16(vacc0, vshift);
+    vacc1 = _mm_sll_epi16(vacc1, vshift);
+    vacc2 = _mm_sll_epi16(vacc2, vshift);
+    vacc3 = _mm_sll_epi16(vacc3, vshift);
 
     vacc0 = _mm_mulhrs_epi16(vacc0, vmultiplier);
     vacc1 = _mm_mulhrs_epi16(vacc1, vmultiplier);
@@ -85,8 +87,8 @@ void xnn_qs8_vcvt_ukernel__ssse3_u32(
     __m128i vacc_hi = _mm_unpackhi_epi8(vx, vm);
     vacc_lo = _mm_sub_epi16(vinput_zero_point, vacc_lo);
     vacc_hi = _mm_sub_epi16(vinput_zero_point, vacc_hi);
-    vacc_lo = _mm_slli_epi16(vacc_lo, 7);
-    vacc_hi = _mm_slli_epi16(vacc_hi, 7);
+    vacc_lo = _mm_sll_epi16(vacc_lo, vshift);
+    vacc_hi = _mm_sll_epi16(vacc_hi, vshift);
     vacc_lo = _mm_mulhrs_epi16(vacc_lo, vmultiplier);
     vacc_hi = _mm_mulhrs_epi16(vacc_hi, vmultiplier);
     vacc_lo = _mm_adds_epi16(vacc_lo, voutput_zero_point);
@@ -107,8 +109,8 @@ void xnn_qs8_vcvt_ukernel__ssse3_u32(
     __m128i vacc_hi = _mm_unpackhi_epi8(vx, vm);
     vacc_lo = _mm_sub_epi16(vinput_zero_point, vacc_lo);
     vacc_hi = _mm_sub_epi16(vinput_zero_point, vacc_hi);
-    vacc_lo = _mm_slli_epi16(vacc_lo, 7);
-    vacc_hi = _mm_slli_epi16(vacc_hi, 7);
+    vacc_lo = _mm_sll_epi16(vacc_lo, vshift);
+    vacc_hi = _mm_sll_epi16(vacc_hi, vshift);
     vacc_lo = _mm_mulhrs_epi16(vacc_lo, vmultiplier);
     vacc_hi = _mm_mulhrs_epi16(vacc_hi, vmultiplier);
     vacc_lo = _mm_adds_epi16(vacc_lo, voutput_zero_point);
