@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -464,3 +465,71 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Values(xnn_unary_convert), testing::ValuesIn(all_datatypes),
         testing::ValuesIn(quantized_datatypes), testing::ValuesIn(run_modes))),
     [](const auto& info) { return info.param.Name(); });
+
+TEST(UNARY_ELEMENTWISE_NC, int32_abs_min) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const int32_t input = std::numeric_limits<int32_t>::min();
+  int32_t output = 0;
+  const xnn_unary_params params = {};
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_unary_elementwise_nc(
+                xnn_unary_abs, xnn_datatype_int32, xnn_datatype_int32,
+                &params, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0,
+                /*batch_size=*/1, /*channels=*/1, /*input_stride=*/1,
+                /*output_stride=*/1, /*threadpool=*/nullptr,
+                &input, &output));
+  EXPECT_EQ(output, std::numeric_limits<int32_t>::min());
+
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unary_elementwise_nc(
+                xnn_unary_abs, xnn_datatype_int32, xnn_datatype_int32,
+                &params, /*lut=*/nullptr, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_unary_elementwise_nc(
+                op, /*batch_size=*/1, /*channels=*/1, /*input_stride=*/1,
+                /*output_stride=*/1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_unary_elementwise_nc(op, &input, &output));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+  EXPECT_EQ(output, std::numeric_limits<int32_t>::min());
+}
+
+TEST(UNARY_ELEMENTWISE_NC, int32_negate_min) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const int32_t input = std::numeric_limits<int32_t>::min();
+  int32_t output = 0;
+  const xnn_unary_params params = {};
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_unary_elementwise_nc(
+                xnn_unary_negate, xnn_datatype_int32, xnn_datatype_int32,
+                &params, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0,
+                /*batch_size=*/1, /*channels=*/1, /*input_stride=*/1,
+                /*output_stride=*/1, /*threadpool=*/nullptr,
+                &input, &output));
+  EXPECT_EQ(output, std::numeric_limits<int32_t>::min());
+
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unary_elementwise_nc(
+                xnn_unary_negate, xnn_datatype_int32, xnn_datatype_int32,
+                &params, /*lut=*/nullptr, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_unary_elementwise_nc(
+                op, /*batch_size=*/1, /*channels=*/1, /*input_stride=*/1,
+                /*output_stride=*/1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_unary_elementwise_nc(op, &input, &output));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+  EXPECT_EQ(output, std::numeric_limits<int32_t>::min());
+}
