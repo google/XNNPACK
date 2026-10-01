@@ -239,6 +239,13 @@ enum xnn_status xnn_define_static_transpose(
     return xnn_status_invalid_parameter;
   }
 
+  if (perm == NULL) {
+    xnn_log_error(
+      "failed to define %s operator: perm must be non-NULL",
+      xnn_node_type_to_string(xnn_node_type_static_transpose));
+    return xnn_status_invalid_parameter;
+  }
+
   for (size_t i = 0; i < num_dims; ++i) {
     if (perm[i] >= num_dims) {
       xnn_log_error(

@@ -279,3 +279,25 @@ TEST(SPACE_TO_DEPTH_NHWC_X32, overflow_stride) {
                 /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
                 /*threadpool=*/nullptr));
 }
+
+TEST(SPACE_TO_DEPTH_NHWC_X32, zero_batch_populates_output_dimensions) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t space_to_depth_op = nullptr;
+  const size_t block_size = 2;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_space_to_depth_nhwc_x32(
+                block_size, 0, &space_to_depth_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      space_to_depth_op, xnn_delete_operator);
+
+  size_t out_h = 0, out_w = 0, out_c = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_space_to_depth_nhwc_x32(
+                space_to_depth_op, /*batch_size=*/0, /*input_height=*/4,
+                /*input_width=*/6, /*input_channels=*/3, &out_h, &out_w,
+                &out_c, /*threadpool=*/nullptr));
+  EXPECT_EQ(out_h, 2);
+  EXPECT_EQ(out_w, 3);
+  EXPECT_EQ(out_c, 12);
+}
+
