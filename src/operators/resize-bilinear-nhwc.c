@@ -231,8 +231,23 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   size_t resize_bilinear_compute_index = 0;
   if (enable_transient_indirection) {
     // Round up to a multiple of pointer size
-    const size_t indirect_input_offset = (packed_weights_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
-    *workspace_size = indirection_buffer_size + indirect_input_offset;
+    size_t indirect_input_offset = 0;
+    if (!xnn_safe_add(packed_weights_size, sizeof(void*) - 1,
+                      &indirect_input_offset)) {
+      xnn_log_error(
+          "failed to reshape %s operator: indirect input offset overflows "
+          "size_t",
+          xnn_operator_type_to_string_v2(resize_op));
+      return xnn_status_out_of_memory;
+    }
+    indirect_input_offset &= ~(sizeof(void*) - 1);
+    if (!xnn_safe_add(indirection_buffer_size, indirect_input_offset,
+                      workspace_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: workspace size overflows size_t",
+          xnn_operator_type_to_string_v2(resize_op));
+      return xnn_status_out_of_memory;
+    }
 
     resize_bilinear_compute_index++;
     resize_op->context.resize_nhwc_indirection_init = (struct resize_bilinear_nhwc_indirection_init_context) {
@@ -411,10 +426,27 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc(
   const size_t log2_weight_element_size = resize_op->ibilinear_config->log2_weight_element_size;
   const size_t output_height = resize_op->context.resize_nhwc_indirection_init.output_height;
   const size_t output_width = resize_op->context.resize_nhwc_indirection_init.output_width;
-  const size_t packed_weights_size = (output_height * output_width * 2) << log2_weight_element_size;
+  size_t packed_weights_size = 0;
+  if (!xnn_safe_mul(output_height, output_width, &packed_weights_size) ||
+      !xnn_safe_mul(packed_weights_size, (size_t) 2, &packed_weights_size) ||
+      !xnn_safe_mul(packed_weights_size, (size_t) 1 << log2_weight_element_size,
+                    &packed_weights_size)) {
+    xnn_log_error(
+        "failed to setup %s operator: packed weights size overflows size_t",
+        xnn_operator_type_to_string_v2(resize_op));
+    return xnn_status_out_of_memory;
+  }
   if (resize_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
     // indirect_input should start at a multiple of pointer size to avoid ubsan failures
-    const size_t indirect_input_offset = (packed_weights_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+    size_t indirect_input_offset = 0;
+    if (!xnn_safe_add(packed_weights_size, sizeof(void*) - 1,
+                      &indirect_input_offset)) {
+      xnn_log_error(
+          "failed to setup %s operator: indirect input offset overflows size_t",
+          xnn_operator_type_to_string_v2(resize_op));
+      return xnn_status_out_of_memory;
+    }
+    indirect_input_offset &= ~(sizeof(void*) - 1);
     resize_op->context.resize_bilinear.packed_weights = (const void*) workspace;
     resize_op->context.resize_bilinear.indirect_input = (const void**) ((uintptr_t) workspace + indirect_input_offset);
     resize_op->context.resize_nhwc_indirection_init.buffer = (const void**) workspace;
