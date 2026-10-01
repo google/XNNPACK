@@ -32,6 +32,7 @@ limitations under the License.
 #include "litert/tensor/backends/xnnpack/graph.h"
 #include "litert/tensor/runners/common_nnpack/runner.h"
 #include "litert/tensor/tensor.h"
+#include "litert/tensor/utils/macros.h"
 #include <pthreadpool.h>
 
 namespace litert::tensor {
@@ -83,8 +84,10 @@ class XnnpackRunner : public NnpackRunner {
     return *this;
   }
 
-  void SetNumThreads(size_t num_threads) override {
-    NnpackRunner::SetNumThreads(num_threads);
+  absl::Status SetNumThreads(size_t num_threads) override {
+    // Fails once the runtime exists, which keeps the pool below from being
+    // destroyed while the runtime still uses it.
+    LRT_TENSOR_RETURN_IF_ERROR(NnpackRunner::SetNumThreads(num_threads));
     if (threadpool_ != nullptr) {
       pthreadpool_destroy(threadpool_);
       threadpool_ = nullptr;
@@ -92,6 +95,7 @@ class XnnpackRunner : public NnpackRunner {
     if (num_threads > 1) {
       threadpool_ = pthreadpool_create(num_threads);
     }
+    return absl::OkStatus();
   }
 
   void SetWeightsCache(xnn_weights_cache_t weights_cache) {
