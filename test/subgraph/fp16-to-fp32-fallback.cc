@@ -64,7 +64,7 @@ using xnnpack::IsIsomorphicTo;
 class Fp16ToFp32FallbackTest : public testing::Test {
  public:
   void SetUp() override {
-    // Use an empty config to disable FP16 support.
+    // Disable native FP16 support; scalar kernels remain available.
     xnn_set_hardware_config(&mock_config_);
   }
 
@@ -73,62 +73,7 @@ class Fp16ToFp32FallbackTest : public testing::Test {
   xnn_hardware_config mock_config_{};
 };
 
-TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
-  // A single op rewrite should add convert nodes for the fp32 inputs (to fp32)
-  // and outputs (from fp32) that are fp16.
-  //
-  // Before:
-  //
-  //                         ┌─────────────────────────┐
-  //                 (input) │     000: FP16[3, 4]     │
-  //                         └─────────────────────────┘
-  //                           │
-  //                           │
-  //      (weights)            ▼
-  // ┌─────────────────┐     ┌─────────────────────────┐
-  // │ 002: FP16[2, 4] │     │  #000: Fully Connected  │
-  // │                 │ ──▶ │ (FP16, FP16, FP16, goi) │
-  // └─────────────────┘     └─────────────────────────┘
-  //                           │
-  //                           │
-  //                           ▼
-  //                         ┌─────────────────────────┐
-  //                         │     001: FP16[3, 2]     │
-  //                         └─────────────────────────┘
-  //
-  //
-  // After:
-  //                         ┌─────────────────────────┐
-  //                 (input) │     000: FP16[3, 4]     │
-  //                         └─────────────────────────┘
-  //                           │
-  //                           │
-  //                           ▼
-  //                         ┌─────────────────────────┐
-  //                         │ #000: Unary Elementwise │
-  //                         │     (convert, FP16)     │
-  //                         └─────────────────────────┘
-  //                           │
-  // (statically converted     │ v004: FP32[3, 4]
-  //       weights)            ▼
-  // ┌─────────────────┐     ┌─────────────────────────┐
-  // │ 005: FP32[2, 4] │     │  #001: Fully Connected  │
-  // │                 │ ──▶ │ (FP32, FP32, FP32, goi) │
-  // └─────────────────┘     └─────────────────────────┘
-  //                           │
-  //                           │ v003: FP32[3, 2]
-  //                           ▼
-  //                         ┌─────────────────────────┐
-  //                         │ #002: Unary Elementwise │
-  //                         │     (convert, FP32)     │
-  //                         └─────────────────────────┘
-  //                           │
-  //                           │
-  //                           ▼
-  //                         ┌─────────────────────────┐
-  //                         │     001: FP16[3, 2]     │
-  //                         └─────────────────────────┘
-
+TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithoutNativeFp16) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
@@ -144,13 +89,11 @@ TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   std::unique_ptr<XnnpackGraph> expected_graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
-    input = Cast(input, Type::kFP32);
-    XnnTensor weights({.type = Type::kFP32,
+    XnnTensor weights({.type = Type::kFP16,
                        .shape = {2, 4},
-                       .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                       .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
                            {1, 2, 3, 4, 5, 6, 7, 8})});
     XnnTensor output = FullyConnected(input, weights);
-    output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
@@ -566,17 +509,15 @@ TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
   std::unique_ptr<XnnpackGraph> expected_graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
-    input = Cast(input, Type::kFP32);
-    XnnTensor weights({.type = Type::kFP32,
+    XnnTensor weights({.type = Type::kFP16,
                        .shape = {2, 4},
-                       .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+               .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
                            {1, 2, 3, 4, 5, 6, 7, 8})});
     XnnTensor bias(
-        {.type = Type::kFP32,
+      {.type = Type::kFP16,
          .shape = {2},
-         .buffer = OwningCpuBuffer::Copy<Type::kFP32>({1.0f, 2.0f})});
+       .buffer = OwningCpuBuffer::Copy<Type::kFP16>({1.0f, 2.0f})});
     XnnTensor output = FullyConnected(input, weights, bias);
-    output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
@@ -601,10 +542,7 @@ TEST_F(Fp16ToFp32FallbackTest, BatchMatMul) {
   {
     XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
     XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
-    XnnTensor x_fp32 = Cast(x, Type::kFP32);
-    XnnTensor y_fp32 = Cast(y, Type::kFP32);
-    XnnTensor output = BatchMatMul(x_fp32, y_fp32);
-    output = Cast(output, Type::kFP16);
+    XnnTensor output = BatchMatMul(x, y);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
@@ -641,15 +579,13 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeConv2D) {
                       .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
                           std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
     XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
-    XnnTensor input_fp32 = Cast(input, Type::kFP32);
-    XnnTensor bias({.type = Type::kFP32,
+    XnnTensor bias({.type = Type::kFP16,
                     .shape = {8},
-                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
                         std::vector<float>(8, 1.0f))});
-    XnnTensor output = TransposeConv2D(filter, input_fp32, bias, {1, 5, 5, 8},
+    XnnTensor output = TransposeConv2D(filter, input, bias, {1, 5, 5, 8},
                                        litert::tensor::kPaddingSame,
                                        /*stride_h=*/1, /*stride_w=*/1);
-    output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
@@ -1174,7 +1110,10 @@ struct Qd8FcSubgraph {
   std::vector<int8_t> weights_data = {1, 2, 3, 4, 5, 6, 7, 8};
 
   void Build(enum xnn_datatype input_datatype,
-             enum xnn_datatype output_datatype) {
+             enum xnn_datatype output_datatype,
+             enum xnn_datatype quantized_datatype = xnn_datatype_qdint8,
+             bool inline_lhs_packing = false) {
+    ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
     ASSERT_EQ(
         xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph),
         xnn_status_success);
@@ -1225,8 +1164,68 @@ struct Qd8FcSubgraph {
                   subgraph, -INFINITY, INFINITY, convert_output_id, weights_id,
                   XNN_INVALID_VALUE_ID, output_id, /*flags=*/0),
               xnn_status_success);
+
+    subgraph->values[convert_output_id].datatype = quantized_datatype;
+    if (inline_lhs_packing) {
+      xnn_node& fully_connected = subgraph->nodes[1];
+      fully_connected.inputs[0] = input_id;
+      fully_connected.flags |= XNN_FLAG_INLINE_LHS_PACKING;
+      fully_connected.packed_input_datatype = quantized_datatype;
+      subgraph->nodes[0].type = xnn_node_type_invalid;
+    }
   }
 };
+
+TEST_F(Fp16ToFp32FallbackTest, QuantizedFullyConnectedWithoutNativeFp16) {
+  for (xnn_datatype datatype :
+       {xnn_datatype_qdint8, xnn_datatype_qduint8, xnn_datatype_qpint8}) {
+    SCOPED_TRACE(datatype);
+    for (bool inline_lhs_packing : {false, true}) {
+      SCOPED_TRACE(inline_lhs_packing);
+      Qd8FcSubgraph builder;
+      ASSERT_NO_FATAL_FAILURE(builder.Build(xnn_datatype_fp32, xnn_datatype_fp16,
+                                            datatype, inline_lhs_packing));
+      std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_guard(
+          builder.subgraph, xnn_delete_subgraph);
+
+      ASSERT_EQ(xnn_subgraph_fallback_from_fp16_to_fp32(builder.subgraph, 0),
+                xnn_status_success);
+
+      size_t fully_connected_count = 0;
+      for (size_t node_id = 0; node_id < builder.subgraph->num_nodes; ++node_id) {
+        const xnn_node& node = builder.subgraph->nodes[node_id];
+        if (node.type == xnn_node_type_fully_connected) {
+          ++fully_connected_count;
+          EXPECT_EQ(builder.subgraph->values[node.outputs[0]].datatype,
+                    xnn_datatype_fp32);
+        }
+      }
+      EXPECT_EQ(fully_connected_count, 1);
+      EXPECT_EQ(builder.subgraph->values[builder.output_id].datatype,
+                xnn_datatype_fp16);
+    }
+  }
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, InlineQdint8FullyConnectedKeepsFp16) {
+  xnn_set_hardware_config(&mock_config_);
+
+  Qd8FcSubgraph builder;
+  ASSERT_NO_FATAL_FAILURE(builder.Build(xnn_datatype_fp32, xnn_datatype_fp16,
+                                        xnn_datatype_qdint8, true));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_guard(
+      builder.subgraph, xnn_delete_subgraph);
+
+  Qd8FcSubgraph expected_builder;
+  ASSERT_NO_FATAL_FAILURE(expected_builder.Build(
+      xnn_datatype_fp32, xnn_datatype_fp16, xnn_datatype_qdint8, true));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      expected_subgraph_guard(expected_builder.subgraph, xnn_delete_subgraph);
+
+  ASSERT_EQ(xnn_subgraph_fallback_from_fp16_to_fp32(builder.subgraph, 0),
+            xnn_status_success);
+  EXPECT_THAT(builder.subgraph, IsIsomorphicTo(expected_builder.subgraph));
+}
 
 TEST_F(Fp16ToFp32FineGrainedOpSupportTest, Fp16ToQdint8Convert) {
   xnn_set_hardware_config(&mock_config_);
