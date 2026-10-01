@@ -3559,3 +3559,35 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
     ASSERT_EQ(output[i], reference_output[i]) << "at index " << i;
   }
 }
+
+TEST(DECONVOLUTION_NHWC_F32, reshape_batch_size_zero) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const float kernel[1] = {1.0f};
+  const float bias[1] = {0.0f};
+  xnn_operator_t deconvolution_op = nullptr;
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_deconvolution2d_nhwc_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+          kernel, bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &deconvolution_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      deconvolution_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_reshape_deconvolution2d_nhwc_f32(
+          deconvolution_op, 0, 5, 5, 0, 0,
+          &output_height, &output_width, nullptr));
+  EXPECT_EQ(5, output_height);
+  EXPECT_EQ(5, output_width);
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_setup_deconvolution2d_nhwc_f32(deconvolution_op, nullptr, nullptr));
+  EXPECT_EQ(xnn_status_success, xnn_run_operator(deconvolution_op, nullptr));
+}
