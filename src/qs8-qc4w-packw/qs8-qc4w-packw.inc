@@ -59,5 +59,12 @@ XNN_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_
 XNN_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni_prfm, 16, 8, 1, 32, 1, 128)
 #endif
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon, 8, 8, 1, 64, 1, 0)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm, 8, 8, 1, 64, 1, 0)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon, 16, 8, 1, 64, 1, 0)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm, 16, 8, 1, 64, 1, 0)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 
 

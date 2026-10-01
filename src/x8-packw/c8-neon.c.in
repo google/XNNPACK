@@ -1,0 +1,373 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 8 == 0
+$assert KR == 8
+$assert DATATYPE in ["QS8", "QS4"]
+$assert IZP in [0, 128]
+
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/packw.h"
+$if PREFETCH:
+  #include "src/xnnpack/prefetch.h"
+
+$BTYPE = "int32_t"
+$WTYPE = {"QS8": "int8_t", "QS4": "uint8_t"}[DATATYPE]
+$PACKEDWTYPE = {"QS8": "int8_t", "QS4": "void"}[DATATYPE]
+$SCALETYPE = {"QS8": "void", "QS4": "float"}[DATATYPE]
+$PARAMTYPE = {"QS8": "void", "QS4": "struct xnn_qs8_qc4w_packing_params"}[DATATYPE]
+$DATATYPE_SPEC = ("qs8_to_qu8_qc4w" if DATATYPE == "QS4" else "qs8_to_qu8") if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w"}[DATATYPE]
+$# Number of KR blocks per row in the QS4 main loop.
+$KBLOCK = 4
+
+// Load 'n' bytes from 'address' into a uint64_t, padding the remaining bytes
+// with 'pad_value'.
+$if DATATYPE == "QS4":
+  // If 'odd' is set, one more byte is loaded, but only its low nibble is
+  // used and its high nibble is replaced by the high nibble of 'pad_value'.
+  // This handles an odd number of 4 bit weights (KC) per row.
+  XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, size_t odd, uint8_t pad_value) {
+    uint64_t value = (uint64_t) pad_value * 0x0101010101010101ULL;
+    assert(n + odd <= sizeof(uint64_t));
+    const uint8_t* bytes = (const uint8_t*) address;
+    for (size_t i = 0; i < n; ++i) {
+      ((uint8_t*) &value)[i] = bytes[i];
+    }
+    if (odd) {
+      ((uint8_t*) &value)[n] = (uint8_t) ((bytes[n] & 0x0F) | (pad_value & 0xF0));
+    }
+    return value;
+  }
+$else:
+  XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, uint8_t pad_value) {
+    uint64_t value = (uint64_t) pad_value * 0x0101010101010101ULL;
+    assert(n <= sizeof(uint64_t));
+    const uint8_t* bytes = (const uint8_t*) address;
+    for (size_t i = 0; i < n; ++i) {
+      ((uint8_t*) &value)[i] = bytes[i];
+    }
+    return value;
+  }
+
+$if DATATYPE == "QS8":
+  // Pairwise add of 2 vectors of 32 bit sums laid out as [a, a, b, b].
+  // Returns [a0 + a1, b0 + b1, a2 + a3, b2 + b3] of both inputs.
+  XNN_INLINE static int32x4_t xnn_padd_s32(int32x4_t va, int32x4_t vb) {
+  #if XNN_ARCH_ARM64
+    return vpaddq_s32(va, vb);
+  #else
+    return vcombine_s32(vpadd_s32(vget_low_s32(va), vget_high_s32(va)),
+                        vpadd_s32(vget_low_s32(vb), vget_high_s32(vb)));
+  #endif
+  }
+
+  // Transpose 64 bit elements of 2 rows.
+  // Returns [a0, b0] and [a1, b1]
+  XNN_INLINE static int8x16x2_t xnn_zip_s64(int8x16_t va, int8x16_t vb) {
+    int8x16x2_t vr;
+  #if XNN_ARCH_ARM64
+    vr.val[0] = vreinterpretq_s8_s64(vzip1q_s64(vreinterpretq_s64_s8(va), vreinterpretq_s64_s8(vb)));
+    vr.val[1] = vreinterpretq_s8_s64(vzip2q_s64(vreinterpretq_s64_s8(va), vreinterpretq_s64_s8(vb)));
+  #else
+    vr.val[0] = vcombine_s8(vget_low_s8(va), vget_low_s8(vb));
+    vr.val[1] = vcombine_s8(vget_high_s8(va), vget_high_s8(vb));
+  #endif
+    return vr;
+  }
+
+  // Accumulate the sum of int8 weights of 2 rows.  Each input vector holds 8
+  // bytes of row a followed by 8 bytes of row b.  Accumulator is [a, a, b, b].
+  XNN_INLINE static int32x4_t xnn_ksum2_s8(int32x4_t vacc, int8x16_t v0, int8x16_t v1) {
+    return vpadalq_s16(vacc, vpadalq_s8(vpaddlq_s8(v0), v1));
+  }
+
+  XNN_INLINE static int32x4_t xnn_ksum_s8(int32x4_t vacc, int8x16_t v) {
+    return vpadalq_s16(vacc, vpaddlq_s8(v));
+  }
+$else:
+  // Convert KR blocks of packed nibbles to planar nibbles.
+  //
+  // Each 8 byte KR block of the source holds 16 int4 weights k0..k15 with
+  // byte i = k[2i] | k[2i+1] << 4.  The planar layout has byte j = k[j] |
+  // k[j+8] << 4.  With L = bytes 0..3 (k0..k7) and H = bytes 4..7 (k8..k15):
+  //   planar[2i]   = (L[i] & 0x0F) | (H[i] << 4)    = vsli(L, H, 4)
+  //   planar[2i+1] = (L[i] >> 4)   | (H[i] & 0xF0)  = vsri(H, L, 4)
+  // followed by a byte interleave of the 2 results.
+  //
+  // vl holds L and vh holds H of 4 KR blocks, one block per 32 bit lane.
+  // Returns the 4 planar KR blocks in lane order: val[0] = blocks 0 and 1,
+  // val[1] = blocks 2 and 3.
+  //
+  // TODO: Move xnn_packed2planar to a shared header (for reuse by 2 bit
+  // packing) and add a unit test for it.
+  XNN_INLINE static uint8x16x2_t xnn_packed2planar(uint8x16_t vl, uint8x16_t vh) {
+    return vzipq_u8(vsliq_n_u8(vl, vh, 4), vsriq_n_u8(vh, vl, 4));
+  }
+
+  // Add the 2 signed nibbles of each byte of v to the 8 bit sums.
+  XNN_INLINE static int8x16_t xnn_nibble_acc_s4(int8x16_t vsum, uint8x16_t v) {
+    vsum = vsraq_n_s8(vsum, vreinterpretq_s8_u8(v), 4);  // high nibble
+    return vsraq_n_s8(vsum, vshlq_n_s8(vreinterpretq_s8_u8(v), 4), 4);  // low nibble
+  }
+
+void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__neon${"_prfm" if PREFETCH else ""}(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t n_stride,
+  const ${WTYPE}* weights,
+  const ${BTYPE}* bias,
+  const ${SCALETYPE}* scale,
+  ${PACKEDWTYPE}* packed_weights,
+  size_t extra_bytes,
+  const ${PARAMTYPE}* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == ${KR});
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  $if DATATYPE == "QS4":
+    assert(params != NULL);
+    assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+    // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes.
+    // TODO: kr-avxvnni QS4 asserts kc is even and drops the last nibble when
+    // kc is odd, while this kernel packs it.  Fix AVX to handle odd kc, or
+    // make this kernel match AVX.
+    const size_t kc_odd = kc & 1;  // Last byte of each row has 1 weight.
+    kc >>= 1;
+    const size_t w_stride = n_stride >> 1;
+    // XOR converts uint4 to int4 when kernel_zero_point is 8.
+    const uint8_t kzp = (uint8_t) (params->kernel_zero_point * 0x11);
+    const uint8x16_t vkzp = vdupq_n_u8(kzp);
+    // Bias and ksum are scaled by 16 for the planar int4 GEMM.
+    const int32x4_t vzeropoint = vdupq_n_s32(((int32_t) params->input_zero_point + ${IZP}) * 16);
+    // The KC remainder transposes 4 rows at a time by loading 32 bit lanes.
+    // Every lane is loaded before use.
+    $for G in range(0, NR, 4):
+      uint32x4x2_t vtb${G};
+  $else:
+    const size_t w_stride = n_stride;
+    const int32x4_t vzeropoint = vdupq_n_s32((int32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + ${IZP}) : ${IZP}));
+
+  uint8_t* out = (uint8_t*) packed_weights;
+  const ${BTYPE}* b = (const ${BTYPE}*) bias;
+
+  do {
+    const ${WTYPE}* wb = (const ${WTYPE}*) weights;
+    size_t n = nc;
+    $for REMAINDER in [False, True]:
+      $if REMAINDER:
+        // NC remainder (1..${NR-1})
+        // Same as main loop except bias is copied and w pointers are clamped
+      $else:
+        // NC main loop multiple of ${NR}
+      ${"if XNN_UNLIKELY(n != 0)" if REMAINDER else "for (; n >= %d; n -= %d)" % (NR, NR)} {
+        $if REMAINDER:
+          assert(n >= 1 && n <= ${NR-1});
+        const ${WTYPE}* w0 = wb;
+        $for N in range(1, NR):
+          const ${WTYPE}* w${N} = w${N-1} + w_stride;
+          $if REMAINDER:
+            $if N % 2 == 0:
+              if XNN_UNPREDICTABLE(n <= ${N}) {
+                w${N} = w${N-1};
+              }
+            $else:
+              if XNN_UNPREDICTABLE(n < ${N+1}) {
+                w${N} = w${N-1};
+              }
+
+        int32_t* packed_b = (int32_t*) out;
+        $if not REMAINDER:
+          if XNN_LIKELY(b != NULL) {
+            $for N in range(0, NR, 4):
+              $if DATATYPE == "QS4":
+                const int32x4_t vb${N} = vshlq_n_s32(vld1q_s32(b + ${N}), 4);
+              $else:
+                const int32x4_t vb${N} = vld1q_s32(b + ${N});
+            $for N in range(0, NR, 4):
+              vst1q_s32(packed_b + ${N}, vb${N});
+            b += ${NR};
+          } else {
+            $for N in range(0, NR, 4):
+              vst1q_s32(packed_b + ${N}, vdupq_n_s32(0));
+          }
+        $else:
+          $for N in range(0, NR, 4):
+            vst1q_s32(packed_b + ${N}, vdupq_n_s32(0));
+          if XNN_LIKELY(b != NULL) {
+            for (size_t nb = 0; nb < n; ++nb) {
+              $if DATATYPE == "QS4":
+                packed_b[nb] = (int32_t) ((uint32_t) b[nb] << 4);
+              $else:
+                packed_b[nb] = b[nb];
+            }
+            b += n;
+          }
+        out += ${NR} * sizeof(${BTYPE});
+        $if PREFETCH:
+
+          $for N in range(NR):
+            $for OFFSET in range(0, 256, 64):
+              xnn_prefetch_to_l1((const int8_t*) w${N} + ${OFFSET});
+
+        size_t k = kc;
+        $if DATATYPE == "QS4":
+          // ksum of rows [a, b, a, b] from the main loop
+          $for N in range(0, NR, 2):
+            int32x4_t vaccp${N} = vdupq_n_s32(0);
+          // ksum of rows [a, b, c, d] from the remainders
+          $for G in range(0, NR, 4):
+            int32x4_t vacc${G} = vdupq_n_s32(0);
+
+          // KC main loop multiple of ${NR}x${KBLOCK * KR}
+          for (; k >= ${KBLOCK * KR}; k -= ${KBLOCK * KR}) {
+            $for B in range(0, KBLOCK, 2):
+              $for N in range(0, NR, 2):
+                const uint8x16_t va${N}_${B} = veorq_u8(vld1q_u8(w${N} + ${B * KR}), vkzp);  // uint4 -> int4
+                const uint8x16_t vb${N}_${B} = veorq_u8(vld1q_u8(w${N+1} + ${B * KR}), vkzp);
+                // vt.val[0] = [a.L0, b.L0, a.L1, b.L1], vt.val[1] = [a.H0, b.H0, a.H1, b.H1]
+                const uint32x4x2_t vt${N}_${B} = vtrnq_u32(vreinterpretq_u32_u8(va${N}_${B}), vreinterpretq_u32_u8(vb${N}_${B}));
+                const uint8x16_t vl${N}_${B} = vreinterpretq_u8_u32(vt${N}_${B}.val[0]);
+                const uint8x16_t vh${N}_${B} = vreinterpretq_u8_u32(vt${N}_${B}.val[1]);
+                const uint8x16x2_t vp${N}_${B} = xnn_packed2planar(vl${N}_${B}, vh${N}_${B});
+                vst1q_u8(out + ${(B * NR + N) * KR}, vp${N}_${B}.val[0]);
+                vst1q_u8(out + ${((B + 1) * NR + N) * KR}, vp${N}_${B}.val[1]);
+                $if B == 0:
+                  int8x16_t vsum${N} = xnn_nibble_acc_s4(vdupq_n_s8(0), vl${N}_${B});
+                $else:
+                  vsum${N} = xnn_nibble_acc_s4(vsum${N}, vl${N}_${B});
+                vsum${N} = xnn_nibble_acc_s4(vsum${N}, vh${N}_${B});
+            // 8 bit sums of ${2 * KBLOCK} nibbles are in [${-16 * KBLOCK}, ${14 * KBLOCK}].
+            $for N in range(0, NR, 2):
+              vaccp${N} = vpadalq_s16(vaccp${N}, vpaddlq_s8(vsum${N}));
+            $if PREFETCH:
+              $for N in range(NR):
+                xnn_prefetch_to_l1((const int8_t*) w${N} + 256);
+
+            $for N in range(NR):
+              w${N} += ${KBLOCK * KR};
+            out += ${KBLOCK * NR * KR};
+          }
+
+          // KC remainder of multiples of ${KR}
+          for (; k >= ${KR}; k -= ${KR}) {
+            // vtb.val[0] = [a.L, b.L, c.L, d.L], vtb.val[1] = [a.H, b.H, c.H, d.H]
+            $for G in range(0, NR, 4):
+              $for L in range(4):
+                vtb${G} = vld2q_lane_u32((const uint32_t*) w${G+L}, vtb${G}, ${L});
+            $for G in range(0, NR, 4):
+              const uint8x16_t vl${G} = veorq_u8(vreinterpretq_u8_u32(vtb${G}.val[0]), vkzp);  // uint4 -> int4
+              const uint8x16_t vh${G} = veorq_u8(vreinterpretq_u8_u32(vtb${G}.val[1]), vkzp);
+              const uint8x16x2_t vp${G} = xnn_packed2planar(vl${G}, vh${G});
+              vst1q_u8(out + ${G * KR}, vp${G}.val[0]);
+              vst1q_u8(out + ${(G + 2) * KR}, vp${G}.val[1]);
+              vacc${G} = vpadalq_s16(vacc${G}, vpaddlq_s8(xnn_nibble_acc_s4(xnn_nibble_acc_s4(vdupq_n_s8(0), vl${G}), vh${G})));
+
+            $for N in range(NR):
+              w${N} += ${KR};
+            out += ${NR * KR};
+          }
+
+          // KC remainder of 1..${KR-1} bytes
+          if (k != 0 || kc_odd != 0) {
+            assert(k + kc_odd >= 1 && k + kc_odd <= ${KR});
+            $for G in range(0, NR, 4):
+              // vu.val[0] = [a.L, b.L, c.L, d.L], vu.val[1] = [a.H, b.H, c.H, d.H]
+              const uint32x4x2_t vu${G} = vuzpq_u32(
+                  vreinterpretq_u32_u64(vcombine_u64(vcreate_u64(safe_load_u64(w${G}, k, kc_odd, kzp)), vcreate_u64(safe_load_u64(w${G+1}, k, kc_odd, kzp)))),
+                  vreinterpretq_u32_u64(vcombine_u64(vcreate_u64(safe_load_u64(w${G+2}, k, kc_odd, kzp)), vcreate_u64(safe_load_u64(w${G+3}, k, kc_odd, kzp)))));
+              const uint8x16_t vl${G} = veorq_u8(vreinterpretq_u8_u32(vu${G}.val[0]), vkzp);  // uint4 -> int4
+              const uint8x16_t vh${G} = veorq_u8(vreinterpretq_u8_u32(vu${G}.val[1]), vkzp);
+              const uint8x16x2_t vp${G} = xnn_packed2planar(vl${G}, vh${G});
+              vst1q_u8(out + ${G * KR}, vp${G}.val[0]);
+              vst1q_u8(out + ${(G + 2) * KR}, vp${G}.val[1]);
+              vacc${G} = vpadalq_s16(vacc${G}, vpaddlq_s8(xnn_nibble_acc_s4(xnn_nibble_acc_s4(vdupq_n_s8(0), vl${G}), vh${G})));
+
+            out += ${NR * KR};
+          }
+
+          // Subtract ksum * input_zero_point from bias
+          $for G in range(0, NR, 4):
+            vacc${G} = vaddq_s32(vacc${G}, vcombine_s32(
+                vadd_s32(vget_low_s32(vaccp${G}), vget_high_s32(vaccp${G})),
+                vadd_s32(vget_low_s32(vaccp${G+2}), vget_high_s32(vaccp${G+2}))));
+          $for G in range(0, NR, 4):
+            vst1q_s32(packed_b + ${G}, vmlsq_s32(vld1q_s32(packed_b + ${G}), vacc${G}, vzeropoint));
+        $else:
+          // ksum of rows [a, a, b, b]
+          $for N in range(0, NR, 2):
+            int32x4_t vacc${N} = vdupq_n_s32(0);
+
+          // KC main loop multiple of ${NR}x${2 * KR}
+          for (; k >= ${2 * KR}; k -= ${2 * KR}) {
+            $for N in range(0, NR, 2):
+              const int8x16_t v${N} = vld1q_s8(w${N});
+              const int8x16_t v${N+1} = vld1q_s8(w${N+1});
+              const int8x16x2_t vp${N} = xnn_zip_s64(v${N}, v${N+1});
+              vacc${N} = xnn_ksum2_s8(vacc${N}, vp${N}.val[0], vp${N}.val[1]);
+              vst1q_s8((int8_t*) out + ${N * KR}, vp${N}.val[0]);
+              vst1q_s8((int8_t*) out + ${(NR + N) * KR}, vp${N}.val[1]);
+            $if PREFETCH:
+              $for N in range(NR):
+                xnn_prefetch_to_l1((const int8_t*) w${N} + 256);
+
+            $for N in range(NR):
+              w${N} += ${2 * KR};
+            out += ${2 * NR * KR};
+          }
+
+          // KC remainder of ${KR}
+          if (k >= ${KR}) {
+            $for N in range(0, NR, 2):
+              const int8x16_t vp${N} = vcombine_s8(vld1_s8(w${N}), vld1_s8(w${N+1}));
+              vacc${N} = xnn_ksum_s8(vacc${N}, vp${N});
+              vst1q_s8((int8_t*) out + ${N * KR}, vp${N});
+
+            $for N in range(NR):
+              w${N} += ${KR};
+            out += ${NR * KR};
+            k -= ${KR};
+          }
+
+          // KC remainder of 1..${KR-1}
+          if (k != 0) {
+            assert(k >= 1 && k <= ${KR-1});
+            $for N in range(0, NR, 2):
+              const int8x16_t vp${N} = vcombine_s8(vcreate_s8(safe_load_u64(w${N}, k, 0)), vcreate_s8(safe_load_u64(w${N+1}, k, 0)));
+              vacc${N} = xnn_ksum_s8(vacc${N}, vp${N});
+              vst1q_s8((int8_t*) out + ${N * KR}, vp${N});
+
+            out += ${NR * KR};
+          }
+
+          // Subtract ksum * input_zero_point from bias
+          $for N in range(0, NR, 4):
+            const int32x4_t vksum${N} = xnn_padd_s32(vacc${N}, vacc${N+2});
+          $for N in range(0, NR, 4):
+            vst1q_s32(packed_b + ${N}, vmlsq_s32(vld1q_s32(packed_b + ${N}), vksum${N}, vzeropoint));
+
+        out = (uint8_t*) ((uintptr_t) out + extra_bytes);
+        $if not REMAINDER:
+          wb += ${NR} * w_stride;
+      }
+
+    weights = (const ${WTYPE}*) ((intptr_t) weights + nc * w_stride);
+  } while (--g != 0);
+}

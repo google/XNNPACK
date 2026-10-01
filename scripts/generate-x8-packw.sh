@@ -184,6 +184,17 @@ tools/xngen src/x8-packw/c4-neon.c.in -D NR=16 -D KR=4 -D DATATYPE=QS8 -D TYPE=i
 tools/xngen src/x8-packw/c4-neon.c.in -D NR=8  -D KR=4 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0 -o src/x8-packw/gen/x8-packw-x8c4-gemm-goi-neon.c &
 tools/xngen src/x8-packw/c4-neon.c.in -D NR=16 -D KR=4 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0 -o src/x8-packw/gen/x8-packw-x16c4-gemm-goi-neon.c &
 
+### NEON C8 micro-kernels
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D IZP=0 -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-neon.c &
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D IZP=0 -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-neon-prfm.c &
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D IZP=0 -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-neon.c &
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D IZP=0 -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-neon-prfm.c &
+
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0 -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-neon.c &
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0 -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-neon-prfm.c &
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0 -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-neon.c &
+tools/xngen src/x8-packw/c8-neon.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0 -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-neon-prfm.c &
+
 
 
 ################################## Wasm SIMD ##################################

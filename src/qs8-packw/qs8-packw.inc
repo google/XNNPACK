@@ -88,3 +88,10 @@ XNN_QS8_UKERNEL(xnn_arch_arm_neon_dot, xnn_qs8_packw_gemm_goi_ukernel_x8c4__neon
 XNN_QS8_UKERNEL(xnn_arch_arm_neon_dot, xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot, 16, 4, 1, 4, 1, 0)
 #endif
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_QS8_UKERNEL(xnn_arch_arm_neon, xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon, 8, 8, 1, 16, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_arm_neon, xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon_prfm, 8, 8, 1, 16, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_arm_neon, xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon, 16, 8, 1, 16, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_arm_neon, xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon_prfm, 16, 8, 1, 16, 1, 0)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+

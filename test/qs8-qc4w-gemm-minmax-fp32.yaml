@@ -682,62 +682,62 @@
 # ARM NEON I8MM
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_2x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_3x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_4x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_6x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_3x16c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_6x16c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm
   k-block: 16
   planes: 2
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x16c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  pack: xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__neon_prfm
   k-block: 16
   planes: 2
 

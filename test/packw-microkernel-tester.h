@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 #include <numeric>
 #include <random>
@@ -170,6 +171,35 @@ class PackWMicrokernelTester {
               << "at n " << i << " of "
               << (int32_t)(packed_n() * packed_k() +
                            packed_n() * sizeof(int32_t));
+        }
+      }
+    }
+
+    // Verify bias and all packed weight bytes, block by block.  Columns beyond
+    // n() are not written by the reference, so only the first n() columns of
+    // each block are compared.
+    const size_t block_size = nr() * sizeof(int32_t) + nr() * packed_k();
+    for (size_t nb = 0; nb < n(); nb += nr()) {
+      const size_t block_n = std::min(n() - nb, nr());
+      const int8_t* block = packed_w.data() + (nb / nr()) * block_size;
+      const int8_t* block_ref = packed_w_ref.data() + (nb / nr()) * block_size;
+      for (size_t ni = 0; ni < block_n; ni++) {
+        int32_t b, b_ref;
+        std::memcpy(&b, block + ni * sizeof(int32_t), sizeof(b));
+        std::memcpy(&b_ref, block_ref + ni * sizeof(int32_t), sizeof(b));
+        EXPECT_EQ(b, b_ref) << "bias at n " << nb + ni << " of " << n()
+                            << ", k " << k();
+      }
+      const int8_t* w = block + nr() * sizeof(int32_t);
+      const int8_t* w_ref = block_ref + nr() * sizeof(int32_t);
+      for (size_t kb = 0; kb < packed_k(); kb += kr() * sr()) {
+        for (size_t i = 0; i < nr() * kr() * sr(); i++) {
+          const size_t ni = i / kr() % nr();
+          if (ni < block_n) {
+            EXPECT_EQ((int32_t)w[kb * nr() + i], (int32_t)w_ref[kb * nr() + i])
+                << "weight at n " << nb + ni << " of " << n() << ", k block "
+                << kb << " of " << packed_k();
+          }
         }
       }
     }
@@ -451,6 +481,38 @@ class PackWMicrokernelTester {
               << "at n " << i << " of "
               << (int32_t)(packed_n() * packed_k() +
                            packed_n() * sizeof(int32_t));
+        }
+      }
+    }
+
+    // Verify bias and all packed weight bytes, block by block.  Columns beyond
+    // n() are not written by the reference, so only the first n() columns of
+    // each block are compared.  Each KR block holds kr() bytes (2 * kr()
+    // nibbles) per column.
+    const size_t packed_k_bytes_per_n = round_up_po2(k2, kr() * sr() * 2) / 2;
+    const size_t block_size =
+        nr() * sizeof(int32_t) + nr() * packed_k_bytes_per_n;
+    for (size_t nb = 0; nb < n(); nb += nr()) {
+      const size_t block_n = std::min(n() - nb, nr());
+      const int8_t* block = packed_w.data() + (nb / nr()) * block_size;
+      const int8_t* block_ref = packed_w_ref.data() + (nb / nr()) * block_size;
+      for (size_t ni = 0; ni < block_n; ni++) {
+        int32_t b, b_ref;
+        std::memcpy(&b, block + ni * sizeof(int32_t), sizeof(b));
+        std::memcpy(&b_ref, block_ref + ni * sizeof(int32_t), sizeof(b));
+        EXPECT_EQ(b, b_ref) << "bias at n " << nb + ni << " of " << n()
+                            << ", k " << k2 << ", kzp " << kzp();
+      }
+      const int8_t* w = block + nr() * sizeof(int32_t);
+      const int8_t* w_ref = block_ref + nr() * sizeof(int32_t);
+      for (size_t kb = 0; kb < packed_k_bytes_per_n; kb += kr() * sr()) {
+        for (size_t i = 0; i < nr() * kr() * sr(); i++) {
+          const size_t ni = i / kr() % nr();
+          if (ni < block_n) {
+            EXPECT_EQ((int32_t)w[kb * nr() + i], (int32_t)w_ref[kb * nr() + i])
+                << "weight at n " << nb + ni << " of " << n() << ", k byte "
+                << kb << " of " << packed_k_bytes_per_n << ", kzp " << kzp();
+          }
         }
       }
     }

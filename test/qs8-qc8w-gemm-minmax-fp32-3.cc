@@ -1012,7 +1012,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__neoni8mm,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_i8mm)),
@@ -1032,7 +1032,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c8__neoni8mm,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_i8mm)),
@@ -1052,7 +1052,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__neoni8mm,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_i8mm)),
@@ -1072,7 +1072,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x16c8__neoni8mm,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_i8mm)),
@@ -1092,7 +1092,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x8c8__neoni8mm,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_i8mm)),
@@ -1235,7 +1235,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__neon_mlal,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neon_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon)),
@@ -1255,7 +1255,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__neonv8_mlal,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_v8)),
@@ -1321,7 +1321,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__aarch64_neondot_ld128,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon_dot)),
@@ -1424,7 +1424,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c8__neon_mlal,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_neon_params,
-                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c8__neon,
                         xnn_qs8_requantize_fp32);
           },
           xnn_arch_arm_neon)),
