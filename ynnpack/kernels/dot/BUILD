@@ -441,6 +441,10 @@ ynn_cc_library(
     ],
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(unroll_loops = False),
+    local_defines = select({
+        "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],
+        "//conditions:default": [],
+    }),
     per_arch_srcs = {
         "arm64_neon": [
             "arm64_neon_fp32.cc",
@@ -551,8 +555,12 @@ ynn_cc_library(
         "//ynnpack/base",
         "//ynnpack/base:log",
         "//ynnpack/base/simd",
+        "//ynnpack/kernels/dot/cost_model",
     ] + select({
         "//ynnpack:arm64": [":arm64_sme_stubs"],
+        "//conditions:default": [],
+    }) + select({
+        "//ynnpack:ynn_enable_cpuinfo": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
@@ -640,6 +648,7 @@ cc_test(
         ":dot",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
+        "//ynnpack/kernels/dot/cost_model",
     ] + ynn_test_deps(),
 )
 
@@ -654,6 +663,7 @@ cc_test(
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
+        "//ynnpack/kernels/dot/cost_model",
         "@com_google_benchmark//:benchmark",
     ],
 )

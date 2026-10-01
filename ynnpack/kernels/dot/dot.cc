@@ -21,6 +21,35 @@
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
+#ifdef YNN_ENABLE_CPUINFO
+#include <cpuinfo.h>
+#endif
+#ifdef YNN_ARCH_X86
+#include "ynnpack/kernels/dot/cost_model/broadwell.h"
+#include "ynnpack/kernels/dot/cost_model/cascade_lake.h"
+#include "ynnpack/kernels/dot/cost_model/golden_cove.h"
+#include "ynnpack/kernels/dot/cost_model/haswell.h"
+#include "ynnpack/kernels/dot/cost_model/redwood_cove.h"
+#include "ynnpack/kernels/dot/cost_model/zen2.h"
+#include "ynnpack/kernels/dot/cost_model/zen3.h"
+#include "ynnpack/kernels/dot/cost_model/zen4.h"
+#endif  // YNN_ARCH_X86
+#ifdef YNN_ARCH_ARM
+#include "ynnpack/kernels/dot/cost_model/cortex_a510.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_a520.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_a710.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_a715.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_a720.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_a725.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_x1.h"
+#include "ynnpack/kernels/dot/cost_model/cortex_x4.h"
+#include "ynnpack/kernels/dot/cost_model/lumex_c1_pro.h"
+#include "ynnpack/kernels/dot/cost_model/lumex_c1_ultra.h"
+#include "ynnpack/kernels/dot/cost_model/neoverse_n1.h"
+#include "ynnpack/kernels/dot/cost_model/neoverse_v2.h"
+#include "ynnpack/kernels/dot/cost_model/oryon.h"
+#endif  // YNN_ARCH_ARM
 
 namespace ynn {
 
@@ -265,83 +294,25 @@ void dot_int8_int2_int32_1xNx4_1x1x4(size_t m, size_t n, size_t k3, size_t k2,
 
 namespace {
 
-float estimate_dot_cost_impl(uint32_t m, uint32_t n, uint32_t k,
-                             uint32_t block_m, uint32_t block_n,
-                             uint32_t block_k, uint32_t tile_m, uint32_t tile_n,
-                             uint32_t tile_k, uint32_t b_elem_count) {
-  const float blocks_m = ceil_div(m, block_m);
-  const float blocks_n = ceil_div(n, block_n);
-  const float blocks_k = ceil_div(k, block_k);
-
-  // This model was derived by benchmarking each kernel on a [block_m, block_k *
-  // 64] . [block_k * 64, block_n] dot operation (64 blocks should fit in L1
-  // cache), and then fitting a linear model to a set of features (block/tile
-  // dimensions, memory loaded, etc.). It turned out that the only features the
-  // model really depends on is the number of loads it does, and that loads of b
-  // are ~2x as expensive as loads from a.
-  // TODO(dsharlet): This has been tested on Intel Skylake and AMD Rome, but not
-  // ARM.
-  const uint32_t loads_a = block_m * block_k / (tile_m * tile_k);
-  const uint32_t loads_b = block_n * block_k / (tile_n * tile_k);
-
-  // The cost model doesn't understand that padding has a cost beyond just the
-  // extra computation, so it will think that two kernels that both need the
-  // same number of tiles will cost the same. However, in practice, the smaller
-  // tile would be better, so here, we add a small penalty proportional to the
-  // tile size.
-  const uint32_t tile_cost = tile_m * tile_n * tile_k;
-
-  // We assume that loads from b are more expensive as b_elem_count grows.
-  const float block_cost =
-      loads_a * 5 + loads_b * 11 * b_elem_count + 9 + tile_cost * 1e-4f;
-
-  return blocks_m * blocks_n * blocks_k * block_cost;
+// dot_cost_model estimates the cost of a single block of a dot. When processing
+// multiple blocks, there is a super-linear cost due to blocks not fitting in
+// the cache. This is a continuous, cache-oblivious model of this cost.
+YNN_ALWAYS_INLINE float locality_penalty(float blocks_m, float blocks_n) {
+  return 1.0f + (fast_log2(blocks_m) + fast_log2(blocks_n)) * (1.0f / 32.0f);
 }
 
-// An additional penalty scale term on the cost of a dot kernel based on the
-// architecture.
-float dot_arch_cost_factor(uint64_t arch, uint32_t m, uint32_t n,
-                           uint32_t block_m, uint32_t block_n, uint32_t tile_m,
-                           uint32_t tile_n) {
-  if (arch == arch_flag::none) {
-    // We should only use the default dot kernel if there is no other choice.
-    return 100.0f;
-  }
-#ifdef YNN_ARCH_ARM
-  if (arch & (arch_flag::sme | arch_flag::sme2)) {
-    // At m == 1, NEON is faster than SME due to SME startup overhead and
-    // vector-matrix multiplication not benefiting from outer-product
-    // accumulation. A penalty factor >= 3.0 (here 10.0) ensures NEON is
-    // selected even for sub-byte weights (int4, int2) where NEON's narrow
-    // tile_n inflates its estimated cost relative to SME.
-    if (m == 1) {
-      return 10.0f;
-    }
-  }
-#endif
-#ifdef YNN_ARCH_X86
-  if (arch & arch_flag::avx512vnni || arch & arch_flag::amxint8) {
-    // The VNNI kernels have a smaller unrolling in K than the AVX512 kernels,
-    // which tricks `estimate_dot_cost` into thinking the regular AVX512 kernels
-    // are better. We then also need to adjust AMX, to avoid tricking it into
-    // thinking VNNI is faster than AMX.
-    return 0.5f;
-  }
-  if (arch & arch_flag::amxbf16) {
-    // The AMX 32x48 kernel (2x3 configuration) currently only works better than
-    // 32x32 kernels for small shapes. This may be due to memory bandwidth
-    // limitations, as there are only 2 tiles for A/B and must be frequently
-    // updated.
-    if (block_m == 32 && block_n == 48 && tile_m == 16 && tile_n == 16) {
-      if (n > 48) {
-        return 100.0f;
-      } else {
-        return 0.5f;
-      }
-    }
-  }
-#endif
-  return 1.0f;
+YNN_ALWAYS_INLINE float estimate_dot_cost(uint32_t m, uint32_t n, uint32_t k,
+                                          uint32_t block_m, uint32_t block_n,
+                                          uint32_t block_k,
+                                          const dot_cost_model& cost_model) {
+  const float block_cost =
+      cost_model.estimate_block_cost(k, block_m, block_n, block_k);
+
+  const float blocks_m = ceil_div(m, block_m);
+  const float blocks_n = ceil_div(n, block_n);
+
+  return block_cost *
+         (blocks_m * blocks_n * locality_penalty(blocks_m, blocks_n));
 }
 
 template <typename A, typename B, typename C>
@@ -362,52 +333,49 @@ struct optimizer {
   const char* kernel_used = nullptr;
 #endif
 
-  void operator()(uint64_t arch, uint32_t block_m, uint32_t block_n,
-                  uint32_t block_k, uint32_t tile_m, uint32_t tile_n,
-                  uint32_t tile_k, uint32_t flags, dot_kernel_fn kernel,
-                  const char* name) {
+  YNN_ALWAYS_INLINE void operator()(uint64_t arch, uint32_t block_m,
+                                    uint32_t block_n, uint32_t block_k,
+                                    uint32_t tile_m, uint32_t tile_n,
+                                    uint32_t tile_k, uint32_t flags,
+                                    dot_kernel_fn kernel,
+                                    const dot_cost_model& cost_model,
+                                    const char* name) {
     // These checks are ordered to minimize the cost of these checks:
+    // - Checks that are invariant across many kernels should be first.
     // - Checks that are more likely to fail should be first.
     // - Checks that are cheap should be first.
-    if (required_tile_k && tile_k != required_tile_k) {
-      return;
-    }
-    if ((required_flags & flags) != required_flags) {
-      return;
-    }
-    if (disallowed_flags & flags) {
-      return;
-    }
-    if (!is_arch_supported(arch, supported_arch_flags)) {
-      return;
-    }
-    if (required_block_n && (flags & dot_flag::unaligned_b) == 0 &&
-        (required_block_n % tile_n != 0)) {
-      return;
-    }
+    if (!is_arch_supported(arch, supported_arch_flags)) return;
+    if ((required_flags & flags) != required_flags) return;
+    if (disallowed_flags & flags) return;
     assert(block_m > 0);
     assert(block_n > 0);
     assert(block_k > 0);
     assert(tile_n > 0);
     assert(tile_k > 0);
-
-    // We might use this kernel, update max_block_n accordingly.
-    result.max_block_n = std::max<int>(result.max_block_n, block_n);
-
-    constexpr int b_elem_count = type_info<B>::element_count();
-    const float dot_cost_k =
-        estimate_dot_cost_impl(m, n, k, block_m, block_n, block_k, tile_m,
-                               tile_n, tile_k, b_elem_count) *
-        dot_arch_cost_factor(arch, m, n, block_m, block_n, tile_m, tile_n);
-#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
-    if (!required_tile_k && !required_block_n) {
-      char selected = dot_cost_k < result.cost ? '*' : ' ';
-      YNN_LOG_DEBUG() << " " << selected << name << " cost=" << dot_cost_k;
-    }
-#endif
-    if (dot_cost_k >= result.cost) {
+    if (required_tile_k && tile_k != required_tile_k) return;
+    if ((flags & dot_flag::unaligned_b) == 0 &&
+        (required_block_n % tile_n != 0)) {
       return;
     }
+
+    // We might use this kernel.
+    result.max_block_n = std::max<int>(result.max_block_n, block_n);
+
+    // This is equivalent to estimate_dot_cost, but we evaluate it in two steps,
+    // so we can skip some work if part of the cost exceeds the optimal kernel
+    // found so far.
+    const float block_cost =
+        cost_model.estimate_block_cost(k, block_m, block_n, block_k);
+
+    const float blocks_m = ceil_div(m, block_m);
+    const float blocks_n = ceil_div(n, block_n);
+    const float unpenalized_cost = block_cost * (blocks_m * blocks_n);
+    if (unpenalized_cost >= result.cost) return;
+
+    const float dot_cost_k =
+        unpenalized_cost * locality_penalty(blocks_m, blocks_n);
+    if (dot_cost_k >= result.cost) return;
+
     result = {
         kernel,
         static_cast<int>(block_m),
@@ -417,6 +385,7 @@ struct optimizer {
         static_cast<int>(tile_n),
         static_cast<int>(tile_k),
         flags,
+        &cost_model,
         dot_cost_k,
         static_cast<int>(result.max_block_n),
     };
@@ -434,7 +403,8 @@ YNN_UNUSED null_logger& operator<<(null_logger& os, std::optional<size_t> v) {
 }
 
 template <typename A, typename B, typename C>
-dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
+dot_kernel get_dot_kernel(const dot_cost_models& cost_models,
+                          const dot_shape& shape, dot_packed_shape packed_shape,
                           uint32_t required_flags,
                           std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
@@ -480,14 +450,15 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
 
 // TODO: Limit this to only a subset of the "prod" kernels.
 #define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)                 \
-  if (std::is_same<A, a_type>::value && std::is_same<B, b_type>::value &&     \
-      std::is_same<C, c_type>::value) {                                       \
+                       tile_k, flags, a_type, b_type, c_type, cost_model)     \
+  if constexpr (std::is_same_v<A, a_type> && std::is_same_v<B, b_type> &&     \
+                std::is_same_v<C, c_type>) {                                  \
     optimizer(arch, block_m, block_n, block_k, tile_m, tile_n, tile_k, flags, \
-              name, #name);                                                   \
+              name, cost_model, #name);                                       \
   }
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
+
 #if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
   if (packed_shape.tile_k == 0 && packed_shape.block_n == 0) {
     if (optimizer.result.kernel) {
@@ -519,15 +490,16 @@ constexpr uint32_t dot_type_id() {
 
 }  // namespace
 
-dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
-                          dot_packed_shape packed_shape,
+dot_kernel get_dot_kernel(const dot_type& type,
+                          const dot_cost_models& cost_models,
+                          const dot_shape& shape, dot_packed_shape packed_shape,
                           uint32_t required_flags,
                           std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
-#define GET_DOT_KERNEL_CASE(a, b, c)                                    \
-  case dot_type_id<a, b, c>():                                          \
-    return get_dot_kernel<a, b, c>(shape, packed_shape, required_flags, \
-                                   transpose_a, arch_flags);
+#define GET_DOT_KERNEL_CASE(a, b, c)                                 \
+  case dot_type_id<a, b, c>():                                       \
+    return get_dot_kernel<a, b, c>(cost_models, shape, packed_shape, \
+                                   required_flags, transpose_a, arch_flags);
   switch (dot_type_id(type.a, type.b, type.c)) {
     GET_DOT_KERNEL_CASE(double, double, double);
     GET_DOT_KERNEL_CASE(float, float, float);
@@ -546,14 +518,122 @@ dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
   }
 }
 
-float estimate_dot_cost(size_t m, size_t n, size_t k, uint32_t block_m,
-                        uint32_t block_n, uint32_t block_k, uint32_t tile_m,
-                        uint32_t tile_n, uint32_t tile_k,
-                        uint32_t b_elem_count) {
+float dot_kernel::estimate_cost(size_t m, size_t n, size_t k) const {
+  assert(cost_model);
   // Cast to uint16_t, because we need a bit of headroom to do arithmetic.
-  return estimate_dot_cost_impl(cast<uint16_t>(m), cast<uint16_t>(n),
-                                cast<uint16_t>(k), block_m, block_n, block_k,
-                                tile_m, tile_n, tile_k, b_elem_count);
+  return estimate_dot_cost(cast<uint16_t>(m), cast<uint16_t>(n),
+                           cast<uint16_t>(k), block_m, block_n, block_k,
+                           *cost_model);
+}
+
+const dot_cost_models& get_dot_cost_models() {
+#ifdef YNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    uint32_t uarch_index = cpuinfo_get_current_uarch_index_with_default(0);
+    const cpuinfo_uarch_info* uarch = cpuinfo_get_uarch(uarch_index);
+    assert(uarch);
+    // TODO: b/549305639 - This is probably overkill, many of the uarchs we have
+    // separate models for are probably very similar, and should be combined
+    // into one model.
+    switch (uarch->uarch) {
+#ifdef YNN_ARCH_X86
+      case cpuinfo_uarch_haswell:
+      case cpuinfo_uarch_sandy_bridge:
+      case cpuinfo_uarch_ivy_bridge:
+        return haswell;
+      case cpuinfo_uarch_broadwell:
+        return broadwell;
+      case cpuinfo_uarch_sky_lake:
+      case cpuinfo_uarch_palm_cove:
+      case cpuinfo_uarch_sunny_cove:
+      case cpuinfo_uarch_willow_cove:
+        return cascade_lake;
+      case cpuinfo_uarch_golden_cove:
+      case cpuinfo_uarch_raptor_cove:
+        return golden_cove;
+      case cpuinfo_uarch_redwood_cove:
+      case cpuinfo_uarch_coyote_cove:
+        return redwood_cove;
+      case cpuinfo_uarch_zen:
+      case cpuinfo_uarch_zen2:
+        return zen2;
+      case cpuinfo_uarch_zen3:
+        return zen3;
+      case cpuinfo_uarch_zen4:
+      case cpuinfo_uarch_zen5:
+      case cpuinfo_uarch_zen6:
+        return zen4;
+#endif  // YNN_ARCH_X86
+#ifdef YNN_ARCH_ARM
+      case cpuinfo_uarch_cortex_a53:
+      case cpuinfo_uarch_cortex_a55:
+      case cpuinfo_uarch_cortex_a55r0:
+      case cpuinfo_uarch_cortex_a35:
+      case cpuinfo_uarch_cortex_a32:
+      case cpuinfo_uarch_cortex_a510:
+        return cortex_a510;
+      case cpuinfo_uarch_cortex_a520:
+      case cpuinfo_uarch_cortex_a320:
+        return cortex_a520;
+      case cpuinfo_uarch_cortex_a78:
+      case cpuinfo_uarch_cortex_a77:
+      case cpuinfo_uarch_cortex_a76:
+      case cpuinfo_uarch_cortex_a75:
+      case cpuinfo_uarch_cortex_a73:
+      case cpuinfo_uarch_cortex_a72:
+      case cpuinfo_uarch_cortex_a57:
+      case cpuinfo_uarch_cortex_a710:
+        return cortex_a710;
+      case cpuinfo_uarch_cortex_a715:
+        return cortex_a715;
+      case cpuinfo_uarch_cortex_a720:
+        return cortex_a720;
+      case cpuinfo_uarch_cortex_a725:
+        return cortex_a725;
+      case cpuinfo_uarch_cortex_x1:
+      case cpuinfo_uarch_cortex_x2:
+      case cpuinfo_uarch_cortex_x3:
+        return cortex_x1;
+      case cpuinfo_uarch_cortex_x4:
+      case cpuinfo_uarch_cortex_x925:
+        return cortex_x4;
+      case cpuinfo_uarch_lumex_c1_pro:
+      case cpuinfo_uarch_lumex_c1_nano:
+        return lumex_c1_pro;
+      case cpuinfo_uarch_lumex_c1_ultra:
+      case cpuinfo_uarch_lumex_c1_premium:
+      case cpuinfo_uarch_lumex_c2_ultra:
+        return lumex_c1_ultra;
+      case cpuinfo_uarch_neoverse_n1:
+      case cpuinfo_uarch_neoverse_e1:
+        return neoverse_n1;
+      case cpuinfo_uarch_neoverse_v1:
+      case cpuinfo_uarch_neoverse_n2:
+      case cpuinfo_uarch_neoverse_v2:
+      case cpuinfo_uarch_neoverse_n4:
+        return neoverse_v2;
+      case cpuinfo_uarch_oryon:
+      case cpuinfo_uarch_oryon_v3:
+        return oryon;
+#endif  // YNN_ARCH_ARM
+      default:
+        break;
+    }
+  }
+#endif  // YNN_ENABLE_CPUINFO
+
+  // We don't know what the CPU is. Use a very high end CPU, so we have coverage
+  // of the advanced instruction sets.
+#if defined(YNN_ARCH_ARM64)
+  return neoverse_v2;
+#elif defined(YNN_ARCH_ARM)
+  return cortex_a510;
+#elif defined(YNN_ARCH_X86)
+  return redwood_cove;
+#else
+  static constexpr dot_cost_models default_models = {};
+  return default_models;
+#endif
 }
 
 }  // namespace ynn

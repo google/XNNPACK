@@ -11,6 +11,7 @@
 #include <random>
 
 #include <gtest/gtest.h>
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/bit_cast.h"
 #include "ynnpack/base/fp8.h"
@@ -172,6 +173,18 @@ TEST(is_convert_lossless, is_convert_lossless) {
 
   // int32 to fp32 (32 bits > 23 bits)
   EXPECT_FALSE(is_convert_lossless(ynn_type_int32, ynn_type_fp32));
+}
+
+TEST(arithmetic, fast_log2) {
+  constexpr float relative_tolerance = 0.06f;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::seconds(1))) {
+    const float x = random_value<float>(rng, 1.0f, 1e9f);
+    const float expected = std::log2(x);
+    const float tolerance = relative_tolerance * expected;
+    EXPECT_NEAR(fast_log2(x), expected, tolerance) << "x = " << x;
+  }
 }
 
 }  // namespace ynn

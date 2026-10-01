@@ -284,6 +284,9 @@ IF(YNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(ynnpack_kernels_dot_bench bench.cc)
   TARGET_LINK_LIBRARIES(ynnpack_kernels_dot_bench ynnpack_kernels_dot ynnpack_base ynnpack_base_test_tensor benchmark::benchmark)
 
+  ADD_EXECUTABLE(ynnpack_kernels_dot_cost_model_bench cost_model/bench.cc)
+  TARGET_LINK_LIBRARIES(ynnpack_kernels_dot_cost_model_bench ynnpack_kernels_dot ynnpack_base ynnpack_base_test_tensor benchmark::benchmark)
+
   ADD_EXECUTABLE(ynnpack_kernels_dot_schedule_bench schedule_bench.cc)
   TARGET_LINK_LIBRARIES(ynnpack_kernels_dot_schedule_bench ynnpack_kernels_dot ynnpack_base ynnpack_base_test_tensor benchmark::benchmark gtest)
 ENDIF()
