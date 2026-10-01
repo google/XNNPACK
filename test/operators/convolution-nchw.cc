@@ -4049,3 +4049,36 @@ TEST(CONVOLUTION_NCHW_F32, batch_stride_overflow) {
           convolution_op, overflow_batch, 1, 1, &output_height,
           &output_width, nullptr));
 }
+
+TEST(CONVOLUTION_NCHW_F32, reshape_batch_size_zero) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::array<float, 1> kernel{{1.0f}};
+  const std::array<float, 1> bias{{0.0f}};
+  xnn_operator_t convolution_op = nullptr;
+
+  const xnn_status status = xnn_create_convolution2d_nchw_f32(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), 0, nullptr,
+      &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      convolution_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_reshape_convolution2d_nchw_f32(
+          convolution_op, 0, 5, 5, &output_height,
+          &output_width, nullptr));
+  EXPECT_EQ(5, output_height);
+  EXPECT_EQ(5, output_width);
+  EXPECT_EQ(xnn_status_success,
+            xnn_setup_convolution2d_nchw_f32(convolution_op, nullptr, nullptr));
+  EXPECT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr));
+}
