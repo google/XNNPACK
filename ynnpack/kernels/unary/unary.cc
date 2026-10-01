@@ -151,9 +151,16 @@ struct square_op {
 };
 
 struct sqrt_op {
-  explicit sqrt_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::sqrt(x); }
-  double operator()(double x) const { return std::sqrt(x); }
+  sqrt_params params;
+
+  explicit sqrt_op(const unary_params& params) : params(params.sqrt) {}
+  float operator()(float x) const {
+    return std::sqrt(x * static_cast<float>(params.input_multiplier) +
+                     static_cast<float>(params.input_offset));
+  }
+  double operator()(double x) const {
+    return std::sqrt(x * params.input_multiplier + params.input_offset);
+  }
 };
 
 struct cbrt_op {
@@ -176,9 +183,9 @@ struct tanh_op {
 };
 
 struct rsqrt_op {
-  rsqrt_params params;
+  sqrt_params params;
 
-  explicit rsqrt_op(const unary_params& params) : params(params.rsqrt) {}
+  explicit rsqrt_op(const unary_params& params) : params(params.sqrt) {}
   float operator()(float x) const {
     return 1.0f / std::sqrt(x * static_cast<float>(params.input_multiplier) +
                             static_cast<float>(params.input_offset));
@@ -560,6 +567,9 @@ unary_params get_unary_params(ynn_unary_operator op) {
     case ynn_unary_poly3:
       return unary_params{.poly3 = poly3_params{/*c0=*/zero, /*c1=*/zero,
                                                 /*c2=*/zero, /*c3=*/zero}};
+    case ynn_unary_sqrt:
+      return unary_params{.sqrt = sqrt_params{.input_offset = zero,
+                                              .input_multiplier = 1.0}};
     case ynn_unary_rsqrt:
       return unary_params{.rsqrt = rsqrt_params{.input_offset = zero,
                                                 .input_multiplier = 1.0}};

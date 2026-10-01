@@ -215,9 +215,16 @@ struct square : public unary_op_info {
 };
 
 struct sqrt : public unary_op_info {
-  explicit sqrt(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::sqrt(x); }
-  double operator()(double x) const override { return std::sqrt(x); }
+  sqrt_params params;
+
+  explicit sqrt(const unary_params& params) : params(params.sqrt) {}
+  float operator()(float x) const override {
+    return std::sqrt(x * static_cast<float>(params.input_multiplier) +
+                     static_cast<float>(params.input_offset));
+  }
+  double operator()(double x) const override {
+    return std::sqrt(x * params.input_multiplier + params.input_offset);
+  }
 
   tolerance_spec tolerance(ynn_type type) const override {
     switch (type) {
@@ -276,11 +283,18 @@ struct tanh : public unary_op_info {
 };
 
 struct rsqrt : public unary_op_info {
-  explicit rsqrt(const unary_params& = {}) {}
+  rsqrt_params params;
+
+  explicit rsqrt(const unary_params& params) : params(params.rsqrt) {}
   float operator()(float x) const override {
-    return static_cast<float>(1.0 / std::sqrt(static_cast<double>(x)));
+    return static_cast<float>(
+        1.0 / std::sqrt(static_cast<double>(
+                  x * static_cast<float>(params.input_multiplier) +
+                  static_cast<float>(params.input_offset))));
   }
-  double operator()(double x) const override { return 1.0 / std::sqrt(x); }
+  double operator()(double x) const override {
+    return 1.0 / std::sqrt(x * params.input_multiplier + params.input_offset);
+  }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
     return tolerance_spec{/*relative=*/2.0f};

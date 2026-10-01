@@ -77,17 +77,23 @@ TEST(fusion, square_add) {
 }
 
 TEST(fusion, divide_sqrt) {
-  // rewrite x/sqrt(y) -> x*rsqrt(y)
+  // rewrite x/sqrt(y + 0.5) -> x*rsqrt(y)
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   const uint32_t out_id = 2;
-  SubgraphBuilder builder(3);
+  const uint32_t half_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t y_plus_half_id = YNN_INVALID_VALUE_ID;
   uint32_t sqrt_y_id = YNN_INVALID_VALUE_ID;
   builder.AddInput(ynn_type_fp32, 2, x_id)
       .AddInput(ynn_type_fp32, 2, y_id)
       .AddOutput(ynn_type_fp32, 2, out_id)
-      .AddTensor(ynn_type_fp32, 2, sqrt_y_id);
-  builder.AddUnary(ynn_unary_sqrt, y_id, sqrt_y_id)
+      .AddTensor(ynn_type_fp32, 2, y_plus_half_id)
+      .AddTensor(ynn_type_fp32, 2, sqrt_y_id)
+      .AddScalar(0.5f, half_id);
+  builder
+      .AddBinary(ynn_binary_add, y_id, half_id, y_plus_half_id)
+      .AddUnary(ynn_unary_sqrt, y_plus_half_id, sqrt_y_id)
       .AddBinary(ynn_binary_divide, x_id, sqrt_y_id, out_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
@@ -99,8 +105,12 @@ TEST(fusion, divide_sqrt) {
   EXPECT_THAT(
       ProducerOf(out_id, subgraph),
       AllOf(IsBinary(ynn_binary_multiply), InputsInclude(x_id, sqrt_y_id)));
-  EXPECT_THAT(ProducerOf(sqrt_y_id, subgraph),
-              AllOf(IsUnary(ynn_unary_rsqrt), InputsAre(y_id)));
+  const ynn_node& rsqrt_node = ProducerOf(sqrt_y_id, subgraph);
+  EXPECT_THAT(rsqrt_node, AllOf(IsUnary(ynn_unary_rsqrt), InputsAre(y_id)));
+  const auto* unary = std::get_if<ynn_node::unary_elementwise>(&rsqrt_node.op);
+  ASSERT_NE(unary, nullptr);
+  EXPECT_NEAR(unary->params.sqrt.input_multiplier, 1.0f, 1e-6f);
+  EXPECT_NEAR(unary->params.sqrt.input_offset, 0.5f, 1e-6f);
 }
 
 TEST(fusion, negate_multiply) {

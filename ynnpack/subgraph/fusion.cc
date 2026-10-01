@@ -229,7 +229,9 @@ bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   ynn_node* producer = analysis.producer_of(node.inputs[1]);
-  if (!producer || !is_unary_node(*producer, ynn_unary_sqrt)) {
+  if (!producer) return false;
+  const auto* unary = std::get_if<ynn_node::unary_elementwise>(&producer->op);
+  if (!unary || unary->op != ynn_unary_sqrt) {
     // The denominator of the divide is not a square root.
     return false;
   }
@@ -254,7 +256,7 @@ bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
   if (rsqrt_kernel != nullptr && multiply_kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting x/sqrt(y) to x*rsqrt(y)";
     ynn::define_unary(subgraph, *producer, y.id, sqrt_y.id, ynn_unary_rsqrt,
-                      rsqrt_kernel);
+                      rsqrt_kernel, unary->params);
     ynn::define_binary(subgraph, node, x.id, sqrt_y.id, output.id,
                        ynn_binary_multiply, multiply_kernel);
     return true;
@@ -1611,6 +1613,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_erf:
     case ynn_unary_approx_erf:
     case ynn_unary_rsqrt:
+    case ynn_unary_sqrt:
       break;
     default:
       return false;
@@ -1625,6 +1628,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     if (mul->b != 0.0f) {
       switch (unary->op) {
         case ynn_unary_rsqrt:
+        case ynn_unary_sqrt:
           break;
         default:
           // We can't handle addition here.
@@ -1655,10 +1659,10 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
       unary->params.exp.input_multiplier *= mul->a;
     } else if (unary->op == ynn_unary_approx_erf) {
       unary->params.approx_erf.input_multiplier *= mul->a;
-    } else if (unary->op == ynn_unary_rsqrt) {
-      unary->params.rsqrt.input_offset +=
-          mul->b * unary->params.rsqrt.input_multiplier;
-      unary->params.rsqrt.input_multiplier *= mul->a;
+    } else if (unary->op == ynn_unary_rsqrt || unary->op == ynn_unary_sqrt) {
+      unary->params.sqrt.input_offset +=
+          mul->b * unary->params.sqrt.input_multiplier;
+      unary->params.sqrt.input_multiplier *= mul->a;
     } else {
       unary->params.erf.input_multiplier *= mul->a;
     }

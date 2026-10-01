@@ -91,19 +91,21 @@ using approx_tanh_params = tanh_params;
 using sin_params = affine_output_params;
 using cos_params = affine_output_params;
 
-struct rsqrt_params {
+struct sqrt_params {
   real input_offset;
   real input_multiplier;
 
-  friend bool operator==(const rsqrt_params& a, const rsqrt_params& b) {
+  friend bool operator==(const sqrt_params& a, const sqrt_params& b) {
     return std::tie(a.input_multiplier, a.input_offset) ==
            std::tie(b.input_multiplier, b.input_offset);
   }
-  friend bool operator<(const rsqrt_params& a, const rsqrt_params& b) {
+  friend bool operator<(const sqrt_params& a, const sqrt_params& b) {
     return std::tie(a.input_multiplier, a.input_offset) <
            std::tie(b.input_multiplier, b.input_offset);
   }
 };
+
+using rsqrt_params = sqrt_params;
 
 struct poly3_params {
   real c0, c1, c2, c3;
@@ -121,6 +123,7 @@ union unary_params {
   expm1_params expm1;
   log_params log;
   log1p_params log1p;
+  sqrt_params sqrt;
   rsqrt_params rsqrt;
 
   // All of these params have the first two params a, b, such that they form
