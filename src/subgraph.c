@@ -4477,6 +4477,14 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
     return false;
   }
 
+  const struct xnn_gemm_config* f32_qc8w_gemm_config =
+      xnn_init_f32_qc8w_gemm_config();
+  if (f32_qc8w_gemm_config == NULL ||
+      a_value->shape.dim[a_value->shape.num_dims - 2] >
+          f32_qc8w_gemm_config->mr) {
+    return false;
+  }
+
   // Determine channel info for b. For bmm, b is `[..., K, N]` (or `[..., N,
   // K]` if `XNN_FLAG_TRANSPOSE_B`). The N dimension is the qcint8 channel
   // dimension. The actual per-channel scale array is materialized by the

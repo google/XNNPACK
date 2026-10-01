@@ -714,6 +714,37 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
     }
   }
 }
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_large_m_not_rewritten) {
+  const uint32_t external_input_a = 0;
+  const uint32_t external_input_b = 1;
+  const uint32_t external_output = 2;
+  uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+  const uint32_t flags =
+      xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING;
+  SubgraphTester tester(/*external_value_ids=*/3, flags);
+  tester.AddInputTensorF32({2, 64, 4}, external_input_a)
+      .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {2, 4, 5},
+                         external_input_b)
+      .AddInternalDynamicTensorF32({2, 4, 5}, &internal_b_f32)
+      .AddOutputTensor({2, 64, 5}, xnn_datatype_fp32, external_output)
+      .AddConvert(external_input_b, internal_b_f32)
+      .AddBatchMatrixMultiply(external_input_a, internal_b_f32, external_output)
+      .Optimize(flags);
+
+  const xnn_node* bmm_node = nullptr;
+  for (size_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* n = tester.Node(i);
+    if (n->type == xnn_node_type_batch_matrix_multiply) {
+      bmm_node = n;
+      break;
+    }
+  }
+  ASSERT_NE(bmm_node, nullptr) << "bmm node missing";
+  const xnn_value* b_val = tester.Value(bmm_node->inputs[1]);
+  EXPECT_EQ(b_val->datatype, xnn_datatype_fp32)
+      << "bmm input B should remain fp32 when M > mr";
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 #ifndef XNNPACK_USE_YNNPACK
