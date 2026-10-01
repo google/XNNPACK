@@ -347,17 +347,23 @@ static void init_hardware_config(void) {
     // TODO: Use cpuinfo when fp16 detect works
     const long hwcap = getauxval(AT_HWCAP);
     xnn_log_debug("getauxval(AT_HWCAP) = %08lX", hwcap);
-    const bool use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
-    set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
-
-    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, XNN_ENABLE_RISCV_FP16_VECTOR && supports_rvv_fp16());
+    bool use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
 
     if (use_riscv_vector) {
       register uint32_t vlenb __asm__ ("t0");
       __asm__(".word 0xC22022F3"  /* CSRR t0, vlenb */ : "=r" (vlenb));
       hardware_config.vlenb = vlenb;
       xnn_log_info("RISC-V VLENB: %" PRIu32, vlenb);
+      if (vlenb == 0) {
+        use_riscv_vector = false;
+      }
     }
+    set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
+
+    set_arch_flag(
+        xnn_arch_riscv_vector_fp16_arith,
+        use_riscv_vector && XNN_ENABLE_RISCV_FP16_VECTOR &&
+            supports_rvv_fp16());
   #endif
 
   #if XNN_ARCH_PPC64
