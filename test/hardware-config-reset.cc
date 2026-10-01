@@ -46,4 +46,21 @@ TEST(HardwareConfigResetTest, HardwareConfigResetAndInitialization) {
   xnn_reset_hardware_config();
 }
 
+TEST(HardwareConfigResetTest, ZeroArchFlagsFallbacks) {
+  xnn_hardware_config mock_zero{};
+  xnn_set_hardware_config(&mock_zero);
+
+  const struct xnn_avgpool_config* avgpool = xnn_init_f32_avgpool_config();
+  EXPECT_NE(avgpool, nullptr);
+
+  const struct xnn_dwconv_config* dwconv = xnn_init_f32_dwconv_config();
+  EXPECT_NE(dwconv, nullptr);
+
+  const struct xnn_binary_elementwise_config* vadd =
+      xnn_init_f32_vadd_config();
+  EXPECT_NE(vadd, nullptr);
+
+  xnn_reset_hardware_config();
+}
+
 }  // namespace
