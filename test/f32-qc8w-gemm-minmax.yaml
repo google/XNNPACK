@@ -228,6 +228,32 @@
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
 
+# ARM SVE2
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sve2_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16_prfm
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x16__sve2_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_x8_packw_gemm_goi_ukernel_x16__neon_u16_prfm
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sve2_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16_prfm
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x16__sve2_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_x8_packw_gemm_goi_ukernel_x16__neon_u16_prfm
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_6x8__sve2_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16_prfm
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_8x8__sve2_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16_prfm
+  k-block: 4
+
 # x86 SSE4.1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_dup
   init: xnn_init_f32_minmax_scalar_params

@@ -10,13 +10,26 @@ $#   SXTL   - sign extend 8->16->32 bits, then SCVTF (default).
 $#   FMAGIC - TBL builds 0x4B0000xx (= 2^23 + 128 + w) from the biased bytes,
 $#            then FSUB removes the magic bias. 9 ops per 16 weights vs 10.
 $CVT = globals().get("CVT", "SXTL")
+$SVE = globals().get("SVE", 0)
 $assert CVT in ["SXTL", "FMAGIC"]
 $assert CVT == "SXTL" or DATATYPE == "QC8"
 $assert CVT != "FMAGIC" or NR in [8, 16]
+$assert not SVE or (DATATYPE == "QC8" and NR in [8, 16] and FMA and not DUP and CVT == "SXTL")
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 #include <arm_neon.h>
+$if SVE:
+  #include <arm_sve.h>
+  #if __has_include(<arm_neon_sve_bridge.h>)
+  #include <arm_neon_sve_bridge.h>
+  #else
+  static inline float32x4_t svget_neonq_f32(svfloat32_t z) {
+    float32x4_t q;
+    __asm__("" : "=w"(q) : "0"(z));
+    return q;
+  }
+  #endif
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -27,7 +40,7 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
-$ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
+$ISA = "sve2" if SVE else (("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon")
 $SUFFIX = "_fmagic" if CVT == "FMAGIC" else ""
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld128${SUFFIX}(
@@ -84,6 +97,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
   $if DATATYPE == "QC4":
     const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
     const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
+  $if SVE:
+    // 4 lanes of the SVE vector, valid for any vector length >= 128 bits.
+    const svbool_t pg = svptrue_pat_b32(SV_VL4);
   $if CVT == "FMAGIC":
     $NUM_IDX = 4
     // int8 weights are converted to f32 with a table lookup: each weight byte
@@ -143,6 +159,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
             $for N in range(0, NR, 4):
               const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
+          $elif SVE:
+            $for N in range(0, NR, 4):
+              const float32x4_t vb${ABC[N:N+4]}c${L} = svget_neonq_f32(svcvt_f32_s32_x(pg, svld1sb_s32(pg, (const int8_t*) w + ${N})));
+            w = (const int8_t*) w + ${NR};
           $elif CVT == "FMAGIC":
             $if NR == 16:
               const uint8x16_t vw${ABC[0:16]}c${L} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
@@ -203,6 +223,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
             $for N in range(0, NR, 4):
               const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
+          $elif SVE:
+            $for N in range(0, NR, 4):
+              const float32x4_t vb${ABC[N:N+4]}c${L} = svget_neonq_f32(svcvt_f32_s32_x(pg, svld1sb_s32(pg, (const int8_t*) w + ${N})));
+            w = (const int8_t*) w + ${NR};
           $elif CVT == "FMAGIC":
             $if NR == 16:
               const uint8x16_t vw${ABC[0:16]}c${L} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
@@ -253,6 +277,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             const int32x4_t vxw${ABC[N+4:N+8]} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]})));
           $for N in range(0, NR, 4):
             const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
+        $elif SVE:
+          $for N in range(0, NR, 4):
+            const float32x4_t vb${ABC[N:N+4]} = svget_neonq_f32(svcvt_f32_s32_x(pg, svld1sb_s32(pg, (const int8_t*) w + ${N})));
+          w = (const int8_t*) w + ${NR};
         $elif CVT == "FMAGIC":
           $if NR == 16:
             const uint8x16_t vw${ABC[0:16]} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;

@@ -74,6 +74,7 @@ _ISA_LIST = frozenset({
     'sse2fma',
     'sse41',
     'ssse3',
+    'sve2',
     'wasmblendvps',
     'wasmrelaxedsimd',
     'wasmrelaxedsimdfp16',

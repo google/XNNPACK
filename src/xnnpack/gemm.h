@@ -1835,6 +1835,19 @@ DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_8x8__aarch64_neonfma_lane_ld128_fmagic)
 
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sve2_lane_ld128)
+DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_qc8w_gemm_minmax_ukernel_1x16__sve2_lane_ld128)
+DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sve2_lane_ld128)
+DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_qc8w_gemm_minmax_ukernel_4x16__sve2_lane_ld128)
+DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_qc8w_gemm_minmax_ukernel_6x8__sve2_lane_ld128)
+DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_qc8w_gemm_minmax_ukernel_8x8__sve2_lane_ld128)
+
+DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64)
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_4x2__neon_lane_ld64)
