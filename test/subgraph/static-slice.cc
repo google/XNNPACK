@@ -212,6 +212,49 @@ TEST(Slice, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(Slice, RankMismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[2] = {10, 10};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const int64_t begins[2] = {0, 0};
+  const int64_t ends[2] = {5, 5};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_static_slice_v3(subgraph, 2, begins, ends, nullptr,
+                                       input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  runtime->values[input_id].shape.num_dims = 3;
+  runtime->values[input_id].shape.dim[0] = 2;
+  runtime->values[input_id].shape.dim[1] = 5;
+  runtime->values[input_id].shape.dim[2] = 10;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

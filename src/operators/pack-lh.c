@@ -108,6 +108,9 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
   pack_lh_op->state = xnn_run_state_invalid;
 
   if (num_groups == 0 || batch_size == 0) {
+    if (output_size_bytes != NULL) {
+      *output_size_bytes = 0;
+    }
     pack_lh_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }

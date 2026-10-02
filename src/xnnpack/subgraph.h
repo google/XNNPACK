@@ -465,11 +465,13 @@ struct xnn_operator_data {
     struct {
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
       size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+      size_t num_padding_dims;
     };
     // Used for static slice.
     struct {
       int64_t begins[XNN_MAX_TENSOR_DIMS];
       int64_t ends[XNN_MAX_TENSOR_DIMS];
+      size_t num_slice_dims;
     };
     struct {
       uint32_t adjustment_height;
