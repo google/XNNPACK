@@ -363,3 +363,22 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_swap_height_and_width) {
       .channels(24)
       .TestSetupF32();
 }
+
+TEST(ARGMAX_POOLING_NHWC_F32, reshape_padded_input_smaller_than_kernel) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t argmax_pooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_argmax_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 3, 3, 0, &argmax_pooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      argmax_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  // Padded input is 2x2, smaller than 3x3 pooling size.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_argmax_pooling2d_nhwc_f32(
+          argmax_pooling_op, 1, 2, 2, 1, 1, 1,
+          &output_height, &output_width, nullptr));
+}

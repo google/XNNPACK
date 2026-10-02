@@ -1940,3 +1940,47 @@ TEST(MAX_POOLING_NHWC_F32, reshape_overflow_output_stride) {
           max_pooling_op, 1, 4, 4, 1, 1, large_stride,
           &output_height, &output_width, nullptr));
 }
+
+TEST(MAX_POOLING_NHWC_F32, reshape_padded_input_smaller_than_kernel) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t max_pooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_max_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 3, 3, 1, 1, 1, 1,
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                0, &max_pooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      max_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  // Padded input is 2x2, smaller than 3x3 kernel.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_max_pooling2d_nhwc_f32(
+          max_pooling_op, 1, 2, 2, 1, 1, 1,
+          &output_height, &output_width, nullptr));
+}
+
+TEST(MAX_POOLING_NHWC_F32, reshape_padded_input_smaller_than_dilated_kernel) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t max_pooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_max_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 2, 2, 1, 1, 2, 2,
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                0, &max_pooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      max_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  // Effective kernel is 3x3 with dilation=2; padded input is 2x2.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_max_pooling2d_nhwc_f32(
+          max_pooling_op, 1, 2, 2, 1, 1, 1,
+          &output_height, &output_width, nullptr));
+}
