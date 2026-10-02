@@ -149,10 +149,26 @@ enum xnn_status xnn_init_value_allocation_tracker(
   const struct xnn_runtime* runtime)
 {
   tracker->mem_arena_size = 0;
-  tracker->usage = xnn_allocate_zero_memory(sizeof(struct xnn_usage_record) * (runtime->num_values + runtime->num_ops));
-  if (tracker->usage == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for memory planning usage tracker",
-                  sizeof(struct xnn_usage_record) * (runtime->num_values + runtime->num_ops));
+  size_t total_records = 0;
+  if (!xnn_safe_add(runtime->num_values, runtime->num_ops, &total_records)) {
+    xnn_log_error(
+        "failed to allocate memory planning usage tracker: total records "
+        "overflows size_t");
+    return xnn_status_out_of_memory;
+  }
+  size_t usage_bytes = 0;
+  if (!xnn_safe_mul(sizeof(struct xnn_usage_record), total_records,
+                    &usage_bytes)) {
+    xnn_log_error(
+        "failed to allocate memory planning usage tracker: usage size "
+        "overflows size_t");
+    return xnn_status_out_of_memory;
+  }
+  tracker->usage = xnn_allocate_zero_memory(usage_bytes);
+  if (tracker->usage == NULL && total_records != 0) {
+    xnn_log_error(
+        "failed to allocate %zu bytes for memory planning usage tracker",
+        usage_bytes);
     return xnn_status_out_of_memory;
   }
   populate_value_lifecycle(runtime, tracker->usage);
@@ -213,11 +229,25 @@ enum xnn_status xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tr
     return xnn_status_success;
   }
 
-  const uint32_t num_values = tracker->max_value_id - tracker->min_value_id + 1;
-  struct xnn_usage_record** sorted_usage = xnn_allocate_zero_memory(sizeof(struct xnn_usage_record*) * num_values);
-  if (sorted_usage == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for memory planning sorted usage array",
-                  sizeof(struct xnn_usage_record*) * num_values);
+  size_t num_values = 0;
+  if (!xnn_safe_add(tracker->max_value_id - tracker->min_value_id, 1,
+                    &num_values)) {
+    xnn_log_error("failed to plan memory: num_values overflows size_t");
+    return xnn_status_out_of_memory;
+  }
+  size_t sorted_usage_size = 0;
+  if (!xnn_safe_mul(sizeof(struct xnn_usage_record*), num_values,
+                    &sorted_usage_size)) {
+    xnn_log_error(
+        "failed to plan memory: sorted usage array size overflows size_t");
+    return xnn_status_out_of_memory;
+  }
+  struct xnn_usage_record** sorted_usage =
+      (struct xnn_usage_record**)xnn_allocate_zero_memory(sorted_usage_size);
+  if (sorted_usage == NULL && num_values != 0) {
+    xnn_log_error(
+        "failed to allocate %zu bytes for memory planning sorted usage array",
+        sorted_usage_size);
     return xnn_status_out_of_memory;
   }
   size_t num_values_to_alloc = 0;
@@ -227,14 +257,24 @@ enum xnn_status xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tr
       sorted_usage[num_values_to_alloc++] = info;
     }
   }
-  qsort(sorted_usage, num_values_to_alloc, sizeof(struct xnn_usage_record*), cmp_value_usage_tensor_size);
+  qsort(sorted_usage, num_values_to_alloc, sizeof(struct xnn_usage_record*),
+        cmp_value_usage_tensor_size);
 
   // Start the allocation planning process.
-  struct memory_block* current_live_mem_blocks = xnn_allocate_zero_memory(
-      sizeof(struct memory_block) * num_values_to_alloc);
+  size_t live_blocks_size = 0;
+  if (!xnn_safe_mul(sizeof(struct memory_block), num_values_to_alloc,
+                    &live_blocks_size)) {
+    xnn_log_error(
+        "failed to plan memory: live blocks array size overflows size_t");
+    xnn_release_memory(sorted_usage);
+    return xnn_status_out_of_memory;
+  }
+  struct memory_block* current_live_mem_blocks =
+      (struct memory_block*)xnn_allocate_zero_memory(live_blocks_size);
   if (current_live_mem_blocks == NULL && num_values_to_alloc != 0) {
-    xnn_log_error("failed to allocate %zu bytes for memory planning live blocks array",
-                  sizeof(struct memory_block) * num_values_to_alloc);
+    xnn_log_error(
+        "failed to allocate %zu bytes for memory planning live blocks array",
+        live_blocks_size);
     xnn_release_memory(sorted_usage);
     return xnn_status_out_of_memory;
   }
