@@ -466,4 +466,51 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16Rewrite, params3,
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32Rewrite, params3,
                          [](auto p) { return p.param.Name(); });
 
+TEST(StaticReduceTest, DefineRejectsInvalidParameters) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const size_t axes[1] = {0};
+  const int64_t signed_axes[1] = {0};
+
+  // Reject num_reduction_axes == 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_reduce(
+          subgraph, xnn_reduce_sum, 0, axes, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_reduce_v2(
+          subgraph, xnn_reduce_sum, 0, signed_axes, input_id, output_id, 0));
+
+  // Reject reduction_axes == nullptr when num_reduction_axes > 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_reduce(
+          subgraph, xnn_reduce_sum, 1, nullptr, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_reduce_v2(
+          subgraph, xnn_reduce_sum, 1, nullptr, input_id, output_id, 0));
+}
+
 }  // namespace xnnpack
