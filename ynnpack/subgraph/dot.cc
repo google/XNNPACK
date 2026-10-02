@@ -687,7 +687,7 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
   node.inputs = {input_b_id};
   node.outputs = {packed_b_id};
   node.op = ynn_node::pack_b{};
-  node.create = [num_k_dims](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
@@ -740,13 +740,6 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                               output.buffer->elem_size(), given_splits);
     sched->loop_splits[0].step_is_required = true;
     sched->loop_splits[1].step_is_required = true;
-
-    // TODO(vksnk): This is a temporary workaround to avoid recomputing packed
-    // buffer. The proper fix would probably involve adding a loop splits for
-    // the packing function and making scheduler match it.
-    if (num_k_dims > 1) {
-      sched->force_root = true;
-    }
 
     // The real bounds of the input's n dimension are blocks of size block_n
     // indexed by `no`, which breaks the scheduler's source region inference.
