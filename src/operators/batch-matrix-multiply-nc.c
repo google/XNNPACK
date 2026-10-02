@@ -406,7 +406,8 @@ create_batch_matrix_multiply_nc_const_weights(
     size_t log2_kernel_element_size, size_t bias_element_size,
     const void* packing_params, xnn_init_scale_params_fn init_scale_b,
     const float* scale_b, size_t scale_b_size, size_t extra_weights_bytes,
-    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+    uint32_t flags, enum xnn_operator_type operator_type,
+    xnn_operator_t* batch_matrix_multiply_op_out) {
   xnn_operator_t batch_matrix_multiply_op = *batch_matrix_multiply_op_out;
   batch_matrix_multiply_op->dynamic_context.gemm->const_weights = true;
   const struct xnn_gemm_config* gemm_config =
@@ -522,6 +523,14 @@ create_batch_matrix_multiply_nc_const_weights(
           xnn_look_up_or_insert_weights_cache(
               batch_matrix_multiply_op->weights_cache, &cache_key, packed_data,
               aligned_size);
+      if (batch_matrix_multiply_op->packed_weights.offset ==
+          XNN_CACHE_NOT_FOUND) {
+        xnn_log_error(
+            "failed to create %s operator: packed weights were not inserted "
+            "into the weights cache",
+            xnn_operator_type_to_string(operator_type));
+        return xnn_status_out_of_memory;
+      }
     }
 
   } else {
@@ -535,6 +544,7 @@ create_batch_matrix_multiply_nc_const_weights(
 enum xnn_status create_batch_matrix_multiply_nc_helper(
     const struct bmm_variant* variant, struct bmm_context* context) {
   enum xnn_status status = xnn_status_invalid_state;
+  *context->op_out = NULL;
   if (context->gemm_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -561,12 +571,20 @@ enum xnn_status create_batch_matrix_multiply_nc_helper(
             context->gemm_config->log2_filter_element_size,
             context->gemm_config->bias_element_size, context->packing_params,
             context->init_scale_b, context->scale_b, context->scale_b_size,
-            context->extra_weights_bytes, context->flags, context->op_out));
+            context->extra_weights_bytes, context->flags,
+            context->operator_type, context->op_out));
   }
 
-error:
   variant->cleanup(variant, context);
   return xnn_status_success;
+
+error:
+  if (*context->op_out != NULL) {
+    xnn_delete_operator(*context->op_out);
+    *context->op_out = NULL;
+  }
+  variant->cleanup(variant, context);
+  return status;
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
