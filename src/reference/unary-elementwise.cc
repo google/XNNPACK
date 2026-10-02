@@ -229,7 +229,13 @@ template <typename T>
 struct AbsOp {
   explicit AbsOp(const xnn_unary_uparams*) {}
 
-  int32_t operator()(int32_t x) const { return std::abs(x); }
+  // Unsigned negation avoids undefined behavior on INT32_MIN, for which
+  // -x is unrepresentable. The observable result is unchanged (INT32_MIN
+  // maps to itself, as with two's complement wraparound).
+  int32_t operator()(int32_t x) const {
+    const uint32_t u = static_cast<uint32_t>(x);
+    return static_cast<int32_t>(x >= 0 ? u : 0u - u);
+  }
   float operator()(float x) const { return std::abs(x); }
   xnn_float16 operator()(xnn_float16 x) const {
     return xnn_float16_from_bits(xnn_float16_to_bits(x) & 0x7fff);
@@ -306,7 +312,11 @@ struct NegateOp {
   explicit NegateOp(const xnn_unary_uparams*) {}
 
   static const uint16_t sign_mask = 0x8000;
-  int32_t operator()(int32_t x) const { return -x; }
+  // Unsigned negation avoids undefined behavior on INT32_MIN, for which
+  // -x is unrepresentable. The observable result is unchanged.
+  int32_t operator()(int32_t x) const {
+    return static_cast<int32_t>(0u - static_cast<uint32_t>(x));
+  }
   float operator()(float x) const { return -x; }
   xnn_float16 operator()(xnn_float16 x) const {
     return xnn_float16_from_bits(xnn_float16_to_bits(x) ^ sign_mask);
