@@ -1602,3 +1602,40 @@ TEST(FullyConnected, ReshapeOverflowOutputSize) {
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
+
+// A rank-0 filter makes dim[num_dims - 1] read dim[SIZE_MAX], out of bounds
+// (in practice the adjacent num_dims field, so the value is 0 and a later
+// check still rejects it). Reject up front, matching the reshape-time check,
+// so the out-of-bounds read cannot execute. This pins the rejection stage:
+// create itself must fail, not a later reshape.
+TEST(FullyConnectedTest, RejectsScalarFilterAtCreate) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_subgraph_t sg = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(2, 0, &sg), xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_sg(
+      sg, xnn_delete_subgraph);
+
+  const size_t idims[1] = {8};
+  const size_t odims[1] = {4};
+  static float fdata[1] = {0.0f};
+  uint32_t i, f, o;
+  ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, 1, idims, nullptr,
+                                    0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &i),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, 0, nullptr, fdata,
+                                    XNN_INVALID_VALUE_ID, 0, &f),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, 1, odims, nullptr,
+                                    1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &o),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_fully_connected(sg, -1e30f, 1e30f, i, f,
+                                       XNN_INVALID_VALUE_ID, o, 0),
+            xnn_status_success);
+  xnn_runtime_t rt = nullptr;
+  EXPECT_EQ(xnn_create_runtime_v4(sg, nullptr, nullptr, nullptr, 0, &rt),
+            xnn_status_invalid_parameter);
+  if (rt != nullptr) {
+    xnn_delete_runtime(rt);
+  }
+}
+
