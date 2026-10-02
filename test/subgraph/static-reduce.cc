@@ -467,3 +467,56 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32Rewrite, params3,
                          [](auto p) { return p.param.Name(); });
 
 }  // namespace xnnpack
+
+// The deprecated global-pooling wrappers compute reduction axes as
+// num_dims - 2 (1d) or num_dims - 3 / num_dims - 2 (2d) with no rank check.
+// Low-rank inputs wrapped the subtraction and were accepted at define time,
+// failing later inside static_reduce with a misleading axis message. Define
+// must reject them first.
+TEST(StaticReduceTest, DeprecatedGlobalPoolingRejectsLowRankInput) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  for (size_t rank : {size_t(0), size_t(1)}) {
+    xnn_subgraph_t sg = nullptr;
+    ASSERT_EQ(xnn_create_subgraph(2, 0, &sg), xnn_status_success);
+    std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_sg(
+        sg, xnn_delete_subgraph);
+    const size_t odims[1] = {1};
+    uint32_t i, o;
+    ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, rank,
+                                      rank ? odims : nullptr, nullptr, 0,
+                                      XNN_VALUE_FLAG_EXTERNAL_INPUT, &i),
+              xnn_status_success);
+    ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, 1, odims, nullptr,
+                                      1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &o),
+              xnn_status_success);
+    EXPECT_EQ(xnn_define_global_average_pooling_1d(sg, -INFINITY, INFINITY, i,
+                                                   o, 0),
+              xnn_status_invalid_parameter)
+        << "rank=" << rank;
+    EXPECT_EQ(xnn_define_global_sum_pooling_1d(sg, -INFINITY, INFINITY, i, o,
+                                               0),
+              xnn_status_invalid_parameter)
+        << "rank=" << rank;
+  }
+  // The 2d variants index num_dims - 3 and need rank >= 3.
+  {
+    xnn_subgraph_t sg = nullptr;
+    ASSERT_EQ(xnn_create_subgraph(2, 0, &sg), xnn_status_success);
+    std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_sg(
+        sg, xnn_delete_subgraph);
+    const size_t dims[2] = {2, 2};
+    uint32_t i, o;
+    ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, 2, dims, nullptr,
+                                      0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &i),
+              xnn_status_success);
+    ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_fp32, 1, dims, nullptr,
+                                      1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &o),
+              xnn_status_success);
+    EXPECT_EQ(xnn_define_global_average_pooling_2d(sg, -INFINITY, INFINITY, i,
+                                                   o, 0),
+              xnn_status_invalid_parameter);
+    EXPECT_EQ(xnn_define_global_sum_pooling_2d(sg, -INFINITY, INFINITY, i, o,
+                                               0),
+              xnn_status_invalid_parameter);
+  }
+}
