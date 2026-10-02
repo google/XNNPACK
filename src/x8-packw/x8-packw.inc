@@ -27,6 +27,14 @@ XNN_GIO_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_gio_ukernel_x64__scalar, 64, 1,
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_gio_ukernel_x8c8__scalar, 8, 8, 1, 8, 1)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x8__neon_u8, 8, 1, 1, 8, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x8__neon_u8_prfm, 8, 1, 1, 8, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16, 8, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16_prfm, 8, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x16__neon_u8, 16, 1, 1, 8, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x16__neon_u8_prfm, 16, 1, 1, 8, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x16__neon_u16, 16, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x16__neon_u16_prfm, 16, 1, 1, 16, 1)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x8c4__neon, 8, 4, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x16c4__neon, 16, 4, 1, 4, 1)
 
@@ -50,6 +58,12 @@ XNN_GIO_UKERNEL(xnn_arch_hexagon_hvx, xnn_x8_packw_gemm_gio_ukernel_x256__hvx_u2
 
 
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x8__avx2_u16, 8, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x8__avx2_u16_prfm, 8, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x16__avx2_u16, 16, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x16__avx2_u16_prfm, 16, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x32__avx2_u16, 32, 1, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x32__avx2_u16_prfm, 32, 1, 1, 16, 1)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x8c8__avx2, 8, 8, 1, 8, 1)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x8c8__avx2_prfm, 8, 8, 1, 8, 1)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x16c8__avx2, 16, 8, 1, 8, 1)

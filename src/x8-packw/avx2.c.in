@@ -1,0 +1,332 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR >= 8
+$assert NR % 8 == 0
+$assert KBLOCK == 16
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
+$if PREFETCH:
+  #include "src/xnnpack/prefetch.h"
+
+void xnn_x8_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t n_stride,
+  const int8_t* weights,
+  const uint32_t* bias,
+  const void* scale,
+  int8_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == 1);
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  int8_t* out = (int8_t*) packed_weights;
+  const uint32_t* b = (const uint32_t*) bias;
+
+  do {
+    const int8_t* wb = weights;
+    size_t n = nc;
+    $for REMAINDER in [False, True]:
+      $if REMAINDER:
+        // NC remainder (1..${NR-1})
+      $else:
+        // NC main loop multiple of ${NR}
+      ${"if XNN_UNLIKELY(n != 0)" if REMAINDER else "for (; n >= %d; n -= %d)" % (NR, NR)} {
+        $if REMAINDER:
+          assert(n >= 1);
+          assert(n <= ${NR-1});
+        const int8_t* w0 = wb;
+        $for N in range(1, NR):
+          const int8_t* w${N} = w${N-1} + n_stride;
+          $if REMAINDER:
+            $if N % 2 == 0:
+              if XNN_UNPREDICTABLE(n <= ${N}) {
+                w${N} = w${N-1};
+              }
+            $else:
+              if XNN_UNPREDICTABLE(n < ${N+1}) {
+                w${N} = w${N-1};
+              }
+
+        uint32_t* packed_b = (uint32_t*) out;
+        $if not REMAINDER:
+          if XNN_LIKELY(b != NULL) {
+            $for N in range(0, NR, 8):
+              const __m256i vb${N} = _mm256_loadu_si256((const __m256i*) (b + ${N}));
+            $for N in range(0, NR, 8):
+              _mm256_storeu_si256((__m256i*) (packed_b + ${N}), vb${N});
+            b += ${NR};
+          } else {
+            const __m256i vzero = _mm256_setzero_si256();
+            $for N in range(0, NR, 8):
+              _mm256_storeu_si256((__m256i*) (packed_b + ${N}), vzero);
+          }
+        $else:
+          const __m256i vzero = _mm256_setzero_si256();
+          $for N in range(0, NR, 8):
+            _mm256_storeu_si256((__m256i*) (packed_b + ${N}), vzero);
+          if XNN_LIKELY(b != NULL) {
+            for (size_t nb = 0; nb < n; ++nb) {
+              packed_b[nb] = b[nb];
+            }
+            b += n;
+          }
+        out += ${NR} * sizeof(uint32_t);
+
+        $if PREFETCH:
+          $for N in range(NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N});
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+
+        // KC main loop multiple of ${KBLOCK}
+        size_t k = kc;
+        for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+          $if NR == 8:
+            $for L in range(8):
+              const __m128i v${L} = _mm_loadu_si128((const __m128i*) w${L});
+              w${L} += 16;
+            $if PREFETCH:
+              $for L in range(8):
+                xnn_prefetch_to_l1((const int8_t*) w${L} + 128);
+
+            $for L in range(0, 8, 2):
+              const __m128i t${L} = _mm_unpacklo_epi8(v${L}, v${L+1});
+              const __m128i t${L+1} = _mm_unpackhi_epi8(v${L}, v${L+1});
+
+            $for L in range(0, 8, 4):
+              const __m128i u${L} = _mm_unpacklo_epi16(t${L}, t${L+2});
+              const __m128i u${L+1} = _mm_unpackhi_epi16(t${L}, t${L+2});
+              const __m128i u${L+2} = _mm_unpacklo_epi16(t${L+1}, t${L+3});
+              const __m128i u${L+3} = _mm_unpackhi_epi16(t${L+1}, t${L+3});
+
+            const __m128i s0 = _mm_unpacklo_epi32(u0, u4);
+            const __m128i s1 = _mm_unpackhi_epi32(u0, u4);
+            const __m128i s2 = _mm_unpacklo_epi32(u1, u5);
+            const __m128i s3 = _mm_unpackhi_epi32(u1, u5);
+            const __m128i s4 = _mm_unpacklo_epi32(u2, u6);
+            const __m128i s5 = _mm_unpackhi_epi32(u2, u6);
+            const __m128i s6 = _mm_unpacklo_epi32(u3, u7);
+            const __m128i s7 = _mm_unpackhi_epi32(u3, u7);
+
+            $for K in range(8):
+              _mm_storeu_si128((__m128i*) (out + ${K * 2 * NR}), s${K});
+          $else:
+            $for N in range(0, NR, 16):
+              $for L in range(8):
+                const __m128i v${N}_${L}_lo = _mm_loadu_si128((const __m128i*) w${N+L});
+                const __m128i v${N}_${L}_hi = _mm_loadu_si128((const __m128i*) w${N+8+L});
+                const __m256i v${N}_${L} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${N}_${L}_lo), v${N}_${L}_hi, 1);
+                w${N+L} += 16;
+                w${N+8+L} += 16;
+              $if PREFETCH:
+                $for L in range(16):
+                  xnn_prefetch_to_l1((const int8_t*) w${N+L} + 128);
+
+              $for L in range(0, 8, 2):
+                const __m256i t${N}_${L} = _mm256_unpacklo_epi8(v${N}_${L}, v${N}_${L+1});
+                const __m256i t${N}_${L+1} = _mm256_unpackhi_epi8(v${N}_${L}, v${N}_${L+1});
+
+              $for L in range(0, 8, 4):
+                const __m256i u${N}_${L} = _mm256_unpacklo_epi16(t${N}_${L}, t${N}_${L+2});
+                const __m256i u${N}_${L+1} = _mm256_unpackhi_epi16(t${N}_${L}, t${N}_${L+2});
+                const __m256i u${N}_${L+2} = _mm256_unpacklo_epi16(t${N}_${L+1}, t${N}_${L+3});
+                const __m256i u${N}_${L+3} = _mm256_unpackhi_epi16(t${N}_${L+1}, t${N}_${L+3});
+
+              const __m256i s${N}_0 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_0, u${N}_4), 0xD8);
+              const __m256i s${N}_1 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_0, u${N}_4), 0xD8);
+              const __m256i s${N}_2 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_1, u${N}_5), 0xD8);
+              const __m256i s${N}_3 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_1, u${N}_5), 0xD8);
+              const __m256i s${N}_4 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_2, u${N}_6), 0xD8);
+              const __m256i s${N}_5 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_2, u${N}_6), 0xD8);
+              const __m256i s${N}_6 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_3, u${N}_7), 0xD8);
+              const __m256i s${N}_7 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_3, u${N}_7), 0xD8);
+
+              $if NR == 16:
+                $for K in range(8):
+                  _mm256_storeu_si256((__m256i*) (out + ${K * 2 * NR}), s${N}_${K});
+              $else:
+                $for K in range(8):
+                  _mm_storeu_si128((__m128i*) (out + ${(K * 2) * NR + N}), _mm256_castsi256_si128(s${N}_${K}));
+                  _mm_storeu_si128((__m128i*) (out + ${(K * 2 + 1) * NR + N}), _mm256_extracti128_si256(s${N}_${K}, 1));
+          out += ${NR * 16};
+        }
+
+        // KC remainder (1..15)
+        if XNN_UNLIKELY(k != 0) {
+          assert(k >= 1);
+          assert(k <= 15);
+
+          if (k & 8) {
+            $if NR == 8:
+              $for L in range(8):
+                const __m128i v${L} = _mm_loadl_epi64((const __m128i*) w${L});
+                w${L} += 8;
+
+              $for L in range(0, 8, 2):
+                const __m128i t${L} = _mm_unpacklo_epi8(v${L}, v${L+1});
+
+              $for L in range(0, 8, 4):
+                const __m128i u${L} = _mm_unpacklo_epi16(t${L}, t${L+2});
+                const __m128i u${L+1} = _mm_unpackhi_epi16(t${L}, t${L+2});
+
+              const __m128i s0 = _mm_unpacklo_epi32(u0, u4);
+              const __m128i s1 = _mm_unpackhi_epi32(u0, u4);
+              const __m128i s2 = _mm_unpacklo_epi32(u1, u5);
+              const __m128i s3 = _mm_unpackhi_epi32(u1, u5);
+
+              $for K in range(4):
+                _mm_storeu_si128((__m128i*) (out + ${K * 2 * NR}), s${K});
+            $else:
+              $for N in range(0, NR, 16):
+                $for L in range(8):
+                  const __m128i v${N}_${L}_lo = _mm_loadl_epi64((const __m128i*) w${N+L});
+                  const __m128i v${N}_${L}_hi = _mm_loadl_epi64((const __m128i*) w${N+8+L});
+                  const __m256i v${N}_${L} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${N}_${L}_lo), v${N}_${L}_hi, 1);
+                  w${N+L} += 8;
+                  w${N+8+L} += 8;
+
+                $for L in range(0, 8, 2):
+                  const __m256i t${N}_${L} = _mm256_unpacklo_epi8(v${N}_${L}, v${N}_${L+1});
+
+                $for L in range(0, 8, 4):
+                  const __m256i u${N}_${L} = _mm256_unpacklo_epi16(t${N}_${L}, t${N}_${L+2});
+                  const __m256i u${N}_${L+1} = _mm256_unpackhi_epi16(t${N}_${L}, t${N}_${L+2});
+
+                const __m256i s${N}_0 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_0, u${N}_4), 0xD8);
+                const __m256i s${N}_1 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_0, u${N}_4), 0xD8);
+                const __m256i s${N}_2 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_1, u${N}_5), 0xD8);
+                const __m256i s${N}_3 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_1, u${N}_5), 0xD8);
+
+                $if NR == 16:
+                  $for K in range(4):
+                    _mm256_storeu_si256((__m256i*) (out + ${K * 2 * NR}), s${N}_${K});
+                $else:
+                  $for K in range(4):
+                    _mm_storeu_si128((__m128i*) (out + ${(K * 2) * NR + N}), _mm256_castsi256_si128(s${N}_${K}));
+                    _mm_storeu_si128((__m128i*) (out + ${(K * 2 + 1) * NR + N}), _mm256_extracti128_si256(s${N}_${K}, 1));
+            out += ${NR * 8};
+          }
+
+          if (k & 4) {
+            $if NR == 8:
+              $for L in range(8):
+                const __m128i v${L} = _mm_cvtsi32_si128((int) unaligned_load_u32(w${L}));
+                w${L} += 4;
+
+              $for L in range(0, 8, 2):
+                const __m128i t${L} = _mm_unpacklo_epi8(v${L}, v${L+1});
+
+              $for L in range(0, 8, 4):
+                const __m128i u${L} = _mm_unpacklo_epi16(t${L}, t${L+2});
+
+              const __m128i s0 = _mm_unpacklo_epi32(u0, u4);
+              const __m128i s1 = _mm_unpackhi_epi32(u0, u4);
+
+              _mm_storeu_si128((__m128i*) (out + ${0 * NR}), s0);
+              _mm_storeu_si128((__m128i*) (out + ${2 * NR}), s1);
+            $else:
+              $for N in range(0, NR, 16):
+                $for L in range(8):
+                  const __m128i v${N}_${L}_lo = _mm_cvtsi32_si128((int) unaligned_load_u32(w${N+L}));
+                  const __m128i v${N}_${L}_hi = _mm_cvtsi32_si128((int) unaligned_load_u32(w${N+8+L}));
+                  const __m256i v${N}_${L} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${N}_${L}_lo), v${N}_${L}_hi, 1);
+                  w${N+L} += 4;
+                  w${N+8+L} += 4;
+
+                $for L in range(0, 8, 2):
+                  const __m256i t${N}_${L} = _mm256_unpacklo_epi8(v${N}_${L}, v${N}_${L+1});
+
+                $for L in range(0, 8, 4):
+                  const __m256i u${N}_${L} = _mm256_unpacklo_epi16(t${N}_${L}, t${N}_${L+2});
+
+                const __m256i s${N}_0 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_0, u${N}_4), 0xD8);
+                const __m256i s${N}_1 = _mm256_permute4x64_epi64(_mm256_unpackhi_epi32(u${N}_0, u${N}_4), 0xD8);
+
+                $if NR == 16:
+                  _mm256_storeu_si256((__m256i*) (out + ${0 * NR}), s${N}_0);
+                  _mm256_storeu_si256((__m256i*) (out + ${2 * NR}), s${N}_1);
+                $else:
+                  $for K in range(2):
+                    _mm_storeu_si128((__m128i*) (out + ${(K * 2) * NR + N}), _mm256_castsi256_si128(s${N}_${K}));
+                    _mm_storeu_si128((__m128i*) (out + ${(K * 2 + 1) * NR + N}), _mm256_extracti128_si256(s${N}_${K}, 1));
+            out += ${NR * 4};
+          }
+
+          if (k & 2) {
+            $if NR == 8:
+              $for L in range(8):
+                const __m128i v${L} = _mm_cvtsi32_si128((int) unaligned_load_u16(w${L}));
+                w${L} += 2;
+
+              $for L in range(0, 8, 2):
+                const __m128i t${L} = _mm_unpacklo_epi8(v${L}, v${L+1});
+
+              $for L in range(0, 8, 4):
+                const __m128i u${L} = _mm_unpacklo_epi16(t${L}, t${L+2});
+
+              const __m128i s0 = _mm_unpacklo_epi32(u0, u4);
+
+              _mm_storeu_si128((__m128i*) out, s0);
+            $else:
+              $for N in range(0, NR, 16):
+                $for L in range(8):
+                  const __m128i v${N}_${L}_lo = _mm_cvtsi32_si128((int) unaligned_load_u16(w${N+L}));
+                  const __m128i v${N}_${L}_hi = _mm_cvtsi32_si128((int) unaligned_load_u16(w${N+8+L}));
+                  const __m256i v${N}_${L} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${N}_${L}_lo), v${N}_${L}_hi, 1);
+                  w${N+L} += 2;
+                  w${N+8+L} += 2;
+
+                $for L in range(0, 8, 2):
+                  const __m256i t${N}_${L} = _mm256_unpacklo_epi8(v${N}_${L}, v${N}_${L+1});
+
+                $for L in range(0, 8, 4):
+                  const __m256i u${N}_${L} = _mm256_unpacklo_epi16(t${N}_${L}, t${N}_${L+2});
+
+                const __m256i s${N}_0 = _mm256_permute4x64_epi64(_mm256_unpacklo_epi32(u${N}_0, u${N}_4), 0xD8);
+
+                $if NR == 16:
+                  _mm256_storeu_si256((__m256i*) out, s${N}_0);
+                $else:
+                  _mm_storeu_si128((__m128i*) (out + ${0 * NR + N}), _mm256_castsi256_si128(s${N}_0));
+                  _mm_storeu_si128((__m128i*) (out + ${1 * NR + N}), _mm256_extracti128_si256(s${N}_0, 1));
+            out += ${NR * 2};
+          }
+
+          if (k & 1) {
+            $for N in range(NR):
+              out[${N}] = *w${N}++;
+            out += ${NR};
+          }
+        }
+
+        out = (int8_t*) ((uintptr_t) out + extra_bytes);
+        $if not REMAINDER:
+          wb += ${NR} * n_stride;
+      }
+
+    weights += nc * n_stride;
+  } while (--g != 0);
+}

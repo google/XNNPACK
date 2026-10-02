@@ -175,6 +175,15 @@ tools/xngen src/x8-packw/gio-scalar.c.in -D NR=32 -o src/x8-packw/gen/x8-packw-x
 tools/xngen src/x8-packw/gio-scalar.c.in -D NR=64 -o src/x8-packw/gen/x8-packw-x64-gemm-gio-scalar.c &
 
 ################################## ARM NEON ###################################
+tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u8.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u8-prfm.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u16.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u16-prfm.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u8.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u8-prfm.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u16.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u16-prfm.c &
+
 tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=neon -o src/x8-packw/gen/x8-packw-gio-neon-u2.c &
 
 ### NEON C4 micro-kernels
@@ -195,7 +204,13 @@ tools/xngen src/x8-packw/c8-neon.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0 
 tools/xngen src/x8-packw/c8-neon.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0 -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-neon.c &
 tools/xngen src/x8-packw/c8-neon.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0 -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-neon-prfm.c &
 
-
+################################### X86 AVX2 ##################################
+tools/xngen src/x8-packw/avx2.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x8-gemm-goi-avx2-u16.c &
+tools/xngen src/x8-packw/avx2.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x8-gemm-goi-avx2-u16-prfm.c &
+tools/xngen src/x8-packw/avx2.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x16-gemm-goi-avx2-u16.c &
+tools/xngen src/x8-packw/avx2.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x16-gemm-goi-avx2-u16-prfm.c &
+tools/xngen src/x8-packw/avx2.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x32-gemm-goi-avx2-u16.c &
+tools/xngen src/x8-packw/avx2.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x32-gemm-goi-avx2-u16-prfm.c &
 
 ################################## Wasm SIMD ##################################
 tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=wasmsimd -o src/x8-packw/gen/x8-packw-gio-wasmsimd-u2.c &

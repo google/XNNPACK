@@ -1,0 +1,258 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR >= 8
+$assert NR % 8 == 0
+$assert KBLOCK in [8, 16]
+
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packw.h"
+$if PREFETCH:
+  #include "src/xnnpack/prefetch.h"
+
+// Interleave 8-bit elements of two 64-bit vectors into a 128-bit vector.
+XNN_INLINE static int8x16_t xnn_zip_s8(int8x8_t va, int8x8_t vb) {
+  const int8x8x2_t vz = vzip_s8(va, vb);
+  return vcombine_s8(vz.val[0], vz.val[1]);
+}
+
+$if NR >= 16:
+  // Transpose 64-bit elements of 2 rows.
+  // Returns [a0, b0] and [a1, b1].
+  XNN_INLINE static int8x16x2_t xnn_zip_s64(int8x16_t va, int8x16_t vb) {
+    int8x16x2_t vr;
+  #if XNN_ARCH_ARM64
+    vr.val[0] = vreinterpretq_s8_s64(vzip1q_s64(vreinterpretq_s64_s8(va), vreinterpretq_s64_s8(vb)));
+    vr.val[1] = vreinterpretq_s8_s64(vzip2q_s64(vreinterpretq_s64_s8(va), vreinterpretq_s64_s8(vb)));
+  #else
+    vr.val[0] = vcombine_s8(vget_low_s8(va), vget_low_s8(vb));
+    vr.val[1] = vcombine_s8(vget_high_s8(va), vget_high_s8(vb));
+  #endif
+    return vr;
+  }
+
+void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t n_stride,
+  const int8_t* weights,
+  const uint32_t* bias,
+  const void* scale,
+  int8_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == 1);
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  int8_t* out = (int8_t*) packed_weights;
+  const uint32_t* b = (const uint32_t*) bias;
+
+  do {
+    const int8_t* wb = weights;
+    size_t n = nc;
+    $for REMAINDER in [False, True]:
+      $if REMAINDER:
+        // NC remainder (1..${NR-1})
+      $else:
+        // NC main loop multiple of ${NR}
+      ${"if XNN_UNLIKELY(n != 0)" if REMAINDER else "for (; n >= %d; n -= %d)" % (NR, NR)} {
+        $if REMAINDER:
+          assert(n >= 1);
+          assert(n <= ${NR-1});
+        const int8_t* w0 = wb;
+        $for N in range(1, NR):
+          const int8_t* w${N} = w${N-1} + n_stride;
+          $if REMAINDER:
+            $if N % 2 == 0:
+              if XNN_UNPREDICTABLE(n <= ${N}) {
+                w${N} = w${N-1};
+              }
+            $else:
+              if XNN_UNPREDICTABLE(n < ${N+1}) {
+                w${N} = w${N-1};
+              }
+
+        uint32_t* packed_b = (uint32_t*) out;
+        $if not REMAINDER:
+          if XNN_LIKELY(b != NULL) {
+            $for N in range(0, NR, 4):
+              const uint32x4_t vb${N} = vld1q_u32(b + ${N});
+            $for N in range(0, NR, 4):
+              vst1q_u32(packed_b + ${N}, vb${N});
+            b += ${NR};
+          } else {
+            const uint32x4_t vzero = vdupq_n_u32(0);
+            $for N in range(0, NR, 4):
+              vst1q_u32(packed_b + ${N}, vzero);
+          }
+        $else:
+          const uint32x4_t vzero = vdupq_n_u32(0);
+          $for N in range(0, NR, 4):
+            vst1q_u32(packed_b + ${N}, vzero);
+          if XNN_LIKELY(b != NULL) {
+            for (size_t nb = 0; nb < n; ++nb) {
+              packed_b[nb] = b[nb];
+            }
+            b += n;
+          }
+        out += ${NR} * sizeof(uint32_t);
+
+        $if PREFETCH:
+          $for N in range(NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N});
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+
+        size_t k = kc;
+        $if KBLOCK == 16:
+          // KC main loop multiple of ${NR}x16
+          for (; k >= 16; k -= 16) {
+            $for N in range(0, NR, 8):
+              $for L in range(8):
+                const int8x16_t v${N+L} = vld1q_s8(w${N+L});
+                w${N+L} += 16;
+              $if PREFETCH:
+                $for L in range(8):
+                  xnn_prefetch_to_l1((const int8_t*) w${N+L} + 128);
+
+              const int8x16x2_t t${N}_0 = vzipq_s8(v${N+0}, v${N+1});
+              const int8x16x2_t t${N}_1 = vzipq_s8(v${N+2}, v${N+3});
+              const int8x16x2_t t${N}_2 = vzipq_s8(v${N+4}, v${N+5});
+              const int8x16x2_t t${N}_3 = vzipq_s8(v${N+6}, v${N+7});
+
+              $for H in range(2):
+                const int16x8x2_t u${N}_${H}_0 = vzipq_s16(
+                    vreinterpretq_s16_s8(t${N}_0.val[${H}]),
+                    vreinterpretq_s16_s8(t${N}_1.val[${H}]));
+                const int16x8x2_t u${N}_${H}_1 = vzipq_s16(
+                    vreinterpretq_s16_s8(t${N}_2.val[${H}]),
+                    vreinterpretq_s16_s8(t${N}_3.val[${H}]));
+
+                $for Q in range(2):
+                  const int32x4x2_t s${N}_${4*H+2*Q} = vzipq_s32(
+                      vreinterpretq_s32_s16(u${N}_${H}_0.val[${Q}]),
+                      vreinterpretq_s32_s16(u${N}_${H}_1.val[${Q}]));
+
+            $if NR == 8:
+              $for I in range(0, 8, 2):
+                vst1q_s8(out + ${I * 2 * NR}, vreinterpretq_s8_s32(s0_${I}.val[0]));
+                vst1q_s8(out + ${(I * 2 + 2) * NR}, vreinterpretq_s8_s32(s0_${I}.val[1]));
+            $else:
+              $for I in range(0, 8, 2):
+                $for V in range(2):
+                  $for N in range(0, NR, 16):
+                    const int8x16x2_t out${N}_${I+V} = xnn_zip_s64(
+                        vreinterpretq_s8_s32(s${N}_${I}.val[${V}]),
+                        vreinterpretq_s8_s32(s${N+8}_${I}.val[${V}]));
+                    vst1q_s8(out + ${(I * 2 + V * 2) * NR + N}, out${N}_${I+V}.val[0]);
+                    vst1q_s8(out + ${(I * 2 + V * 2 + 1) * NR + N}, out${N}_${I+V}.val[1]);
+            out += ${NR * 16};
+          }
+
+        // KC loop / remainder of ${NR}x8
+        ${"if (k & 8)" if KBLOCK == 16 else "for (; k >= 8; k -= 8)"} {
+          $for N in range(0, NR, 8):
+            $for L in range(8):
+              const int8x8_t v${N+L} = vld1_s8(w${N+L});
+              w${N+L} += 8;
+            $if PREFETCH and KBLOCK == 8:
+              $for L in range(8):
+                xnn_prefetch_to_l1((const int8_t*) w${N+L} + 128);
+
+            const int8x16_t t${N}_0 = xnn_zip_s8(v${N+0}, v${N+1});
+            const int8x16_t t${N}_1 = xnn_zip_s8(v${N+2}, v${N+3});
+            const int8x16_t t${N}_2 = xnn_zip_s8(v${N+4}, v${N+5});
+            const int8x16_t t${N}_3 = xnn_zip_s8(v${N+6}, v${N+7});
+
+            const int16x8x2_t u${N}_0 = vzipq_s16(
+                vreinterpretq_s16_s8(t${N}_0),
+                vreinterpretq_s16_s8(t${N}_1));
+            const int16x8x2_t u${N}_1 = vzipq_s16(
+                vreinterpretq_s16_s8(t${N}_2),
+                vreinterpretq_s16_s8(t${N}_3));
+
+            $for Q in range(2):
+              const int32x4x2_t s${N}_${2*Q} = vzipq_s32(
+                  vreinterpretq_s32_s16(u${N}_0.val[${Q}]),
+                  vreinterpretq_s32_s16(u${N}_1.val[${Q}]));
+
+          $if NR == 8:
+            $for I in range(0, 4, 2):
+              vst1q_s8(out + ${I * 2 * NR}, vreinterpretq_s8_s32(s0_${I}.val[0]));
+              vst1q_s8(out + ${(I * 2 + 2) * NR}, vreinterpretq_s8_s32(s0_${I}.val[1]));
+          $else:
+            $for I in range(0, 4, 2):
+              $for V in range(2):
+                $for N in range(0, NR, 16):
+                  const int8x16x2_t out${N}_${I+V} = xnn_zip_s64(
+                      vreinterpretq_s8_s32(s${N}_${I}.val[${V}]),
+                      vreinterpretq_s8_s32(s${N+8}_${I}.val[${V}]));
+                  vst1q_s8(out + ${(I * 2 + V * 2) * NR + N}, out${N}_${I+V}.val[0]);
+                  vst1q_s8(out + ${(I * 2 + V * 2 + 1) * NR + N}, out${N}_${I+V}.val[1]);
+          out += ${NR * 8};
+        }
+
+        // KC remainder of 1..7
+        if XNN_UNLIKELY((k & 7) != 0) {
+          if (k & 4) {
+            $for N in range(0, NR, 8):
+              int8x8x4_t vtmp${N};
+              $for K in range(4):
+                vtmp${N}.val[${K}] = vdup_n_s8(0);
+              $for L in range(8):
+                vtmp${N} = vld4_lane_s8(w${N+L}, vtmp${N}, ${L});
+                w${N+L} += 4;
+            $for K in range(4):
+              $for N in range(0, NR, 8):
+                vst1_s8(out + ${K * NR + N}, vtmp${N}.val[${K}]);
+            out += ${NR * 4};
+          }
+          if (k & 2) {
+            $for N in range(0, NR, 8):
+              int8x8x2_t vtmp${N};
+              $for K in range(2):
+                vtmp${N}.val[${K}] = vdup_n_s8(0);
+              $for L in range(8):
+                vtmp${N} = vld2_lane_s8(w${N+L}, vtmp${N}, ${L});
+                w${N+L} += 2;
+            $for K in range(2):
+              $for N in range(0, NR, 8):
+                vst1_s8(out + ${K * NR + N}, vtmp${N}.val[${K}]);
+            out += ${NR * 2};
+          }
+          if (k & 1) {
+            $for N in range(0, NR, 8):
+              int8x8_t vtmp${N} = vdup_n_s8(0);
+              $for L in range(8):
+                vtmp${N} = vld1_lane_s8(w${N+L}, vtmp${N}, ${L});
+                w${N+L} += 1;
+              vst1_s8(out + ${N}, vtmp${N});
+            out += ${NR};
+          }
+        }
+
+        out = (int8_t*) ((uintptr_t) out + extra_bytes);
+        $if not REMAINDER:
+          wb += ${NR} * n_stride;
+      }
+
+    weights += nc * n_stride;
+  } while (--g != 0);
+}
