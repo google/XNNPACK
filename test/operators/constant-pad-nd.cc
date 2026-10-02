@@ -645,3 +645,46 @@ TEST(CONSTANT_PAD_ND_X32, stride_overflow) {
           constant_pad_op, 2, input_shape, pre_padding, post_padding,
           nullptr));
 }
+
+TEST(CONSTANT_PAD_ND_X32, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const uint32_t padding_value = 0;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_constant_pad_nd_x32(&padding_value, 0, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X32, null_padding_value) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t constant_pad_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_constant_pad_nd_x32(nullptr, 0, &constant_pad_op));
+  EXPECT_EQ(nullptr, constant_pad_op);
+}
+
+TEST(CONSTANT_PAD_ND_X32, null_reshape_pointers) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t constant_pad_op = nullptr;
+  const uint32_t padding_value = 0;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_constant_pad_nd_x32(&padding_value, 0, &constant_pad_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      constant_pad_op, xnn_delete_operator);
+
+  const size_t shape[1] = {1};
+  const size_t pad[1] = {0};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_constant_pad_nd_x32(
+          constant_pad_op, 1, nullptr, pad, pad, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_constant_pad_nd_x32(
+          constant_pad_op, 1, shape, nullptr, pad, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_constant_pad_nd_x32(
+          constant_pad_op, 1, shape, pad, nullptr, nullptr));
+}
