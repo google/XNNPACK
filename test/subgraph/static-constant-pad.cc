@@ -200,6 +200,44 @@ TEST(ConstantPad, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(StaticConstantPadTest, DefineRejectsNullPaddings) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const size_t paddings[2] = {1, 1};
+
+  // Reject pre_paddings == nullptr with num_padding_dims > 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_constant_pad_v2(
+          subgraph, 2, nullptr, paddings, 0.0f, input_id, output_id, 0));
+
+  // Reject post_paddings == nullptr with num_padding_dims > 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_constant_pad_v2(
+          subgraph, 2, paddings, nullptr, 0.0f, input_id, output_id, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
