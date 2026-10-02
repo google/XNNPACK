@@ -321,6 +321,19 @@ static enum xnn_status create_fully_connected_operator(
   assert(filter_id < num_values);
   const struct xnn_runtime_value* filter_value = &values[filter_id];
 
+  // The channel reads below index dim[0], dim[1], and dim[num_dims - 1].
+  // Reject rank < 2 here, matching the reshape-time check, so a scalar or
+  // vector filter cannot reach those reads. dim[SIZE_MAX] on a rank-0 filter
+  // otherwise reads out of bounds (in practice the adjacent num_dims field).
+  if (filter_value->shape.num_dims < 2) {
+    xnn_log_error(
+        "failed to create %s operator with filter ID #%" PRIu32
+        ": number of dimensions (%zu) must be at least 2",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id,
+        filter_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
