@@ -180,7 +180,8 @@ class BinaryElementwiseOperatorTester {
       case xnn_binary_bitwise_xor:
         return a ^ b;
       case xnn_binary_shift_left:
-        return a << (b & 31);
+        return static_cast<int32_t>(
+            static_cast<uint32_t>(a) << (b & 31));
       case xnn_binary_shift_right_logical:
         return static_cast<uint32_t>(a) >> (b & 31);
       case xnn_binary_shift_right_arithmetic:
@@ -710,6 +711,89 @@ TEST(BINARY_ELEMENTWISE_ND, overflow_compressed_shape) {
                 op, input1_shape.size(), input1_shape.data(),
                 input2_shape.size(), input2_shape.data(),
                 /*threadpool=*/nullptr));
+}
+
+TEST(BINARY_ELEMENTWISE_ND, int32_divide_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const int32_t input1 = std::numeric_limits<int32_t>::min();
+  const int32_t input2 = -1;
+  int32_t output = 0;
+  const size_t shape = 1;
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_binary_elementwise_nd(
+                xnn_binary_divide, xnn_datatype_int32,
+                /*a_quantization=*/nullptr,
+                /*b_quantization=*/nullptr,
+                /*output_quantization=*/nullptr,
+                /*flags=*/0,
+                /*num_input1_dims=*/1, &shape,
+                /*num_input2_dims=*/1, &shape,
+                &input1, &input2, &output,
+                /*threadpool=*/nullptr));
+  EXPECT_EQ(output, std::numeric_limits<int32_t>::min());
+}
+
+TEST(BINARY_ELEMENTWISE_ND, int32_modulus_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const int32_t input1 = std::numeric_limits<int32_t>::min();
+  const int32_t input2 = -1;
+  int32_t output = -12345;
+  const size_t shape = 1;
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_binary_elementwise_nd(
+                xnn_binary_modulus, xnn_datatype_int32,
+                /*a_quantization=*/nullptr,
+                /*b_quantization=*/nullptr,
+                /*output_quantization=*/nullptr,
+                /*flags=*/0,
+                /*num_input1_dims=*/1, &shape,
+                /*num_input2_dims=*/1, &shape,
+                &input1, &input2, &output,
+                /*threadpool=*/nullptr));
+  EXPECT_EQ(output, 0);
+}
+
+TEST(BINARY_ELEMENTWISE_ND, int32_pow_negative_exponent) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const int32_t input1[3] = {2, -1, -1};
+  const int32_t input2[3] = {std::numeric_limits<int32_t>::min(),
+                             std::numeric_limits<int32_t>::min(), -3};
+  int32_t output[3] = {99, 99, 99};
+  const size_t shape = 3;
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_binary_elementwise_nd(
+                xnn_binary_pow, xnn_datatype_int32,
+                /*a_quantization=*/nullptr,
+                /*b_quantization=*/nullptr,
+                /*output_quantization=*/nullptr,
+                /*flags=*/0,
+                /*num_input1_dims=*/1, &shape,
+                /*num_input2_dims=*/1, &shape,
+                input1, input2, output,
+                /*threadpool=*/nullptr));
+  EXPECT_EQ(output[0], 0);
+  EXPECT_EQ(output[1], 1);
+  EXPECT_EQ(output[2], -1);
+}
+
+TEST(BINARY_ELEMENTWISE_ND, int32_shift_left_negative) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const int32_t input1 = -1;
+  const int32_t input2 = 1;
+  int32_t output = 0;
+  const size_t shape = 1;
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_binary_elementwise_nd(
+                xnn_binary_shift_left, xnn_datatype_int32,
+                /*a_quantization=*/nullptr,
+                /*b_quantization=*/nullptr,
+                /*output_quantization=*/nullptr,
+                /*flags=*/0,
+                /*num_input1_dims=*/1, &shape,
+                /*num_input2_dims=*/1, &shape,
+                &input1, &input2, &output,
+                /*threadpool=*/nullptr));
+  EXPECT_EQ(output, -2);
 }
 
 }  // namespace xnnpack
