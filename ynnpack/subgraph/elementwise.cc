@@ -190,6 +190,17 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
   };
 }
 
+// Bounds are physical shapes, this helper adjusts the bounds to account for
+// the logical number of elements in the physical shape.
+void adjust_bounds(slinky::box_expr& bounds, ynn_type in_type,
+                   ynn_type out_type) {
+  const int in_elem_count = type_element_count(in_type);
+  const int out_elem_count = type_element_count(out_type);
+  if (!bounds.empty() && in_elem_count > out_elem_count) {
+    bounds[0] = (bounds[0] * out_elem_count) / in_elem_count;
+  }
+}
+
 ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
                         unary_kernel_fn kernel) {
   assert(node.inputs.size() == 1);
@@ -203,11 +214,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   x.make_buffer(runtime);
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
-  if (!bounds.empty() &&
-      type_element_count(a.type) > type_element_count(x.type)) {
-    bounds[0] =
-        (bounds[0] * type_element_count(x.type)) / type_element_count(a.type);
-  }
+  adjust_bounds(bounds, a.type, x.type);
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
   attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
@@ -248,6 +255,8 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
       make_elementwise_bounds(dims, a.physical_extents());
   slinky::box_expr b_bounds =
       make_elementwise_bounds(dims, b.physical_extents());
+  adjust_bounds(a_bounds, a.type, x.type);
+  adjust_bounds(b_bounds, b.type, x.type);
   a_bounds.resize(a.rank());
   b_bounds.resize(b.rank());
   auto func = slinky::func::make(
@@ -289,6 +298,9 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
       make_elementwise_bounds(dims, b.physical_extents());
   slinky::box_expr c_bounds =
       make_elementwise_bounds(dims, c.physical_extents());
+  adjust_bounds(a_bounds, a.type, x.type);
+  adjust_bounds(b_bounds, b.type, x.type);
+  adjust_bounds(c_bounds, c.type, x.type);
   a_bounds.resize(a.rank());
   b_bounds.resize(b.rank());
   c_bounds.resize(c.rank());

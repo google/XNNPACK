@@ -208,7 +208,8 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
           op.permutation[0] < input.rank()) {
         // We're loading a non-packed dimension with an index from the packed
         // dimension, adjust for the number of elements.
-        bounds[op.permutation[0]] *= elem_count;
+        bounds[op.permutation[0]] =
+            slinky::min_extent(output_dims[0] * elem_count, elem_count);
       }
     }
 
