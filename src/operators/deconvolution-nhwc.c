@@ -1813,7 +1813,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
   }
 
   const size_t groups = deconvolution_op->convolution_op->groups;
-  const size_t output_size = output_height * output_width;
+  size_t output_size = 0;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output size overflows size_t",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
   size_t mr = deconvolution_op->ukernel.igemm->mr;
   const uint32_t nr = deconvolution_op->ukernel.igemm->nr;
   const uint32_t mr_packed = deconvolution_op->ukernel.igemm->mr_packed;
@@ -2085,7 +2091,13 @@ static enum xnn_status reshape_subconv2d_path(
       divide_round_up(output_width, stride_width);
 
   const size_t groups = deconvolution_op->convolution_op->groups;
-  const size_t output_size = output_height * output_width;
+  size_t output_size = 0;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output size overflows size_t",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
   const uint32_t nr = deconvolution_op->ukernel.igemm->nr;
   const uint32_t mr = xnn_get_heuristic_mr_igemm(
       batch_size, deconvolution_op->ukernel.igemm->mr, nr,
