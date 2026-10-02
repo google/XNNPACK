@@ -531,7 +531,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4(
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }
-      out += (32 - n) * sizeof(uint32_t);
+      for (size_t i = n; i < 32; ++i) {
+        unaligned_store_s32(out, 0);
+        out += sizeof(uint32_t);
+      }
 
       // NR remainder has less than 32 rows so last row is not loaded
       const int8_t* w1 = w0 + n_stride;
@@ -844,6 +847,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4(
         out[28] = v280;
         out[29] = v290;
         out[30] = v300;
+        out[31] = 0;
         out[32] = v01;
         out[33] = v11;
         out[34] = v21;
@@ -875,6 +879,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4(
         out[60] = v281;
         out[61] = v291;
         out[62] = v301;
+        out[63] = 0;
         out[64] = v02;
         out[65] = v12;
         out[66] = v22;
@@ -906,6 +911,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4(
         out[92] = v282;
         out[93] = v292;
         out[94] = v302;
+        out[95] = 0;
         out[96] = v03;
         out[97] = v13;
         out[98] = v23;
@@ -937,6 +943,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4(
         out[124] = v283;
         out[125] = v293;
         out[126] = v303;
+        out[127] = 0;
         out += 128;
       }
 
@@ -1004,6 +1011,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4(
         out[29] = v29;
         const int8_t v30 = *w30++;
         out[30] = v30;
+        out[31] = 0;
         out += 32;
       }
       out = (int8_t*) ((uintptr_t) out + extra_bytes);

@@ -305,7 +305,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4(
           *out++ = 0;
         } while (--nb != 0);
       }
-      out += (16 - n);
+      for (size_t i = n; i < 16; ++i) {
+        *out++ = 0;
+      }
 
       // NR remainder has less than 16 rows so last row is not loaded
       const float* w1 = w0 + n_stride;
@@ -458,6 +460,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4(
         out[12] = v120;
         out[13] = v130;
         out[14] = v140;
+        out[15] = 0;
         out[16] = v01;
         out[17] = v11;
         out[18] = v21;
@@ -473,6 +476,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4(
         out[28] = v121;
         out[29] = v131;
         out[30] = v141;
+        out[31] = 0;
         out[32] = v02;
         out[33] = v12;
         out[34] = v22;
@@ -488,6 +492,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4(
         out[44] = v122;
         out[45] = v132;
         out[46] = v142;
+        out[47] = 0;
         out[48] = v03;
         out[49] = v13;
         out[50] = v23;
@@ -503,6 +508,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4(
         out[60] = v123;
         out[61] = v133;
         out[62] = v143;
+        out[63] = 0;
         out += 64;
       }
 
@@ -538,6 +544,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4(
         out[13] = v13;
         const float v14 = *w14++;
         out[14] = v14;
+        out[15] = 0;
         out += 16;
       }
       out = (float*) ((uintptr_t) out + extra_bytes);

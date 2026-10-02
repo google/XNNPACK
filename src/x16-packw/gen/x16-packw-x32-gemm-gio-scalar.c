@@ -233,6 +233,9 @@ void xnn_x16_packw_gemm_gio_ukernel_x32__scalar(
         for (size_t i = 0; i < n; ++i) {
           packed_w[i] = b[i];
         }
+        for (size_t i = n; i < 32; ++i) {
+          packed_w[i] = 0;
+        }
         b += n;
       } else {
         packed_w[0] = 0;
@@ -274,6 +277,9 @@ void xnn_x16_packw_gemm_gio_ukernel_x32__scalar(
       for (size_t k = kc; k > 0; --k) {
         for (size_t i = 0; i < n; ++i) {
           packed_w[i] = w[i];
+        }
+        for (size_t i = n; i < 32; ++i) {
+          packed_w[i] = 0;
         }
         w += k_stride;
         packed_w += 32;
