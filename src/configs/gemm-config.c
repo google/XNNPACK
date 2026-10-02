@@ -405,8 +405,8 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     pf16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2);
     pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
-    pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases;
-    pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases;
+    pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases_sme2;
+    pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases_sme2;
     pf16_gemm_config.pack_igemm_goki =
       (xnn_pack_conv_goki_w_fn)xnn_pack_kai_f16_conv_goki_w_sme; // both sme and sme2 use the same packing kernel
     pf16_gemm_config.pack_igemm_kgo =
@@ -429,8 +429,8 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
             (xnn_packed_lhs_igemm_ukernel_fn)
                 xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme);
     pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
-    pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases;
-    pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases;
+    pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases_sme;
+    pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases_sme;
     pf16_gemm_config.pack_igemm_goki =
       (xnn_pack_conv_goki_w_fn)xnn_pack_kai_f16_conv_goki_w_sme; // both sme and sme2 use the same packing kernel
     pf16_gemm_config.pack_igemm_kgo =
