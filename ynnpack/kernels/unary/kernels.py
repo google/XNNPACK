@@ -67,16 +67,24 @@ def square_fp64(a, x):
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("input_offset", Float(32)),
+    Scalar("input_multiplier", Float(32)),
+)
 @operator_name("sqrt")
-def sqrt_fp32(a, x):
-  return store(sqrt(load(a)), x)
+def sqrt_fp32(a, x, input_offset, input_multiplier):
+  return store(sqrt(load(a) * input_multiplier + input_offset), x)
 
 
 @const_buffer("a", Float(64))
 @buffer("x", Float(64))
+@params(
+    Scalar("input_offset", Float(64)),
+    Scalar("input_multiplier", Float(64)),
+)
 @operator_name("sqrt")
-def sqrt_fp64(a, x):
-  return store(sqrt(load(a)), x)
+def sqrt_fp64(a, x, input_offset, input_multiplier):
+  return store(sqrt(load(a) * input_multiplier + input_offset), x)
 
 
 @const_buffer("a", Float(32))
