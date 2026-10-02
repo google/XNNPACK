@@ -385,8 +385,13 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
                      std::vector<loop_level>& global_loop_nest,
                      const std::vector<int>& funcs_in_level) {
   // Enough tasks to have good load balancing.
+#if defined(__ANDROID__)
+  const slinky::index_t tasks_per_thread = 4;
+#else
+  const slinky::index_t tasks_per_thread = 2;
+#endif
   const slinky::index_t target_task_count =
-      max_threads > 1 ? max_threads * 2 : 1;
+      max_threads > 1 ? max_threads * tasks_per_thread : 1;
 
   // A guaranteed lower bound of the number of iterations of loop level `l`:
   // ceil_div(lower bound of extent, upper bound of step), or 1 when either
