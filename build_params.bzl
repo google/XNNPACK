@@ -443,7 +443,14 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "neonsme2": _create_params(
         cond = "//:arm_sme2_enabled",
-        extra_deps = xnnpack_if_kleidiai_enabled([
+        copts = xnnpack_select_if(
+            "//:arm_sme2_acle_enabled",
+            ["-march=armv9.2-a+sme2+nosve"],
+        ),
+        extra_deps = xnnpack_select_if(
+            "//:arm_sme2_acle_enabled",
+            ["//:arm_sme_abi_stubs"],
+        ) + xnnpack_if_kleidiai_enabled([
             "@KleidiAI//:common",
             "@KleidiAI//kai/ukernels/dwconv:dwconv",
             "@KleidiAI//kai/ukernels/dwconv:interface",

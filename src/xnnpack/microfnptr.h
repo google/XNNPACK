@@ -1403,8 +1403,12 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
   xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 };
 
-// Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+// Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX), 32 with KleidiAI
+// on Arm64, and 2 * SVL/32 (up to 64 for SVL = 1024) for the Arm SME2 ACLE
+// microkernels.
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2_ACLE
+#define XNN_MAX_MR 64
+#elif XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 #define XNN_MAX_MR 32
 #else
 #define XNN_MAX_MR 16

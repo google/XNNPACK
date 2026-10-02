@@ -258,6 +258,91 @@ namespace {
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 
+#if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+  #if XNN_ENABLE_ARM_SME2_ACLE
+  static void qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_qs8_weights_and_biases,
+      xnn_packed_stride_kai_qs8_weights_and_biases,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+      /*arch_flags=*/xnn_arch_arm_sme2);
+  }
+
+  BENCHMARK_GEMM(qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2)
+
+  static void qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_qs8_weights_and_biases,
+      xnn_packed_stride_kai_qs8_weights_and_biases,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+      /*arch_flags=*/xnn_arch_arm_sme2);
+  }
+
+  BENCHMARK_GEMM(qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2)
+  #endif  // XNN_ENABLE_ARM_SME2_ACLE
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+
+
 }  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
