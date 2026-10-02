@@ -452,6 +452,14 @@ enum xnn_status define_copy_node(xnn_subgraph_t subgraph, size_t num_dims,
     return xnn_status_unsupported_parameter;
   }
 
+  if (num_dims != 0 && new_shape == NULL) {
+    xnn_log_error(
+      "failed to define %s operator: "
+      "new_shape cannot be NULL when num_dims > 0",
+      xnn_node_type_to_string(node_type));
+    return xnn_status_invalid_parameter;
+  }
+
   status = xnn_subgraph_check_input_node_id(node_type, input_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;

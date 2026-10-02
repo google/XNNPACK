@@ -82,4 +82,33 @@ INSTANTIATE_TEST_SUITE_P(Copy, CopyBF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyF32, rank_params);
 
+TEST(CopyTest, StaticReshapeRejectsNullShape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  // Reject new_shape == nullptr when num_dims > 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_reshape(subgraph, 2, nullptr, input_id, output_id, 0));
+}
+
 }  // namespace xnnpack
