@@ -3664,11 +3664,6 @@ static enum xnn_status reshape_convolution2d_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  if (batch_size == 0) {
-    convolution_op->state = xnn_run_state_skip;
-    return xnn_status_success;
-  }
-
   convolution_op->batch_size = batch_size;
   convolution_op->convolution_op->input_height = input_height;
   convolution_op->convolution_op->input_width = input_width;
@@ -3750,6 +3745,14 @@ static enum xnn_status reshape_convolution2d_nhwc(
   }
   if (output_width_out != NULL) {
     *output_width_out = convolution_op->convolution_op->output_width;
+  }
+
+  if (batch_size == 0) {
+    if (workspace_size != NULL) {
+      *workspace_size = 0;
+    }
+    convolution_op->state = xnn_run_state_skip;
+    return xnn_status_success;
   }
 
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);

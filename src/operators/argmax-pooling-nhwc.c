@@ -199,11 +199,6 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  if (batch_size == 0) {
-    argmax_pooling_op->state = xnn_run_state_skip;
-    return xnn_status_success;
-  }
-
   argmax_pooling_op->batch_size = batch_size;
   argmax_pooling_op->output_pixel_stride = output_pixel_stride;
   argmax_pooling_op->input_pixel_stride = input_pixel_stride;
@@ -225,11 +220,28 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     argmax_pooling_op->convolution_op->padding_bottom = padding_height - argmax_pooling_op->convolution_op->padding_top;
     argmax_pooling_op->convolution_op->padding_right = padding_width - argmax_pooling_op->convolution_op->padding_left;
   } else {
+    const size_t padded_input_height =
+        argmax_pooling_op->convolution_op->padding_top + input_height +
+        argmax_pooling_op->convolution_op->padding_bottom;
+    const size_t padded_input_width =
+        argmax_pooling_op->convolution_op->padding_left + input_width +
+        argmax_pooling_op->convolution_op->padding_right;
+    if (padded_input_height < pooling_height ||
+        padded_input_width < pooling_width) {
+      xnn_log_error(
+          "failed to reshape %s operator with %zux%zu input: the padded input "
+          "(%zux%zu) is smaller than the pooling size (%zux%zu)",
+          xnn_operator_type_to_string(
+              xnn_operator_type_argmax_pooling_nhwc_f32),
+          input_width, input_height, padded_input_width, padded_input_height,
+          pooling_width, pooling_height);
+      return xnn_status_invalid_parameter;
+    }
     argmax_pooling_op->convolution_op->output_height = compute_output_dimension(
-        argmax_pooling_op->convolution_op->padding_top + input_height + argmax_pooling_op->convolution_op->padding_bottom,
+        padded_input_height,
         argmax_pooling_op->convolution_op->kernel_height);
     argmax_pooling_op->convolution_op->output_width = compute_output_dimension(
-        argmax_pooling_op->convolution_op->padding_left + input_width + argmax_pooling_op->convolution_op->padding_right,
+        padded_input_width,
         argmax_pooling_op->convolution_op->kernel_width);
   }
 
@@ -240,6 +252,11 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   }
   if (output_width_out != NULL) {
     *output_width_out = output_width;
+  }
+
+  if (batch_size == 0) {
+    argmax_pooling_op->state = xnn_run_state_skip;
+    return xnn_status_success;
   }
   size_t pooling_size = 0;
   if (!xnn_safe_mul(pooling_height, pooling_width, &pooling_size)) {
