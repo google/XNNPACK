@@ -260,6 +260,8 @@ ynn_generate_srcs(
     output_srcs = [
         "x86_avx512vnni_uint8_int8_int32.cc",
         "x86_avx512vnni_uint8_int8_int32.inc",
+        "x86_avxvnni_uint8_int8_int32.cc",
+        "x86_avxvnni_uint8_int8_int32.inc",
     ],
 )
 
@@ -284,6 +286,8 @@ ynn_generate_srcs(
         "x86_avx512_uint8_int2_int32.inc",
         "x86_avx512vnni_uint8_int2_int32.cc",
         "x86_avx512vnni_uint8_int2_int32.inc",
+        "x86_avxvnni_uint8_int2_int32.cc",
+        "x86_avxvnni_uint8_int2_int32.inc",
     ],
 )
 
@@ -298,6 +302,8 @@ ynn_generate_srcs(
         "x86_avx512_uint8_int4_int32.inc",
         "x86_avx512vnni_uint8_int4_int32.cc",
         "x86_avx512vnni_uint8_int4_int32.inc",
+        "x86_avxvnni_uint8_int4_int32.cc",
+        "x86_avxvnni_uint8_int4_int32.inc",
     ],
 )
 
@@ -424,6 +430,9 @@ ynn_cc_library(
         "x86_avx512vnni_uint8_int8_int32_k16.inc",
         "x86_avx_fp32.inc",
         "x86_avx_fp64.inc",
+        "x86_avxvnni_uint8_int2_int32.inc",
+        "x86_avxvnni_uint8_int4_int32.inc",
+        "x86_avxvnni_uint8_int8_int32.inc",
         "x86_f16c_fma3_fp16_fp16_fp32.inc",
         "x86_f16c_fp16_fp16_fp32.inc",
         "x86_fma3_fp32.inc",
@@ -511,6 +520,11 @@ ynn_cc_library(
             "x86_avx512vnni_uint8_int4_int32.cc",
             "x86_avx512vnni_uint8_int8_int32.cc",
             "x86_avx512vnni_uint8_int8_int32_k16.cc",
+        ],
+        "x86_avxvnni": [
+            "x86_avxvnni_uint8_int2_int32.cc",
+            "x86_avxvnni_uint8_int4_int32.cc",
+            "x86_avxvnni_uint8_int8_int32.cc",
         ],
         "x86_amxbf16": [
             "x86_amxbf16.cc",

@@ -732,6 +732,7 @@ jobs:
         --define=xnn_enable_avx512f=false
         --define=ynn_enable_x86_amx=false
         --define=ynn_enable_x86_avx512=false
+        --define=ynn_enable_x86_avxvnni=false
     steps:
       - uses: actions/checkout@v6
       - name: Restore Bazel Cache

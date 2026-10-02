@@ -259,6 +259,11 @@ define_build_option(
 )
 
 define_build_option(
+    name = "ynn_enable_x86_avxvnni",
+    default_all = [":ynn_enable_x86_avx2"],
+)
+
+define_build_option(
     name = "ynn_enable_x86_avx512",
     default_all = [":ynn_enable_x86_avx"],
 )

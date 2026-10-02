@@ -24,6 +24,7 @@ FUNCTION(YNN_GENERATE_DOT_KERNELS SCRIPT)
             "${CMAKE_CURRENT_SOURCE_DIR}/generator/x86.py"
             "${CMAKE_CURRENT_SOURCE_DIR}/generator/arm.py"
             "${CMAKE_CURRENT_SOURCE_DIR}/generator/wasm.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/generator/hexagon.py"
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   )
 ENDFUNCTION()
@@ -115,6 +116,10 @@ YNN_ADD_DOT_KERNELS(x86_fp32_k4
   x86_avx512 x86_avx512_fp32_k4
 )
 
+YNN_ADD_DOT_KERNELS(x86_fp32_k8
+  x86_avx2_fma3 x86_avx2_fma3_fp32_k8
+)
+
 YNN_ADD_DOT_KERNELS(x86_fp64
   x86_avx x86_avx_fp64
   x86_fma3 x86_fma3_fp64
@@ -140,7 +145,9 @@ YNN_ADD_DOT_KERNELS(x86_bf16_bf16_fp32_k1
 
 YNN_ADD_DOT_KERNELS(x86_int8_int8_int32
   x86_avx2 x86_avx2_int8_int8_int32
+  x86_avx2 x86_avx2_int8_int8_int32_symmetric_b
   x86_avx512 x86_avx512_int8_int8_int32
+  x86_avx512 x86_avx512_int8_int8_int32_symmetric_b
 )
 
 YNN_ADD_DOT_KERNELS(x86_int8_int8_int32_k1
@@ -154,10 +161,25 @@ YNN_ADD_DOT_KERNELS(x86_int8_int8_int32_k16
 
 YNN_ADD_DOT_KERNELS(x86_uint8_int8_int32
   x86_avx512vnni x86_avx512vnni_uint8_int8_int32
+  x86_avxvnni x86_avxvnni_uint8_int8_int32
 )
 
 YNN_ADD_DOT_KERNELS(x86_uint8_int8_int32_k16
   x86_avx512vnni x86_avx512vnni_uint8_int8_int32_k16
+)
+
+YNN_ADD_DOT_KERNELS(x86_uint8_int2_int32
+  x86_avx2 x86_avx2_uint8_int2_int32
+  x86_avx512 x86_avx512_uint8_int2_int32
+  x86_avx512vnni x86_avx512vnni_uint8_int2_int32
+  x86_avxvnni x86_avxvnni_uint8_int2_int32
+)
+
+YNN_ADD_DOT_KERNELS(x86_uint8_int4_int32
+  x86_avx2 x86_avx2_uint8_int4_int32
+  x86_avx512 x86_avx512_uint8_int4_int32
+  x86_avx512vnni x86_avx512vnni_uint8_int4_int32
+  x86_avxvnni x86_avxvnni_uint8_int4_int32
 )
 
 YNN_ADD_DOT_SRC(x86_amxbf16 x86_amxbf16.cc)
@@ -222,7 +244,9 @@ YNN_ADD_DOT_KERNELS(wasm_int8_int8_int32
 )
 
 # --- Hexagon kernels ---
-YNN_ADD_DOT_SRC(hexagon_hvx hexagon_hvx.cc)
+YNN_ADD_DOT_KERNELS(hexagon_fp32
+  hexagon_hvx hexagon_hvx_fp32_32x1
+)
 
 
 

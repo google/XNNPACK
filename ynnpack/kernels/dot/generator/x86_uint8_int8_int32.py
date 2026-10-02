@@ -9,12 +9,17 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
+from ynnpack.kernels.dot.generator.x86 import x86
+from ynnpack.kernels.dot.generator.x86 import x86_avx
 from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 
-class x86_avx512vnni_uint8_int8_int32(x86_avx512):
-  def __init__(self, vector_bits=512):
-    super().__init__("avx512vnni", "uint8_int8_int32", "int32_t", vector_bits, (1, 16, 4))
+class x86_uint8_int8_int32(x86):
+
+  def __init__(self, arch, vector_bits, tile_shape):
+    super().__init__(
+        arch, "uint8_int8_int32", "int32_t", vector_bits, tile_shape
+    )
     self.a_type = "uint8_t"
     self.b_type = "int8_t"
     self.flags += ["dot_flag::consistent_arithmetic"]
@@ -49,6 +54,18 @@ YNN_INTRINSIC int32_t unaligned_load_u8x4(const uint8_t* ptr) {
     return f"{c_ij} = {mm}_dpbusd_epi32({c_ij}, a_{i}_{k}, b_{k}_{j});\n"
 
 
+class x86_avx512vnni_uint8_int8_int32(x86_uint8_int8_int32, x86_avx512):
+
+  def __init__(self, arch="avx512vnni", vector_bits=512):
+    super().__init__(arch, vector_bits, tile_shape=(1, 16, 4))
+
+
+class x86_avxvnni_uint8_int8_int32(x86_uint8_int8_int32, x86_avx):
+
+  def __init__(self, arch="avxvnni", vector_bits=256):
+    super().__init__(arch, vector_bits, tile_shape=(1, 8, 4))
+
+
 generate_dot_kernels(
     x86_avx512vnni_uint8_int8_int32(),
     [
@@ -66,5 +83,18 @@ generate_dot_kernels(
         (8, 32, 4),
         (10, 32, 4),
         (16, 16, 4),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avxvnni_uint8_int8_int32(),
+    [
+        (1, 32, 4),
+        (2, 32, 4),
+        (3, 16, 4),
+        (4, 16, 4),
+        (5, 16, 4),
+        (6, 16, 4),
+        (8, 8, 4),
     ],
 )

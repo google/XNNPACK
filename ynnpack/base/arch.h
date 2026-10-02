@@ -30,9 +30,10 @@ enum {
   avx512bf16 = 1 << 11,
   avx512fp16 = 1 << 12,
   avx512vnni = 1 << 13,
-  amxbf16 = 1 << 14,
-  amxfp16 = 1 << 15,
-  amxint8 = 1 << 16,
+  avxvnni = 1 << 14,
+  amxbf16 = 1 << 15,
+  amxfp16 = 1 << 16,
+  amxint8 = 1 << 17,
 
   avx2_fma3 = avx2 | fma3,
   sse2_fma = sse2,

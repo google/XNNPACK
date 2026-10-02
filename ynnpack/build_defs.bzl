@@ -85,6 +85,7 @@ _YNN_IMPLIED_ARCHS = {
     "x86_avx512bf16": ["x86_avx512"],
     "x86_avx512fp16": ["x86_avx512"],
     "x86_avx512vnni": ["x86_avx512"],
+    "x86_avxvnni": ["x86_avx2"],
     "x86_amxbf16": ["x86_avx512"],
     "x86_amxfp16": ["x86_avx512"],
     "x86_amxint8": ["x86_avx512"],
@@ -274,6 +275,11 @@ _YNN_PARAMS_FOR_ARCH = {
         "cond": "//ynnpack:ynn_enable_x86_avx2_fma3",
         "arch_copts": _copts_for_compiler(["-mavx2", "-mfma"]),
         "arch_flag": "avx2_fma3",
+    },
+    "x86_avxvnni": {
+        "cond": "//ynnpack:ynn_enable_x86_avxvnni",
+        "arch_copts": _copts_for_compiler(["-mavx2", "-mavxvnni"]),
+        "arch_flag": "avxvnni",
     },
     "x86_avx512": {
         "cond": "//ynnpack:ynn_enable_x86_avx512",

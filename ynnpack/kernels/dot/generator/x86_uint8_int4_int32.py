@@ -170,6 +170,19 @@ c_{i}_{j+8} = {mm}_dpbusd_epi32(c_{i}_{j+8}, a_{i}_{k}, b_{k}_{j+8});
 """
 
 
+class x86_avxvnni_uint8_int4_int32(x86_avx2_uint8_int4_int32):
+
+  def __init__(self, arch="avxvnni"):
+    super().__init__(arch)
+
+  def product(self, i, j, k):
+    mm = self._mm()
+    return f"""
+c_{i}_{j+0} = {mm}_dpbusd_epi32(c_{i}_{j+0}, a_{i}_{k}, b_{k}_{j+0});
+c_{i}_{j+4} = {mm}_dpbusd_epi32(c_{i}_{j+4}, a_{i}_{k}, b_{k}_{j+4});
+"""
+
+
 generate_dot_kernels(
     x86_avx2_uint8_int4_int32(),
     [
@@ -208,5 +221,18 @@ generate_dot_kernels(
         (5, 16, 8),
         (8, 16, 8),
         (12, 16, 8),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avxvnni_uint8_int4_int32(),
+    [
+        (1, 16, 8),
+        (2, 16, 8),
+        (3, 16, 8),
+        (1, 8, 8),
+        (3, 8, 8),
+        (4, 8, 8),
+        (5, 8, 8),
     ],
 )

@@ -66,6 +66,7 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_x86_avx512bf16()) result |= arch_flag::avx512bf16;
     if (cpuinfo_has_x86_avx512fp16()) result |= arch_flag::avx512fp16;
     if (cpuinfo_has_x86_avx512vnni()) result |= arch_flag::avx512vnni;
+    if (cpuinfo_has_x86_avxvnni()) result |= arch_flag::avxvnni;
     if (cpuinfo_has_x86_amx_tile() && can_use_amx_tile()) {
       if (cpuinfo_has_x86_amx_bf16()) result |= arch_flag::amxbf16;
       if (cpuinfo_has_x86_amx_fp16()) result |= arch_flag::amxfp16;
