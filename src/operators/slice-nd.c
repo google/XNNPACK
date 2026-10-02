@@ -44,6 +44,13 @@ static enum xnn_status create_slice_nd(
   xnn_operator_t slice_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
+  if (slice_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: slice_op_out must be non-NULL",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
       "failed to create %s operator: XNNPACK is not initialized",
@@ -151,6 +158,14 @@ static enum xnn_status reshape_slice_nd(
         xnn_operator_type_to_string_v2(slice_op), num_dims,
         XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
+  }
+
+  if (input_shape == NULL || offsets == NULL || sizes == NULL) {
+    xnn_log_error(
+        "failed to reshape %s operator: input_shape, offsets, and sizes must "
+        "be non-NULL",
+        xnn_operator_type_to_string_v2(slice_op));
+    return xnn_status_invalid_parameter;
   }
 
   size_t num_input_elements = 1;

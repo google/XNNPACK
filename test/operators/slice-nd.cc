@@ -536,3 +536,34 @@ TEST(SLICE_ND_X32, reshape_overflow_contiguous_size) {
       xnn_reshape_slice_nd_x32(
           slice_op, 1, input_shape, offsets, sizes, nullptr));
 }
+
+TEST(SLICE_ND_X32, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_slice_nd_x32(0, nullptr));
+}
+
+TEST(SLICE_ND_X32, null_reshape_pointers) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t slice_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_slice_nd_x32(0, &slice_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      slice_op, xnn_delete_operator);
+
+  const size_t input_shape[1] = {4};
+  const size_t offsets[1] = {1};
+  const size_t sizes[1] = {2};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 1, nullptr, offsets, sizes, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 1, input_shape, nullptr, sizes, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_slice_nd_x32(
+          slice_op, 1, input_shape, offsets, nullptr, nullptr));
+}

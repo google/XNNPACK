@@ -363,3 +363,10 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_swap_height_and_width) {
       .channels(24)
       .TestSetupF32();
 }
+
+TEST(ARGMAX_POOLING_NHWC_F32, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_argmax_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 2, 2, 0, nullptr));
+}
