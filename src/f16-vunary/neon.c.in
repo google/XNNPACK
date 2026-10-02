@@ -1,0 +1,75 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["ABS", "NEG"]
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+$VOPQ_U16 = {
+$  "ABS": lambda x: "vandq_u16(%s, vnonsign_mask)" % x,
+$  "NEG": lambda x: "veorq_u16(%s, vsign_mask)" % x,
+$}[OP]
+void xnn_f16_v${OP.lower()}_ukernel__neon_u${BATCH_TILE}(
+    size_t batch,
+    const xnn_float16* input,
+    xnn_float16* output,
+    const struct xnn_f16_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  $if OP == "ABS":
+    const uint16x8_t vnonsign_mask = vdupq_n_u16(0x7FFF);
+  $elif OP == "NEG":
+    const uint16x8_t vsign_mask = vdupq_n_u16(0x8000);
+  $if BATCH_TILE > 8:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(SIMD_TILE):
+        uint16x8_t vacc${ABC[N]} = vld1q_u16(i); i += 8;
+
+      $for N in range(SIMD_TILE):
+        vacc${ABC[N]} = ${VOPQ_U16("vacc" + ABC[N])};
+
+      $for N in range(SIMD_TILE):
+        vst1q_u16(o, vacc${ABC[N]}); o += 8;
+    }
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    uint16x8_t vacc = vld1q_u16(i); i += 8;
+    vacc = ${VOPQ_U16("vacc")};
+    vst1q_u16(o, vacc); o += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    uint16x8_t vacc = vld1q_u16(i);
+    vacc = ${VOPQ_U16("vacc")};
+    uint16x4_t vacc_lo = vget_low_u16(vacc);
+    if (batch & (4 * sizeof(uint16_t))) {
+      vst1_u16(o, vacc_lo); o += 4;
+      vacc_lo = vget_high_u16(vacc);
+    }
+    if (batch & (2 * sizeof(uint16_t))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vacc_lo), 0); o += 2;
+      vacc_lo = vext_u16(vacc_lo, vacc_lo, 2);
+    }
+    if (batch & (1 * sizeof(uint16_t))) {
+      vst1_lane_u16(o, vacc_lo, 0);
+    }
+  }
+}

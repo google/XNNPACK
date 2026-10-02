@@ -11,6 +11,7 @@
 
 SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-u16.c
+  src/f16-vunary/gen/f16-vabs-wasmsimd-u16.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-wasmsimd-c4.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-wasmsimd-u4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-wasmsimd-2x2.c
@@ -223,6 +224,7 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int32-u16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int32-u24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int32-u32.c
+  src/f16-vunary/gen/f16-vabs-wasmsimd-u8.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-x86-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-x86.c

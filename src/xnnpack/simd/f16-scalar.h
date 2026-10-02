@@ -143,11 +143,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_min_f16(xnn_simd_f16_t a,
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_abs_f16(xnn_simd_f16_t a) {
-#if XNN_HAVE_FLOAT16
-  return fabsf(a);
-#else
-  return xnn_float16_from_float(fabsf(xnn_float16_to_float(a)));
-#endif  // XNN_HAVE_FLOAT16
+  return xnn_float16_from_bits(xnn_float16_to_bits(a) & 0x7FFF);
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_sqrt_f16(xnn_simd_f16_t a) {
@@ -159,11 +155,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_sqrt_f16(xnn_simd_f16_t a) {
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
-#if XNN_HAVE_FLOAT16
-  return -a;
-#else
-  return xnn_float16_from_float(-xnn_float16_to_float(a));
-#endif  // XNN_HAVE_FLOAT16
+  return xnn_float16_from_bits(xnn_float16_to_bits(a) ^ 0x8000);
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_round_f16(xnn_simd_f16_t a) {

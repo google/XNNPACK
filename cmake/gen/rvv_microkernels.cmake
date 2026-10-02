@@ -10,6 +10,7 @@
 
 
 SET(PROD_RVV_MICROKERNEL_SRCS
+  src/f16-vunary/gen/f16-vabs-rvv-u8v.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-rvv-u2v.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-2x2.c
@@ -153,6 +154,9 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/xx-pad/xx-pad-rvv-u4v.c)
 
 SET(NON_PROD_RVV_MICROKERNEL_SRCS
+  src/f16-vunary/gen/f16-vabs-rvv-u1v.c
+  src/f16-vunary/gen/f16-vabs-rvv-u2v.c
+  src/f16-vunary/gen/f16-vabs-rvv-u4v.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-1x1.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-2x1.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-1x2v.c
