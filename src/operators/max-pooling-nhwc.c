@@ -58,6 +58,20 @@ static enum xnn_status create_max_pooling2d_nhwc(
   xnn_operator_t max_pooling_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
+  if (max_pooling_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: max_pooling_op_out must be non-NULL",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (params == NULL && params_size != 0) {
+    xnn_log_error(
+        "failed to create %s operator: params must be non-NULL",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));

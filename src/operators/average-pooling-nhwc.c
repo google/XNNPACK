@@ -138,6 +138,14 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   xnn_operator_t average_pooling_op = NULL;
   enum xnn_status status = xnn_status_invalid_parameter;
 
+  if (average_pooling_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: average_pooling_op_out must be non-NULL",
+        xnn_operator_type_to_string(
+            xnn_operator_type_average_pooling_nhwc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
   const xnn_float16 fp16_output_min = xnn_float16_from_float(output_min);
   const xnn_float16 fp16_output_max = xnn_float16_from_float(output_max);
   const float rounded_output_min = xnn_float16_to_float(fp16_output_min);
@@ -230,6 +238,14 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
 {
   xnn_operator_t average_pooling_op = NULL;
   enum xnn_status status = xnn_status_out_of_memory;
+
+  if (average_pooling_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: average_pooling_op_out must be non-NULL",
+        xnn_operator_type_to_string(
+            xnn_operator_type_average_pooling_nhwc_f32));
+    return xnn_status_invalid_parameter;
+  }
 
   average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (average_pooling_op == NULL) {
