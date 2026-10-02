@@ -184,6 +184,40 @@ TEST(EvenSplitTest, OverflowInputStride) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+TEST(EvenSplitTest, DefineRejectsInvalidOutputs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  // Reject num_outputs == 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_even_split(subgraph, 0, input_id, 0, nullptr, 0));
+
+  // Reject output_ids == nullptr with num_outputs > 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_even_split(subgraph, 0, input_id, 2, nullptr, 0));
+
+  // Reject num_outputs > XNN_MAX_OUTPUTS.
+  std::vector<uint32_t> many_outputs(XNN_MAX_OUTPUTS + 1, 0);
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_even_split(
+          subgraph, 0, input_id, many_outputs.size(), many_outputs.data(), 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
