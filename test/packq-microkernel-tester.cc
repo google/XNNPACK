@@ -47,7 +47,20 @@ void PackQMicrokernelTester::Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const {
         /*lhs_stride=*/k() * sizeof(float), packed_w.data());
 
   // Verify results.
+  const size_t k_internal = k_roundedup(k(), kr(), sr());
+  const size_t k_block_len = kr() / sr();
+  const size_t block_stride = lhs_packed_stride(k(), mr(), kr(), sr());
   for (size_t i = 0; i < packed_size; i++) {
+    if (!check_k_padding()) {
+      const size_t offset = i % block_stride;
+      if (offset < mr() * k_internal) {
+        const size_t k_index = (offset / (mr() * k_block_len)) * k_block_len +
+                               offset % k_block_len;
+        if (k_index >= k()) {
+          continue;
+        }
+      }
+    }
     if (packed_w_ref[i] != INT8_C(0x7B)) {  // Allow pad to differ
       ASSERT_EQ((int32_t)packed_w[i], (int32_t)packed_w_ref[i])
           << "at n " << i << " of " << packed_size << ", m=" << m()

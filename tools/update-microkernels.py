@@ -69,6 +69,7 @@ _ISA_LIST = frozenset({
     'rvv',
     'rvvfp16arith',
     'scalar',
+    'sme2',
     'sse',
     'sse2',
     'sse2fma',
@@ -84,6 +85,7 @@ _ISA_LIST = frozenset({
 })
 
 _ISA_MAP = {
+    'sme2': 'neonsme2',
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',
@@ -102,6 +104,10 @@ _ARCH_LIST = frozenset({
 _MICROKERNEL_NAME_REGEX = re.compile(
     r'\bxnn_(?:[a-z0-9]+(?:_[a-z0-9]+)*)_ukernel(?:_[a-z0-9]+)*__(?:[a-z0-9]+(?:_[a-z0-9]+)*)\b'
 )
+
+_EXTRA_PROD_MICROKERNELS = {
+    'src/arm-sme-abi-stubs-sme2.c': 'neonsme2',
+}
 
 _VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'qs8-requantization'),
@@ -327,6 +333,9 @@ def main(args):
   prod_microkernels = set(
       map(microkernel_name_to_filename.get, prod_microkernels)
   )
+  for extra_path, extra_isa in _EXTRA_PROD_MICROKERNELS.items():
+    c_microkernels_per_isa[extra_isa].append(extra_path)
+    prod_microkernels.add(extra_path)
 
   # Split the microkernels into prod/test.
   prod_c_microkernels_per_isa = dict()

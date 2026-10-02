@@ -1431,6 +1431,18 @@ config_setting(
     define_values = {"xnn_enable_hmp": "false"},
 )
 
+# Enables usage of ARM SME2 ACLE kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_acle_explicit_true",
+    define_values = {"xnn_enable_arm_sme2_acle": "true"},
+)
+
+# Disables usage of ARM SME2 ACLE kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_acle_explicit_false",
+    define_values = {"xnn_enable_arm_sme2_acle": "false"},
+)
+
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
 config_setting(
     name = "xnn_enable_wasm_revectorize_explicit_true",
@@ -1659,6 +1671,15 @@ alias(
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
         "//conditions:default": ":arm_sme2_enabled_by_default",
+    }),
+)
+
+alias(
+    name = "arm_sme2_acle_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme2_acle_explicit_true": ":xnn_enable_arm_sme2_acle_explicit_true",
+        ":xnn_enable_arm_sme2_acle_explicit_false": ":xnn_enable_arm_sme2_acle_explicit_true",
+        "//conditions:default": ":xnn_enable_arm_sme2_acle_explicit_true",
     }),
 )
 
