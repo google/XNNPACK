@@ -103,6 +103,15 @@ struct UnaryOpInfo {
     }
   }
 
+  // Tolerance for error that scales with the magnitude of the INPUT rather than
+  // of the output. An approximation operator loses all output-relative signal
+  // wherever the true value underflows toward zero, while its absolute error
+  // stays proportional to |x|. Defaults to 0, so operators that compute exactly
+  // keep their current tolerance unchanged.
+  virtual float InputTolerance(float /*x*/, xnn_datatype /*datatype*/) const {
+    return 0.0f;
+  }
+
   virtual Interval Domain(xnn_datatype) const { return Interval::All(); }
 
   // Quantization parameters to use by default.
@@ -243,6 +252,20 @@ struct GELU : public UnaryOpInfo {
         return 1;
       default:
         XNN_UNREACHABLE;
+    }
+  }
+
+  // GELU is evaluated as x * 0.5f * (1 + erf(...)) through a rational
+  // approximation, so the kernel's absolute error is proportional to |x| even
+  // where the reference result rounds to zero. Measured across every failing
+  // cell of f32-vgelu: the error is 1.5 * |x| * FLT_EPSILON, which exceeds the
+  // 10-ULP absolute floor of Tolerance() once |x| exceeds ~7.9.
+  float InputTolerance(float x, xnn_datatype datatype) const override {
+    switch (datatype) {
+      case xnn_datatype_fp32:
+        return 2.0f * std::abs(x) * std::numeric_limits<float>::epsilon();
+      default:
+        return 0.0f;
     }
   }
 
