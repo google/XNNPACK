@@ -766,6 +766,9 @@ void xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x8c8__sse2(
           packed_b[i] = 0;
         }
       }
+      for (size_t i = n; i < 8; ++i) {
+        packed_b[i] = 0;
+      }
       out += 8 * sizeof(int32_t);
 
       // Clamp weight pointers
