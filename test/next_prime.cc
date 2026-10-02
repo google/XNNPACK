@@ -104,7 +104,10 @@ std::array<size_t, 1000> kFirstThousandPrimes = {
 
 bool IsPrime(size_t n) {
   assert(n <= kFirstThousandPrimes.back() * kFirstThousandPrimes.back());
-  if (n == 1 || n == 2) {
+  if (n <= 1) {
+    return false;
+  }
+  if (n == 2) {
     return true;
   }
   for (const size_t k : kFirstThousandPrimes) {

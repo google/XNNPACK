@@ -215,6 +215,7 @@ class Buffer {
   Buffer& operator=(Buffer&& other) {
     std::swap(data_, other.data_);
     std::swap(size_, other.size_);
+    std::swap(name_, other.name_);
     return *this;
   }
 

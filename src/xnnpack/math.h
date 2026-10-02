@@ -146,26 +146,25 @@ XNN_INLINE static int16_t saturating_add_s16(int16_t x, int16_t y) {
 }
 
 XNN_INLINE static int32_t math_asr_s32_rounding(int32_t x, int n) {
-  if (n == 0) return x;
-  int32_t rounding = 1 << (n - 1);
-  return ((int64_t)x + rounding) >> n;
+  if (n <= 0) return x;
+  if (n >= 32) return 0;
+  const int64_t rounding = INT64_C(1) << (n - 1);
+  return (int32_t)(((int64_t)x + rounding) >> n);
 }
 
 XNN_INLINE static int32_t saturating_rounding_shift_left_s32(int32_t x,
                                                              int32_t shift) {
-  if (shift >= 0) {
-    return saturating_cast_s64_s32((int64_t)x << shift);
+  if (shift >= 32) {
+    return x > 0 ? INT32_MAX : (x < 0 ? INT32_MIN : 0);
+  } else if (shift >= 0) {
+    return saturating_cast_s64_s32((int64_t)x * (INT64_C(1) << shift));
   } else {
     return math_asr_s32_rounding(x, -shift);
   }
 }
 
 XNN_INLINE static uint32_t math_abs_s32(int32_t n) {
-#if defined(_MSC_VER)
-  return (uint32_t)abs((int)n);
-#else
   return XNN_UNPREDICTABLE(n >= 0) ? (uint32_t)n : -(uint32_t)n;
-#endif
 }
 
 // Flip low 15 bits based on high bit.  Reversible.
@@ -374,6 +373,24 @@ XNN_INLINE static uint32_t math_clz_nonzero_u32(uint32_t x) {
 XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
 #if defined(_MSC_VER) && !defined(__clang__)
   unsigned long index;
+  if XNN_UNPREDICTABLE (_BitScanForward(&index, (unsigned long)x) != 0) {
+    return (uint32_t)index;
+  } else {
+    return 32;
+  }
+#else
+  if XNN_UNPREDICTABLE (x == 0) {
+    return 32;
+  } else {
+    return (uint32_t)__builtin_ctz((unsigned int)x);
+  }
+#endif
+}
+
+XNN_INLINE static uint32_t math_ctz_nonzero_u32(uint32_t x) {
+  assert(x != 0);
+#if defined(_MSC_VER) && !defined(__clang__)
+  unsigned long index;
   _BitScanForward(&index, (unsigned long)x);
   return (uint32_t)index;
 #else
@@ -397,7 +414,7 @@ XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r) {
 #if XNN_COMPILER_MSVC
   return _rotl((unsigned int)x, (int)r);
 #else
-  return (x << r) | (x >> (32 - r));
+  return (x << (r & 31)) | (x >> ((32 - r) & 31));
 #endif
 }
 
