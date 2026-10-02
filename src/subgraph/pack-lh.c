@@ -256,6 +256,20 @@ enum xnn_status xnn_define_pack_lh(
     return status;
   }
 
+  status = xnn_subgraph_check_datatype_matches(
+    xnn_node_type_pack_lh, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (input_value->datatype == xnn_datatype_qint8) {
+    status = xnn_subgraph_check_quantization_parameter_matches(
+      xnn_node_type_pack_lh, input_id, input_value, output_id, output_value);
+    if (status != xnn_status_success) {
+      return status;
+    }
+  }
+
   switch (output_value->datatype) {
     case xnn_datatype_qint8:
       // Coerce the output from `xnn_datatype_qint8` to `xnn_datatype_pqint8` so
