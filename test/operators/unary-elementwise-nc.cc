@@ -464,3 +464,57 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Values(xnn_unary_convert), testing::ValuesIn(all_datatypes),
         testing::ValuesIn(quantized_datatypes), testing::ValuesIn(run_modes))),
     [](const auto& info) { return info.param.Name(); });
+
+TEST(UNARY_ELEMENTWISE_NC, int32_edge_cases) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const std::array<int32_t, 5> input = {
+      std::numeric_limits<int32_t>::min(), -1, 0, 1,
+      std::numeric_limits<int32_t>::max()};
+  std::array<int32_t, 5> output = {0};
+
+  // Test Negate
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_unary_elementwise_nc(
+                xnn_unary_negate, xnn_datatype_int32, xnn_datatype_int32,
+                /*params=*/nullptr, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0, /*batch_size=*/1,
+                /*channels=*/input.size(), /*input_stride=*/input.size(),
+                /*output_stride=*/output.size(), /*threadpool=*/nullptr,
+                input.data(), output.data()));
+  EXPECT_EQ(output[0], std::numeric_limits<int32_t>::min());
+  EXPECT_EQ(output[1], 1);
+  EXPECT_EQ(output[2], 0);
+  EXPECT_EQ(output[3], -1);
+  EXPECT_EQ(output[4], -std::numeric_limits<int32_t>::max());
+
+  // Test Abs
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_unary_elementwise_nc(
+                xnn_unary_abs, xnn_datatype_int32, xnn_datatype_int32,
+                /*params=*/nullptr, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0, /*batch_size=*/1,
+                /*channels=*/input.size(), /*input_stride=*/input.size(),
+                /*output_stride=*/output.size(), /*threadpool=*/nullptr,
+                input.data(), output.data()));
+  EXPECT_EQ(output[0], std::numeric_limits<int32_t>::min());
+  EXPECT_EQ(output[1], 1);
+  EXPECT_EQ(output[2], 0);
+  EXPECT_EQ(output[3], 1);
+  EXPECT_EQ(output[4], std::numeric_limits<int32_t>::max());
+
+  // Test Square
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_unary_elementwise_nc(
+                xnn_unary_square, xnn_datatype_int32, xnn_datatype_int32,
+                /*params=*/nullptr, /*input_quantization=*/nullptr,
+                /*output_quantization=*/nullptr, /*flags=*/0, /*batch_size=*/1,
+                /*channels=*/input.size(), /*input_stride=*/input.size(),
+                /*output_stride=*/output.size(), /*threadpool=*/nullptr,
+                input.data(), output.data()));
+  EXPECT_EQ(output[0], 0);
+  EXPECT_EQ(output[1], 1);
+  EXPECT_EQ(output[2], 0);
+  EXPECT_EQ(output[3], 1);
+  EXPECT_EQ(output[4], 1);
+}

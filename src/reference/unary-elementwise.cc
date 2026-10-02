@@ -229,7 +229,9 @@ template <typename T>
 struct AbsOp {
   explicit AbsOp(const xnn_unary_uparams*) {}
 
-  int32_t operator()(int32_t x) const { return std::abs(x); }
+  int32_t operator()(int32_t x) const {
+    return static_cast<int32_t>(math_abs_s32(x));
+  }
   float operator()(float x) const { return std::abs(x); }
   xnn_float16 operator()(xnn_float16 x) const {
     return xnn_float16_from_bits(xnn_float16_to_bits(x) & 0x7fff);
@@ -306,7 +308,9 @@ struct NegateOp {
   explicit NegateOp(const xnn_unary_uparams*) {}
 
   static const uint16_t sign_mask = 0x8000;
-  int32_t operator()(int32_t x) const { return -x; }
+  int32_t operator()(int32_t x) const {
+    return static_cast<int32_t>(-static_cast<uint32_t>(x));
+  }
   float operator()(float x) const { return -x; }
   xnn_float16 operator()(xnn_float16 x) const {
     return xnn_float16_from_bits(xnn_float16_to_bits(x) ^ sign_mask);
@@ -370,7 +374,10 @@ template <>
 struct SquareOp<int32_t> {
   explicit SquareOp(const xnn_unary_uparams*) {}
 
-  int32_t operator()(int32_t x) const { return (int64_t)x * (int64_t)x; }
+  int32_t operator()(int32_t x) const {
+    const uint32_t ux = static_cast<uint32_t>(x);
+    return static_cast<int32_t>(ux * ux);
+  }
 };
 
 template <typename T>

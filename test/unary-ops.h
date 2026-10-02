@@ -151,7 +151,7 @@ struct Abs : public UnaryOpInfo {
     return std::abs(x);
   }
   int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
-    return std::abs(x);
+    return static_cast<int32_t>(math_abs_s32(x));
   }
 };
 
@@ -160,7 +160,7 @@ struct Negate : public UnaryOpInfo {
     return -x;
   }
   int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
-    return -x;
+    return static_cast<int32_t>(-static_cast<uint32_t>(x));
   }
 };
 
