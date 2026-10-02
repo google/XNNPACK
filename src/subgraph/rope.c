@@ -302,7 +302,14 @@ enum xnn_status xnn_define_rope(
       return xnn_status_invalid_parameter;
   }
 
-  status = xnn_subgraph_check_datatype_matches(xnn_node_type_rope, input_id, input_value, output_id, output_value);
+  status = xnn_subgraph_check_datatype_matches(
+    xnn_node_type_rope, input_id, input_value, weights_id, weights_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  status = xnn_subgraph_check_datatype_matches(
+    xnn_node_type_rope, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
