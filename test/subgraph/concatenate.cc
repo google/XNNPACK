@@ -235,6 +235,38 @@ TEST(ConcatenateTest, OverflowBatchSize) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+// The batch-size guard at the top of reshape_concatenate_operator only checks
+// the leading-dims product. Forge a case where those fit but the final
+// xnn_runtime_tensor_get_size (elements × bytes) overflows.  This exercises the
+// `new_size == SIZE_MAX` guard added to reshape_concatenate_operator.
+TEST(ConcatenateTest, OverflowOutputTensorSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  uint32_t input_id1 = 1;
+  uint32_t input_id2 = 2;
+  uint32_t output_id = 0;
+  std::vector<uint32_t> input_ids = {input_id1, input_id2};
+
+  // Concatenate along axis=0 so leading batch dims are absent and batch_size=1.
+  // 1-D tensors: [10] + [10] → [20].
+  ConcatenateTester tester(3);
+  tester.AddOutputTensorF32(TensorShape({20}), output_id)
+      .AddInputTensorF32(TensorShape({10}), input_id1)
+      .AddInputTensorF32(TensorShape({10}), input_id2)
+      .AddConcatenate(/*axis=*/0, input_ids, output_id)
+      .CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  ASSERT_NE(runtime, nullptr);
+
+  // Make both inputs huge: concatenated dim = SIZE_MAX / 2 + SIZE_MAX / 2
+  // = SIZE_MAX - 1 elements, so element count fits but byte count (× 4) overflows.
+  runtime->values[input_id1].shape.dim[0] = SIZE_MAX / 4 + 1;
+  runtime->values[input_id2].shape.dim[0] = SIZE_MAX / 4 + 1;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
