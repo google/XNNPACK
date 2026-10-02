@@ -60,10 +60,27 @@ size_t xnn_compute_deconvolution_output_dimension(
   size_t dilation_dimension,
   size_t stride_dimension)
 {
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
-  return doz(
-    stride_dimension * (input_dimension - 1) + adjustment_dimension + effective_kernel_dimension,
-    output_padding_dimension);
+  // Returns SIZE_MAX on overflow. stride_dimension, kernel_dimension,
+  // dilation_dimension and the padding terms are node parameters, so their
+  // products with the input dimension are not bounded by the shape size
+  // validation performed in xnn_define_tensor_value.
+  size_t effective_kernel_dimension = 0;
+  if (!xnn_safe_mul(kernel_dimension - 1, dilation_dimension,
+                    &effective_kernel_dimension) ||
+      !xnn_safe_add(effective_kernel_dimension, 1,
+                    &effective_kernel_dimension)) {
+    return SIZE_MAX;
+  }
+  size_t output_dimension = 0;
+  if (!xnn_safe_mul(stride_dimension, input_dimension - 1,
+                    &output_dimension) ||
+      !xnn_safe_add(output_dimension, adjustment_dimension,
+                    &output_dimension) ||
+      !xnn_safe_add(output_dimension, effective_kernel_dimension,
+                    &output_dimension)) {
+    return SIZE_MAX;
+  }
+  return doz(output_dimension, output_padding_dimension);
 }
 
 size_t xnn_compute_unpooling_output_dimension(
