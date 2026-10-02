@@ -564,11 +564,25 @@ static void init_qs8_rsum_config(void) {
     qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_u32);
     qs8_rsum_config.rd_width = 32;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__rvv_u2v);
-    qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
-    qs8_rsum_config.rd_width = 2 * hardware_config->vlenb / sizeof(int8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(int8_t)) {
+      qs8_rsum_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__rvv_u2v);
+      qs8_rsum_config.rd_ukernel =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(
+              xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      qs8_rsum_config.rd_width = 2 * hardware_config->vlenb / sizeof(int8_t);
+    } else {
+      qs8_rsum_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__scalar_u4);
+      qs8_rsum_config.rd_ukernel =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(
+              xnn_qs8_rdsum_ukernel_7p7x__scalar_u4);
+      qs8_rsum_config.rd_width = 4;
+    }
   #else
     qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__scalar_u4);
     qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__scalar_u4);
@@ -631,11 +645,25 @@ static void init_qu8_rsum_config(void) {
     qu8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_u32);
     qu8_rsum_config.rd_width = 32;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__rvv_u2v);
-    qu8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v);
-    qu8_rsum_config.rd_width = 2 * hardware_config->vlenb / sizeof(uint8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(uint8_t)) {
+      qu8_rsum_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__rvv_u2v);
+      qu8_rsum_config.rd_ukernel =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(
+              xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v);
+      qu8_rsum_config.rd_width = 2 * hardware_config->vlenb / sizeof(uint8_t);
+    } else {
+      qu8_rsum_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__scalar_u4);
+      qu8_rsum_config.rd_ukernel =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(
+              xnn_qu8_rdsum_ukernel_7p7x__scalar_u4);
+      qu8_rsum_config.rd_width = 4;
+    }
   #else
     qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__scalar_u4);
     qu8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qu8_rdsum_ukernel_7p7x__scalar_u4);
@@ -1030,11 +1058,18 @@ static void init_f32_rmax_config(void) {
     f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__wasmsimd_u32);
     f32_rmax_config.rd_width = 32;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__rvv_u8v);
-    f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__rvv_u8v);
-    f32_rmax_config.rd_width = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rmax_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__rvv_u8v);
+      f32_rmax_config.rd_ukernel =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(
+              xnn_f32_rdmax_ukernel_2p2x__rvv_u8v);
+      f32_rmax_config.rd_width = 8 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1172,11 +1207,18 @@ static void init_f32_rmin_config(void) {
     f32_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmin_ukernel_2p2x__wasmsimd_u32);
     f32_rmin_config.rd_width = 32;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmin_ukernel__rvv_u8v);
-    f32_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmin_ukernel_2p2x__rvv_u8v);
-    f32_rmin_config.rd_width = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rmin_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmin_ukernel__rvv_u8v);
+      f32_rmin_config.rd_ukernel =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(
+              xnn_f32_rdmin_ukernel_2p2x__rvv_u8v);
+      f32_rmin_config.rd_width = 8 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1266,11 +1308,18 @@ static void init_f32_rsum_config(void) {
     f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_u16);
     f32_rsum_config.rd_width = 16;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__rvv_u4v);
-    f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__rvv_u4v);
-    f32_rsum_config.rd_width = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rsum_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__rvv_u4v);
+      f32_rsum_config.rd_ukernel2 =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(
+              xnn_f32_rdsum_ukernel_7p7x__rvv_u4v);
+      f32_rsum_config.rd_width = 4 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1344,11 +1393,25 @@ static void init_f32_rsum2_config(void) {
     f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__wasmsimd_u16);
     f32_rsum2_config.rd_width = 16;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__rvv_u4v);
-    f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__rvv_u4v);
-    f32_rsum2_config.rd_width = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rsum2_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__rvv_u4v);
+      f32_rsum2_config.rd_ukernel2 =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(
+              xnn_f32_rdsum2_ukernel_7p7x__rvv_u4v);
+      f32_rsum2_config.rd_width = 4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_rsum2_config.ukernel =
+          XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__scalar_u4_acc4);
+      f32_rsum2_config.rd_ukernel2 =
+          XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(
+              xnn_f32_rdsum2_ukernel_7p7x__scalar_u4);
+      f32_rsum2_config.rd_width = 4;
+    }
   #else
     f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__scalar_u4_acc4);
     f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__scalar_u4);
