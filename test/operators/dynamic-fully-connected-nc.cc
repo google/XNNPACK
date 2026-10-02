@@ -327,3 +327,24 @@ TEST(DYNAMIC_FULLY_CONNECTED_NC_F32, overflow_batch_stride) {
                 /*threadpool=*/nullptr));
 }
 
+// NULL workspace_size skips the query instead of crashing. Every other
+// reshape follows the `if (workspace_size != NULL)` convention.
+TEST(DYNAMIC_FULLY_CONNECTED_NC_F32, null_workspace_size) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_dynamic_fully_connected_nc_f32(
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  EXPECT_EQ(xnn_status_success,
+            xnn_reshape_dynamic_fully_connected_nc_f32(
+                op, /*batch_size=*/2, /*input_channels=*/10,
+                /*output_channels=*/10, /*input_stride=*/10,
+                /*output_stride=*/10, /*workspace_size=*/nullptr,
+                /*threadpool=*/nullptr));
+}
+
