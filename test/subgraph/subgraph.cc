@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/datatype.h"
 #include "test/subgraph/runtime-tester.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -115,6 +116,55 @@ TEST(SUBGRAPH, reserve_nodes_overflow) {
                 subgraph, static_cast<size_t>(XNN_INVALID_NODE_ID)),
             xnn_status_out_of_memory);
   ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
+struct DatatypeSize {
+  xnn_datatype datatype;
+  size_t log2_size_bits;
+};
+
+const DatatypeSize kDatatypeSizes[] = {
+    {xnn_datatype_qint2, 1},   {xnn_datatype_qcint2, 1},
+    {xnn_datatype_qint4, 2},   {xnn_datatype_qcint4, 2},
+    {xnn_datatype_qbint4, 2},  {xnn_datatype_qint8, 3},
+    {xnn_datatype_pqint8, 3},  {xnn_datatype_quint8, 3},
+    {xnn_datatype_qcint8, 3},  {xnn_datatype_qdint8, 3},
+    {xnn_datatype_qduint8, 3}, {xnn_datatype_qpint8, 3},
+    {xnn_datatype_fp16, 4},    {xnn_datatype_bf16, 4},
+    {xnn_datatype_pfp16, 4},   {xnn_datatype_qint32, 5},
+    {xnn_datatype_qcint32, 5}, {xnn_datatype_int32, 5},
+    {xnn_datatype_fp32, 5},    {xnn_datatype_pfp32, 5},
+};
+
+TEST(Datatype, Log2SizeBits) {
+  for (const DatatypeSize& entry : kDatatypeSizes) {
+    EXPECT_EQ(xnn_datatype_log2_size_bits(entry.datatype),
+              entry.log2_size_bits);
+  }
+}
+
+TEST(Datatype, SizeBits) {
+  for (const DatatypeSize& entry : kDatatypeSizes) {
+    EXPECT_EQ(xnn_datatype_size_bits(entry.datatype),
+              size_t{1} << entry.log2_size_bits);
+  }
+}
+
+TEST(Datatype, SizeBytes) {
+  for (const DatatypeSize& entry : kDatatypeSizes) {
+    if (entry.log2_size_bits < 3) {
+      continue;
+    }
+    EXPECT_EQ(xnn_datatype_log2_size_bytes(entry.datatype),
+              entry.log2_size_bits - 3);
+    EXPECT_EQ(xnn_datatype_size_bytes(entry.datatype),
+              size_t{1} << (entry.log2_size_bits - 3));
+  }
+}
+
+TEST(Datatype, InvalidDatatypeHasNoSize) {
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_invalid), 0u);
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_invalid), 0u);
 }
 
 }  // namespace xnnpack
