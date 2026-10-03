@@ -1149,6 +1149,145 @@ class CountingAllocatorGuard {
   size_t live_aligned_allocations_ = 0;
 };
 
+// Fails the Nth allocation made while it is installed, counting the plain and the
+// aligned hook together, and passes every other allocation through to the
+// allocator it replaced. Like CountingAllocatorGuard it swaps xnn_params.allocator
+// directly, so it does not depend on xnn_initialize() being called first.
+class FailingAllocatorGuard {
+ public:
+  explicit FailingAllocatorGuard(size_t fail_at)
+      : saved_allocator_(xnn_params.allocator), fail_at_(fail_at) {
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.allocate = Allocate;
+    xnn_params.allocator.reallocate = Reallocate;
+    xnn_params.allocator.aligned_allocate = AlignedAllocate;
+  }
+
+  ~FailingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+  // Non-copyable/non-movable because xnn_params.allocator.context holds `this`.
+  FailingAllocatorGuard(const FailingAllocatorGuard&) = delete;
+  FailingAllocatorGuard& operator=(const FailingAllocatorGuard&) = delete;
+
+  // How many allocations were attempted, so a caller can tell whether the
+  // injection index was ever reached.
+  size_t attempts() const { return attempts_; }
+
+ private:
+  bool ShouldFail() { return ++attempts_ == fail_at_; }
+
+  static void* Allocate(void* context, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->ShouldFail()) {
+      return nullptr;
+    }
+    return self->saved_allocator_.allocate(self->saved_allocator_.context, size);
+  }
+
+  static void* Reallocate(void* context, void* pointer, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->ShouldFail()) {
+      return nullptr;
+    }
+    return self->saved_allocator_.reallocate(self->saved_allocator_.context,
+                                             pointer, size);
+  }
+
+  static void* AlignedAllocate(void* context, size_t alignment, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->ShouldFail()) {
+      return nullptr;
+    }
+    return self->saved_allocator_.aligned_allocate(
+        self->saved_allocator_.context, alignment, size);
+  }
+
+  const struct xnn_allocator saved_allocator_;
+  const size_t fail_at_;
+  size_t attempts_ = 0;
+};
+
+// Regression test for create_convolution2d_nhwc() returning a stale status.
+//
+// `status` is a single variable reused across the whole function. It is set to
+// xnn_status_out_of_memory before the operator descriptor allocations, but the
+// microkernel paths then reassign it to the result of create_vmulcaddc_path(),
+// create_dwconv_path() or create_igemm(). Once one of those succeeds, `status`
+// holds xnn_status_success, so any *later* allocation failure jumps to `error:`
+// and returns that stale success - while `*convolution_op_out`, which is only
+// written on the success path, is left untouched.
+//
+// The caller is therefore told the operator was created and handed a null
+// operator. xnn_reshape_convolution2d_nhwc_* dereferences it immediately
+// (src/operators/convolution-nhwc.c:3892).
+TEST(CONVOLUTION_NHWC_QD8_F32_QC8W, out_of_memory_during_create_is_reported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const size_t input_channels = 8;
+  const size_t output_channels = 8;
+  const size_t kernel_height = 3;
+  const size_t kernel_width = 3;
+  std::vector<int8_t> kernel(
+      output_channels * kernel_height * kernel_width * input_channels, 0);
+  std::vector<float> bias(output_channels, 0.0f);
+  std::vector<float> kernel_scale(output_channels, 1.0f);
+
+  // Warm the fingerprint cache with one uninjected create, so the sweep below
+  // only ever fails an allocation that create_convolution2d_nhwc() itself makes.
+  {
+    xnn_operator_t warmup_op = nullptr;
+    ASSERT_EQ(xnn_status_success, xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
+              /*input_padding_top=*/1, /*input_padding_right=*/1,
+              /*input_padding_bottom=*/1, /*input_padding_left=*/1,
+              kernel_height, kernel_width, /*subsampling_height=*/1,
+              /*subsampling_width=*/1, /*dilation_height=*/1,
+              /*dilation_width=*/1, /*groups=*/1, input_channels, output_channels,
+              /*input_channel_stride=*/input_channels,
+              /*output_channel_stride=*/output_channels, kernel_scale.data(),
+              kernel.data(), bias.data(), /*output_min=*/-1.0e+30f,
+              /*output_max=*/1.0e+30f, /*flags=*/0, /*weights_cache=*/nullptr,
+              &warmup_op));
+    ASSERT_NE(warmup_op, nullptr);
+    ASSERT_EQ(xnn_status_success, xnn_delete_operator(warmup_op));
+  }
+
+  // create_convolution2d_nhwc() makes at most a handful of allocations; sweep
+  // past the end of that so each index is exercised.
+  for (size_t fail_at = 1; fail_at <= 16; fail_at++) {
+    FailingAllocatorGuard allocator_guard(fail_at);
+
+    xnn_operator_t convolution_op = nullptr;
+    const xnn_status status = xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
+        /*input_padding_top=*/1, /*input_padding_right=*/1,
+        /*input_padding_bottom=*/1, /*input_padding_left=*/1, kernel_height,
+        kernel_width, /*subsampling_height=*/1, /*subsampling_width=*/1,
+        /*dilation_height=*/1, /*dilation_width=*/1, /*groups=*/1, input_channels,
+        output_channels,
+        /*input_channel_stride=*/input_channels,
+        /*output_channel_stride=*/output_channels, kernel_scale.data(),
+        kernel.data(), bias.data(), /*output_min=*/-1.0e+30f,
+        /*output_max=*/1.0e+30f, /*flags=*/0, /*weights_cache=*/nullptr,
+        &convolution_op);
+
+    if (allocator_guard.attempts() < fail_at) {
+      // This create never reached the failing index, so nothing was injected.
+      continue;
+    }
+
+    if (status == xnn_status_success) {
+      // Reporting success obliges the caller to receive an operator.
+      EXPECT_NE(convolution_op, nullptr) << "fail_at=" << fail_at;
+      if (convolution_op != nullptr) {
+        EXPECT_EQ(xnn_status_success, xnn_delete_operator(convolution_op))
+            << "fail_at=" << fail_at;
+      }
+    } else {
+      // Reporting failure must not hand back an operator.
+      EXPECT_EQ(convolution_op, nullptr) << "fail_at=" << fail_at;
+    }
+  }
+}
+
 // The dynamically quantized reshape grows convolution_op->zero_buffers and
 // bumps valid_batch_size before it delegates to the shared reshape, which can
 // still reject the shape and leave xnn_operator::batch_size behind. Deleting
