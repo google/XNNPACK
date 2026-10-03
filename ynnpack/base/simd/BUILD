@@ -5,8 +5,6 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
-package(default_visibility = ["//ynnpack:__subpackages__"])
-
 _COMPATIBLE_WITH = []
 
 # These headers provide SIMD wrappers shared among multiple targets.
