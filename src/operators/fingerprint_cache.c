@@ -154,6 +154,12 @@ struct fingerprint_context create_fingerprint_context(
     // Do this after the checks to avoid a memory allocation when unnecessary.
     context.cache.context =
         xnn_allocate_zero_memory(sizeof(struct fingerprint_cache_context));
+    if (context.cache.context == NULL) {
+      // Report the failure. Leaving the status as xnn_status_uninitialized would
+      // tell callers that no fingerprint exists yet, so they would go on to compute
+      // one against a NULL cache context.
+      context.status = xnn_status_out_of_memory;
+    }
   }
   return context;
 }
