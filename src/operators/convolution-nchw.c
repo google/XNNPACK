@@ -221,6 +221,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_conv2d_hwc2chw_path(
     const xnn_conv_hwc2chw_ukernel_fn conv_hwc2chw_ukernel,
     const xnn_operator_t convolution_op)
 {
+  enum xnn_status status = xnn_status_out_of_memory;
   assert(conv_hwc2chw_ukernel != NULL);
 
   const struct xnn_weights_cache_look_up_key cache_key = {
@@ -270,15 +271,30 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_conv2d_hwc2chw_path(
     if (use_weights_cache(convolution_op)) {
       convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
           convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+      if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+        // The packed weights could not be recorded in the cache (e.g. the
+        // cache was already finalized and did not contain these weights).
+        // `packed_weights()` would resolve the offset to NULL and the
+        // microkernel would read from address 0, so fail the create instead.
+        xnn_log_error(
+            "failed to create %s operator: failed to store packed weights in "
+            "the weights cache",
+            xnn_operator_type_to_string(context->operator_type));
+        goto error;
+      }
     }
   }
 
+  status = xnn_status_success;
   convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
     .hwc2chw_fn = conv_hwc2chw_ukernel,
     .output_height_tile = output_height_tile,
     .output_channel_tile = output_channel_tile,
   };
   return xnn_status_success;
+
+error:
+  return status;
 }
 
 static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
@@ -290,6 +306,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
     const xnn_dwconv2d_chw_ukernel_fn dwconv_ukernel,
     const xnn_operator_t convolution_op)
 {
+  enum xnn_status status = xnn_status_out_of_memory;
   assert(dwconv_ukernel != NULL);
   // All 1s or 0s to negate the binary representation of the cache key if the
   // convolution isn't depthwise.
@@ -338,15 +355,30 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
     if (use_weights_cache(convolution_op)) {
       convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
           convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+      if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+        // The packed weights could not be recorded in the cache (e.g. the
+        // cache was already finalized and did not contain these weights).
+        // `packed_weights()` would resolve the offset to NULL and the
+        // microkernel would read from address 0, so fail the create instead.
+        xnn_log_error(
+            "failed to create %s operator: failed to store packed weights in "
+            "the weights cache",
+            xnn_operator_type_to_string(context->operator_type));
+        goto error;
+      }
     }
   }
 
+  status = xnn_status_success;
   convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {
     .chw_fn = dwconv_ukernel,
     .output_width_tile = output_width_tile,
   };
 
   return xnn_status_success;
+
+error:
+  return status;
 }
 
 struct conv2d_variant {

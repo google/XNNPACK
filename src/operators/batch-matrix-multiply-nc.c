@@ -522,6 +522,18 @@ create_batch_matrix_multiply_nc_const_weights(
           xnn_look_up_or_insert_weights_cache(
               batch_matrix_multiply_op->weights_cache, &cache_key, packed_data,
               aligned_size);
+      if (batch_matrix_multiply_op->packed_weights.offset ==
+          XNN_CACHE_NOT_FOUND) {
+        // The packed weights could not be recorded in the cache (e.g. the
+        // cache was already finalized and did not contain these weights).
+        // `packed_weights()` would resolve the offset to NULL and the GEMM
+        // microkernel would read from address 0, so fail the create instead.
+        xnn_log_error(
+            "failed to create %s operator: failed to store packed weights in "
+            "the weights cache",
+            xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+        return xnn_status_out_of_memory;
+      }
     }
 
   } else {
