@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/datatype.h"
 #include "test/subgraph/runtime-tester.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -115,6 +116,84 @@ TEST(SUBGRAPH, reserve_nodes_overflow) {
                 subgraph, static_cast<size_t>(XNN_INVALID_NODE_ID)),
             xnn_status_out_of_memory);
   ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
+size_t ExpectedLog2SizeBits(xnn_datatype datatype) {
+  switch (datatype) {
+    case xnn_datatype_invalid:
+      return -1;
+    case xnn_datatype_qint2:
+    case xnn_datatype_qcint2:
+      return 1;
+    case xnn_datatype_qint4:
+    case xnn_datatype_qcint4:
+    case xnn_datatype_qbint4:
+      return 2;
+    case xnn_datatype_qint8:
+    case xnn_datatype_pqint8:
+    case xnn_datatype_quint8:
+    case xnn_datatype_qcint8:
+    case xnn_datatype_qdint8:
+    case xnn_datatype_qduint8:
+    case xnn_datatype_qpint8:
+      return 3;
+    case xnn_datatype_fp16:
+    case xnn_datatype_bf16:
+    case xnn_datatype_pfp16:
+      return 4;
+    case xnn_datatype_qint32:
+    case xnn_datatype_qcint32:
+    case xnn_datatype_int32:
+    case xnn_datatype_fp32:
+    case xnn_datatype_pfp32:
+      return 5;
+  }
+  XNN_UNREACHABLE;
+  return -1;
+}
+
+const xnn_datatype kAllDatatypes[] = {
+    xnn_datatype_invalid, xnn_datatype_fp32,   xnn_datatype_fp16,
+    xnn_datatype_qint8,   xnn_datatype_quint8, xnn_datatype_qint32,
+    xnn_datatype_qcint8,  xnn_datatype_qcint32, xnn_datatype_qcint4,
+    xnn_datatype_qdint8,  xnn_datatype_qpint8, xnn_datatype_int32,
+    xnn_datatype_qbint4,  xnn_datatype_pfp32,  xnn_datatype_bf16,
+    xnn_datatype_qduint8, xnn_datatype_pfp16,  xnn_datatype_pqint8,
+    xnn_datatype_qcint2,  xnn_datatype_qint4,  xnn_datatype_qint2,
+};
+
+TEST(Datatype, Log2SizeBits) {
+  for (xnn_datatype datatype : kAllDatatypes) {
+    EXPECT_EQ(xnn_datatype_log2_size_bits(datatype),
+              ExpectedLog2SizeBits(datatype));
+  }
+}
+
+TEST(Datatype, SizeBits) {
+  for (xnn_datatype datatype : kAllDatatypes) {
+    if (datatype == xnn_datatype_invalid) {
+      EXPECT_EQ(xnn_datatype_size_bits(datatype), 0u);
+    } else {
+      EXPECT_EQ(xnn_datatype_size_bits(datatype),
+                size_t{1} << ExpectedLog2SizeBits(datatype));
+    }
+  }
+}
+
+TEST(Datatype, SizeBytes) {
+  for (xnn_datatype datatype : kAllDatatypes) {
+    if (datatype == xnn_datatype_invalid) {
+      EXPECT_EQ(xnn_datatype_size_bytes(datatype), 0u);
+      continue;
+    }
+    const size_t log2_size_bits = ExpectedLog2SizeBits(datatype);
+    if (log2_size_bits < 3) {
+      continue;
+    }
+    EXPECT_EQ(xnn_datatype_log2_size_bytes(datatype), log2_size_bits - 3);
+    EXPECT_EQ(xnn_datatype_size_bytes(datatype),
+              size_t{1} << (log2_size_bits - 3));
+  }
 }
 
 }  // namespace xnnpack
