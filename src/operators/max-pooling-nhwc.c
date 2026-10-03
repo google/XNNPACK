@@ -429,7 +429,6 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
 
   if (batch_size == 0) {
     max_pooling_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   max_pooling_op->convolution_op->input_height = input_height;
@@ -469,6 +468,9 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   }
   if (output_width_out != NULL) {
     *output_width_out = max_pooling_op->convolution_op->output_width;
+  }
+  if (batch_size == 0) {
+    return xnn_status_success;
   }
 
   const size_t pooling_height = max_pooling_op->convolution_op->kernel_height;
