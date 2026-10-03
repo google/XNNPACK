@@ -2343,7 +2343,6 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
 
   if (batch_size == 0) {
     deconvolution_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   deconvolution_op->batch_size = batch_size;
@@ -2383,6 +2382,9 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
   }
   if (output_width_out != NULL) {
     *output_width_out = deconvolution_op->convolution_op->output_width;
+  }
+  if (batch_size == 0) {
+    return xnn_status_success;
   }
 
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
