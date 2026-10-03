@@ -154,7 +154,12 @@ XNN_INLINE static int32_t math_asr_s32_rounding(int32_t x, int n) {
 XNN_INLINE static int32_t saturating_rounding_shift_left_s32(int32_t x,
                                                              int32_t shift) {
   if (shift >= 0) {
-    return saturating_cast_s64_s32((int64_t)x << shift);
+    // Shift in the unsigned domain: left-shifting a negative signed value
+    // is undefined behavior even when the result would fit. The bit pattern
+    // is identical on two's complement targets, so the saturated result is
+    // unchanged.
+    return saturating_cast_s64_s32(
+        (int64_t)((uint64_t)(int64_t)x << shift));
   } else {
     return math_asr_s32_rounding(x, -shift);
   }
