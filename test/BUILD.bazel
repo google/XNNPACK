@@ -1096,6 +1096,17 @@ xnnpack_unit_test(
     ],
 )
 
+# Own binary: it installs a process-wide allocator via xnn_initialize().
+xnnpack_unit_test(
+    name = "subgraph_ssa_oom_test",
+    srcs = ["subgraph-ssa-oom.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:pthreadpool",
+        "//:subgraph_h",
+    ],
+)
+
 xnnpack_unit_test(
     name = "mutex_test",
     srcs = ["mutex.cc"],

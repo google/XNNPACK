@@ -488,6 +488,11 @@ IF(XNNPACK_BUILD_LIBRARY)
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)
   TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK pthreadpool GTest::gtest GTest::gtest_main)
 
+  # Own binary: it installs a process-wide allocator via xnn_initialize().
+  ADD_EXECUTABLE(subgraph-ssa-oom-test subgraph-ssa-oom.cc)
+  TARGET_LINK_LIBRARIES(subgraph-ssa-oom-test PRIVATE XNNPACK pthreadpool
+    GTest::gtest GTest::gtest_main)
+
   ADD_EXECUTABLE(mutex-test mutex.cc)
   TARGET_LINK_LIBRARIES(mutex-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
   TARGET_LINK_LIBRARIES(mutex-test PRIVATE xnnpack-logging xnnpack-mutex)
