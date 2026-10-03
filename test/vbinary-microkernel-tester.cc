@@ -63,7 +63,11 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      if (std::isnan(y_ref[i])) {
+      // Cast to float explicitly: on architectures where `xnn_float16` is the
+      // native `_Float16` type, `std::isnan` has no `_Float16` overload, so the
+      // implicit conversions to float/double/long double are all equally good
+      // and the call is ambiguous (libstdc++ 15 on x86_64 with F16C).
+      if (std::isnan(static_cast<float>(y_ref[i]))) {
         // TODO: We could check if y[i] is NaN, but not all our kernels do this.
       } else {
         ASSERT_NEAR(
