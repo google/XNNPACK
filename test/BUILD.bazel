@@ -1070,6 +1070,7 @@ xnnpack_unit_test(
         "//:cache",
         "//:fingerprint_cache",
         "//:fingerprint_id",
+        "//:fingerprint_id",
     ],
 )
 
@@ -1082,6 +1083,17 @@ xnnpack_unit_test(
         "//:fingerprint_check",
         "//:fingerprint_id",
         "//:operators",
+    ],
+)
+
+# Own binary: it installs a process-wide allocator via xnn_initialize().
+xnnpack_unit_test(
+    name = "fingerprint_context_oom_test",
+    srcs = ["fingerprint-context-oom.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:fingerprint_cache",
+        "//:fingerprint_id",
     ],
 )
 
