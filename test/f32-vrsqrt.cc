@@ -38,8 +38,8 @@ using TestInfo = ReciprocalSquareRoot;
 TEST(ukernel, special_values) {                                                                                         \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
-    /*inputs=*/{INFINITY, -INFINITY, NAN},                                                                              \
-    /*outputs=*/{0, NAN, NAN},                                                                                          \
+    /*inputs=*/{INFINITY, -INFINITY, NAN, 0.0f, -0.0f},                                                            \
+    /*outputs=*/{0, NAN, NAN, INFINITY, -INFINITY},                                                               \
     /*tolerance_ulp=*/1);                                                                                               \
 }
 #include "src/f32-vrsqrt/f32-vrsqrt.inc"
