@@ -860,6 +860,7 @@ static enum xnn_status create_convolution2d_nhwc(
       break;
     }
     case xnn_microkernel_type_dwconv: {
+      status = xnn_status_out_of_memory;
       convolution_op->dynamic_context.dwconv =
           xnn_allocate_zero_simd_memory(sizeof(struct dwconv_op_context));
       if (convolution_op->dynamic_context.dwconv == NULL) {
@@ -886,6 +887,7 @@ static enum xnn_status create_convolution2d_nhwc(
       break;
     }
     case xnn_microkernel_type_kai_dwconv: {
+      status = xnn_status_out_of_memory;
       convolution_op->dynamic_context.kai_dwconv =
           xnn_allocate_zero_simd_memory(sizeof(struct kai_dwconv_op_context));
       if (convolution_op->dynamic_context.kai_dwconv == NULL) {
@@ -902,6 +904,7 @@ static enum xnn_status create_convolution2d_nhwc(
       break;
     }
     case xnn_microkernel_type_igemm: {
+      status = xnn_status_out_of_memory;
       convolution_op->dynamic_context.igemm =
           xnn_allocate_zero_simd_memory(sizeof(struct igemm_op_context));
       if (convolution_op->dynamic_context.igemm == NULL) {
@@ -939,6 +942,7 @@ static enum xnn_status create_convolution2d_nhwc(
       (context->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && kernel_size != 1;
   if (any_padding || tf_same_padding) {
     convolution_op->convolution_op->zero_size = zero_size;
+    status = xnn_status_out_of_memory;
     convolution_op->zero_buffer = xnn_allocate_simd_memory(zero_size);
     if (convolution_op->zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for %s operator zero padding",
