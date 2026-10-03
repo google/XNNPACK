@@ -468,6 +468,7 @@ struct xnn_operator_data {
     };
     // Used for static slice.
     struct {
+      size_t slice_num_dims;
       int64_t begins[XNN_MAX_TENSOR_DIMS];
       int64_t ends[XNN_MAX_TENSOR_DIMS];
     };
