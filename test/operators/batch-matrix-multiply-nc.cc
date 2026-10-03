@@ -340,3 +340,24 @@ TEST(BatchMatMulTest, gc_stride_overflow_fails) {
           batch_matrix_multiply_op, 1, batch_dims, batch_dims, overflow_m, 1,
           4, &workspace_size, nullptr));
 }
+
+// reshape on a zero-batch returns success without writing *workspace_size,
+// leaving the caller with a stale value. The early return must zero it.
+TEST(BatchMatMulTest, zero_workspace_initialization) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_batch_matrix_multiply_nc_f32(
+                0, &batch_matrix_multiply_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      batch_matrix_multiply_op, xnn_delete_operator);
+
+  const size_t batch_dims[1] = {0};
+  size_t workspace_size = SIZE_MAX;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          batch_matrix_multiply_op, 1, batch_dims, batch_dims, 1, 1,
+          1, &workspace_size, nullptr));
+  EXPECT_EQ(workspace_size, 0);
+}
