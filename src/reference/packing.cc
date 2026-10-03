@@ -2584,12 +2584,19 @@ void xnn_pack_kai_qs4_weights_and_biases_sme(
 
   bool free_accumulator_init = false;
   if (extra_data0 == nullptr) {
-    extra_data0 = calloc(output_channels, sizeof(float));
+    size_t bias_bytes = 0;
+    if (!xnn_safe_mul(output_channels, sizeof(float), &bias_bytes)) {
+      xnn_log_error(
+          "failed to allocate bias substitute buffer for KleidiAI QS4: "
+          "integer overflow");
+      return;
+    }
+    extra_data0 = xnn_allocate_zero_memory(bias_bytes);
     if (extra_data0 == nullptr) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI QS4 bias substitute "
           "buffer",
-          output_channels * sizeof(float));
+          bias_bytes);
       assert(false);
       return;
     }
@@ -2603,7 +2610,7 @@ void xnn_pack_kai_qs4_weights_and_biases_sme(
       /*rhs_packed=*/packed_weights_ptr,
       /*extra_bytes=*/0, &kai_params);
   if (free_accumulator_init) {
-    free((void*)extra_data0);
+    xnn_release_memory((void*)extra_data0);
   }
 }
 
@@ -2712,7 +2719,17 @@ void xnn_pack_kai_qs2_weights_and_biases_sme2(
   const size_t packed_group_size =
       kai_get_rhs_packed_size_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon(
           output_channels, input_channels, nr, kr, sr);
-  const size_t rhs_group_stride = output_channels * ((k_stride + 3) / 4);
+  size_t rhs_group_stride = 0;
+  if (!xnn_safe_mul(output_channels, (k_stride + 3) / 4, &rhs_group_stride)) {
+    xnn_log_error("failed to calculate rhs_group_stride: integer overflow");
+    return;
+  }
+  size_t scale_group_stride = 0;
+  if (!xnn_safe_mul(output_channels, extra_data1_element_size,
+                    &scale_group_stride)) {
+    xnn_log_error("failed to calculate scale_group_stride: integer overflow");
+    return;
+  }
   const int32_t xnn_qc2w_signed_lut[4] = {0, 1, -2, -1};
   struct kai_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon_params kai_params;
   kai_params.lhs_zero_point = 1;
@@ -2727,8 +2744,7 @@ void xnn_pack_kai_qs2_weights_and_biases_sme2(
             : static_cast<const float*>(accumulator_init) +
                   group * output_channels;
     const float* group_scale = reinterpret_cast<const float*>(
-        static_cast<const uint8_t*>(extra_data1) +
-        group * output_channels * extra_data1_element_size);
+        static_cast<const uint8_t*>(extra_data1) + group * scale_group_stride);
     kai_run_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon(
         /*num_groups=*/1, output_channels, input_channels, nr, kr, sr,
         group_rhs, group_bias, group_scale,
@@ -3083,7 +3099,22 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
   const size_t packed_group_size =
       api.get_rhs_packed_size(&config, &packed_shape, &packed_stride);
   const size_t rhs_stride_row = (k_stride + 1) / 2;
-  const size_t rhs_group_stride = output_channels * rhs_stride_row;
+  size_t rhs_group_stride = 0;
+  if (!xnn_safe_mul(output_channels, rhs_stride_row, &rhs_group_stride)) {
+    xnn_log_error("failed to calculate rhs_group_stride: integer overflow");
+    return;
+  }
+  size_t bias_group_stride = 0;
+  if (!xnn_safe_mul(output_channels, sizeof(int32_t), &bias_group_stride)) {
+    xnn_log_error("failed to calculate bias_group_stride: integer overflow");
+    return;
+  }
+  size_t scale_group_stride = 0;
+  if (!xnn_safe_mul(output_channels, extra_data0_element_size,
+                    &scale_group_stride)) {
+    xnn_log_error("failed to calculate scale_group_stride: integer overflow");
+    return;
+  }
   // KleidiAI adds k_sum_scale * sum(weights) to each packed bias.
   const int32_t k_sum_scale = -(int32_t)xnn_params->input_zero_point;
   const float scale_multiplier = 1.0f;
@@ -3094,11 +3125,9 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
   for (size_t group = 0; group < groups; group++) {
     const uint8_t* group_rhs = rhs + group * rhs_group_stride;
     const void* group_accumulator_init =
-        (const uint8_t*)accumulator_init +
-        group * output_channels * sizeof(int32_t);
+        (const uint8_t*)accumulator_init + group * bias_group_stride;
     const void* group_extra_data0 =
-        (const uint8_t*)extra_data0 +
-        group * output_channels * extra_data0_element_size;
+        (const uint8_t*)extra_data0 + group * scale_group_stride;
 
     struct kai_matmul_pack_rhs_uker_args args = {};
     args.shape.n = output_channels;
@@ -3162,18 +3191,30 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
-  const size_t rhs_stride = output_channels * sizeof(int8_t);
+  size_t rhs_stride = 0;
+  if (!xnn_safe_mul(output_channels, sizeof(int8_t), &rhs_stride)) {
+    xnn_log_error("failed to calculate rhs_stride: integer overflow");
+    return;
+  }
+
+  size_t bias_bytes = 0;
+  if (!xnn_safe_mul(output_channels, sizeof(int32_t), &bias_bytes)) {
+    xnn_log_error(
+        "failed to allocate bias substitute buffer for KleidiAI SME: "
+        "integer overflow in output_channels");
+    return;
+  }
 
   // Some packing kernels assume that the bias is non-null. Allocate a zero
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(int32_t));
+    accumulator_init = xnn_allocate_zero_memory(bias_bytes);
     if (accumulator_init == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute "
           "buffer",
-          output_channels * sizeof(int32_t));
+          bias_bytes);
       assert(false);
       return;
     }
@@ -3194,15 +3235,26 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
         /*extra_bytes=*/0, &kai_params);
   } else {
     // Transpose the weights until the transpose packing function is ready.
-    int8_t* tmp_data =
-        (int8_t*)malloc(input_channels * output_channels * sizeof(int8_t));
+    size_t tmp_elements = 0;
+    size_t tmp_bytes = 0;
+    if (!xnn_safe_mul(input_channels, output_channels, &tmp_elements) ||
+        !xnn_safe_mul(tmp_elements, sizeof(int8_t), &tmp_bytes)) {
+      xnn_log_error(
+          "failed to allocate weight transpose buffer for KleidiAI SME: "
+          "integer overflow");
+      if (free_accumulator_init) {
+        xnn_release_memory((void*)accumulator_init);
+      }
+      return;
+    }
+    int8_t* tmp_data = (int8_t*)xnn_allocate_memory(tmp_bytes);
     if (tmp_data == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME weight transpose "
           "buffer",
-          input_channels * output_channels * sizeof(int8_t));
+          tmp_bytes);
       if (free_accumulator_init) {
-        free((void*)accumulator_init);
+        xnn_release_memory((void*)accumulator_init);
       }
       assert(false);
       return;
@@ -3216,10 +3268,10 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
         /*scale=*/extra_data0,
         /*rhs_packed=*/packed_weights_ptr,
         /*extra_bytes=*/0, &kai_params);
-    free(tmp_data);
+    xnn_release_memory(tmp_data);
   }
   if (free_accumulator_init) {
-    free((void*)accumulator_init);
+    xnn_release_memory((void*)accumulator_init);
   }
 }
 
@@ -3253,14 +3305,24 @@ void xnn_pack_kai_qs8_weights_and_biases(
   kai_params.lhs_zero_point = xnn_params->input_zero_point;
   kai_params.scale_multiplier = xnn_params->scale_multiplier;
 
-  const size_t weights_group_stride =
-      sizeof(int8_t) * input_channels * output_channels;
+  size_t weights_channels = 0;
+  size_t weights_group_stride = 0;
+  if (!xnn_safe_mul(input_channels, output_channels, &weights_channels) ||
+      !xnn_safe_mul(weights_channels, sizeof(int8_t), &weights_group_stride)) {
+    xnn_log_error("failed to calculate weights_group_stride: integer overflow");
+    return;
+  }
   const size_t n_stride = round_up(output_channels, nr);
-  const size_t packed_weights_group_stride =
-      n_stride * xnn_packed_stride_kai_qs8_weights_and_biases(
-                     gemm_config, input_channels, unused_block_size,
-                     /*unused_k_stride=*/0,
-                     extra_data0_element_size + extra_data1_element_size);
+  const size_t packed_stride = xnn_packed_stride_kai_qs8_weights_and_biases(
+      gemm_config, input_channels, unused_block_size,
+      /*unused_k_stride=*/0,
+      extra_data0_element_size + extra_data1_element_size);
+  size_t packed_weights_group_stride = 0;
+  if (!xnn_safe_mul(n_stride, packed_stride, &packed_weights_group_stride)) {
+    xnn_log_error(
+        "failed to calculate packed_weights_group_stride: integer overflow");
+    return;
+  }
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     for (size_t group = 0; group < groups; group++) {
@@ -3330,31 +3392,62 @@ void xnn_pack_kai_f16_weights_and_biases(
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
+  size_t bias_bytes = 0;
+  if (!xnn_safe_mul(output_channels, sizeof(xnn_float16), &bias_bytes)) {
+    xnn_log_error(
+        "failed to allocate bias substitute buffer for KleidiAI SME: "
+        "integer overflow in output_channels");
+    return;
+  }
+
   // Some packing kernels assume that the bias is non-null. Allocate a zero
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(float));
+    accumulator_init = xnn_allocate_zero_memory(bias_bytes);
     if (accumulator_init == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute "
           "buffer",
-          output_channels * sizeof(float));
+          bias_bytes);
       assert(false);
       return;
     }
     free_accumulator_init = true;
   }
 
-  const size_t rhs_stride = k_stride * sizeof(xnn_float16);
-  const size_t weights_group_stride =
-      sizeof(xnn_float16) * input_channels * output_channels;
+  size_t rhs_stride = 0;
+  if (!xnn_safe_mul(k_stride, sizeof(xnn_float16), &rhs_stride)) {
+    xnn_log_error("failed to calculate rhs_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
+  size_t weights_channels = 0;
+  size_t weights_group_stride = 0;
+  if (!xnn_safe_mul(input_channels, output_channels, &weights_channels) ||
+      !xnn_safe_mul(weights_channels, sizeof(xnn_float16),
+                    &weights_group_stride)) {
+    xnn_log_error("failed to calculate weights_group_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
   const size_t n_stride = round_up(output_channels, nr);
-  const size_t packed_weights_group_stride =
-      n_stride * xnn_packed_stride_kai_f16_weights_and_biases(
-                     gemm_config, input_channels, unused_block_size,
-                     /*unused_k_stride=*/0,
-                     /*unused_extra_bytes=*/0);
+  const size_t packed_stride = xnn_packed_stride_kai_f16_weights_and_biases(
+      gemm_config, input_channels, unused_block_size,
+      /*unused_k_stride=*/0, /*unused_extra_bytes=*/0);
+  size_t packed_weights_group_stride = 0;
+  if (!xnn_safe_mul(n_stride, packed_stride, &packed_weights_group_stride)) {
+    xnn_log_error(
+        "failed to calculate packed_weights_group_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     for (size_t group = 0; group < groups; group++) {
@@ -3365,7 +3458,8 @@ void xnn_pack_kai_f16_weights_and_biases(
           /*bias=*/
           free_accumulator_init
               ? accumulator_init
-              : (const float*)(accumulator_init) + group * output_channels,
+              : (const xnn_float16*)(accumulator_init) +
+                    group * output_channels,
           /*scale=*/NULL,
           /*rhs_packed=*/
           (void*)((uintptr_t)packed_weights_ptr +
@@ -3381,7 +3475,8 @@ void xnn_pack_kai_f16_weights_and_biases(
           /*bias=*/
           free_accumulator_init
               ? accumulator_init
-              : (const float*)(accumulator_init) + group * output_channels,
+              : (const xnn_float16*)(accumulator_init) +
+                    group * output_channels,
           /*scale=*/NULL,
           /*rhs_packed=*/
           (void*)((uintptr_t)packed_weights_ptr +
@@ -3390,7 +3485,7 @@ void xnn_pack_kai_f16_weights_and_biases(
     }
   }
   if (free_accumulator_init) {
-    free((void*)accumulator_init);
+    xnn_release_memory((void*)accumulator_init);
   }
 }
 
@@ -3441,30 +3536,62 @@ void xnn_pack_kai_f32_weights_and_biases_sme(
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
+  size_t bias_bytes = 0;
+  if (!xnn_safe_mul(output_channels, sizeof(float), &bias_bytes)) {
+    xnn_log_error(
+        "failed to allocate bias substitute buffer for KleidiAI SME: "
+        "integer overflow in output_channels");
+    return;
+  }
+
   // Some packing kernels assume that the bias is non-null. Allocate a zero
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(float));
+    accumulator_init = xnn_allocate_zero_memory(bias_bytes);
     if (accumulator_init == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute "
           "buffer",
-          output_channels * sizeof(float));
+          bias_bytes);
       assert(false);
       return;
     }
     free_accumulator_init = true;
   }
 
-  const size_t rhs_stride = k_stride * sizeof(float);
-  const size_t weights_group_stride =
-      sizeof(float) * input_channels * output_channels;
+  size_t rhs_stride = 0;
+  if (!xnn_safe_mul(k_stride, sizeof(float), &rhs_stride)) {
+    xnn_log_error("failed to calculate rhs_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
+  size_t weights_channels = 0;
+  size_t weights_group_stride = 0;
+  if (!xnn_safe_mul(input_channels, output_channels, &weights_channels) ||
+      !xnn_safe_mul(weights_channels, sizeof(float), &weights_group_stride)) {
+    xnn_log_error("failed to calculate weights_group_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
   const size_t n_stride = round_up(output_channels, nr);
-  const size_t packed_weights_group_stride =
-      n_stride * xnn_packed_stride_kai_f32_weights_and_biases_sme(
-                     gemm_config, input_channels, unused_block_size,
-                     /*unused_k_stride=*/0, /*unused_extra_bytes=*/0);
+  const size_t packed_stride =
+      xnn_packed_stride_kai_f32_weights_and_biases_sme(
+          gemm_config, input_channels, unused_block_size,
+          /*unused_k_stride=*/0, /*unused_extra_bytes=*/0);
+  size_t packed_weights_group_stride = 0;
+  if (!xnn_safe_mul(n_stride, packed_stride, &packed_weights_group_stride)) {
+    xnn_log_error(
+        "failed to calculate packed_weights_group_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     for (size_t group = 0; group < groups; group++) {
@@ -3500,7 +3627,7 @@ void xnn_pack_kai_f32_weights_and_biases_sme(
     }
   }
   if (free_accumulator_init) {
-    free((void*)accumulator_init);
+    xnn_release_memory((void*)accumulator_init);
   }
 }
 
@@ -3527,31 +3654,63 @@ void xnn_pack_kai_f32_weights_and_biases_sme2(
   assert(extra_data1 == nullptr);
   const uint32_t nr = gemm_config->nr;
 
+  size_t bias_bytes = 0;
+  if (!xnn_safe_mul(output_channels, sizeof(float), &bias_bytes)) {
+    xnn_log_error(
+        "failed to allocate bias substitute buffer for KleidiAI SME2: "
+        "integer overflow in output_channels");
+    return;
+  }
+
   // Some packing kernels assume that the bias is non-null. Allocate a zero
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init =
-        xnn_allocate_zero_memory(output_channels * sizeof(float));
+    accumulator_init = xnn_allocate_zero_memory(bias_bytes);
     if (accumulator_init == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME2 bias substitute "
           "buffer",
-          output_channels * sizeof(float));
+          bias_bytes);
       return;
     }
     free_accumulator_init = true;
   }
 
-  const size_t rhs_stride = k_stride * sizeof(float);
-  const size_t weights_group_stride =
-      sizeof(float) * input_channels * output_channels;
+  size_t rhs_stride = 0;
+  if (!xnn_safe_mul(k_stride, sizeof(float), &rhs_stride)) {
+    xnn_log_error("failed to calculate rhs_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
+  size_t weights_channels = 0;
+  size_t weights_group_stride = 0;
+  if (!xnn_safe_mul(input_channels, output_channels, &weights_channels) ||
+      !xnn_safe_mul(weights_channels, sizeof(float), &weights_group_stride)) {
+    xnn_log_error("failed to calculate weights_group_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
   const size_t n_stride = round_up(output_channels, nr);
-  const size_t packed_weights_group_stride =
-      n_stride * xnn_packed_stride_kai_f32_weights_and_biases_sme2(
-                     gemm_config, input_channels, unused_block_size,
-                     /*unused_k_stride=*/0,
-                     /*unused_extra_bytes=*/0);
+  const size_t packed_stride_size =
+      xnn_packed_stride_kai_f32_weights_and_biases_sme2(
+          gemm_config, input_channels, unused_block_size,
+          /*unused_k_stride=*/0,
+          /*unused_extra_bytes=*/0);
+  size_t packed_weights_group_stride = 0;
+  if (!xnn_safe_mul(n_stride, packed_stride_size,
+                    &packed_weights_group_stride)) {
+    xnn_log_error(
+        "failed to calculate packed_weights_group_stride: integer overflow");
+    if (free_accumulator_init) {
+      xnn_release_memory((void*)accumulator_init);
+    }
+    return;
+  }
 
   const struct kai_matmul_pack_rhs_uker_config config = {};
   const struct kai_matmul_pack_rhs_uker_api api =
@@ -3622,8 +3781,18 @@ void xnn_pack_kai_qb4_weights_and_biases(
   const struct xnn_qs8_qc4w_packing_params* xnn_params =
       reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
 
+  if (block_size == 0) {
+    xnn_log_error("KleidiAI QB4 RHS packing requires non-zero block_size");
+    return;
+  }
+
   size_t rhs_stride = (k_stride + 1) / 2;
   size_t blocks_per_row = (input_channels + block_size - 1) / block_size;
+  size_t scale_stride = 0;
+  if (!xnn_safe_mul(blocks_per_row, sizeof(uint16_t), &scale_stride)) {
+    xnn_log_error("failed to calculate scale_stride: integer overflow");
+    return;
+  }
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     struct kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0_params kai_params;
@@ -3636,7 +3805,7 @@ void xnn_pack_kai_qb4_weights_and_biases(
         /*rhs=*/reinterpret_cast<const uint8_t*>(weights), rhs_stride,
         /*bias=*/reinterpret_cast<const float*>(extra_data0),
         /*scale=*/reinterpret_cast<const uint16_t*>(extra_data1),
-        /*scale_stride=*/blocks_per_row * sizeof(uint16_t),
+        /*scale_stride=*/scale_stride,
         /*rhs_packed*/ packed_weights_ptr,
         /*extra_bytes=*/0, &kai_params);
   } else {
@@ -3651,7 +3820,7 @@ void xnn_pack_kai_qb4_weights_and_biases(
         /*rhs=*/reinterpret_cast<const uint8_t*>(weights), rhs_stride,
         /*bias=*/reinterpret_cast<const float*>(extra_data0),
         /*scale=*/reinterpret_cast<const uint16_t*>(extra_data1),
-        /*scale_stride=*/blocks_per_row * sizeof(uint16_t),
+        /*scale_stride=*/scale_stride,
         /*rhs_packed*/ packed_weights_ptr,
         /*extra_bytes=*/0, &kai_params);
   }
@@ -3666,11 +3835,8 @@ void xnn_pack_kai_qb4_weights_and_biases(
   const size_t weights_stride = xnn_packed_stride_kai_qb4_weights_and_biases(
       gemm_config, input_channels, block_size, packed_k_stride, 0);
   if (accumulator_init != NULL) {
-    void* weights_start =
-        (void*)((uintptr_t)packed_weights_ptr +
-                nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
-    weights_start = (void*)((uintptr_t)packed_weights_ptr +
-                            nr * (weights_stride - sizeof(float)));
+    void* weights_start = (void*)((uintptr_t)packed_weights_ptr +
+                                  nr * (weights_stride - sizeof(float)));
     xnn_init_qs8_qc8w_scale_fp32_params(
         output_channels, nr, nr * weights_stride,
         (const float*)accumulator_init, weights_start);
@@ -3687,33 +3853,60 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
 
-  uint16_t* tmp_bias = NULL;
+  size_t rhs_row_stride = 0;
+  if (!xnn_safe_mul(nc, sizeof(uint16_t), &rhs_row_stride)) {
+    xnn_log_error("failed to calculate rhs_row_stride: integer overflow");
+    return;
+  }
 
+  uint16_t* tmp_bias = NULL;
   if (b == NULL) {
-    tmp_bias = (uint16_t*)xnn_allocate_zero_memory(g * nc * sizeof(uint16_t));
+    size_t bias_elements = 0;
+    size_t bias_bytes = 0;
+    if (!xnn_safe_mul(g, nc, &bias_elements) ||
+        !xnn_safe_mul(bias_elements, sizeof(uint16_t), &bias_bytes)) {
+      xnn_log_error(
+          "failed to allocate bias substitute buffer for KleidiAI SME: "
+          "integer overflow");
+      return;
+    }
+    tmp_bias = (uint16_t*)xnn_allocate_zero_memory(bias_bytes);
     if (tmp_bias == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute "
           "buffer",
-          g * nc * sizeof(uint16_t));
+          bias_bytes);
       return;
     }
     b = tmp_bias;
   }
 
-  uint16_t* tmp_data =
-      (uint16_t*)xnn_allocate_memory(nc * ks * kc * sizeof(uint16_t));
+  size_t kernel_spatial_channels = 0;
+  size_t kernel_elements = 0;
+  size_t kernel_bytes = 0;
+  if (!xnn_safe_mul(ks, kc, &kernel_spatial_channels) ||
+      !xnn_safe_mul(nc, kernel_spatial_channels, &kernel_elements) ||
+      !xnn_safe_mul(kernel_elements, sizeof(uint16_t), &kernel_bytes)) {
+    xnn_log_error(
+        "failed to allocate weight transpose buffer for KleidiAI SME: "
+        "integer overflow");
+    if (tmp_bias != NULL) {
+      xnn_release_memory(tmp_bias);
+    }
+    return;
+  }
+
+  uint16_t* tmp_data = (uint16_t*)xnn_allocate_memory(kernel_bytes);
   if (tmp_data == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(uint16_t));
+        kernel_bytes);
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
     assert(false);
     return;
   }
-  const size_t rhs_row_stride = nc * sizeof(uint16_t);
   const size_t packed_rhs_size =
       kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
           nc, ks, kc);
@@ -3758,33 +3951,60 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
   kai_params.lhs_zero_point = params->input_zero_point;
   kai_params.scale_multiplier = 1.0F;
 
-  int32_t* tmp_bias = NULL;
+  size_t rhs_row_stride = 0;
+  if (!xnn_safe_mul(nc, sizeof(int8_t), &rhs_row_stride)) {
+    xnn_log_error("failed to calculate rhs_row_stride: integer overflow");
+    return;
+  }
 
+  int32_t* tmp_bias = NULL;
   if (b == NULL) {
-    tmp_bias = (int32_t*)xnn_allocate_zero_memory(g * nc * sizeof(int32_t));
+    size_t bias_elements = 0;
+    size_t bias_bytes = 0;
+    if (!xnn_safe_mul(g, nc, &bias_elements) ||
+        !xnn_safe_mul(bias_elements, sizeof(int32_t), &bias_bytes)) {
+      xnn_log_error(
+          "failed to allocate bias substitute buffer for KleidiAI SME: "
+          "integer overflow");
+      return;
+    }
+    tmp_bias = (int32_t*)xnn_allocate_zero_memory(bias_bytes);
     if (tmp_bias == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute "
           "buffer",
-          g * nc * sizeof(int32_t));
+          bias_bytes);
       return;
     }
     b = tmp_bias;
   }
 
-  int8_t* tmp_data =
-      (int8_t*)xnn_allocate_memory(nc * ks * kc * sizeof(int8_t));
+  size_t kernel_spatial_channels = 0;
+  size_t kernel_elements = 0;
+  size_t kernel_bytes = 0;
+  if (!xnn_safe_mul(ks, kc, &kernel_spatial_channels) ||
+      !xnn_safe_mul(nc, kernel_spatial_channels, &kernel_elements) ||
+      !xnn_safe_mul(kernel_elements, sizeof(int8_t), &kernel_bytes)) {
+    xnn_log_error(
+        "failed to allocate weight transpose buffer for KleidiAI SME: "
+        "integer overflow");
+    if (tmp_bias != NULL) {
+      xnn_release_memory(tmp_bias);
+    }
+    return;
+  }
+
+  int8_t* tmp_data = (int8_t*)xnn_allocate_memory(kernel_bytes);
   if (tmp_data == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(int8_t));
+        kernel_bytes);
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
     assert(false);
     return;
   }
-  const size_t rhs_row_stride = nc * sizeof(int8_t);
   const size_t packed_rhs_size =
       kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
           nc, ks, kc);
@@ -3832,32 +4052,60 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
 
-  float* tmp_bias = NULL;
+  size_t rhs_row_stride = 0;
+  if (!xnn_safe_mul(nc, sizeof(float), &rhs_row_stride)) {
+    xnn_log_error("failed to calculate rhs_row_stride: integer overflow");
+    return;
+  }
 
+  float* tmp_bias = NULL;
   if (b == NULL) {
-    tmp_bias = (float*)xnn_allocate_zero_memory(g * nc * sizeof(float));
+    size_t bias_elements = 0;
+    size_t bias_bytes = 0;
+    if (!xnn_safe_mul(g, nc, &bias_elements) ||
+        !xnn_safe_mul(bias_elements, sizeof(float), &bias_bytes)) {
+      xnn_log_error(
+          "failed to allocate bias substitute buffer for KleidiAI SME: "
+          "integer overflow");
+      return;
+    }
+    tmp_bias = (float*)xnn_allocate_zero_memory(bias_bytes);
     if (tmp_bias == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute "
           "buffer",
-          g * nc * sizeof(float));
+          bias_bytes);
       return;
     }
     b = tmp_bias;
   }
 
-  float* tmp_data = (float*)malloc(nc * ks * kc * sizeof(float));
+  size_t kernel_spatial_channels = 0;
+  size_t kernel_elements = 0;
+  size_t kernel_bytes = 0;
+  if (!xnn_safe_mul(ks, kc, &kernel_spatial_channels) ||
+      !xnn_safe_mul(nc, kernel_spatial_channels, &kernel_elements) ||
+      !xnn_safe_mul(kernel_elements, sizeof(float), &kernel_bytes)) {
+    xnn_log_error(
+        "failed to allocate weight transpose buffer for KleidiAI SME: "
+        "integer overflow");
+    if (tmp_bias != NULL) {
+      xnn_release_memory(tmp_bias);
+    }
+    return;
+  }
+
+  float* tmp_data = (float*)xnn_allocate_memory(kernel_bytes);
   if (tmp_data == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(float));
+        kernel_bytes);
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
     assert(false);
     return;
   }
-  const size_t rhs_row_stride = nc * sizeof(float);
   const size_t packed_rhs_size =
       kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme(
           nc, ks, kc);
@@ -3872,7 +4120,7 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
     packed_weights = (float*)((uintptr_t)packed_weights + packed_rhs_size);
   }
 
-  free(tmp_data);
+  xnn_release_memory(tmp_data);
 
   if (tmp_bias != NULL) {
     xnn_release_memory(tmp_bias);
