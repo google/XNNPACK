@@ -16,6 +16,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/bf16-rminmax/gen/bf16-rminmax-neon-u32-acc4.c
   src/bf16-vunary/gen/bf16-vunary-neon.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u16.c
+  src/f16-vunary/gen/f16-vabs-neon-u16.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-neon-c4.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-neon-u4.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u8.c
@@ -216,6 +217,7 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u32.c
+  src/f16-vunary/gen/f16-vabs-neon-u8.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u16.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u24.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u32.c
