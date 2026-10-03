@@ -4424,6 +4424,13 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
     return false;
   }
 
+  // Explicit dequantization can be faster when the FP32 operand is reused over
+  // many row tiles. Let the author retain it for this BMM without disabling
+  // unrelated optimizations or the mixed path for other BMMs in the same graph.
+  if (subgraph->nodes[node_id].flags & XNN_FLAG_NO_BMM_DEQUANTIZATION_FUSION) {
+    return false;
+  }
+
   // Reserve space upfront (we'll add 1 value + 1 node) so the later
   // `xnn_subgraph_new_internal_value` / `xnn_subgraph_new_node` calls do not
   // each trigger an additional reallocation or invalidate pointers.
