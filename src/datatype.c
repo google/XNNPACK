@@ -117,7 +117,7 @@ bool xnn_datatype_is_blockwise_quantized(enum xnn_datatype t) {
   switch (t) {
     case xnn_datatype_qbint4:
       return true;
-    default: return false;
+    default:
       return false;
   }
 }
@@ -158,17 +158,27 @@ size_t xnn_datatype_log2_size_bits(enum xnn_datatype t) {
 }
 
 size_t xnn_datatype_log2_size_bytes(enum xnn_datatype t) {
-  size_t size_bits = xnn_datatype_log2_size_bits(t);
-  assert(size_bits >= 3);
+  const size_t size_bits = xnn_datatype_log2_size_bits(t);
+  if (size_bits < 3 || size_bits == (size_t)-1) {
+    return (size_t)-1;
+  }
   return size_bits - 3;
 }
 
 size_t xnn_datatype_size_bits(enum xnn_datatype t) {
-  return 1 << xnn_datatype_log2_size_bits(t);
+  const size_t size_bits = xnn_datatype_log2_size_bits(t);
+  if (size_bits == (size_t)-1) {
+    return 0;
+  }
+  return (size_t)1 << size_bits;
 }
 
 size_t xnn_datatype_size_bytes(enum xnn_datatype t) {
-  return 1 << xnn_datatype_log2_size_bytes(t);
+  const size_t log2_bytes = xnn_datatype_log2_size_bytes(t);
+  if (log2_bytes == (size_t)-1) {
+    return 0;
+  }
+  return (size_t)1 << log2_bytes;
 }
 
 bool xnn_datatype_is_byte_addressable(enum xnn_datatype t) {
