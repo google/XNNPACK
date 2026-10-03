@@ -2088,8 +2088,14 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       kernel_value->datatype == xnn_datatype_qbint4;
 
   if (is_blockwise_quantized) {
-    // TODO: Unsupported features
-    assert((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0);
+    if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+      xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
+                    ": transposed weights are not supported for blockwise "
+                    "quantized filters",
+                    xnn_node_type_to_string(xnn_node_type_fully_connected),
+                    filter_id);
+      return xnn_status_invalid_parameter;
+    }
 
     const size_t input_channels_dim =
         ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) ? 0 : 1;
