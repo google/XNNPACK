@@ -1495,6 +1495,12 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           // Prevent double assignments by creating a new copy of the output
           // value if it has already been written to.
           fp16_value = xnn_subgraph_new_internal_value(subgraph);
+          if (fp16_value == NULL) {
+            xnn_log_error(
+                "failed to allocate value for already produced output #%" PRIu32,
+                fp16_id);
+            return false;
+          }
           xnn_value_copy(fp16_value, &subgraph->values[fp16_id]);
           fp16_value->first_consumer = XNN_INVALID_NODE_ID;
           fp16_value->num_consumers = 0;
@@ -4701,6 +4707,13 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
         // We already wrote this value. Make a new value to replace the previous
         // value with (so the external output remains the last write).
         struct xnn_value* new_value = xnn_subgraph_new_internal_value(subgraph);
+        if (new_value == NULL) {
+          xnn_log_error(
+              "failed to allocate value for already produced output #%" PRIu32,
+              output_id);
+          xnn_release_memory(values_written);
+          return;
+        }
         // xnn_subgraph_new_internal_value may have invalidated `value` pointer.
         value = &subgraph->values[output_id];
         xnn_value_copy(new_value, value);
