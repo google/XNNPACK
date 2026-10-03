@@ -340,3 +340,35 @@ TEST(BatchMatMulTest, gc_stride_overflow_fails) {
           batch_matrix_multiply_op, 1, batch_dims, batch_dims, overflow_m, 1,
           4, &workspace_size, nullptr));
 }
+
+// Regression test for create_batch_matrix_multiply_nc_helper() discarding the
+// status of every step it runs.
+//
+// The helper captures each step's status into `status` through
+// XNN_IF_ERROR_GOTO (src/xnnpack/internal.h:62), but its `error:` label ended
+// with a hardcoded `return xnn_status_success`, so the captured status was
+// thrown away. A rejected output range is the cheapest way to reach that label:
+// setup_params_qs8_qc8w() returns xnn_status_invalid_parameter when
+// output_min > output_max, and the helper reported that rejection as success.
+//
+// Reporting success left the caller's operator out-parameter unwritten, so a
+// caller that checks the returned status proceeds with a null operator. See also
+// the `batch_size_overflow_fails` test above, which passes an operator to
+// xnn_reshape_... straight after create reports success.
+TEST(BatchMatMulTest, invalid_output_range_is_reported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  // output_min is above output_max, which the operator must reject.
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  const xnn_status status = xnn_create_batch_matrix_multiply_nc_qs8(
+      /*input_zero_point=*/0, /*output_zero_point=*/0, /*output_min=*/100,
+      /*output_max=*/-100, /*scale_b=*/nullptr, /*flags=*/0,
+      &batch_matrix_multiply_op);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP() << "qs8/qc8w GEMM is unavailable on this target";
+  }
+  EXPECT_EQ(status, xnn_status_invalid_parameter);
+  // A rejected create must not leave the caller holding an operator.
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+}
