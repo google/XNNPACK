@@ -271,8 +271,8 @@ static enum xnn_status setup_packing_params_qx8_f32_qc8w(
 
   if (!context->batch_size_b) {  // Non const weights.
     xnn_operator_t batch_matrix_multiply_op = *context->op_out;
-    xnn_allocate_extra_params(batch_matrix_multiply_op,
-                              /*extra_params_size=*/1);
+    XNN_RETURN_IF_ERROR(xnn_allocate_extra_params(
+        batch_matrix_multiply_op, /*extra_params_size=*/1));
 
     if (context->gemm_config->pack_weights_and_biases) {
       memcpy(&batch_matrix_multiply_op->extra_params->qs8_packing,
@@ -340,8 +340,8 @@ static enum xnn_status setup_packing_params_qs8(
   } else {  // Non const weights.
     if (context->scale_b != NULL) {
       xnn_operator_t batch_matrix_multiply_op = *context->op_out;
-      xnn_allocate_extra_params(batch_matrix_multiply_op,
-                                /*extra_params_size=*/1);
+      XNN_RETURN_IF_ERROR(xnn_allocate_extra_params(
+          batch_matrix_multiply_op, /*extra_params_size=*/1));
 
       context->packing_params_.qs8_qc8w = (struct xnn_qs8_qc8w_packing_params){
           .input_zero_point = context->input_zero_point,
