@@ -1,3 +1,4 @@
+#include "src/xnnpack/operator.h"
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
@@ -2331,3 +2332,25 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
           nullptr, nullptr, nullptr));
 }
 }  // namespace
+
+// Same class: assert-only NULL guard with unconditional dereference
+// downstream on the inline-LHS path (exit 139 before the redirect).
+TEST(CONVOLUTION_NHWC_QD8_F32_QC8W, null_workspace_size_inline_lhs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  static int8_t kernel[8] = {0};
+  static float scale[1] = {1.0f};
+  static float bias[1] = {0.0f};
+  ASSERT_EQ(xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 1, 8, 8, scale, kernel,
+                bias, -INFINITY, INFINITY, XNN_FLAG_INLINE_LHS_PACKING,
+                nullptr, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t oh = 0, ow = 0;
+  EXPECT_EQ(xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(op, 1, 2, 2, nullptr,
+                                                       &oh, &ow, nullptr),
+            xnn_status_success);
+}
+

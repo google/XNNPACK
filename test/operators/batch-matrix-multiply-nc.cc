@@ -1,3 +1,4 @@
+#include "src/xnnpack/operator.h"
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -339,4 +340,40 @@ TEST(BatchMatMulTest, gc_stride_overflow_fails) {
       xnn_reshape_batch_matrix_multiply_nc_f32(
           batch_matrix_multiply_op, 1, batch_dims, batch_dims, overflow_m, 1,
           4, &workspace_size, nullptr));
+}
+
+TEST(BatchMatMulTest, zero_workspace_initialization) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_batch_matrix_multiply_nc_f32(
+                0, &batch_matrix_multiply_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      batch_matrix_multiply_op, xnn_delete_operator);
+
+  const size_t batch_dims[1] = {0};
+  size_t workspace_size = SIZE_MAX;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          batch_matrix_multiply_op, 1, batch_dims, batch_dims, 1, 1,
+          1, &workspace_size, nullptr));
+  EXPECT_EQ(workspace_size, 0);
+}
+
+// reshape with NULL workspace and inline LHS packing dereferenced the
+// out-param unconditionally (exit 139). The redirect at function entry makes
+// NULL skip the query like every other reshape.
+TEST(BATCH_MATRIX_MULTIPLY_NC_QD8_F32_QC8W, null_workspace_size_inline_lhs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                XNN_FLAG_INLINE_LHS_PACKING, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  static float scale[1] = {1.0f};
+  EXPECT_EQ(xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                op, 0, nullptr, nullptr, 2, 8, 4, scale, nullptr, nullptr),
+            xnn_status_success);
 }
