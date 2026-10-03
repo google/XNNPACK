@@ -432,7 +432,6 @@ xnnpack_cc_library(
                 prod_asm_srcs_for_arch(arch),
             ),
             arch = arch,
-            # Internal build flag.
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS,
         ),
