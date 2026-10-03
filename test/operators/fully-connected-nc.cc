@@ -3805,3 +3805,25 @@ TEST(FULLY_CONNECTED_NC_F32, overflow_create_weights_stride) {
                 /*flags=*/0, /*weights_cache=*/nullptr, &op));
 }
 
+// reshape with NULL workspace and inline LHS packing dereferenced the
+// out-param unconditionally (exit 139). The redirect at function entry makes
+// NULL skip the query like every other reshape.
+TEST(FULLY_CONNECTED_NC_QD8_F32_QC4W, null_workspace_size_inline_lhs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  static uint8_t kernel[32] = {0};
+  static float scale[1] = {1.0f};
+  static float bias[1] = {0.0f};
+  ASSERT_EQ(xnn_create_fully_connected_nc_qd8_f32_qc4w(
+                /*input_channels=*/8, /*output_channels=*/1,
+                /*input_stride=*/8, /*output_stride=*/1,
+                /*kernel_zero_point=*/0, scale, kernel, bias, -INFINITY,
+                INFINITY, XNN_FLAG_INLINE_LHS_PACKING, nullptr, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  EXPECT_EQ(xnn_reshape_fully_connected_nc_qd8_f32_qc4w(op, /*batch_size=*/2,
+                                                        nullptr, nullptr),
+            xnn_status_success);
+}
+
