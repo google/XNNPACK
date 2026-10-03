@@ -485,6 +485,11 @@ ADD_TEST(NAME polyfill-test COMMAND polyfill-test)
 SET_TARGET_PROPERTIES(polyfill-test PROPERTIES CXX_EXTENSIONS YES)
 
 IF(XNNPACK_BUILD_LIBRARY)
+  # Own binary: it installs a process-wide allocator via xnn_initialize().
+  ADD_EXECUTABLE(runtime-error-path-ownership-test runtime-error-path-ownership.cc)
+  TARGET_LINK_LIBRARIES(runtime-error-path-ownership-test PRIVATE XNNPACK pthreadpool
+    GTest::gtest GTest::gtest_main)
+
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)
   TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK pthreadpool GTest::gtest GTest::gtest_main)
 

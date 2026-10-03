@@ -1085,6 +1085,17 @@ xnnpack_unit_test(
     ],
 )
 
+# Own binary: it installs a process-wide allocator via xnn_initialize().
+xnnpack_unit_test(
+    name = "runtime_error_path_ownership_test",
+    srcs = ["runtime-error-path-ownership.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:operator_h",
+        "//:subgraph_h",
+    ],
+)
+
 xnnpack_unit_test(
     name = "weights_cache_test",
     srcs = ["weights-cache.cc"],
