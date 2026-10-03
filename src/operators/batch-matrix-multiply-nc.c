@@ -932,6 +932,7 @@ reshape_batch_matrix_multiply_nc(
 
   if (batch_size_c == 0) {
     batch_matrix_multiply_op->state = xnn_run_state_skip;
+    *workspace_size = 0;
     return xnn_status_success;
   }
 
