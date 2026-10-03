@@ -107,8 +107,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
-  return _mm_castsi128_ps(
-      _mm_cmpeq_epi32(_mm_castps_si128(a), _mm_castps_si128(b)));
+  // Compare as floats, not as integer bit patterns: `+0` and `-0` are equal as
+  // floats but have different bit patterns (0x00000000 vs 0x80000000), so an
+  // integer compare misses `-0`. `_mm_cmpeq_ps` also returns false for NaN,
+  // matching the other architectures' `xnn_cmpeq_f32`.
+  return _mm_cmpeq_ps(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
