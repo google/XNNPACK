@@ -65,7 +65,10 @@ static enum xnn_status create_dynamic_fully_connected_nc(
     goto error;
   }
   dynamic_fully_connected_op->num_compute_invocations = num_compute_invocations;
-  xnn_allocate_extra_params(dynamic_fully_connected_op, /*num_extra_params=*/1);
+  status = xnn_allocate_extra_params(dynamic_fully_connected_op, /*num_extra_params=*/1);
+  if (status != xnn_status_success) {
+    goto error;
+  }
 
   dynamic_fully_connected_op->ukernel.gemm_ukernels =
       xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));

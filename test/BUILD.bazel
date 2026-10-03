@@ -1096,6 +1096,16 @@ xnnpack_unit_test(
     ],
 )
 
+# Own binary: it installs a process-wide allocator via xnn_initialize().
+xnnpack_unit_test(
+    name = "binary_elementwise_extra_params_oom_test",
+    srcs = ["binary-elementwise-extra-params-oom.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:operator_h",
+    ],
+)
+
 xnnpack_unit_test(
     name = "mutex_test",
     srcs = ["mutex.cc"],
