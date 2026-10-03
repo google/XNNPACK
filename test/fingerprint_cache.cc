@@ -5,10 +5,12 @@
 
 #include "src/operators/fingerprint_cache.h"
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
 #include <set>
+#include <thread>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -66,10 +68,10 @@ TEST_F(FingerprintCacheTest, SetAndGetFingerprint) {
       /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
       /*value=*/314};
   xnn_set_fingerprint(expected);
-  const struct xnn_fingerprint* fingerprint = xnn_get_fingerprint(expected.id);
-  ASSERT_THAT(fingerprint, NotNull());
-  EXPECT_THAT(fingerprint->id, Eq(expected.id));
-  EXPECT_THAT(fingerprint->value, Eq(expected.value));
+  struct xnn_fingerprint fingerprint;
+  ASSERT_THAT(xnn_get_fingerprint(expected.id, &fingerprint), Eq(true));
+  EXPECT_THAT(fingerprint.id, Eq(expected.id));
+  EXPECT_THAT(fingerprint.value, Eq(expected.value));
 }
 
 TEST_F(FingerprintCacheTest, SetGetFingerprintMultipleTimesDoesntDeadlock) {
@@ -88,10 +90,11 @@ TEST_F(FingerprintCacheTest, SetGetFingerprintMultipleTimesDoesntDeadlock) {
   xnn_set_fingerprint(finger2);
   xnn_set_fingerprint(finger2);
 
-  xnn_get_fingerprint(finger1.id);
-  xnn_get_fingerprint(finger2.id);
-  xnn_get_fingerprint(finger1.id);
-  xnn_get_fingerprint(finger2.id);
+  struct xnn_fingerprint fingerprint;
+  xnn_get_fingerprint(finger1.id, &fingerprint);
+  xnn_get_fingerprint(finger2.id, &fingerprint);
+  xnn_get_fingerprint(finger1.id, &fingerprint);
+  xnn_get_fingerprint(finger2.id, &fingerprint);
 }
 
 TEST_F(FingerprintCacheTest, InitializeAndFinalize) {
@@ -101,8 +104,10 @@ TEST_F(FingerprintCacheTest, InitializeAndFinalize) {
   EXPECT_THAT(context.fingerprint_id,
               Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
   finalize_fingerprint_context(&context);
-  EXPECT_THAT(xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2),
-              NotNull());
+  struct xnn_fingerprint fingerprint;
+  EXPECT_THAT(xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
+                                  &fingerprint),
+              Eq(true));
 }
 
 TEST_F(FingerprintCacheTest, ReserveAndWrite) {
@@ -121,9 +126,64 @@ TEST_F(FingerprintCacheTest, ReserveAndWrite) {
   EXPECT_THAT(context.cache.look_up(context.cache.context, &key),
               Eq(XNN_CACHE_NOT_FOUND));
   finalize_fingerprint_context(&context);
-  const xnn_fingerprint* fingerprint =
-      xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
-  ASSERT_THAT(fingerprint, NotNull());
-  EXPECT_THAT(fingerprint->id, Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
-  EXPECT_THAT(fingerprint->value, Not(Eq(0)));
+  struct xnn_fingerprint fingerprint;
+  ASSERT_THAT(xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
+                                  &fingerprint),
+              Eq(true));
+  EXPECT_THAT(fingerprint.id, Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
+  EXPECT_THAT(fingerprint.value, Not(Eq(0)));
 }
+
+TEST_F(FingerprintCacheTest, ConcurrentSetAndGetIsRaceFree) {
+  constexpr uint32_t kFingerprintId = 0xABCDu;
+  constexpr int kNumWriters = 2;
+  constexpr int kNumReaders = 4;
+  constexpr int kNumIterations = 20000;
+
+  std::atomic<bool> start{false};
+  std::atomic<uint32_t> observed{0};
+
+  auto writer = [&]() {
+    while (!start.load(std::memory_order_acquire)) {
+      std::this_thread::yield();
+    }
+    for (uint32_t value = 1; value <= kNumIterations; value++) {
+      xnn_set_fingerprint({kFingerprintId, value});
+    }
+  };
+
+  auto reader = [&]() {
+    while (!start.load(std::memory_order_acquire)) {
+      std::this_thread::yield();
+    }
+    for (int i = 0; i < kNumIterations; i++) {
+      struct xnn_fingerprint fingerprint;
+      if (xnn_get_fingerprint(kFingerprintId, &fingerprint)) {
+        observed.store(fingerprint.value, std::memory_order_relaxed);
+      }
+    }
+  };
+
+  xnn_set_fingerprint({kFingerprintId, 1});
+
+  std::vector<std::thread> threads;
+  threads.reserve(kNumWriters + kNumReaders);
+  for (int t = 0; t < kNumWriters; t++) {
+    threads.emplace_back(writer);
+  }
+  for (int t = 0; t < kNumReaders; t++) {
+    threads.emplace_back(reader);
+  }
+
+  start.store(true, std::memory_order_release);
+  for (std::thread& thread : threads) {
+    thread.join();
+  }
+
+  struct xnn_fingerprint fingerprint;
+  ASSERT_TRUE(xnn_get_fingerprint(kFingerprintId, &fingerprint));
+  EXPECT_EQ(fingerprint.id, kFingerprintId);
+  EXPECT_GE(fingerprint.value, 1u);
+  EXPECT_LE(fingerprint.value, static_cast<uint32_t>(kNumIterations));
+}
+
