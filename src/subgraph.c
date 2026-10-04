@@ -937,6 +937,16 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
       continue;
     }
 
+    // Only NCHW-compatible nodes take part in sparse inference. A Node whose
+    // Values are not all FP16/FP32 has no layout flags at all, but it can still
+    // lead its own cluster, so the cluster check above does not exclude it.
+    // Skipping such Nodes also keeps the filter datatype below to FP16/FP32,
+    // which is all that switch handles.
+    if ((node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC |
+                               XNN_LAYOUT_FLAG_COMPATIBLE_NCHW)) == 0) {
+      continue;
+    }
+
     if ((node->type == xnn_node_type_convolution_2d &&
          max(node->params.convolution_2d.kernel_height,
              node->params.convolution_2d.kernel_width) == 1) ||

@@ -22,6 +22,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
       fusion
       input-output
+      nchw-quantized-node
       memory-planner
       subgraph-fp16
       subgraph

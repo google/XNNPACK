@@ -312,6 +312,18 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "nchw_quantized_node_test",
+    srcs = ["nchw-quantized-node.cc"],
+    tags = ["no_ynnpack"],
+    deps = [
+        ":subgraph_tester",
+        "//:node_type",
+        "//:subgraph_h",
+        "//:xnnpack_h",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(
