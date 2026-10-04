@@ -2818,7 +2818,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   float* fp32_bias_buffer_to_release = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
   const xnn_float16* f16_bias = (const xnn_float16*)bias;
-  for (size_t i = 0; i < input_channels * output_channels; ++i) {
+  for (size_t i = 0; i < fp32_kernel_elements; ++i) {
     fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
   }
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
@@ -2890,7 +2890,7 @@ enum xnn_status xnn_create_fully_connected_nc_pf32_f16(
   float* fp32_bias_buffer_to_release = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
   const xnn_float16* f16_bias = (const xnn_float16*)bias;
-  for (size_t i = 0; i < input_channels * output_channels; ++i) {
+  for (size_t i = 0; i < fp32_kernel_elements; ++i) {
     fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
   }
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
