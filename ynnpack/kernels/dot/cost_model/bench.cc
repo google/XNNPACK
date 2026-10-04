@@ -27,16 +27,31 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
          size_t block_m, size_t block_n, size_t block_k, size_t tile_m,
          size_t tile_n, size_t tile_k, uint32_t flags,
          const dot_cost_model& cost_model, TA, TB, TC) {
+  const size_t m = block_m;
+  const size_t n = state.range(0);
+  const size_t k = state.range(1);
+
+  // Record the problem shape and the kernel's block and tile parameters as
+  // counters, so the cost model fitter can read them directly from the CSV
+  // columns. The alternative, parsing them out of the benchmark name, is
+  // impossible for kernels like SME whose block and tile sizes are only known
+  // at runtime. These are set before the skip check below so that every run
+  // (including skipped ones) carries them, which keeps the CSV reporter's
+  // counter columns consistent across all runs.
+  state.counters["m"] = static_cast<double>(m);
+  state.counters["n"] = static_cast<double>(n);
+  state.counters["k"] = static_cast<double>(k);
+  state.counters["block_m"] = static_cast<double>(block_m);
+  state.counters["block_n"] = static_cast<double>(block_n);
+  state.counters["block_k"] = static_cast<double>(block_k);
+  state.counters["tile_m"] = static_cast<double>(tile_m);
+  state.counters["tile_n"] = static_cast<double>(tile_n);
+  state.counters["tile_k"] = static_cast<double>(tile_k);
+
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
   }
-
-  const size_t m = block_m;
-  const size_t n = state.range(0);
-  const size_t k = state.range(1);
-  state.SetLabel(std::to_string(m) + "x" + std::to_string(n) + "x" +
-                 std::to_string(k));
 
   const bool transpose_a = flags & dot_flag::transpose_a;
 

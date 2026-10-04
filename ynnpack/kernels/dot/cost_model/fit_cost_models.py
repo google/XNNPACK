@@ -60,8 +60,13 @@ def load_benchmark_data(input_sources: List[str]) -> List[Dict[str, Any]]:
           "real_time": real_time,
           "cpu_time": cpu_time,
           "time_unit": row.get("time_unit", "ns"),
-          "label": row.get("label", ""),
       }
+      # The benchmark emits the problem shape and the kernel block/tile sizes as
+      # CSV counter columns (see bench.cc), so we read them directly instead of
+      # parsing them out of the benchmark name.
+      for col in ("m", "n", "k", "block_m", "block_n", "block_k", "tile_m",
+                  "tile_n", "tile_k"):
+        entry[col] = _int_counter(row.get(col))
       if (row.get("error_occurred") or "").lower() in ("true", "1"):
         entry["error_occurred"] = True
       if row.get("error_message"):
@@ -85,29 +90,35 @@ def load_benchmark_data(input_sources: List[str]) -> List[Dict[str, Any]]:
   return benchmarks
 
 
-def parse_kernel_dims(
-    benchmark_name: str,
-) -> Optional[Tuple[int, int, int, int, int, int]]:
-  """Extracts (block_m, block_n, block_k, tile_m, tile_n, tile_k) from benchmark name."""
-  m = re.search(r"(\d+)x(\d+)x(\d+)_(\d+)x(\d+)x(\d+)", benchmark_name)
-  if not m:
+def _int_counter(value: Any) -> Optional[int]:
+  """Parses a CSV counter cell (a float-formatted integer) into an int."""
+  if value is None or value == "":
     return None
-  return (
-      int(m.group(1)),
-      int(m.group(2)),
-      int(m.group(3)),
-      int(m.group(4)),
-      int(m.group(5)),
-      int(m.group(6)),
+  try:
+    return int(round(float(value)))
+  except (TypeError, ValueError):
+    return None
+
+
+def kernel_dims(
+    entry: Dict[str, Any],
+) -> Optional[Tuple[int, int, int, int, int, int]]:
+  """Reads (block_m, block_n, block_k, tile_m, tile_n, tile_k) from CSV columns."""
+  dims = tuple(
+      entry.get(col)
+      for col in ("block_m", "block_n", "block_k", "tile_m", "tile_n", "tile_k")
   )
+  if any(d is None for d in dims):
+    return None
+  return dims
 
 
-def parse_shape(label: str) -> Tuple[int, int, int]:
-  """Extracts (m, n, k) from label string 'MxNxK'."""
-  m = re.search(r"(\d+)x(\d+)x(\d+)", label)
-  if m:
-    return int(m.group(1)), int(m.group(2)), int(m.group(3))
-  return 240, 240, 240
+def kernel_shape(entry: Dict[str, Any]) -> Optional[Tuple[int, int, int]]:
+  """Reads (m, n, k) from CSV columns."""
+  shape = tuple(entry.get(col) for col in ("m", "n", "k"))
+  if any(s is None for s in shape):
+    return None
+  return shape
 
 
 # TODO: b/549795065 - The following two functions are big and messy, and exist
@@ -206,11 +217,39 @@ def infer_kernel_model_name(
   return None
 
 
+def solve_nnls(
+    a_mat: np.ndarray,
+    b_vec: np.ndarray,
+    fallback_x: np.ndarray,
+    fallback_y: np.ndarray,
+) -> np.ndarray:
+  """Non-negative least squares with fallbacks for hard-to-fit data.
+
+  scipy's `nnls` defaults to a low iteration cap (3 * num_columns) and raises if
+  it is reached, which happens for some ill-conditioned data (e.g. the slow
+  efficiency-core SME runs). We give it more room, and fall back to an ordinary
+  least-squares solve (clamped to non-negative) if it still does not converge or
+  returns all zeros.
+  """
+  try:
+    c, _ = nnls(a_mat, b_vec, maxiter=100 * a_mat.shape[1])
+  except RuntimeError:
+    c = None
+  if c is None or np.all(c == 0):
+    c = np.linalg.lstsq(fallback_x, fallback_y, rcond=None)[0]
+    c = np.maximum(c, 1e-12)
+  return c
+
+
 def fit_model(
     benchmarks: List[Dict[str, Any]],
-    is_amx: bool = False,
+    shared_load: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-  """Fits a single cost model to all valid benchmarks."""
+  """Fits a single cost model to all valid benchmarks.
+
+  If `shared_load` is set, load_a_cost and load_b_cost are constrained to a
+  single shared coefficient (see the AMX/SME note below).
+  """
   entries = {}
 
   # Only exclude m = 1 if the model has kernels with m > 1, so models that are
@@ -218,7 +257,7 @@ def fit_model(
   # still be fit.
   has_large_m = False
   for b in benchmarks:
-    dims = parse_kernel_dims(b.get("name", ""))
+    dims = kernel_dims(b)
     if dims and dims[0] > 1:
       has_large_m = True
       break
@@ -228,7 +267,7 @@ def fit_model(
       continue
 
     name = b.get("name", "")
-    dims = parse_kernel_dims(name)
+    dims = kernel_dims(b)
     if not dims:
       continue
     block_m, block_n, _, tile_m, tile_n, _ = dims
@@ -239,7 +278,10 @@ def fit_model(
     if (block_m // tile_m) * (block_n // tile_n) < 4:
       continue
 
-    m, n, k = parse_shape(b.get("label", ""))
+    shape = kernel_shape(b)
+    if not shape:
+      continue
+    m, n, k = shape
 
     real_time_ns = b.get("real_time") or b.get("cpu_time")
     if not real_time_ns or real_time_ns <= 0:
@@ -283,19 +325,19 @@ def fit_model(
   x = np.array(x_list, dtype=np.float64)
   y = np.array(y_list, dtype=np.float64)
 
-  if is_amx:
-    # Hack: AMX kernels have identical compute and symmetric tile execution, but
-    # benchmark data only covers single-M iterations where 1x4 and 2x2 take the
-    # same time, causing unconstrained regression to over-penalize load_a.
-    # Constrain load_a_cost == load_b_cost by fitting a shared load coefficient.
+  if shared_load:
+    # Hack: AMX and SME kernels load A and B symmetrically into tiles, so their
+    # load costs should be equal. The benchmark data does not constrain the two
+    # separately (e.g. AMX only has single-M iterations where 1x4 and 2x2 take
+    # the same time; SME sweeps leave load_a and load_b collinear), so an
+    # unconstrained regression splits the load cost arbitrarily between them
+    # (typically driving one to zero). Constrain load_a_cost == load_b_cost by
+    # fitting a single shared load coefficient.
     x_reduced = np.column_stack([x[:, 0], x[:, 1], x[:, 2] + x[:, 3], x[:, 4]])
     a_mat = x_reduced / y[:, np.newaxis]
     b_vec = np.ones(len(y))
 
-    c_reduced, _ = nnls(a_mat, b_vec)
-    if np.all(c_reduced == 0):
-      c_reduced = np.linalg.lstsq(x_reduced, y, rcond=None)[0]
-      c_reduced = np.maximum(c_reduced, 1e-12)
+    c_reduced = solve_nnls(a_mat, b_vec, x_reduced, y)
 
     c = np.array(
         [c_reduced[0], c_reduced[1], c_reduced[2], c_reduced[2], c_reduced[3]]
@@ -305,10 +347,7 @@ def fit_model(
     a_mat = x / y[:, np.newaxis]
     b_vec = np.ones(len(y))
 
-    c, _ = nnls(a_mat, b_vec)
-    if np.all(c == 0):
-      c = np.linalg.lstsq(x, y, rcond=None)[0]
-      c = np.maximum(c, 1e-12)
+    c = solve_nnls(a_mat, b_vec, x, y)
 
   # Scale so mean ratio is 1.000
   pred = x @ c
@@ -331,7 +370,7 @@ def generate_cpu_header(
   """Generates the C++ contents of `<cpu>.h`."""
   cpu_ident = re.sub(r"[^a-zA-Z0-9_]", "_", cpu)
   guard_macro = (
-      "THIRD_PARTY_XNNPACK_YNNPACK_KERNELS_DOT_COST_MODEL_"
+      "XNNPACK_YNNPACK_KERNELS_DOT_COST_MODEL_"
       f"{cpu_ident.upper()}_H_"
   )
 
@@ -503,7 +542,8 @@ def main():
         continue
       try:
         coeffs, ratios, y = fit_model(
-            by_model[field_name], is_amx="amx" in field_name
+            by_model[field_name],
+            shared_load="amx" in field_name or "sme" in field_name,
         )
       except ValueError:
         continue

@@ -44,11 +44,13 @@
 #include "ynnpack/kernels/dot/cost_model/cortex_a725.h"
 #include "ynnpack/kernels/dot/cost_model/cortex_x1.h"
 #include "ynnpack/kernels/dot/cost_model/cortex_x4.h"
+#include "ynnpack/kernels/dot/cost_model/everest.h"
 #include "ynnpack/kernels/dot/cost_model/lumex_c1_pro.h"
 #include "ynnpack/kernels/dot/cost_model/lumex_c1_ultra.h"
 #include "ynnpack/kernels/dot/cost_model/neoverse_n1.h"
 #include "ynnpack/kernels/dot/cost_model/neoverse_v2.h"
 #include "ynnpack/kernels/dot/cost_model/oryon.h"
+#include "ynnpack/kernels/dot/cost_model/sawtooth.h"
 #endif  // YNN_ARCH_ARM
 
 namespace ynn {
@@ -602,7 +604,7 @@ const dot_cost_models& get_dot_cost_models() {
         return lumex_c1_pro;
       case cpuinfo_uarch_lumex_c1_ultra:
       case cpuinfo_uarch_lumex_c1_premium:
-      case cpuinfo_uarch_lumex_c2_ultra:
+      //case cpuinfo_uarch_lumex_c2_ultra:
         return lumex_c1_ultra;
       case cpuinfo_uarch_neoverse_n1:
       case cpuinfo_uarch_neoverse_e1:
@@ -610,11 +612,46 @@ const dot_cost_models& get_dot_cost_models() {
       case cpuinfo_uarch_neoverse_v1:
       case cpuinfo_uarch_neoverse_n2:
       case cpuinfo_uarch_neoverse_v2:
-      case cpuinfo_uarch_neoverse_n4:
+      //case cpuinfo_uarch_neoverse_n4:
         return neoverse_v2;
       case cpuinfo_uarch_oryon:
       case cpuinfo_uarch_oryon_v3:
         return oryon;
+      // All Apple cores use the cost models fit on the Apple M4, mapped by core
+      // type: performance ("big") cores (and the early single-core-type chips)
+      // use the Everest model, efficiency ("little") cores use the Sawtooth
+      // model.
+      case cpuinfo_uarch_swift:
+      case cpuinfo_uarch_cyclone:
+      case cpuinfo_uarch_typhoon:
+      case cpuinfo_uarch_twister:
+      case cpuinfo_uarch_hurricane:
+      case cpuinfo_uarch_monsoon:
+      case cpuinfo_uarch_vortex:
+      case cpuinfo_uarch_lightning:
+      case cpuinfo_uarch_firestorm:
+      case cpuinfo_uarch_avalanche:
+      case cpuinfo_uarch_everest:
+      case cpuinfo_uarch_coll_everest:
+      case cpuinfo_uarch_tupai_everest:
+      case cpuinfo_uarch_tahiti_everest:
+      case cpuinfo_uarch_tilos_everest:
+      case cpuinfo_uarch_donan_everest:
+      case cpuinfo_uarch_sotra_super:
+      case cpuinfo_uarch_sotra_performance:
+        return everest;
+      case cpuinfo_uarch_mistral:
+      case cpuinfo_uarch_tempest:
+      case cpuinfo_uarch_thunder:
+      case cpuinfo_uarch_icestorm:
+      case cpuinfo_uarch_blizzard:
+      case cpuinfo_uarch_sawtooth:
+      case cpuinfo_uarch_coll_sawtooth:
+      case cpuinfo_uarch_tupai_sawtooth:
+      case cpuinfo_uarch_tahiti_sawtooth:
+      case cpuinfo_uarch_tilos_sawtooth:
+      case cpuinfo_uarch_donan_sawtooth:
+        return sawtooth;
 #endif  // YNN_ARCH_ARM
       default:
         break;
