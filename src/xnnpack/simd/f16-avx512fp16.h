@@ -198,19 +198,21 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
 }
 
 static XNN_INLINE float xnn_reduce_add_f16(xnn_simd_f16_t a) {
-  const __m256h a_lo = _mm512_castph512_ph256(a);
-  const __m256h a_hi =
-      _mm256_castpd_ph(_mm512_extractf64x4_pd(_mm512_castph_pd(a), 1));
-  const __m512 a_f32 =
-      _mm512_add_ps(_mm512_cvtxph_ps(a_lo), _mm512_cvtxph_ps(a_hi));
-  const __m256 a256 = _mm256_add_ps(
-      _mm512_castps512_ps256(a_f32),
-      _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a_f32), 1)));
-  __m128 a128 =
-      _mm_add_ps(_mm256_castps256_ps128(a256), _mm256_extractf128_ps(a256, 1));
-  a128 = _mm_add_ps(a128, _mm_movehl_ps(a128, a128));
-  a128 = _mm_add_ss(a128, _mm_movehdup_ps(a128));
-  return _mm_cvtss_f32(a128);
+  const __m256h a256 = _mm256_add_ph(
+      _mm512_castph512_ph256(a),
+      _mm256_castpd_ph(_mm512_extractf64x4_pd(_mm512_castph_pd(a), 1)));
+  __m128h a128 = _mm_add_ph(
+      _mm256_castph256_ph128(a256),
+      _mm_castps_ph(_mm256_extractf128_ps(_mm256_castph_ps(a256), 1)));
+  a128 = _mm_add_ph(
+      a128, _mm_castps_ph(_mm_movehl_ps(_mm_castph_ps(a128),
+                                       _mm_castph_ps(a128))));
+  a128 = _mm_add_ph(a128,
+                    _mm_castps_ph(_mm_movehdup_ps(_mm_castph_ps(a128))));
+  a128 = _mm_add_sh(
+      a128, _mm_castsi128_ph(_mm_srli_epi32(_mm_castph_si128(a128), 16)));
+  return xnn_float16_to_float(xnn_float16_from_bits(
+      (uint16_t)_mm_extract_epi16(_mm_castph_si128(a128), 0)));
 }
 
 // Tail load/store operations.
