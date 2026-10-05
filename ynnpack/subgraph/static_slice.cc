@@ -109,15 +109,20 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::static_slice& op =
         std::get<ynn_node::static_slice>(node.op);
-    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
+    // Constrain the first non-trivial dimension of both input and output to be
+    // dense so Slinky's copy and in-place aliasers can match their strides.
+    const size_t first_non_trivial_in = first_non_trivial_dim(input.extents);
+    if (first_non_trivial_in < input.buffer->rank()) {
+      input.buffer->dim(first_non_trivial_in).stride =
+          input.buffer->elem_size();
+    }
     const size_t first_non_trivial = first_non_trivial_dim(output.extents);
     if (first_non_trivial < output.buffer->rank()) {
-      // Don't create output buffers where the first non-trivial dimension is
-      // not dense.
       output.buffer->dim(first_non_trivial).stride = output.buffer->elem_size();
     }
 
