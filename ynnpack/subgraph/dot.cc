@@ -896,6 +896,30 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
                                    {std::move(func_input)},
                                    {{output.buffer, dims}}, std::move(attrs));
 
+    // Pin ki, mi and the k dimensions to their full extents (the transpose
+    // kernel produces whole ki x mi tiles and all of ko at once), and let
+    // make_schedule pick splits and workers for the mo and batch dimensions.
+    // When it is fused, the splits don't require their steps, so they adopt
+    // the loops of the dot.
+    std::vector<slinky::expr> given_splits(m_dim + 2);
+    for (int i = 0; i < m_dim + 2; ++i) {
+      given_splits[i] = output.physical_extent(i);
+    }
+    auto sched =
+        runtime.make_schedule(dims, output.physical_extents(),
+                              output.buffer->elem_size(), given_splits);
+
+    // The real bounds of the input's m dimension are tiles of size tile_m
+    // indexed by `mo`, which breaks the scheduler's source region inference.
+    // Declare a virtual 1-to-1 mapping with `mo` instead, so producers of the
+    // input can be fused with loops derived from it.
+    sched->input_scheduler_bounds.resize(1);
+    sched->input_scheduler_bounds[0].resize(m_dim + 1);
+    sched->input_scheduler_bounds[0][m_dim] = slinky::point(mo);
+
+    func.user_data() = sched.get();
+    runtime.scheduling_info_storage.push_back(std::move(sched));
+
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
