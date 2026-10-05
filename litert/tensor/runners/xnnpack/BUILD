@@ -46,8 +46,12 @@ cc_test(
     deps = [
         ":runner",
         "//:XNNPACK",
+        "//litert/tensor",
+        "//litert/tensor:arithmetic",
+        "//litert/tensor:datatypes",
         "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/runners/common_nnpack:runner_test_suite",
+        "@abseil-cpp//absl/status",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
