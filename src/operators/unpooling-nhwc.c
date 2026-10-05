@@ -147,11 +147,6 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
     return xnn_status_invalid_parameter;
   }
 
-  if (batch_size == 0) {
-    unpooling_op->state = xnn_run_state_skip;
-    return xnn_status_success;
-  }
-
   if (channels == 0) {
     xnn_log_error(
       "failed to reshape %s operator with %zu channels: number of channels must be non-zero",
@@ -191,11 +186,27 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
     input_width, unpooling_op->convolution_op->padding_left + unpooling_op->convolution_op->padding_right,
     unpooling_op->convolution_op->kernel_width);
 
+  if (unpooling_op->convolution_op->output_height == 0 ||
+      unpooling_op->convolution_op->output_width == 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: computed output dimensions %zux%zu, "
+        "dimensions must be non-zero",
+        xnn_operator_type_to_string_v2(unpooling_op),
+        unpooling_op->convolution_op->output_height,
+        unpooling_op->convolution_op->output_width);
+    return xnn_status_invalid_parameter;
+  }
+
   if (output_height_out != NULL) {
     *output_height_out = unpooling_op->convolution_op->output_height;
   }
   if (output_width_out != NULL) {
     *output_width_out = unpooling_op->convolution_op->output_width;
+  }
+
+  if (batch_size == 0) {
+    unpooling_op->state = xnn_run_state_skip;
+    return xnn_status_success;
   }
 
   // Dummy output for initializing indirection buffers. Output needs to be earlier output due to valid_batch_size

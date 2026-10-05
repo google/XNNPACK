@@ -2330,4 +2330,39 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
           convolution_op, overflow_batch, 1, 1, &workspace_size,
           nullptr, nullptr, nullptr));
 }
+
+TEST(CONVOLUTION_NHWC_F32, reshape_batch_size_zero) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const float kernel[1] = {1.0f};
+  const float bias[1] = {0.0f};
+  xnn_operator_t convolution_op = nullptr;
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_convolution2d_nhwc_f32(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+          kernel, bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      convolution_op, xnn_delete_operator);
+  size_t workspace_size = SIZE_MAX;
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_reshape_convolution2d_nhwc_f32(
+          convolution_op, 0, 5, 5, &workspace_size,
+          &output_height, &output_width, nullptr));
+  EXPECT_EQ(0, workspace_size);
+  EXPECT_EQ(5, output_height);
+  EXPECT_EQ(5, output_width);
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_setup_convolution2d_nhwc_f32(
+          convolution_op, nullptr, nullptr, nullptr));
+  EXPECT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr));
+}
 }  // namespace
