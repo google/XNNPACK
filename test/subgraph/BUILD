@@ -225,6 +225,7 @@ xnnpack_unit_test(
     deps = SUBGRAPH_TEST_DEPS + [
         "//:microparams_h",
         "//:quantization",
+        "//src/configs:config_hdrs",
     ],
 )
 

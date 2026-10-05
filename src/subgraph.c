@@ -4414,6 +4414,66 @@ static bool is_qs8_to_f32_dequant(const struct xnn_subgraph* subgraph,
          out->datatype == xnn_datatype_fp32;
 }
 
+static bool should_fuse_bmm_dequantization(
+    size_t m, size_t k, size_t n, bool transpose_b,
+    const struct xnn_gemm_config* f32_gemm_config,
+    const struct xnn_gemm_config* qc8w_gemm_config) {
+  // The rewrite is chosen at graph optimization and is not revisited on
+  // reshape. Zero dimensions do not identify a decode workload.
+  if (qc8w_gemm_config == NULL || m == 0 || k == 0 || n == 0) {
+    return false;
+  }
+
+  // Preserve the SME/SME2 cutoff: FP32 prefill can use the matrix tile once
+  // there are enough rows to fill it.
+  if (f32_gemm_config != NULL && f32_gemm_config->mr >= 32) {
+    return m < f32_gemm_config->mr;
+  }
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  // Match the selected AVX-512 kernel pair across CPU vendors. Ryzen 9950X
+  // measurements favor fusion, including prefill, for at least one full N tile.
+  // Keep the existing fallback for the unmeasured narrow-N region.
+  if (f32_gemm_config != NULL &&
+      f32_gemm_config->arch == xnn_arch_x86_avx512f &&
+      f32_gemm_config->mr == 7 && f32_gemm_config->nr == 32 &&
+      qc8w_gemm_config->arch == xnn_arch_x86_avx512skx &&
+      qc8w_gemm_config->mr == 7 && qc8w_gemm_config->nr == 32 &&
+      n >= qc8w_gemm_config->nr) {
+    return true;
+  }
+
+  if (f32_gemm_config != NULL && f32_gemm_config->arch == xnn_arch_x86_fma3 &&
+      f32_gemm_config->mr == 6 && f32_gemm_config->nr == 16 &&
+      qc8w_gemm_config->arch == xnn_arch_x86_avx2 &&
+      qc8w_gemm_config->mr == 5 && qc8w_gemm_config->nr == 16 && m <= 8 &&
+      !transpose_b && k >= 256 && n >= 256 &&
+      divide_round_up(m, qc8w_gemm_config->mr) <=
+          divide_round_up(m, f32_gemm_config->mr)) {
+    // Non-transposed M=7/8 benefits from cheaper INT8 RHS preparation with
+    // equal row-tile counts. Do not extend to M=6 or the transposed layout;
+    // small transposed tails can lose. K/N bounds delimit the initial scope.
+    return true;
+  }
+#else
+  (void)transpose_b;
+#endif
+
+  // Retain the previous small-operand policy on SIMD backends. In particular,
+  // small M=6/8 cases do not uniformly benefit from extending the MR cutoff.
+  if (m <= qc8w_gemm_config->mr) {
+    return true;
+  }
+
+  // Extend to folded decode only for a large individual RHS. The conservative
+  // 4 MiB INT8 bound matches the measured 512x8192 long-context workload;
+  // it is not an estimate of the crossover for smaller operands. Counting
+  // each RHS separately avoids treating many small batches as one large RHS.
+  size_t rhs_elements;
+  return m <= 8 && xnn_safe_mul(n, k, &rhs_elements) &&
+         rhs_elements >= 4 * 1024 * 1024;
+}
+
 static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   // Only batch-matrix-multiply nodes are rewritten here. Check the node type
   // *before* reserving any space: reserving may reallocate the subgraph's node
@@ -4477,14 +4537,6 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
     return false;
   }
 
-  const struct xnn_gemm_config* f32_qc8w_gemm_config =
-      xnn_init_f32_qc8w_gemm_config();
-  if (f32_qc8w_gemm_config == NULL ||
-      a_value->shape.dim[a_value->shape.num_dims - 2] >
-          f32_qc8w_gemm_config->mr) {
-    return false;
-  }
-
   // Determine channel info for b. For bmm, b is `[..., K, N]` (or `[..., N,
   // K]` if `XNN_FLAG_TRANSPOSE_B`). The N dimension is the qcint8 channel
   // dimension. The actual per-channel scale array is materialized by the
@@ -4494,7 +4546,19 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   const bool transpose_b = (node->flags & XNN_FLAG_TRANSPOSE_B) != 0;
   const size_t b_num_dims = b_qint8_value->shape.num_dims;
   const size_t channel_dim = transpose_b ? b_num_dims - 2 : b_num_dims - 1;
-  if (b_qint8_value->shape.dim[channel_dim] == 0) {
+  const size_t k_dim = transpose_b ? b_num_dims - 1 : b_num_dims - 2;
+  const size_t m = a_value->shape.dim[a_value->shape.num_dims - 2];
+  const size_t k = b_qint8_value->shape.dim[k_dim];
+  const size_t n = b_qint8_value->shape.dim[channel_dim];
+
+  const struct xnn_gemm_config* f32_gemm_config = xnn_init_pf32_gemm_config();
+  if (f32_gemm_config == NULL) {
+    f32_gemm_config = xnn_init_f32_gemm_config(node->flags);
+  }
+  const struct xnn_gemm_config* f32_qc8w_gemm_config =
+      xnn_init_f32_qc8w_gemm_config();
+  if (!should_fuse_bmm_dequantization(m, k, n, transpose_b, f32_gemm_config,
+                                      f32_qc8w_gemm_config)) {
     return false;
   }
 

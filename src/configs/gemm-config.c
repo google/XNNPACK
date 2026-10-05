@@ -1006,6 +1006,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
         f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x32__avx512f_u4_prfm;
         f32_gemm_config->mr = 7;
         f32_gemm_config->nr = 32;
+        f32_gemm_config->arch = xnn_arch_x86_avx512f;
       } else
     #endif
     #if XNN_ENABLE_FMA3
@@ -1034,6 +1035,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
               f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
               f32_gemm_config->mr = 6;
               f32_gemm_config->nr = 16;
+              f32_gemm_config->arch = xnn_arch_x86_fma3;
             #elif XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
               f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast);
               f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_2x16__fma3_broadcast);
@@ -2128,6 +2130,7 @@ static void init_f32_qc8w_gemm_config(void) {
         f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x32__avx2_u16;
         f32_qc8w_gemm_config.mr = 7;
         f32_qc8w_gemm_config.nr = 32;
+        f32_qc8w_gemm_config.arch = xnn_arch_x86_avx512skx;
       } else
     #endif
     #if XNN_ENABLE_AVX2
@@ -2139,6 +2142,7 @@ static void init_f32_qc8w_gemm_config(void) {
         f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__avx2_u16;
         f32_qc8w_gemm_config.mr = 5;
         f32_qc8w_gemm_config.nr = 16;
+        f32_qc8w_gemm_config.arch = xnn_arch_x86_avx2;
     } else
     #endif
     #if XNN_ENABLE_FMA3
@@ -3051,6 +3055,27 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
     #if XNN_ENABLE_ARM_SME2
     const size_t mr = xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
     const size_t nr = xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
+    // TODO: Evaluate an M=1 NEON SDOT GEMV for QP8/QC4W and QP8/QC8W that
+    // consumes the existing SME2-packed RHS in non-streaming mode, avoiding
+    // SMSTART/SMSTOP and ZA setup per microkernel call. SME2 prefill and NEON
+    // decode could then share one packed weight buffer without repacking or
+    // retaining separate copies for each backend.
+    //
+    // Match the complete packing contract: NR derived from streaming vector
+    // length (e.g. 64), KR/SR interleaving, K padding, INT4 nibble order where
+    // applicable, channel sums, scales and bias. Smaller NEON output tiles can
+    // traverse a wider packed panel using its existing strides. Preserve the
+    // activation quantization, LHS packing and FP32 output/clamping contract;
+    // audit preparation and address helpers for remaining mode transitions.
+    //
+    // Compare with the dedicated SME2 GEMV using the same packed RHS, realistic
+    // K/N and tails, one/two/four threads, and warm/rotating weights. Measure
+    // both kernel and complete FC latency, including activation preparation,
+    // to distinguish mode-switch costs from compute and thread-scaling effects.
+    // Select per operator during reshape using shape and thread count, keeping
+    // SME2 where it is faster. Evaluate M=4/8 small GEMM separately because
+    // repeated GEMV calls can reload the same RHS. This targets integer
+    // activations; FP32/QC8W attention BMM requires a separate arithmetic design.
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2);
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2);
     qp8_f32_qc4w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;

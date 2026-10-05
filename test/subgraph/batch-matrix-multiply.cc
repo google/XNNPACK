@@ -19,12 +19,14 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/node-type.h"
-#include "src/xnnpack/reference-utils.h"
 #include "src/xnnpack/quantization.h"
+#include "src/xnnpack/reference-utils.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/quantization-helpers.h"
@@ -711,6 +713,130 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
       EXPECT_FALSE(in->datatype == xnn_datatype_qint8 &&
                    out->datatype == xnn_datatype_fp32)
           << "stale dequant(qint8 -> f32) survived rewrite";
+    }
+  }
+}
+
+static bool uses_avx512_bmm_kernels(const xnn_gemm_config* f32,
+                                    const xnn_gemm_config* qc8w) {
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  return f32 != nullptr && f32->arch == xnn_arch_x86_avx512f && f32->mr == 7 &&
+         f32->nr == 32 && qc8w != nullptr &&
+         qc8w->arch == xnn_arch_x86_avx512skx && qc8w->mr == 7 &&
+         qc8w->nr == 32;
+#else
+  return false;
+#endif
+}
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_shape_policy) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const xnn_gemm_config* qc8w_config = xnn_init_f32_qc8w_gemm_config();
+  if (qc8w_config == nullptr) {
+    GTEST_SKIP();
+  }
+  const xnn_gemm_config* f32_config = xnn_init_pf32_gemm_config();
+  if (f32_config == nullptr) {
+    f32_config = xnn_init_f32_gemm_config(/*flags=*/0);
+  }
+  const bool wide_matrix = f32_config != nullptr && f32_config->mr >= 32;
+  const bool avx512 = uses_avx512_bmm_kernels(f32_config, qc8w_config);
+  bool avx2 = false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  avx2 = f32_config != nullptr && f32_config->arch == xnn_arch_x86_fma3 &&
+         f32_config->mr == 6 && f32_config->nr == 16 &&
+         qc8w_config->arch == xnn_arch_x86_avx2 && qc8w_config->mr == 5 &&
+         qc8w_config->nr == 16;
+#endif
+  struct Case {
+    const char* name;
+    size_t m, k, n, a_batches, b_batches;
+    bool fused, fused_transpose;
+  };
+  std::vector<Case> cases = {
+      {"long_context_decode", 8, 512, 8192, 1, 1, true, true},
+      {"above_decode_rows", 9, 512, 8192, 1, 1,
+       wide_matrix || avx512 || qc8w_config->mr >= 9,
+       wide_matrix || avx512 || qc8w_config->mr >= 9},
+      {"below_decode_bound", 8, 512, 8191, 1, 1,
+       wide_matrix || avx512 || avx2 || qc8w_config->mr >= 8,
+       wide_matrix || avx512 || qc8w_config->mr >= 8},
+      {"small_transposed_tail", 6, 511, 513, 1, 1,
+       wide_matrix || avx512 || qc8w_config->mr >= 6,
+       wide_matrix || avx512 || qc8w_config->mr >= 6},
+      {"equal_row_tiles", 7, 513, 511, 1, 1,
+       wide_matrix || avx512 || avx2 || qc8w_config->mr >= 7,
+       wide_matrix || avx512 || qc8w_config->mr >= 7},
+      {"at_avx2_shape_bounds", 7, 256, 256, 1, 1,
+       wide_matrix || avx512 || avx2 || qc8w_config->mr >= 7,
+       wide_matrix || avx512 || qc8w_config->mr >= 7},
+      {"below_avx2_k_bound", 7, 255, 511, 1, 1,
+       wide_matrix || avx512 || qc8w_config->mr >= 7,
+       wide_matrix || avx512 || qc8w_config->mr >= 7},
+      {"below_avx2_n_bound", 7, 513, 255, 1, 1,
+       wide_matrix || avx512 || qc8w_config->mr >= 7,
+       wide_matrix || avx512 || qc8w_config->mr >= 7},
+      {"independent_small_rhs", 8, 65, 33, 8, 8,
+       wide_matrix || avx512 || qc8w_config->mr >= 8,
+       wide_matrix || avx512 || qc8w_config->mr >= 8},
+      {"many_small_rhs", 8, 65, 33, 2048, 2048,
+       wide_matrix || avx512 || qc8w_config->mr >= 8,
+       wide_matrix || avx512 || qc8w_config->mr >= 8},
+      {"e4b_two_kv_heads", 4, 256, 544, 2, 2,
+       wide_matrix || qc8w_config->mr >= 4,
+       wide_matrix || qc8w_config->mr >= 4},
+      {"tiny_broadcast_rhs", 1, 33, 65, 8, 1, true, true},
+      {"prefill", 128, 1024, 512, 1, 1, avx512, avx512},
+      {"broadcast_prefill", 128, 1024, 512, 8, 1, avx512, avx512},
+      {"large_rhs_prefill", 128, 8192, 512, 1, 1, avx512, avx512},
+      {"narrow_n_prefill", 128, 1024, 31, 1, 1, false, false},
+      {"full_n_tile_prefill", 128, 1024, 32, 1, 1, avx512, avx512},
+      {"unknown_m", 0, 17, 9, 1, 1, false, false},
+      {"unknown_k", 8, 0, 9, 1, 1, false, false},
+      {"unknown_n", 8, 17, 0, 1, 1, false, false},
+  };
+  if (wide_matrix) {
+    const size_t matrix_mr = f32_config->mr;
+    cases.push_back(
+        {"below_matrix_mr", matrix_mr - 1, 17, 9, 1, 1, true, true});
+    cases.push_back({"at_matrix_mr", matrix_mr, 17, 9, 1, 1, false, false});
+    cases.push_back(
+        {"above_matrix_mr", matrix_mr + 1, 17, 9, 1, 1, false, false});
+  }
+  const uint32_t flags =
+      xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING;
+  for (const Case& c : cases) {
+    for (uint32_t transpose : {0u, uint32_t(XNN_FLAG_TRANSPOSE_B)}) {
+      SCOPED_TRACE(testing::Message() << c.name << ", transpose=" << transpose);
+      uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+      const TensorShape b_shape =
+          transpose ? TensorShape{1, c.b_batches, c.n, c.k}
+                    : TensorShape{1, c.b_batches, c.k, c.n};
+      SubgraphTester tester(/*external_value_ids=*/3, flags);
+      tester.AddInputTensorF32({1, c.a_batches, c.m, c.k}, 0)
+          .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.037f, b_shape, 1)
+          .AddInternalDynamicTensorF32(b_shape, &internal_b_f32)
+          .AddOutputTensor({1, c.a_batches, c.m, c.n}, xnn_datatype_fp32, 2)
+          .AddConvert(1, internal_b_f32)
+          .AddBatchMatrixMultiply(0, internal_b_f32, 2, transpose)
+          .Optimize(flags);
+
+      const xnn_node* bmm_node = nullptr;
+      for (size_t i = 0; i < tester.NumNodes(); ++i) {
+        if (tester.Node(i)->type == xnn_node_type_batch_matrix_multiply) {
+          bmm_node = tester.Node(i);
+          break;
+        }
+      }
+      ASSERT_NE(bmm_node, nullptr);
+      const xnn_value* b_value = tester.Value(bmm_node->inputs[1]);
+      const bool fused = transpose ? c.fused_transpose : c.fused;
+      EXPECT_EQ(b_value->datatype,
+                fused ? xnn_datatype_qcint8 : xnn_datatype_fp32);
+      if (fused) {
+        EXPECT_EQ(b_value->quantization.channel_dimension,
+                  b_value->shape.num_dims - (transpose ? 2 : 1));
+      }
     }
   }
 }
