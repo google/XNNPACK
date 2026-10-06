@@ -736,6 +736,45 @@ TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2,
   EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
                           [](uint8_t value) { return value == 0xA5; }));
 }
+TEST(PACK_KAI_QS8_QC8W_WEIGHTS_AND_BIASES_SME2, groups_and_padding) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  const size_t groups = 2, n = 3, k = 5;
+  xnn_gemm_config config = {};
+  config.nr = xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr();
+  config.log2_kr = 2;
+  const size_t stride = xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2(
+      &config, k, 0, k, 0);
+  const size_t group_size = round_up(n, config.nr) * stride;
+  std::vector<int32_t> bias(groups * n);
+  std::iota(bias.begin(), bias.end(), 10);
+  std::vector<float> scales(groups * n);
+  std::iota(scales.begin(), scales.end(), 0.25f);
+  const xnn_qs8_packing_params params = {-7};
+  for (bool transpose : {false, true}) {
+    const size_t row_stride = (transpose ? n : k) + 3;
+    const size_t weights_group_stride = (transpose ? k : n) * row_stride;
+    std::vector<int8_t> weights(groups * weights_group_stride);
+    std::iota(weights.begin(), weights.end(), -31);
+    for (bool has_bias : {false, true}) {
+      std::vector<uint8_t> actual(groups * group_size + 64, 0xA5);
+      std::vector<uint8_t> expected(actual.size(), 0xA5);
+      const uint32_t flags = transpose ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0;
+      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
+          flags, &config, k, n, groups, 0, row_stride,
+          has_bias ? bias.data() : nullptr, weights.data(), nullptr,
+          scales.data(), sizeof(float), nullptr, nullptr, 0, actual.data(), &params);
+      for (size_t group = 0; group < groups; ++group) {
+        xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
+            flags, &config, k, n, 1, 0, row_stride,
+            has_bias ? bias.data() + group * n : nullptr,
+            weights.data() + group * weights_group_stride, nullptr,
+            scales.data() + group * n, sizeof(float), nullptr, nullptr, 0,
+            expected.data() + group * group_size, &params);
+      }
+      EXPECT_THAT(actual, ElementsAreArray(expected));
+    }
+  }
+}
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
 
 #if XNN_ENABLE_KLEIDIAI

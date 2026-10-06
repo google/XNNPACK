@@ -482,6 +482,14 @@ std::vector<GemmTestParams> CreateTests(
           .loop_n(nr * 2, nr * 3, nr)
           .loop_k(1, k_block * 3, k_block + 1)
           .loop_m(1, mr));
+      $if TEST_N_MULTIPLIER:
+        const size_t test_n = nr * ${TEST_N_MULTIPLIER};
+        gemm_tests.push_back(GemmTestParams(
+            "n_eq_" + std::to_string(test_n) + "_subtile",
+            tester.clone()
+                .n(test_n).k(k_block)
+            , test_func, arch_flags)
+            .loop_m(1, mr));
       if (is_igemm) {
         gemm_tests.push_back(GemmTestParams(
             "small_kernel",
@@ -856,6 +864,7 @@ def generate_test_cases(
     sr,
     mr_packed,
     k_block,
+    test_n_multiplier,
     unsigned_inputs,
     planes,
     vector_tile,
@@ -882,6 +891,8 @@ def generate_test_cases(
     mr_packed: Optional MR parameter for the left-hand packing function.
     k_block: Number of K values processed per one iteration of the main loop of
       the micro-kernel.
+    test_n_multiplier: If non-zero, generate a subtile-M test with N equal to
+      this multiple of NR.
     unsigned_inputs: whether the inputs should be converted to unsigned
       integers. Some microkernels are more efficient with unsigned inputs.
     planes: the number of packing planes used by the microkernel.
@@ -1029,6 +1040,7 @@ def generate_test_cases(
       "SR": sr,
       "MR_PACKED": mr_packed,
       "KBLOCK": k_block,
+      "TEST_N_MULTIPLIER": test_n_multiplier,
       "UNSIGNED_INPUTS": unsigned_inputs,
       "PLANES": planes,
       "NR_SCALE": nr_scale,
@@ -1185,6 +1197,7 @@ namespace {{
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       k_block = int(ukernel_spec["k-block"])
+      test_n_multiplier = int(ukernel_spec.get("test-n-multiplier", 0))
       if "unsigned-inputs" in ukernel_spec:
         unsigned_inputs = int(ukernel_spec["unsigned-inputs"])
       else:
@@ -1229,6 +1242,7 @@ namespace {{
           sr,
           mr_packed,
           k_block,
+          test_n_multiplier,
           unsigned_inputs,
           planes,
           vector_tile,

@@ -3443,6 +3443,8 @@ reshape_fully_connected_nc_with_pack_lh_config(
       packed_lh_config = xnn_init_x32_pack_lh_config();
       break;
     case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
+      packed_lh_config = xnn_init_x8_qc8w_pack_lh_config();
+      break;
     case xnn_operator_type_fully_connected_nc_pqs8_qc4w:
       packed_lh_config = xnn_init_x8_pack_lh_config();
       break;
@@ -3524,9 +3526,10 @@ reshape_fully_connected_nc_with_pack_lh_config(
             batch_size, /*k=*/input_channels, mr_packed, kr, sr);
 
         // Set up the LHS packing as a separate compute.
+        // Include padding between input rows in the packing stride.
         size_t lhs_stride;
         if (!xnn_safe_mul(
-                input_channels,
+                fully_connected_op->input_pixel_stride,
                 (size_t)1 << packed_lh_config->log2_input_element_size,
                 &lhs_stride)) {
           xnn_log_error(

@@ -19,6 +19,11 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
+extern "C" {
+#include "src/xnnpack/compute.h"
+}
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/igemm.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
@@ -740,6 +745,135 @@ TEST(FULLY_CONNECTED_NC_QS8_QC8W, weights_cache_unit_batch_transpose_weights) {
       .use_weights_cache(true)
       .TestQS8QC8W();
 }
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC8W, separate_gemm_and_igemm_configs) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const auto* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  const auto* igemm_config = xnn_init_pqs8_qc8w_igemm_config();
+  ASSERT_NE(gemm_config, nullptr);
+  ASSERT_NE(igemm_config, nullptr);
+  EXPECT_NE(gemm_config, igemm_config);
+  EXPECT_EQ(gemm_config->mr,
+            xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr());
+  EXPECT_EQ(gemm_config->nr,
+            xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr());
+  EXPECT_EQ(gemm_config->mr_packed, gemm_config->mr);
+  EXPECT_NE(gemm_config->minmax.gemm[gemm_config->mr - 1].function[0], nullptr);
+  EXPECT_EQ(gemm_config->minmax.igemm[gemm_config->mr - 1].packed_lhs_function[0],
+            nullptr);
+  EXPECT_EQ(igemm_config->mr,
+            xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr());
+  EXPECT_EQ(igemm_config->nr,
+            xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr());
+  EXPECT_EQ(igemm_config->mr_packed, igemm_config->mr);
+  EXPECT_NE(gemm_config->mr, igemm_config->mr);
+  EXPECT_NE(gemm_config->nr, igemm_config->nr);
+  EXPECT_NE(igemm_config->minmax.igemm[igemm_config->mr - 1].packed_lhs_function[0],
+            nullptr);
+  EXPECT_EQ(igemm_config->minmax.gemm[igemm_config->mr - 1].function[0], nullptr);
+  EXPECT_NE(gemm_config->pack_weights_and_biases, nullptr);
+  EXPECT_NE(igemm_config->pack_weights_and_biases, nullptr);
+  EXPECT_NE(gemm_config->pack_weights_and_biases,
+            igemm_config->pack_weights_and_biases);
+  EXPECT_NE(gemm_config->packed_stride_weights_and_biases, nullptr);
+  EXPECT_NE(igemm_config->packed_stride_weights_and_biases, nullptr);
+  EXPECT_NE(gemm_config->packed_stride_weights_and_biases,
+            igemm_config->packed_stride_weights_and_biases);
+  EXPECT_NE(igemm_config->pack_igemm_goki, nullptr);
+  EXPECT_NE(igemm_config->pack_igemm_kgo, nullptr);
+  EXPECT_NE(igemm_config->pack_deconv_goki, nullptr);
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC8W, packing_and_tails) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  for (bool inline_lhs_packing : {false, true}) {
+    for (size_t batch : {1, 3, 17, 33}) {
+      for (bool transpose : {false, true}) {
+        for (bool bias : {false, true}) {
+          SCOPED_TRACE(testing::Message() << "inline=" << inline_lhs_packing
+              << " batch=" << batch << " transpose=" << transpose
+              << " bias=" << bias);
+          FullyConnectedOperatorTester()
+              .batch_size(batch)
+              .input_channels(23)
+              .input_stride(29)
+              .output_channels(65)
+              .output_stride(71)
+              .input_zero_point(119)
+              .output_zero_point(137)
+              .qmin(17)
+              .qmax(231)
+              .transpose_weights(transpose)
+              .has_bias(bias)
+              .TestPQS8QC8W(inline_lhs_packing);
+        }
+      }
+    }
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC8W, tiled_lhs_packing) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const auto* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  const auto* pack_config = xnn_init_x8_qc8w_pack_lh_config();
+  ASSERT_NE(gemm_config, nullptr);
+  ASSERT_NE(pack_config, nullptr);
+
+  const size_t mr = gemm_config->mr_packed;
+  ASSERT_GT(mr, 1);
+  const size_t m = 2 * mr;
+  const size_t k = 23;
+  const size_t lhs_stride = 29;
+  const size_t kr = size_t{1} << gemm_config->log2_kr;
+  const size_t sr = size_t{1} << gemm_config->log2_sr;
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> lhs(m * lhs_stride,
+                                                        int8_t{0x55});
+  for (size_t row = 0; row < m; ++row) {
+    for (size_t col = 0; col < k; ++col) {
+      lhs[row * lhs_stride + col] =
+          static_cast<int8_t>(static_cast<int>((row + col) % 127) - 63);
+    }
+  }
+
+  const size_t packed_size = pack_config->size_fn(m, k, mr, kr, sr);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> expected(packed_size,
+                                                              uint8_t{0xA5});
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> actual(packed_size,
+                                                            uint8_t{0xA5});
+  pack_config->pack_lh_fn(m, k, mr, kr, sr, /*m_idx_start=*/0, lhs.data(),
+                          lhs_stride, expected.data());
+
+  struct pack_lh_context context = {};
+  context.m = m;
+  context.k = k;
+  context.mr = mr;
+  context.kr = kr;
+  context.sr = sr;
+  context.lhs = lhs.data();
+  context.lhs_stride = lhs_stride;
+  context.lhs_packed = actual.data();
+  context.pack_lh_ukernel = pack_config->pack_lh_fn;
+  context.packed_offset_fn = pack_config->offset_fn;
+  xnn_compute_pack_lh(&context, /*group_idx=*/0, /*m_idx_start=*/0, mr);
+  xnn_compute_pack_lh(&context, /*group_idx=*/0, /*m_idx_start=*/mr, mr);
+  EXPECT_EQ(expected, actual);
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC8W, weights_cache) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  FullyConnectedOperatorTester()
+      .batch_size(33)
+      .input_channels(23)
+      .output_channels(65)
+      .use_weights_cache(true)
+      .TestPQS8QC8W();
+}
+
+#endif
 
 TEST(FULLY_CONNECTED_NC_QU8, unit_batch) {
   FullyConnectedOperatorTester()
@@ -3827,4 +3961,3 @@ TEST(FULLY_CONNECTED_NC_F32, overflow_create_weights_stride) {
                 +std::numeric_limits<float>::infinity(),
                 /*flags=*/0, /*weights_cache=*/nullptr, &op));
 }
-

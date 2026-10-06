@@ -43,12 +43,9 @@ typedef void (*xnn_x16_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
                                            size_t lhs_stride,
                                            void* lhs_packed);
 
-typedef void (*xnn_x8_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
-                                          size_t kr, size_t sr,
-                                          size_t m_idx_start,
-                                          const int8_t* lhs,
-                                          size_t lhs_stride,
-                                          void* lhs_packed);
+typedef void (*xnn_x8_pack_lh_ukernel_fn)(
+    size_t m, size_t k, size_t mr, size_t kr, size_t sr, size_t m_idx_start,
+    const int8_t* lhs, size_t lhs_stride, void* lhs_packed);
 
 class GemmMicrokernelTester {
  public:

@@ -162,6 +162,13 @@ std::vector<GemmTestParams> CreateTests1(
       .loop_n(nr * 2, nr * 3, nr)
       .loop_k(1, k_block * 3, k_block + 1)
       .loop_m(1, mr));
+  const size_t test_n = nr * 4;
+  gemm_tests.push_back(GemmTestParams(
+      "n_eq_" + std::to_string(test_n) + "_subtile",
+      tester.clone()
+          .n(test_n).k(k_block)
+      , test_func, arch_flags)
+      .loop_m(1, mr));
   if (is_igemm) {
     gemm_tests.push_back(GemmTestParams(
         "small_kernel",
@@ -500,8 +507,10 @@ std::vector<GemmTestParams> CreateTests2(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                        xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
-                        xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme);
+                        xnn_x8_pack_lh_ukernel__neonsme2,
+                        xnn_x8_pack_lh_size__neonsme2,
+                        xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2,
+                        xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2);
           },
           xnn_arch_arm_sme2)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -549,8 +558,10 @@ std::vector<GemmTestParams> CreateTests2(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                        xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
-                        xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme);
+                        xnn_x8_pack_lh_ukernel__neonsme2,
+                        xnn_x8_pack_lh_size__neonsme2,
+                        xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2,
+                        xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2);
           },
           xnn_arch_arm_sme2)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -603,6 +614,8 @@ std::vector<GemmTestParams> CreateTests2(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_x8_pack_lh_ukernel__neonsme,
+                        xnn_x8_pack_lh_size__neonsme,
                         xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
                         xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme);
           },

@@ -12,7 +12,10 @@
 XNN_UKERNEL(xnn_arch_arm_sme, xnn_x8_pack_lh_ukernel__neonsme,
             xnn_x8_pack_lh_size__neonsme, xnn_x8_pack_lh_offset__neonsme)
 XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_pack_lh_ukernel__neonsme2,
-            xnn_x8_pack_lh_size__neonsme2, xnn_x8_pack_lh_offset__neonsme2)            
+            xnn_x8_pack_lh_size__neonsme2, xnn_x8_pack_lh_offset__neonsme2)
+XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_pack_lh_ukernel__neonsme2_p2,
+            xnn_x8_pack_lh_size__neonsme2_p2,
+            xnn_x8_pack_lh_offset__neonsme2_p2)
 #endif  // XNN_ENABLE_KLEIDIAI
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE

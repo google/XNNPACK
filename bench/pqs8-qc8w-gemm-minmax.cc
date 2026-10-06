@@ -33,8 +33,8 @@ namespace {
     GEMMBenchmark(state,
       xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2,
       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
-      xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme,
+      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2,
+      xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -73,8 +73,8 @@ namespace {
     GEMMBenchmark(state,
       xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2,
       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
-      xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme,
+      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2,
+      xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
