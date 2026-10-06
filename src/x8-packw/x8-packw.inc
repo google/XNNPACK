@@ -51,10 +51,10 @@ XNN_GIO_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_gio_ukernel_x48__wasmsimd_u2, 4
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_gio_ukernel_x64__wasmsimd_u2, 64, 1, 1, 1, 1)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_HEXAGON
-XNN_GIO_UKERNEL(xnn_arch_hexagon_hvx, xnn_x8_packw_gemm_gio_ukernel_x128__hvx_u2, 128, 1, 1, 1, 1)
-XNN_GIO_UKERNEL(xnn_arch_hexagon_hvx, xnn_x8_packw_gemm_gio_ukernel_x256__hvx_u2, 256, 1, 1, 1, 1)
-#endif  // XNN_ARCH_HEXAGON
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x8_packw_gemm_gio_ukernel_x128__hvx_u2, 128, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x8_packw_gemm_gio_ukernel_x256__hvx_u2, 256, 1, 1, 1, 1)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
