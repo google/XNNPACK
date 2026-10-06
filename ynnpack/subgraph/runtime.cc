@@ -462,19 +462,19 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     // iteration and fold the loop away entirely.
     const bool elide_allowed =
         !l.step_is_required && globals.is_pure_dim(l.loop_id.var);
-    // Serial reduction ("k") dims additionally qualify for the
-    // single-iteration elision below (but not for the widening elisions):
-    // with provably one iteration there is no accumulation blocking to
-    // preserve.
-    const bool single_iteration_elide_allowed =
-        elide_allowed ||
-        (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
-    const slinky::expr once = single_iteration_elide_allowed
-                                  ? is_single_iteration(globals, l)
-                                  : slinky::expr();
+    const slinky::expr once = is_single_iteration(globals, l);
     if (once.defined() &&
         slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment)) {
-      l.step = slinky::max(slinky::simplify(l.extent), 1);
+      // Serial reduction ("k") dims additionally qualify for the
+      // single-iteration elision below (but not for the widening elisions):
+      // with provably one iteration there is no accumulation blocking to
+      // preserve.
+      const bool single_iteration_elide_allowed =
+          elide_allowed ||
+          (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
+      if (single_iteration_elide_allowed) {
+        l.step = slinky::max(slinky::simplify(l.extent), 1);
+      }
       l.workers = slinky::loop::serial;
       tasks[i] = tasks_above;
       tasks_lb[i] = tasks_above_lb;
