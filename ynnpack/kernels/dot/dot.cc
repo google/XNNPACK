@@ -433,6 +433,16 @@ YNN_UNUSED null_logger& operator<<(null_logger& os, std::optional<size_t> v) {
   return v ? os << *v : os << "?";
 }
 
+// We have to pick a kernel even for a dot whose extents we don't know yet, and
+// the cost model needs numbers, so we assume an extent we don't know is big.
+// This is only a tie-break between kernels: all the candidates of one call see
+// the same assumption.
+constexpr size_t assumed_dot_extent = 2048;
+
+size_t or_assumed(std::optional<size_t> extent) {
+  return extent.value_or(assumed_dot_extent);
+}
+
 template <typename A, typename B, typename C>
 dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
                           uint32_t required_flags,
@@ -468,9 +478,9 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
       // These casts might saturate a size_t value, which should be OK, because
       // if m, n, k are that large, any tail cases will be negligible. Cast to
       // uint16 so we have some headroom for arithmetic.
-      cast<uint16_t>(shape.m),
-      cast<uint16_t>(shape.n),
-      cast<uint16_t>(shape.k1),
+      cast<uint16_t>(or_assumed(shape.m)),
+      cast<uint16_t>(or_assumed(shape.n)),
+      cast<uint16_t>(or_assumed(shape.k1)),
       static_cast<uint32_t>(packed_shape.tile_k),
       static_cast<uint32_t>(packed_shape.block_n),
       strictly_required_flags,
