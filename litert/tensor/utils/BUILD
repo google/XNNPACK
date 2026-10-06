@@ -10,6 +10,7 @@ cc_library(
     deps = [
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:source_location",
     ],
@@ -21,8 +22,12 @@ cc_test(
     deps = [
         ":macros",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:cord",
+        "@abseil-cpp//absl/types:source_location",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

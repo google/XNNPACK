@@ -1168,6 +1168,7 @@ xnnpack_source_set("litert_tensor_api_core") {
     "//third_party/abseil-cpp/absl/log:absl_log",
     "//third_party/abseil-cpp/absl/random",
     "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:status_builder",
     "//third_party/abseil-cpp/absl/status:statusor",
     "//third_party/abseil-cpp/absl/strings",
     "//third_party/abseil-cpp/absl/strings:str_format",

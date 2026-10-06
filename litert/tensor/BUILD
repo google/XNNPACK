@@ -129,7 +129,11 @@ cc_test(
         ":datatypes",
         ":tensor",
         "//litert/tensor/internal:graph",
+        "//litert/tensor/utils:macros",
         "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
