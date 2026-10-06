@@ -33,7 +33,11 @@ static void xnn_deallocate(void* context, void* pointer) {
   }
 }
 
-static void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
+static void* xnn_aligned_allocate(
+    void* context, size_t alignment, size_t size) {
+  if (alignment < sizeof(void*) || (alignment & (alignment - 1)) != 0) {
+    return NULL;
+  }
 #if XNN_ARCH_WASM
   assert(alignment <= 2 * sizeof(void*));
   return malloc(size);
