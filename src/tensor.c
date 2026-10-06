@@ -830,14 +830,27 @@ size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value
   if (datatype == xnn_datatype_qpint8) {
     assert(gemm_config != NULL);
     size_t num_groups = xnn_shape_multiply_batch_dims(shape, 2);
+    if (num_groups == SIZE_MAX) {
+      return SIZE_MAX;
+    }
     size_t m = shape->dim[shape->num_dims - 2];
     const size_t k = shape->dim[shape->num_dims - 1];
     if (flags & XNN_FLAG_SQUASH_GROUPS) {
-      m *= num_groups;
+      if (!xnn_safe_mul(m, num_groups, &m)) {
+        return SIZE_MAX;
+      }
       num_groups = 1;
     }
-    return num_groups *
-           xnn_x8_packq_f32qp8_gemm_packed_size(gemm_config, m, k);
+    const size_t packed_size =
+        xnn_x8_packq_f32qp8_gemm_packed_size(gemm_config, m, k);
+    if (packed_size == SIZE_MAX) {
+      return SIZE_MAX;
+    }
+    size_t total_size;
+    if (!xnn_safe_mul(num_groups, packed_size, &total_size)) {
+      return SIZE_MAX;
+    }
+    return total_size;
   }
 
   // Returns SIZE_MAX on overflow so the caller can detect and reject the tensor
