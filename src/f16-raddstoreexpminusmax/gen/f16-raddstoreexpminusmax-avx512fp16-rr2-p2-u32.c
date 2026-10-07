@@ -17,38 +17,29 @@
 #include "src/xnnpack/simd/f16-avx512fp16.h"
 
 
-static XNN_INLINE xnn_simd_f16_t setexp_f16(xnn_simd_f16_t vx) {
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vmagic, 1039.0f);
-  return xnn_sll_f16(xnn_add_f16(vx, vmagic), 10);
-}
-
-static XNN_INLINE xnn_simd_f16_t qd_round_f16(xnn_simd_f16_t vx) {
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vmagic, 1536.0f);
-  return xnn_sub_f16(xnn_add_f16(vmagic, vx), vmagic);
-}
-
 static XNN_INLINE xnn_simd_f16_t expminusmax_f16(
     xnn_simd_f16_t vx, xnn_simd_f16_t vmax)
 {
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 0.6933594f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_2, 0.24255371f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.05517578f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vlog2e, 1.4423828f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(v16, 16.0f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vm15, -15.0f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
+  XNN_SIMD_CONST_F16_FROM_INT16(vlog2e, 0x3DC5);
+  XNN_SIMD_CONST_F16_FROM_INT16(vmagic_bias, 0x660F);
+  XNN_SIMD_CONST_F16_FROM_INT16(vminus_ln2_hi, 0xB98C);
+  XNN_SIMD_CONST_F16_FROM_INT16(vminus_ln2_lo, 0x0AF4);
+  XNN_SIMD_CONST_F16_FROM_INT16(vc2, 0x37F9);
+  XNN_SIMD_CONST_F16_FROM_INT16(vc1, 0x3C0E);
+  XNN_SIMD_CONST_F16_FROM_INT16(vdenorm_cutoff, 0xC8DA);
 
   vx = xnn_sub_f16(vx, vmax);
-  xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-  vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
-  const xnn_simd_f16_t vz = qd_round_f16(vz_prime);
-  const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-  const xnn_simd_f16_t v2z = setexp_f16(vz);
+  xnn_simd_f16_t vn = xnn_fmadd_f16(vx, vlog2e, vmagic_bias);
+  const xnn_simd_f16_t vs = xnn_sll_f16(vn, 10);
+  vn = xnn_sub_f16(vn, vmagic_bias);
 
-  xnn_simd_f16_t v2r = xnn_fmadd_f16(vr, valpha_3, valpha_2);
-  v2r = xnn_fmadd_f16(vr, v2r, valpha_1);
-  v2r = xnn_fmadd_f16(vr, v2r, vone);
-  return xnn_mul_f16(v2z, v2r);
+  xnn_simd_f16_t vt = xnn_fmadd_f16(vn, vminus_ln2_hi, vx);
+  vt = xnn_fmadd_f16(vn, vminus_ln2_lo, vt);
+  const xnn_simd_f16_t vp = xnn_fmadd_f16(vc2, vt, vc1);
+  vt = xnn_mul_f16(vt, vs);
+
+  const xnn_simd_f16_t vf = xnn_fmadd_f16(vp, vt, vs);
+  return xnn_andnot_f16(xnn_cmplt_f16(vx, vdenorm_cutoff), vf);
 }
 
 void xnn_f16_raddstoreexpminusmax_ukernel__avx512fp16_rr2_p2_u32(

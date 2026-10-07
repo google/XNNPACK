@@ -60,6 +60,14 @@ TEST(${TEST_NAME}, elements_eq_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
 }
 
+$if TEST_NEON_FP16ARITH_COMPATIBILITY:
+  TEST(${TEST_NAME}, neon_fp16arith_compatibility) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .TestNeonFp16ArithCompatibility(${TEST_FUNCTION});
+  }
+
 $if ELEMENTS_TILE > 1 or ELEMENTS_SCALE != "":
   TEST(${TEST_NAME}, elements_div_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     $if ISA_CHECK:
@@ -120,7 +128,14 @@ TEST(${TEST_NAME}, elements_gt_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
 """
 
 
-def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
+def generate_test_cases(
+  ukernel,
+  init_fn,
+  elements_tile,
+  vector_tile,
+  isa,
+  test_neon_fp16arith_compatibility,
+):
   """Generates all tests cases for a RAddStoreExpMinusMax micro-kernel.
 
   Args:
@@ -132,6 +147,8 @@ def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
       elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
+    test_neon_fp16arith_compatibility: Whether to test numerical compatibility
+      with the established NEON FP16 arithmetic implementation.
 
   Returns:
     Code for the test case.
@@ -159,6 +176,9 @@ def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
           "ELEMENTS_SCALE": elements_scale,
           "ELEMENTS_SUFFIX": "v" if vector_tile else "",
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+            "TEST_NEON_FP16ARITH_COMPATIBILITY": (
+              test_neon_fp16arith_compatibility
+            ),
       },
   )
 
@@ -199,7 +219,12 @@ def main(args):
       elements_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(
-          name, init_fn, elements_tile, vector_tile, isa
+          name,
+          init_fn,
+          elements_tile,
+          vector_tile,
+          isa,
+          ukernel_spec.get("test-neon-fp16arith-compatibility", False),
       )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 

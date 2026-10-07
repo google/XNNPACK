@@ -172,6 +172,11 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
   return vreinterpretq_f16_u16(vceqq_f16(a, b));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
+                                               xnn_simd_f16_t b) {
+  return vreinterpretq_f16_u16(vcltq_f16(a, b));
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F16 1
 #define XNN_SIMD_NUM_RCP_ITER_F16 2
