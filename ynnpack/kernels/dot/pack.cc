@@ -14,7 +14,7 @@
 namespace ynn {
 
 packer::packer(bool transpose, size_t elem_size_bits, size_t tile_m,
-               size_t tile_n)
+               size_t tile_n, bool allow_fused)
     : elem_size_bits(elem_size_bits), tile_m(tile_m), tile_n(tile_n) {
   // This operation is fusing 3 separate transposes (with padding as needed):
   //
@@ -49,6 +49,12 @@ packer::packer(bool transpose, size_t elem_size_bits, size_t tile_m,
       // We're interleaving rows of the input to produce rows of the output.
       interleave_fn = get_interleave_kernel(elem_size_bits, tile_m);
       assert(interleave_fn);
+      // Optional: if there is a kernel that can do the whole block in one
+      // call, prefer it. `interleave_fn` stays populated as the fallback.
+      if (allow_fused) {
+        interleave_block_fn =
+            get_interleave_block_kernel(elem_size_bits, tile_m);
+      }
     }
   }
 }
@@ -70,6 +76,33 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
       input = offset_bytes(input, input_stride * (tile_n / elem_count));
       output = offset_bytes(output, output_block_stride);
       n = sub_sat(n, tile_n);
+    }
+  } else if (interleave_block_fn) {
+    // Same as the `interleave_fn` case below, except the kernel owns the loop
+    // over `m` and the column padding, so there is no per-row indirect call or
+    // memset. Strip-mining `n` across `kChunkN` adjacent blocks and `m` in
+    // 32-row panels keeps source cache lines and DTLB entries hot across
+    // adjacent column blocks when `m` and `n` are large.
+    constexpr size_t kChunkN = 4;
+    const size_t chunk_m = tile_m * 16;
+    const size_t elem_bytes = elem_size_bits / 8;
+    const size_t blocks_n = ceil_div(n, tile_n);
+    for (size_t bn0 = 0; bn0 < blocks_n; bn0 += kChunkN) {
+      const size_t bn_end = std::min(bn0 + kChunkN, blocks_n);
+      for (size_t m0 = 0; m0 < m; m0 += chunk_m) {
+        const size_t m_i = std::min(m - m0, chunk_m);
+        const size_t mo0 = m0 / tile_m;
+        for (size_t bn = bn0; bn < bn_end; ++bn) {
+          const size_t col0 = bn * tile_n;
+          const size_t n_i = std::min(n - col0, tile_n);
+          const void* in_tile =
+              offset_bytes(input, m0 * input_stride + col0 * elem_bytes);
+          void* out_tile = offset_bytes(
+              output, bn * output_block_stride + mo0 * output_stride);
+          interleave_block_fn(tile_m, m_i, n_i, tile_n, input_stride, in_tile,
+                              output_stride, out_tile);
+        }
+      }
     }
   } else if (interleave_fn) {
     while (n > 0) {
