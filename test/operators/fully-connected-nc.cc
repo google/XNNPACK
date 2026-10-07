@@ -3790,6 +3790,38 @@ TEST(FULLY_CONNECTED_NC_F32, overflow_batch_stride) {
                 op, /*batch_size=*/SIZE_MAX / 50, /*threadpool=*/nullptr));
 }
 
+TEST(FULLY_CONNECTED_NC_F32, overflow_n_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  const std::vector<float> kernel(1);
+  const std::vector<float> bias(1);
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_create_fully_connected_nc_f32(
+          /*input_channels=*/1, /*output_channels=*/(SIZE_MAX / 2) + 1,
+          /*input_stride=*/1, /*output_stride=*/(SIZE_MAX / 2) + 1,
+          kernel.data(), bias.data(),
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(),
+          /*flags=*/0, /*weights_cache=*/nullptr, &op));
+}
+
+TEST(FULLY_CONNECTED_NC_F32, overflow_k_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  const std::vector<float> kernel(1);
+  const std::vector<float> bias(1);
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_create_fully_connected_nc_f32(
+          /*input_channels=*/(SIZE_MAX / 2) + 1, /*output_channels=*/1,
+          /*input_stride=*/(SIZE_MAX / 2) + 1, /*output_stride=*/1,
+          kernel.data(), bias.data(),
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(),
+          /*flags=*/0, /*weights_cache=*/nullptr, &op));
+}
+
 TEST(FULLY_CONNECTED_NC_F32, overflow_create_weights_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_operator_t op = nullptr;
