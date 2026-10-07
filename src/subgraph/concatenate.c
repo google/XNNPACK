@@ -123,9 +123,18 @@ static enum xnn_status reshape_concatenate_operator(
     input_channels[i] = 1;
   }
 
+  const size_t num_dims = values[input_id[0]].shape.num_dims;
   int32_t axis = opdata->axis;
   if (axis < 0) {
-    axis += values[input_id[0]].shape.num_dims;
+    axis += (int32_t) num_dims;
+  }
+  if (axis < 0 || (size_t) axis >= num_dims) {
+    xnn_log_error(
+        "failed to reshape %s operator with output ID #%" PRIu32
+        ": axis (%d) is invalid for number of dimensions (%zu)",
+        xnn_node_type_to_string(xnn_node_type_concatenate),
+        opdata->outputs[0], opdata->axis, num_dims);
+    return xnn_status_invalid_parameter;
   }
 
   // All inputs must share the same rank and identical dimensions on every axis
@@ -133,7 +142,6 @@ static enum xnn_status reshape_concatenate_operator(
   // dimensions differ from input0's would make the per-row copy stride exceed
   // the output buffer size computed below (which is derived from input0's
   // shape), producing an out-of-bounds write in the copy micro-kernel.
-  const size_t num_dims = values[input_id[0]].shape.num_dims;
   for (size_t i = 1; i < num_inputs; ++i) {
     if (values[input_id[i]].shape.num_dims != num_dims) {
       xnn_log_error(
@@ -188,8 +196,9 @@ static enum xnn_status reshape_concatenate_operator(
   output_value->shape.num_dims = input0_value->shape.num_dims;
   if (axis >= output_value->shape.num_dims) {
     xnn_log_error(
-        "failed to reshape reshape operator operator with the output ID "
+        "failed to reshape %s operator with output ID "
         "#%" PRIu32 ": axis (%d) exceeds the number of dimensions (%zu)",
+        xnn_node_type_to_string(xnn_node_type_concatenate),
         output_id, axis, input0_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }

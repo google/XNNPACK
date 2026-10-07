@@ -61,8 +61,12 @@ static enum xnn_status create_constant_pad_operator(
       XNN_UNREACHABLE;
   }
   if (status == xnn_status_success) {
-    memcpy(opdata->pre_paddings, node->params.static_pad.pre_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
-    memcpy(opdata->post_paddings, node->params.static_pad.post_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+    memset(opdata->pre_paddings, 0, sizeof(opdata->pre_paddings));
+    memset(opdata->post_paddings, 0, sizeof(opdata->post_paddings));
+    const size_t num_padding_dims = node->params.static_pad.num_padding_dims;
+    opdata->num_padding_dims = num_padding_dims;
+    memcpy(opdata->pre_paddings, node->params.static_pad.pre_paddings, sizeof(size_t) * num_padding_dims);
+    memcpy(opdata->post_paddings, node->params.static_pad.post_paddings, sizeof(size_t) * num_padding_dims);
   }
   return status;
 }
@@ -78,6 +82,14 @@ static enum xnn_status reshape_constant_pad_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   struct xnn_runtime_value* input_value = values + input_id;
+  if (input_value->shape.num_dims < opdata->num_padding_dims) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": input shape rank (%zu) is less than padding rank (%zu)",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), input_id,
+      input_value->shape.num_dims, opdata->num_padding_dims);
+    return xnn_status_invalid_parameter;
+  }
   const size_t num_input_elements =
       xnn_shape_multiply_all_dims(&input_value->shape);
   if (num_input_elements == SIZE_MAX) {

@@ -865,6 +865,10 @@ reshape_batch_matrix_multiply_nc(
     return xnn_status_uninitialized;
   }
 
+  if (workspace_size != NULL) {
+    *workspace_size = 0;
+  }
+
   if (m == 0) {
     xnn_log_error(
         "failed to reshape %s operator with %zu rows: number of rows must be "

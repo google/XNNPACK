@@ -621,3 +621,20 @@ std::vector<TestParam> GenerateTests() {
 
 INSTANTIATE_TEST_SUITE_P(ND, ReduceNDTest, testing::ValuesIn(GenerateTests()),
                          TestParam::GetName);
+
+TEST(ReduceNDTest, ZeroOutputElementsWorkspace) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_operator_t reduce_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_reduce_nd(xnn_reduce_sum, xnn_datatype_fp32, nullptr, nullptr, 0, &reduce_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(reduce_op, xnn_delete_operator);
+
+  size_t workspace_size = SIZE_MAX;
+  const int64_t reduction_axes[1] = {1};
+  const size_t input_shape[2] = {0, 5};
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_reduce_nd(reduce_op, 1, reduction_axes, 2, input_shape, &workspace_size, nullptr));
+  EXPECT_EQ(workspace_size, 0);
+}

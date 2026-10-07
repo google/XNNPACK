@@ -3330,6 +3330,10 @@ reshape_fully_connected_nc_with_pack_lh_config(
     return xnn_status_uninitialized;
   }
 
+  if (workspace_size != NULL) {
+    *workspace_size = 0;
+  }
+
   if (batch_size == 0) {
     fully_connected_op->state = xnn_run_state_skip;
     return xnn_status_success;
