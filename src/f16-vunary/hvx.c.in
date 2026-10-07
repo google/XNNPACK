@@ -1,0 +1,73 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 64 == 0
+$assert BATCH_TILE >= 64
+$SIMD_TILE = BATCH_TILE // 64
+$assert OP in ["ABS", "NEG"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+#include <hvx_hexagon_protos.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+$_HEXAGON_OP_HVX = {
+$  "ABS": lambda x: "Q6_V_vand_VV(%s, vnonsign_mask)" % x,
+$  "NEG": lambda x: "Q6_V_vxor_VV(%s, vsign_mask)" % x,
+$}[OP]
+void xnn_f16_v${OP.lower()}_ukernel__hvx_u${BATCH_TILE}(
+    size_t batch,
+    const xnn_float16* input,
+    xnn_float16* output,
+    const struct xnn_f16_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  $if OP == "ABS":
+    const HVX_Vector vnonsign_mask = Q6_Vh_vsplat_R(0x7FFF);
+  $elif OP == "NEG":
+    const HVX_Vector vsign_mask = Q6_Vh_vsplat_R(0x8000);
+  $if BATCH_TILE > 64:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      HVX_Vector vacc0 = *((const HVX_UVector*) i);
+      $for N in range(1, SIMD_TILE):
+        HVX_Vector vacc${N} = *((const HVX_UVector*) (i + ${N * 64}));
+      i += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        vacc${N} = ${_HEXAGON_OP_HVX("vacc" + str(N))};
+
+      *((HVX_UVector*) o) = vacc0;
+      $for N in range(1, SIMD_TILE):
+        *((HVX_UVector*) (o + ${N * 64})) = vacc${N};
+      o += ${BATCH_TILE};
+    }
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    HVX_Vector vacc = *((const HVX_UVector*) i);
+    i += 64;
+    vacc = ${_HEXAGON_OP_HVX("vacc")};
+    *((HVX_UVector*) o) = vacc;
+    o += 64;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    HVX_Vector vacc = *((const HVX_UVector*) i);
+    vacc = ${_HEXAGON_OP_HVX("vacc")};
+    Q6_V_vstu_variable(o, batch, vacc);
+  }
+}
