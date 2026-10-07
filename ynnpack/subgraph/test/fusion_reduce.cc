@@ -793,9 +793,12 @@ TEST(fusion, reduce_sum_to_dot_f32) {
   EXPECT_THAT(subgraph, Not(HasValidValueId(mul_id)));
   const ynn_node& dot_node = ProducerOf(y_id, subgraph);
   ASSERT_THAT(dot_node, IsDot());
-  EXPECT_THAT(
-      ProducerOf(dot_node.inputs[0], subgraph),
-      AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)), InputsAre(a_id)));
+  const ynn_node* a_transpose = &ProducerOf(dot_node.inputs[0], subgraph);
+  if (std::holds_alternative<ynn_node::transpose_a>(a_transpose->op)) {
+    a_transpose = &ProducerOf(a_transpose->inputs[0], subgraph);
+  }
+  EXPECT_THAT(*a_transpose, AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)),
+                                  InputsAre(a_id)));
 }
 
 TEST(fusion, reduce_sum_of_gather_constant) {

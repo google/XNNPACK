@@ -424,7 +424,8 @@ TEST_P(Dot, Conv2D) {
 }
 
 #define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_m, \
-                       tile_n, tile_k, flags, a_type, b_type, c_type)       \
+                       tile_n, tile_k, flags, a_type, b_type, c_type,       \
+                       cost_model)                                          \
   INSTANTIATE_TEST_SUITE_P(name, Dot,                                       \
                            testing::Values(KernelInfo{                      \
                                arch_flags,                                  \

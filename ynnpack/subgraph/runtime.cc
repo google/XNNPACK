@@ -35,6 +35,8 @@
 #include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
+#include "ynnpack/kernels/dot/dot.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/tensor.h"
@@ -1053,6 +1055,13 @@ bool ynn_traceme_enabled() {
 // smaller than this threshold.
 constexpr size_t auto_stack_threshold = 64 * 1024;
 
+void init_context(slinky::eval_context& ctx) {
+  // `get_dot_cost_models` is expensive due to a syscall to learn the current
+  // CPU core. To avoid this, do it when we create a new context.
+  ctx.user_data =
+      const_cast<ynn::dot_cost_models*>(&ynn::get_dot_cost_models());
+}
+
 }  // namespace
 
 extern "C" {
@@ -1073,6 +1082,11 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
   eval_config.auto_stack_threshold = auto_stack_threshold;
+
+  eval_config.init_context = [](slinky::eval_context& ctx,
+                                const slinky::eval_context& parent) {
+    init_context(ctx);
+  };
 
 #ifdef YNN_ENABLE_PERFETTO
   if (ynn::perfetto_session::global()) {
@@ -1287,6 +1301,7 @@ ynn_status ynn_runtime::invoke() {
     // This pipeline is a no-op.
     return ynn_status_success;
   }
+  init_context(eval_context);
   slinky::index_t result = pipeline.evaluate(eval_context, /*is_set_up=*/true);
   // Heap blocks are reused within an evaluation, but not kept between invokes.
   eval_context.free_pool();

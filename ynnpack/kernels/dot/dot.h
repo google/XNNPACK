@@ -15,6 +15,7 @@
 #include "ynnpack/base/base.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/arm64_sme.h"  // IWYU pragma: keep
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
 
 namespace ynn {
 
@@ -100,7 +101,8 @@ typedef void (*dot_kernel_fn)(size_t m, size_t n, size_t k3, size_t k2,
                               dot_kernel_state* state);
 
 #define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
-                       tile_k, transpose_a, type_a, type_b, type_c)           \
+                       tile_k, transpose_a, type_a, type_b, type_c,           \
+                       cost_model)                                            \
   void name(size_t m, size_t n, size_t k3, size_t k2, size_t k1,              \
             size_t a_stride_m, size_t a_stride_k3, size_t a_stride_k2,        \
             const void* a, size_t b_stride_k3, size_t b_stride_k2,            \
@@ -144,11 +146,15 @@ struct dot_kernel {
   int tile_n : 8;
   int tile_k : 8;
   uint32_t flags;
+  const dot_cost_model* cost_model = nullptr;
+
   float cost = std::numeric_limits<float>::infinity();
 
   // If not specifically known, this is the maximum `block_n` value that could
   // be returned by another compatible call to `get_dot_kernel`.
   int max_block_n;
+
+  float estimate_cost(size_t m, size_t n, size_t k) const;
 };
 
 // If we don't know the shape of a dot, just assume it's big.
@@ -162,13 +168,6 @@ struct dot_shape {
   size_t k3 = unknown_dot_extent;
 };
 
-// Compute an estimate of the cost of a dot operation. This number has no
-// absolute meaning, it is only comparable to other return values of this
-// function.
-float estimate_dot_cost(size_t m, size_t n, size_t k, uint32_t block_m,
-                        uint32_t block_n, uint32_t block_k, uint32_t tile_m,
-                        uint32_t tile_n, uint32_t tile_k,
-                        uint32_t b_elem_count = 1);
 
 struct dot_packed_shape {
   int block_n = 0;
@@ -180,11 +179,16 @@ struct dot_packed_shape {
 // both kernels can use the same packed data.). Similarly, if `transpose_a` is
 // not `nullopt`, the chosen kernel will have the flag `dot_flag::transpose_a`
 // if *transpose_a is true.
-dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape = {},
-                          dot_packed_shape dot_packed_shape = {},
-                          uint32_t required_flags = 0,
-                          std::optional<bool> transpose_a = std::nullopt,
-                          uint64_t arch_flags = get_supported_arch_flags());
+dot_kernel get_dot_kernel(
+    const dot_type& type, const dot_cost_models& cost_models = {},
+    const dot_shape& shape = {}, dot_packed_shape dot_packed_shape = {},
+    uint32_t required_flags = 0, std::optional<bool> transpose_a = std::nullopt,
+    uint64_t arch_flags = get_supported_arch_flags(), int thread_count = 1);
+
+// This function may return a different set of cost models depending on the core
+// this thread is running on. The result should not be cached, because the
+// thread may be moved to a core with a different cost model.
+const dot_cost_models& get_dot_cost_models();
 
 }  // namespace ynn
 

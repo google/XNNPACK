@@ -14,6 +14,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/bit_cast.h"
 #include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
@@ -285,6 +286,16 @@ T floor_log2(T a) {
   T significand = std::frexp(a, &exp);
   if (std::isinf(significand)) return significand;
   return static_cast<T>(exp - 1);
+}
+
+// This is a fast approximation of log2(x) that is exact for powers of 2, and
+// linearly interpolates between those points, using the bits of a float to make
+// this cheap.
+inline float fast_log2(float x) {
+  assert(x > 0.0f);
+  const uint32_t bits = bit_cast<uint32_t>(x);
+  return static_cast<float>(static_cast<int32_t>(bits) - 0x3F800000) *
+         (1.0f / 8388608.0f);
 }
 
 template <typename T>

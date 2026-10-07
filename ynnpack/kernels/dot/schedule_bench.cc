@@ -67,7 +67,7 @@ struct kernel_info {
 kernel_info get_kernel(const std::string& kernel_name) {
   std::vector<kernel_info> kernels;
 #define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)                 \
+                       tile_k, flags, a_type, b_type, c_type, cost_model)     \
   if (#name == kernel_name) {                                                 \
     if (!is_arch_supported(arch)) {                                           \
       std::cerr << "Kernel architecture not supported by this CPU\n";         \
