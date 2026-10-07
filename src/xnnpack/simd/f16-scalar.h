@@ -53,55 +53,30 @@ static XNN_INLINE xnn_simd_f16_t xnn_mul_f16(xnn_simd_f16_t a,
 #endif  // XNN_HAVE_FLOAT16
 }
 
-// If we're computing the fused ops in `float`, act as if we're going to
-// round like native FMA.
-#if XNN_HAVE_FLOAT16
-#if ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) || \
-    (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA && defined(__ARM_FEATURE_FP16_FML))
 #define XNN_SIMD_HAS_NATIVE_FMA 1
-#else
-#define XNN_SIMD_HAS_NATIVE_FMA 0
-#endif  // ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) ||
-        // (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA &&
-        // defined(__ARM_FEATURE_FP16_FML))
-#else
-#define XNN_SIMD_HAS_NATIVE_FMA 1
-#endif  // XNN_HAVE_FLOAT16
 
 static XNN_INLINE xnn_simd_f16_t xnn_fmadd_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
-#if XNN_HAVE_FLOAT16
-  return a * b + c;
-#else
   return xnn_float16_from_float(
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)) +
       xnn_float16_to_float(c));
-#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_fnmadd_f16(xnn_simd_f16_t a,
                                                 xnn_simd_f16_t b,
                                                 xnn_simd_f16_t c) {
-#if XNN_HAVE_FLOAT16
-  return c - a * b;
-#else
   return xnn_float16_from_float(
       xnn_float16_to_float(c) -
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)));
-#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_fmsub_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
-#if XNN_HAVE_FLOAT16
-  return a * b - c;
-#else
   return xnn_float16_from_float(
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)) -
       xnn_float16_to_float(c));
-#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_sub_f16(xnn_simd_f16_t a,
