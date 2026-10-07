@@ -146,13 +146,18 @@ NO_YNNPACK = [
 
 xnnpack_unit_test(
     name = "fp16_to_fp32_fallback_test",
-    srcs = ["fp16-to-fp32-fallback.cc"],
+    srcs = [
+        "fp16-to-fp32-fallback.cc",
+        "mock-allocator.h",
+    ],
     tags = ["no_ynnpack"],
     deps = [
         "//:XNNPACK",
+        "//:allocator",
         "//:common",
         "//:node_type",
         "//:operator_utils",
+        "//:params",
         "//:subgraph",
         "//litert/tensor",
         "//litert/tensor:arithmetic",
@@ -380,6 +385,7 @@ xnnpack_unit_test(
         "//:allocation_type",
         "//:allocator",
         "//:buffer",
+        "//:internal",
         "//:math",
         "//:node_type",
         "//:operator_h",
@@ -387,6 +393,7 @@ xnnpack_unit_test(
         "//:subgraph_h",
         "//:xnnpack_h",
         "//src/configs:hardware_config",
+        "//src/subgraph/rewrites:cvt_to_fp32",
         "//test:replicable_random_device",
     ],
 )
