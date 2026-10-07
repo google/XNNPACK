@@ -46,4 +46,12 @@ TEST(HardwareConfigResetTest, HardwareConfigResetAndInitialization) {
   xnn_reset_hardware_config();
 }
 
+TEST(HardwareConfigResetTest, NullHardwareConfigCompatibilityHelpers) {
+  EXPECT_FALSE(xnn_is_bf16_compatible_config(nullptr));
+  EXPECT_FALSE(xnn_is_f16_compatible_config(nullptr));
+  EXPECT_FALSE(xnn_is_f16_chw_compatible_config(nullptr));
+  EXPECT_FALSE(xnn_is_chw_compatible_config(nullptr));
+  EXPECT_FALSE(xnn_is_f16_supported_natively(nullptr));
+}
+
 }  // namespace
