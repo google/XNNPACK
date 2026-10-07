@@ -24,28 +24,53 @@ class arm_neon_int8_int8_int32(arm_int8_int8_int32):
   def __init__(self, arch="neon", tile_shape=(1, 4, 1)):
     super().__init__(arch, tile_shape)
 
+  def header(self):
+    return super().header() + """
+
+namespace {
+
+// Prevent LLVM on 32-bit ARM from folding `vmovl_s8(vld1_s8(ptr))` into an
+// unaligned extending load, which gets legalized via GPR loads and a stack
+// bounce (`ldr` + `ldr` + `str` + `str` + `vld1.8 [sp:64]`).
+YNN_INTRINSIC int16x8_t unaligned_load_and_widen_int8x8(const int8_t* ptr) {
+  int8x8_t v = vld1_s8(ptr);
+#if defined(__GNUC__) && defined(__arm__)
+  __asm("" : "+w"(v));
+#endif
+  return vmovl_s8(v);
+}
+
+}  // namespace
+"""
+
   def load_a_tile_k_tail(self, i, k, nk):
     if k % nk != 0:
       return ""
     if nk == 8:
-      return f"int16x8_t a_{i}_{k} = vmovl_s8(vld1_s8({self.a_ptr(i, k)}));\n"
+      return (
+          f"int16x8_t a_{i}_{k} ="
+          f" unaligned_load_and_widen_int8x8({self.a_ptr(i, k)});\n"
+      )
     else:
       assert(nk == 1)
       return f"int16x8_t a_{i}_{k} = vdupq_n_s16(*{self.a_ptr(i, k)});\n"
 
   def load_b_tile(self, k, j):
-    if self.b_chunk_n < 8 or j + 8 > self.block_shape[1]:
+    if self.b_chunk_n < 8 or (j // 8) * 8 + 8 > self.block_shape[1]:
       # We can only load 4 values.
       int8 = f"vreinterpret_s8_s32(vdup_n_s32(*{self.b_ptr(k, j, 'int32_t')}))"
       return f"int16x8_t b_{k}_{j} = vmovl_s8({int8});\n"
     elif j % 8 == 0:
       # The next 8 values are all in bounds of the block.
-      return f"int16x8_t b_{k}_{j} = vmovl_s8(vld1_s8({self.b_ptr(k, j)}));\n"
+      return (
+          f"int16x8_t b_{k}_{j} ="
+          f" unaligned_load_and_widen_int8x8({self.b_ptr(k, j)});\n"
+      )
     else:
       return ""
 
   def product(self, i, j, k):
-    if self.b_chunk_n < 8 or j + 8 > self.block_shape[1]:
+    if self.b_chunk_n < 8 or (j // 8) * 8 + 8 > self.block_shape[1]:
       a = f"vget_{'low' if k % 8 < 4 else 'high'}_s16(a_{i}_{(k//8)*8})"
       b = f"vget_low_s16(b_{k}_{(j//4)*4})"
       return f"c_{i}_{j} = vmlal_lane_s16(c_{i}_{j}, {b}, {a}, {k%4});\n"

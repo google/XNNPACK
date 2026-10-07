@@ -97,6 +97,36 @@ class x86_avx2_int8_int8_int32_k1(x86_avx, x86_int8_int8_int32_k1):
 using __m64i = void;
 """
 
+  def load_b_tile(self, k, j):
+    if self.block_shape[2] % 2 == 0 and k % 2 != 0:
+      return ""
+    if self.block_shape[2] % 2 == 0:
+      if self.b_chunk_n >= 16 and (j // 16) * 16 + 16 <= self.block_shape[1]:
+        if j % 16 != 0:
+          return ""
+        b0 = self.b_ptr(k, j, "__m128i")
+        b1 = self.b_ptr(k + 1, j, "__m128i")
+        return (
+            f"const __m128i b_r0_{k}_{j} = _mm_loadu_si128({b0});\n"
+            f"const __m128i b_r1_{k}_{j} = _mm_loadu_si128({b1});\n"
+            f"__m256i b_{k}_{j} ="
+            f" _mm256_cvtepi8_epi16(_mm_unpacklo_epi8(b_r0_{k}_{j},"
+            f" b_r1_{k}_{j}));\n"
+            f"__m256i b_{k}_{j+8} ="
+            f" _mm256_cvtepi8_epi16(_mm_unpackhi_epi8(b_r0_{k}_{j},"
+            f" b_r1_{k}_{j}));\n"
+        )
+    b0 = f"_mm_loadu_si64({self.b_ptr(k, j, '__m64i')})"
+    b1 = (
+        f"_mm_loadu_si64({self.b_ptr(k + 1, j, '__m64i')})"
+        if self.block_shape[2] % 2 == 0
+        else "_mm_setzero_si128()"
+    )
+    return (
+        f"__m256i b_{k}_{j} ="
+        f" _mm256_cvtepi8_epi16(_mm_unpacklo_epi8({b0}, {b1}));\n"
+    )
+
 
 class x86_avx512_int8_int8_int32_k1(x86_avx512, x86_int8_int8_int32_k1):
 
