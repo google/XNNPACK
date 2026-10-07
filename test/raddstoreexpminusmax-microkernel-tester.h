@@ -118,6 +118,33 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     }
   }
 
+  void TestFp16DenormCutoff(
+      xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax) const {
+    constexpr std::array<uint16_t, 4> input_bits = {
+        0xC8D9, 0xC8DA, 0xC8DB, 0xC900};
+    constexpr size_t repeats = 9;
+
+    xnnpack::Buffer<xnn_float16> x(input_bits.size() * repeats,
+                                   xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> y(input_bits.size() * repeats);
+    for (size_t i = 0; i < x.size(); i++) {
+      x[i] = xnn_float16_from_bits(input_bits[i % input_bits.size()]);
+    }
+
+    const xnn_float16 x_max = xnn_float16_zero();
+    float sum = 0.0f;
+    raddstoreexpminusmax(x.size() * sizeof(xnn_float16), x.data(), &x_max,
+                         y.data(), &sum, nullptr);
+
+    for (size_t i = 0; i < y.size(); i++) {
+      if (i % input_bits.size() < 2) {
+        ASSERT_NE(xnn_float16_to_bits(y[i]), UINT16_C(0)) << "element " << i;
+      } else {
+        ASSERT_EQ(xnn_float16_to_bits(y[i]), UINT16_C(0)) << "element " << i;
+      }
+    }
+  }
+
   void Test(xnn_f32_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax,
             xnn_init_f32_expminus_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;

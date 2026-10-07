@@ -68,6 +68,14 @@ $if TEST_NEON_FP16ARITH_COMPATIBILITY:
       .TestNeonFp16ArithCompatibility(${TEST_FUNCTION});
   }
 
+$if TEST_FP16_DENORM_CUTOFF:
+  TEST(${TEST_NAME}, fp16_denorm_cutoff) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .TestFp16DenormCutoff(${TEST_FUNCTION});
+  }
+
 $if ELEMENTS_TILE > 1 or ELEMENTS_SCALE != "":
   TEST(${TEST_NAME}, elements_div_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     $if ISA_CHECK:
@@ -135,6 +143,7 @@ def generate_test_cases(
   vector_tile,
   isa,
   test_neon_fp16arith_compatibility,
+  test_fp16_denorm_cutoff,
 ):
   """Generates all tests cases for a RAddStoreExpMinusMax micro-kernel.
 
@@ -149,6 +158,7 @@ def generate_test_cases(
       will skip execution if the host processor doesn't support this ISA.
     test_neon_fp16arith_compatibility: Whether to test numerical compatibility
       with the established NEON FP16 arithmetic implementation.
+    test_fp16_denorm_cutoff: Whether to test the FP16 denormal cutoff.
 
   Returns:
     Code for the test case.
@@ -179,6 +189,7 @@ def generate_test_cases(
             "TEST_NEON_FP16ARITH_COMPATIBILITY": (
               test_neon_fp16arith_compatibility
             ),
+            "TEST_FP16_DENORM_CUTOFF": test_fp16_denorm_cutoff,
       },
   )
 
@@ -225,6 +236,7 @@ def main(args):
           vector_tile,
           isa,
           ukernel_spec.get("test-neon-fp16arith-compatibility", False),
+            ukernel_spec.get("test-fp16-denorm-cutoff", False),
       )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
