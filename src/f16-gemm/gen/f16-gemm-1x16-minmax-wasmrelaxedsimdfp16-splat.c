@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-gemm/wasmrelaxedsimd-splat.c.in
+//   Template: src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
@@ -14,7 +14,7 @@
 
 #include "src/xnnpack/gemm.h"
 
-void xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(
+void xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -38,8 +38,8 @@ void xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(
   const uint16_t* a0 = (const uint16_t*) a;
   uint16_t* c0 = (uint16_t*) c;
 
-  const v128_t vmin = wasm_v128_load16_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v128_load16_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load16_splat(&params->scalar.min);;
+  const v128_t vmax = wasm_v128_load16_splat(&params->scalar.max);;
 
 
   do {

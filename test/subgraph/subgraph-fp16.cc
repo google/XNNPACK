@@ -1473,81 +1473,33 @@ TEST(SUBGRAPH_FP16, fully_connected_f32_weights_and_biases_pack_to_f16) {
       .AddFullyConnected(input_id, filter_id, bias_id, output_id, 0)
       .Optimize();
 
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
-  ASSERT_NE(hardware_config, nullptr);
-  const bool f16_possible = xnn_is_f16_compatible_config(hardware_config);
-
+  // Verify weights were packed (f16_gemm has a scalar fallback, so
+  // FullyConnected is always supported in FP16).
   const xnn_value* filter_val = tester.Value(filter_id);
-  if (f16_possible) {
-    // Verify weights were packed
-    ASSERT_EQ(filter_val->datatype, xnn_datatype_fp16);
-    ASSERT_NE(filter_val->data, nullptr);
-    ASSERT_NE(filter_val->data, weights_f32.data());
+  ASSERT_EQ(filter_val->datatype, xnn_datatype_fp16);
+  ASSERT_NE(filter_val->data, nullptr);
+  ASSERT_NE(filter_val->data, weights_f32.data());
 
-    const xnn_float16* packed_weights =
-        reinterpret_cast<const xnn_float16*>(filter_val->data);
-    for (size_t i = 0; i < weights_f32.size(); i++) {
-      float unpacked_val = xnn_float16_to_float(packed_weights[i]);
-      const float tolerance = std::max(std::abs(weights_f32[i]) * 1e-3f, 1e-3f);
-      ASSERT_NEAR(unpacked_val, weights_f32[i], tolerance);
-    }
+  const xnn_float16* packed_weights =
+      reinterpret_cast<const xnn_float16*>(filter_val->data);
+  for (size_t i = 0; i < weights_f32.size(); i++) {
+    float unpacked_val = xnn_float16_to_float(packed_weights[i]);
+    const float tolerance = std::max(std::abs(weights_f32[i]) * 1e-3f, 1e-3f);
+    ASSERT_NEAR(unpacked_val, weights_f32[i], tolerance);
+  }
 
-    // Verify bias was packed
-    const xnn_value* bias_val = tester.Value(bias_id);
-    ASSERT_EQ(bias_val->datatype, xnn_datatype_fp16);
-    ASSERT_NE(bias_val->data, nullptr);
-    ASSERT_NE(bias_val->data, bias_f32.data());
+  // Verify bias was packed
+  const xnn_value* bias_val = tester.Value(bias_id);
+  ASSERT_EQ(bias_val->datatype, xnn_datatype_fp16);
+  ASSERT_NE(bias_val->data, nullptr);
+  ASSERT_NE(bias_val->data, bias_f32.data());
 
-    const xnn_float16* packed_bias =
-        reinterpret_cast<const xnn_float16*>(bias_val->data);
-    for (size_t i = 0; i < bias_f32.size(); i++) {
-      float unpacked_val = xnn_float16_to_float(packed_bias[i]);
-      const float tolerance = std::max(std::abs(bias_f32[i]) * 1e-3f, 1e-3f);
-      ASSERT_NEAR(unpacked_val, bias_f32[i], tolerance);
-    }
-  } else {
-    // Verify fallback to FP32 for weights and bias
-    ASSERT_EQ(filter_val->datatype, xnn_datatype_invalid);
-    const xnn_value* bias_val = tester.Value(bias_id);
-    ASSERT_EQ(bias_val->datatype, xnn_datatype_invalid);
-
-    bool found_weights = false;
-    bool found_bias = false;
-    for (uint32_t i = 0; i < tester.Subgraph()->num_values; i++) {
-      const xnn_value* v = &tester.Subgraph()->values[i];
-      if (v->type != xnn_value_type_invalid &&
-          v->datatype == xnn_datatype_fp32 &&
-          (v->flags & XNN_VALUE_FLAG_PACK_TO_FP16) && v->data != nullptr) {
-        size_t num_elements = 1;
-        for (size_t d = 0; d < v->shape.num_dims; d++) {
-          num_elements *= v->shape.dim[d];
-        }
-
-        if (num_elements == weights_f32.size() &&
-            v->data != weights_f32.data()) {
-          const float* val_data = reinterpret_cast<const float*>(v->data);
-          for (size_t j = 0; j < num_elements; j++) {
-            float expected_val =
-                xnn_float16_to_float(xnn_float16_from_float(weights_f32[j]));
-            ASSERT_FLOAT_EQ(val_data[j], expected_val);
-          }
-          found_weights = true;
-        } else if (num_elements == bias_f32.size() &&
-                   v->data != bias_f32.data()) {
-          const float* val_data = reinterpret_cast<const float*>(v->data);
-          for (size_t j = 0; j < num_elements; j++) {
-            float expected_val =
-                xnn_float16_to_float(xnn_float16_from_float(bias_f32[j]));
-            ASSERT_FLOAT_EQ(val_data[j], expected_val);
-          }
-          found_bias = true;
-        }
-      }
-    }
-    ASSERT_TRUE(found_weights)
-        << "Could not find packed and unpacked F32 weights";
-    ASSERT_TRUE(found_bias) << "Could not find packed and unpacked F32 bias";
+  const xnn_float16* packed_bias =
+      reinterpret_cast<const xnn_float16*>(bias_val->data);
+  for (size_t i = 0; i < bias_f32.size(); i++) {
+    float unpacked_val = xnn_float16_to_float(packed_bias[i]);
+    const float tolerance = std::max(std::abs(bias_f32[i]) * 1e-3f, 1e-3f);
+    ASSERT_NEAR(unpacked_val, bias_f32[i], tolerance);
   }
 }
 
