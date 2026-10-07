@@ -42,10 +42,10 @@ tools/xngen src/f16-raddstoreexpminusmax/rvvfp16arith-rr2-p2.c.in -D LMUL=4 -o s
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=wasmrelaxedsimdfp16 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimdfp16-rr2-p2-u8.c &
 
 # WebAssembly Relaxed SIMD with FP32 accumulation
-tools/xngen src/f16-raddstoreexpminusmax/f16-f32acc-rr2-p5.c.in -D ARCH=wasmrelaxedsimd -o src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u4.c &
+tools/xngen src/f16-raddstoreexpminusmax/f16-f32acc-rr1-p2.c.in -D ARCH=wasmrelaxedsimd -o src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u4.c &
 
 # Portable FP32 accumulation
-tools/xngen src/f16-raddstoreexpminusmax/f16-f32acc-rr2-p5.c.in -D ARCH=f16c -o src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr2-p5-u8.c &
-tools/xngen src/f16-raddstoreexpminusmax/f16-f32acc-rr2-p5.c.in -D ARCH=avx512f -o src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx512f-rr2-p5-u16.c &
+tools/xngen src/f16-raddstoreexpminusmax/f16-f32acc-rr1-p2.c.in -D ARCH=f16c -o src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u8.c &
+tools/xngen src/f16-raddstoreexpminusmax/f16-f32acc-rr1-p2.c.in -D ARCH=avx512f -o src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx512f-rr1-p2-u16.c &
 
 wait

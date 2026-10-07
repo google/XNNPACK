@@ -64,7 +64,7 @@ static void init_f16_raddstoreexpminusmax_config(void) {
   #elif XNN_ARCH_WASMRELAXEDSIMDFP16
     f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimdfp16_rr2_p2_u8);
   #elif XNN_ARCH_WASMRELAXEDSIMD
-    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u4);
+    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4);
   #endif
   if (f16_raddstoreexpminusmax_config.ukernel == NULL) {
     f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1);
