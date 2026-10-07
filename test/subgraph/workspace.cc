@@ -16,6 +16,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
@@ -768,4 +769,67 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters) {
   } else {
     ASSERT_EQ(dq_tensors, 1);
   }
+}
+
+TEST(SubgraphUtilsTest, NullSubgraphOrFile) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_log_impl("test.c", 1, nullptr, stderr);
+  xnn_subgraph_log_dot_impl(nullptr, stderr);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  xnn_subgraph_log_impl("test.c", 1, subgraph, nullptr);
+  xnn_subgraph_log_dot_impl(subgraph, nullptr);
+}
+
+TEST(SubgraphUtilsTest, SubgraphLogging) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[2] = {2, 4};
+  uint32_t in1_id = XNN_INVALID_VALUE_ID;
+  uint32_t in2_id = XNN_INVALID_VALUE_ID;
+  uint32_t out_id = XNN_INVALID_VALUE_ID;
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &in1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &in2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_binary(subgraph, xnn_binary_add, nullptr, in1_id, in2_id,
+                              out_id, 0));
+
+#if defined(_WIN32)
+  FILE* devnull = fopen("NUL", "w");
+#else
+  FILE* devnull = fopen("/dev/null", "w");
+#endif
+  if (devnull != nullptr) {
+    xnn_subgraph_log_impl("test.c", 1, subgraph, devnull);
+    xnn_subgraph_log_dot_impl(subgraph, devnull);
+    fclose(devnull);
+  }
+}
+
+TEST(SubgraphUtilsTest, PrintFlagsNullSafety) {
+  xnn_print_flags(0, 0, nullptr, nullptr);
+  int values[] = {1, 2};
+  xnn_print_flags(1, 0, values, "FLAG_A, FLAG_B");
+  xnn_print_flags(1, 2, nullptr, "FLAG_A, FLAG_B");
+  xnn_print_flags(1, 2, values, nullptr);
 }
