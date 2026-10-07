@@ -191,6 +191,17 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
     input_width, unpooling_op->convolution_op->padding_left + unpooling_op->convolution_op->padding_right,
     unpooling_op->convolution_op->kernel_width);
 
+  if (unpooling_op->convolution_op->output_height == 0 ||
+      unpooling_op->convolution_op->output_width == 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: computed output dimensions %zux%zu, "
+        "dimensions must be non-zero",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+        unpooling_op->convolution_op->output_height,
+        unpooling_op->convolution_op->output_width);
+    return xnn_status_invalid_parameter;
+  }
+
   if (output_height_out != NULL) {
     *output_height_out = unpooling_op->convolution_op->output_height;
   }
