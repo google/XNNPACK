@@ -28,6 +28,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/params.h"
 #include "src/xnnpack/reference-utils.h"
 #include "test/operators/operator-test-utils.h"
 #include "test/replicable_random_device.h"
@@ -710,6 +711,83 @@ TEST(BINARY_ELEMENTWISE_ND, overflow_compressed_shape) {
                 op, input1_shape.size(), input1_shape.data(),
                 input2_shape.size(), input2_shape.data(),
                 /*threadpool=*/nullptr));
+}
+
+namespace {
+
+class FailingAllocatorGuard {
+ public:
+  explicit FailingAllocatorGuard(size_t fail_at)
+      : saved_allocator_(xnn_params.allocator), fail_at_(fail_at) {
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.allocate = Allocate;
+    xnn_params.allocator.reallocate = Reallocate;
+    xnn_params.allocator.aligned_allocate = AlignedAllocate;
+  }
+
+  ~FailingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+  FailingAllocatorGuard(const FailingAllocatorGuard&) = delete;
+  FailingAllocatorGuard& operator=(const FailingAllocatorGuard&) = delete;
+
+  size_t attempts() const { return attempts_; }
+
+ private:
+  bool ShouldFail() { return ++attempts_ == fail_at_; }
+
+  static void* Allocate(void* context, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->ShouldFail()) {
+      return nullptr;
+    }
+    return self->saved_allocator_.allocate(
+        self->saved_allocator_.context, size);
+  }
+
+  static void* Reallocate(void* context, void* pointer, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->ShouldFail()) {
+      return nullptr;
+    }
+    return self->saved_allocator_.reallocate(self->saved_allocator_.context,
+                                             pointer, size);
+  }
+
+  static void* AlignedAllocate(void* context, size_t alignment, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->ShouldFail()) {
+      return nullptr;
+    }
+    return self->saved_allocator_.aligned_allocate(
+        self->saved_allocator_.context, alignment, size);
+  }
+
+  const struct xnn_allocator saved_allocator_;
+  const size_t fail_at_;
+  size_t attempts_ = 0;
+};
+
+}  // namespace
+
+TEST(BINARY_ELEMENTWISE_ND, create_out_of_memory_reports_status) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  for (size_t fail_at = 1; fail_at <= 2; fail_at++) {
+    FailingAllocatorGuard allocator_guard(fail_at);
+
+    xnn_operator_t op = nullptr;
+    const xnn_status status = xnn_create_binary_elementwise_nd(
+        xnn_binary_multiply, xnn_datatype_fp32, /*a_quantization=*/nullptr,
+        /*b_quantization=*/nullptr, /*output_quantization=*/nullptr,
+        /*flags=*/0, &op);
+
+    if (allocator_guard.attempts() < fail_at) {
+      continue;
+    }
+
+    EXPECT_EQ(status, xnn_status_out_of_memory);
+    EXPECT_EQ(op, nullptr);
+  }
 }
 
 }  // namespace xnnpack
