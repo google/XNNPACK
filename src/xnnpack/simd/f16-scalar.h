@@ -16,6 +16,7 @@
 
 // SIMD vector type for f16 using SCALAR.
 typedef xnn_float16 xnn_simd_f16_t;
+typedef float xnn_simd_f16_accumulator_t;
 #define xnn_simd_size_f16 1
 #define xnn_simd_log2_size_f16 0
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(xnn_float16))
@@ -231,8 +232,18 @@ static XNN_INLINE void xnn_store_f16(xnn_simd_f16_t *ptr, xnn_simd_f16_t v) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_simd_f16_t v) { return v; }
 
-static XNN_INLINE float xnn_reduce_add_f16(xnn_simd_f16_t a) {
-  return xnn_float16_to_float(a);
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
+  return 0.0f;
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
+    xnn_simd_f16_accumulator_t accumulator, xnn_simd_f16_t value) {
+  return accumulator + xnn_float16_to_float(value);
+}
+
+static XNN_INLINE float xnn_reduce_f16_accumulator(
+    xnn_simd_f16_accumulator_t accumulator) {
+  return accumulator;
 }
 
 // Tail load/store operations.

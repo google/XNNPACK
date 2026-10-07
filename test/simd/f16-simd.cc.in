@@ -103,6 +103,16 @@ TEST_F(${TESTNAME}, Mul) {
   }
 }
 
+TEST_F(${TESTNAME}, Accumulate) {
+  std::fill(inputs_.begin(), inputs_.begin() + xnn_simd_size_f16,
+            xnn_float16_from_bits(UINT16_C(0x7BFF)));
+  const xnn_simd_f16_t value = xnn_loadu_f16(inputs_.data());
+  xnn_simd_f16_accumulator_t accumulator = xnn_zero_f16_accumulator();
+  accumulator = xnn_accumulate_f16(accumulator, value);
+  ASSERT_EQ(xnn_reduce_f16_accumulator(accumulator),
+            65504.0f * xnn_simd_size_f16);
+}
+
 TEST_F(${TESTNAME}, Fmadd) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
