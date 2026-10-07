@@ -2427,9 +2427,20 @@ static void init_f32_lrelu_config(void) {
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    f32_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__rvv_u4v);
-    f32_lrelu_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
-    f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      f32_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__rvv_u4v);
+      f32_lrelu_config.element_tile =
+          4 * hardware_config->vlenb / sizeof(float);
+      f32_lrelu_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
+    } else {
+      f32_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__scalar_u4);
+      f32_lrelu_config.element_tile = 4;
+      f32_lrelu_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
+    }
   #else
     f32_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__scalar_u4);
     f32_lrelu_config.element_tile = 4;
