@@ -1641,10 +1641,15 @@ static void init_f32_abs_config(void) {
     f32_abs_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vabs_ukernel__wasmsimd_u8);
     f32_abs_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_abs_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vabs_ukernel__rvv_u8v);
-    f32_abs_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_abs_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vabs_ukernel__rvv_u8v);
+      f32_abs_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1804,10 +1809,16 @@ static void init_f32_clamp_config(void) {
     f32_clamp_config.element_tile = 8;
     f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vclamp_ukernel__rvv_u8v);
-    f32_clamp_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_clamp_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vclamp_ukernel__rvv_u8v);
+      f32_clamp_config.element_tile =
+          8 * hardware_config->vlenb / sizeof(float);
+    }
     f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2161,10 +2172,15 @@ static void init_f32_hswish_config_impl(struct xnn_unary_elementwise_config* con
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__wasmsimd_u8);
     config->element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__rvv_u4v);
-    config->element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      config->ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__rvv_u4v);
+      config->element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2425,10 +2441,22 @@ static void init_f32_lrelu_config(void) {
       }
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__rvv_u4v);
-    f32_lrelu_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__rvv_u4v);
+      f32_lrelu_config.element_tile =
+          4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__scalar_u4);
+      f32_lrelu_config.element_tile = 4;
+      f32_lrelu_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
+    }
     f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
   #else
     f32_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlrelu_ukernel__scalar_u4);
@@ -2482,10 +2510,15 @@ static void init_f32_neg_config(void) {
     f32_neg_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vneg_ukernel__wasmsimd_u8);
     f32_neg_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_neg_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vneg_ukernel__rvv_u8v);
-    f32_neg_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_neg_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vneg_ukernel__rvv_u8v);
+      f32_neg_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2562,10 +2595,19 @@ static void init_f32_rndd_config(void) {
       f32_rndd_config.element_tile = 128;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rndd_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndd_ukernel__rvv_u4v);
-    f32_rndd_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rndd_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndd_ukernel__rvv_u4v);
+      f32_rndd_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_rndd_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndd_ukernel__scalar_libm_u1);
+      f32_rndd_config.element_tile = 1;
+    }
   #else
     f32_rndd_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndd_ukernel__scalar_libm_u1);
     f32_rndd_config.element_tile = 1;
@@ -2635,10 +2677,20 @@ static void init_f32_rndne_config(void) {
       f32_rndne_config.element_tile = 128;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rndne_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndne_ukernel__rvv_u4v);
-    f32_rndne_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rndne_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndne_ukernel__rvv_u4v);
+      f32_rndne_config.element_tile =
+          4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_rndne_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndne_ukernel__scalar_libm_u1);
+      f32_rndne_config.element_tile = 1;
+    }
   #else
     f32_rndne_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndne_ukernel__scalar_libm_u1);
     f32_rndne_config.element_tile = 1;
@@ -2708,10 +2760,19 @@ static void init_f32_rndu_config(void) {
       f32_rndu_config.element_tile = 128;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rndu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndu_ukernel__rvv_u4v);
-    f32_rndu_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rndu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndu_ukernel__rvv_u4v);
+      f32_rndu_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_rndu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndu_ukernel__scalar_libm_u1);
+      f32_rndu_config.element_tile = 1;
+    }
   #else
     f32_rndu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndu_ukernel__scalar_libm_u1);
     f32_rndu_config.element_tile = 1;
@@ -2781,10 +2842,19 @@ static void init_f32_rndz_config(void) {
       f32_rndz_config.element_tile = 128;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_rndz_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndz_ukernel__rvv_u4v);
-    f32_rndz_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_rndz_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndz_ukernel__rvv_u4v);
+      f32_rndz_config.element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_rndz_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndz_ukernel__scalar_libm_u1);
+      f32_rndz_config.element_tile = 1;
+    }
   #else
     f32_rndz_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrndz_ukernel__scalar_libm_u1);
     f32_rndz_config.element_tile = 1;
@@ -2924,10 +2994,15 @@ static void init_f32_sqr_config(void) {
     f32_sqr_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqr_ukernel__wasmsimd_u8);
     f32_sqr_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_sqr_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqr_ukernel__rvv_u8v);
-    f32_sqr_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_sqr_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqr_ukernel__rvv_u8v);
+      f32_sqr_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2990,10 +3065,19 @@ static void init_f32_sqrt_config_impl(struct xnn_unary_elementwise_config* confi
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u8);
     config->element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqrt_ukernel__rvv_sqrt_u8v);
-    config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      config->ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqrt_ukernel__rvv_sqrt_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqrt_ukernel__scalar_sqrt_u1);
+      config->element_tile = 1;
+    }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsqrt_ukernel__scalar_sqrt_u1);
     config->element_tile = 1;
@@ -3066,10 +3150,19 @@ static void init_f32_rsqrt_config_impl(struct xnn_unary_elementwise_config* conf
       config->element_tile = 4;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u4v);
-    config->element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      config->ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u4v);
+      config->element_tile = 4 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_vrsqrt_ukernel__scalar_sqrt_u4);
+      config->element_tile = 4;
+    }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vrsqrt_ukernel__scalar_sqrt_u4);
     config->element_tile = 4;
@@ -3481,10 +3574,16 @@ static void init_f32_to_qs8_cvt_config(void) {
     f32_to_qs8_cvt_config.element_tile = 32;
     f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_qs8_vcvt_ukernel__rvv_u2v);
-    f32_to_qs8_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_to_qs8_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_qs8_vcvt_ukernel__rvv_u2v);
+      f32_to_qs8_cvt_config.element_tile =
+          2 * hardware_config->vlenb / sizeof(float);
+    }
     f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -3567,9 +3666,22 @@ static void init_f32_to_qu8_cvt_config(void) {
     f32_to_qu8_cvt_config.element_tile = 32;
     f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    f32_to_qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__rvv_u2v);
-    f32_to_qu8_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(float);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_to_qu8_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__rvv_u2v);
+      f32_to_qu8_cvt_config.element_tile =
+          2 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_to_qu8_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4);
+      f32_to_qu8_cvt_config.element_tile = 4;
+      f32_to_qu8_cvt_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
+    }
     f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
   #else
     f32_to_qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4);
@@ -3757,9 +3869,22 @@ static void init_qs8_lrelu_config(void) {
       }
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    qs8_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_vlrelu_ukernel__rvv_u2v);
-    qs8_lrelu_config.element_tile = 2 * hardware_config->vlenb / sizeof(int8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(int8_t)) {
+      qs8_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qs8_vlrelu_ukernel__rvv_u2v);
+      qs8_lrelu_config.element_tile =
+          2 * hardware_config->vlenb / sizeof(int8_t);
+    } else {
+      qs8_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qs8_vlrelu_ukernel__scalar_andxor_u4);
+      qs8_lrelu_config.element_tile = 4;
+      qs8_lrelu_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
+    }
     qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
   #else
     qs8_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_vlrelu_ukernel__scalar_andxor_u4);
@@ -3867,9 +3992,22 @@ static void init_qs8_to_f32_cvt_config(void) {
     qs8_to_f32_cvt_config.element_tile = 32;
     qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    qs8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__rvv_u2v);
-    qs8_to_f32_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(int8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(int8_t)) {
+      qs8_to_f32_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__rvv_u2v);
+      qs8_to_f32_cvt_config.element_tile =
+          2 * hardware_config->vlenb / sizeof(int8_t);
+    } else {
+      qs8_to_f32_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__scalar_u4);
+      qs8_to_f32_cvt_config.element_tile = 4;
+      qs8_to_f32_cvt_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
+    }
     qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #else
     qs8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__scalar_u4);
@@ -4055,9 +4193,22 @@ static void init_qu8_lrelu_config(void) {
       }
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    qu8_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vlrelu_ukernel__rvv_u2v);
-    qu8_lrelu_config.element_tile = 2 * hardware_config->vlenb / sizeof(uint8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(uint8_t)) {
+      qu8_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qu8_vlrelu_ukernel__rvv_u2v);
+      qu8_lrelu_config.element_tile =
+          2 * hardware_config->vlenb / sizeof(uint8_t);
+    } else {
+      qu8_lrelu_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qu8_vlrelu_ukernel__scalar_andxor_u4);
+      qu8_lrelu_config.element_tile = 4;
+      qu8_lrelu_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
+    }
     qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
   #else
     qu8_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vlrelu_ukernel__scalar_andxor_u4);
@@ -4133,9 +4284,22 @@ static void init_qu8_to_f32_cvt_config(void) {
     qu8_to_f32_cvt_config.element_tile = 32;
     qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    qu8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__rvv_u2v);
-    qu8_to_f32_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(uint8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(uint8_t)) {
+      qu8_to_f32_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__rvv_u2v);
+      qu8_to_f32_cvt_config.element_tile =
+          2 * hardware_config->vlenb / sizeof(uint8_t);
+    } else {
+      qu8_to_f32_cvt_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__scalar_u4);
+      qu8_to_f32_cvt_config.element_tile = 4;
+      qu8_to_f32_cvt_config.init =
+          (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
+    }
     qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #else
     qu8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__scalar_u4);
@@ -4163,10 +4327,16 @@ static void init_s8_clamp_config(void) {
     s8_clamp_config.element_tile = 64;
     s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__rvv_u4v);
-    s8_clamp_config.element_tile = 4 * hardware_config->vlenb / sizeof(int8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(int8_t)) {
+      s8_clamp_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__rvv_u4v);
+      s8_clamp_config.element_tile =
+          4 * hardware_config->vlenb / sizeof(int8_t);
+    }
     s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -4235,10 +4405,16 @@ static void init_u8_clamp_config(void) {
     u8_clamp_config.element_tile = 64;
     u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    u8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_u8_vclamp_ukernel__rvv_u4v);
-    u8_clamp_config.element_tile = 4 * hardware_config->vlenb / sizeof(uint8_t);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(uint8_t)) {
+      u8_clamp_config.ukernel =
+          XNN_INIT_UNARY_UKERNEL(xnn_u8_vclamp_ukernel__rvv_u4v);
+      u8_clamp_config.element_tile =
+          4 * hardware_config->vlenb / sizeof(uint8_t);
+    }
     u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
