@@ -50,8 +50,13 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
+        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx512fp16_rr2_p2_u32);
+      }
+    #endif
     #if XNN_ENABLE_AVX2
-      if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
+      if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_avx2)) {
         f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
       }
     #endif
