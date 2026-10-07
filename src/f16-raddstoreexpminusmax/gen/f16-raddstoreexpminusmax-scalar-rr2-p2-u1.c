@@ -58,14 +58,15 @@ void xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1(
   assert(sum != NULL);
 
   const xnn_simd_f16_t vmax = xnn_set1_f16(*max);
-  float vsum = 0.0f;
+  xnn_simd_f16_accumulator_t vacc = xnn_zero_f16_accumulator();
   for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
     const xnn_simd_f16_t vf = expminusmax_f16(xnn_loadu_f16(input), vmax);
     input += xnn_simd_size_f16;
     xnn_storeu_f16(output, vf);
     output += xnn_simd_size_f16;
-    vsum += xnn_reduce_add_f16(vf);
+    vacc = xnn_accumulate_f16(vacc, vf);
   }
 
+  float vsum = xnn_reduce_f16_accumulator(vacc);
   *sum = vsum;
 }

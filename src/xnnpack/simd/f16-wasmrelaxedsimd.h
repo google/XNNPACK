@@ -17,6 +17,10 @@
 
 // SIMD vector type for f16 using WASMRELAXEDSIMD.
 typedef v128_t xnn_simd_f16_t;
+typedef struct {
+  v128_t lo;
+  v128_t hi;
+} xnn_simd_f16_accumulator_t;
 #define xnn_simd_size_f16 8
 #define xnn_simd_log2_size_f16 3
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(uint16_t))
@@ -304,13 +308,27 @@ static XNN_INLINE v128_t xnn_cvt_f16_f32(v128_t f) {
       0, 0, 0, 0);
 }
 
-static XNN_INLINE float xnn_reduce_add_f16(xnn_simd_f16_t a) {
-  v128_t vacc = xnn_cvt_f32_f16(a);
-  vacc = wasm_f32x4_add(
-      vacc, xnn_cvt_f32_f16(wasm_v64x2_shuffle(a, a, 1, 1)));
-  vacc = wasm_f32x4_add(vacc, wasm_v64x2_shuffle(vacc, vacc, 1, 1));
-  return wasm_f32x4_extract_lane(vacc, 0) +
-         wasm_f32x4_extract_lane(vacc, 1);
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
+  const v128_t zero = wasm_f32x4_splat(0.0f);
+  return (xnn_simd_f16_accumulator_t) {zero, zero};
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
+    xnn_simd_f16_accumulator_t accumulator, xnn_simd_f16_t value) {
+  accumulator.lo =
+      wasm_f32x4_add(accumulator.lo, xnn_cvt_f32_f16(value));
+  accumulator.hi = wasm_f32x4_add(
+      accumulator.hi,
+      xnn_cvt_f32_f16(wasm_v64x2_shuffle(value, value, 1, 1)));
+  return accumulator;
+}
+
+static XNN_INLINE float xnn_reduce_f16_accumulator(
+    xnn_simd_f16_accumulator_t accumulator) {
+  v128_t sum = wasm_f32x4_add(accumulator.lo, accumulator.hi);
+  sum = wasm_f32x4_add(sum, wasm_v64x2_shuffle(sum, sum, 1, 1));
+  return wasm_f32x4_extract_lane(sum, 0) +
+         wasm_f32x4_extract_lane(sum, 1);
 }
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_WASMRELAXEDSIMD_H_

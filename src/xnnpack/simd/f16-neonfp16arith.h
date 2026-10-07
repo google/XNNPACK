@@ -16,6 +16,10 @@
 
 // SIMD vector type for f16 using NEON.
 typedef float16x8_t xnn_simd_f16_t;
+typedef struct {
+  float32x4_t lo;
+  float32x4_t hi;
+} xnn_simd_f16_accumulator_t;
 #define xnn_simd_size_f16 8
 #define xnn_simd_log2_size_f16 3
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(xnn_float16))
@@ -212,6 +216,28 @@ static XNN_INLINE void xnn_store_f16(xnn_float16 *ptr, xnn_simd_f16_t v) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
   return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)&v));
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
+  const float32x4_t zero = vdupq_n_f32(0.0f);
+  return (xnn_simd_f16_accumulator_t) {zero, zero};
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
+    xnn_simd_f16_accumulator_t accumulator, xnn_simd_f16_t value) {
+  accumulator.lo =
+      vaddq_f32(accumulator.lo, vcvt_f32_f16(vget_low_f16(value)));
+  accumulator.hi =
+      vaddq_f32(accumulator.hi, vcvt_f32_f16(vget_high_f16(value)));
+  return accumulator;
+}
+
+static XNN_INLINE float xnn_reduce_f16_accumulator(
+    xnn_simd_f16_accumulator_t accumulator) {
+  const float32x4_t sum = vaddq_f32(accumulator.lo, accumulator.hi);
+  const float32x2_t sum2 =
+      vadd_f32(vget_low_f32(sum), vget_high_f32(sum));
+  return vget_lane_f32(vpadd_f32(sum2, sum2), 0);
 }
 
 // Tail load/store operations.
