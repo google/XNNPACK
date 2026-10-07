@@ -13,7 +13,9 @@
 
 # Portable FP32 accumulation
 - name: xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr2_p5_u8
+  test-fp16-denorm-cutoff: true
 - name: xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16
+  test-fp16-denorm-cutoff: true
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16
@@ -49,3 +51,4 @@
 
 # WebAssembly Relaxed SIMD with FP32 accumulation
 - name: xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u4
+  test-fp16-denorm-cutoff: true

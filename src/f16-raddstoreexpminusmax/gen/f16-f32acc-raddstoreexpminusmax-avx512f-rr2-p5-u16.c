@@ -29,20 +29,18 @@ static XNN_INLINE xnn_simd_f32_t load_tail_f16_f32(
   return xnn_cvt_f32_f16(xnn_load_tail_f16(input, elements));
 }
 
-static XNN_INLINE xnn_simd_f32_t store_f32_f16(
+static XNN_INLINE void store_f32_f16(
     xnn_float16* output, xnn_simd_f32_t value)
 {
   const xnn_simd_f16_t rounded = xnn_cvt_f16_f32(value);
-  xnn_store_tail_f16(output, rounded, xnn_simd_size_f32);
-  return xnn_cvt_f32_f16(rounded);
+  xnn_storeu_f16(output, rounded);
 }
 
-static XNN_INLINE xnn_simd_f32_t store_tail_f32_f16(
+static XNN_INLINE void store_tail_f32_f16(
     xnn_float16* output, xnn_simd_f32_t value, size_t elements)
 {
   const xnn_simd_f16_t rounded = xnn_cvt_f16_f32(value);
   xnn_store_tail_f16(output, rounded, elements);
-  return xnn_cvt_f32_f16(rounded);
 }
 
 static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
@@ -57,9 +55,12 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   XNN_SIMD_CONST_F32(vc3, 0x1.555A80p-3f);
   XNN_SIMD_CONST_F32(vc2, 0x1.FFFDC6p-2f);
   XNN_SIMD_CONST_F32(vc1, 0x1.FFFFF6p-1f);
-  XNN_SIMD_CONST_F32(vdenorm_cutoff, -0x1.5D589Ep6f);
+  XNN_SIMD_CONST_F32(vdenorm_cutoff, -0x1.368000p+3f);
 
-  vx = xnn_max_f32(xnn_sub_f32(vx, vmax), vdenorm_cutoff);
+  vx = xnn_sub_f32(vx, vmax);
+  const xnn_simd_f32_t vclamped = xnn_max_f32(vx, vdenorm_cutoff);
+  const xnn_simd_f32_t vmask = xnn_cmpeq_f32(vclamped, vx);
+  vx = vclamped;
   xnn_simd_f32_t vn = xnn_fmadd_f32(vx, vlog2e, vmagic_bias);
   const xnn_simd_f32_t vs = xnn_sll_f32(vn, 23);
   vn = xnn_sub_f32(vn, vmagic_bias);
@@ -73,7 +74,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   vp = xnn_fmadd_f32(vp, vt, vc1);
 
   vt = xnn_mul_f32(vt, vs);
-  return xnn_fmadd_f32(vt, vp, vs);
+  return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
 void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
@@ -97,8 +98,9 @@ void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
        batch -= 16 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf = expminusmax_f32(load_f16_f32(input), vmax);
     input += 16;
-    vacc = xnn_add_f32(vacc, store_f32_f16(output, vf));
+    store_f32_f16(output, vf);
     output += 16;
+    vacc = xnn_add_f32(vacc, vf);
   }
 
   float vsum = xnn_reduce_add_f32(vacc);
@@ -106,11 +108,10 @@ void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
     const size_t num_elements = batch / sizeof(xnn_float16);
     const xnn_simd_f32_t vf =
         expminusmax_f32(load_tail_f16_f32(input, num_elements), vmax);
-    const xnn_simd_f32_t rounded =
-        store_tail_f32_f16(output, vf, num_elements);
+      store_tail_f32_f16(output, vf, num_elements);
 
     XNN_ALIGN(128) float values[xnn_simd_size_f32];
-    xnn_storeu_f32(values, rounded);
+      xnn_storeu_f32(values, vf);
     for (size_t i = 0; i < num_elements; i++) {
       vsum += values[i];
     }
