@@ -17,6 +17,10 @@
 
 // SIMD vector type for f32 using AVX512F.
 typedef __m512h xnn_simd_f16_t;
+typedef struct {
+  __m512 lo;
+  __m512 hi;
+} xnn_simd_f16_accumulator_t;
 #define xnn_simd_size_f16 32
 #define xnn_simd_log2_size_f16 5
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(xnn_float16))
@@ -203,22 +207,34 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
 #endif  // XNN_HAVE_FLOAT16
 }
 
-static XNN_INLINE float xnn_reduce_add_f16(xnn_simd_f16_t a) {
-  const __m256h a256 = _mm256_add_ph(
-      _mm512_castph512_ph256(a),
-      _mm256_castpd_ph(_mm512_extractf64x4_pd(_mm512_castph_pd(a), 1)));
-  __m128h a128 = _mm_add_ph(
-      _mm256_castph256_ph128(a256),
-      _mm_castps_ph(_mm256_extractf128_ps(_mm256_castph_ps(a256), 1)));
-  a128 = _mm_add_ph(
-      a128, _mm_castps_ph(_mm_movehl_ps(_mm_castph_ps(a128),
-                                       _mm_castph_ps(a128))));
-  a128 = _mm_add_ph(a128,
-                    _mm_castps_ph(_mm_movehdup_ps(_mm_castph_ps(a128))));
-  a128 = _mm_add_sh(
-      a128, _mm_castsi128_ph(_mm_srli_epi32(_mm_castph_si128(a128), 16)));
-  return xnn_float16_to_float(xnn_float16_from_bits(
-      (uint16_t)_mm_extract_epi16(_mm_castph_si128(a128), 0)));
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
+  const __m512 zero = _mm512_setzero_ps();
+  return (xnn_simd_f16_accumulator_t) {zero, zero};
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
+  xnn_simd_f16_accumulator_t accumulator, xnn_simd_f16_t value) {
+  accumulator.lo = _mm512_add_ps(
+    accumulator.lo, _mm512_cvtxph_ps(_mm512_castph512_ph256(value)));
+  accumulator.hi = _mm512_add_ps(
+    accumulator.hi,
+    _mm512_cvtxph_ps(
+      _mm256_castpd_ph(
+        _mm512_extractf64x4_pd(_mm512_castph_pd(value), 1))));
+  return accumulator;
+}
+
+static XNN_INLINE float xnn_reduce_f16_accumulator(
+  xnn_simd_f16_accumulator_t accumulator) {
+  const __m512 sum = _mm512_add_ps(accumulator.lo, accumulator.hi);
+  const __m256 sum256 = _mm256_add_ps(
+    _mm512_castps512_ps256(sum),
+    _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(sum), 1)));
+  __m128 sum128 = _mm_add_ps(
+    _mm256_castps256_ps128(sum256), _mm256_extractf128_ps(sum256, 1));
+  sum128 = _mm_add_ps(sum128, _mm_movehl_ps(sum128, sum128));
+  sum128 = _mm_add_ss(sum128, _mm_movehdup_ps(sum128));
+  return _mm_cvtss_f32(sum128);
 }
 
 // Tail load/store operations.
