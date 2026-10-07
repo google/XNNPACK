@@ -1,4 +1,8 @@
+#include <climits>
+#include <cstddef>
+
 #include <gtest/gtest.h>
+#include "src/xnnpack/normalization.h"
 #include "test/operators/reduce-normalization-tester.h"
 
 TEST(REDUCE_NORMALIZATION_TEST, normalize_5D_reduce_all) {
@@ -541,4 +545,31 @@ TEST(REDUCE_NORMALIZATION_TEST, normalize_1D_reduce_all) {
 
 TEST(REDUCE_NORMALIZATION_TEST, normalize_1D_reduce_none) {
   ReduceNormalizationTester().shape({2}).expected_shape({2}).Test();
+}
+
+// Overflow regression tests: xnn_normalize_reduction must return false
+// when merging dimensions would overflow size_t.
+TEST(REDUCE_NORMALIZATION_TEST, overflow_adjacent_reduce_axes_returns_false) {
+  // Two adjacent reduction axes with dims that overflow when merged.
+  constexpr size_t kHalf = (SIZE_MAX / 2) + 2;
+  size_t input_dims[2] = {kHalf, kHalf};
+  size_t num_input_dims = 2;
+  size_t reduction_axes[2] = {0, 1};
+  size_t num_reduction_axes = 2;
+  EXPECT_FALSE(xnn_normalize_reduction(
+      &num_reduction_axes, reduction_axes,
+      &num_input_dims, input_dims));
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, overflow_non_reduce_dims_returns_false) {
+  // Axis 2 is reduced; dims 0 and 1 (pre-reduction) are merged.
+  // kHalf * kHalf overflows, so the pre-reduce merge must return false.
+  constexpr size_t kHalf = (SIZE_MAX / 2) + 2;
+  size_t input_dims[3] = {kHalf, kHalf, 1};
+  size_t num_input_dims = 3;
+  size_t reduction_axes[1] = {2};
+  size_t num_reduction_axes = 1;
+  EXPECT_FALSE(xnn_normalize_reduction(
+      &num_reduction_axes, reduction_axes,
+      &num_input_dims, input_dims));
 }
