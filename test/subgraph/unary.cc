@@ -463,6 +463,84 @@ INSTANTIATE_TEST_SUITE_P(UnaryTestQint8ToQcint8, Convert,
                                      ValuesIn({xnn_datatype_qcint8}),
                                      testing::Range(1, XNN_MAX_TENSOR_DIMS))),
                          [](const auto& info) { return info.param.Name(); });
+
+TEST(UnaryConvert, RejectsRankSmallerThanNumNonbatchDims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, 0, &subgraph));
+
+  const std::array<size_t, 3> initial_dims = {2, 3, 4};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, initial_dims.size(),
+          initial_dims.data(), nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+          &input_id),
+      xnn_status_success);
+
+  uint32_t qd_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_dynamically_quantized_tensor_value(
+          subgraph, xnn_datatype_qdint8, initial_dims.size(),
+          /*num_nonbatch_dims=*/3, initial_dims.data(), XNN_INVALID_VALUE_ID,
+          /*flags=*/0, &qd_id),
+      xnn_status_success);
+
+  ASSERT_EQ(
+      xnn_define_unary(
+          subgraph, xnn_unary_convert, nullptr, input_id, qd_id, 0),
+      xnn_status_success);
+
+  const std::array<size_t, 2> weights_dims = {4, 4};
+  const std::vector<int8_t> weights_data(4 * 4, 0);
+  const std::vector<float> weights_scale(4, 1.0f);
+  uint32_t weights_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_channelwise_quantized_tensor_value(
+          subgraph, xnn_datatype_qcint8, weights_scale.data(),
+          weights_dims.size(), /*channel_dim=*/0, weights_dims.data(),
+          weights_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0,
+          &weights_id),
+      xnn_status_success);
+
+  const std::array<size_t, 3> output_dims = {2, 3, 4};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp16, output_dims.size(),
+          output_dims.data(), nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+          &output_id),
+      xnn_status_success);
+
+  ASSERT_EQ(
+      xnn_define_fully_connected(
+          subgraph, -INFINITY, INFINITY, qd_id, weights_id,
+          XNN_INVALID_VALUE_ID, output_id, /*flags=*/0),
+      xnn_status_success);
+
+  xnn_runtime_t runtime_raw = nullptr;
+  ASSERT_EQ(
+      xnn_create_runtime_v2(
+          subgraph, nullptr,
+          xnn_test_runtime_flags() | XNN_FLAG_NO_OPERATOR_FUSION |
+              XNN_FLAG_NO_INLINED_LHS_PACKING,
+          &runtime_raw),
+      xnn_status_success);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> runtime(
+      runtime_raw, xnn_delete_runtime);
+
+  // Reshape input to rank 2, which is less than num_nonbatch_dims (3).
+  const std::array<size_t, 2> reshaped_dims = {4, 4};
+  ASSERT_EQ(
+      xnn_reshape_external_value(
+          runtime.get(), input_id, reshaped_dims.size(), reshaped_dims.data()),
+      xnn_status_success);
+
+  // Runtime reshape must fail with invalid parameter, not underflow.
+  EXPECT_EQ(xnn_reshape_runtime(runtime.get()),
+            xnn_status_invalid_parameter);
+}
 #endif
 
 }  // namespace xnnpack
