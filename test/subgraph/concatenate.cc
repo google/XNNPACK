@@ -235,6 +235,51 @@ TEST(ConcatenateTest, OverflowBatchSize) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+TEST(ConcatenateTest, DefineRejectsInvalidNumInputs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {2, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  // Reject num_inputs < 2.
+  uint32_t inputs[1] = {input_id};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_concatenate(subgraph, 0, 1, inputs, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_concatenate(subgraph, 0, 0, nullptr, output_id, 0));
+
+  // Reject inputs == nullptr with num_inputs >= 2.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_concatenate(subgraph, 0, 2, nullptr, output_id, 0));
+
+  // Reject num_inputs > XNN_MAX_OPERATOR_OBJECTS.
+  std::vector<uint32_t> many_inputs(XNN_MAX_OPERATOR_OBJECTS + 1, input_id);
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_concatenate(
+          subgraph, 0, many_inputs.size(), many_inputs.data(), output_id, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
