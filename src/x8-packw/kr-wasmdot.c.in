@@ -181,7 +181,10 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
           out += sizeof(${BTYPE});
         } while (--nb != 0);
       }
-      out += (${NR} - n) * sizeof(${BTYPE});
+      for (size_t i = n; i < ${NR}; ++i) {
+        *((${BTYPE}*) out) = 0;
+        out += sizeof(${BTYPE});
+      }
 
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + n_stride;
