@@ -845,6 +845,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                       xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                       filter_id, filter_value->quantization.zero_point,
                       xnn_datatype_to_string(filter_value->datatype));
+        return xnn_status_invalid_parameter;
       }
       break;
     case xnn_datatype_quint8:
