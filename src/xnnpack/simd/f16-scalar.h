@@ -222,6 +222,17 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
 #endif  // XNN_HAVE_FLOAT16
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
+                                               xnn_simd_f16_t b) {
+  XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
+#if XNN_HAVE_FLOAT16
+  return a < b ? ones : xnn_zero_f16();
+#else
+  return xnn_float16_to_float(a) < xnn_float16_to_float(b) ? ones
+                                                           : xnn_zero_f16();
+#endif  // XNN_HAVE_FLOAT16
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F16 0
 #define XNN_SIMD_HAVE_RSQRT_F16 0

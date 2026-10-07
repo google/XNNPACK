@@ -154,6 +154,12 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
       _mm512_maskz_set1_epi16(_mm512_cmp_ph_mask(a, b, _CMP_EQ_OQ), 0xFFFF));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
+                         xnn_simd_f16_t b) {
+  return _mm512_castsi512_ph(
+    _mm512_maskz_set1_epi16(_mm512_cmp_ph_mask(a, b, _CMP_LT_OQ), 0xFFFF));
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F16 1
 #define XNN_SIMD_NUM_RCP_ITER_F16 0

@@ -173,6 +173,31 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
   return wasm_v128_and(eq, wasm_v128_and(a_is_not_nan, b_is_not_nan));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
+                                               xnn_simd_f16_t b) {
+  const v128_t sign_a = wasm_i16x8_shr(a, 15);
+  const v128_t sign_b = wasm_i16x8_shr(b, 15);
+  const v128_t sign_bit = wasm_i16x8_splat((int16_t)0x8000);
+  const v128_t ordered_a =
+    wasm_v128_xor(a, wasm_v128_or(sign_a, sign_bit));
+  const v128_t ordered_b =
+    wasm_v128_xor(b, wasm_v128_or(sign_b, sign_bit));
+  const v128_t less = wasm_u16x8_lt(ordered_a, ordered_b);
+
+  const v128_t abs_mask = wasm_i16x8_splat(0x7FFF);
+  const v128_t inf = wasm_i16x8_splat(0x7C00);
+    const v128_t zero = wasm_i16x8_splat(0);
+    const v128_t abs_a = wasm_v128_and(a, abs_mask);
+    const v128_t abs_b = wasm_v128_and(b, abs_mask);
+    const v128_t both_zero =
+      wasm_v128_and(wasm_i16x8_eq(abs_a, zero), wasm_i16x8_eq(abs_b, zero));
+    const v128_t a_is_not_nan = wasm_i16x8_le(abs_a, inf);
+    const v128_t b_is_not_nan = wasm_i16x8_le(abs_b, inf);
+    return wasm_v128_and(
+      less, wasm_v128_and(wasm_v128_not(both_zero),
+                wasm_v128_and(a_is_not_nan, b_is_not_nan)));
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
   return wasm_v128_load(ptr);

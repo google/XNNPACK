@@ -573,6 +573,20 @@ TEST_F(F16SimdSCALARTest, CmpEq) {
   }
 }
 
+TEST_F(F16SimdSCALARTest, CmpLt) {
+  inputs_[0] = xnn_float16_from_bits(0x8000);
+  inputs_[xnn_simd_size_f16] = xnn_float16_from_bits(0x0000);
+  const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
+  const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
+  const xnn_simd_f16_t res = xnn_cmplt_f16(a, b);
+  xnn_storeu_f16(output_.data(), res);
+  std::vector<float> inputs_f32 = ToFloat32(inputs_);
+  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+    ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+              inputs_f32[k] < inputs_f32[k + xnn_simd_size_f16] ? 0xFFFF : 0);
+  }
+}
+
 TEST_F(F16SimdSCALARTest, StoreTail) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
