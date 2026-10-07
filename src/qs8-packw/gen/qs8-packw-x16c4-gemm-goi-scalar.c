@@ -584,7 +584,10 @@ void xnn_qs8_packw_gemm_goi_ukernel_x16c4__scalar(
           out += sizeof(int32_t);
         } while (--nb != 0);
       }
-      out += (16 - n) * sizeof(int32_t);
+      for (size_t i = n; i < 16; ++i) {
+        *((int32_t*) out) = 0;
+        out += sizeof(int32_t);
+      }
 
       // NR remainder has less than 16 rows so last row is not loaded
       const int8_t* w1 = w0 + n_stride;
@@ -857,6 +860,10 @@ void xnn_qs8_packw_gemm_goi_ukernel_x16c4__scalar(
         out[58] = v14x2;
         out[59] = v14x3;
         w14 += 4;
+        out[60] = 0;
+        out[61] = 0;
+        out[62] = 0;
+        out[63] = 0;
         out += 64;
       }
 
