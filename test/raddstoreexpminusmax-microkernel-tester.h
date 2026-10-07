@@ -145,6 +145,34 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     }
   }
 
+  void TestAvx2Compatibility(
+      xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax,
+      xnn_f16_raddstoreexpminusmax_ukernel_fn reference,
+      uint16_t max_ulp = 0) const {
+    constexpr size_t num_values = UINT16_C(0x7C00);
+    xnnpack::Buffer<xnn_float16> x(num_values, xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> y(num_values);
+    xnnpack::Buffer<xnn_float16> y_ref(num_values);
+    for (size_t i = 0; i < num_values; i++) {
+      x[i] = xnn_float16_from_bits(UINT16_C(0x8000) + i);
+    }
+
+    const xnn_float16 x_max = xnn_float16_zero();
+    float sum = 0.0f;
+    float sum_ref = 0.0f;
+    raddstoreexpminusmax(num_values * sizeof(xnn_float16), x.data(), &x_max,
+                         y.data(), &sum, nullptr);
+    reference(num_values * sizeof(xnn_float16), x.data(), &x_max,
+              y_ref.data(), &sum_ref, nullptr);
+
+    for (size_t i = 0; i < num_values; i++) {
+      const uint16_t actual = xnn_float16_to_bits(y[i]);
+      const uint16_t expected = xnn_float16_to_bits(y_ref[i]);
+      ASSERT_LE(std::abs(int32_t{actual} - int32_t{expected}), max_ulp)
+          << "input 0x" << std::hex << xnn_float16_to_bits(x[i]);
+    }
+  }
+
   void Test(xnn_f32_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax,
             xnn_init_f32_expminus_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
