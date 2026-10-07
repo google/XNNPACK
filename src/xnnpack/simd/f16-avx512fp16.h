@@ -209,7 +209,10 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
 
 static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
   const __m512 zero = _mm512_setzero_ps();
-  return (xnn_simd_f16_accumulator_t) {zero, zero};
+  xnn_simd_f16_accumulator_t accumulator;
+  accumulator.lo = zero;
+  accumulator.hi = zero;
+  return accumulator;
 }
 
 static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(

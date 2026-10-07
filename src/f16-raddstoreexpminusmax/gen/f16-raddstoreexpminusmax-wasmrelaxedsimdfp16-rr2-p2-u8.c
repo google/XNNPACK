@@ -17,6 +17,18 @@
 #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 
 
+static XNN_INLINE xnn_simd_f16_t fmadd_f16(
+    xnn_simd_f16_t a, xnn_simd_f16_t b, xnn_simd_f16_t c)
+{
+  return xnn_fmadd_f16(a, b, c);
+}
+
+static XNN_INLINE xnn_simd_f16_t cmplt_f16(
+    xnn_simd_f16_t a, xnn_simd_f16_t b)
+{
+  return xnn_cmplt_f16(a, b);
+}
+
 static XNN_INLINE xnn_simd_f16_t expminusmax_f16(
     xnn_simd_f16_t vx, xnn_simd_f16_t vmax)
 {
@@ -29,17 +41,17 @@ static XNN_INLINE xnn_simd_f16_t expminusmax_f16(
   XNN_SIMD_CONST_F16_FROM_INT16(vdenorm_cutoff, 0xC8DA);
 
   vx = xnn_sub_f16(vx, vmax);
-  xnn_simd_f16_t vn = xnn_fmadd_f16(vx, vlog2e, vmagic_bias);
+  xnn_simd_f16_t vn = fmadd_f16(vx, vlog2e, vmagic_bias);
   const xnn_simd_f16_t vs = xnn_sll_f16(vn, 10);
   vn = xnn_sub_f16(vn, vmagic_bias);
 
-  xnn_simd_f16_t vt = xnn_fmadd_f16(vn, vminus_ln2_hi, vx);
-  vt = xnn_fmadd_f16(vn, vminus_ln2_lo, vt);
-  const xnn_simd_f16_t vp = xnn_fmadd_f16(vc2, vt, vc1);
+  xnn_simd_f16_t vt = fmadd_f16(vn, vminus_ln2_hi, vx);
+  vt = fmadd_f16(vn, vminus_ln2_lo, vt);
+  const xnn_simd_f16_t vp = fmadd_f16(vc2, vt, vc1);
   vt = xnn_mul_f16(vt, vs);
 
-  const xnn_simd_f16_t vf = xnn_fmadd_f16(vp, vt, vs);
-  return xnn_andnot_f16(xnn_cmplt_f16(vx, vdenorm_cutoff), vf);
+  const xnn_simd_f16_t vf = fmadd_f16(vp, vt, vs);
+  return xnn_andnot_f16(cmplt_f16(vx, vdenorm_cutoff), vf);
 }
 
 void xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimdfp16_rr2_p2_u8(
