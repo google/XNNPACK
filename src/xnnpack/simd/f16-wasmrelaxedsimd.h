@@ -310,7 +310,10 @@ static XNN_INLINE v128_t xnn_cvt_f16_f32(v128_t f) {
 
 static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
   const v128_t zero = wasm_f32x4_splat(0.0f);
-  return (xnn_simd_f16_accumulator_t) {zero, zero};
+  xnn_simd_f16_accumulator_t accumulator;
+  accumulator.lo = zero;
+  accumulator.hi = zero;
+  return accumulator;
 }
 
 static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(

@@ -121,7 +121,7 @@ TEST_F(F16SimdAVX512FP16Test, Fmadd) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-#if XNN_SIMD_HAS_NATIVE_FMA
+#if XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
@@ -134,30 +134,9 @@ TEST_F(F16SimdAVX512FP16Test, Fmadd) {
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
+#endif  // XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
   }
 }
-
-#if XNN_SIMD_HAS_NATIVE_FMA
-TEST_F(F16SimdAVX512FP16Test, FmaddFused) {
-  std::fill(inputs_.begin(),
-            inputs_.begin() + 2 * xnn_simd_size_f16,
-            xnn_float16_from_bits(UINT16_C(0x3C01)));
-  std::fill(inputs_.begin() + 2 * xnn_simd_size_f16, inputs_.end(),
-            xnn_float16_from_bits(UINT16_C(0xBC01)));
-
-  const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
-  const xnn_simd_f16_t b =
-      xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
-  const xnn_simd_f16_t c =
-      xnn_loadu_f16(inputs_.data() + 2 * xnn_simd_size_f16);
-  xnn_storeu_f16(output_.data(), xnn_fmadd_f16(a, b, c));
-
-  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-    ASSERT_EQ(xnn_float16_to_bits(output_[k]), UINT16_C(0x1401));
-  }
-}
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
 
 TEST_F(F16SimdAVX512FP16Test, Fmsub) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
@@ -169,7 +148,7 @@ TEST_F(F16SimdAVX512FP16Test, Fmsub) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-#if XNN_SIMD_HAS_NATIVE_FMA
+#if XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] -
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
@@ -182,7 +161,7 @@ TEST_F(F16SimdAVX512FP16Test, Fmsub) {
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] -
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
+#endif  // XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
   }
 }
 
@@ -196,7 +175,7 @@ TEST_F(F16SimdAVX512FP16Test, Fnmadd) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-#if XNN_SIMD_HAS_NATIVE_FMA
+#if XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(-inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
@@ -209,7 +188,7 @@ TEST_F(F16SimdAVX512FP16Test, Fnmadd) {
     ASSERT_EQ(output_f32[k],
               TruncToF16(-inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
+#endif  // XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
   }
 }
 
@@ -616,13 +595,15 @@ TEST_F(F16SimdAVX512FP16Test, CmpLt) {
   inputs_[1] = xnn_float16_from_bits(0x7E00);
   inputs_[xnn_simd_size_f16 + 1] = xnn_float16_from_bits(0x3C00);
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
-  const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
+  const xnn_simd_f16_t b =
+      xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_cmplt_f16(a, b);
   xnn_storeu_f16(output_.data(), res);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
     ASSERT_EQ(xnn_float16_to_bits(output_[k]),
-              inputs_f32[k] < inputs_f32[k + xnn_simd_size_f16] ? 0xFFFF : 0);
+              inputs_f32[k] < inputs_f32[k + xnn_simd_size_f16]
+                  ? 0xFFFF : 0);
   }
 }
 

@@ -17,6 +17,22 @@
 #include "src/xnnpack/simd/f16-scalar.h"
 
 
+static XNN_INLINE xnn_simd_f16_t fmadd_f16(
+    xnn_simd_f16_t a, xnn_simd_f16_t b, xnn_simd_f16_t c)
+{
+  return xnn_float16_from_float(
+      (xnn_float16_to_float(a) * xnn_float16_to_float(b)) +
+      xnn_float16_to_float(c));
+}
+
+static XNN_INLINE xnn_simd_f16_t cmplt_f16(
+    xnn_simd_f16_t a, xnn_simd_f16_t b)
+{
+  XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
+  return xnn_float16_to_float(a) < xnn_float16_to_float(b)
+      ? ones : xnn_zero_f16();
+}
+
 static XNN_INLINE xnn_simd_f16_t expminusmax_f16(
     xnn_simd_f16_t vx, xnn_simd_f16_t vmax)
 {
@@ -29,17 +45,17 @@ static XNN_INLINE xnn_simd_f16_t expminusmax_f16(
   XNN_SIMD_CONST_F16_FROM_INT16(vdenorm_cutoff, 0xC8DA);
 
   vx = xnn_sub_f16(vx, vmax);
-  xnn_simd_f16_t vn = xnn_fmadd_f16(vx, vlog2e, vmagic_bias);
+  xnn_simd_f16_t vn = fmadd_f16(vx, vlog2e, vmagic_bias);
   const xnn_simd_f16_t vs = xnn_sll_f16(vn, 10);
   vn = xnn_sub_f16(vn, vmagic_bias);
 
-  xnn_simd_f16_t vt = xnn_fmadd_f16(vn, vminus_ln2_hi, vx);
-  vt = xnn_fmadd_f16(vn, vminus_ln2_lo, vt);
-  const xnn_simd_f16_t vp = xnn_fmadd_f16(vc2, vt, vc1);
+  xnn_simd_f16_t vt = fmadd_f16(vn, vminus_ln2_hi, vx);
+  vt = fmadd_f16(vn, vminus_ln2_lo, vt);
+  const xnn_simd_f16_t vp = fmadd_f16(vc2, vt, vc1);
   vt = xnn_mul_f16(vt, vs);
 
-  const xnn_simd_f16_t vf = xnn_fmadd_f16(vp, vt, vs);
-  return xnn_andnot_f16(xnn_cmplt_f16(vx, vdenorm_cutoff), vf);
+  const xnn_simd_f16_t vf = fmadd_f16(vp, vt, vs);
+  return xnn_andnot_f16(cmplt_f16(vx, vdenorm_cutoff), vf);
 }
 
 void xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1(
@@ -58,15 +74,15 @@ void xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1(
   assert(sum != NULL);
 
   const xnn_simd_f16_t vmax = xnn_set1_f16(*max);
-  xnn_simd_f16_accumulator_t vacc = xnn_zero_f16_accumulator();
+  float vacc = 0.0f;
   for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
     const xnn_simd_f16_t vf = expminusmax_f16(xnn_loadu_f16(input), vmax);
     input += xnn_simd_size_f16;
     xnn_storeu_f16(output, vf);
     output += xnn_simd_size_f16;
-    vacc = xnn_accumulate_f16(vacc, vf);
+    vacc += xnn_float16_to_float(vf);
   }
 
-  float vsum = xnn_reduce_f16_accumulator(vacc);
+  float vsum = vacc;
   *sum = vsum;
 }

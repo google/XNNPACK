@@ -16,7 +16,6 @@
 
 // SIMD vector type for f16 using SCALAR.
 typedef xnn_float16 xnn_simd_f16_t;
-typedef float xnn_simd_f16_accumulator_t;
 #define xnn_simd_size_f16 1
 #define xnn_simd_log2_size_f16 0
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(xnn_float16))
@@ -54,30 +53,55 @@ static XNN_INLINE xnn_simd_f16_t xnn_mul_f16(xnn_simd_f16_t a,
 #endif  // XNN_HAVE_FLOAT16
 }
 
+// If we're computing the fused ops in `float`, act as if we're going to
+// round like native FMA.
+#if XNN_HAVE_FLOAT16
+#if ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) || \
+    (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA && defined(__ARM_FEATURE_FP16_FML))
 #define XNN_SIMD_HAS_NATIVE_FMA 1
+#else
+#define XNN_SIMD_HAS_NATIVE_FMA 0
+#endif  // ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) ||
+        // (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA &&
+        // defined(__ARM_FEATURE_FP16_FML))
+#else
+#define XNN_SIMD_HAS_NATIVE_FMA 1
+#endif  // XNN_HAVE_FLOAT16
 
 static XNN_INLINE xnn_simd_f16_t xnn_fmadd_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
+#if XNN_HAVE_FLOAT16
+  return a * b + c;
+#else
   return xnn_float16_from_float(
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)) +
       xnn_float16_to_float(c));
+#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_fnmadd_f16(xnn_simd_f16_t a,
                                                 xnn_simd_f16_t b,
                                                 xnn_simd_f16_t c) {
+#if XNN_HAVE_FLOAT16
+  return c - a * b;
+#else
   return xnn_float16_from_float(
       xnn_float16_to_float(c) -
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)));
+#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_fmsub_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
+#if XNN_HAVE_FLOAT16
+  return a * b - c;
+#else
   return xnn_float16_from_float(
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)) -
       xnn_float16_to_float(c));
+#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_sub_f16(xnn_simd_f16_t a,
@@ -198,17 +222,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
 #endif  // XNN_HAVE_FLOAT16
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
-                                               xnn_simd_f16_t b) {
-  XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
-#if XNN_HAVE_FLOAT16
-  return a < b ? ones : xnn_zero_f16();
-#else
-  return xnn_float16_to_float(a) < xnn_float16_to_float(b) ? ones
-                                                           : xnn_zero_f16();
-#endif  // XNN_HAVE_FLOAT16
-}
-
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F16 0
 #define XNN_SIMD_HAVE_RSQRT_F16 0
@@ -232,18 +245,8 @@ static XNN_INLINE void xnn_store_f16(xnn_simd_f16_t *ptr, xnn_simd_f16_t v) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_simd_f16_t v) { return v; }
 
-static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
-  return 0.0f;
-}
-
-static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
-    xnn_simd_f16_accumulator_t accumulator, xnn_simd_f16_t value) {
-  return accumulator + xnn_float16_to_float(value);
-}
-
-static XNN_INLINE float xnn_reduce_f16_accumulator(
-    xnn_simd_f16_accumulator_t accumulator) {
-  return accumulator;
+static XNN_INLINE float xnn_reduce_add_f16(xnn_simd_f16_t a) {
+  return xnn_float16_to_float(a);
 }
 
 // Tail load/store operations.
