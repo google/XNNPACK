@@ -29,6 +29,7 @@ void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32(
 
   const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
   const v128_t vmultiplier = wasm_i16x8_splat(-params->scalar.multiplier);
+  const int32_t vshift = params->scalar.shift;
   const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
   XNN_FORCE_REALIZATION(vinput_zero_point);
   XNN_FORCE_REALIZATION(vmultiplier);
@@ -45,10 +46,10 @@ void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32(
     vacc2 = wasm_i16x8_sub(vinput_zero_point, vacc2);
     vacc3 = wasm_i16x8_sub(vinput_zero_point, vacc3);
 
-    vacc0 = wasm_i16x8_shl(vacc0, 7);
-    vacc1 = wasm_i16x8_shl(vacc1, 7);
-    vacc2 = wasm_i16x8_shl(vacc2, 7);
-    vacc3 = wasm_i16x8_shl(vacc3, 7);
+    vacc0 = wasm_i16x8_shl(vacc0, vshift);
+    vacc1 = wasm_i16x8_shl(vacc1, vshift);
+    vacc2 = wasm_i16x8_shl(vacc2, vshift);
+    vacc3 = wasm_i16x8_shl(vacc3, vshift);
 
     vacc0 = wasm_i16x8_relaxed_q15mulr(vacc0, vmultiplier);
     vacc1 = wasm_i16x8_relaxed_q15mulr(vacc1, vmultiplier);
@@ -70,7 +71,7 @@ void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32(
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     v128_t vacc = wasm_u16x8_load8x8(input);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
-    vacc = wasm_i16x8_shl(vacc, 7);
+    vacc = wasm_i16x8_shl(vacc, vshift);
     vacc = wasm_i16x8_relaxed_q15mulr(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     input += 8;
@@ -85,7 +86,7 @@ void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32(
 
     v128_t vacc = wasm_u16x8_load8x8(input);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
-    vacc = wasm_i16x8_shl(vacc, 7);
+    vacc = wasm_i16x8_shl(vacc, vshift);
     vacc = wasm_i16x8_relaxed_q15mulr(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
