@@ -50,6 +50,13 @@ static enum xnn_status create_constant_pad_nd(
   xnn_operator_t constant_pad_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
+  if (constant_pad_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: constant_pad_op_out must be non-NULL",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
       "failed to create %s operator: XNNPACK is not initialized",
@@ -113,9 +120,13 @@ enum xnn_status xnn_create_constant_pad_nd_x8(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
+  if (padding_value == NULL || constant_pad_op_out == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint8_t*) padding_value);
   return create_constant_pad_nd(
-    padding_pattern * UINT32_C(0x01010101), flags, xnn_operator_type_constant_pad_nd_x8, constant_pad_op_out);
+    padding_pattern * UINT32_C(0x01010101), flags,
+    xnn_operator_type_constant_pad_nd_x8, constant_pad_op_out);
 }
 
 enum xnn_status xnn_create_constant_pad_nd_x16(
@@ -123,9 +134,13 @@ enum xnn_status xnn_create_constant_pad_nd_x16(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
+  if (padding_value == NULL || constant_pad_op_out == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t padding_pattern = *((const uint16_t*) padding_value);
   return create_constant_pad_nd(
-    padding_pattern * UINT32_C(0x00010001), flags, xnn_operator_type_constant_pad_nd_x16, constant_pad_op_out);
+    padding_pattern * UINT32_C(0x00010001), flags,
+    xnn_operator_type_constant_pad_nd_x16, constant_pad_op_out);
 }
 
 enum xnn_status xnn_create_constant_pad_nd_x32(
@@ -133,8 +148,12 @@ enum xnn_status xnn_create_constant_pad_nd_x32(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
+  if (padding_value == NULL || constant_pad_op_out == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   return create_constant_pad_nd(
-    *((const uint32_t*) padding_value), flags, xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
+    *((const uint32_t*) padding_value), flags,
+    xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
 }
 
 static enum xnn_status reshape_constant_pad_nd(
@@ -164,6 +183,15 @@ static enum xnn_status reshape_constant_pad_nd(
         xnn_operator_type_to_string_v2(constant_pad_op), num_dims,
         XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
+  }
+
+  if (num_dims != 0 && (input_shape == NULL || pre_paddings == NULL ||
+                        post_paddings == NULL)) {
+    xnn_log_error(
+        "failed to setup %s operator: input_shape, pre_paddings, and "
+        "post_paddings must be non-NULL",
+        xnn_operator_type_to_string_v2(constant_pad_op));
+    return xnn_status_invalid_parameter;
   }
 
   size_t num_squeezed_dims = 0;

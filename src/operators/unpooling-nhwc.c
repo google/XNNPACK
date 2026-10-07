@@ -38,6 +38,13 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   xnn_operator_t unpooling_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
+  if (unpooling_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unpooling_op_out must be non-NULL",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    return xnn_status_invalid_parameter;
+  }
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));

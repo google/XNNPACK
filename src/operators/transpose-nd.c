@@ -59,6 +59,13 @@ static enum xnn_status create_transpose_nd(
 {
   xnn_operator_t transpose_op = NULL;
 
+  if (transpose_op_out == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: transpose_op_out must be non-NULL",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
   enum xnn_status status = xnn_status_uninitialized;
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
@@ -176,6 +183,13 @@ static enum xnn_status reshape_transpose_nd(
     return xnn_status_invalid_parameter;
   }
 
+  if (perm == NULL || input_shape == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: perm and input_shape must be non-NULL",
+        xnn_operator_type_to_string_v2(transpose_op));
+    return xnn_status_invalid_parameter;
+  }
+
   for (size_t i = 0; i < num_dims; ++i) {
     if (perm[i] >= num_dims) {
       xnn_log_error(
@@ -209,7 +223,10 @@ static enum xnn_status reshape_transpose_nd(
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
-      if ((input_stride[i - 1] < input_stride[i] * input_shape[i]) || (input_stride[i - 1] < current_stride)) {
+      size_t min_stride;
+      if (!xnn_safe_mul(input_stride[i], input_shape[i], &min_stride) ||
+          (input_stride[i - 1] < min_stride) ||
+          (input_stride[i - 1] < current_stride)) {
         xnn_log_error(
             "failed to create %s operator with %zu input_shape and %zu "
             "input_stride: input_stride >= input_shape",
@@ -217,7 +234,12 @@ static enum xnn_status reshape_transpose_nd(
             input_stride[i]);
         return xnn_status_invalid_parameter;
       }
-      current_stride *= input_shape[i];
+      if (!xnn_safe_mul(current_stride, input_shape[i], &current_stride)) {
+        xnn_log_error(
+            "failed to reshape %s operator: current_stride overflows size_t",
+            xnn_operator_type_to_string_v2(transpose_op));
+        return xnn_status_out_of_memory;
+      }
     }
   }
 
@@ -232,7 +254,10 @@ static enum xnn_status reshape_transpose_nd(
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
-      if ((output_stride[i - 1] < output_stride[i] * input_shape[perm[i]]) || (output_stride[i - 1] < current_stride)) {
+      size_t min_stride;
+      if (!xnn_safe_mul(output_stride[i], input_shape[perm[i]], &min_stride) ||
+          (output_stride[i - 1] < min_stride) ||
+          (output_stride[i - 1] < current_stride)) {
         xnn_log_error(
             "failed to create %s operator with %zu output_shape and %zu "
             "output_stride: output_stride >= output_shape",
@@ -240,7 +265,13 @@ static enum xnn_status reshape_transpose_nd(
             output_stride[i]);
         return xnn_status_invalid_parameter;
       }
-      current_stride *= input_shape[perm[i]];
+      if (!xnn_safe_mul(current_stride, input_shape[perm[i]],
+                        &current_stride)) {
+        xnn_log_error(
+            "failed to reshape %s operator: current_stride overflows size_t",
+            xnn_operator_type_to_string_v2(transpose_op));
+        return xnn_status_out_of_memory;
+      }
     }
   }
 

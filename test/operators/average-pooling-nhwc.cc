@@ -4994,3 +4994,13 @@ TEST(AVERAGE_POOLING_NHWC_F32, reshape_overflow_output_stride) {
           average_pooling_op, 1, 4, 4, 1, 1, large_stride,
           &output_height, &output_width, nullptr));
 }
+
+TEST(AVERAGE_POOLING_NHWC_F32, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_average_pooling2d_nhwc_f32(
+                0, 0, 0, 0, 2, 2, 1, 1,
+                -std::numeric_limits<float>::infinity(),
+                +std::numeric_limits<float>::infinity(),
+                0, nullptr));
+}
