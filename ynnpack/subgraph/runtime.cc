@@ -1025,8 +1025,9 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         assert(i.data);
         assert(i.data->rank == i.rank());
         for (size_t d = 0; d < i.rank(); ++d) {
-          slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
-          i.data->dims[d].set_min_extent(0, extent_d);
+          slinky::expr extent_d = i.physical_extent(d);
+          i.data->dims[d].set_min_extent(
+              0, extent_d.defined() ? evaluate(extent_d, ctx) : 1);
         }
         ynn::init_buffer_strides(*i.data);
       }
