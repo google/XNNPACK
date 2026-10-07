@@ -4777,6 +4777,10 @@ void xnn_qs8_packw_gemm_goi_ukernel_x96c4__scalar(
         out[378] = v94x2;
         out[379] = v94x3;
         w94 += 4;
+        out[380] = 0;
+        out[381] = 0;
+        out[382] = 0;
+        out[383] = 0;
         out += 384;
       }
 
