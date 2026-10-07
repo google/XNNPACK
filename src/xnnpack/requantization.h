@@ -82,17 +82,12 @@ static inline struct ExpMul parse_f32(float scale) {
 }
 
 // multiply_2x_high_s16 emulates X86_64 pmulhrsw.
-// int16_t range is [-2^15, 2^15 - 1]
-// int16_t * int16_t range is strictly included into [-2^30, 2^30 - 1],
-// so the result can modeled by signed int31.
-// To extract the most significant 16 bits one can shift int31 by 15.
-static int16_t multiply_2x_high_s16(int16_t x, int16_t y) {
+// int16_t range is [-2^15, 2^15 - 1]. When x = y = -32768, product + rounding
+// equals 2^30 + 2^14, which shifts to 32768, saturating to INT16_MAX (32767).
+static inline int16_t multiply_2x_high_s16(int16_t x, int16_t y) {
   int32_t product = (int32_t)x * (int32_t)y;
   int32_t rounding = 1 << 14;
-  // This is safe from overflow since x, y are in [-2^15, 2^15 - 1],
-  // therefore, x * y is in [2^-30, 2^30).
-  int16_t result = (product + rounding) >> 15;
-  return result;
+  return saturating_cast_s32_s16((product + rounding) >> 15);
 }
 
 static inline uint8_t clamp_s16_u8(int16_t result, uint8_t zero_point,
