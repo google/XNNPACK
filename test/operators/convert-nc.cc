@@ -24,6 +24,26 @@
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 
+TEST(CONVERT_NC_F32_QP8, reshape_overflow_packed_size) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_qp8_f32_qc4w_gemm_config();
+  if (gemm_config == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_operator_t convert_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_convert_nc_f32_qp8(/*flags=*/0, gemm_config,
+                                           &convert_op));
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_convert_nc_f32_qp8(
+                convert_op, /*num_groups=*/1, /*batch_size=*/1,
+                /*channels=*/SIZE_MAX - 30, /*input_stride=*/1,
+                /*threadpool=*/nullptr));
+  EXPECT_EQ(xnn_status_success, xnn_delete_operator(convert_op));
+}
+
 class ConvertOperatorTester {
  public:
   ConvertOperatorTester& channels(size_t channels) {
