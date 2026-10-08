@@ -201,7 +201,6 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
 
   if (batch_size == 0) {
     argmax_pooling_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   argmax_pooling_op->batch_size = batch_size;
@@ -240,6 +239,9 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   }
   if (output_width_out != NULL) {
     *output_width_out = output_width;
+  }
+  if (batch_size == 0) {
+    return xnn_status_success;
   }
   size_t pooling_size = 0;
   if (!xnn_safe_mul(pooling_height, pooling_width, &pooling_size)) {

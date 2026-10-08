@@ -393,3 +393,18 @@ TEST(UNPOOLING_NHWC_X32, batch_stride_overflow) {
                 &output_height, &output_width, /*threadpool=*/nullptr));
 }
 
+TEST(UNPOOLING_NHWC_X32, zero_batch_writes_output_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_create_unpooling2d_nhwc_x32(0, 0, 0, 0, 2, 2, 0, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t oh = SIZE_MAX, ow = SIZE_MAX;
+  ASSERT_EQ(xnn_reshape_unpooling2d_nhwc_x32(op, 0, 2, 2, 3, 3, 3, &oh, &ow,
+                                            nullptr),
+            xnn_status_success);
+  EXPECT_EQ(oh, 4u);
+  EXPECT_EQ(ow, 4u);
+}
+
