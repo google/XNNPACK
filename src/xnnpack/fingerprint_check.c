@@ -151,14 +151,13 @@ static enum xnn_status compute_fingerprint(
 
 enum xnn_status xnn_check_fingerprint(
     const struct xnn_fingerprint fingerprint) {
-  const struct xnn_fingerprint* reference_fingerprint =
-      xnn_get_fingerprint(fingerprint.id);
-  if (!reference_fingerprint) {
+  struct xnn_fingerprint reference_fingerprint;
+  bool found = xnn_get_fingerprint(fingerprint.id, &reference_fingerprint);
+  if (!found) {
     XNN_RETURN_IF_ERROR(compute_fingerprint(fingerprint.id));
-    reference_fingerprint = xnn_get_fingerprint(fingerprint.id);
+    found = xnn_get_fingerprint(fingerprint.id, &reference_fingerprint);
   }
-  if (reference_fingerprint &&
-      reference_fingerprint->value == fingerprint.value) {
+  if (found && reference_fingerprint.value == fingerprint.value) {
     return xnn_status_success;
   }
   return xnn_status_invalid_parameter;
