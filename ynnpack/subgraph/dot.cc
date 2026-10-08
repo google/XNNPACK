@@ -581,6 +581,29 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
 auto make_pack_impl(int elem_count) {
   return [elem_count](slinky::raw_buffer input,
                       slinky::raw_buffer output) -> index_t {
+    // The packer requires that either the n or the k dimension of the input is
+    // contiguous. This may not be the case, e.g. if the input is a broadcast
+    // (stride 0) in both n and k. In that case, make a dense copy of the input
+    // first.
+    slinky::buffer<void, max_tensor_rank> dense_input;
+    if (!is_contiguous(input, 0, output.elem_size) &&
+        !is_contiguous(input, 1, output.elem_size)) {
+      dense_input =
+          slinky::buffer<void, max_tensor_rank>(input.rank, input.elem_size);
+      for (size_t d = 0; d < input.rank; ++d) {
+        dense_input.mutable_dim(d) =
+            slinky::dim(input.dim(d).min(), input.dim(d).max());
+      }
+      dense_input.allocate();
+      if (!dense_input.base() && dense_input.elem_count() > 0) {
+        YNN_LOG_ERROR() << "Failed to allocate a dense copy of the input of "
+                           "pack_b";
+        return -1;
+      }
+      slinky::copy(input, dense_input);
+      input = dense_input;
+    }
+
     const slinky::dim& input_n = input.dim(0);
     const slinky::dim& input_k = input.dim(1);
     const slinky::dim& output_ki = output.dim(0);
@@ -1451,7 +1474,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     if (pack_b) {
       require_contiguous(*packed_b.buffer, 3);
     } else {
-      require_contiguous(*packed_b.buffer, 1);
+      // The unpacked B has an extra dimension of extent 1 inserted before n
+      // (see `define_static_expand_dims` above), so we need to include the n
+      // dimension (dimension 1) to require that n is dense, which forces any
+      // broadcasts in n to be realized into memory.
+      require_contiguous(*packed_b.buffer, 2);
     }
     output.make_buffer(runtime);
 
