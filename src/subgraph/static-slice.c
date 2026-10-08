@@ -216,6 +216,15 @@ enum xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph,
     return status;
   }
 
+  if (num_dims != input_value->shape.num_dims) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of slice dimensions (%zu) does not match the input rank (%zu)",
+      xnn_node_type_to_string(xnn_node_type_static_slice), input_id, num_dims,
+      input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
     xnn_log_error(
       "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",

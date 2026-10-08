@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -213,5 +214,45 @@ TEST(Slice, ReshapeOverflowOutputSize) {
               reshape_status == xnn_status_invalid_parameter);
 }
 #endif  // XNNPACK_USE_YNNPACK
+
+TEST(Slice, RejectsNumDimsLessThanInputRank) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_subgraph(/*num_external_values=*/2, /*flags=*/0,
+                                &subgraph));
+  const std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = 0;
+  const size_t input_dims[4] = {2, 3, 4, 5};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    /*num_dims=*/4, input_dims, nullptr,
+                                    /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, /*num_dims=*/4, input_dims,
+                nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                &output_id));
+
+  const std::vector<int64_t> begins = {0, 0};
+  const std::vector<int64_t> ends = {2, 3};
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_static_slice_v3(
+                subgraph, /*num_dims=*/2, begins.data(), ends.data(),
+                /*strides=*/nullptr, input_id, output_id, /*flags=*/0));
+
+  const std::vector<int64_t> begins4 = {0, 0, 0, 0};
+  const std::vector<int64_t> ends4 = {2, 3, 4, 5};
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_static_slice_v3(subgraph, /*num_dims=*/4, begins4.data(),
+                                       ends4.data(), /*strides=*/nullptr,
+                                       input_id, output_id, /*flags=*/0));
+}
 
 }  // namespace xnnpack
