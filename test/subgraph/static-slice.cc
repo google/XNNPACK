@@ -212,6 +212,118 @@ TEST(Slice, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(StaticSliceTest, DefineRejectsInvalidParameters) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const size_t offsets[2] = {0, 0};
+  const size_t sizes[2] = {2, 2};
+  const int64_t begins[2] = {0, 0};
+  const int64_t ends[2] = {2, 2};
+
+  // Reject num_dims == 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice(
+          subgraph, 0, offsets, sizes, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice_v2(
+          subgraph, 0, begins, sizes, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice_v3(
+          subgraph, 0, begins, ends, nullptr, input_id, output_id, 0));
+
+  // Reject null pointers when num_dims > 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice(
+          subgraph, 2, nullptr, sizes, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice(
+          subgraph, 2, offsets, nullptr, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice_v2(
+          subgraph, 2, nullptr, sizes, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice_v2(
+          subgraph, 2, begins, nullptr, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice_v3(
+          subgraph, 2, nullptr, ends, nullptr, input_id, output_id, 0));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_slice_v3(
+          subgraph, 2, begins, nullptr, nullptr, input_id, output_id, 0));
+}
+
+TEST(StaticSliceTest, ReshapeHandlesMinInt64) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const int64_t begins[2] = {INT64_MIN, INT64_MIN};
+  const int64_t ends[2] = {INT64_MIN, INT64_MIN};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_static_slice_v3(
+          subgraph, 2, begins, ends, nullptr, input_id, output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  EXPECT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
