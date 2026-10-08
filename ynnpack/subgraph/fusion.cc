@@ -756,6 +756,9 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
   const ynn_value& input = subgraph.value(broadcast.inputs[0]);
   uint32_t broadcast_id = broadcast.outputs[0];
 
+  // Do not retype/reshape a value that is visible to the caller.
+  if (subgraph.value(broadcast_id).is_external_output()) return false;
+
   ynn_node* consumer = analysis.single_consumer_of(broadcast_id);
   if (!consumer) return false;
 

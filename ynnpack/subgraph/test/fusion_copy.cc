@@ -696,6 +696,33 @@ TEST(fusion, move_broadcast_to_output_topological_order) {
   EXPECT_THAT(subgraph.nodes[2], IsStaticBroadcast());
 }
 
+TEST(fusion, move_broadcast_to_output_external) {
+  // Do not rewrite consumer(broadcast(x)) -> broadcast(consumer(x)) if the
+  // broadcast output is an external output.
+  const uint32_t x_id = 0;
+  const uint32_t broadcast_x_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddOutput(ynn_type_fp32, 2, broadcast_x_id)
+      .AddOutput(ynn_type_fp32, 2, out_id);
+
+  builder.AddStaticBroadcast({10, 0}, x_id, broadcast_x_id)
+      .AddUnary(ynn_unary_abs, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // broadcast_x_id is an external output, so it should not be moved past abs.
+  EXPECT_THAT(ProducerOf(broadcast_x_id, subgraph),
+              AllOf(IsStaticBroadcast(), InputsAre(x_id)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsUnary(ynn_unary_abs), InputsAre(broadcast_x_id)));
+}
+
 TEST(fusion, pack_b_gather) {
   const uint32_t a_id = 0;
   const uint32_t index_id = 1;
