@@ -1359,9 +1359,9 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      float* packed_b = (float*)packed_weights;
-      std::fill_n(packed_b, nr, 0.0f);
-      packed_weights = (float*)packed_weights + nr;
+      uint8_t* packed_b = (uint8_t*)packed_weights;
+      memset(packed_b, 0, nr * sizeof(float));
+      packed_weights = packed_b + nr * sizeof(float);
 
       for (size_t kr_block_start = 0;
            kr_block_start < round_up_po2(kc, skr * 2);
@@ -1477,9 +1477,9 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      int32_t* packed_b = (int32_t*)packed_weights;
-      std::fill_n(packed_b, nr, 0);
-      packed_weights = (float*)packed_weights + nr;
+      uint8_t* packed_b = (uint8_t*)packed_weights;
+      memset(packed_b, 0, nr * sizeof(float));
+      packed_weights = packed_b + nr * sizeof(float);
 
       for (size_t kr_block_start = 0;
            kr_block_start < round_up_po2(kc, skr * 2);
