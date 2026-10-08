@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/log.h"
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -38,6 +40,15 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
   YNN_RETURN_IF_ERROR(
       validate_output_tensor("static_pad", subgraph, "output_id", output_id));
   const ynn_value& input = subgraph->value(input_id);
+  if (padding_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& padding = subgraph->value(padding_id);
+    if (padding.type != input.type) {
+      YNN_LOG_ERROR() << "For node `static_pad`, padding type "
+                      << to_string(padding.type) << " must match input type "
+                      << to_string(input.type);
+      return ynn_status_invalid_parameter;
+    }
+  }
 
   ynn_node::static_pad op;
   op.paddings.reserve(num_axes);
