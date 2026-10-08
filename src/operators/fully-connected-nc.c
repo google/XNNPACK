@@ -322,6 +322,29 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
                                              &cache_key);
   }
 
+  const bool needs_bias_accumulator_buffer =
+      gemm_config->pack_weights_and_biases && bias == NULL &&
+      operator_type == xnn_operator_type_fully_connected_nc_pqs8_qc4w;
+  if (needs_bias_accumulator_buffer) {
+    size_t bias_buffer_size;
+    if (!xnn_safe_mul(output_channels, sizeof(int32_t), &bias_buffer_size)) {
+      xnn_log_error(
+          "failed to allocate bias buffer for %s operator: buffer size "
+          "overflows size_t",
+          xnn_operator_type_to_string(operator_type));
+      status = xnn_status_out_of_memory;
+      goto error;
+    }
+    accumulator_init_to_release = xnn_allocate_zero_memory(bias_buffer_size);
+    if (accumulator_init_to_release == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator bias buffer",
+          bias_buffer_size, xnn_operator_type_to_string(operator_type));
+      status = xnn_status_out_of_memory;
+      goto error;
+    }
+  }
+
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
     void* weights_ptr = xnn_get_pointer_to_write_weights(
         fully_connected_op, aligned_total_weights_size);
@@ -348,25 +371,6 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
           init_scale_params != NULL ? sizeof(float) : 0;
       if (operator_type == xnn_operator_type_fully_connected_nc_pqs8_qc4w) {
         if (bias == NULL) {
-          size_t bias_buffer_size;
-          if (!xnn_safe_mul(output_channels, sizeof(int32_t),
-                            &bias_buffer_size)) {
-            xnn_log_error(
-                "failed to allocate bias buffer for %s operator: buffer size "
-                "overflows size_t",
-                xnn_operator_type_to_string(operator_type));
-            status = xnn_status_out_of_memory;
-            goto error;
-          }
-          accumulator_init_to_release =
-              xnn_allocate_zero_memory(bias_buffer_size);
-          if (accumulator_init_to_release == NULL) {
-            xnn_log_error(
-                "failed to allocate %zu bytes for %s operator bias buffer",
-                bias_buffer_size, xnn_operator_type_to_string(operator_type));
-            status = xnn_status_out_of_memory;
-            goto error;
-          }
           accumulator_init = accumulator_init_to_release;
         }
         // KAI expects final per-output-channel requantization scales.
@@ -442,6 +446,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
                                               aligned_total_weights_size);
     }
   } else {
+    xnn_release_memory(accumulator_init_to_release);
+    accumulator_init_to_release = NULL;
     fully_connected_op->packed_weights.offset = cache_offset;
   }
 
