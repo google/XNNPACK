@@ -1185,7 +1185,7 @@ ynn_status ynn_runtime::build() {
       ynn_runtime_value& value = values[j];
       if (!value.is_valid()) continue;
       assert(value.buffer->elem_size().defined());
-      if (value.is_external_output() &&
+      if (value.is_external() &&
           (!value.data || value.data->rank != value.rank())) {
         value.data = slinky::raw_buffer::make(
             value.rank(), *as_constant(value.buffer->elem_size()));
@@ -1204,7 +1204,8 @@ ynn_status ynn_runtime::build() {
 
       // This should be assert(value.data), but let's do that in a follow-up.
       if (value.data) {
-        for (size_t d = 0; d < value.extents.size(); ++d) {
+        for (size_t d = 0;
+             d < std::min(value.extents.size(), value.data->rank); ++d) {
           if (!value.extents[d].defined() ||
               slinky::is_constant(value.extents[d], 1)) {
             value.data->mutable_dim(d) = slinky::dim::broadcast();
