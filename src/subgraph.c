@@ -2458,6 +2458,11 @@ static float get_scalar_value_as_float(struct xnn_value* val) {
     int8_t int8;
     uint8_t uint8;
   } data;
+  if (!xnn_datatype_is_byte_addressable(val->datatype)) {
+    // Sub-byte datatypes have no byte size, and the switch below cannot read
+    // them anyway.
+    return NAN;
+  }
   memcpy(&data, val->data, xnn_datatype_size_bytes(val->datatype));
 
   switch (val->datatype) {
