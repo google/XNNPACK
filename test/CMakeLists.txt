@@ -463,6 +463,17 @@ IF(XNNPACK_ENABLE_KLEIDIAI)
   TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE kleidiai)
 ENDIF()
 
+ADD_EXECUTABLE(x16-x32-packw-test x16-x32-packw.cc)
+TARGET_LINK_LIBRARIES(x16-x32-packw-test PRIVATE
+  xnnpack-hardware-config
+  xnnpack-logging
+  xnnpack-microkernels-all
+  xnnpack-microparams-init
+  pthreadpool
+  xnnpack-test)
+ADD_TEST(NAME x16-x32-packw-test COMMAND x16-x32-packw-test)
+SET_TARGET_PROPERTIES(x16-x32-packw-test PROPERTIES CXX_EXTENSIONS YES)
+
 ADD_EXECUTABLE(buffer-test buffer.cc)
 TARGET_LINK_LIBRARIES(buffer-test PRIVATE
   xnnpack-test
