@@ -7,6 +7,7 @@
 #define XNNPACK_TEST_RADDSTOREEXPMINUSMAX_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -82,6 +83,93 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       }
       ASSERT_NEAR(sum_ref, sum, std::abs(sum_ref) * 5.0e-3f)
           << "batch " << elements() << ", x_max " << x_max_as_float;
+    }
+  }
+
+  void TestNeonFp16ArithCompatibility(
+      xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax) const {
+    constexpr std::array<uint16_t, 7> input_bits = {
+        0x0000, 0xB807, 0xC500, 0xC8D9, 0xC8DA, 0xC8DB, 0xC900};
+    constexpr std::array<uint16_t, 7> output_bits = {
+        0x3C00, 0x38D7, 0x1EE3, 0x0409, 0x0401, 0x0000, 0x0000};
+    constexpr size_t repeats = 5;
+
+    xnnpack::Buffer<xnn_float16> x(input_bits.size() * repeats,
+                                   xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> y(input_bits.size() * repeats);
+    for (size_t i = 0; i < x.size(); i++) {
+      x[i] = xnn_float16_from_bits(input_bits[i % input_bits.size()]);
+    }
+
+    const xnn_float16 x_max = xnn_float16_zero();
+    float sum = 0.0f;
+    raddstoreexpminusmax(x.size() * sizeof(xnn_float16), x.data(), &x_max,
+                         y.data(), &sum, nullptr);
+
+    for (size_t i = 0; i < y.size(); i++) {
+      const uint16_t expected = output_bits[i % output_bits.size()];
+      const uint16_t actual = xnn_float16_to_bits(y[i]);
+      if (expected == 0) {
+        ASSERT_EQ(actual, expected) << "element " << i;
+      } else {
+        ASSERT_LE(std::abs(int32_t{actual} - int32_t{expected}), 1)
+            << "element " << i;
+      }
+    }
+  }
+
+  void TestFp16DenormCutoff(
+      xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax) const {
+    constexpr std::array<uint16_t, 4> input_bits = {
+        0xC8D9, 0xC8DA, 0xC8DB, 0xC900};
+    constexpr size_t repeats = 9;
+
+    xnnpack::Buffer<xnn_float16> x(input_bits.size() * repeats,
+                                   xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> y(input_bits.size() * repeats);
+    for (size_t i = 0; i < x.size(); i++) {
+      x[i] = xnn_float16_from_bits(input_bits[i % input_bits.size()]);
+    }
+
+    const xnn_float16 x_max = xnn_float16_zero();
+    float sum = 0.0f;
+    raddstoreexpminusmax(x.size() * sizeof(xnn_float16), x.data(), &x_max,
+                         y.data(), &sum, nullptr);
+
+    for (size_t i = 0; i < y.size(); i++) {
+      if (i % input_bits.size() < 2) {
+        ASSERT_NE(xnn_float16_to_bits(y[i]), UINT16_C(0)) << "element " << i;
+      } else {
+        ASSERT_EQ(xnn_float16_to_bits(y[i]), UINT16_C(0)) << "element " << i;
+      }
+    }
+  }
+
+  void TestAvx2Compatibility(
+      xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax,
+      xnn_f16_raddstoreexpminusmax_ukernel_fn reference,
+      uint16_t max_ulp = 0) const {
+    constexpr size_t num_values = UINT16_C(0x7C00);
+    xnnpack::Buffer<xnn_float16> x(num_values, xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> y(num_values);
+    xnnpack::Buffer<xnn_float16> y_ref(num_values);
+    for (size_t i = 0; i < num_values; i++) {
+      x[i] = xnn_float16_from_bits(UINT16_C(0x8000) + i);
+    }
+
+    const xnn_float16 x_max = xnn_float16_zero();
+    float sum = 0.0f;
+    float sum_ref = 0.0f;
+    raddstoreexpminusmax(num_values * sizeof(xnn_float16), x.data(), &x_max,
+                         y.data(), &sum, nullptr);
+    reference(num_values * sizeof(xnn_float16), x.data(), &x_max,
+              y_ref.data(), &sum_ref, nullptr);
+
+    for (size_t i = 0; i < num_values; i++) {
+      const uint16_t actual = xnn_float16_to_bits(y[i]);
+      const uint16_t expected = xnn_float16_to_bits(y_ref[i]);
+      ASSERT_LE(std::abs(int32_t{actual} - int32_t{expected}), max_ulp)
+          << "input 0x" << std::hex << xnn_float16_to_bits(x[i]);
     }
   }
 
