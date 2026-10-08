@@ -121,6 +121,17 @@ ynn_status ynn_define_dynamic_quantization(ynn_subgraph_t subgraph,
   ynn_value& zero_point =
       subgraph->get_output_value(zero_point_id, ynn_type_int32);
 
+  if (scale.type != ynn_type_fp32) {
+    YNN_LOG_ERROR()
+        << "For node `dynamic_quantization`, scale must have type fp32";
+    return ynn_status_invalid_parameter;
+  }
+  if (zero_point.type != ynn_type_int32) {
+    YNN_LOG_ERROR()
+        << "For node `dynamic_quantization`, zero_point must have type int32";
+    return ynn_status_invalid_parameter;
+  }
+
   scale.extents = min_max.extents;
   scale.extents.pop_back();
   zero_point.extents = scale.extents;
