@@ -119,7 +119,10 @@ struct abs : public unary_op_info {
   explicit abs(const unary_params& = {}) {}
   float operator()(float x) const override { return std::abs(x); }
   double operator()(double x) const override { return std::abs(x); }
-  int32_t operator()(int32_t x) const override { return std::abs(x); }
+  int32_t operator()(int32_t x) const override {
+    const uint32_t u = static_cast<uint32_t>(x);
+    return static_cast<int32_t>(x >= 0 ? u : 0u - u);
+  }
 
   tolerance_spec tolerance(ynn_type type) const override {
     return tolerance_spec{/*relative=*/0.0f,
@@ -131,7 +134,9 @@ struct negate : public unary_op_info {
   explicit negate(const unary_params& = {}) {}
   float operator()(float x) const override { return -x; }
   double operator()(double x) const override { return -x; }
-  int32_t operator()(int32_t x) const override { return -x; }
+  int32_t operator()(int32_t x) const override {
+    return static_cast<int32_t>(0u - static_cast<uint32_t>(x));
+  }
 
   tolerance_spec tolerance(ynn_type type) const override {
     return tolerance_spec{/*relative=*/0.0f,

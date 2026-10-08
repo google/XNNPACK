@@ -104,14 +104,19 @@ struct abs_op {
   explicit abs_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::abs(x); }
   double operator()(double x) const { return std::abs(x); }
-  int32_t operator()(int32_t x) const { return std::abs(x); }
+  int32_t operator()(int32_t x) const {
+    const uint32_t u = static_cast<uint32_t>(x);
+    return static_cast<int32_t>(x >= 0 ? u : 0u - u);
+  }
 };
 
 struct negate_op {
   explicit negate_op(const unary_params& = {}) {}
   float operator()(float x) const { return -x; }
   double operator()(double x) const { return -x; }
-  int32_t operator()(int32_t x) const { return -x; }
+  int32_t operator()(int32_t x) const {
+    return static_cast<int32_t>(0u - static_cast<uint32_t>(x));
+  }
 };
 
 struct round_op {
