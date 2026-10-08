@@ -340,3 +340,19 @@ TEST(BatchMatMulTest, gc_stride_overflow_fails) {
           batch_matrix_multiply_op, 1, batch_dims, batch_dims, overflow_m, 1,
           4, &workspace_size, nullptr));
 }
+
+TEST(BatchMatMulTest, invalid_output_range_is_reported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  const xnn_status status = xnn_create_batch_matrix_multiply_nc_qs8(
+      /*input_zero_point=*/0, /*output_zero_point=*/0, /*output_min=*/100,
+      /*output_max=*/-100, /*scale_b=*/nullptr, /*flags=*/0,
+      &batch_matrix_multiply_op);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP() << "qs8/qc8w GEMM is unavailable on this target";
+  }
+  EXPECT_EQ(status, xnn_status_invalid_parameter);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+}
