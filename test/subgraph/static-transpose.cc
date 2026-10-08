@@ -204,6 +204,36 @@ TEST(Transpose, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(StaticTransposeTest, DefineRejectsNullPerm) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[2] = {4, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  // Reject perm == nullptr.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_transpose(
+          subgraph, 2, nullptr, input_id, output_id, 0));
+}
 #else
 // In YNNPACK transpose can add or remove dimensions, so a rank mismatch is not
 // an error.
