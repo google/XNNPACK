@@ -291,3 +291,35 @@ TEST(TRANSPOSE_ND_X64, transpose_6D) {
         .TestX64();
   } while (std::next_permutation(perm.begin(), perm.end()));
 }
+
+TEST(DEPTH_TO_SPACE_NHWC_X32, zero_batch_writes_output_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_create_depth_to_space_nhwc_x32(2, 0, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t oh = SIZE_MAX, ow = SIZE_MAX, oc = SIZE_MAX;
+  ASSERT_EQ(xnn_reshape_depth_to_space_nhwc_x32(op, 0, 4, 4, 8, &oh, &ow, &oc,
+                                               nullptr),
+            xnn_status_success);
+  EXPECT_EQ(oh, 8u);
+  EXPECT_EQ(ow, 8u);
+  EXPECT_EQ(oc, 2u);
+}
+
+TEST(SPACE_TO_DEPTH_NHWC_X32, zero_batch_writes_output_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_create_space_to_depth_nhwc_x32(2, 0, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t oh = SIZE_MAX, ow = SIZE_MAX, oc = SIZE_MAX;
+  ASSERT_EQ(xnn_reshape_space_to_depth_nhwc_x32(op, 0, 4, 4, 8, &oh, &ow, &oc,
+                                               nullptr),
+            xnn_status_success);
+  EXPECT_EQ(oh, 2u);
+  EXPECT_EQ(ow, 2u);
+  EXPECT_EQ(oc, 32u);
+}

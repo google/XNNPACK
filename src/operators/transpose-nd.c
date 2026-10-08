@@ -853,7 +853,6 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
 
   if (batch_size == 0) {
     depth_to_space_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   const size_t input_shape[6] = {batch_size, block_size, block_size, output_channels, input_height, input_width};
@@ -957,6 +956,9 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
   }
   if (output_channels_out != NULL) {
     *output_channels_out = output_channels;
+  }
+  if (batch_size == 0) {
+    return xnn_status_success;
   }
 
   const size_t output_stride[6] = {
@@ -1234,9 +1236,26 @@ static enum xnn_status reshape_depth_to_space_nhwc(
 
   const size_t output_channels = input_channels / block_size_sq;
 
+  size_t output_height = 0, output_width = 0;
+  if (!xnn_safe_mul(input_height, (size_t)block_size, &output_height) ||
+      !xnn_safe_mul(input_width, (size_t)block_size, &output_width)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output dimensions overflow size_t",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  if (output_height_out != NULL) {
+    *output_height_out = output_height;
+  }
+  if (output_width_out != NULL) {
+    *output_width_out = output_width;
+  }
+  if (output_channels_out != NULL) {
+    *output_channels_out = output_channels;
+  }
+
   if (batch_size == 0) {
     depth_to_space_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   size_t block_output_pixel_stride;
@@ -1283,14 +1302,8 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     1
   };
 
-  if (output_height_out != NULL) {
-    *output_height_out = input_height * (size_t)block_size;
-  }
-  if (output_width_out != NULL) {
-    *output_width_out = input_width * (size_t)block_size;
-  }
-  if (output_channels_out != NULL) {
-    *output_channels_out = output_channels;
+  if (batch_size == 0) {
+    return xnn_status_success;
   }
 
   const size_t output_stride[5] = {
@@ -1583,7 +1596,6 @@ static enum xnn_status reshape_space_to_depth_nhwc(
 
   if (batch_size == 0) {
     space_to_depth_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   const size_t input_height_div_block = input_height / block_size;
@@ -1650,6 +1662,9 @@ static enum xnn_status reshape_space_to_depth_nhwc(
   }
   if (output_channels_out != NULL) {
     *output_channels_out = output_channels;
+  }
+  if (batch_size == 0) {
+    return xnn_status_success;
   }
 
   const size_t input_stride[5] = {
