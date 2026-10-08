@@ -7,6 +7,8 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <climits>
+#include <cstdio>
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -466,3 +468,48 @@ INSTANTIATE_TEST_SUITE_P(UnaryTestQint8ToQcint8, Convert,
 #endif
 
 }  // namespace xnnpack
+
+template <enum xnn_unary_operator Op, int32_t E0, int32_t E1, int32_t E2,
+          int32_t E3>
+void TestInt32EdgeValues() {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_subgraph_t sg = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(2, 0, &sg), xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_sg(
+      sg, xnn_delete_subgraph);
+  const size_t dims[1] = {4};
+  static int32_t in_data[4] = {1, -1, INT32_MIN, INT32_MAX};
+  static int32_t out_data[4] = {0, 0, 0, 0};
+  uint32_t i, o;
+  ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_int32, 1, dims, nullptr,
+                                    0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &i),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_tensor_value(sg, xnn_datatype_int32, 1, dims, nullptr,
+                                    1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &o),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_unary(sg, Op, nullptr, i, o, 0), xnn_status_success);
+  xnn_runtime_t rt = nullptr;
+  ASSERT_EQ(xnn_create_runtime_v4(sg, nullptr, nullptr, nullptr, 0, &rt),
+            xnn_status_success);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_rt(
+      rt, xnn_delete_runtime);
+  ASSERT_EQ(xnn_reshape_runtime(rt), xnn_status_success);
+  const struct xnn_external_value externals[2] = {
+      {.id = i, .data = in_data},
+      {.id = o, .data = out_data},
+  };
+  ASSERT_EQ(xnn_setup_runtime(rt, 2, externals), xnn_status_success);
+  ASSERT_EQ(xnn_invoke_runtime(rt), xnn_status_success);
+  EXPECT_EQ(out_data[0], E0);
+  EXPECT_EQ(out_data[1], E1);
+  EXPECT_EQ(out_data[2], E2);
+  EXPECT_EQ(out_data[3], E3);
+}
+
+TEST(UnaryInt32, AbsEdgeValues) {
+  TestInt32EdgeValues<xnn_unary_abs, 1, 1, INT32_MIN, INT32_MAX>();
+}
+
+TEST(UnaryInt32, NegateEdgeValues) {
+  TestInt32EdgeValues<xnn_unary_negate, -1, 1, INT32_MIN, -INT32_MAX>();
+}
