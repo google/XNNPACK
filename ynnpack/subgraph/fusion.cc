@@ -2376,10 +2376,10 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  if (reduce_op->k_dims.count() > 1) {
+  if (reduce_op->k_dims.count() != 1) {
     YNN_LOG_DEBUG()
-        << "not rewriting sum(a*b) to dot(a, b) because the sum has "
-           "more than 1 reduction dimension.";
+        << "not rewriting sum(a*b) to dot(a, b) because the sum does not have "
+           "exactly 1 reduction dimension.";
     return false;
   }
 
@@ -2549,8 +2549,11 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
 
   // Do the dot.
   uint32_t dot_id = is_perm_output_identity ? output_id : YNN_INVALID_VALUE_ID;
-  ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id, init_t_id, &dot_id,
-                 /*flags=*/0);
+  ynn_status status = ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id,
+                                     init_t_id, &dot_id, /*flags=*/0);
+  if (status != ynn_status_success) {
+    return false;
+  }
 
   node.invalidate();
   if (!is_perm_output_identity) {
