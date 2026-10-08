@@ -3324,6 +3324,11 @@ reshape_fully_connected_nc_with_pack_lh_config(
   }
   fully_connected_op->state = xnn_run_state_invalid;
 
+  size_t workspace_size_local = 0;
+  if (workspace_size == NULL) {
+    workspace_size = &workspace_size_local;
+  }
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
                   xnn_operator_type_to_string_v2(fully_connected_op));
