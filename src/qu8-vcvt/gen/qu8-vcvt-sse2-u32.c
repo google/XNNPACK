@@ -31,13 +31,16 @@ void xnn_qu8_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
+  const uint32_t shift = 15 - (uint32_t) params->scalar.shift;
   const __m128i vmultiplier = _mm_set1_epi16(params->scalar.multiplier);
   const __m128i vbias = _mm_set1_epi32(
-      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) -
-      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
-      INT32_C(0x80));
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << shift) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
+      (INT32_C(1) << (shift - 1)));
+  const __m128i vshift = _mm_cvtsi32_si128((int) shift);
   XNN_FORCE_REALIZATION(vmultiplier);
   XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(vshift);
   const __m128i vzero = _mm_setzero_si128();
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
@@ -76,14 +79,14 @@ void xnn_qu8_vcvt_ukernel__sse2_u32(
     vacc6 = _mm_add_epi32(vacc6, vbias);
     vacc7 = _mm_add_epi32(vacc7, vbias);
 
-    vacc0 = _mm_srai_epi32(vacc0, 8);
-    vacc1 = _mm_srai_epi32(vacc1, 8);
-    vacc2 = _mm_srai_epi32(vacc2, 8);
-    vacc3 = _mm_srai_epi32(vacc3, 8);
-    vacc4 = _mm_srai_epi32(vacc4, 8);
-    vacc5 = _mm_srai_epi32(vacc5, 8);
-    vacc6 = _mm_srai_epi32(vacc6, 8);
-    vacc7 = _mm_srai_epi32(vacc7, 8);
+    vacc0 = _mm_sra_epi32(vacc0, vshift);
+    vacc1 = _mm_sra_epi32(vacc1, vshift);
+    vacc2 = _mm_sra_epi32(vacc2, vshift);
+    vacc3 = _mm_sra_epi32(vacc3, vshift);
+    vacc4 = _mm_sra_epi32(vacc4, vshift);
+    vacc5 = _mm_sra_epi32(vacc5, vshift);
+    vacc6 = _mm_sra_epi32(vacc6, vshift);
+    vacc7 = _mm_sra_epi32(vacc7, vshift);
 
     vacc0 = _mm_packs_epi32(vacc0, vacc1);
     vacc1 = _mm_packs_epi32(vacc2, vacc3);
@@ -119,10 +122,10 @@ void xnn_qu8_vcvt_ukernel__sse2_u32(
     vacc_hl = _mm_add_epi32(vacc_hl, vbias);
     vacc_hh = _mm_add_epi32(vacc_hh, vbias);
 
-    vacc_ll = _mm_srai_epi32(vacc_ll, 8);
-    vacc_lh = _mm_srai_epi32(vacc_lh, 8);
-    vacc_hl = _mm_srai_epi32(vacc_hl, 8);
-    vacc_hh = _mm_srai_epi32(vacc_hh, 8);
+    vacc_ll = _mm_sra_epi32(vacc_ll, vshift);
+    vacc_lh = _mm_sra_epi32(vacc_lh, vshift);
+    vacc_hl = _mm_sra_epi32(vacc_hl, vshift);
+    vacc_hh = _mm_sra_epi32(vacc_hh, vshift);
 
     const __m128i vacc_lo = _mm_packs_epi32(vacc_ll, vacc_lh);
     const __m128i vacc_hi = _mm_packs_epi32(vacc_hl, vacc_hh);
@@ -155,10 +158,10 @@ void xnn_qu8_vcvt_ukernel__sse2_u32(
     vacc_hl = _mm_add_epi32(vacc_hl, vbias);
     vacc_hh = _mm_add_epi32(vacc_hh, vbias);
 
-    vacc_ll = _mm_srai_epi32(vacc_ll, 8);
-    vacc_lh = _mm_srai_epi32(vacc_lh, 8);
-    vacc_hl = _mm_srai_epi32(vacc_hl, 8);
-    vacc_hh = _mm_srai_epi32(vacc_hh, 8);
+    vacc_ll = _mm_sra_epi32(vacc_ll, vshift);
+    vacc_lh = _mm_sra_epi32(vacc_lh, vshift);
+    vacc_hl = _mm_sra_epi32(vacc_hl, vshift);
+    vacc_hh = _mm_sra_epi32(vacc_hh, vshift);
 
     const __m128i vacc_lo = _mm_packs_epi32(vacc_ll, vacc_lh);
     const __m128i vacc_hi = _mm_packs_epi32(vacc_hl, vacc_hh);
