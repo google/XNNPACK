@@ -3,6 +3,11 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
+#include "src/xnnpack/subgraph.h"
 #include "test/subgraph/runtime-tester.h"
 
 TEST(RUNTIME, reshape_runtime) {
@@ -69,3 +74,106 @@ TEST(RUNTIME, null_runtime) {
                                            nullptr, &required_size));
   EXPECT_EQ(xnn_status_invalid_parameter, xnn_invoke_runtime(nullptr));
 }
+
+namespace {
+
+class FailingAllocatorGuard {
+ public:
+  explicit FailingAllocatorGuard(size_t fail_bytes)
+      : saved_allocator_(xnn_params.allocator), fail_bytes_(fail_bytes) {
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.reallocate = FailingReallocate;
+    xnn_params.allocator.aligned_allocate = FailingAlignedAllocate;
+  }
+  ~FailingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+  FailingAllocatorGuard(const FailingAllocatorGuard&) = delete;
+  FailingAllocatorGuard& operator=(const FailingAllocatorGuard&) = delete;
+
+ private:
+  static void* FailingReallocate(void* context, void* pointer, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (size == self->fail_bytes_) {
+      return nullptr;
+    }
+    return self->saved_allocator_.reallocate(
+        self->saved_allocator_.context, pointer, size);
+  }
+
+  static void* FailingAlignedAllocate(
+      void* context, size_t alignment, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (size == self->fail_bytes_) {
+      return nullptr;
+    }
+    return self->saved_allocator_.aligned_allocate(
+        self->saved_allocator_.context, alignment, size);
+  }
+
+  const struct xnn_allocator saved_allocator_;
+  const size_t fail_bytes_;
+};
+
+xnn_subgraph_t CreateStaticBroadcastSubgraph() {
+  xnn_subgraph_t subgraph = nullptr;
+  if (xnn_create_subgraph(2, 0, &subgraph) != xnn_status_success) {
+    return nullptr;
+  }
+  const size_t dims[3] = {2, 3, 4};
+  const size_t broadcast_shape[3] = {2, 3, 4};
+  uint32_t input_id;
+  uint32_t output_id;
+  if (xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, dims, nullptr, 0,
+          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id) != xnn_status_success ||
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, dims, nullptr, 1,
+          XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id) != xnn_status_success) {
+    xnn_delete_subgraph(subgraph);
+    return nullptr;
+  }
+  if (xnn_define_static_broadcast(
+          subgraph, 3, broadcast_shape, input_id, output_id, 0) !=
+      xnn_status_success) {
+    xnn_delete_subgraph(subgraph);
+    return nullptr;
+  }
+  return subgraph;
+}
+
+size_t CountStaleOwnedCleanupBuffers(xnn_subgraph_t subgraph) {
+  size_t stale = 0;
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    const struct xnn_value* value = &subgraph->values[i];
+    if (value->data == nullptr) {
+      continue;
+    }
+    if (value->allocation_type != xnn_allocation_type_static) {
+      continue;
+    }
+    if ((value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) ||
+        value->fp16_rewrite.fp16_compatible) {
+      stale++;
+    }
+  }
+  return stale;
+}
+
+}  // namespace
+
+TEST(RUNTIME, failed_create_does_not_leave_subgraph_owning_freed_buffers) {
+  xnn_subgraph_t subgraph = CreateStaticBroadcastSubgraph();
+  ASSERT_NE(subgraph, nullptr);
+
+  xnn_runtime_t runtime = nullptr;
+  {
+    FailingAllocatorGuard guard(sizeof(struct xnn_operator));
+    const xnn_status status = xnn_create_runtime_v4(
+        subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+    ASSERT_EQ(status, xnn_status_out_of_memory);
+  }
+
+  EXPECT_EQ(CountStaleOwnedCleanupBuffers(subgraph), 0u);
+  xnn_delete_subgraph(subgraph);
+}
+
