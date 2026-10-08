@@ -122,7 +122,7 @@ int32_t compute_integral(xnn_binary_operator op, int32_t a, int32_t b) {
     case xnn_binary_bitwise_xor:
       return a ^ b;
     case xnn_binary_shift_left:
-      return a << (b & 31);
+      return static_cast<uint32_t>(a) << (b & 31);
     case xnn_binary_shift_right_logical:
       return static_cast<uint32_t>(a) >> (b & 31);
     case xnn_binary_shift_right_arithmetic:
