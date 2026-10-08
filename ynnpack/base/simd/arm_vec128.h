@@ -2261,10 +2261,22 @@ YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
 
 using f8_e5m2x8 = vec<fp8_e5m2, 8>;
 using f16x8 = vec<half, 8>;
+using f8_e5m2x16 = vec<fp8_e5m2, 16>;
+using f16x16 = vec<half, 16>;
 
 YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
   return f16x8{vshll_n_u8(a.v, 8)};
 }
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f16x16 cast(f8_e5m2x16 a, half) {
+  const uint8x16_t vzero = vdupq_n_u8(0);
+  const uint8x16_t va = vcombine_u8(lo(a).v, hi(a).v);
+  return {
+      f16x8{vreinterpretq_u16_u8(vzip1q_u8(vzero, va))},
+      f16x8{vreinterpretq_u16_u8(vzip2q_u8(vzero, va))},
+  };
+}
+#endif
 YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
   uint16x8_t u = a.v;
   uint16x8_t is_nan = vcgtq_u16(vshlq_n_u16(u, 1), vdupq_n_u16(0xF800));
