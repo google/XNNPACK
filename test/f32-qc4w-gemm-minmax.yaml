@@ -45,6 +45,10 @@
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_f32_qc4w_gemm_goi_w
   k-block: 4
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128_fmagic
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_f32_qc4w_gemm_goi_w
+  k-block: 4
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__neon_dup_ld64
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_f32_qc4w_gemm_goi_w
@@ -62,6 +66,10 @@
   pack: xnn_pack_f32_qc4w_gemm_goi_w
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_f32_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128_fmagic
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_f32_qc4w_gemm_goi_w
   k-block: 4
@@ -90,6 +98,18 @@
   pack: xnn_pack_f32_qc4w_gemm_goi_w
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_f32_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128_fmagic
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_f32_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_8x8__aarch64_neonfma_lane_ld128
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_f32_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_8x8__aarch64_neonfma_lane_ld128_fmagic
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_f32_qc4w_gemm_goi_w
   k-block: 4
