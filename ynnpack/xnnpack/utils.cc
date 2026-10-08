@@ -749,7 +749,7 @@ ynn_status define_xnn_stencil(
 
   // (n, y, x, c) -> (n, y, x, dy, dx, c)
   const int32_t stencil_axes[] = {1, 2};
-  const int32_t new_axes[] = {input_rank - 1, input_rank};
+  const int32_t new_axes[] = {-3, -2};
   const size_t stencil_dims[] = {pooling_height, pooling_width};
   const size_t stencil_strides[] = {stride_height, stride_width};
   const size_t stencil_dilations[] = {dilation_height, dilation_width};
