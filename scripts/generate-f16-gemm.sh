@@ -36,27 +36,49 @@ tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=16 -D INC=0 -o sr
 tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=16 -D INC=0 -o src/f16-gemm/gen/f16-gemm-8x16-minmax-neonfp16arith-ld64.c &
 
 ################################### x86 AVX2 ###################################
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-4x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-5x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-6x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-7x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-4x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-5x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-6x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-7x8-minmax-avx2-broadcast.c &
 
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-3x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-4x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-5x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ISA=avx2 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-5x16-minmax-avx2-broadcast.c &
 
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-6x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-6x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x8-minmax-avx2-broadcast.c &
 
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ISA=avx2 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-avx2-broadcast.c &
+
+################################### x86 FMA3 ###################################
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x8-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-6x8-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x8-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-fma3-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ISA=fma3 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-fma3-broadcast.c &
+
+################################### x86 F16C ###################################
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x8-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-6x8-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x8-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-f16c-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ISA=f16c -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-f16c-broadcast.c &
 
 ################################# x86 AVX-512 FP16 #################################
 ### AVX512FP16+BROADCAST micro-kernels

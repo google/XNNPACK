@@ -630,7 +630,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__ssse3_madd,
                         xnn_init_f32_qc4w_minmax_scalar_params,
-                        xnn_pack_qs8_qc4uw_gemm_goi_w);
+                        xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2);
           },
           xnn_arch_x86_ssse3)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -649,7 +649,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__ssse3_madd,
                         xnn_init_f32_qc4w_minmax_scalar_params,
-                        xnn_pack_qs8_qc4uw_gemm_goi_w);
+                        xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2);
           },
           xnn_arch_x86_ssse3)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -668,13 +668,73 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__ssse3_madd,
                         xnn_init_f32_qc4w_minmax_scalar_params,
-                        xnn_pack_qs8_qc4uw_gemm_goi_w);
+                        xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2);
           },
           xnn_arch_x86_ssse3)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
 #endif  // XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC4W_GEMM_MINMAX_1X4C8__AVX_MADD, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/16,
+          /*adj_k_block=*/16,
+          /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/true,
+          /*planes=*/2,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__avx_madd,
+                        xnn_init_f32_qc4w_minmax_scalar_params,
+                        xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2);
+          },
+          xnn_arch_x86_avx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC4W_GEMM_MINMAX_4X4C8__AVX_MADD_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/16,
+          /*adj_k_block=*/16,
+          /*mr=*/4, /*nr=*/4, /*kr=*/8, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/true,
+          /*planes=*/2,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__avx_madd_prfm,
+                        xnn_init_f32_qc4w_minmax_scalar_params,
+                        xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2);
+          },
+          xnn_arch_x86_avx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC4W_GEMM_MINMAX_6X4C8__AVX_MADD_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/16,
+          /*adj_k_block=*/16,
+          /*mr=*/6, /*nr=*/4, /*kr=*/8, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/true,
+          /*planes=*/2,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x4c8__avx_madd_prfm,
+                        xnn_init_f32_qc4w_minmax_scalar_params,
+                        xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2);
+          },
+          xnn_arch_x86_avx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

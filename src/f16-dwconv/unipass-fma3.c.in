@@ -6,6 +6,7 @@
 $assert CHANNEL_TILE % 8 == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
+$assert ISA in ["fma3", "f16c"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <stddef.h>
@@ -20,7 +21,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "src/xnnpack/microparams.h"
 
 
-void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__fma3${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ISA}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const xnn_float16** input,
@@ -70,8 +71,10 @@ void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__fma3${"" if 
         $for C in range(0, CHANNEL_TILE, 8):
           $if 1 <= K < ACCUMULATORS:
             __m256 vacc${ABC[C:C+8]}p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
-          $else:
+          $elif ISA == "fma3":
             vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}, vacc${ABC[C:C+8]}p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(_mm256_mul_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}), vacc${ABC[C:C+8]}p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
 
       w += ${(KERNEL_TILE + 1) * CHANNEL_TILE};
 
@@ -106,8 +109,10 @@ void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__fma3${"" if 
           const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${(K + 1) * CHANNEL_TILE})));
           $if 1 <= K < ACCUMULATORS:
             __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
-          $else:
+          $elif ISA == "fma3":
             vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
 
         w += 8;
 
@@ -138,8 +143,10 @@ void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__fma3${"" if 
         const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${(K + 1) * CHANNEL_TILE})));
         $if 1 <= K < ACCUMULATORS:
           __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
-        $else:
+        $elif ISA == "fma3":
           vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+        $else:
+          vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
 
       $if ACCUMULATORS > 1:
         // Add up all accumulators to vacc${ABC[0:8]}p0

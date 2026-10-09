@@ -5,6 +5,7 @@
 
 $assert NR % 8 == 0
 $assert ACCTYPE in ["F16", "F32"]
+$assert ISA in ["avx2", "fma3", "f16c"]
 $ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
 #include <assert.h>
 #include <stddef.h>
@@ -19,7 +20,7 @@ $ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
 #include "src/xnnpack/igemm.h"
 
 
-void xnn_f16${ACC_SUFFIX}_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
+void xnn_f16${ACC_SUFFIX}_igemm_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -98,8 +99,12 @@ void xnn_f16${ACC_SUFFIX}_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
 
         $for M in range(MR):
           $for N in range(0, NR, 8):
-            $if ACCTYPE == "F32":
+            $if ACCTYPE == "F32" and ISA == "f16c":
+              vacc${M}x${N//8} = _mm256_add_ps(vacc${M}x${N//8}, _mm256_mul_ps(va${M}, vb${N//8}));
+            $elif ACCTYPE == "F32":
               vacc${M}x${N//8} = _mm256_fmadd_ps(va${M}, vb${N//8}, vacc${M}x${N//8});
+            $elif ISA == "f16c":
+              vacc${M}x${N//8} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc${M}x${N//8}, _mm256_mul_ps(va${M}, vb${N//8})), _MM_FROUND_TO_NEAREST_INT));
             $else:
               vacc${M}x${N//8} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${N//8}, vacc${M}x${N//8}), _MM_FROUND_TO_NEAREST_INT));
 
