@@ -152,11 +152,12 @@ struct scheduling_split {
   slinky::var var;
   slinky::expr step;
   slinky::expr extent;
-  // If this is true the corresponding loop is required to have this specific
-  // step, i.e. it can not get scheduled in the loop of the other function
-  // unless the step matches or the other loop doesn't have required step yet.
-  // In the latter case this step will override the existing step of that loop.
+  // This split takes precedence over ordinary split proposals. Shared steps
+  // must be multiples of step, unless required_alignment specifies a finer
+  // blocking requirement and leaves step as the preferred tile size.
   bool step_is_required = false;
+  // A blocking constraint.
+  slinky::expr required_alignment;
 };
 
 struct scheduling_info {
