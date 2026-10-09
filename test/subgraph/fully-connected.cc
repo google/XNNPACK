@@ -1601,4 +1601,76 @@ TEST(FullyConnected, ReshapeOverflowOutputSize) {
 }
 #endif  // XNNPACK_USE_YNNPACK
 
+namespace {
+
+constexpr uint16_t kScaleOne = 0x3C00;
+constexpr uint16_t kScaleInvalid = 0x0000;
+
+enum xnn_status DefineBlockwise(const std::vector<size_t>& dims,
+                                size_t channel_dim, size_t block_size,
+                                const std::vector<uint16_t>& scale) {
+  xnn_subgraph_t subgraph = nullptr;
+  if (xnn_create_subgraph(/*num_external_values=*/1, /*flags=*/0,
+                          &subgraph) != xnn_status_success) {
+    return xnn_status_uninitialized;
+  }
+
+  size_t num_elements = 1;
+  for (size_t dim : dims) {
+    num_elements *= dim;
+  }
+  std::vector<int8_t> data(num_elements, 0);
+
+  uint32_t id = XNN_INVALID_VALUE_ID;
+  const enum xnn_status status =
+      xnn_define_blockwise_quantized_tensor_value_v2(
+          subgraph, xnn_datatype_qbint4, /*zero_point=*/0, scale.data(),
+          dims.size(), channel_dim, block_size, dims.data(), data.data(),
+          /*external_id=*/0, /*flags=*/0,
+          /*scale_type=*/xnn_datatype_bf16, &id);
+  xnn_delete_subgraph(subgraph);
+  return status;
+}
+
+}  // namespace
+
+TEST(FullyConnected, ValidatesEveryBlockwiseScaleTheKernelReads) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> dims = {4, 10};
+  const size_t block_size = 8;
+  std::vector<uint16_t> scale(8, kScaleOne);
+  scale[7] = kScaleInvalid;
+
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            DefineBlockwise(dims, /*channel_dim=*/0, block_size, scale));
+}
+
+TEST(FullyConnected, AcceptsAllValidBlockwiseScales) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> dims = {4, 10};
+  const size_t block_size = 8;
+  const std::vector<uint16_t> scale(8, kScaleOne);
+
+  EXPECT_EQ(xnn_status_success,
+            DefineBlockwise(dims, /*channel_dim=*/0, block_size, scale));
+}
+
+TEST(FullyConnected, HonoursBlockwiseChannelDim) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> dims = {3, 8, 2};
+  const size_t block_size = 8;
+
+  const std::vector<uint16_t> valid(6, kScaleOne);
+  EXPECT_EQ(xnn_status_success,
+            DefineBlockwise(dims, /*channel_dim=*/1, block_size, valid));
+
+  std::vector<uint16_t> bad(6, kScaleOne);
+  bad[1] = kScaleInvalid;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            DefineBlockwise(dims, /*channel_dim=*/1, block_size, bad));
+}
+
 }  // namespace xnnpack

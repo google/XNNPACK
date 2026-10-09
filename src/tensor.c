@@ -602,7 +602,17 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
         xnn_datatype_to_string(scale_type), datatype);
       return xnn_status_unsupported_parameter;
   }
-  const size_t block_count = dims[0] * dims[1] / block_size;
+  const size_t output_channels = dims[0];
+  const size_t input_channels = dims[num_dims - 1];
+  const size_t num_blocks =
+      (input_channels + block_size - 1) / block_size;
+  size_t block_count;
+  if (!xnn_safe_mul(output_channels, num_blocks, &block_count)) {
+    xnn_log_error(
+        "failed to create Blockwise Quantized Dense Tensor value: "
+        "block count overflows size_t");
+    return xnn_status_unsupported_parameter;
+  }
   for (size_t block = 0; block < block_count; block++) {
     float float_scale;
     switch (scale_type) {
