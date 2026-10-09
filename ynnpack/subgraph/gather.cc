@@ -262,9 +262,14 @@ ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
       ynn::validate_input_tensor("gather", subgraph, "index_id", index_id));
   YNN_RETURN_IF_ERROR(
       ynn::validate_output_tensor("gather", subgraph, "output_id", output_id));
+  YNN_RETURN_IF_ERROR(ynn::validate_rank("gather", "output", output_rank));
 
   if (num_axes == 0) {
     YNN_LOG_ERROR() << "For node `gather`, num_axes must be greater than 0";
+    return ynn_status_invalid_parameter;
+  }
+  if (axes == nullptr) {
+    YNN_LOG_ERROR() << "For node `gather`, axes must not be null";
     return ynn_status_invalid_parameter;
   }
 
