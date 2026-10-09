@@ -518,11 +518,15 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
+    bool pack_a = false;
+    bool pack_a_in_m_loop = false;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims;
+      return std::tie(a.num_k_dims, a.pack_a, a.pack_a_in_m_loop) ==
+             std::tie(b.num_k_dims, b.pack_a, b.pack_a_in_m_loop);
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return a.num_k_dims < b.num_k_dims;
+      return std::tie(a.num_k_dims, a.pack_a, a.pack_a_in_m_loop) <
+             std::tie(b.num_k_dims, b.pack_a, b.pack_a_in_m_loop);
     }
   };
   struct iota {
@@ -535,9 +539,26 @@ struct ynn_node {
       return std::tie(a.params, a.less_zero) < std::tie(b.params, b.less_zero);
     }
   };
+  struct pack_a {
+    size_t tile_m;
+    size_t tile_k;
+    int32_t m_dim;
+    friend bool operator==(const pack_a& a, const pack_a& b) {
+      return a.tile_m == b.tile_m && a.tile_k == b.tile_k && a.m_dim == b.m_dim;
+    }
+    friend bool operator<(const pack_a& a, const pack_a& b) {
+      return std::tie(a.tile_m, a.tile_k, a.m_dim) <
+             std::tie(b.tile_m, b.tile_k, b.m_dim);
+    }
+  };
   struct pack_b {
-    friend bool operator==(const pack_b&, const pack_b&) { return true; }
-    friend bool operator<(const pack_b&, const pack_b&) { return false; }
+    bool allow_skip_unmatched_loop = false;
+    friend bool operator==(const pack_b& a, const pack_b& b) {
+      return a.allow_skip_unmatched_loop == b.allow_skip_unmatched_loop;
+    }
+    friend bool operator<(const pack_b& a, const pack_b& b) {
+      return a.allow_skip_unmatched_loop < b.allow_skip_unmatched_loop;
+    }
   };
   struct transpose_a {
     size_t tile_m;
@@ -607,8 +628,8 @@ struct ynn_node {
                gather, split_dim, fuse_dim, fuse_dims, split_dims, stack,
                static_reshape, static_broadcast, static_pad, static_slice,
                slice_like, static_transpose, stencil_copy, unary_elementwise,
-               binary_elementwise, ternary_elementwise, dot, iota, pack_b,
-               transpose_a, get_tensor_shape, reduce, dequantize_dot,
+               binary_elementwise, ternary_elementwise, dot, iota, pack_a,
+               pack_b, transpose_a, get_tensor_shape, reduce, dequantize_dot,
                dynamic_quantization>
       op;
 
@@ -719,6 +740,9 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
 
   // Rewrite parts of the graph that we have optimized patterns for.
   ynn_status fusion();
+
+  // Insert pack_a operations for dots that benefit from packing A.
+  ynn_status insert_pack_a();
 
   // Common subexpression elimination.
   ynn_status eliminate_common_subgraphs();

@@ -29,12 +29,18 @@ struct dot_loop {
 
 // Generate a set of loops we should use when running a dot, attempting to
 // optimize the order and size of loop steps such that memory locality is
-// maximized for each cache in `cache_sizes`. `storage` must have room for at
-// most 3 loops per cache size.
-span<dot_loop> schedule_dot(span<const size_t> cache_sizes, size_t m, size_t n,
-                            span<const size_t> ks, size_t block_m,
+// maximized for `l2_cache_size`. `storage` must have room for at most 3 loops.
+// If there is a loop over k, it is the outermost loop.
+//
+// `pack_a` indicates A will be packed one panel of block_m x (chunk of k) at a
+// time. `pack_b` indicates B has been packed such that k is contiguous within
+// each block of n. If B is not packed, it is assumed to be stored with n
+// contiguous.
+span<dot_loop> schedule_dot(size_t l2_cache_size, size_t m, size_t n,
+                            span<const size_t> k, size_t block_m,
                             size_t block_n, size_t block_k, size_t a_elem_size,
-                            size_t b_elem_size, dot_loop* storage);
+                            size_t b_elem_size, bool pack_a, bool pack_b,
+                            dot_loop* storage);
 
 // Block a dot's m dimension, calling f at each block.
 template <typename DotFn>
@@ -70,7 +76,6 @@ void block_dot_n(size_t m, ptrdiff_t n, span<const size_t> ks,
   do {
     f(m, std::min(n, block_n), ks, a, a_stride_m, a_k_strides, b, b_k_strides,
       init_c_stride_m, init_c, c, state);
-
     n -= block_n;
     if (init_c) init_c = offset_bytes(init_c, c_stride_n * block_n);
     c = offset_bytes(c, c_stride_n * block_n);
