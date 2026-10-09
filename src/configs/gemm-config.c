@@ -2978,6 +2978,24 @@ static void init_f32_qc8w_gemm_config(void) {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   assert(hardware_config);
+#if XNN_ENABLE_ARM_SVE2
+  if (hardware_config->arch_flags & xnn_arch_arm_sve2) {
+    f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] =
+        XNN_INIT_HMP_GEMM_UKERNEL(
+            xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sve2_lane_ld128);
+    f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(8)] =
+        XNN_INIT_HMP_GEMM_UKERNEL(
+            xnn_f32_qc8w_gemm_minmax_ukernel_8x8__sve2_lane_ld128);
+    f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn)
+        xnn_x8_packw_gemm_goi_ukernel_x8__neon_u16_prfm;
+    f32_qc8w_gemm_config.pack_gemm_gio =
+        (xnn_packw_gemm_gio_ukernel_fn)xnn_x8_packw_gemm_gio_ukernel_x8__scalar;
+    f32_qc8w_gemm_config.mr = 8;
+    f32_qc8w_gemm_config.nr = 8;
+    return;
+  }
+#endif  // XNN_ENABLE_ARM_SVE2
   switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
     case xnn_uarch_cortex_a72:
     case xnn_uarch_cortex_a57:

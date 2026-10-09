@@ -28,8 +28,10 @@ SET(PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x8-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-spmm/gen/f32-spmm-32x2-minmax-aarch64-neonfma.c
@@ -111,7 +113,6 @@ SET(NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-aarch64-neonfma-lane-ld128-fmagic.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-aarch64-neonfma-lane-ld64.c
@@ -122,7 +123,6 @@ SET(NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x16-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x2-minmax-aarch64-neonfma-lane-ld64.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-spmm/gen/f32-spmm-4x2-minmax-aarch64-neonfma.c
