@@ -3677,6 +3677,134 @@ void xnn_pack_kai_qb4_weights_and_biases(
   }
 }
 
+// The KleidiAI SME blockwise INT4 RHS packing microkernels are exposed through
+// the "NextGen" micro-kernel API, where the NxK and KxN variants differ only in
+// which source stride they consume.
+static struct kai_matmul_pack_rhs_uker_api xnn_kleidiai_qb4_rhs_pack_api_sme(
+    uint32_t flags) {
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    return kai_matmul_pack_rhs_kxn_qsi4c32p16vsx4s4s0_qsu4c32_f32_bf16_sme();
+  }
+  return kai_matmul_pack_rhs_nxk_qsi4c32p16vsx4s4s0_qsu4c32_f32_bf16_sme();
+}
+
+size_t xnn_packed_stride_kai_qb4_weights_and_biases_sme(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
+    size_t unused_k_stride, size_t extra_bytes) {
+  // The NxK and KxN variants produce identical packed layouts, so either one
+  // can be used to query the packed stride.
+  struct kai_matmul_pack_rhs_uker_config config = {};
+  config.format.nr = gemm_config->nr;
+  config.format.kr = UINT32_C(1) << gemm_config->log2_kr;
+  config.format.sr = UINT32_C(1) << gemm_config->log2_sr;
+  config.format.bl = block_size;
+  const struct kai_matmul_pack_rhs_uker_api api =
+      kai_matmul_pack_rhs_nxk_qsi4c32p16vsx4s4s0_qsu4c32_f32_bf16_sme();
+  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args shape = {};
+  shape.k = k;
+  // KleidiAI reports the stride of a whole `n_step`-wide block of rows, but
+  // XNNPACK wants the per-output-channel stride.
+  const size_t n_step = api.get_step(&config).n;
+  return api.get_rhs_packed_stride(&config, &shape).n / n_step;
+}
+
+void xnn_pack_kai_qb4_weights_and_biases_sme(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  // The blockwise BF16 scales arrive in `extra_data1` and the FP32 bias in
+  // `accumulator_init`. `extra_data0` holds the per-channel scale, which is
+  // unused for blockwise quantization.
+  (void)init_extra_data0_fn;
+  (void)extra_data0;
+  (void)extra_data0_element_size;
+  (void)init_extra_data1_fn;
+  (void)extra_data1_element_size;
+
+  const struct xnn_qs8_qc4w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
+
+  // The packing microkernels bake in an RHS zero point of 8 (unsigned INT4
+  // weights) and an LHS zero point of 1.
+  if (xnn_params->kernel_zero_point != 8) {
+    xnn_log_error(
+        "KleidiAI QP8 F32 QB4W SME RHS packing requires a kernel zero point "
+        "of 8 (unsigned weights)");
+    return;
+  }
+  if (xnn_params->input_zero_point != 1) {
+    xnn_log_error(
+        "KleidiAI QP8 F32 QB4W SME RHS packing requires an input zero point "
+        "of 1");
+    return;
+  }
+  if (extra_data1 == NULL) {
+    xnn_log_error(
+        "KleidiAI QP8 F32 QB4W SME RHS packing requires blockwise scale data");
+    return;
+  }
+
+  struct kai_matmul_pack_rhs_uker_config config = {};
+  config.format.nr = gemm_config->nr;
+  config.format.kr = UINT32_C(1) << gemm_config->log2_kr;
+  config.format.sr = UINT32_C(1) << gemm_config->log2_sr;
+  config.format.bl = block_size;
+
+  const struct kai_matmul_pack_rhs_uker_api api =
+      xnn_kleidiai_qb4_rhs_pack_api_sme(flags);
+
+  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args packed_shape = {};
+  packed_shape.n = output_channels;
+  packed_shape.k = input_channels;
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args packed_stride =
+      api.get_rhs_packed_stride(&config, &packed_shape);
+  const size_t packed_group_size =
+      api.get_rhs_packed_size(&config, &packed_shape, &packed_stride);
+
+  struct kai_matmul_pack_rhs_uker_scale_nk_dim_args scale_shape = {};
+  scale_shape.n = output_channels;
+  scale_shape.k = input_channels;
+  const struct kai_matmul_pack_rhs_uker_scale_nk_stride_args scale_stride =
+      api.get_scale_nk_stride(&config, &scale_shape);
+
+  // Two INT4 weights share a byte along the minor dimension, which is K for
+  // NxK weights and N for KxN weights.
+  const size_t rhs_row_stride = (k_stride + 1) / 2;
+  const size_t rhs_rows =
+      (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? input_channels : output_channels;
+  const size_t rhs_group_stride = rhs_rows * rhs_row_stride;
+  const size_t scale_group_stride = output_channels * scale_stride.n;
+
+  for (size_t group = 0; group < groups; ++group) {
+    struct kai_matmul_pack_rhs_uker_args args = {};
+    args.shape.n = output_channels;
+    args.shape.k = input_channels;
+    args.operand.rhs.ptr = (const uint8_t*)weights + group * rhs_group_stride;
+    if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+      args.operand.rhs.stride.k = rhs_row_stride;
+    } else {
+      args.operand.rhs.stride.n = rhs_row_stride;
+    }
+    args.operand.rhs_packed.ptr =
+        (uint8_t*)packed_weights_ptr + group * packed_group_size;
+    args.operand.rhs_packed.stride = packed_stride;
+    // A null bias is zero-filled by the packing microkernel.
+    args.operand.bias_n.ptr =
+        accumulator_init == NULL
+            ? NULL
+            : (const float*)accumulator_init + group * output_channels;
+    args.operand.scale_nk.ptr =
+        (const uint8_t*)extra_data1 + group * scale_group_stride;
+    args.operand.scale_nk.stride = scale_stride;
+    api.run(&config, &args);
+  }
+}
+
 void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
                                       size_t nr, size_t kr, size_t sr,
                                       const uint16_t* k, const uint16_t* b,
