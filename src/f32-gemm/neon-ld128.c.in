@@ -5,14 +5,6 @@
 
 $assert NR % 4 == 0
 $assert DATATYPE in ["F32", "QC4", "QC8"]
-$# CVT selects how QC8 int8 weights are converted to f32:
-$#   SXTL   - sign extend 8->16->32 bits, then SCVTF (default).
-$#   FMAGIC - TBL builds 0x4B0000xx (= 2^23 + 128 + w) from the biased bytes,
-$#            then FSUB removes the magic bias. 9 ops per 16 weights vs 10.
-$CVT = globals().get("CVT", "SXTL")
-$assert CVT in ["SXTL", "FMAGIC"]
-$assert CVT == "SXTL" or DATATYPE == "QC8"
-$assert CVT != "FMAGIC" or NR in [8, 16]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
@@ -28,9 +20,8 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
-$SUFFIX = "_fmagic" if CVT == "FMAGIC" else ""
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
-void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld128${SUFFIX}(
+void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld128(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -84,22 +75,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
   $if DATATYPE == "QC4":
     const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
     const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
-  $if CVT == "FMAGIC":
-    $NUM_IDX = 4
-    // int8 weights are converted to f32 with a table lookup: each weight byte
-    // is XORed with 0x80 (biased to unsigned), then TBL assembles the 32-bit
-    // pattern 0x4B0000xx = (float) (2^23 + 128 + weight), using bytes from the
-    // magic bias register (0x80, 0x00, 0x00, 0x4B) as the second table.
-    // Subtracting the magic bias (2^23 + 128) yields the exact weight value.
-    const uint8x16_t vsign_mask = vdupq_n_u8(UINT8_C(0x80));
-    const uint8x16_t vmagic_bias = vreinterpretq_u8_u32(vdupq_n_u32(UINT32_C(0x4B000080)));
-    const float32x4_t vmagic_bias_f32 = vreinterpretq_f32_u8(vmagic_bias);
-    static const uint8_t ktbl_idx[${NUM_IDX * 16}] = {
-      $for I in range(NUM_IDX * 4):
-        ${I}, 17, 18, 19,
-    };
-    $for I in range(NUM_IDX):
-      const uint8x16_t vtbl_idx${I} = vld1q_u8(ktbl_idx + ${I * 16});
 
   do {
     $if INC:
@@ -143,18 +118,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
             $for N in range(0, NR, 4):
               const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
-          $elif CVT == "FMAGIC":
-            $if NR == 16:
-              const uint8x16_t vw${ABC[0:16]}c${L} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
-              const uint8x16x2_t vtbl${ABC[0:16]}c${L} = { { vw${ABC[0:16]}c${L}, vmagic_bias } };
-              $for N in range(0, NR, 4):
-                const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vtbl${ABC[0:16]}c${L}, vtbl_idx${N//4})), vmagic_bias_f32);
-            $else:
-              $if L % 2 == 0:
-                const uint8x16_t vw${ABC[0:8]}c${L}${L+1} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
-                const uint8x16x2_t vtbl${ABC[0:8]}c${L}${L+1} = { { vw${ABC[0:8]}c${L}${L+1}, vmagic_bias } };
-              $for N in range(0, NR, 4):
-                const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vtbl${ABC[0:8]}c${L - L % 2}${L - L % 2 + 1}, vtbl_idx${(L % 2) * 2 + N//4})), vmagic_bias_f32);
           $else:
             $for N in range(0, NR, 8):
               const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
@@ -203,18 +166,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
             $for N in range(0, NR, 4):
               const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
-          $elif CVT == "FMAGIC":
-            $if NR == 16:
-              const uint8x16_t vw${ABC[0:16]}c${L} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
-              const uint8x16x2_t vtbl${ABC[0:16]}c${L} = { { vw${ABC[0:16]}c${L}, vmagic_bias } };
-              $for N in range(0, NR, 4):
-                const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vtbl${ABC[0:16]}c${L}, vtbl_idx${N//4})), vmagic_bias_f32);
-            $else:
-              $if L == 0:
-                const uint8x16_t vw${ABC[0:8]}c01 = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
-                const uint8x16x2_t vtbl${ABC[0:8]}c01 = { { vw${ABC[0:8]}c01, vmagic_bias } };
-              $for N in range(0, NR, 4):
-                const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vtbl${ABC[0:8]}c01, vtbl_idx${L * 2 + N//4})), vmagic_bias_f32);
           $else:
             $for N in range(0, NR, 8):
               const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
@@ -253,17 +204,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             const int32x4_t vxw${ABC[N+4:N+8]} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]})));
           $for N in range(0, NR, 4):
             const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
-        $elif CVT == "FMAGIC":
-          $if NR == 16:
-            const uint8x16_t vw${ABC[0:16]} = veorq_u8(vld1q_u8(w), vsign_mask); w = (const uint8_t*) w + 16;
-            const uint8x16x2_t vtbl${ABC[0:16]} = { { vw${ABC[0:16]}, vmagic_bias } };
-            $for N in range(0, NR, 4):
-              const float32x4_t vb${ABC[N:N+4]} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vtbl${ABC[0:16]}, vtbl_idx${N//4})), vmagic_bias_f32);
-          $else:
-            const uint8x16_t vw${ABC[0:8]} = veorq_u8(vcombine_u8(vld1_u8(w), vdup_n_u8(0)), vsign_mask); w = (const uint8_t*) w + 8;
-            const uint8x16x2_t vtbl${ABC[0:8]} = { { vw${ABC[0:8]}, vmagic_bias } };
-            $for N in range(0, NR, 4):
-              const float32x4_t vb${ABC[N:N+4]} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vtbl${ABC[0:8]}, vtbl_idx${N//4})), vmagic_bias_f32);
         $else:
           $for N in range(0, NR, 8):
             const int8x8_t vw${ABC[N:N+8]} = vld1_s8(w); w = (const int8_t*) w + 8;
