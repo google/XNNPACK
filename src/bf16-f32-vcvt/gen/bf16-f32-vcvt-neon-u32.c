@@ -29,6 +29,52 @@ void xnn_bf16_f32_vcvt_ukernel__neon_u32(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
+#if XNN_ARCH_ARM64
+  const uint16x8_t vzero = vdupq_n_u16(0);
+  for (; batch >= 32 * sizeof(xnn_bfloat16); batch -= 32 * sizeof(xnn_bfloat16)) {
+    const uint16x8_t vbf0 = vld1q_u16(i); i += 8;
+    const uint16x8_t vbf1 = vld1q_u16(i); i += 8;
+    const uint16x8_t vbf2 = vld1q_u16(i); i += 8;
+    const uint16x8_t vbf3 = vld1q_u16(i); i += 8;
+
+    const float32x4_t vf0 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf0));
+    const float32x4_t vf1 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf0));
+    const float32x4_t vf2 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf1));
+    const float32x4_t vf3 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf1));
+    const float32x4_t vf4 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf2));
+    const float32x4_t vf5 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf2));
+    const float32x4_t vf6 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf3));
+    const float32x4_t vf7 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf3));
+
+    vst1q_f32(output, vf0); output += 4;
+    vst1q_f32(output, vf1); output += 4;
+    vst1q_f32(output, vf2); output += 4;
+    vst1q_f32(output, vf3); output += 4;
+    vst1q_f32(output, vf4); output += 4;
+    vst1q_f32(output, vf5); output += 4;
+    vst1q_f32(output, vf6); output += 4;
+    vst1q_f32(output, vf7); output += 4;
+  }
+  for (; batch >= 8 * sizeof(xnn_bfloat16); batch -= 8 * sizeof(xnn_bfloat16)) {
+    const uint16x8_t vbf = vld1q_u16(i); i += 8;
+
+    const float32x4_t vf_lo = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf));
+    const float32x4_t vf_hi = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf));
+
+    vst1q_f32(output, vf_lo); output += 4;
+    vst1q_f32(output, vf_hi); output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(xnn_bfloat16));
+    assert(batch <= 7 * sizeof(xnn_bfloat16));
+    const uint16x8_t vbf = vld1q_u16(i);
+
+    float32x4_t vf = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf));
+    if (batch & (4 * sizeof(xnn_bfloat16))) {
+      vst1q_f32(output, vf); output += 4;
+      vf = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf));
+    }
+#else
   for (; batch >= 32 * sizeof(xnn_bfloat16); batch -= 32 * sizeof(xnn_bfloat16)) {
     const uint16x8_t vbf0 = vld1q_u16(i); i += 8;
     const uint16x8_t vbf1 = vld1q_u16(i); i += 8;
@@ -72,6 +118,7 @@ void xnn_bf16_f32_vcvt_ukernel__neon_u32(
       vst1q_f32(output, vf); output += 4;
       vf = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
     }
+#endif
     float32x2_t vf_lo = vget_low_f32(vf);
     if (batch & (2 * sizeof(xnn_bfloat16))) {
       vst1_f32(output, vf_lo); output += 2;
