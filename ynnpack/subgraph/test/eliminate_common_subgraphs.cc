@@ -239,4 +239,42 @@ TEST(eliminate_common_subgraphs, no_merge_different_inputs) {
                                                t2_id, output1_id, output2_id)));
 }
 
+TEST(eliminate_common_subgraphs, no_merge_different_output_rank) {
+  // Two iota nodes with the same begin/stride inputs but different ranks:
+  // iota(begin, stride) -> rank-1 temp1 -> output1
+  // iota(begin, stride) -> rank-2 temp2 -> output2
+  // Must NOT be merged by CSE.
+  const uint32_t begin_id = 0;
+  const uint32_t stride_id = 1;
+  const uint32_t output1_id = 2;
+  const uint32_t output2_id = 3;
+  uint32_t temp1_id = YNN_INVALID_VALUE_ID;
+  uint32_t temp2_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(4);
+  builder.AddInput(type_of<int32_t>(), 0, begin_id)
+      .AddInput(type_of<int32_t>(), 0, stride_id)
+      .AddOutput(type_of<int32_t>(), 1, output1_id)
+      .AddOutput(type_of<int32_t>(), 2, output2_id)
+      .AddTensor(type_of<int32_t>(), 1, temp1_id)
+      .AddTensor(type_of<int32_t>(), 2, temp2_id);
+
+  builder.AddIota(type_of<int32_t>(), {4}, begin_id, stride_id, temp1_id);
+  builder.AddIota(type_of<int32_t>(), {4, 4}, begin_id, stride_id, temp2_id);
+  builder.AddCopy(temp1_id, output1_id);
+  builder.AddCopy(temp2_id, output2_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ASSERT_THAT(subgraph, HasValidNodeCount(4));  // Iota, Iota, Copy, Copy.
+
+  subgraph.eliminate_common_subgraphs();
+  subgraph.invalidate_dead_values();
+
+  // No merge because output ranks differ.
+  EXPECT_THAT(subgraph,
+              AllOf(HasValidNodeCount(4),
+                    HasValidValueIds(begin_id, stride_id, temp1_id, temp2_id,
+                                     output1_id, output2_id)));
+}
+
 }  // namespace ynn
