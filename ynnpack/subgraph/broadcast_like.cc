@@ -82,10 +82,12 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
       // We know the output extent is one, just use the template.
       output_extent = template_extent;
     } else {
+      slinky::expr input_extent = output_extent;
       output_extent = subgraph->globals.get(
-          select(template_extent > 1, template_extent, output_extent), "b");
+          select(template_extent > 1, template_extent, input_extent), "b");
 
-      node.add_check(template_extent == 1 || output_extent == template_extent,
+      node.add_check(input_extent == 1 || template_extent == 1 ||
+                         input_extent == template_extent,
                      {"invalid broadcast in dimension ", d, " of ",
                       ynn_node::input_idx{0}, " and ", ynn_node::input_idx{1}});
     }
