@@ -67,6 +67,10 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
     return ynn_status_success;
   }
 
+  if (!op.paddings.empty() && padding_id == YNN_INVALID_VALUE_ID) {
+    padding_id = subgraph->get_scalar_value_id(input.type, 0.0f);
+  }
+
   // Propagate shape.
   ynn_value& output = subgraph->get_output_value(output_id, input);
   output.extents = input.extents;
