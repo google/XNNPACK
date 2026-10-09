@@ -61,9 +61,8 @@ void iota_impl(iota_kernel_fn kernel, T begin, const T* stride,
 
 template <typename T>
 auto make_iota_impl(iota_kernel_fn kernel, const iota_params& params) {
-  return [=](slinky::buffer<const T, 0> begin,
-             slinky::buffer<const T, 1> stride,
-             slinky::buffer<T, max_tensor_rank> output) -> slinky::index_t {
+  return [=](const slinky::raw_buffer& begin, const slinky::raw_buffer& stride,
+             const slinky::raw_buffer& output) -> slinky::index_t {
     // Copy the params to the type of the iota.
     T scale = params.scale;
     T offset = params.offset;
@@ -80,9 +79,10 @@ auto make_iota_impl(iota_kernel_fn kernel, const iota_params& params) {
         0,
     };
     for (int i = 0; i < output.rank; ++i) {
-      stride_broadcast[i] = stride(i) * scale;
+      stride_broadcast[i] = stride.at<T>(i) * scale;
     }
-    iota_impl<T>(kernel, begin() * scale + offset, stride_broadcast, output);
+    iota_impl<T>(kernel, begin.at<T>() * scale + offset, stride_broadcast,
+                 output);
     return 0;
   };
 }
@@ -139,9 +139,8 @@ void iota_less_zero_impl(T begin, const T* stride, T scale, T offset,
 
 template <typename T>
 auto make_iota_less_zero_impl(const iota_params& params) {
-  return [=](slinky::buffer<const T, 0> begin,
-             slinky::buffer<const T, 1> stride,
-             slinky::buffer<T, max_tensor_rank> output) -> slinky::index_t {
+  return [=](const slinky::raw_buffer& begin, const slinky::raw_buffer& stride,
+             const slinky::raw_buffer& output) -> slinky::index_t {
     T scale = params.scale;
     T offset = params.offset;
     assert(scale == params.scale);
@@ -155,9 +154,10 @@ auto make_iota_less_zero_impl(const iota_params& params) {
         0,
     };
     for (int i = 0; i < output.rank; ++i) {
-      stride_broadcast[i] = stride(i);
+      stride_broadcast[i] = stride.at<T>(i);
     }
-    iota_less_zero_impl<T>(begin(), stride_broadcast, scale, offset, output);
+    iota_less_zero_impl<T>(begin.at<T>(), stride_broadcast, scale, offset,
+                           output);
     return 0;
   };
 }
@@ -185,12 +185,17 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
   YNN_RETURN_IF_ERROR(
       validate_input_tensor("iota", subgraph, "stride_id", stride_id));
 
-  if (rank > 0) {
-    const ynn_value& stride_val = subgraph->value(stride_id);
-    if (stride_val.rank() > 1) {
-      YNN_LOG_ERROR() << "For node 'iota', 'stride_id' must be a 1D tensor";
-      return ynn_status_invalid_parameter;
-    }
+  const ynn_value& begin = subgraph->value(begin_id);
+  const ynn_value& stride = subgraph->value(stride_id);
+  if (begin.type != type) {
+    YNN_LOG_ERROR()
+        << "For node 'iota', 'begin_id' type must match output type";
+    return ynn_status_invalid_parameter;
+  }
+  if (stride.type != type) {
+    YNN_LOG_ERROR()
+        << "For node 'iota', 'stride_id' type must match output type";
+    return ynn_status_invalid_parameter;
   }
 
   YNN_RETURN_IF_ERROR(
@@ -210,6 +215,12 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
   ynn_node node;
   node.inputs = {begin_id, stride_id};
   node.outputs = {*output_id};
+  if (rank > 0 && stride.rank() >= 1 && stride.extents[0].defined()) {
+    node.add_check(stride.extents[0] == static_cast<slinky::index_t>(rank),
+                   {"For node 'iota', extent of ", ynn_node::input_idx{1}, " (",
+                    stride.extents[0], ") must match rank (",
+                    static_cast<slinky::index_t>(rank), ")"});
+  }
   ynn_node::iota op;
   op.less_zero = (flags & YNN_NODE_FLAG_LESS_ZERO) != 0;
   node.op = op;
