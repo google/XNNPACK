@@ -4403,6 +4403,12 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
   if (XNN_ENABLE_ARM_SME2 &&
       (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
 #if XNN_ENABLE_ARM_SME2
+    #if XNN_ENABLE_ARM_SME2_ACLE
+    const size_t mr = 32;
+    const size_t nr = 32;
+    qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x32c4__sme2);
+    qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2);
+    #else
     const size_t mr =
         xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
     const size_t nr =
@@ -4413,6 +4419,7 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_QP8GEMM_UKERNEL(
             xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2);
+    #endif  // XNN_ENABLE_ARM_SME2_ACLE
     qp8_f32_qc4w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     qp8_f32_qc4w_gemm_config.pack_weights_and_biases =
         xnn_pack_kai_qs4_weights_and_biases_sme;
@@ -4512,6 +4519,12 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
   if (XNN_ENABLE_ARM_SME2 &&
       (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
 #if XNN_ENABLE_ARM_SME2
+    #if XNN_ENABLE_ARM_SME2_ACLE
+    const size_t mr = 32;
+    const size_t nr = 32;
+    qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2);
+    qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2);
+    #else
     const size_t mr =
         xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
     const size_t nr =
@@ -4522,6 +4535,7 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
     qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_QP8GEMM_UKERNEL(
             xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2);
+    #endif  // XNN_ENABLE_ARM_SME2_ACLE
     qp8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     qp8_f32_qc8w_gemm_config.pack_weights_and_biases =
         xnn_pack_kai_qs8_weights_and_biases;

@@ -42,6 +42,15 @@ static void x8_packq(benchmark::State& state, const char* net,
 
 #undef XNN_UKERNEL
 
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
+BENCHMARK_CAPTURE_BGEMM(x8_packq, xnn_x8_packq_f32qp8_ukernel__sme2_mr1_kr4_,
+                        xnn_x8_packq_f32qp8_ukernel__sme2, xnn_arch_arm_sme2,
+                        /*mr=*/1, /*kr=*/4);
+BENCHMARK_CAPTURE_BGEMM(x8_packq, xnn_x8_packq_f32qp8_ukernel__sme2_mr32_kr4_,
+                        xnn_x8_packq_f32qp8_ukernel__sme2, xnn_arch_arm_sme2,
+                        /*mr=*/32, /*kr=*/4);
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
 #endif

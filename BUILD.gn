@@ -119,6 +119,9 @@ declare_args() {
   # Enables Arm Scalable Matrix Extension (SME2)
   xnnpack_enable_arm_sme2 = target_cpu == "arm64"
 
+  # Enables Arm Scalable Matrix Extension (SME2) ACLE microkernels
+  xnnpack_enable_arm_sme2_acle = false
+
   # Enable Arm's Neon Dot Product extension
   xnnpack_enable_arm_dotprod = target_cpu == "arm64" || target_cpu == "arm"
 
@@ -136,6 +139,8 @@ assert(!xnnpack_enable_arm_sme || target_cpu == "arm64",
        "xnnpack_enable_arm_sme requires target_cpu='arm64'")
 assert(!xnnpack_enable_arm_sme2 || xnnpack_enable_arm_sme,
        "xnnpack_enable_arm_sme2 requires xnnpack_enable_arm_sme")
+assert(!xnnpack_enable_arm_sme2_acle || xnnpack_enable_arm_sme2,
+       "xnnpack_enable_arm_sme2_acle requires xnnpack_enable_arm_sme2")
 assert(
     !xnnpack_enable_arm_dotprod || target_cpu == "arm64" || target_cpu == "arm",
     "xnnpack_enable_arm_dotprod requires target_cpu='arm64' or target_cpu='arm'")
@@ -215,6 +220,11 @@ config("xnnpack_private_config") {
       defines += [ "XNN_ENABLE_ARM_SME2=1" ]
     } else {
       defines += [ "XNN_ENABLE_ARM_SME2=0" ]
+    }
+    if (xnnpack_enable_arm_sme2_acle) {
+      defines += [ "XNN_ENABLE_ARM_SME2_ACLE=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_ARM_SME2_ACLE=0" ]
     }
   } else if (current_cpu == "arm") {
     defines += [

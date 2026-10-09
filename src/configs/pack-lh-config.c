@@ -42,6 +42,15 @@ static void init_qp8_pack_lh_config(void) {
   qp8_pack_lh_config.pack_lh_fn =
       (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__scalar_u1;
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+    qp8_pack_lh_config.pack_lh_fn =
+        (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__sme2;
+  }
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
   qp8_pack_lh_config.size_fn =
       (xnn_pack_lh_size_fn)xnn_x8_packq_f32qp8_packed_size;
   qp8_pack_lh_config.offset_fn =
