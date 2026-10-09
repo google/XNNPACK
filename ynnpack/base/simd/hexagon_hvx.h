@@ -289,6 +289,7 @@ YNN_ALWAYS_INLINE HVX_Vector partial_load(const T* ptr, size_t n) {
 template <typename T>
 YNN_ALWAYS_INLINE HVX_Vector partial_load(const T* ptr, size_t n,
                                           HVX_Vector src) {
+  if (n == 0) return src;
   // Get the lanes we want to load.
   HVX_Vector result = partial_load(ptr, n);
 
@@ -300,6 +301,7 @@ YNN_ALWAYS_INLINE HVX_Vector partial_load(const T* ptr, size_t n,
 
 template <typename T>
 YNN_ALWAYS_INLINE void partial_store(T* ptr, HVX_Vector v, size_t n) {
+  if (n == 0) return;
   const uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
   HVX_Vector value = Q6_V_vlalign_VVR(v, v, addr);
   uintptr_t offset = addr & (sizeof(HVX_Vector) - 1);
