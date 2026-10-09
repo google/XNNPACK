@@ -2012,6 +2012,10 @@ bool rewrite_reduce_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t init_id = node.inputs[1];
   uint32_t y_id = node.outputs[0];
 
+  if (init_id != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+
   const ynn_value& x = subgraph.value(x_id);
 
   ynn::axes_set new_axes;
