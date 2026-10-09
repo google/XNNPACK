@@ -633,6 +633,10 @@ std::vector<bool> initial_split_matches(
     const std::vector<ynn::scheduling_split>& splits) {
   std::vector<bool> matched(splits.size());
   for (int i = 0; i < splits.size(); ++i) {
+    if (auto c = slinky::as_constant(splits[i].extent)) {
+      matched[i] = (*c == 1);
+      continue;
+    }
     matched[i] = prove_true(splits[i].extent == 1, globals.fact_bounds,
                             globals.fact_alignment);
   }
