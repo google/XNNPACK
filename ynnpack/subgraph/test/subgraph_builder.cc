@@ -345,6 +345,17 @@ SubgraphBuilder& SubgraphBuilder::AddDot(size_t num_k_dims, uint32_t input_a_id,
   return *this;
 }
 
+SubgraphBuilder& SubgraphBuilder::AddScaledDot(
+    size_t num_k_dims, uint32_t input_a_id, uint32_t input_b_id,
+    uint32_t input_c_id, uint32_t input_scale_id, uint32_t output_id,
+    uint32_t flags) {
+  assert(status_ == ynn_status_success);
+  status_ =
+      ynn_define_scaled_dot(subgraph_.get(), num_k_dims, input_a_id, input_b_id,
+                            input_c_id, input_scale_id, &output_id, flags);
+  return *this;
+}
+
 SubgraphBuilder& SubgraphBuilder::AddReduce(
     ynn_reduce_operator op, const std::vector<int32_t>& reduce_axes,
     uint32_t input_a_id, uint32_t input_b_id, uint32_t output_id,
