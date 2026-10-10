@@ -48,3 +48,18 @@ cc_test(
         "//ynnpack/subgraph/test:subgraph_builder",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "batched_dot_broadcast_reduce",
+    srcs = ["batched_dot_broadcast_reduce.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/subgraph",
+        "//ynnpack/subgraph/test:scheduler",
+        "//ynnpack/subgraph/test:subgraph_builder",
+    ] + ynn_test_deps(),
+)
