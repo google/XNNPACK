@@ -78,6 +78,8 @@ constexpr uint64_t arch_flags_fma3 = arch_flag::fma3 | arch_flags_avx;
 constexpr uint64_t arch_flags_avx2_fma3 = arch_flags_avx2 | arch_flags_fma3;
 constexpr uint64_t arch_flags_avx512 =
     arch_flag::avx512 | arch_flags_fma3 | arch_flags_avx2;
+constexpr uint64_t arch_flags_avxvnni =
+    arch_flags_avx2_fma3 | arch_flag::avxvnni;
 
 TEST(get_dot_kernel, small_m) {
   dot_type fp32 = {ynn_type_fp32, ynn_type_fp32, ynn_type_fp32};
@@ -211,6 +213,27 @@ TEST(get_dot_kernel, large_tile_k_1) {
   EXPECT_EQ(fp32_large(arch_flags_avx2), "dot_fp32_4x16x1_1x8x1_avx");
   EXPECT_EQ(fp32_large(arch_flags_avx2_fma3), "dot_fp32_6x16x1_1x8x1_fma3");
   EXPECT_EQ(fp32_large(arch_flags_avx512), "dot_fp32_5x64x1_1x16x1_avx512");
+}
+
+TEST(get_dot_kernel, uint8_int2_int32_avxvnni) {
+  dot_type uint8_int2 = {ynn_type_uint8, ynn_type_int2, ynn_type_int32};
+
+  // Prefill/packing query selects the AVXVNNI kernel.
+  dot_kernel k_prefill =
+      get_dot_kernel(uint8_int2, test_cost_models, {2048, 2048, 2048}, {},
+                     /*required_flags=*/0, std::nullopt, arch_flags_avxvnni);
+  EXPECT_EQ(kernels[k_prefill.kernel],
+            "dot_uint8_int2_int32_4x16x16_1x8x16_avxvnni");
+  dot_packed_shape packed_shape = {k_prefill.block_n, k_prefill.tile_k};
+
+  // Decode query (m = 1) should select
+  // dot_uint8_int2_int32_1x32x16_1x8x16_avxvnni.
+  EXPECT_EQ(get_dot_kernel_name(uint8_int2, {1, 2048, 2048}, arch_flags_avxvnni,
+                                packed_shape),
+            "dot_uint8_int2_int32_1x32x16_1x8x16_avxvnni");
+  EXPECT_EQ(
+      get_dot_kernel_name(uint8_int2, {1, 2048, 2048}, arch_flags_avxvnni),
+      "dot_uint8_int2_int32_1x32x16_1x8x16_avxvnni");
 }
 
 TEST(dot_kernel_state, destructor) {
