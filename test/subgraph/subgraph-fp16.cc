@@ -431,7 +431,7 @@ TEST(SUBGRAPH_FP16, convolution_weights_used_by_another_node) {
       .AddOutputTensorF32({1, 5, 5, 2}, convolution_out_id)
       .AddInputTensorF32({1, 4, 2, 3}, subtract_input_id)
       .AddOutputTensorF32({2, 1, 1, 3}, out_id2)
-      .AddConvolution2D(ConvolutionParams{Padding{0, 0, 0, 0}, Kernel{3, 3},
+      .AddConvolution2D(ConvolutionParams{Padding{0, 0, 0, 0}, Kernel{1, 1},
                                           Subsampling{1, 1}, Dilation{1, 1},
                                           /*groups=*/1,
                                           /*group_input_channels=*/3,
@@ -508,7 +508,7 @@ TEST(SUBGRAPH_FP16, convolution_bias_used_by_another_node) {
       .AddOutputTensorF32({1, 5, 5, 2}, convolution_out_id)
       .AddInputTensorF32({2}, subtract_input_id)
       .AddOutputTensorF32({2}, out_id2)
-      .AddConvolution2D(ConvolutionParams{Padding{0, 0, 0, 0}, Kernel{3, 3},
+      .AddConvolution2D(ConvolutionParams{Padding{0, 0, 0, 0}, Kernel{1, 1},
                                           Subsampling{1, 1}, Dilation{1, 1},
                                           /*groups=*/1,
                                           /*group_input_channels=*/3,
