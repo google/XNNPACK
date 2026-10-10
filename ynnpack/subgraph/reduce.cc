@@ -77,7 +77,9 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
     bool init_output = true;
     if (op.keep_dims) {
       int r_dim = 0;
-      for (int i = 0; i < a.rank && r_dim < reduction_bounds.rank; ++i) {
+      // Slinky can omit trailing broadcast dimensions from a. They still
+      // index distinct partial results, so visit all reduction dimensions.
+      for (int i = 0; r_dim < reduction_bounds.rank; ++i) {
         if (op.k_dims[i]) {
           const slinky::dim& r_dim_i = reduction_bounds.dim(r_dim++);
           if (c.dim(i).stride() == 0) {
