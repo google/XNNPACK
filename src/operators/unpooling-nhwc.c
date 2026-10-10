@@ -178,11 +178,8 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   }
 
   unpooling_op->batch_size = batch_size;
-  unpooling_op->input_pixel_stride = input_pixel_stride;
-  unpooling_op->output_pixel_stride = output_pixel_stride;
   unpooling_op->convolution_op->input_height = input_height;
   unpooling_op->convolution_op->input_width = input_width;
-  unpooling_op->channels = channels;
 
   unpooling_op->convolution_op->output_height = xnn_compute_unpooling_output_dimension(
     input_height, unpooling_op->convolution_op->padding_top + unpooling_op->convolution_op->padding_bottom,
@@ -202,9 +199,15 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   // optimization, where the smaller batch sizes are not re-initialized if we setup with different output.
   unpooling_op->convolution_op->output = unpooling_op->convolution_op->last_output;
 
+  // The indirection buffer bakes in the output pixel stride and the compute
+  // context holds the channel count and input strides, so both can only be
+  // reused when all of them match the previous reshape.
   size_t valid_batch_size = 0;
   if (input_height == unpooling_op->convolution_op->last_input_height &&
-      input_width == unpooling_op->convolution_op->last_input_width)
+      input_width == unpooling_op->convolution_op->last_input_width &&
+      channels == unpooling_op->convolution_op->last_input_channels &&
+      input_pixel_stride == unpooling_op->input_pixel_stride &&
+      output_pixel_stride == unpooling_op->output_pixel_stride)
   {
     valid_batch_size = unpooling_op->convolution_op->valid_batch_size;
     if (batch_size <= valid_batch_size) {
@@ -319,8 +322,12 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   unpooling_op->compute[0].range[1] = input_width;
   unpooling_op->state = xnn_run_state_needs_setup;
 
+  unpooling_op->input_pixel_stride = input_pixel_stride;
+  unpooling_op->output_pixel_stride = output_pixel_stride;
+  unpooling_op->channels = channels;
   unpooling_op->convolution_op->last_input_height = input_height;
   unpooling_op->convolution_op->last_input_width = input_width;
+  unpooling_op->convolution_op->last_input_channels = channels;
   unpooling_op->convolution_op->valid_batch_size = max(valid_batch_size, batch_size);
 
   return xnn_status_success;

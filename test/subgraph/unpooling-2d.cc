@@ -153,6 +153,57 @@ TEST(Unpooling2D, reshape_rejects_index_shape_mismatch) {
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
 
+TEST(Unpooling2D, reshape_changing_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const StencilParams kh = {/*size=*/2, /*dilation=*/1, /*stride=*/2,
+                            /*padding_min=*/0, /*padding_max=*/0};
+  const StencilParams kw = kh;
+
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(4, xnn_datatype_int32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp32, 2)
+      .AddUnpooling2D(0, 0, 0, 0, kh.size, kw.size, 0, 1, 2);
+  if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ReplicableRandomDevice rng;
+  DatatypeGenerator<float> value_gen(-10.0f, 20.0f);
+  DatatypeGenerator<int32_t> index_gen(0, kh.size * kw.size - 1);
+
+  // Keep the spatial extents fixed and only change the channel count between
+  // reshapes. The operator caches its indirection buffer and compute context
+  // keyed on the input height and width, so the per-pixel strides and channel
+  // count must be picked up again on each reshape.
+  const size_t channel_counts[] = {16, 4, 32};
+  for (const size_t channels : channel_counts) {
+    const std::vector<size_t> input_shape = {1, 4, 4, channels};
+    const std::vector<size_t> output_shape = {
+        1, kh.input_extent(4), kw.input_extent(4), channels};
+
+    Tensor<float> value(input_shape, XnnExtraBytes);
+    Tensor<int32_t> index(input_shape, XnnExtraBytes);
+    value.generate([&]() { return value_gen(rng); });
+    index.generate([&]() { return index_gen(rng); });
+
+    subgraph.ReshapeExternalTensor(input_shape, value.base(), 0)
+        .ReshapeExternalTensor(input_shape, index.base(), 1)
+        .ReshapeRuntime();
+    ASSERT_EQ(subgraph.GetExternalTensorShape(2), output_shape)
+        << "channels=" << channels;
+
+    Tensor<float> output(output_shape);
+    subgraph.SetupExternalTensor(output.base(), 2)
+        .SetupRuntime()
+        .InvokeRuntime();
+
+    Tensor<float> expected = ReferenceImpl(value, index, kh, kw);
+    ASSERT_THAT(output, ElementsAreArray(expected)) << "channels=" << channels;
+  }
+}
+
 TEST(Unpooling2D, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
