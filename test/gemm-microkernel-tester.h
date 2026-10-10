@@ -36,6 +36,13 @@ typedef void (*xnn_x32_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
                                            size_t lhs_stride,
                                            void* lhs_packed);
 
+typedef void (*xnn_x16_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
+                                           size_t kr, size_t sr,
+                                           size_t m_idx_start,
+                                           const xnn_float16* lhs,
+                                           size_t lhs_stride,
+                                           void* lhs_packed);
+
 class GemmMicrokernelTester {
  public:
   GemmMicrokernelTester clone() const { return *this; }
@@ -397,6 +404,8 @@ class GemmMicrokernelTester {
 
   void Test_PF16(xnn_pf16_gemm_minmax_ukernel_fn gemm,
                  xnn_init_f16_minmax_params_fn init_minmax_params,
+                 xnn_x16_pack_lh_ukernel_fn pack_lh_fn,
+                 xnn_pack_lh_size_fn pack_lh_size_fn,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
