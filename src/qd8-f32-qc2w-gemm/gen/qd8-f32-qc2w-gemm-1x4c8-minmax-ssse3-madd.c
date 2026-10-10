@@ -63,7 +63,7 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd(
     const __m128i vsum0x23 = _mm_unpackhi_epi32(vsum0x02, vsum0x13);
     __m128i vacc0x01 = _mm_setzero_si128();
     __m128i vacc0x23 = _mm_setzero_si128();
-    __m128i vsum0x0123 = _mm_unpacklo_epi64(vsum0x01, vsum0x23);
+    const __m128i vsum0x0123 = _mm_unpacklo_epi64(vsum0x01, vsum0x23);
     __m128i vacc1x0x01 = _mm_setzero_si128();
     __m128i vacc1x0x23 = _mm_setzero_si128();
     w = (const int32_t*) w + 4;
