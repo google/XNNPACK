@@ -170,8 +170,10 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "get_tensor_shape";
-    auto func = slinky::func(std::move(impl), {},
-                             {{output.buffer, std::move(dims)}}, {}, attrs);
+    slinky::box_expr input_bounds(input.rank(), slinky::interval_expr::none());
+    auto func =
+        slinky::func(std::move(impl), {{input.buffer, std::move(input_bounds)}},
+                     {{output.buffer, std::move(dims)}}, {}, attrs);
     runtime.funcs.push_back(std::move(func));
 
     auto sched = std::make_unique<scheduling_info>();
