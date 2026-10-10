@@ -1300,6 +1300,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   dot_type type = {a.type, b.type, c.type};
   dot_shape shape;
   learn_shape_from_b(shape, num_k_dims, b);
+  // Use known rows before choosing a packing layout that constrains execution.
+  shape.m = as_constant(a.extent(num_k_dims)).value_or(unknown_dot_extent);
   static constexpr dot_packed_shape no_tile_k = {0, 1};
   static constexpr dot_packed_shape packed_shape = {};
   const bool symmetric_b = (flags & YNN_NODE_FLAG_SYMMETRIC_B) != 0;
