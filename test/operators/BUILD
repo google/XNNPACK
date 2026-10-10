@@ -43,7 +43,7 @@ xnnpack_cxx_library(
         "convolution-test-helpers.h",
     ],
     # TODO: This shouldn't be required outside of here.
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:private"],
     deps = [
         "//:buffer",
         "//:microparams_h",
