@@ -70,7 +70,7 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
 
     if (!template_extent.defined() ||
         slinky::prove_true(template_extent == output_extent) ||
-        slinky::is_one(template_extent)) {
+        slinky::is_one(template_extent) || slinky::is_one(output_extent)) {
       // This broadcast is a no-op in this dimension.
       axes_set[d] = false;
       continue;
