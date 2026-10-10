@@ -156,6 +156,15 @@ DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(
 DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(
     xnn_f32_ibilinear_chw_ukernel__sse_p8)
 
+DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(
+    xnn_f32_ibilinear_chw_ukernel__rvv_1x1v)
+DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(
+    xnn_f32_ibilinear_chw_ukernel__rvv_1x2v)
+DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(
+    xnn_f32_ibilinear_chw_ukernel__rvv_2x1v)
+DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(
+    xnn_f32_ibilinear_chw_ukernel__rvv_2x2v)
+
 #define DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name)                  \
   XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels,           \
                             const xnn_float16** input, size_t input_offset,  \
