@@ -1324,6 +1324,42 @@ TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
 }
 #endif  // XNNPACK_USE_YNNPACK
 
+// Regression test: a channelwise quantized filter whose channel dimension is
+// not a dimension of the tensor must be rejected. The per-channel scale shape
+// is derived from the dimensions up to and including the channel dimension, so
+// an out of range channel dimension reads past the end of the shape.
+TEST(FullyConnectedQC8W, filter_channel_dim_out_of_range_rejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(0, 0, &subgraph));
+
+  const size_t filter_dims[] = {3, 4};
+  const float filter_scale[] = {0.5f, 0.75f, 1.0f};
+  const int8_t filter[12 + XNN_EXTRA_BYTES] = {};
+  for (size_t channel_dim : {size_t{2}, size_t{8}, size_t{1000}, SIZE_MAX}) {
+    uint32_t filter_id = XNN_INVALID_VALUE_ID;
+    ASSERT_EQ(xnn_status_invalid_parameter,
+              xnn_define_channelwise_quantized_tensor_value(
+                  subgraph, xnn_datatype_qcint8, filter_scale, /*num_dims=*/2,
+                  channel_dim, filter_dims, filter, XNN_INVALID_VALUE_ID,
+                  /*flags=*/0, &filter_id))
+        << "channel_dim=" << channel_dim;
+  }
+
+  // A rank above the supported maximum must be rejected before the channel
+  // dimension is used.
+  const size_t large_dims[] = {1, 1, 1, 1, 1, 1, 1, 1, 3};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, filter_scale, /*num_dims=*/9,
+                /*channel_dim=*/8, large_dims, filter, XNN_INVALID_VALUE_ID,
+                /*flags=*/0, &filter_id));
+
+  xnn_delete_subgraph(subgraph);
+}
+
 // Regression test: fully-connected with a zero-dimensional input must not
 // cause a heap-buffer-overflow via unsigned underflow on num_dims - 1.
 TEST(FullyConnectedF32, zero_dim_input_rejected) {
