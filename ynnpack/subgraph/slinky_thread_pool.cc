@@ -45,29 +45,42 @@ slinky::ref_count<slinky::thread_pool::task> slinky_thread_pool::enqueue(
     size_t n, task_body t, int max_workers) {
   auto result = impl_.enqueue(n, t, max_workers);
   if (scheduler_) {
-    // Atomically increment the expected workers, so we know how many workers
-    // this enqueue should schedule.
+    // Claim idle workers for this enqueue, so we know how many workers to
+    // schedule. We account for the new workers here, before they actually
+    // exist, so that concurrent enqueues don't schedule many workers based on
+    // the same idle workers.
 
     // Limit the number of workers we enqueue to the most workers we could use,
     // and the number of threads in the thread pool. Since these workers are
     // generic, we don't want more live workers than there are threads.
     max_workers = std::min<size_t>(max_workers, n);
-    max_workers = std::min<int>(max_workers, idle_workers_);
 
-    // The logic here is a bit racy, because the number of workers we compute we
-    // need is based on this shared state that might be changed by another
-    // thread. It seems best to account for the new workers here, before they
-    // actually exist, so we don't end up enqueuing many instances based on
-    // accounting for the same idle workers many times. Doing this here doesn't
-    // fix this race, it just makes it less bad. Ideally we'd do it atomically,
-    // unfortunately there is no saturating atomic add.
-    idle_workers_ -= max_workers;
-    for (int32_t i = 0; i < max_workers; ++i) {
+    // This is a saturating atomic subtraction: claim min(max_workers,
+    // idle_workers_) workers, never claiming a negative number. The invariant
+    // we must maintain is that `idle_workers_` plus the number of scheduled
+    // workers that have not yet finished is equal to `num_threads_`, which the
+    // destructor relies on to wait for all scheduled workers. A naive
+    // `idle_workers_ -= max_workers` with `max_workers` computed from a
+    // transiently negative `idle_workers_` would *add* to the counter without
+    // scheduling anything, breaking this invariant.
+    int claimed = 0;
+    int idle = idle_workers_.load();
+    do {
+      claimed = std::min<int>(max_workers, idle);
+      if (claimed <= 0) {
+        claimed = 0;
+        break;
+      }
+    } while (!idle_workers_.compare_exchange_weak(idle, idle - claimed));
+
+    for (int i = 0; i < claimed; ++i) {
       // Note that here, every worker is identical, so we can re-use the same
       // context for all scheduled tasks!
       scheduler_->schedule(scheduler_context_, this, [](void* context) {
         auto pool = reinterpret_cast<slinky_thread_pool*>(context);
         pool->impl_.work_until_idle();
+        // This must be the last access to `pool`, the destructor may return as
+        // soon as this is incremented.
         ++pool->idle_workers_;
       });
     }
