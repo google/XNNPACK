@@ -4050,6 +4050,40 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
   return xnn_status_success;
 }
 
+static size_t batch_matrix_multiply_logical_m(
+    const struct xnn_node* node, const struct xnn_value* input_value) {
+  assert(node->type == xnn_node_type_batch_matrix_multiply);
+  assert(input_value->shape.num_dims >= 2);
+  const size_t m_dimension =
+      (node->flags & XNN_FLAG_TRANSPOSE_A) != 0
+          ? input_value->shape.num_dims - 1
+          : input_value->shape.num_dims - 2;
+  return input_value->shape.dim[m_dimension];
+}
+
+static bool use_qp8_f32_qc8w_bmm_on_sme2(uint32_t optimization_flags,
+                                         size_t m) {
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+  // SME2 setup and dynamic LHS quantization are not amortized by the small M
+  // values used during decode. Keep these shapes on the mixed F32/QC8W path.
+  static const size_t qp8_f32_qc8w_bmm_sme2_m_threshold = 32;
+  if (m <= qp8_f32_qc8w_bmm_sme2_m_threshold ||
+      (optimization_flags & (XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC |
+                             XNN_FLAG_NO_INLINED_LHS_PACKING)) != 0) {
+    return false;
+  }
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  return hardware_config != NULL &&
+         (hardware_config->arch_flags & xnn_arch_arm_sme2) != 0 &&
+         xnn_init_qp8_f32_qc8w_gemm_config() != NULL;
+#else
+  (void) optimization_flags;
+  (void) m;
+  return false;
+#endif
+}
+
 enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                                                  uint32_t optimization_flags) {
   // Count the number of changes made.
@@ -4086,12 +4120,25 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             }
             break;
           case xnn_datatype_fp32:
-            if (input_datatype == output_datatype &&
-                (kernel_datatype == xnn_datatype_fp32 ||
-                  kernel_datatype == xnn_datatype_fp16)) {
-              if ((gemm_config = xnn_init_pf32_gemm_config())) {
-                assumed_datatype = xnn_datatype_pfp32;
+            if (input_datatype == output_datatype) {
+              if (kernel_datatype == xnn_datatype_fp32 ||
+                  kernel_datatype == xnn_datatype_fp16) {
+                if ((gemm_config = xnn_init_pf32_gemm_config())) {
+                  assumed_datatype = xnn_datatype_pfp32;
+                }
               }
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+              else if (kernel_datatype == xnn_datatype_qcint8 &&
+                       node->type == xnn_node_type_batch_matrix_multiply &&
+                       input_value->shape.num_dims >= 2 &&
+                       use_qp8_f32_qc8w_bmm_on_sme2(
+                           optimization_flags,
+                           batch_matrix_multiply_logical_m(node,
+                                                           input_value))) {
+                gemm_config = xnn_init_qp8_f32_qc8w_gemm_config();
+                assumed_datatype = xnn_datatype_qpint8;
+              }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
             }
             break;
           case xnn_datatype_qint8:
@@ -4414,7 +4461,8 @@ static bool is_qs8_to_f32_dequant(const struct xnn_subgraph* subgraph,
          out->datatype == xnn_datatype_fp32;
 }
 
-static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
+static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id,
+                                   uint32_t optimization_flags) {
   // Only batch-matrix-multiply nodes are rewritten here. Check the node type
   // *before* reserving any space: reserving may reallocate the subgraph's node
   // and value arrays, and some callers optimize a fixed-capacity scratch
@@ -4477,12 +4525,14 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
     return false;
   }
 
-  const struct xnn_gemm_config* f32_qc8w_gemm_config =
-      xnn_init_f32_qc8w_gemm_config();
-  if (f32_qc8w_gemm_config == NULL ||
-      a_value->shape.dim[a_value->shape.num_dims - 2] >
-          f32_qc8w_gemm_config->mr) {
-    return false;
+  const size_t m = batch_matrix_multiply_logical_m(node, a_value);
+  if (!use_qp8_f32_qc8w_bmm_on_sme2(optimization_flags, m)) {
+    const struct xnn_gemm_config* f32_qc8w_gemm_config =
+        xnn_init_f32_qc8w_gemm_config();
+    if (f32_qc8w_gemm_config == NULL ||
+        m > f32_qc8w_gemm_config->mr) {
+      return false;
+    }
   }
 
   // Determine channel info for b. For bmm, b is `[..., K, N]` (or `[..., N,
@@ -4535,7 +4585,8 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   return true;
 }
 
-enum xnn_status xnn_subgraph_rewrite_dequant_bmm(xnn_subgraph_t subgraph) {
+enum xnn_status xnn_subgraph_rewrite_dequant_bmm(
+    xnn_subgraph_t subgraph, uint32_t optimization_flags) {
   if (subgraph->num_nodes == 0) {
     return xnn_status_success;
   }
@@ -4544,7 +4595,7 @@ enum xnn_status xnn_subgraph_rewrite_dequant_bmm(xnn_subgraph_t subgraph) {
 
   bool any_changes = false;
   for (uint32_t node_id = 0; node_id < subgraph->num_nodes; ++node_id) {
-    if (rewrite_dequant_bmm_at(subgraph, node_id)) {
+    if (rewrite_dequant_bmm_at(subgraph, node_id, optimization_flags)) {
       any_changes = true;
     }
   }
@@ -4889,7 +4940,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   }
 #endif
 
-  XNN_RETURN_IF_ERROR(xnn_subgraph_rewrite_dequant_bmm(subgraph));
+  XNN_RETURN_IF_ERROR(
+      xnn_subgraph_rewrite_dequant_bmm(subgraph, optimization_flags));
 
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));
