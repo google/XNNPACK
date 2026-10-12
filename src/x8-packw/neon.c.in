@@ -6,6 +6,8 @@
 $assert NR >= 8
 $assert NR % 8 == 0
 $assert KBLOCK in [8, 16]
+$IZP = globals().get("IZP", 0)
+$DATATYPE_SPEC = "qs8_to_qu8" if IZP == 128 else "x8"
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -38,7 +40,7 @@ $if NR >= 16:
     return vr;
   }
 
-void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
+void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -64,6 +66,8 @@ void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH 
 
   int8_t* out = (int8_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
+  $if IZP == 128:
+    const int8x16_t vsign_mask = vdupq_n_s8(-128);
 
   do {
     const int8_t* wb = weights;
@@ -126,7 +130,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH 
           for (; k >= 16; k -= 16) {
             $for N in range(0, NR, 8):
               $for L in range(8):
-                const int8x16_t v${N+L} = vld1q_s8(w${N+L});
+                $if IZP == 128:
+                  const int8x16_t v${N+L} = veorq_s8(vld1q_s8(w${N+L}), vsign_mask);
+                $else:
+                  const int8x16_t v${N+L} = vld1q_s8(w${N+L});
                 w${N+L} += 16;
               $if PREFETCH:
                 $for L in range(8):
@@ -170,7 +177,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH 
         ${"if (k & 8)" if KBLOCK == 16 else "for (; k >= 8; k -= 8)"} {
           $for N in range(0, NR, 8):
             $for L in range(8):
-              const int8x8_t v${N+L} = vld1_s8(w${N+L});
+              $if IZP == 128:
+                const int8x8_t v${N+L} = veor_s8(vld1_s8(w${N+L}), vget_low_s8(vsign_mask));
+              $else:
+                const int8x8_t v${N+L} = vld1_s8(w${N+L});
               w${N+L} += 8;
             $if PREFETCH and KBLOCK == 8:
               $for L in range(8):
@@ -221,7 +231,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH 
                 w${N+L} += 4;
             $for K in range(4):
               $for N in range(0, NR, 8):
-                vst1_s8(out + ${K * NR + N}, vtmp${N}.val[${K}]);
+                $if IZP == 128:
+                  vst1_s8(out + ${K * NR + N}, veor_s8(vtmp${N}.val[${K}], vget_low_s8(vsign_mask)));
+                $else:
+                  vst1_s8(out + ${K * NR + N}, vtmp${N}.val[${K}]);
             out += ${NR * 4};
           }
           if (k & 2) {
@@ -234,7 +247,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH 
                 w${N+L} += 2;
             $for K in range(2):
               $for N in range(0, NR, 8):
-                vst1_s8(out + ${K * NR + N}, vtmp${N}.val[${K}]);
+                $if IZP == 128:
+                  vst1_s8(out + ${K * NR + N}, veor_s8(vtmp${N}.val[${K}], vget_low_s8(vsign_mask)));
+                $else:
+                  vst1_s8(out + ${K * NR + N}, vtmp${N}.val[${K}]);
             out += ${NR * 2};
           }
           if (k & 1) {
@@ -243,7 +259,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x${NR}__neon_u${KBLOCK}${"_prfm" if PREFETCH 
               $for L in range(8):
                 vtmp${N} = vld1_lane_s8(w${N+L}, vtmp${N}, ${L});
                 w${N+L} += 1;
-              vst1_s8(out + ${N}, vtmp${N});
+              $if IZP == 128:
+                vst1_s8(out + ${N}, veor_s8(vtmp${N}, vget_low_s8(vsign_mask)));
+              $else:
+                vst1_s8(out + ${N}, vtmp${N});
             out += ${NR};
           }
         }

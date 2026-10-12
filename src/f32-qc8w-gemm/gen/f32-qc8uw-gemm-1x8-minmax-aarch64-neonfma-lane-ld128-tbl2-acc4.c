@@ -1,0 +1,195 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f32-gemm/neon-ld128.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microparams.h"
+
+
+void xnn_f32_qc8uw_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128_tbl2_acc4(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const float* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= 1);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  const float* a0 = a;
+  float* c0 = c;
+  static const uint8_t idx0_bytes[16] = {
+      0, 16, 16, 17, 1, 16, 16, 17, 2, 16, 16, 17, 3, 16, 16, 17,
+  };
+  static const uint8_t idx1_bytes[16] = {
+      4, 16, 16, 17, 5, 16, 16, 17, 6, 16, 16, 17, 7, 16, 16, 17,
+  };
+  static const uint8_t idx2_bytes[16] = {
+      8, 16, 16, 17, 9, 16, 16, 17, 10, 16, 16, 17, 11, 16, 16, 17,
+  };
+  static const uint8_t idx3_bytes[16] = {
+      12, 16, 16, 17, 13, 16, 16, 17, 14, 16, 16, 17, 15, 16, 16, 17,
+  };
+  const uint8x16_t vidx0 = vld1q_u8(idx0_bytes);
+  const uint8x16_t vidx1 = vld1q_u8(idx1_bytes);
+  const uint8x16_t vidx2 = vld1q_u8(idx2_bytes);
+  const uint8x16_t vidx3 = vld1q_u8(idx3_bytes);
+  const uint8x16_t vmagic_hi = vreinterpretq_u8_u16(vdupq_n_u16(UINT16_C(0x4B00)));
+  const float32x4_t vmagic_bias = vdupq_n_f32(0x1.000100p+23f);
+
+  do {
+    float32x4_t vacc0x0 = vld1q_f32(w); w = (const float*) w + 4;
+    float32x4_t vacc0x1 = vld1q_f32(w); w = (const float*) w + 4;
+    float32x4_t vacc0x0c1 = vdupq_n_f32(0.0f);
+    float32x4_t vacc0x1c1 = vdupq_n_f32(0.0f);
+    float32x4_t vacc0x0c2 = vdupq_n_f32(0.0f);
+    float32x4_t vacc0x1c2 = vdupq_n_f32(0.0f);
+    float32x4_t vacc0x0c3 = vdupq_n_f32(0.0f);
+    float32x4_t vacc0x1c3 = vdupq_n_f32(0.0f);
+
+    size_t k = kc;
+    if XNN_LIKELY(k >= 4 * sizeof(float)) {
+      do {
+        const float32x4_t va0 = vld1q_f32(a0); a0 += 4;
+
+
+        uint8x16x2_t vw01234567c01;
+        vw01234567c01.val[0] = vld1q_u8(w);
+        vw01234567c01.val[1] = vmagic_hi;
+        w = (const uint8_t*) w + 16;
+        const float32x4_t vb0123c0 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx0)), vmagic_bias);
+        const float32x4_t vb4567c0 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx1)), vmagic_bias);
+
+        vacc0x0 = vfmaq_lane_f32(vacc0x0, vb0123c0, vget_low_f32(va0), 0);
+        vacc0x1 = vfmaq_lane_f32(vacc0x1, vb4567c0, vget_low_f32(va0), 0);
+
+        const float32x4_t vb0123c1 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx2)), vmagic_bias);
+        const float32x4_t vb4567c1 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx3)), vmagic_bias);
+
+        vacc0x0c1 = vfmaq_lane_f32(vacc0x0c1, vb0123c1, vget_low_f32(va0), 1);
+        vacc0x1c1 = vfmaq_lane_f32(vacc0x1c1, vb4567c1, vget_low_f32(va0), 1);
+
+        uint8x16x2_t vw01234567c23;
+        vw01234567c23.val[0] = vld1q_u8(w);
+        vw01234567c23.val[1] = vmagic_hi;
+        w = (const uint8_t*) w + 16;
+        const float32x4_t vb0123c2 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c23, vidx0)), vmagic_bias);
+        const float32x4_t vb4567c2 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c23, vidx1)), vmagic_bias);
+
+        vacc0x0c2 = vfmaq_lane_f32(vacc0x0c2, vb0123c2, vget_high_f32(va0), 0);
+        vacc0x1c2 = vfmaq_lane_f32(vacc0x1c2, vb4567c2, vget_high_f32(va0), 0);
+
+        const float32x4_t vb0123c3 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c23, vidx2)), vmagic_bias);
+        const float32x4_t vb4567c3 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c23, vidx3)), vmagic_bias);
+
+        vacc0x0c3 = vfmaq_lane_f32(vacc0x0c3, vb0123c3, vget_high_f32(va0), 1);
+        vacc0x1c3 = vfmaq_lane_f32(vacc0x1c3, vb4567c3, vget_high_f32(va0), 1);
+        k -= 4 * sizeof(float);
+      } while (k >= 4 * sizeof(float));
+      vacc0x0 = vaddq_f32(vacc0x0, vacc0x0c2);
+      vacc0x0c1 = vaddq_f32(vacc0x0c1, vacc0x0c3);
+      vacc0x1 = vaddq_f32(vacc0x1, vacc0x1c2);
+      vacc0x1c1 = vaddq_f32(vacc0x1c1, vacc0x1c3);
+    }
+
+    if XNN_UNLIKELY(k != 0) {
+      if XNN_UNLIKELY(k & (2 * sizeof(float))) {
+        const float32x2_t va0 = vld1_f32(a0); a0 += 2;
+
+
+        uint8x16x2_t vw01234567c01;
+        vw01234567c01.val[0] = vld1q_u8(w);
+        vw01234567c01.val[1] = vmagic_hi;
+        w = (const uint8_t*) w + 16;
+        const float32x4_t vb0123c0 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx0)), vmagic_bias);
+        const float32x4_t vb4567c0 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx1)), vmagic_bias);
+
+        vacc0x0 = vfmaq_lane_f32(vacc0x0, vb0123c0, va0, 0);
+        vacc0x1 = vfmaq_lane_f32(vacc0x1, vb4567c0, va0, 0);
+
+        const float32x4_t vb0123c1 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx2)), vmagic_bias);
+        const float32x4_t vb4567c1 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567c01, vidx3)), vmagic_bias);
+
+        vacc0x0c1 = vfmaq_lane_f32(vacc0x0c1, vb0123c1, va0, 1);
+        vacc0x1c1 = vfmaq_lane_f32(vacc0x1c1, vb4567c1, va0, 1);
+      }
+      if XNN_UNLIKELY(k & (1 * sizeof(float))) {
+        const float32x4_t va0 = vld1q_dup_f32(a0); a0 += 1;
+
+        uint8x16x2_t vw01234567;
+        vw01234567.val[0] = vcombine_u8(vld1_u8(w), vcreate_u8(0));
+        vw01234567.val[1] = vmagic_hi;
+        w = (const uint8_t*) w + 8;
+        const float32x4_t vb0123 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567, vidx0)), vmagic_bias);
+        const float32x4_t vb4567 = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw01234567, vidx1)), vmagic_bias);
+
+        vacc0x0 = vfmaq_f32(vacc0x0, va0, vb0123);
+        vacc0x1 = vfmaq_f32(vacc0x1, va0, vb4567);
+      }
+    }
+    vacc0x0 = vaddq_f32(vacc0x0, vacc0x0c1);
+    vacc0x1 = vaddq_f32(vacc0x1, vacc0x1c1);
+    const float32x4_t vscale0123 = vld1q_f32(w); w = ((const float*) w + 4);
+    const float32x4_t vscale4567 = vld1q_f32(w); w = ((const float*) w + 4);
+    vacc0x0 = vmulq_f32(vacc0x0, vscale0123);
+    vacc0x1 = vmulq_f32(vacc0x1, vscale4567);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+    vacc0x0 = vminq_f32(vacc0x0, vmax);
+    vacc0x1 = vminq_f32(vacc0x1, vmax);
+
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+    vacc0x0 = vmaxq_f32(vacc0x0, vmin);
+    vacc0x1 = vmaxq_f32(vacc0x1, vmin);
+
+    if XNN_LIKELY(nc >= 8) {
+      vst1q_f32(c0, vacc0x0);
+      vst1q_f32(c0 + 4, vacc0x1);
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+
+      a0 = (const float*) ((uintptr_t) a0 - kc);
+
+      nc -= 8;
+
+    } else {
+      if (nc & 4) {
+        vst1q_f32(c0, vacc0x0); c0 += 4;
+
+        vacc0x0 = vacc0x1;
+      }
+      float32x2_t vacc0 = vget_low_f32(vacc0x0);
+      if (nc & 2) {
+        vst1_f32(c0, vacc0); c0 += 2;
+
+        vacc0 = vget_high_f32(vacc0x0);
+      }
+      if (nc & 1) {
+        vst1_lane_f32(c0, vacc0, 0);
+      }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

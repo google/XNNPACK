@@ -349,11 +349,15 @@ class PackWMicrokernelTester {
     const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_qs8_packing_params packing_params = {127};
 
+    xnnpack::Buffer<int8_t> weights_ref(n() * k());
+    for (size_t i = 0; i < weights.size(); i++) {
+      weights_ref[i] = static_cast<int8_t>(weights[i] ^ izp());
+    }
+
     // Compute reference results.
     xnn_pack_f32_qs8w_gemm_goi_w(
         /*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k(),
-        reinterpret_cast<const int8_t*>(weights.data()),
-        reinterpret_cast<const float*>(bias_data),
+        weights_ref.data(), reinterpret_cast<const float*>(bias_data),
         /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
         /*extra_bytes=*/0, &packing_params);
 
@@ -418,10 +422,14 @@ class PackWMicrokernelTester {
     const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_qs8_packing_params packing_params = {127};
 
+    xnnpack::Buffer<int8_t> weights_ref(n() * k());
+    for (size_t i = 0; i < weights.size(); i++) {
+      weights_ref[i] = static_cast<int8_t>(weights[i] ^ izp());
+    }
+
     // Compute reference results.
     xnn_pack_f32_qs8w_gemm_gio_w(
-        /*g=*/1, n(), k(), nr(), kr(), sr(), n(),
-        reinterpret_cast<const int8_t*>(weights.data()),
+        /*g=*/1, n(), k(), nr(), kr(), sr(), n(), weights_ref.data(),
         reinterpret_cast<const float*>(bias_data),
         /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
         /*extra_bytes=*/0, &packing_params);

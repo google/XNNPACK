@@ -181,6 +181,9 @@ tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=8  -o src/x8
 tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u8-prfm.c &
 tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u16.c &
 tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x8-gemm-goi-neon-u16-prfm.c &
+tools/xngen src/x8-packw/neon.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=16 -D IZP=128 -o src/x8-packw/gen/qs8-to-qu8-packw-x8-gemm-goi-neon-u16-prfm.c &
+tools/xngen src/x8-packw/scalar.c.in -D NR=8 -D KBLOCK=4 -D TYPE=int8_t -D IZP=128 -o src/x8-packw/gen/qs8-to-qu8-packw-x8-gemm-goi-scalar-u4.c &
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=8 -D IZP=128 -o src/x8-packw/gen/qs8-to-qu8-packw-x8-gemm-gio-scalar.c &
 tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u8.c &
 tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=8  -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u8-prfm.c &
 tools/xngen src/x8-packw/neon.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=16 -o src/x8-packw/gen/x8-packw-x16-gemm-goi-neon-u16.c &

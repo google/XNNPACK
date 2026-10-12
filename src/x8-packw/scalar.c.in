@@ -6,6 +6,8 @@
 $assert NR > 1
 $assert KBLOCK >= 1
 $assert TYPE in ["int8_t"]
+$IZP = globals().get("IZP", 0)
+$DATATYPE_SPEC = "qs8_to_qu8" if IZP == 128 else "x8"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -17,7 +19,7 @@ $assert TYPE in ["int8_t"]
 $BITS = {"int8_t": 8}[TYPE]
 $BTYPE = {"int8_t": "uint32_t"}[TYPE]
 $WTYPE = {"int8_t": "int8_t"}[TYPE]
-void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_u${KBLOCK}(
+void xnn_${DATATYPE_SPEC if IZP == 128 else ("x%d" % BITS)}_packw_gemm_goi_ukernel_x${NR}__scalar_u${KBLOCK}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -76,7 +78,10 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_u${KBLOCK}(
       for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $for N in range(NR):
           $for K in range(KBLOCK):
-            const ${TYPE} v${N}${K} = w${N}[${K}];
+            $if IZP == 128:
+              const ${TYPE} v${N}${K} = (${TYPE}) ((uint8_t) w${N}[${K}] ^ UINT8_C(0x80));
+            $else:
+              const ${TYPE} v${N}${K} = w${N}[${K}];
           w${N} += ${KBLOCK};
         $for K in range(KBLOCK):
           $for N in range(NR):
@@ -87,7 +92,10 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_u${KBLOCK}(
       // KC remainder
       for (; k != 0; --k) {
         $for N in range(NR):
-          const ${TYPE} v${N} = *w${N}++;
+          $if IZP == 128:
+            const ${TYPE} v${N} = (${TYPE}) ((uint8_t) (*w${N}++) ^ UINT8_C(0x80));
+          $else:
+            const ${TYPE} v${N} = *w${N}++;
           out[${N}] = v${N};
         out += ${NR};
       }
@@ -139,7 +147,10 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_u${KBLOCK}(
       for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $for N in range(NR-1):
           $for K in range(KBLOCK):
-            const ${TYPE} v${N}${K} = w${N}[${K}];
+            $if IZP == 128:
+              const ${TYPE} v${N}${K} = (${TYPE}) ((uint8_t) w${N}[${K}] ^ UINT8_C(0x80));
+            $else:
+              const ${TYPE} v${N}${K} = w${N}[${K}];
           w${N} += ${KBLOCK};
         $for K in range(KBLOCK):
           $for N in range(NR-1):
@@ -150,7 +161,10 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_u${KBLOCK}(
       // KC remainder of 1..${KBLOCK-1}
       for (; k != 0; --k) {
         $for N in range(NR-1):
-          const ${TYPE} v${N} = *w${N}++;
+          $if IZP == 128:
+            const ${TYPE} v${N} = (${TYPE}) ((uint8_t) (*w${N}++) ^ UINT8_C(0x80));
+          $else:
+            const ${TYPE} v${N} = *w${N}++;
           out[${N}] = v${N};
         out += ${NR};
       }

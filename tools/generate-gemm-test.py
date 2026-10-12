@@ -835,6 +835,8 @@ def generate_test_cases(
       ukernel_type = token
     elif token in {"qc4w", "qc2w", "qc8w", "qb4w"}:
       weights_datatype = token
+    elif token in {"qc8uw"}:
+      weights_datatype = "qc8w"
     elif token in {"f32acc"}:
       accum_type = token
     elif token in {"fp32", "fp16", "fp32acc", "rndnu", "rndnu16", "ppmm"}:
