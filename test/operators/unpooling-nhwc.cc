@@ -393,3 +393,13 @@ TEST(UNPOOLING_NHWC_X32, batch_stride_overflow) {
                 &output_height, &output_width, /*threadpool=*/nullptr));
 }
 
+TEST(UNPOOLING_NHWC_X32, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_unpooling2d_nhwc_x32(
+                /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0,
+                /*pooling_height=*/1, /*pooling_width=*/1,
+                /*flags=*/0, nullptr));
+}
+
