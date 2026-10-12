@@ -12,7 +12,9 @@
 #include "src/xnnpack/packw.h"
 
 
-void xnn_x8_packw_gemm_gio_ukernel_x${NR}__scalar(
+$IZP = globals().get("IZP", 0)
+$DATATYPE_SPEC = "qs8_to_qu8" if IZP == 128 else "x8"
+void xnn_${DATATYPE_SPEC}_packw_gemm_gio_ukernel_x${NR}__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -56,7 +58,12 @@ void xnn_x8_packw_gemm_gio_ukernel_x${NR}__scalar(
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        memcpy(packed_w, w, ${NR} * sizeof(int8_t));
+        $if IZP == 128:
+          for (size_t j = 0; j < ${NR}; ++j) {
+            packed_w[j] = (int8_t) ((uint8_t) w[j] ^ UINT8_C(0x80));
+          }
+        $else:
+          memcpy(packed_w, w, ${NR} * sizeof(int8_t));
         w += k_stride;
         packed_w += ${NR};
       }
@@ -81,8 +88,14 @@ void xnn_x8_packw_gemm_gio_ukernel_x${NR}__scalar(
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        memcpy(packed_w, w, n * sizeof(int8_t));
-        memset(packed_w + n, 0, (${NR} - n) * sizeof(int8_t));
+        $if IZP == 128:
+          for (size_t j = 0; j < n; ++j) {
+            packed_w[j] = (int8_t) ((uint8_t) w[j] ^ UINT8_C(0x80));
+          }
+          memset(packed_w + n, 0x80, (${NR} - n) * sizeof(int8_t));
+        $else:
+          memcpy(packed_w, w, n * sizeof(int8_t));
+          memset(packed_w + n, 0, (${NR} - n) * sizeof(int8_t));
         w += k_stride;
         packed_w += ${NR};
       }

@@ -182,6 +182,26 @@ tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D D
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=16 -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-aarch64-neonfma-lane-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=16 -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=1 -D ACCUMULATORS=4 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl1-acc4.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=8 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=2 -D ACCUMULATORS=4 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl2-acc4.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=8 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8   -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=1 -D ACCUMULATORS=4 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl1-acc4.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-4x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-6x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=8 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=1 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-8x8-minmax-aarch64-neonfma-lane-ld128-tbl1.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=2 -D ACCUMULATORS=4 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-tbl2-acc4.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-4x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-6x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=8 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8UW -D FMAGIC=2 -D ACCUMULATORS=1 -o src/f32-qc8w-gemm/gen/f32-qc8uw-gemm-8x8-minmax-aarch64-neonfma-lane-ld128-tbl2.c &
 
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-neon-lane-ld64.c &

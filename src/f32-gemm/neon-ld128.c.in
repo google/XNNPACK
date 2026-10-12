@@ -4,7 +4,11 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 4 == 0
-$assert DATATYPE in ["F32", "QC4", "QC8"]
+$FMAGIC = globals().get("FMAGIC", 0)
+$ACCUMULATORS = globals().get("ACCUMULATORS", 1)
+$assert DATATYPE in ["F32", "QC4", "QC8", "QC8UW"]
+$assert FMAGIC in [0, 1, 2]
+$assert ACCUMULATORS in [1, 2, 4]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
@@ -20,8 +24,10 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
-$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
-void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld128(
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC8UW": "f32_qc8uw", "QC4": "f32_qc4w"}[DATATYPE]
+$ACC_SPEC = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$FMAGIC_SPEC = {0: "", 1: "_tbl1", 2: "_tbl2"}[FMAGIC]
+void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld128${FMAGIC_SPEC}${ACC_SPEC}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -75,6 +81,41 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
   $if DATATYPE == "QC4":
     const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
     const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
+  $elif DATATYPE in ["QC8", "QC8UW"] and FMAGIC == 1:
+    static const uint8_t idx_lo_bytes[16] = {
+        0, 16, 16, 8, 1, 16, 16, 8, 2, 16, 16, 8, 3, 16, 16, 8,
+    };
+    static const uint8_t idx_hi_bytes[16] = {
+        4, 16, 16, 8, 5, 16, 16, 8, 6, 16, 16, 8, 7, 16, 16, 8,
+    };
+    const uint8x16_t vidx_lo = vld1q_u8(idx_lo_bytes);
+    const uint8x16_t vidx_hi = vld1q_u8(idx_hi_bytes);
+    const float32x4_t vmagic_bias = vdupq_n_f32(0x1.000100p+23f);
+    $if DATATYPE == "QC8":
+      const uint8x16_t vmagic_xor = vcombine_u8(vdup_n_u8(UINT8_C(0x80)), vdup_n_u8(UINT8_C(0x4B)));
+    $else:
+      const uint8x16_t vmagic_xor = vcombine_u8(vdup_n_u8(UINT8_C(0x00)), vdup_n_u8(UINT8_C(0x4B)));
+  $elif DATATYPE in ["QC8", "QC8UW"] and FMAGIC == 2:
+    static const uint8_t idx0_bytes[16] = {
+        0, 16, 16, 17, 1, 16, 16, 17, 2, 16, 16, 17, 3, 16, 16, 17,
+    };
+    static const uint8_t idx1_bytes[16] = {
+        4, 16, 16, 17, 5, 16, 16, 17, 6, 16, 16, 17, 7, 16, 16, 17,
+    };
+    static const uint8_t idx2_bytes[16] = {
+        8, 16, 16, 17, 9, 16, 16, 17, 10, 16, 16, 17, 11, 16, 16, 17,
+    };
+    static const uint8_t idx3_bytes[16] = {
+        12, 16, 16, 17, 13, 16, 16, 17, 14, 16, 16, 17, 15, 16, 16, 17,
+    };
+    const uint8x16_t vidx0 = vld1q_u8(idx0_bytes);
+    const uint8x16_t vidx1 = vld1q_u8(idx1_bytes);
+    const uint8x16_t vidx2 = vld1q_u8(idx2_bytes);
+    const uint8x16_t vidx3 = vld1q_u8(idx3_bytes);
+    const uint8x16_t vmagic_hi = vreinterpretq_u8_u16(vdupq_n_u16(UINT16_C(0x4B00)));
+    const float32x4_t vmagic_bias = vdupq_n_f32(0x1.000100p+23f);
+    $if DATATYPE == "QC8":
+      const uint8x16_t vsign_mask = vdupq_n_u8(UINT8_C(0x80));
 
   do {
     $if INC:
@@ -90,6 +131,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $for M in range(1, MR):
         $for N in range(0, NR, 4):
           float32x4_t vacc${M}x${N//4} = vacc0x${N//4};
+    $for A in range(1, ACCUMULATORS):
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          float32x4_t vacc${M}x${N//4}c${A} = vdupq_n_f32(0.0f);
 
     size_t k = kc;
     if XNN_LIKELY(k >= 4 * sizeof(float)) {
@@ -99,6 +144,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
         $for L in range(4):
           $VGET_PART_F32 = "vget_low_f32" if L < 2 else "vget_high_f32"
+          $ACC_SUFFIX = "" if L % ACCUMULATORS == 0 else ("c%d" % (L % ACCUMULATORS))
 
           $if DATATYPE == "F32":
             $for N in range(0, NR, 4):
@@ -118,6 +164,30 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
             $for N in range(0, NR, 4):
               const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
+          $elif FMAGIC == 1:
+            $if L % 2 == 0:
+              $for N in range(0, NR, 8):
+                uint8x16_t vw${ABC[N:N+8]}c${L} = vcombine_u8(vld1_u8(w), vcreate_u8(0));
+                uint8x16_t vw${ABC[N:N+8]}c${L+1} = vcombine_u8(vld1_u8((const uint8_t*) w + 8), vcreate_u8(0));
+                w = (const uint8_t*) w + 16;
+                vw${ABC[N:N+8]}c${L} = veorq_u8(vw${ABC[N:N+8]}c${L}, vmagic_xor);
+                vw${ABC[N:N+8]}c${L+1} = veorq_u8(vw${ABC[N:N+8]}c${L+1}, vmagic_xor);
+            $for N in range(0, NR, 8):
+              const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl1q_u8(vw${ABC[N:N+8]}c${L}, vidx_lo)), vmagic_bias);
+              const float32x4_t vb${ABC[N+4:N+8]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl1q_u8(vw${ABC[N:N+8]}c${L}, vidx_hi)), vmagic_bias);
+          $elif FMAGIC == 2:
+            $if L % 2 == 0:
+              $for N in range(0, NR, 8):
+                uint8x16x2_t vw${ABC[N:N+8]}c${L}${L+1};
+                $if DATATYPE == "QC8":
+                  vw${ABC[N:N+8]}c${L}${L+1}.val[0] = veorq_u8(vld1q_u8(w), vsign_mask);
+                $else:
+                  vw${ABC[N:N+8]}c${L}${L+1}.val[0] = vld1q_u8(w);
+                vw${ABC[N:N+8]}c${L}${L+1}.val[1] = vmagic_hi;
+                w = (const uint8_t*) w + 16;
+            $for N in range(0, NR, 8):
+              const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw${ABC[N:N+8]}c${(L//2)*2}${(L//2)*2+1}, vidx${2*(L%2)})), vmagic_bias);
+              const float32x4_t vb${ABC[N+4:N+8]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw${ABC[N:N+8]}c${(L//2)*2}${(L//2)*2+1}, vidx${2*(L%2)+1})), vmagic_bias);
           $else:
             $for N in range(0, NR, 8):
               const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
@@ -134,13 +204,18 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const float32x4_t va${M}c${L} = vdupq_lane_f32(${VGET_PART_F32}(va${M}), ${L % 2});
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+                vacc${M}x${N//4}${ACC_SUFFIX} = ${VMULADDQ_F32}(vacc${M}x${N//4}${ACC_SUFFIX}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
           $else:
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${N//4} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}, vb${ABC[N:N+4]}c${L}, ${VGET_PART_F32}(va${M}), ${L % 2});
+                vacc${M}x${N//4}${ACC_SUFFIX} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}${ACC_SUFFIX}, vb${ABC[N:N+4]}c${L}, ${VGET_PART_F32}(va${M}), ${L % 2});
         k -= 4 * sizeof(float);
       } while (k >= 4 * sizeof(float));
+      $if ACCUMULATORS == 4:
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${N//4} = vaddq_f32(vacc${M}x${N//4}, vacc${M}x${N//4}c2);
+            vacc${M}x${N//4}c1 = vaddq_f32(vacc${M}x${N//4}c1, vacc${M}x${N//4}c3);
     }
 
     if XNN_UNLIKELY(k != 0) {
@@ -150,6 +225,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
         $for L in range(2):
           $VGET_PART_F32 = "vget_low_f32"
+          $ACC_SUFFIX = "" if (L == 0 or ACCUMULATORS == 1) else "c1"
 
           $if DATATYPE == "F32":
             $for N in range(0, NR, 4):
@@ -166,6 +242,30 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
             $for N in range(0, NR, 4):
               const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
+          $elif FMAGIC == 1:
+            $if L % 2 == 0:
+              $for N in range(0, NR, 8):
+                uint8x16_t vw${ABC[N:N+8]}c0 = vcombine_u8(vld1_u8(w), vcreate_u8(0));
+                uint8x16_t vw${ABC[N:N+8]}c1 = vcombine_u8(vld1_u8((const uint8_t*) w + 8), vcreate_u8(0));
+                w = (const uint8_t*) w + 16;
+                vw${ABC[N:N+8]}c0 = veorq_u8(vw${ABC[N:N+8]}c0, vmagic_xor);
+                vw${ABC[N:N+8]}c1 = veorq_u8(vw${ABC[N:N+8]}c1, vmagic_xor);
+            $for N in range(0, NR, 8):
+              const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl1q_u8(vw${ABC[N:N+8]}c${L}, vidx_lo)), vmagic_bias);
+              const float32x4_t vb${ABC[N+4:N+8]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl1q_u8(vw${ABC[N:N+8]}c${L}, vidx_hi)), vmagic_bias);
+          $elif FMAGIC == 2:
+            $if L % 2 == 0:
+              $for N in range(0, NR, 8):
+                uint8x16x2_t vw${ABC[N:N+8]}c01;
+                $if DATATYPE == "QC8":
+                  vw${ABC[N:N+8]}c01.val[0] = veorq_u8(vld1q_u8(w), vsign_mask);
+                $else:
+                  vw${ABC[N:N+8]}c01.val[0] = vld1q_u8(w);
+                vw${ABC[N:N+8]}c01.val[1] = vmagic_hi;
+                w = (const uint8_t*) w + 16;
+            $for N in range(0, NR, 8):
+              const float32x4_t vb${ABC[N:N+4]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw${ABC[N:N+8]}c01, vidx${2*L})), vmagic_bias);
+              const float32x4_t vb${ABC[N+4:N+8]}c${L} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw${ABC[N:N+8]}c01, vidx${2*L+1})), vmagic_bias);
           $else:
             $for N in range(0, NR, 8):
               const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
@@ -182,11 +282,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const float32x4_t va${M}c${L} = vdupq_lane_f32(va${M}, ${L});
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+                vacc${M}x${N//4}${ACC_SUFFIX} = ${VMULADDQ_F32}(vacc${M}x${N//4}${ACC_SUFFIX}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
           $else:
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${N//4} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
+                vacc${M}x${N//4}${ACC_SUFFIX} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}${ACC_SUFFIX}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
       }
       if XNN_UNLIKELY(k & (1 * sizeof(float))) {
         $for M in range(MR):
@@ -204,6 +304,24 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             const int32x4_t vxw${ABC[N+4:N+8]} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]})));
           $for N in range(0, NR, 4):
             const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
+        $elif FMAGIC == 1:
+          $for N in range(0, NR, 8):
+            uint8x16_t vw${ABC[N:N+8]} = vcombine_u8(vld1_u8(w), vcreate_u8(0));
+            w = (const uint8_t*) w + 8;
+            vw${ABC[N:N+8]} = veorq_u8(vw${ABC[N:N+8]}, vmagic_xor);
+            const float32x4_t vb${ABC[N:N+4]} = vsubq_f32(vreinterpretq_f32_u8(vqtbl1q_u8(vw${ABC[N:N+8]}, vidx_lo)), vmagic_bias);
+            const float32x4_t vb${ABC[N+4:N+8]} = vsubq_f32(vreinterpretq_f32_u8(vqtbl1q_u8(vw${ABC[N:N+8]}, vidx_hi)), vmagic_bias);
+        $elif FMAGIC == 2:
+          $for N in range(0, NR, 8):
+            uint8x16x2_t vw${ABC[N:N+8]};
+            $if DATATYPE == "QC8":
+              vw${ABC[N:N+8]}.val[0] = veorq_u8(vcombine_u8(vld1_u8(w), vcreate_u8(0)), vsign_mask);
+            $else:
+              vw${ABC[N:N+8]}.val[0] = vcombine_u8(vld1_u8(w), vcreate_u8(0));
+            vw${ABC[N:N+8]}.val[1] = vmagic_hi;
+            w = (const uint8_t*) w + 8;
+            const float32x4_t vb${ABC[N:N+4]} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw${ABC[N:N+8]}, vidx0)), vmagic_bias);
+            const float32x4_t vb${ABC[N+4:N+8]} = vsubq_f32(vreinterpretq_f32_u8(vqtbl2q_u8(vw${ABC[N:N+8]}, vidx1)), vmagic_bias);
         $else:
           $for N in range(0, NR, 8):
             const int8x8_t vw${ABC[N:N+8]} = vld1_s8(w); w = (const int8_t*) w + 8;
@@ -221,7 +339,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}, vb${ABC[N:N+4]});
       }
     }
-    $if DATATYPE in ["QC8", "QC4"]:
+    $if ACCUMULATORS > 1:
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          vacc${M}x${N//4} = vaddq_f32(vacc${M}x${N//4}, vacc${M}x${N//4}c1);
+    $if DATATYPE in ["QC8", "QC8UW", "QC4"]:
       $for N in range(0, NR, 4):
         const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = ((const float*) w + 4);
       $for N in range(0, NR, 4):

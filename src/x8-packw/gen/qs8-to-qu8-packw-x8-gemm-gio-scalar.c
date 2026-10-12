@@ -1,0 +1,102 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/x8-packw/gio-scalar.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packw.h"
+
+
+void xnn_qs8_to_qu8_packw_gemm_gio_ukernel_x8__scalar(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t k_stride,
+  const int8_t* weights,
+  const uint32_t* bias,
+  const void* scale,
+  int8_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == 8);   // This kernel is for NR=8
+  assert(kr == 1);
+  assert(sr == 1);
+  assert(k_stride != 0);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  const uint32_t* b = bias;
+  int8_t* packed_w = packed_weights;
+  do {
+    // NC main loop multiple of 8
+    const int8_t* w = weights;
+    size_t n = nc;
+
+    for (; n >= 8; n -= 8) {
+      if XNN_LIKELY(b != NULL) {
+        memcpy(packed_w, b, 8 * sizeof(uint32_t));
+        packed_w += 8 * sizeof(uint32_t);
+        b += 8;
+      } else {
+        memset(packed_w, 0, 8 * sizeof(uint32_t));
+        packed_w += 8 * sizeof(uint32_t);
+      }
+
+      // KC main loop
+      for (size_t k = kc; k > 0; --k) {
+        for (size_t j = 0; j < 8; ++j) {
+          packed_w[j] = (int8_t) ((uint8_t) w[j] ^ UINT8_C(0x80));
+        }
+        w += k_stride;
+        packed_w += 8;
+      }
+      packed_w += extra_bytes;
+      w = w - kc * k_stride + 8;  // Advance to next column of 8 int8_t
+    }
+
+    // NC remainder (1..7)
+    if XNN_UNLIKELY(n != 0) {
+      assert(n >= 1);
+      assert(n <= 7);
+
+      if XNN_LIKELY(b != NULL) {
+        memcpy(packed_w, b, n * sizeof(uint32_t));
+        memset(packed_w + n * sizeof(uint32_t), 0, (8 - n) * sizeof(uint32_t));
+        packed_w += 8 * sizeof(uint32_t);
+        b += n;
+      } else {
+        memset(packed_w, 0, 8 * sizeof(uint32_t));
+        packed_w += 8 * sizeof(uint32_t);
+      }
+
+      // KC main loop
+      for (size_t k = kc; k > 0; --k) {
+        for (size_t j = 0; j < n; ++j) {
+          packed_w[j] = (int8_t) ((uint8_t) w[j] ^ UINT8_C(0x80));
+        }
+        memset(packed_w + n, 0x80, (8 - n) * sizeof(int8_t));
+        w += k_stride;
+        packed_w += 8;
+      }
+      packed_w += extra_bytes;
+    }
+    weights += nc * kc;
+  } while (--g != 0);
+}
