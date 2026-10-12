@@ -1395,11 +1395,6 @@ static enum xnn_status reshape_convolution2d_nchw(
     return xnn_status_invalid_parameter;
   }
 
-  if (batch_size == 0) {
-    convolution_op->state = xnn_run_state_skip;
-    return xnn_status_success;
-  }
-
   convolution_op->batch_size = batch_size;
   convolution_op->convolution_op->input_height = input_height;
   convolution_op->convolution_op->input_width = input_width;
@@ -1445,6 +1440,11 @@ static enum xnn_status reshape_convolution2d_nchw(
       convolution_op->convolution_op->stride_width);
   if (output_width_out != NULL) {
     *output_width_out = output_width;
+  }
+
+  if (batch_size == 0) {
+    convolution_op->state = xnn_run_state_skip;
+    return xnn_status_success;
   }
 
   size_t num_input_pixels = 0;

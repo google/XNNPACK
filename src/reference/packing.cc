@@ -2537,7 +2537,7 @@ void xnn_pack_qu8_weights_and_biases(
   const size_t packed_k_stride = round_up_po2(input_channels, kr * sr);
   const size_t extra_bytes =
       extra_data0_element_size + extra_data1_element_size;
-  const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
+  const size_t weights_stride = xnn_packed_stride_qu8_weights_and_biases(
       gemm_config, input_channels, unused_block_size, packed_k_stride,
       extra_bytes);
   return pack_weights_and_biases(
