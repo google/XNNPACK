@@ -393,3 +393,25 @@ TEST(UNPOOLING_NHWC_X32, batch_stride_overflow) {
                 &output_height, &output_width, /*threadpool=*/nullptr));
 }
 
+TEST(UNPOOLING_NHWC_X32, reshape_zero_output_dimensions) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t unpooling_op = nullptr;
+  // Total padding is 4; kernel is 2, input is 1.
+  // Output dimension is doz(2 * 1, 4) = 0.
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unpooling2d_nhwc_x32(
+                /*padding_top=*/2, /*padding_right=*/2,
+                /*padding_bottom=*/2, /*padding_left=*/2,
+                /*pooling_height=*/2, /*pooling_width=*/2,
+                /*flags=*/0, &unpooling_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      unpooling_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_unpooling2d_nhwc_x32(
+                unpooling_op, /*batch_size=*/1, /*input_height=*/1,
+                /*input_width=*/1, /*channels=*/1,
+                /*input_pixel_stride=*/1, /*output_pixel_stride=*/1,
+                &output_height, &output_width, /*threadpool=*/nullptr));
+}
