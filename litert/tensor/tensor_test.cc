@@ -20,16 +20,21 @@ limitations under the License.
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "absl/status/status.h"
+#include "absl/status/status_matchers.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "litert/tensor/arithmetic.h"
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
+#include "litert/tensor/utils/macros.h"
 #include "litert/tensor/utils/matchers.h"
 
 namespace litert::tensor {
 namespace {
 
+using ::absl_testing::StatusIs;
 using ::litert::tensor::IsOk;
 using ::litert::tensor::IsOkAndHolds;
 using ::testing::Address;
@@ -38,6 +43,7 @@ using ::testing::Each;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
+using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::SizeIs;
 using ::testing::StrEq;
@@ -258,6 +264,46 @@ TEST(TensorTest, ShallowCloneTo) {
   EXPECT_THAT(clone.GetType(), Eq(model.GetType()));
   EXPECT_THAT(clone.GetShape(), Eq(model.GetShape()));
   EXPECT_THAT(clone.GetBuffer(), IsOkAndHolds(Address(Eq(buffer.get()))));
+}
+
+TEST(TensorTest, MacroErrorTensorRecordsCallerLocation) {
+  const int line = __LINE__ + 2;
+  auto make_tensor = []() -> TensorHandle {
+    LRT_TENSOR_RETURN_IF_ERROR(absl::InternalError("Internal."));
+    return TensorHandle();
+  };
+  const TensorHandle t = make_tensor();
+  const absl::Status status = t.GetStatus();
+
+  EXPECT_THAT(status, StatusIs(absl::StatusCode::kInternal, "Internal."));
+  EXPECT_EQ(graph::GetLocation(t.GetRaw()).line(), line);
+  ASSERT_THAT(status.GetSourceLocations(), Not(IsEmpty()));
+  EXPECT_EQ(status.GetSourceLocations().back().line(), line);
+}
+
+TEST(TensorTest, AnnotatedMacroErrorReturnsTensor) {
+  absl::StatusOr<int> error = absl::InternalError("a");
+  const int line = __LINE__ + 2;
+  auto make_tensor = [&]() -> Tensor<> {
+    LRT_TENSOR_ASSIGN_OR_RETURN([[maybe_unused]] int value, error, _ << "b");
+    return Tensor<>();
+  };
+  const Tensor<> t = make_tensor();
+
+  EXPECT_THAT(t.GetStatus(), StatusIs(absl::StatusCode::kInternal, "a; b"));
+  EXPECT_EQ(graph::GetLocation(t.GetRaw()).line(), line);
+}
+
+TEST(TensorTest, MacroErrorTensorSupportsStatusBuilderFunctions) {
+  const int line = __LINE__ + 2;
+  auto make_tensor = []() -> TensorHandle {
+    LRT_TENSOR_RETURN_IF_ERROR(absl::InternalError("a")).SetPrepend() << "b: ";
+    return TensorHandle();
+  };
+  const TensorHandle t = make_tensor();
+
+  EXPECT_THAT(t.GetStatus(), StatusIs(absl::StatusCode::kInternal, "b: a"));
+  EXPECT_EQ(graph::GetLocation(t.GetRaw()).line(), line);
 }
 
 }  // namespace

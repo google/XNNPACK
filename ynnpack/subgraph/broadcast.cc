@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/static_transpose.h"
@@ -28,6 +29,16 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
       validate_input_tensor("broadcast", subgraph, "input_id", input_id));
   YNN_RETURN_IF_ERROR(
       validate_output_tensor("broadcast", subgraph, "output_id", output_id));
+  if (num_axes > YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "For node `broadcast`, num_axes " << num_axes
+                    << " exceeds YNN_MAX_TENSOR_RANK " << YNN_MAX_TENSOR_RANK;
+    return ynn_status_invalid_parameter;
+  }
+  if (num_axes > 0 && axes == nullptr) {
+    YNN_LOG_ERROR()
+        << "For node `broadcast`, axes must be non-null when num_axes > 0";
+    return ynn_status_invalid_parameter;
+  }
   const ynn_value& input = subgraph->value(input_id);
 
   ynn::axes_set axes_set;

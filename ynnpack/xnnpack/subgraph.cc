@@ -711,12 +711,10 @@ xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph, float output_min,
                                       uint32_t output_id, uint32_t flags) {
   if (!(flags & XNN_FLAG_TRANSPOSE_WEIGHTS)) {
     uint32_t filter_id_transposed = YNN_INVALID_VALUE_ID;
-    assert(ynn::rank_of_value(subgraph, filter_id) == 2);
-    const int32_t perm[] = {1, 0};
+    const int32_t perm[2] = {-1, -2};
     ynn_status status = ynn_define_static_transpose(
-        subgraph->ynn,
-        /*num_dims=*/2, perm, filter_id, &filter_id_transposed,
-        /*flags=*/0);
+        subgraph->ynn, /*num_axes=*/2, perm, filter_id, &filter_id_transposed,
+        YNN_NODE_FLAG_KEEP_DIMS);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
@@ -1211,16 +1209,10 @@ xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
 
   if (flags & XNN_FLAG_TRANSPOSE_B) {
     uint32_t input2_id_transposed = YNN_INVALID_VALUE_ID;
-    const size_t b_rank = ynn::rank_of_value(subgraph, input2_id);
-    assert(b_rank >= 2);
-    assert(b_rank <= YNN_MAX_TENSOR_RANK);
-    std::array<int32_t, YNN_MAX_TENSOR_RANK> perm;
-    std::iota(perm.begin(), perm.end(), 0);
-    std::swap(perm[b_rank - 1], perm[b_rank - 2]);
-    status = ynn_define_static_transpose(subgraph->ynn,
-                                         /*num_dims=*/b_rank, perm.data(),
+    const int32_t perm[2] = {-1, -2};
+    status = ynn_define_static_transpose(subgraph->ynn, /*num_axes=*/2, perm,
                                          input2_id, &input2_id_transposed,
-                                         /*flags=*/0);
+                                         YNN_NODE_FLAG_KEEP_DIMS);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }

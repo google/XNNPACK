@@ -307,6 +307,18 @@ ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t num_axes,
     internal_axes.push_back(axis);
   }
 
+  for (size_t i = 0; i + 1 < internal_axes.size(); ++i) {
+    const int32_t dim_i = internal_axes[i];
+    if (slinky::is_constant(input.extent(dim_i), 1)) continue;
+    if (any_n(internal_axes.size(),
+              [&](int j) { return j != i && internal_axes[j] == dim_i; })) {
+      YNN_LOG_ERROR()
+          << "For node `static_transpose`, duplicate non-broadcast dimension: "
+          << axes[i];
+      return ynn_status_invalid_parameter;
+    }
+  }
+
   std::vector<int32_t> op_permutation;
   if (flags & YNN_NODE_FLAG_KEEP_DIMS) {
     std::vector<int32_t> positions = internal_axes;

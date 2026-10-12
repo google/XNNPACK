@@ -93,11 +93,14 @@ void TestImpl(T, size_t rank) {
       }
     }
 
-    T pad_value = 7;
+    const T pad_value = bool_dist(rng) ? 0 : 7;
 
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    uint32_t padding_id = subgraph.DefineScalar<T>(pad_value);
+    uint32_t padding_id =
+        pad_value == 0 && bool_dist(rng)
+            ? YNN_INVALID_VALUE_ID
+            : subgraph.DefineScalar<T>(pad_value);
     subgraph.AddInput(type_of<T>(), input_shape, 0)
         .AddOutput(type_of<T>(), rank, 1)
         .AddPad(axes, gather(axes, pre_padding), gather(axes, post_padding), 0,

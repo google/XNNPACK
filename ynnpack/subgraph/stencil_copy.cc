@@ -197,6 +197,17 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
         validate_axis("stencil_copy", "input", input.rank(), stencil_axes[i]));
     YNN_RETURN_IF_ERROR(validate_axis(
         "stencil_copy", "output", input.rank() + num_stencils, new_axes[i]));
+    if (stencil_dims[i] == 0 || stencil_strides[i] == 0 ||
+        stencil_dilations[i] == 0) {
+      YNN_LOG_ERROR() << "For node `stencil_copy`, stencil dimension, stride, "
+                         "and dilation must be non-zero";
+      return ynn_status_invalid_parameter;
+    }
+    if ((stencil_dims[i] - 1) > (INT32_MAX - 1) / stencil_dilations[i]) {
+      YNN_LOG_ERROR()
+          << "For node `stencil_copy`, dilated kernel size overflows";
+      return ynn_status_invalid_parameter;
+    }
     op_data.stencils.push_back({
         // Swap the axes to get the slinky dimensions.
         .axis = axis_to_slinky_dim(input.rank(), stencil_axes[i]),

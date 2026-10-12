@@ -125,6 +125,7 @@ cc_library(
         "//ynnpack/kernels/dot",
         "//ynnpack/kernels/dot:pack",
         "//ynnpack/kernels/dot:schedule",
+        "//ynnpack/kernels/dot/cost_model",
         "//ynnpack/kernels/iota",
         "//ynnpack/kernels/lut",
         "//ynnpack/kernels/reduce",

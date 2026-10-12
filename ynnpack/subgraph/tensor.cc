@@ -149,7 +149,7 @@ ynn_status define_tensor(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
           extent_d *= type_element_count(type);
         }
         value->extents[d] = extent_d;
-      } else if (logical > 1) {
+      } else {
         value->extents[d] = logical;
       }
     }

@@ -6,6 +6,8 @@
 $assert NR >= 8
 $assert NR % 8 == 0
 $assert KBLOCK == 16
+$assert AVX in [2, 10]
+$ISA = "avx2" if AVX == 2 else "avx256skx"
 
 #include <assert.h>
 #include <stddef.h>
@@ -22,7 +24,7 @@ $if PREFETCH:
   #include "src/xnnpack/prefetch.h"
 
 
-void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
+void xnn_x16_packw_gemm_goi_ukernel_x${NR}__${ISA}_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,

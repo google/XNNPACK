@@ -2063,6 +2063,16 @@ YNN_ALWAYS_INLINE f32x4 cast(bf16x4 a, float) {
   return f32x4{vreinterpretq_f32_u32(vshll_n_u16(a.v, 16))};
 }
 
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
+  const uint16x8_t vzero = vdupq_n_u16(0);
+  return {
+      f32x4{vreinterpretq_f32_u16(vzip1q_u16(vzero, a.v))},
+      f32x4{vreinterpretq_f32_u16(vzip2q_u16(vzero, a.v))},
+  };
+}
+#endif
+
 YNN_ALWAYS_INLINE bf16x4 cast(f32x4 a, bfloat16) {
   uint32x4_t u = vreinterpretq_u32_f32(a.v);
   uint32x4_t is_nan = vcgtq_u32(vshlq_n_u32(u, 1), vdupq_n_u32(0xFF000000u));
@@ -2107,11 +2117,75 @@ YNN_ALWAYS_INLINE s32x16 cast(u8x16 b, int32_t) {
 }
 
 YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+#ifdef YNN_ARCH_ARM64
+  const uint8x16_t vsign_mask = vdupq_n_u8(0x80);
+  const uint8x16_t vmagic_bias = vreinterpretq_u8_u32(vdupq_n_u32(0x4B000080));
+  const uint8x16x2_t vtbl = {{
+      veorq_u8(vreinterpretq_u8_s8(a.v), vsign_mask),
+      vmagic_bias,
+  }};
+  static constexpr uint8_t idx_table[64] = {
+      0,  17, 18, 19, 1,  17, 18, 19, 2,  17, 18, 19, 3,  17, 18, 19,
+      4,  17, 18, 19, 5,  17, 18, 19, 6,  17, 18, 19, 7,  17, 18, 19,
+      8,  17, 18, 19, 9,  17, 18, 19, 10, 17, 18, 19, 11, 17, 18, 19,
+      12, 17, 18, 19, 13, 17, 18, 19, 14, 17, 18, 19, 15, 17, 18, 19,
+  };
+  const float32x4_t vbias = vreinterpretq_f32_u8(vmagic_bias);
+  return {
+      f32x8{
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 0))),
+              vbias)},
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 16))),
+              vbias)},
+      },
+      f32x8{
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 32))),
+              vbias)},
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 48))),
+              vbias)},
+      },
+  };
+#else
   return cast(cast(a, int32_t{}), float{});
+#endif
 }
 
 YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+#ifdef YNN_ARCH_ARM64
+  const uint8x16_t vmagic_bias = vreinterpretq_u8_u32(vdupq_n_u32(0x4B000000));
+  const uint8x16x2_t vtbl = {{a.v, vmagic_bias}};
+  static constexpr uint8_t idx_table[64] = {
+      0,  17, 18, 19, 1,  17, 18, 19, 2,  17, 18, 19, 3,  17, 18, 19,
+      4,  17, 18, 19, 5,  17, 18, 19, 6,  17, 18, 19, 7,  17, 18, 19,
+      8,  17, 18, 19, 9,  17, 18, 19, 10, 17, 18, 19, 11, 17, 18, 19,
+      12, 17, 18, 19, 13, 17, 18, 19, 14, 17, 18, 19, 15, 17, 18, 19,
+  };
+  const float32x4_t vbias = vreinterpretq_f32_u8(vmagic_bias);
+  return {
+      f32x8{
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 0))),
+              vbias)},
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 16))),
+              vbias)},
+      },
+      f32x8{
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 32))),
+              vbias)},
+          f32x4{vsubq_f32(
+              vreinterpretq_f32_u8(vqtbl2q_u8(vtbl, vld1q_u8(idx_table + 48))),
+              vbias)},
+      },
+  };
+#else
   return cast(cast(a, int32_t{}), float{});
+#endif
 }
 
 YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {

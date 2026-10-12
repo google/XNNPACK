@@ -24,6 +24,7 @@
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
 #include "ynnpack/kernels/dot/dot.h"
 #include <benchmark/benchmark.h>
 
@@ -51,9 +52,8 @@ void fill(T* data, size_t n, int value) {
 Shape shape = {240, 240, 240};
 
 template <typename TA, typename TB, typename TC>
-void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
-         size_t block_m, size_t block_n, size_t tile_m, size_t tile_n,
-         size_t tile_k, uint32_t flags, TA, TB, TC) {
+void dot(benchmark::State& state, uint64_t arch_flags, const dot_kernel& kernel,
+         TA, TB, TC) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
@@ -64,15 +64,15 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   // If k gets aligned up, that means this kernel would have needed to pad the
   // input with zeros up to a multiple of tile_k. To make checking correctness
   // easier, let's just round k up, it should be computationally equivalent.
-  const size_t k = align_up<size_t>(shape.k, tile_k);
+  const size_t k = align_up<size_t>(shape.k, kernel.tile_k);
   state.SetLabel(std::to_string(m) + "x" + std::to_string(n) + "x" +
                  std::to_string(k));
 
-  const bool transpose_a = flags & dot_flag::transpose_a;
+  const bool transpose_a = kernel.flags & dot_flag::transpose_a;
 
-  Tensor<TA> a({align_up(m, tile_m), k});
-  Tensor<TB> b({k, align_up(n, tile_n * tile_k)},
-               Alignment{.bytes = tile_n * tile_k * sizeof(TB)});
+  Tensor<TA> a({align_up<size_t>(m, kernel.tile_m), k});
+  Tensor<TB> b({k, align_up<size_t>(n, kernel.tile_n * kernel.tile_k)},
+               Alignment{.bytes = kernel.tile_n * kernel.tile_k * sizeof(TB)});
   Tensor<TC> c({m, n});
   a.fill(1);
   b.fill(1);
@@ -81,18 +81,19 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
   if (transpose_a) {
     // This mangles the data, but we don't care here.
-    a = a.reshape({k / tile_k, m * tile_k});
+    a = a.reshape({k / kernel.tile_k, m * kernel.tile_k});
   }
 
   for (auto _ : state) {
     dot_kernel_state kernel_state = {};
-    for (size_t i = 0; i < m; i += block_m) {
-      size_t m_i = std::min(block_m, m - i);
-      const void* a_i = transpose_a ? &a(0, i * tile_k) : &a(i, 0);
-      kernel(m_i, n, 1, 1, k, a.stride_bytes(0) / (transpose_a ? tile_k : 1), 0,
-             0, a_i, 0, 0, b.stride_bytes(0) / tile_k, b.base(),
-             /*init_c_stride_m=*/0, nullptr, c.stride_bytes(0), &c(i, 0),
-             &kernel_state);
+    for (size_t i = 0; i < m; i += kernel.block_m) {
+      size_t m_i = std::min<size_t>(kernel.block_m, m - i);
+      const void* a_i = transpose_a ? &a(0, i * kernel.tile_k) : &a(i, 0);
+      kernel.kernel(m_i, n, 1, 1, k,
+                    a.stride_bytes(0) / (transpose_a ? kernel.tile_k : 1), 0, 0,
+                    a_i, 0, 0, b.stride_bytes(0) / kernel.tile_k, b.base(),
+                    /*init_c_stride_m=*/0, nullptr, c.stride_bytes(0), &c(i, 0),
+                    &kernel_state);
     }
   }
 
@@ -107,12 +108,26 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   const size_t ops = shape.m * shape.n * shape.k * 2;
   state.counters["OP"] =
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
+
+  // This counter is the ratio of predicted / actual cost according to the
+  // cost model.
+  const float cost = kernel.estimate_cost(shape.m, shape.n, shape.k);
+  state.counters["normalized_cost"] = benchmark::Counter(
+      state.iterations() * cost, benchmark::Counter::kIsRate);
 }
 
+const dot_cost_models& cost_models = get_dot_cost_models();
+
 #define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_m,  \
-                       tile_n, tile_k, flags, a_type, b_type, c_type)          \
-  BENCHMARK_CAPTURE(dot, kernel, arch_flags, kernel, block_m, block_n, tile_m, \
-                    tile_n, tile_k, flags, a_type(), b_type(), c_type())       \
+                       tile_n, tile_k, flags, a_type, b_type, c_type,          \
+                       cost_model)                                             \
+  BENCHMARK_CAPTURE(                                                           \
+      dot, kernel, arch_flags,                                                 \
+      dot_kernel{kernel, static_cast<int>(block_m), static_cast<int>(block_n), \
+                 static_cast<int>(block_k), static_cast<int>(tile_m),          \
+                 static_cast<int>(tile_n), static_cast<int>(tile_k), flags,    \
+                 &cost_model},                                                 \
+      a_type(), b_type(), c_type())                                            \
       ->UseRealTime();
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
@@ -127,9 +142,11 @@ void get_dot_kernel(benchmark::State& state, A, B, C) {
   packed_shape.tile_k = state.range(3);
   packed_shape.block_n = state.range(4);
 
+  dot_cost_models cost_models = get_dot_cost_models();
+
   dot_type type = {type_of<A>(), type_of<B>(), type_of<C>()};
   for (auto _ : state) {
-    get_dot_kernel(type, {m, n, k}, packed_shape,
+    get_dot_kernel(type, cost_models, {m, n, k}, packed_shape,
                    /*consistent_arithmetic=*/false,
                    /*transpose_a=*/std::nullopt);
   }

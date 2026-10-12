@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -1056,6 +1057,10 @@ void test_unary(F f, Ref ref, float epsilons,
     }
   }
 
+  double max_rel_error = 0.0;
+  double sum_rel_error = 0.0;
+  size_t count = 0;
+
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
@@ -1072,12 +1077,35 @@ void test_unary(F f, Ref ref, float epsilons,
         // Treat all denormals as equal.
         ASSERT_LE(result[i], scalar_info::smallest_normal()) << a[i];
       } else {
+        const double d_res = static_cast<double>(result[i]);
+        const double d_ref = static_cast<double>(k);
+        if (std::isfinite(d_res) && std::isfinite(d_ref)) {
+          const double abs_diff = std::abs(d_res - d_ref);
+          const double rel_error = abs_diff / std::abs(d_ref);
+          max_rel_error = std::max(max_rel_error, rel_error);
+          sum_rel_error += rel_error;
+          ++count;
+        }
+
         const scalar abs_error =
             static_cast<scalar>(static_cast<double>(scalar_info::epsilon()) *
                                 static_cast<double>(std::abs(k) * epsilons));
         ASSERT_NEAR(result[i], k, abs_error) << a[i];
       }
     }
+  }
+
+  if (count > 0) {
+    const double mean_rel_error = sum_rel_error / count;
+    const double eps = static_cast<double>(scalar_info::epsilon());
+    std::cout << "max rel error: " << max_rel_error
+              << " (" << max_rel_error / eps << " eps)"
+              << ", mean rel error: " << mean_rel_error
+              << " (" << mean_rel_error / eps << " eps)" << std::endl;
+    testing::Test::RecordProperty("max_rel_error", max_rel_error);
+    testing::Test::RecordProperty("mean_rel_error", mean_rel_error);
+    testing::Test::RecordProperty("max_rel_error_eps", max_rel_error / eps);
+    testing::Test::RecordProperty("mean_rel_error_eps", mean_rel_error / eps);
   }
 }
 

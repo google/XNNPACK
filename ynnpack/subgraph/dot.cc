@@ -25,10 +25,10 @@
 #include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
 #include "ynnpack/kernels/dot/pack.h"
 #include "ynnpack/kernels/dot/schedule.h"
 #include "ynnpack/kernels/ternary/ternary.h"
-#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/runtime.h"
@@ -37,6 +37,7 @@
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/utils.h"
 #include "slinky/base/arithmetic.h"
+#include "slinky/base/thread_pool.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
@@ -53,13 +54,17 @@ bool prefer_uint8_dot(ynn_type b_type) {
     return false;
   }
 
+  const dot_cost_models& cost_models = get_dot_cost_models();
+
   // Get the kernels we would use for both int8 and uint8.
-  dot_kernel int8 = get_dot_kernel({ynn_type_int8, b_type, ynn_type_int32});
-  dot_kernel uint8 = get_dot_kernel({ynn_type_uint8, b_type, ynn_type_int32});
-  if (!uint8.kernel) {
+  dot_kernel int8 =
+      get_dot_kernel({ynn_type_int8, b_type, ynn_type_int32}, cost_models);
+  dot_kernel uint8 =
+      get_dot_kernel({ynn_type_uint8, b_type, ynn_type_int32}, cost_models);
+  if (!uint8.kernel || !uint8.cost_model) {
     return false;
   }
-  if (!int8.kernel) {
+  if (!int8.kernel || !int8.cost_model) {
     return true;
   }
 
@@ -67,15 +72,9 @@ bool prefer_uint8_dot(ynn_type b_type) {
   const size_t m = int8.block_m * uint8.block_m;
   const size_t n = int8.block_n * uint8.block_n;
   const size_t k = int8.block_k * uint8.block_k;
-  constexpr size_t tile_m = 1;
-
   // Estimate the cost of both kernels.
-  const float uint8_cost =
-      estimate_dot_cost(m, n, k, uint8.block_m, uint8.block_n, uint8.block_k,
-                        tile_m, uint8.tile_n, uint8.tile_k);
-  const float int8_cost =
-      estimate_dot_cost(m, n, k, int8.block_m, int8.block_n, int8.block_k,
-                        tile_m, int8.tile_n, int8.tile_k);
+  const float uint8_cost = uint8.estimate_cost(m, n, k);
+  const float int8_cost = int8.estimate_cost(m, n, k);
   return uint8_cost < int8_cost;
 }
 
@@ -250,10 +249,16 @@ constexpr index_t cache_size_l2 = 128 * 1024;
 // kernel tile sizes, etc.).
 constexpr index_t consistent_block_n = 64;
 
+const dot_cost_models& get_dot_cost_models(const slinky::eval_context& ctx) {
+  assert(ctx.user_data);
+  return *reinterpret_cast<const dot_cost_models*>(ctx.user_data);
+}
+
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
-                   bool transposed_a, bool pack_b, size_t num_k_dims) {
+                   bool transposed_a, bool pack_b, size_t num_k_dims,
+                   int thread_count) {
   uint32_t kernel_flags = 0;
   if (consistent_arithmetic) {
     kernel_flags |= dot_flag::consistent_arithmetic;
@@ -266,10 +271,16 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
   }
   uint64_t arch_flags = get_supported_arch_flags();
 
-  return [type, kernel_flags, transposed_a, pack_b, num_k_dims, arch_flags](
-             slinky::raw_buffer a, slinky::raw_buffer b,
-             slinky::raw_buffer init_c, slinky::raw_buffer c,
-             const slinky::raw_buffer& reduction_bounds) -> index_t {
+  return [type, kernel_flags, transposed_a, pack_b, num_k_dims, arch_flags,
+          thread_count](const slinky::call_stmt* call,
+                        const slinky::eval_context& ctx) -> index_t {
+    slinky::raw_buffer a = *ctx.lookup_buffer(call->inputs[0]);
+    slinky::raw_buffer b = *ctx.lookup_buffer(call->inputs[1]);
+    slinky::raw_buffer init_c = *ctx.lookup_buffer(call->inputs[2]);
+    slinky::raw_buffer c = *ctx.lookup_buffer(call->outputs[0]);
+    const slinky::raw_buffer& reduction_bounds =
+        *ctx.lookup_buffer(call->outputs[1]);
+
     const slinky::dim& c_n = c.dim(0);
     if (c_n.empty()) {
       // Most things below transparently handle empty dimensions, but n has some
@@ -452,8 +463,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     dot_packed_shape packed_shape;
     packed_shape.block_n = block_n;
     packed_shape.tile_k = tile_k;
-    dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags,
-                                       require_transpose_a, arch_flags);
+    dot_kernel kernel = get_dot_kernel(
+        type, get_dot_cost_models(ctx), shape, packed_shape, kernel_flags,
+        require_transpose_a, arch_flags, thread_count);
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
     const index_t block_m = kernel.block_m;
@@ -1299,7 +1311,19 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   if (symmetric_b) {
     kernel_flags |= dot_flag::symmetric_b;
   }
-  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags);
+  const dot_cost_models& cost_models = ynn::get_dot_cost_models();
+
+  // Dot kernel cost models are fit on small tiles that fit in L1 cache. We also
+  // assume that the dot will be tiled such that the operands fit in L1 cache.
+  // To make these assumptions more valid, we can clamp the shape used for
+  // kernel selection to a small size more like to be well represented by the
+  // cost model.
+  shape.m = std::min<size_t>(shape.m, 480);
+  shape.n = std::min<size_t>(shape.n, 384);
+  shape.k1 = std::min<size_t>(shape.k1, 256);
+
+  dot_kernel kernel =
+      get_dot_kernel(type, cost_models, shape, packed_shape, kernel_flags);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -1312,7 +1336,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
-      unpacked_kernel = get_dot_kernel(type, shape, no_tile_k,
+      unpacked_kernel = get_dot_kernel(type, cost_models, shape, no_tile_k,
                                        kernel_flags | dot_flag::unaligned_b);
     }
   }
@@ -1556,15 +1580,17 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, packed_b.type, output.type};
-    auto func = slinky::func::make(
+    const int thread_count =
+        runtime.threadpool() ? runtime.threadpool()->thread_count() + 1 : 1;
+    auto func = slinky::func(
         make_dot_impl(dot_type, consistent_arithmetic, symmetric_b, transpose_a,
-                      pack_b, num_k_dims),
+                      pack_b, num_k_dims, thread_count),
         {{input_a.buffer, std::move(a_bounds)},
          {packed_b.buffer, std::move(b_bounds)},
          {input_c.buffer, std::move(c_bounds)}},
         {{output.buffer, output_dims},
          {reduction_buffer, std::move(reduction_dims)}},
-        std::move(attrs));
+        {}, std::move(attrs));
 
     slinky::expr block_n = pack_b ? packed_b.extent(1) : block_n_unpacked;
     slinky::expr n = output.extent(0);

@@ -6,7 +6,7 @@
 $assert LMUL in [1, 2, 4, 8]
 $assert(DATATYPE in ["f32", "f16"])
 #include <assert.h>
-#include "src/xnnpack/maxpool.h"
+#include "src/xnnpack/avgpool.h"
 #include <riscv_vector.h>
 
 $CTYPE = {"f32": "float", "f16": "xnn_float16"}[DATATYPE]

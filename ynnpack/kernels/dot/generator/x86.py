@@ -8,8 +8,7 @@
 Handles accumulating C tiles to the output.
 """
 
-# pylint: disable=missing-class-docstring
-# pylint: disable=invalid-name
+# pylint: disable=all
 
 from ynnpack.kernels.dot.generator.dot_base import dot_base, indent
 
@@ -45,7 +44,13 @@ class x86(dot_base):
     else:
       raise ValueError(f"Unsupported c_type: {self.c_type}")
 
-  def init_c_tile(self, i, j):
+  def vector_size(self):
+    return self.bits // self.c_bits()
+
+  def vector_step(self):
+    return min(self.vector_size(), self.tile_shape[1])
+
+  def init_c_vector(self, i, j):
     if self.c_type == "float":
       return f"__m{self.bits} c_{i}_{j} = {self._mm()}_setzero_ps();\n"
     elif self.c_type == "double":
@@ -55,7 +60,13 @@ class x86(dot_base):
     else:
       raise ValueError(f"Unsupported c_type: {self.c_type}")
 
-  def add_c_tile(self, i, j):
+  def init_c_tile(self, i, j):
+    result = ""
+    for jj in range(j, j + self.tile_shape[1], self.vector_step()):
+      result += self.init_c_vector(i, jj)
+    return result
+
+  def add_c_vector(self, i, j):
     io_bits = min(self.bits, self.block_shape[1] * self.c_bits())
     if self.c_type == "float":
       load = f"{self._mm(io_bits)}_loadu_ps({self.c_in_ptr(i, j)})"
@@ -77,7 +88,13 @@ class x86(dot_base):
     else:
       raise ValueError(f"Unsupported c_type: {self.c_type}")
 
-  def store_c_tile(self, i, j):
+  def add_c_tile(self, i, j):
+    result = ""
+    for jj in range(j, j + self.tile_shape[1], self.vector_step()):
+      result += self.add_c_vector(i, jj)
+    return result
+
+  def store_c_vector(self, i, j):
     io_bits = min(self.block_shape[1] * self.c_bits(), self.bits)
     if self.c_type == "float":
       c_ij = f"c_{i}_{j}"
@@ -99,13 +116,19 @@ class x86(dot_base):
     else:
       raise ValueError(f"Unsupported c_type: {self.c_type}")
 
+  def store_c_tile(self, i, j):
+    result = ""
+    for jj in range(j, j + self.tile_shape[1], self.vector_step()):
+      result += self.store_c_vector(i, jj)
+    return result
+
   def shift_c_tiles(self, n):
-    assert n % self.tile_shape[1] == 0
+    assert n % self.vector_step() == 0
     result = ""
 
     # Shift the accumulator registers down and the pointers up.
-    for i in range(0, self.block_shape[0]):
-      for j in range(0, n, self.tile_shape[1]):
+    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+      for j in range(0, n, self.vector_step()):
         result += f"c_{i}_{j} = c_{i}_{j + n};\n"
 
     result += f"N -= {n};\n"
@@ -114,6 +137,22 @@ class x86(dot_base):
         " nullptr;\n"
     )
     result += f"C_out = offset_bytes(C_out, {n} * sizeof({self.c_type}));\n"
+    return result
+
+  def add_c_tiles(self, n):
+    assert n % self.vector_step() == 0
+    add_tiles = ""
+    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+      for j in range(0, n, self.vector_step()):
+        add_tiles += self.add_c_vector(i, j) if self.tile_shape[1] > self.vector_size() else self.add_c_tile(i, j)
+    result = "if (C_in) {\n"
+    result += indent(add_tiles, "  ") + "\n"
+    result += "}\n"
+
+    for i in reversed(range(0, self.block_shape[0], self.tile_shape[0])):
+      for j in range(0, n, self.vector_step()):
+        result += self.store_c_vector(i, j) if self.tile_shape[1] > self.vector_size() else self.store_c_tile(i, j)
+
     return result
 
   def add_c_block_vectors(self, n):

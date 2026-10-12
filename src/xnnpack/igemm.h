@@ -715,6 +715,44 @@ DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_f32acc_igemm_minmax_ukernel_7x8__avx2_broadcast)
 
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_1x8__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_1x16__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_3x16__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_4x8__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_4x16__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_5x8__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_5x16__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_6x8__fma3_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_7x8__fma3_broadcast)
+
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_1x8__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_1x16__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_3x16__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_4x8__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_4x16__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_5x8__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_5x16__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_6x8__f16c_broadcast)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_f32acc_igemm_minmax_ukernel_7x8__f16c_broadcast)
+
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_igemm_minmax_ukernel_1x32__avx512fp16_broadcast)
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_igemm_minmax_ukernel_4x32__avx512fp16_broadcast)

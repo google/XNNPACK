@@ -640,6 +640,63 @@ void TestStaticShapeDynamicB(A, B, C) {
   }
 }
 
+template <typename A, typename B, typename C>
+void TestBroadcastExtent1(A, B, C) {
+  ReplicableRandomDevice rng;
+  const float max_abs_value = 10.0f;
+
+  const size_t num_k_dims = 1;
+  const std::vector<size_t> batch_dims = {2, 3};
+  const size_t m = 4;
+  const size_t k = 8;
+  const size_t n = 16;
+
+  const std::vector<size_t> a_shape = {2, 1, m, k};
+  const std::vector<size_t> b_shape = {1, 3, k, n};
+  const std::vector<size_t> output_shape = {2, 3, m, n};
+
+  for (const std::vector<size_t>& c_init_shape :
+       std::vector<std::vector<size_t>>{{1, 3, 1, n}, {2, 1, m, 1}}) {
+    SubgraphBuilder subgraph(4);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t c_id = 2;
+    const uint32_t output_id = 3;
+    subgraph.AddInput(type_of<A>(), a_shape, a_id)
+        .AddInput(type_of<B>(), b_shape, b_id)
+        .AddInput(type_of<C>(), c_init_shape, c_id)
+        .AddOutput(type_of<C>(), output_shape, output_id)
+        .AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+
+    Runtime runtime(subgraph.GetSubgraph());
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<A> a(a_shape);
+    Tensor<B> b(b_shape);
+    Tensor<C> c_init(c_init_shape);
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+    fill_random(c_init.data(), c_init.size(), rng, -max_abs_value,
+                max_abs_value);
+
+    Tensor<C> expected(output_shape);
+    broadcast_extent_1(c_init);
+    expected.assign(c_init);
+
+    Tensor<C> output(output_shape);
+    runtime.SetupExternalTensor(a.data(), a_id)
+        .SetupExternalTensor(b.data(), b_id)
+        .SetupExternalTensor(c_init.data(), c_id)
+        .SetupExternalTensor(output.data(), output_id)
+        .ReshapeRuntime()
+        .InvokeRuntime();
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    VerifyDotResults(a, b, output, expected, batch_dims, a_shape, b_shape,
+                     num_k_dims, max_abs_value);
+  }
+}
+
 class Dot : public testing::TestWithParam<multi_type> {};
 
 TEST_P(Dot, StaticB) {
@@ -657,6 +714,12 @@ TEST_P(Dot, DynamicB) {
 TEST_P(Dot, StaticShapeDynamicB) {
   SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
     TestStaticShapeDynamicB(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, BroadcastExtent1) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestBroadcastExtent1(a_type, b_type, c_type);
   });
 }
 

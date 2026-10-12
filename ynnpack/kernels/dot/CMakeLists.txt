@@ -208,7 +208,8 @@ YNN_ADD_DOT_KERNELS(arm_int8_int8_int32
 
 YNN_ADD_DOT_KERNELS(arm_int8_int2_int32
   arm_neondot arm_neondot_int8_int2_int32
-  arm64_neoni8mm arm64_neoni8mm_int8_int2_int32
+  # TODO: b/570801999 - Re-enable these kernels
+  # arm64_neoni8mm arm64_neoni8mm_int8_int2_int32
 )
 
 YNN_ADD_DOT_KERNELS(arm_int8_int4_int32
@@ -283,6 +284,9 @@ ENDIF()
 IF(YNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(ynnpack_kernels_dot_bench bench.cc)
   TARGET_LINK_LIBRARIES(ynnpack_kernels_dot_bench ynnpack_kernels_dot ynnpack_base ynnpack_base_test_tensor benchmark::benchmark)
+
+  ADD_EXECUTABLE(ynnpack_kernels_dot_cost_model_bench cost_model/bench.cc)
+  TARGET_LINK_LIBRARIES(ynnpack_kernels_dot_cost_model_bench ynnpack_kernels_dot ynnpack_base ynnpack_base_test_tensor benchmark::benchmark)
 
   ADD_EXECUTABLE(ynnpack_kernels_dot_schedule_bench schedule_bench.cc)
   TARGET_LINK_LIBRARIES(ynnpack_kernels_dot_schedule_bench ynnpack_kernels_dot ynnpack_base ynnpack_base_test_tensor benchmark::benchmark gtest)

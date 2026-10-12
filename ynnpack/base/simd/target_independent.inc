@@ -385,6 +385,11 @@ YNN_ALWAYS_INLINE vec<T, N> log_taylor2(vec<T, N> x, const P& poly_p,
   y_norm = select(large, y_norm * half, y_norm);
   auto r = y_norm - one;
   if (p == 1) {
+    // When exp == -1, y_norm = 2*(x + 1) = 2x + 2, so r = y_norm - 1 = 2x + 1.
+    // Evaluating 2x + 1 via FMA avoids catastrophic cancellation in x + 1.
+    vec<T, N> neg_one(-1);
+    vec<T, N> two(2);
+    r = select(exp == neg_one, multiply_add(x, two, one), r);
     r = select(exp == zero, x, r);
   }
 

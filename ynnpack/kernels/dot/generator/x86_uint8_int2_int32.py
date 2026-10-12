@@ -178,6 +178,10 @@ generate_dot_kernels(
         (2, 32, 32),
         (3, 32, 32),
         (4, 32, 32),
+        # These kernels have marginal value, but help the cost model fit.
+        (2, 16, 32),
+        (3, 16, 32),
+        (4, 16, 32),
     ],
 )
 
@@ -188,6 +192,10 @@ generate_dot_kernels(
         (2, 64, 32),
         (3, 64, 32),
         (4, 64, 32),
+        # These kernels have marginal value, but help the cost model fit.
+        (4, 32, 32),
+        (5, 32, 32),
+        (8, 32, 32),
     ],
 )
 
@@ -198,6 +206,10 @@ generate_dot_kernels(
         (2, 64, 16),
         (3, 64, 16),
         (4, 64, 16),
+        # These kernels have marginal value, but help the cost model fit.
+        (4, 32, 16),
+        (5, 32, 16),
+        (8, 32, 16),
     ],
 )
 
@@ -208,5 +220,9 @@ generate_dot_kernels(
         (2, 16, 16),
         (3, 16, 16),
         (4, 16, 16),
+        # These kernels have marginal value, but help the cost model fit.
+        (2, 8, 16),
+        (3, 8, 16),
+        (4, 8, 16),
     ],
 )

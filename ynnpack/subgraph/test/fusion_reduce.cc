@@ -743,6 +743,39 @@ TEST(fusion, reduce_static_transpose_identity) {
   EXPECT_EQ(reduce_op.k_dims, 0b010);
 }
 
+TEST(fusion, reduce_static_transpose_with_init) {
+  // reduce(static_transpose(x), init) should NOT be rewritten because init
+  // would need to be permuted.
+  const uint32_t x_id = 0;
+  uint32_t transposed_id = 1;
+  uint32_t init_id = 2;
+  const uint32_t y_id = 3;
+  SubgraphBuilder builder(4);
+
+  builder.AddInput(ynn_type_fp32, 3, x_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 3, transposed_id)
+      .AddInput(ynn_type_fp32, 2, init_id);
+
+  std::vector<int32_t> perm = {2, 0, 1};
+  builder.AddTranspose(perm, x_id, transposed_id)
+      .AddReduce(ynn_reduce_sum, {1}, transposed_id, init_id, y_id,
+                 /*flags=*/0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // Transpose and Reduce must remain untouched.
+  ASSERT_THAT(subgraph, HasValidNodeCount(2));
+  const ynn_node& trans_node = ProducerOf(transposed_id, subgraph);
+  EXPECT_TRUE(
+      std::holds_alternative<ynn_node::static_transpose>(trans_node.op));
+  const ynn_node& reduce_node = ProducerOf(y_id, subgraph);
+  EXPECT_THAT(reduce_node, AllOf(IsReduce(ynn_reduce_sum),
+                                 InputsAre(transposed_id, init_id)));
+}
+
 TEST(fusion, reduce_new_dimension_static_transpose) {
   const uint32_t x_id = 0;
   uint32_t transposed_id = 1;
@@ -793,9 +826,12 @@ TEST(fusion, reduce_sum_to_dot_f32) {
   EXPECT_THAT(subgraph, Not(HasValidValueId(mul_id)));
   const ynn_node& dot_node = ProducerOf(y_id, subgraph);
   ASSERT_THAT(dot_node, IsDot());
-  EXPECT_THAT(
-      ProducerOf(dot_node.inputs[0], subgraph),
-      AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)), InputsAre(a_id)));
+  const ynn_node* a_transpose = &ProducerOf(dot_node.inputs[0], subgraph);
+  if (std::holds_alternative<ynn_node::transpose_a>(a_transpose->op)) {
+    a_transpose = &ProducerOf(a_transpose->inputs[0], subgraph);
+  }
+  EXPECT_THAT(*a_transpose, AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)),
+                                  InputsAre(a_id)));
 }
 
 TEST(fusion, reduce_sum_of_gather_constant) {

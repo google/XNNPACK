@@ -173,16 +173,17 @@ generate_dot_kernels(
         (8, 4, 16),
     ],
 )
-
-generate_dot_kernels(
-    arm64_neoni8mm_int8_int2_int32(),
-    [
-        (2, 32, 8),
-        (4, 16, 8),
-        (4, 8, 8),
-        (6, 8, 8),
-        (8, 8, 8),
-        (10, 8, 8),
-        (16, 4, 8),
-    ],
-)
+# TODO: b/570801999 - Enable this kernel once it can be rewritten to use
+# tile_k = 16, like the other int2 kernels.
+# generate_dot_kernels(
+#    arm64_neoni8mm_int8_int2_int32(),
+#    [
+#        (2, 32, 8),
+#        (4, 16, 8),
+#        (4, 8, 8),
+#        (6, 8, 8),
+#        (8, 8, 8),
+#        (10, 8, 8),
+#        (16, 4, 8),
+#    ],
+#)

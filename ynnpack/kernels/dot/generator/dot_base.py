@@ -60,6 +60,7 @@ class dot_base:
     self.b_chunk_n = 1
     self.min_tiles = 4
     self.flags = []
+    self.dot_cost_model = type(self).__name__
 
   def header(self):
     return """
@@ -553,7 +554,8 @@ do {
     inc += (
         f"YNN_DOT_KERNEL(arch_flag::{self.arch}, {func_name}, {m}, {n}, {k},"
         f" {', '.join(str(s) for s in self.tile_shape)}, /*flags=*/{flags},"
-        f" {self.a_type}, {self.b_type}, {self.c_type})\n"
+        f" {self.a_type}, {self.b_type}, {self.c_type},"
+        f" cost_models.{self.dot_cost_model})\n"
     )
 
     src = self.begin_func(func_name)

@@ -52,33 +52,44 @@ tools/xngen src/f16-dwconv/unipass-neonfp16arith.c.in -D CHANNEL_TILE=32 -D KERN
 tools/xngen src/f16-dwconv/unipass-neonfp16arith.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-neonfp16arith-acc2.c &
 
 ################################### x86 FMA3 ##################################
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p32c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p32c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p32c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p32c-minmax-fma3-acc2.c &
 
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p8c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-4p8c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p32c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-4p32c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p8c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-4p8c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p32c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-4p32c-minmax-fma3-acc2.c &
 
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-fma3-acc2.c &
 
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-fma3-acc2.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3.c &
-tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-fma3-acc2.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=fma3 -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3-acc2.c &
+
+################################### x86 F16C ##################################
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=16 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p8c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-f16c.c &
+tools/xngen src/f16-dwconv/unipass-fma3.c.in -D ISA=f16c -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-f16c-acc2.c &
 
 ################################### RISC-V Vector #############################
 tools/xngen src/f16-dwconv/unipass-rvvfp16arith.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=3 -o src/f16-dwconv/gen/f16-dwconv-3p4vc-minmax-rvvfp16arith.c &

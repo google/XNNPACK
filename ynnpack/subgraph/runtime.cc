@@ -35,6 +35,8 @@
 #include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
+#include "ynnpack/kernels/dot/dot.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/tensor.h"
@@ -462,19 +464,19 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     // iteration and fold the loop away entirely.
     const bool elide_allowed =
         !l.step_is_required && globals.is_pure_dim(l.loop_id.var);
-    // Serial reduction ("k") dims additionally qualify for the
-    // single-iteration elision below (but not for the widening elisions):
-    // with provably one iteration there is no accumulation blocking to
-    // preserve.
-    const bool single_iteration_elide_allowed =
-        elide_allowed ||
-        (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
-    const slinky::expr once = single_iteration_elide_allowed
-                                  ? is_single_iteration(globals, l)
-                                  : slinky::expr();
+    const slinky::expr once = is_single_iteration(globals, l);
     if (once.defined() &&
         slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment)) {
-      l.step = slinky::max(slinky::simplify(l.extent), 1);
+      // Serial reduction ("k") dims additionally qualify for the
+      // single-iteration elision below (but not for the widening elisions):
+      // with provably one iteration there is no accumulation blocking to
+      // preserve.
+      const bool single_iteration_elide_allowed =
+          elide_allowed ||
+          (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
+      if (single_iteration_elide_allowed) {
+        l.step = slinky::max(slinky::simplify(l.extent), 1);
+      }
       l.workers = slinky::loop::serial;
       tasks[i] = tasks_above;
       tasks_lb[i] = tasks_above_lb;
@@ -1023,8 +1025,9 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         assert(i.data);
         assert(i.data->rank == i.rank());
         for (size_t d = 0; d < i.rank(); ++d) {
-          slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
-          i.data->dims[d].set_min_extent(0, extent_d);
+          slinky::expr extent_d = i.physical_extent(d);
+          i.data->dims[d].set_min_extent(
+              0, extent_d.defined() ? evaluate(extent_d, ctx) : 1);
         }
         ynn::init_buffer_strides(*i.data);
       }
@@ -1053,6 +1056,13 @@ bool ynn_traceme_enabled() {
 // smaller than this threshold.
 constexpr size_t auto_stack_threshold = 64 * 1024;
 
+void init_context(slinky::eval_context& ctx) {
+  // `get_dot_cost_models` is expensive due to a syscall to learn the current
+  // CPU core. To avoid this, do it when we create a new context.
+  ctx.user_data =
+      const_cast<ynn::dot_cost_models*>(&ynn::get_dot_cost_models());
+}
+
 }  // namespace
 
 extern "C" {
@@ -1073,6 +1083,11 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
   eval_config.auto_stack_threshold = auto_stack_threshold;
+
+  eval_config.init_context = [](slinky::eval_context& ctx,
+                                const slinky::eval_context& parent) {
+    init_context(ctx);
+  };
 
 #ifdef YNN_ENABLE_PERFETTO
   if (ynn::perfetto_session::global()) {
@@ -1170,7 +1185,7 @@ ynn_status ynn_runtime::build() {
       ynn_runtime_value& value = values[j];
       if (!value.is_valid()) continue;
       assert(value.buffer->elem_size().defined());
-      if (value.is_external_output() &&
+      if (value.is_external() &&
           (!value.data || value.data->rank != value.rank())) {
         value.data = slinky::raw_buffer::make(
             value.rank(), *as_constant(value.buffer->elem_size()));
@@ -1189,7 +1204,8 @@ ynn_status ynn_runtime::build() {
 
       // This should be assert(value.data), but let's do that in a follow-up.
       if (value.data) {
-        for (size_t d = 0; d < value.extents.size(); ++d) {
+        for (size_t d = 0;
+             d < std::min(value.extents.size(), value.data->rank); ++d) {
           if (!value.extents[d].defined() ||
               slinky::is_constant(value.extents[d], 1)) {
             value.data->mutable_dim(d) = slinky::dim::broadcast();
@@ -1287,6 +1303,7 @@ ynn_status ynn_runtime::invoke() {
     // This pipeline is a no-op.
     return ynn_status_success;
   }
+  init_context(eval_context);
   slinky::index_t result = pipeline.evaluate(eval_context, /*is_set_up=*/true);
   // Heap blocks are reused within an evaluation, but not kept between invokes.
   eval_context.free_pool();

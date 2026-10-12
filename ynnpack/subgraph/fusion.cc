@@ -756,6 +756,9 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
   const ynn_value& input = subgraph.value(broadcast.inputs[0]);
   uint32_t broadcast_id = broadcast.outputs[0];
 
+  // Do not retype/reshape a value that is visible to the caller.
+  if (subgraph.value(broadcast_id).is_external_output()) return false;
+
   ynn_node* consumer = analysis.single_consumer_of(broadcast_id);
   if (!consumer) return false;
 
@@ -2009,6 +2012,10 @@ bool rewrite_reduce_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t init_id = node.inputs[1];
   uint32_t y_id = node.outputs[0];
 
+  if (init_id != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+
   const ynn_value& x = subgraph.value(x_id);
 
   ynn::axes_set new_axes;
@@ -2376,10 +2383,10 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  if (reduce_op->k_dims.count() > 1) {
+  if (reduce_op->k_dims.count() != 1) {
     YNN_LOG_DEBUG()
-        << "not rewriting sum(a*b) to dot(a, b) because the sum has "
-           "more than 1 reduction dimension.";
+        << "not rewriting sum(a*b) to dot(a, b) because the sum does not have "
+           "exactly 1 reduction dimension.";
     return false;
   }
 
@@ -2549,8 +2556,11 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
 
   // Do the dot.
   uint32_t dot_id = is_perm_output_identity ? output_id : YNN_INVALID_VALUE_ID;
-  ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id, init_t_id, &dot_id,
-                 /*flags=*/0);
+  ynn_status status = ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id,
+                                     init_t_id, &dot_id, /*flags=*/0);
+  if (status != ynn_status_success) {
+    return false;
+  }
 
   node.invalidate();
   if (!is_perm_output_identity) {

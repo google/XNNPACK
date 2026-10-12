@@ -36,6 +36,21 @@ cc_library(
         "//litert/tensor/utils:macros",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:source_location",
+    ],
+)
+
+cc_test(
+    name = "utils_test",
+    srcs = ["utils_test.cc"],
+    deps = [
+        ":utils",
+        "//:XNNPACK",
+        "//litert/tensor/utils:macros",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/types:source_location",
+        "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
 

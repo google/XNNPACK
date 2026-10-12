@@ -62,7 +62,7 @@ $PAD_VALUE = "params->kernel_zero_point * 0x11" if DATATYPE == "QS4" else "kzp" 
 $PARAMTYPE = {"QS8": "void", "QU8": "void", "QS4": "struct xnn_qs8_qc4w_packing_params", "X8": "void"}[DATATYPE]
 $if DATATYPE in ["QS8", "QU8", "QS4"]:
   $_MM256_DPBUSD_EPI32 = "mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
-  $ISA = "avx2" if VARIANT == "MADD" else "avxvnni" if AVX == 2 else "avx256vnni"
+  $ISA = ("avx2" if AVX == 2 else "avx256skx") if VARIANT == "MADD" else "avxvnni" if AVX == 2 else "avx256vnni"
 $else:
   $ISA = "avx2" if AVX == 2 else "avx256skx"
 $DATATYPE_SPEC = "qu8" if DATATYPE == "QU8" else ("qs8_to_qu8_qc4w" if DATATYPE == "QS4" else "qs8_to_qu8") if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w", "X8": "x8"}[DATATYPE]

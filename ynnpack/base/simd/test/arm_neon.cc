@@ -176,6 +176,8 @@ TEST_ALL(arm_neon, s32, 4);
 TEST_CAST(arm_neon, s32, s8x16);
 TEST_CAST(arm_neon, s32, u8x16);
 TEST_CAST(arm_neon, s32, s16x8);
+TEST_CAST(arm_neon, f32, s8x16);
+TEST_CAST(arm_neon, f32, u8x16);
 TEST_CAST(arm_neon, f32, s32x4);
 TEST_CAST(arm_neon, s32, f32x4);
 TEST_CAST(arm_neon, f32, bf16x8);

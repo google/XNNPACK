@@ -53,7 +53,8 @@ struct KernelInfo {
 
 KernelInfo all_kernels[] = {
 #define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_m, \
-                       tile_n, tile_k, flags, a_type, b_type, c_type)       \
+                       tile_n, tile_k, flags, a_type, b_type, c_type,       \
+                       cost_model)                                          \
   KernelInfo{arch_flags,                                                    \
              name,                                                          \
              #name,                                                         \

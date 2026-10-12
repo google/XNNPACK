@@ -399,6 +399,19 @@ Tensor<Mixins...> Less(
     absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::LessOperation, Mixins...>(loc, a, b);
+  graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
+  o_info.type = Type::kBOOL;
+  return output;
+}
+
+template <class... Mixins>
+Tensor<Mixins...> LessEqual(
+    Tensor<Mixins...> a, Tensor<Mixins...> b,
+    absl::SourceLocation loc = absl::SourceLocation::current()) {
+  Tensor<Mixins...> output =
+      ElementwiseOp<graph::LessEqualOperation, Mixins...>(loc, a, b);
+  graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
+  o_info.type = Type::kBOOL;
   return output;
 }
 
@@ -408,6 +421,8 @@ Tensor<Mixins...> Greater(
     absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::GreaterOperation, Mixins...>(loc, a, b);
+  graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
+  o_info.type = Type::kBOOL;
   return output;
 }
 
@@ -417,6 +432,8 @@ Tensor<Mixins...> GreaterEqual(
     absl::SourceLocation loc = absl::SourceLocation::current()) {
   Tensor<Mixins...> output =
       ElementwiseOp<graph::GreaterEqualOperation, Mixins...>(loc, a, b);
+  graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
+  o_info.type = Type::kBOOL;
   return output;
 }
 
@@ -761,9 +778,6 @@ Tensor<Mixins...> Squeeze(
   return output;
 }
 
-// Placeholder extent for dimensions that should be inferred.
-inline constexpr int kInferredDim = -1;
-
 // Reshapes `input` to `new_shape`.
 //
 // - `new_shape` may have exactly one of its dimensions set as `kInferredDim`.
@@ -806,6 +820,11 @@ Tensor<Mixins...> Reshape(
   }
 
   op->new_shape = new_shape;
+  // Keep the runtime inference marker in the shape operand. Output metadata
+  // still records the concrete shape at graph construction time.
+  if (op->inferred_axis >= 0) {
+    new_shape[op->inferred_axis] = kInferredDim;
+  }
   Tensor<Mixins...> shape_tensor(
       {.type = Type::kI32,
        .shape = {static_cast<int>(new_shape.size())},

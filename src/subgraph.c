@@ -4903,6 +4903,50 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_fallback_from_bf16_to_fp32(subgraph, optimization_flags));
 
+  // If any `qdint8` GEMM or producer `convert` was lowered to `fp32` during
+  // fp16/bf16 fallback, re-evaluate whether `qduint8` has a better config.
+  for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
+    struct xnn_node* node = &subgraph->nodes[node_id];
+    switch (node->type) {
+      case xnn_node_type_batch_matrix_multiply:
+      case xnn_node_type_convolution_2d:
+      case xnn_node_type_deconvolution_2d:
+      case xnn_node_type_fully_connected: {
+        if ((node->flags & XNN_FLAG_INLINE_LHS_PACKING) &&
+            node->packed_input_datatype == xnn_datatype_qdint8) {
+          const enum xnn_datatype input_datatype =
+              subgraph->values[node->inputs[0]].datatype;
+          const enum xnn_datatype kernel_datatype =
+              subgraph->values[node->inputs[1]].datatype;
+          if (convert_gemm_to_qduint8(input_datatype, node->type,
+                                      kernel_datatype)) {
+            node->packed_input_datatype = xnn_datatype_qduint8;
+          }
+        }
+        break;
+      }
+      case xnn_node_type_convert: {
+        struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+        if (output_value->all_consumers_types_same &&
+            output_value->datatype == xnn_datatype_qdint8) {
+          const enum xnn_datatype input_datatype =
+              subgraph->values[node->inputs[0]].datatype;
+          const struct xnn_node* consumer =
+              &subgraph->nodes[output_value->first_consumer];
+          const enum xnn_datatype consumer_weights_type =
+              subgraph->values[consumer->inputs[1]].datatype;
+          if (convert_gemm_to_qduint8(input_datatype, consumer->type,
+                                      consumer_weights_type)) {
+            output_value->datatype = xnn_datatype_qduint8;
+          }
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
   return xnn_status_success;
 }
 

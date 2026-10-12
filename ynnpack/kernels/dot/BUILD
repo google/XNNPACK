@@ -82,8 +82,9 @@ ynn_generate_srcs(
     output_srcs = [
         "arm_neondot_int8_int2_int32.cc",
         "arm_neondot_int8_int2_int32.inc",
-        "arm64_neoni8mm_int8_int2_int32.cc",
-        "arm64_neoni8mm_int8_int2_int32.inc",
+        # TODO: b/570801999 - Re-enable these kernels
+        # "arm64_neoni8mm_int8_int2_int32.cc",
+        # "arm64_neoni8mm_int8_int2_int32.inc",
     ],
 )
 
@@ -384,7 +385,8 @@ ynn_cc_library(
         "arm64_neon_fp64.inc",
         "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.inc",
         "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.inc",
-        "arm64_neoni8mm_int8_int2_int32.inc",
+        # TODO: b/570801999 - Re-enable these kernels
+        # "arm64_neoni8mm_int8_int2_int32.inc",
         "arm64_neoni8mm_int8_int4_int32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
         "arm64_sme.h",
@@ -441,6 +443,10 @@ ynn_cc_library(
     ],
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(unroll_loops = False),
+    local_defines = select({
+        "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],
+        "//conditions:default": [],
+    }),
     per_arch_srcs = {
         "arm64_neon": [
             "arm64_neon_fp32.cc",
@@ -452,7 +458,8 @@ ynn_cc_library(
             "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.cc",
         ],
         "arm64_neoni8mm": [
-            "arm64_neoni8mm_int8_int2_int32.cc",
+            # TODO: b/570801999 - Re-enable these kernels
+            # "arm64_neoni8mm_int8_int2_int32.cc",
             "arm64_neoni8mm_int8_int4_int32.cc",
             "arm64_neoni8mm_int8_int8_int32.cc",
         ],
@@ -551,8 +558,12 @@ ynn_cc_library(
         "//ynnpack/base",
         "//ynnpack/base:log",
         "//ynnpack/base/simd",
+        "//ynnpack/kernels/dot/cost_model",
     ] + select({
         "//ynnpack:arm64": [":arm64_sme_stubs"],
+        "//conditions:default": [],
+    }) + select({
+        "//ynnpack:ynn_enable_cpuinfo": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
@@ -640,6 +651,7 @@ cc_test(
         ":dot",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
+        "//ynnpack/kernels/dot/cost_model",
     ] + ynn_test_deps(),
 )
 
@@ -654,6 +666,7 @@ cc_test(
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
+        "//ynnpack/kernels/dot/cost_model",
         "@com_google_benchmark//:benchmark",
     ],
 )

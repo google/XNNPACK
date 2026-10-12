@@ -524,7 +524,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx256skx,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256skx_madd,
       /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       /*arch_flags=*/xnn_arch_x86_avx256skx);
   }
@@ -535,7 +535,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx256skx,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256skx_madd,
       /*mr=*/5, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       /*arch_flags=*/xnn_arch_x86_avx256skx);
   }
@@ -546,7 +546,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x8c8__avx256skx,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256skx_madd,
       /*mr=*/7, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       /*arch_flags=*/xnn_arch_x86_avx256skx);
   }
@@ -557,7 +557,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c8__avx256skx,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256skx_madd,
       /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       /*arch_flags=*/xnn_arch_x86_avx256skx);
   }

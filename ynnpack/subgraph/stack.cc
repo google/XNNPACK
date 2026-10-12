@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -43,6 +44,13 @@ ynn_status ynn_define_stack(ynn_subgraph_t subgraph, int32_t axis,
 
   for (int i = 1; i < num_inputs; ++i) {
     const ynn_value& input_i = subgraph->value(input_ids[i]);
+    if (input0.type != input_i.type) {
+      YNN_LOG_ERROR() << "For node `stack`, type mismatch for input " << i
+                      << " (" << to_string(input_i.type)
+                      << ") does not match input 0 (" << to_string(input0.type)
+                      << ")";
+      return ynn_status_invalid_parameter;
+    }
     if (input0.rank() != input_i.rank()) {
       YNN_LOG_ERROR() << "For node `stack`, rank mismatch for input " << i
                       << " of stack";
