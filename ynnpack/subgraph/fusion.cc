@@ -848,7 +848,9 @@ bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
       YNN_LOG_DEBUG() << "Replacing explicit broadcast with implicit broadcast "
                          "in dimension "
                       << d;
-      output.extents[d] = {};
+      if (d < output.extents.size()) {
+        output.extents[d] = {};
+      }
       broadcast->axes[d] = false;
       simplified = true;
     }
