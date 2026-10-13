@@ -7007,7 +7007,7 @@ const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config() {
 #endif
 
   XNN_INIT_ONCE(qd8_f16_qc4w_gemm);
-  return &qd8_f16_qc4w_gemm_config;
+  return qd8_f16_qc4w_gemm_config.mr ? &qd8_f16_qc4w_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_qdu8_f16_qc4w_gemm_config() {
