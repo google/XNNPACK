@@ -4243,6 +4243,14 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             if (input_datatype == xnn_datatype_qdint8) {
               // Short-circuit the inputs of the producer of the `qdint8`
               // values.
+              if (input_value->producer == XNN_INVALID_NODE_ID) {
+                xnn_log_error(
+                    "Expected %s tensor #%u to be produced by a node of type "
+                    "%s, but it has no producer.",
+                    xnn_datatype_to_string(input_datatype), input_id,
+                    xnn_node_type_to_string(xnn_node_type_convert));
+                return xnn_status_invalid_state;
+              }
               struct xnn_node* producer =
                   &subgraph->nodes[input_value->producer];
               if (producer->type != xnn_node_type_convert) {
@@ -4582,12 +4590,20 @@ enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph) {
 
             switch (kernel_datatype) {
               case xnn_datatype_qcint2: {
-                struct xnn_node* producer =
-                    &subgraph->nodes[input_value->producer];
                 if (((output_datatype == xnn_datatype_fp32) &&
                      (gemm_config = xnn_init_qd8_f32_qc2w_gemm_config())) ||
                     ((output_datatype == xnn_datatype_fp16) &&
                      (gemm_config = xnn_init_qd8_f16_qc2w_gemm_config()))) {
+                    if (input_value->producer == XNN_INVALID_NODE_ID) {
+                      xnn_log_error(
+                          "Expected %s tensor #%u to be produced by a node of"
+                          " type %s, but it has no producer.",
+                          xnn_datatype_to_string(input_datatype), input_id,
+                          xnn_node_type_to_string(xnn_node_type_convert));
+                      return xnn_status_invalid_state;
+                    }
+                    struct xnn_node* producer =
+                        &subgraph->nodes[input_value->producer];
                     if (producer->type != xnn_node_type_convert) {
                        xnn_log_error(
                           "Expected producer node #%u of %s tensor #%u to be of"
@@ -4612,12 +4628,20 @@ enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph) {
 
             switch (kernel_datatype) {
               case xnn_datatype_qcint2: {
-                struct xnn_node* producer =
-                    &subgraph->nodes[input_value->producer];
                 if (((output_datatype == xnn_datatype_fp32) &&
                      (gemm_config = xnn_init_qdu8_f32_qc2w_gemm_config())) ||
                     ((output_datatype == xnn_datatype_fp16) &&
                      (gemm_config = xnn_init_qdu8_f16_qc2w_gemm_config()))) {
+                    if (input_value->producer == XNN_INVALID_NODE_ID) {
+                      xnn_log_error(
+                          "Expected %s tensor #%u to be produced by a node of"
+                          " type %s, but it has no producer.",
+                          xnn_datatype_to_string(input_datatype), input_id,
+                          xnn_node_type_to_string(xnn_node_type_convert));
+                      return xnn_status_invalid_state;
+                    }
+                    struct xnn_node* producer =
+                        &subgraph->nodes[input_value->producer];
                     if (producer->type != xnn_node_type_convert) {
                       xnn_log_error(
                           "Expected producer node #%u of %s tensor #%u to be of"

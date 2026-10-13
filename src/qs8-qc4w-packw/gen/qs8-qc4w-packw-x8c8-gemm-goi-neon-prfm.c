@@ -90,9 +90,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__neon_prfm(
   assert(params != NULL);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
   // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes.
-  // TODO: kr-avxvnni QS4 asserts kc is even and drops the last nibble when
-  // kc is odd, while this kernel packs it.  Fix AVX to handle odd kc, or
-  // make this kernel match AVX.
   const size_t kc_odd = kc & 1;  // Last byte of each row has 1 weight.
   kc >>= 1;
   const size_t w_stride = n_stride >> 1;

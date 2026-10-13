@@ -472,14 +472,16 @@ class PackWMicrokernelTester {
                                           : xnn_pack_qs8_qc4uw_gemm_goi_w)
                           : (izp() == 128 ? xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
                                           : xnn_pack_qs8_qc4w_gemm_goi_w);
+    // KC may be odd.  Rows are byte aligned (n_stride is k2) and the padding
+    // nibble of the last byte of each row is random, so it must be ignored.
     reference_fn(
-        /*g=*/1, n(), k2, nr(), kr(), sr(), /*n_stride=*/k2, weights.data(),
+        /*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k2, weights.data(),
         bias_data,
         /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
         /*extra_bytes=*/0, &packing_params);
 
     // Call optimized micro-kernel.
-    packw(/*g=*/1, n(), k2, nr(), kr(), sr(), /*n_stride=*/k2, weights.data(),
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k2, weights.data(),
           bias_data,
           /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
           &packing_params);

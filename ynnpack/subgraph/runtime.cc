@@ -1143,13 +1143,15 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
         }
       }
 
-      if (value.is_external_input()) {
-        if (!value.data) {
-          value.data =
-              slinky::raw_buffer::make(i.rank(), ynn::type_size_bytes(i.type));
-        } else {
-          assert(value.data->rank == value.rank());
-        }
+      if (value.data) {
+        assert(!value.data->base);
+        auto new_data = slinky::raw_buffer::make(value.data->rank);
+        new_data->elem_size = value.data->elem_size;
+        std::copy_n(value.data->dims, value.data->rank, new_data->dims);
+        value.data = std::move(new_data);
+      } else {
+        value.data =
+            slinky::raw_buffer::make(i.rank(), ynn::type_size_bytes(i.type));
       }
     }
   }

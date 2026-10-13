@@ -65,4 +65,49 @@ TEST(runtime, dot_concurrency) {
   ASSERT_GT(get_concurrency(dynamic), 1);
 }
 #endif
+
+TEST(runtime, cross_runtime_isolation) {
+  constexpr uint32_t in_id = 0;
+  constexpr uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  builder.AddInput(type_of<float>(), 1, in_id)
+      .AddOutput(type_of<float>(), 1, out_id)
+      .AddUnary(ynn_unary_negate, in_id, out_id);
+
+  Runtime A(builder.GetSubgraph());
+  Runtime B(builder.GetSubgraph());
+  ASSERT_EQ(A.Status(), ynn_status_success);
+  ASSERT_EQ(B.Status(), ynn_status_success);
+
+  std::vector<float> in_a(100, 1.0f);
+  std::vector<float> in_b(10, 2.0f);
+  std::vector<float> out_a(100, 0.0f);
+  std::vector<float> out_b(10, 0.0f);
+
+  A.ReshapeExternalTensor(TensorShape({100}), in_a.data(), in_id);
+  A.ReshapeRuntime();
+
+  // Runtime B's output shape must not be affected by Runtime A's reshape.
+  EXPECT_NE(B.GetExternalTensorShape(out_id), std::vector<size_t>{100});
+
+  B.ReshapeExternalTensor(TensorShape({10}), in_b.data(), in_id);
+  B.ReshapeRuntime();
+
+  EXPECT_EQ(A.GetExternalTensorShape(out_id), std::vector<size_t>{100});
+  EXPECT_EQ(B.GetExternalTensorShape(out_id), std::vector<size_t>{10});
+
+  A.SetupExternalTensor(out_a.data(), out_id).InvokeRuntime();
+  B.SetupExternalTensor(out_b.data(), out_id).InvokeRuntime();
+
+  ASSERT_EQ(A.Status(), ynn_status_success);
+  ASSERT_EQ(B.Status(), ynn_status_success);
+
+  for (float v : out_a) {
+    EXPECT_FLOAT_EQ(v, -1.0f);
+  }
+  for (float v : out_b) {
+    EXPECT_FLOAT_EQ(v, -2.0f);
+  }
+}
+
 }  // namespace ynn
