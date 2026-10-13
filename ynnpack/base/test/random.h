@@ -175,6 +175,33 @@ inline void replace_denormals_and_nans(int2x4*, size_t) {}
 inline void replace_denormals_and_nans(uint4x2*, size_t) {}
 inline void replace_denormals_and_nans(uint2x4*, size_t) {}
 
+template <typename T>
+void replace_denormals(T* data, size_t size) {
+  if (type_info<T>::smallest_normal() <= 0) {
+    // There are no denormals for this type.
+    return;
+  }
+  for (size_t i = 0; i < size; ++i) {
+    float data_i = static_cast<float>(type_info<T>::get(data, i));
+    if (std::abs(data_i) < type_info<T>::smallest_normal()) {
+      type_info<T>::set(data, i, static_cast<T>(0));
+    }
+  }
+}
+
+inline void replace_denormals(double* data, size_t size) {
+  for (size_t i = 0; i < size; ++i) {
+    if (std::abs(data[i]) < type_info<double>::smallest_normal()) {
+      data[i] = 0.0;
+    }
+  }
+}
+
+inline void replace_denormals(int4x2*, size_t) {}
+inline void replace_denormals(int2x4*, size_t) {}
+inline void replace_denormals(uint4x2*, size_t) {}
+inline void replace_denormals(uint2x4*, size_t) {}
+
 // Fill `[data, data + size)` with uniform random bits, excluding denormals and
 // NaNs for floating point types.
 template <typename T, typename Rng>

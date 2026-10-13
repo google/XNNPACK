@@ -231,8 +231,12 @@ void test_op() {
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
     scalar b[vector::N];
-    fill_random(a, vector::N, rng);
-    fill_random(b, vector::N, rng);
+    fill_uniform_random_bits(a, vector::N, rng);
+    fill_uniform_random_bits(b, vector::N, rng);
+#ifdef YNN_ARCH_ARM32
+    replace_denormals(a, vector::N);
+    replace_denormals(b, vector::N);
+#endif  // YNN_ARCH_ARM32
 
     scalar result[vector::N];
 
@@ -247,9 +251,9 @@ void test_op() {
       }
 #endif  // YNN_ARCH_ARM32
       if (ynn::isnan(expected)) {
-        ASSERT_TRUE(ynn::isnan(result[i]));
+        ASSERT_TRUE(ynn::isnan(result[i])) << a[i] << " " << b[i];
       } else {
-        ASSERT_EQ(result[i], expected);
+        ASSERT_EQ(result[i], expected) << a[i] << " " << b[i];
       }
     }
   }
@@ -262,14 +266,21 @@ void test_floor() {
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
-    fill_random(a, vector::N, rng);
+    fill_uniform_random_bits(a, vector::N, rng);
+#ifdef YNN_ARCH_ARM32
+    replace_denormals(a, vector::N);
+#endif  // YNN_ARCH_ARM32
 
     scalar result[vector::N];
     store(result, floor(load(a, vector::N)));
 
     for (size_t i = 0; i < vector::N; ++i) {
       scalar expected = std::floor(a[i]);
-      ASSERT_EQ(result[i], expected);
+      if (ynn::isnan(expected)) {
+        ASSERT_TRUE(ynn::isnan(result[i]));
+      } else {
+        ASSERT_EQ(result[i], expected);
+      }
     }
   }
 }
@@ -284,14 +295,21 @@ void test_round() {
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
-    fill_random(a, vector::N, rng);
+    fill_uniform_random_bits(a, vector::N, rng);
+#ifdef YNN_ARCH_ARM32
+    replace_denormals(a, vector::N);
+#endif  // YNN_ARCH_ARM32
 
     scalar result[vector::N];
     store(result, round(load(a, vector::N)));
 
     for (size_t i = 0; i < vector::N; ++i) {
       scalar expected = std::nearbyint(a[i]);
-      ASSERT_EQ(result[i], expected);
+      if (ynn::isnan(expected)) {
+        ASSERT_TRUE(ynn::isnan(result[i]));
+      } else {
+        ASSERT_EQ(result[i], expected);
+      }
     }
   }
 }
@@ -306,14 +324,21 @@ void test_ceil() {
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
-    fill_random(a, vector::N, rng);
+    fill_uniform_random_bits(a, vector::N, rng);
+#ifdef YNN_ARCH_ARM32
+    replace_denormals(a, vector::N);
+#endif  // YNN_ARCH_ARM32
 
     scalar result[vector::N];
     store(result, ceil(load(a, vector::N)));
 
     for (size_t i = 0; i < vector::N; ++i) {
       scalar expected = std::ceil(a[i]);
-      ASSERT_EQ(result[i], expected);
+      if (ynn::isnan(expected)) {
+        ASSERT_TRUE(ynn::isnan(result[i]));
+      } else {
+        ASSERT_EQ(result[i], expected);
+      }
     }
   }
 }
@@ -330,13 +355,20 @@ void test_abs() {
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
-    fill_random(a, vector::N, rng);
+    fill_uniform_random_bits(a, vector::N, rng);
+#ifdef YNN_ARCH_ARM32
+    replace_denormals(a, vector::N);
+#endif  // YNN_ARCH_ARM32
 
     typename result_vector::value_type result[vector::N];
     store(result, abs(load(a, vector::N)));
 
     for (size_t i = 0; i < vector::N; ++i) {
-      ASSERT_EQ(result[i], static_cast<result_scalar>(std::abs(a[i])));
+      if (ynn::isnan(a[i])) {
+        ASSERT_TRUE(ynn::isnan(result[i]));
+      } else {
+        ASSERT_EQ(result[i], static_cast<result_scalar>(std::abs(a[i])));
+      }
     }
   }
 }
@@ -577,7 +609,7 @@ void test_isfinite() {
 struct min_op {
   template <typename T>
   T operator()(T a, T b) {
-    using std::min;
+    using ynn::min;
     return min(a, b);
   }
 };
@@ -585,7 +617,7 @@ struct min_op {
 struct max_op {
   template <typename T>
   T operator()(T a, T b) {
-    using std::max;
+    using ynn::max;
     return max(a, b);
   }
 };
@@ -847,7 +879,15 @@ void test_cast() {
     To dst[N];
     store(dst, to_v);
     for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i], ynn::cast<To>(src[i]));
+      if (ynn::isnan(src[i])) {
+        if (type_info<To>::has_nan()) {
+          ASSERT_TRUE(ynn::isnan(dst[i]));
+        } else {
+          // Undefined behavior.
+        }
+      } else {
+        ASSERT_EQ(dst[i], ynn::cast<To>(src[i]));
+      }
     }
   }
 }

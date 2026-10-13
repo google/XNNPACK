@@ -410,11 +410,21 @@ YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
-  return vec<T, N>{a.v_ < b.v_ ? a.v_ : b.v_};
+  return vec<T, N>{a.v_ < b.v_ || !(a.v_ >= a.v_) ? a.v_ : b.v_};
 }
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
+  return vec<T, N>{a.v_ > b.v_ || !(a.v_ >= a.v_) ? a.v_ : b.v_};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> min_no_nan(vec<T, N> a, vec<T, N> b) {
+  return vec<T, N>{a.v_ < b.v_ ? a.v_ : b.v_};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> max_no_nan(vec<T, N> a, vec<T, N> b) {
   return vec<T, N>{a.v_ > b.v_ ? a.v_ : b.v_};
 }
 
@@ -422,19 +432,19 @@ YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
 // propagation)
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, T b) {
-  return min(vec<T, N>{b}, a);
+  return vec<T, N>{b < a.v_ ? b : a.v_};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(T a, vec<T, N> b) {
-  return min(vec<T, N>{a}, b);
+  return vec<T, N>{a < b.v_ ? a : b.v_};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, T b) {
-  return max(vec<T, N>{b}, a);
+  return vec<T, N>{b > a.v_ ? b : a.v_};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(T a, vec<T, N> b) {
-  return max(vec<T, N>{a}, b);
+  return vec<T, N>{a > b.v_ ? a : b.v_};
 }
 
 template <typename T, size_t N>

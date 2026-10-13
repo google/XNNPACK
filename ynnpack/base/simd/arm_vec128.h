@@ -1345,12 +1345,16 @@ YNN_ALWAYS_INLINE u8x8 operator^(u8x8 a, u8x8 b) {
 }
 YNN_ALWAYS_INLINE u8x8 operator~(u8x8 a) { return u8x8{vmvn_u8(a.v)}; }
 
+#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{vminq_f32(a.v, b.v)};
 }
-#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 min(f64x2 a, f64x2 b) {
   return f64x2{vminq_f64(a.v, b.v)};
+}
+#else
+YNN_ALWAYS_INLINE f32x4 min_no_nan(f32x4 a, f32x4 b) {
+  return f32x4{vminq_f32(a.v, b.v)};
 }
 #endif
 YNN_ALWAYS_INLINE s32x4 min(s32x4 a, s32x4 b) {
@@ -1366,12 +1370,16 @@ YNN_ALWAYS_INLINE s8x16 min(s8x16 a, s8x16 b) {
   return s8x16{vminq_s8(a.v, b.v)};
 }
 
+#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
   return f32x4{vmaxq_f32(a.v, b.v)};
 }
-#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 max(f64x2 a, f64x2 b) {
   return f64x2{vmaxq_f64(a.v, b.v)};
+}
+#else
+YNN_ALWAYS_INLINE f32x4 max_no_nan(f32x4 a, f32x4 b) {
+  return f32x4{vmaxq_f32(a.v, b.v)};
 }
 #endif
 YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
@@ -1603,6 +1611,15 @@ YNN_ALWAYS_INLINE s8x16 select(s8x16 cond, s8x16 a, s8x16 b) {
 YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
   return u8x16{vbslq_u8(vreinterpretq_u8_s8(cond.v), a.v, b.v)};
 }
+
+#ifdef YNN_ARCH_ARM32
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+#endif
 
 #ifdef YNN_ARCH_FP16_ARITHMETIC
 YNN_ALWAYS_INLINE f16x8 floor_log2(f16x8 a) {
@@ -1927,10 +1944,10 @@ YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x4 a) {
 
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE double horizontal_min(f64x2 a) {
-  return std::min(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
+  return ynn::min(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
 }
 YNN_ALWAYS_INLINE double horizontal_max(f64x2 a) {
-  return std::max(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
+  return ynn::max(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
 }
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {
   return vgetq_lane_f64(a.v, 0) + vgetq_lane_f64(a.v, 1);

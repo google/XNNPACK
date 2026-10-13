@@ -529,10 +529,10 @@ struct tan : public trig {
 struct hardswish : public unary_op_info {
   explicit hardswish(const unary_params& = {}) {}
   float operator()(float x) const override {
-    return (x / 6.0f) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
+    return (x / 6.0f) * clamp(x + 3.0f, 0.0f, 6.0f);
   }
   double operator()(double x) const override {
-    return (x / 6.0) * std::max(std::min(x + 3.0, 6.0), 0.0);
+    return (x / 6.0) * clamp(x + 3.0, 0.0, 6.0);
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {

@@ -11,12 +11,14 @@
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/simd/scalar.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/reduce/min_max.h"
+#include "ynnpack/kernels/reduce/propagate_nan.h"
 #include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
@@ -99,61 +101,98 @@ MIN_MAX_KN_KERNEL(min_max_kn_uint8, u8x1, u8x1, uint8_t, 1);
 MIN_MAX_K1_KERNEL(min_max_k1_xf8, xf8x1, xf8x1, int8_t, 1);
 MIN_MAX_KN_KERNEL(min_max_kn_xf8, xf8x1, xf8x1, int8_t, 1);
 
-#define YNN_REDUCE_KERNEL(arch, name, k_dim, A, C)          \
-  if (type_of<A>() == a_type && type_of<C>() == c_type) {   \
-    if (is_arch_supported(arch)) {                          \
-      if (k_dim == reduce_dim::k1 && !res.k1) {             \
-        YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-        res.k1 = name;                                      \
-      } else if (k_dim == reduce_dim::kn && !res.kn) {      \
-        YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-        res.kn = name;                                      \
-      }                                                     \
-    }                                                       \
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp32, float, 1);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp32, float, 1);
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp64, double, 1);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp64, double, 1);
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp16, half, 1);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp16, half, 1);
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_bf16, bfloat16, 1);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_bf16, bfloat16, 1);
+
+#define YNN_REDUCE_KERNEL(arch, name, k_dim, A, C, kernel_flags) \
+  if (type_of<A>() == a_type && type_of<C>() == c_type) {        \
+    if (is_arch_supported(arch)) {                               \
+      if (k_dim == reduce_dim::k1 && !res.k1) {                  \
+        YNN_LOG_DEBUG() << "Using reduce kernel " << #name;      \
+        res.k1 = name;                                           \
+        k1_flags = kernel_flags;                                 \
+      } else if (k_dim == reduce_dim::kn && !res.kn) {           \
+        YNN_LOG_DEBUG() << "Using reduce kernel " << #name;      \
+        res.kn = name;                                           \
+        kn_flags = kernel_flags;                                 \
+      }                                                          \
+    }                                                            \
   }
 
 reduce_kernel get_sum_kernel(ynn_type a_type, ynn_type c_type) {
   reduce_kernel res = {};
+  uint32_t k1_flags = 0;
+  uint32_t kn_flags = 0;
 #include "ynnpack/kernels/reduce/sum.inc"
+  res.flags = k1_flags | kn_flags;
   return res;
 }
 
 reduce_kernel get_sum_squared_kernel(ynn_type a_type, ynn_type c_type) {
   reduce_kernel res = {};
+  uint32_t k1_flags = 0;
+  uint32_t kn_flags = 0;
 #include "ynnpack/kernels/reduce/sum_squared.inc"
+  res.flags = k1_flags | kn_flags;
   return res;
 }
 
 #undef YNN_REDUCE_KERNEL
 
-#define YNN_REDUCE_KERNEL(arch, name, k_dim, A, C)          \
-  if (type_of<A>() == type) {                               \
-    if (is_arch_supported(arch)) {                          \
-      if (k_dim == reduce_dim::k1 && !res.k1) {             \
-        YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-        res.k1 = name;                                      \
-      } else if (k_dim == reduce_dim::kn && !res.kn) {      \
-        YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-        res.kn = name;                                      \
-      }                                                     \
-    }                                                       \
+#define YNN_REDUCE_KERNEL(arch, name, k_dim, A, C, kernel_flags) \
+  if (type_of<A>() == type) {                                    \
+    if (is_arch_supported(arch)) {                               \
+      if (k_dim == reduce_dim::k1 && !res.k1) {                  \
+        YNN_LOG_DEBUG() << "Using reduce kernel " << #name;      \
+        res.k1 = name;                                           \
+        k1_flags = kernel_flags;                                 \
+      } else if (k_dim == reduce_dim::kn && !res.kn) {           \
+        YNN_LOG_DEBUG() << "Using reduce kernel " << #name;      \
+        res.kn = name;                                           \
+        kn_flags = kernel_flags;                                 \
+      }                                                          \
+    }                                                            \
   }
 
 reduce_kernel get_min_kernel(ynn_type type) {
   reduce_kernel res = {};
+  uint32_t k1_flags = 0;
+  uint32_t kn_flags = 0;
 #include "ynnpack/kernels/reduce/min.inc"
+  res.flags = k1_flags | kn_flags;
   return res;
 }
 
 reduce_kernel get_max_kernel(ynn_type type) {
   reduce_kernel res = {};
+  uint32_t k1_flags = 0;
+  uint32_t kn_flags = 0;
 #include "ynnpack/kernels/reduce/max.inc"
+  res.flags = k1_flags | kn_flags;
   return res;
 }
 
 reduce_kernel get_min_max_kernel(ynn_type type) {
   reduce_kernel res = {};
+  uint32_t k1_flags = 0;
+  uint32_t kn_flags = 0;
 #include "ynnpack/kernels/reduce/min_max.inc"
+  res.flags = k1_flags | kn_flags;
+  return res;
+}
+
+reduce_kernel get_propagate_nan_kernel(ynn_type type) {
+  reduce_kernel res = {};
+  uint32_t k1_flags = 0;
+  uint32_t kn_flags = 0;
+#include "ynnpack/kernels/reduce/propagate_nan.inc"
+  res.flags = k1_flags | kn_flags;
   return res;
 }
 
@@ -172,6 +211,8 @@ reduce_kernel get_reduce_kernel(ynn_reduce_operator op, ynn_type a_type,
       return get_min_kernel(c_type);
     } else if (op == ynn_reduce_min_max) {
       return get_min_max_kernel(c_type);
+    } else if (op == ynn_reduce_propagate_nan) {
+      return get_propagate_nan_kernel(c_type);
     }
   }
   return {};
