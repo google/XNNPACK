@@ -760,6 +760,74 @@ TEST(FullyConnectedQS8QC4W, transposed_weights_use_unpacked_lhs) {
   EXPECT_EQ(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
   EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_invalid);
 }
+
+// A dynamically quantized input is normally produced by a `convert` node, but
+// nothing requires one. The optimizer must not index the node array with the
+// missing producer ID.
+TEST(FullyConnectedQD8F32QC8W, unproduced_dynamically_quantized_input) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  constexpr size_t m = 4;
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  std::vector<int8_t> filter(output_channels * input_channels);
+  std::vector<float> filter_scale(output_channels, 1.0f);
+
+  SubgraphTester subgraph(2);
+  constexpr uint32_t filter_id = 0;
+  constexpr uint32_t output_id = 1;
+  uint32_t dynamically_quantized_input_id = XNN_INVALID_VALUE_ID;
+  subgraph
+      .AddInternalDynamicallyQuantizedTensor(
+          {m, input_channels}, xnn_datatype_qdint8, /*num_nonbatch_dims=*/1,
+          &dynamically_quantized_input_id)
+      .AddStaticChannelwiseQuantizedTensor(
+          {output_channels, input_channels}, /*channel_dim=*/0,
+          xnn_datatype_qcint8, filter_scale.data(), filter_id, /*flags=*/0,
+          filter.data())
+      .AddOutputTensor({m, output_channels}, xnn_datatype_fp32, output_id)
+      .AddFullyConnected(dynamically_quantized_input_id, filter_id,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, output_id);
+
+  EXPECT_EQ(xnn_status_invalid_state,
+            subgraph.CreateRuntime(
+                /*threadpool=*/nullptr,
+                xnn_test_runtime_flags() & ~XNN_FLAG_NO_INLINED_LHS_PACKING));
+}
+
+// Same graph, but with inlined LHS packing disabled so that the row-sum
+// rewrite is the pass that looks up the producer.
+TEST(FullyConnectedQD8F32QC2W, unproduced_dynamically_quantized_input) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  constexpr size_t m = 4;
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  const size_t packed_input_channels = divide_round_up(input_channels, 4);
+  std::vector<uint8_t> filter(output_channels * packed_input_channels);
+  std::vector<float> filter_scale(output_channels, 1.0f);
+
+  SubgraphTester subgraph(2);
+  constexpr uint32_t filter_id = 0;
+  constexpr uint32_t output_id = 1;
+  uint32_t dynamically_quantized_input_id = XNN_INVALID_VALUE_ID;
+  subgraph
+      .AddInternalDynamicallyQuantizedTensor(
+          {m, input_channels}, xnn_datatype_qdint8, /*num_nonbatch_dims=*/1,
+          &dynamically_quantized_input_id)
+      .AddStaticChannelwiseQuantizedTensor(
+          {output_channels, packed_input_channels}, /*channel_dim=*/0,
+          xnn_datatype_qcint2, filter_scale.data(), filter_id, /*flags=*/0,
+          filter.data())
+      .AddOutputTensor({m, output_channels}, xnn_datatype_fp32, output_id)
+      .AddFullyConnected(dynamically_quantized_input_id, filter_id,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, output_id);
+
+  EXPECT_EQ(xnn_status_invalid_state,
+            subgraph.CreateRuntime(
+                /*threadpool=*/nullptr,
+                xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
