@@ -3812,6 +3812,7 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512AMX
       if (hardware_config->arch_flags & xnn_arch_x86_avx512amx) {
+        qd8_f16_qc8w_gemm_config.arch = xnn_arch_x86_avx512amx;
         qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx);
         qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(16)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx);
         qd8_f16_qc8w_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -4196,6 +4197,7 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512AMX
       if (hardware_config->arch_flags & xnn_arch_x86_avx512amx) {
+        qd8_f16_qc8w_igemm_config.arch = xnn_arch_x86_avx512amx;
         qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x64c4__avx512amx);
         qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(16)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx);
         qd8_f16_qc8w_igemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
