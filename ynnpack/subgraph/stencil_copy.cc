@@ -115,11 +115,9 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
             [d](const stencil_info& stencil) { return stencil.axis == d; });
         if (stencil == op.stencils.end()) continue;
         slinky::expr pre_padding =
-            compute_same_padding_min(*stencil, input.physical_extent(d));
-        func_input.bounds[d] -= pre_padding;
-        if (input.physical_extent(d).defined()) {
-          func_input.input_crop[d] = all_bounds(input.physical_extent(d));
-        }
+            compute_same_padding_min(*stencil, input.extent(d));
+        func_input.bounds[d] = slinky::point(dims[d]) - pre_padding;
+        func_input.input_crop[d] = all_bounds(input.extent(d));
         func_padding.bounds[d] -= pre_padding;
       }
 
