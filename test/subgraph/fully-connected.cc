@@ -760,6 +760,27 @@ TEST(FullyConnectedQS8QC4W, transposed_weights_use_unpacked_lhs) {
   EXPECT_EQ(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
   EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_invalid);
 }
+
+TEST(FullyConnectedQS8QC4W, single_element_filter) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  std::vector<uint8_t> filter(1);
+  std::vector<float> filter_scale(1, 1.0f);
+
+  SubgraphTester subgraph(3);
+  subgraph
+      .AddInputTensor({1, 1}, xnn_datatype_qint8, {0, 1.0f}, /*external_id=*/0)
+      .AddStaticChannelwiseQuantizedTensor(
+          {1, 1}, /*channel_dim=*/0, xnn_datatype_qcint4, filter_scale.data(),
+          /*external_id=*/1, /*flags=*/0, filter.data())
+      .AddOutputTensor({1, 1}, xnn_datatype_qint8, {0, 1.0f},
+                       /*external_id=*/2)
+      .AddFullyConnected(/*input_id=*/0, /*filter_id=*/1,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, /*output_id=*/2)
+      .Optimize(/*flags=*/0);
+
+  ASSERT_EQ(subgraph.NumNodes(), 1);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
