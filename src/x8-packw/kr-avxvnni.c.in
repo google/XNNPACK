@@ -40,15 +40,32 @@ $if VARIANT == "MADD":
 // We initialize 'value' by replicating 'pad_value' across all 8 bytes.
 // Then we overwrite the first 'n' bytes with the actual data.
 // This is used for safe loading at the end of a row, ensuring correct padding (e.g. zero point).
-XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, uint8_t pad_value) {
-  uint64_t value = (uint64_t)pad_value * 0x0101010101010101ULL;
-  assert(n <= sizeof(uint64_t));
-  const uint8_t* bytes = (const uint8_t*) address;
-  for (size_t i = 0; i < n; ++i) {
-    ((uint8_t*)&value)[i] = bytes[i];
+$if DATATYPE == "QS4":
+  // If 'odd' is set, one more byte is loaded, but only its low nibble is
+  // used and its high nibble is replaced by the high nibble of 'pad_value'.
+  // This handles an odd number of 4 bit weights (KC) per row.
+  XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, size_t odd, uint8_t pad_value) {
+    uint64_t value = (uint64_t)pad_value * 0x0101010101010101ULL;
+    assert(n + odd <= sizeof(uint64_t));
+    const uint8_t* bytes = (const uint8_t*) address;
+    for (size_t i = 0; i < n; ++i) {
+      ((uint8_t*)&value)[i] = bytes[i];
+    }
+    if (odd) {
+      ((uint8_t*)&value)[n] = (uint8_t) ((bytes[n] & 0x0F) | (pad_value & 0xF0));
+    }
+    return value;
   }
-  return value;
-}
+$else:
+  XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, uint8_t pad_value) {
+    uint64_t value = (uint64_t)pad_value * 0x0101010101010101ULL;
+    assert(n <= sizeof(uint64_t));
+    const uint8_t* bytes = (const uint8_t*) address;
+    for (size_t i = 0; i < n; ++i) {
+      ((uint8_t*)&value)[i] = bytes[i];
+    }
+    return value;
+  }
 
 $BTYPE = {"QS8": "int32_t", "QU8": "int32_t", "QS4": "int32_t", "X8": "uint32_t"}[DATATYPE]
 $WTYPE = {"QS8": "int8_t", "QU8": "uint8_t", "QS4": "uint8_t", "X8": "int8_t"}[DATATYPE]
@@ -115,8 +132,11 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
   assert(packed_weights != NULL);
   $if DATATYPE == "QS4":
     assert(params != NULL);
-    assert(kc % 2 == 0);  // This kernel does not support odd KC
-    kc >>= 1;  // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes
+    // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes.  Rows are byte
+    // aligned, so when KC is odd the last byte of each row holds 1 weight and
+    // its high nibble is padding that is replaced by the kernel zero point.
+    const size_t kc_odd = kc & 1;
+    kc >>= 1;
 
   ${TYPE}* out = (${TYPE}*) packed_weights;
   const ${BTYPE}* b = (const ${BTYPE}*) bias;
@@ -242,15 +262,21 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         out += ${NR*KR};
       }
 
-      // KC remainder of 1..${KR-1}
-      if (k != 0) {
-        assert(k >= 1 && k <= ${KR-1});
+      $if DATATYPE in ["QS4"]:
+        // KC remainder of 1..${KR} bytes, including the odd KC byte
+        if (k != 0 || kc_odd != 0) {
+          assert(k + kc_odd >= 1 && k + kc_odd <= ${KR});
+      $else:
+        // KC remainder of 1..${KR-1}
+        if (k != 0) {
+          assert(k >= 1 && k <= ${KR-1});
+      $ODD = "kc_odd, " if DATATYPE in ["QS4"] else ""
 
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k, ${PAD_VALUE}));
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k, ${PAD_VALUE})), 0x0C);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k, ${PAD_VALUE})), 0x30);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k, ${PAD_VALUE})), 0xC0);
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k, ${ODD}${PAD_VALUE}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k, ${ODD}${PAD_VALUE})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k, ${ODD}${PAD_VALUE})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k, ${ODD}${PAD_VALUE})), 0xC0);
 
         $for N in range(NR):
           w${N} += k;
@@ -406,15 +432,21 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         out += ${NR*KR};
       }
 
-      // KC remainder of 1..${KR-1}
-      if (k != 0) {
-        assert(k >= 1 && k <= ${KR-1});
+      $if DATATYPE in ["QS4"]:
+        // KC remainder of 1..${KR} bytes, including the odd KC byte
+        if (k != 0 || kc_odd != 0) {
+          assert(k + kc_odd >= 1 && k + kc_odd <= ${KR});
+      $else:
+        // KC remainder of 1..${KR-1}
+        if (k != 0) {
+          assert(k >= 1 && k <= ${KR-1});
+      $ODD = "kc_odd, " if DATATYPE in ["QS4"] else ""
 
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k, ${PAD_VALUE}));
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k, ${PAD_VALUE})), 0x0C);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k, ${PAD_VALUE})), 0x30);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k, ${PAD_VALUE})), 0xC0);
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k, ${ODD}${PAD_VALUE}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k, ${ODD}${PAD_VALUE})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k, ${ODD}${PAD_VALUE})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k, ${ODD}${PAD_VALUE})), 0xC0);
 
         $for N in range(NR):
           w${N} += k;

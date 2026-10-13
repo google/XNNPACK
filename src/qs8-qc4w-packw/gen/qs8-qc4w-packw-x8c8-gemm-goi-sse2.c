@@ -46,9 +46,12 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
   assert(packed_weights != NULL);
   assert(params != NULL);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
-  assert(kc % 2 == 0);
 
   const size_t mock_kc = kc >> 1; // kc in bytes
+  // Rows are byte aligned, so when KC is odd the last byte of each row holds
+  // 1 weight and its high nibble is padding that is replaced by the kernel
+  // zero point.
+  const size_t kc_odd = kc & 1;
   const uint32_t izp = (uint32_t) params->input_zero_point + 0;
   const uint32_t kernel_zero_point = (uint32_t) params->kernel_zero_point;
 
@@ -351,14 +354,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         out += 8 * 16;
       }
 
-      // KC remainder of 1..15 bytes
-      if (k != 0) {
+      // KC remainder of 1..16 bytes, including the odd KC byte
+      if (k != 0 || kc_odd != 0) {
+        assert(k + kc_odd >= 1 && k + kc_odd <= 16);
         uint8_t temp_w0[16];
         for (size_t i = 0; i < k; ++i) {
           temp_w0[i] = w0[i];
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w0[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w0[k] = (uint8_t) ((w0[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v0 = _mm_loadu_si128((const __m128i*) temp_w0);
         if (kernel_zero_point != 0) {
@@ -372,6 +379,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w1[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w1[k] = (uint8_t) ((w1[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v1 = _mm_loadu_si128((const __m128i*) temp_w1);
         if (kernel_zero_point != 0) {
           v1 = _mm_xor_si128(v1, vkernel_zero_point);
@@ -383,6 +393,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w2[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w2[k] = (uint8_t) ((w2[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v2 = _mm_loadu_si128((const __m128i*) temp_w2);
         if (kernel_zero_point != 0) {
@@ -396,6 +409,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w3[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w3[k] = (uint8_t) ((w3[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v3 = _mm_loadu_si128((const __m128i*) temp_w3);
         if (kernel_zero_point != 0) {
           v3 = _mm_xor_si128(v3, vkernel_zero_point);
@@ -407,6 +423,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w4[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w4[k] = (uint8_t) ((w4[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v4 = _mm_loadu_si128((const __m128i*) temp_w4);
         if (kernel_zero_point != 0) {
@@ -420,6 +439,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w5[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w5[k] = (uint8_t) ((w5[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v5 = _mm_loadu_si128((const __m128i*) temp_w5);
         if (kernel_zero_point != 0) {
           v5 = _mm_xor_si128(v5, vkernel_zero_point);
@@ -432,6 +454,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w6[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w6[k] = (uint8_t) ((w6[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v6 = _mm_loadu_si128((const __m128i*) temp_w6);
         if (kernel_zero_point != 0) {
           v6 = _mm_xor_si128(v6, vkernel_zero_point);
@@ -443,6 +468,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w7[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w7[k] = (uint8_t) ((w7[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v7 = _mm_loadu_si128((const __m128i*) temp_w7);
         if (kernel_zero_point != 0) {
@@ -652,7 +680,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         const __m128i vout01_6 = _mm_unpacklo_epi64(vout6, vout7);
         _mm_storeu_si128((__m128i*) &out[6 * 8], vout01_6);
 
-        if (k > 8) {
+        if (k + kc_odd > 8) {
           const __m128i vout23_0 = _mm_unpackhi_epi64(vout0, vout1);
           _mm_storeu_si128((__m128i*) &out[(8 + 0) * 8], vout23_0);
           const __m128i vout23_2 = _mm_unpackhi_epi64(vout2, vout3);
@@ -1006,13 +1034,17 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         out += 8 * 16;
       }
 
-      if (k != 0) {
+      if (k != 0 || kc_odd != 0) {
+        assert(k + kc_odd >= 1 && k + kc_odd <= 16);
         uint8_t temp_w0[16];
         for (size_t i = 0; i < k; ++i) {
           temp_w0[i] = w0[i];
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w0[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w0[k] = (uint8_t) ((w0[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v0 = _mm_loadu_si128((const __m128i*) temp_w0);
         if (kernel_zero_point != 0) {
@@ -1026,6 +1058,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w1[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w1[k] = (uint8_t) ((w1[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v1 = _mm_loadu_si128((const __m128i*) temp_w1);
         if (kernel_zero_point != 0) {
           v1 = _mm_xor_si128(v1, vkernel_zero_point);
@@ -1037,6 +1072,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w2[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w2[k] = (uint8_t) ((w2[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v2 = _mm_loadu_si128((const __m128i*) temp_w2);
         if (kernel_zero_point != 0) {
@@ -1050,6 +1088,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w3[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w3[k] = (uint8_t) ((w3[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v3 = _mm_loadu_si128((const __m128i*) temp_w3);
         if (kernel_zero_point != 0) {
           v3 = _mm_xor_si128(v3, vkernel_zero_point);
@@ -1061,6 +1102,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w4[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w4[k] = (uint8_t) ((w4[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v4 = _mm_loadu_si128((const __m128i*) temp_w4);
         if (kernel_zero_point != 0) {
@@ -1074,6 +1118,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         for (size_t i = k; i < 16; ++i) {
           temp_w5[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w5[k] = (uint8_t) ((w5[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         __m128i v5 = _mm_loadu_si128((const __m128i*) temp_w5);
         if (kernel_zero_point != 0) {
           v5 = _mm_xor_si128(v5, vkernel_zero_point);
@@ -1085,6 +1132,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         }
         for (size_t i = k; i < 16; ++i) {
           temp_w6[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w6[k] = (uint8_t) ((w6[k] & 0x0F) | (kernel_zero_point << 4));
         }
         __m128i v6 = _mm_loadu_si128((const __m128i*) temp_w6);
         if (kernel_zero_point != 0) {
@@ -1272,7 +1322,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2(
         const __m128i vout01_6 = _mm_unpacklo_epi64(vout6, vout7);
         _mm_storeu_si128((__m128i*) &out[6 * 8], vout01_6);
 
-        if (k > 8) {
+        if (k + kc_odd > 8) {
           const __m128i vout23_0 = _mm_unpackhi_epi64(vout0, vout1);
           _mm_storeu_si128((__m128i*) &out[(8 + 0) * 8], vout23_0);
           const __m128i vout23_2 = _mm_unpackhi_epi64(vout2, vout3);

@@ -25,12 +25,18 @@
 // We initialize 'value' by replicating 'pad_value' across all 8 bytes.
 // Then we overwrite the first 'n' bytes with the actual data.
 // This is used for safe loading at the end of a row, ensuring correct padding (e.g. zero point).
-XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, uint8_t pad_value) {
+// If 'odd' is set, one more byte is loaded, but only its low nibble is
+// used and its high nibble is replaced by the high nibble of 'pad_value'.
+// This handles an odd number of 4 bit weights (KC) per row.
+XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, size_t odd, uint8_t pad_value) {
   uint64_t value = (uint64_t)pad_value * 0x0101010101010101ULL;
-  assert(n <= sizeof(uint64_t));
+  assert(n + odd <= sizeof(uint64_t));
   const uint8_t* bytes = (const uint8_t*) address;
   for (size_t i = 0; i < n; ++i) {
     ((uint8_t*)&value)[i] = bytes[i];
+  }
+  if (odd) {
+    ((uint8_t*)&value)[n] = (uint8_t) ((bytes[n] & 0x0F) | (pad_value & 0xF0));
   }
   return value;
 }
@@ -78,8 +84,11 @@ void xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
   assert(weights != NULL);
   assert(packed_weights != NULL);
   assert(params != NULL);
-  assert(kc % 2 == 0);  // This kernel does not support odd KC
-  kc >>= 1;  // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes
+  // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes.  Rows are byte
+  // aligned, so when KC is odd the last byte of each row holds 1 weight and
+  // its high nibble is padding that is replaced by the kernel zero point.
+  const size_t kc_odd = kc & 1;
+  kc >>= 1;
 
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
@@ -207,18 +216,18 @@ void xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         out += 64;
       }
 
-      // KC remainder of 1..7
-      if (k != 0) {
-        assert(k >= 1 && k <= 7);
+      // KC remainder of 1..8 bytes, including the odd KC byte
+      if (k != 0 || kc_odd != 0) {
+        assert(k + kc_odd >= 1 && k + kc_odd <= 8);
 
-        __m256i v0 = _mm256_set1_epi64x((int64_t) safe_load_u64(w0, k, params->kernel_zero_point * 0x11));
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w1, k, params->kernel_zero_point * 0x11)), 0x0C);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w2, k, params->kernel_zero_point * 0x11)), 0x30);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w3, k, params->kernel_zero_point * 0x11)), 0xC0);
-        __m256i v4 = _mm256_set1_epi64x((int64_t) safe_load_u64(w4, k, params->kernel_zero_point * 0x11));
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w5, k, params->kernel_zero_point * 0x11)), 0x0C);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w6, k, params->kernel_zero_point * 0x11)), 0x30);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w7, k, params->kernel_zero_point * 0x11)), 0xC0);
+        __m256i v0 = _mm256_set1_epi64x((int64_t) safe_load_u64(w0, k, kc_odd, params->kernel_zero_point * 0x11));
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w1, k, kc_odd, params->kernel_zero_point * 0x11)), 0x0C);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w2, k, kc_odd, params->kernel_zero_point * 0x11)), 0x30);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w3, k, kc_odd, params->kernel_zero_point * 0x11)), 0xC0);
+        __m256i v4 = _mm256_set1_epi64x((int64_t) safe_load_u64(w4, k, kc_odd, params->kernel_zero_point * 0x11));
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w5, k, kc_odd, params->kernel_zero_point * 0x11)), 0x0C);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w6, k, kc_odd, params->kernel_zero_point * 0x11)), 0x30);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w7, k, kc_odd, params->kernel_zero_point * 0x11)), 0xC0);
 
         w0 += k;
         w1 += k;
@@ -390,18 +399,18 @@ void xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         out += 64;
       }
 
-      // KC remainder of 1..7
-      if (k != 0) {
-        assert(k >= 1 && k <= 7);
+      // KC remainder of 1..8 bytes, including the odd KC byte
+      if (k != 0 || kc_odd != 0) {
+        assert(k + kc_odd >= 1 && k + kc_odd <= 8);
 
-        __m256i v0 = _mm256_set1_epi64x((int64_t) safe_load_u64(w0, k, params->kernel_zero_point * 0x11));
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w1, k, params->kernel_zero_point * 0x11)), 0x0C);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w2, k, params->kernel_zero_point * 0x11)), 0x30);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w3, k, params->kernel_zero_point * 0x11)), 0xC0);
-        __m256i v4 = _mm256_set1_epi64x((int64_t) safe_load_u64(w4, k, params->kernel_zero_point * 0x11));
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w5, k, params->kernel_zero_point * 0x11)), 0x0C);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w6, k, params->kernel_zero_point * 0x11)), 0x30);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w7, k, params->kernel_zero_point * 0x11)), 0xC0);
+        __m256i v0 = _mm256_set1_epi64x((int64_t) safe_load_u64(w0, k, kc_odd, params->kernel_zero_point * 0x11));
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w1, k, kc_odd, params->kernel_zero_point * 0x11)), 0x0C);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w2, k, kc_odd, params->kernel_zero_point * 0x11)), 0x30);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) safe_load_u64(w3, k, kc_odd, params->kernel_zero_point * 0x11)), 0xC0);
+        __m256i v4 = _mm256_set1_epi64x((int64_t) safe_load_u64(w4, k, kc_odd, params->kernel_zero_point * 0x11));
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w5, k, kc_odd, params->kernel_zero_point * 0x11)), 0x0C);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w6, k, kc_odd, params->kernel_zero_point * 0x11)), 0x30);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) safe_load_u64(w7, k, kc_odd, params->kernel_zero_point * 0x11)), 0xC0);
 
         w0 += k;
         w1 += k;

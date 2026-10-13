@@ -47,13 +47,16 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
   assert(packed_weights != NULL);
   assert(params != NULL);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
-  assert(kc % 2 == 0);
 
   uint8_t* out = (uint8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
   // QS4 or QC4UW
 
   const size_t mock_kc = kc >> 1; // kc in bytes (each byte has 2 weights)
+  // Rows are byte aligned, so when KC is odd the last byte of each row holds
+  // 1 weight and its high nibble is padding that is replaced by the kernel
+  // zero point.
+  const size_t kc_odd = kc & 1;
   const uint32_t izp = (uint32_t) params->input_zero_point + 0;
   const uint32_t kernel_zero_point = (uint32_t) params->kernel_zero_point;
 
@@ -690,14 +693,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         out += 32 * 8;
       }
 
-      // KC remainder of 1..7 bytes
-      if (k != 0) {
+      // KC remainder of 1..8 bytes, including the odd KC byte
+      if (k != 0 || kc_odd != 0) {
+        assert(k + kc_odd >= 1 && k + kc_odd <= 8);
         uint8_t temp_w0[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w0[i] = w0[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w0[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w0[k] = (uint8_t) ((w0[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w1[8];
         for (size_t i = 0; i < k; ++i) {
@@ -706,12 +713,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w1[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w1[k] = (uint8_t) ((w1[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w2[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w2[i] = w2[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w2[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w2[k] = (uint8_t) ((w2[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w3[8];
         for (size_t i = 0; i < k; ++i) {
@@ -720,12 +733,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w3[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w3[k] = (uint8_t) ((w3[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w4[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w4[i] = w4[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w4[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w4[k] = (uint8_t) ((w4[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w5[8];
         for (size_t i = 0; i < k; ++i) {
@@ -734,12 +753,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w5[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w5[k] = (uint8_t) ((w5[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w6[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w6[i] = w6[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w6[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w6[k] = (uint8_t) ((w6[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w7[8];
         for (size_t i = 0; i < k; ++i) {
@@ -748,12 +773,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w7[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w7[k] = (uint8_t) ((w7[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w8[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w8[i] = w8[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w8[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w8[k] = (uint8_t) ((w8[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w9[8];
         for (size_t i = 0; i < k; ++i) {
@@ -762,12 +793,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w9[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w9[k] = (uint8_t) ((w9[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w10[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w10[i] = w10[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w10[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w10[k] = (uint8_t) ((w10[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w11[8];
         for (size_t i = 0; i < k; ++i) {
@@ -776,12 +813,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w11[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w11[k] = (uint8_t) ((w11[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w12[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w12[i] = w12[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w12[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w12[k] = (uint8_t) ((w12[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w13[8];
         for (size_t i = 0; i < k; ++i) {
@@ -790,12 +833,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w13[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w13[k] = (uint8_t) ((w13[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w14[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w14[i] = w14[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w14[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w14[k] = (uint8_t) ((w14[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w15[8];
         for (size_t i = 0; i < k; ++i) {
@@ -804,12 +853,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w15[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w15[k] = (uint8_t) ((w15[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w16[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w16[i] = w16[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w16[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w16[k] = (uint8_t) ((w16[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w17[8];
         for (size_t i = 0; i < k; ++i) {
@@ -818,12 +873,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w17[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w17[k] = (uint8_t) ((w17[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w18[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w18[i] = w18[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w18[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w18[k] = (uint8_t) ((w18[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w19[8];
         for (size_t i = 0; i < k; ++i) {
@@ -832,12 +893,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w19[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w19[k] = (uint8_t) ((w19[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w20[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w20[i] = w20[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w20[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w20[k] = (uint8_t) ((w20[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w21[8];
         for (size_t i = 0; i < k; ++i) {
@@ -846,12 +913,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w21[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w21[k] = (uint8_t) ((w21[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w22[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w22[i] = w22[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w22[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w22[k] = (uint8_t) ((w22[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w23[8];
         for (size_t i = 0; i < k; ++i) {
@@ -860,12 +933,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w23[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w23[k] = (uint8_t) ((w23[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w24[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w24[i] = w24[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w24[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w24[k] = (uint8_t) ((w24[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w25[8];
         for (size_t i = 0; i < k; ++i) {
@@ -874,12 +953,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w25[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w25[k] = (uint8_t) ((w25[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w26[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w26[i] = w26[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w26[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w26[k] = (uint8_t) ((w26[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w27[8];
         for (size_t i = 0; i < k; ++i) {
@@ -888,12 +973,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w27[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w27[k] = (uint8_t) ((w27[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w28[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w28[i] = w28[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w28[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w28[k] = (uint8_t) ((w28[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w29[8];
         for (size_t i = 0; i < k; ++i) {
@@ -902,6 +993,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w29[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w29[k] = (uint8_t) ((w29[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w30[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w30[i] = w30[i];
@@ -909,12 +1003,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w30[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w30[k] = (uint8_t) ((w30[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w31[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w31[i] = w31[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w31[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w31[k] = (uint8_t) ((w31[k] & 0x0F) | (kernel_zero_point << 4));
         }
 
         for (size_t i = 0; i < 8; ++i) {
@@ -1497,7 +1597,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
       packed_b[30] -= ksum30 * izp * 16;
       packed_b[31] -= ksum31 * izp * 16;
       out = (uint8_t*) ((uintptr_t) out + extra_bytes);
-      w0 = w31 + n_stride - kc;
+      w0 = w31 + (n_stride >> 1) - mock_kc;
     }
 
     // NC remainder (1..31)
@@ -2207,14 +2307,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         out += 32 * 8;
       }
 
-      // KC remainder of 1..7 bytes
-      if (k != 0) {
+      // KC remainder of 1..8 bytes, including the odd KC byte
+      if (k != 0 || kc_odd != 0) {
+        assert(k + kc_odd >= 1 && k + kc_odd <= 8);
         uint8_t temp_w0[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w0[i] = w0[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w0[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w0[k] = (uint8_t) ((w0[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w1[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2223,12 +2327,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w1[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w1[k] = (uint8_t) ((w1[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w2[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w2[i] = w2[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w2[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w2[k] = (uint8_t) ((w2[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w3[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2237,12 +2347,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w3[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w3[k] = (uint8_t) ((w3[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w4[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w4[i] = w4[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w4[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w4[k] = (uint8_t) ((w4[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w5[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2251,12 +2367,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w5[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w5[k] = (uint8_t) ((w5[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w6[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w6[i] = w6[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w6[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w6[k] = (uint8_t) ((w6[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w7[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2265,12 +2387,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w7[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w7[k] = (uint8_t) ((w7[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w8[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w8[i] = w8[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w8[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w8[k] = (uint8_t) ((w8[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w9[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2279,12 +2407,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w9[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w9[k] = (uint8_t) ((w9[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w10[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w10[i] = w10[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w10[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w10[k] = (uint8_t) ((w10[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w11[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2293,12 +2427,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w11[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w11[k] = (uint8_t) ((w11[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w12[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w12[i] = w12[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w12[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w12[k] = (uint8_t) ((w12[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w13[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2307,12 +2447,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w13[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w13[k] = (uint8_t) ((w13[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w14[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w14[i] = w14[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w14[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w14[k] = (uint8_t) ((w14[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w15[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2321,12 +2467,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w15[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w15[k] = (uint8_t) ((w15[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w16[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w16[i] = w16[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w16[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w16[k] = (uint8_t) ((w16[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w17[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2335,12 +2487,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w17[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w17[k] = (uint8_t) ((w17[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w18[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w18[i] = w18[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w18[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w18[k] = (uint8_t) ((w18[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w19[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2349,12 +2507,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w19[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w19[k] = (uint8_t) ((w19[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w20[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w20[i] = w20[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w20[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w20[k] = (uint8_t) ((w20[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w21[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2363,12 +2527,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w21[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w21[k] = (uint8_t) ((w21[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w22[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w22[i] = w22[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w22[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w22[k] = (uint8_t) ((w22[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w23[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2377,12 +2547,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w23[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w23[k] = (uint8_t) ((w23[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w24[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w24[i] = w24[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w24[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w24[k] = (uint8_t) ((w24[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w25[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2391,12 +2567,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w25[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w25[k] = (uint8_t) ((w25[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w26[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w26[i] = w26[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w26[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w26[k] = (uint8_t) ((w26[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w27[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2405,12 +2587,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w27[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w27[k] = (uint8_t) ((w27[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w28[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w28[i] = w28[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w28[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w28[k] = (uint8_t) ((w28[k] & 0x0F) | (kernel_zero_point << 4));
         }
         uint8_t temp_w29[8];
         for (size_t i = 0; i < k; ++i) {
@@ -2419,12 +2607,18 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
         for (size_t i = k; i < 8; ++i) {
           temp_w29[i] = kernel_zero_point * 0x11;
         }
+        if (kc_odd) {
+          temp_w29[k] = (uint8_t) ((w29[k] & 0x0F) | (kernel_zero_point << 4));
+        }
         uint8_t temp_w30[8];
         for (size_t i = 0; i < k; ++i) {
           temp_w30[i] = w30[i];
         }
         for (size_t i = k; i < 8; ++i) {
           temp_w30[i] = kernel_zero_point * 0x11;
+        }
+        if (kc_odd) {
+          temp_w30[k] = (uint8_t) ((w30[k] & 0x0F) | (kernel_zero_point << 4));
         }
 
         for (size_t i = 0; i < 8; ++i) {

@@ -1203,10 +1203,10 @@ void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512(
 // Applies kv ^ 0x88 to convert int4 to uint4
 // Does not multiply bias by 16
 static void pack_qs8_qc4uw_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
-                                      size_t kr, size_t sr, const uint8_t* k,
-                                      const int32_t* b, const float* scale,
-                                      void* packed_weights, size_t extra_bytes,
-                                      uint32_t izp,
+                                      size_t kr, size_t sr, size_t n_stride,
+                                      const uint8_t* k, const int32_t* b,
+                                      const float* scale, void* packed_weights,
+                                      size_t extra_bytes, uint32_t izp,
                                       uint32_t kernel_zero_point) {
   assert(g != 0);
   assert(nc != 0);
@@ -1239,8 +1239,10 @@ static void pack_qs8_qc4uw_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
           for (size_t kr_block_offset = 0; kr_block_offset < kr;
                kr_block_offset++) {
             const size_t kc_idx = kc_begin + kr_block_offset;
+            // Rows are n_stride nibbles, which is even so rows are byte
+            // aligned.  When kc is odd the padding nibble is ignored.
             const size_t k_offset =
-                (nr_block_start + nr_block_offset) * kc + kc_idx;
+                (nr_block_start + nr_block_offset) * n_stride + kc_idx;
             const size_t kh_offset = k_offset + kr;
             if (kernel_zero_point == 0) {
               int8_t kv_lo = 0;
@@ -1287,7 +1289,7 @@ static void pack_qs8_qc4uw_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
           reinterpret_cast<void*>((uintptr_t)packed_weights + extra_bytes);
       nr_block_start += nr;
     } while (nr_block_start < nc);
-    k += nc * kc;  // kc * 2 nibbles
+    k += nc * ((n_stride + 1) / 2);  // n_stride nibbles per row -> bytes
     if XNN_UNPREDICTABLE (b != nullptr) {
       b += nc;
     }
@@ -1301,9 +1303,9 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params) {
   assert(params != nullptr);
-  pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr, k, b, scale, packed_weights,
-                            extra_bytes, params->input_zero_point,
-                            params->kernel_zero_point);
+  pack_qs8_qc4uw_gemm_goi_w(
+      g, nc, kc, nr, kr, sr, n_stride, k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params->kernel_zero_point);
 }
 
 // For qs8_qc4w madd
@@ -1313,9 +1315,9 @@ void xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w(
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params) {
   assert(params != nullptr);
-  pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr, k, b, scale, packed_weights,
-                            extra_bytes, params->input_zero_point + 0x80,
-                            params->kernel_zero_point);
+  pack_qs8_qc4uw_gemm_goi_w(
+      g, nc, kc, nr, kr, sr, n_stride, k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point + 0x80, params->kernel_zero_point);
 }
 
 void xnn_pack_qs8_qb4w_gemm_goi_w(
