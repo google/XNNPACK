@@ -412,6 +412,13 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
+    # SVE2 kernels use NEON for arithmetic and SVE only where NEON has no
+    # equivalent (e.g. LD1SB Z.S: load int8 sign-extended to 32-bit lanes),
+    # bridging with svget_neonq.  Gated at runtime on xnn_arch_arm_sve2.
+    "sve2": _create_params(
+        cond = "//:arm_sve2_enabled",
+        copts = ["-march=armv8.2-a+sve2"],
+    ),
     "neoni8mmbf16": _create_params(
         cond = "//:arm_i8mm_enabled",
         copts = ["-march=armv8.2-a+i8mm+fp16+bf16"],

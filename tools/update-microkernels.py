@@ -74,6 +74,7 @@ _ISA_LIST = frozenset({
     'sse2fma',
     'sse41',
     'ssse3',
+    'sve2',
     'wasmblendvps',
     'wasmrelaxedsimd',
     'wasmrelaxedsimdfp16',
@@ -377,7 +378,7 @@ def main(args):
 # Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 #
-''')
+''' + (f'\n"""Microkernel filenames lists for {key}."""\n' if key == 'sve2' else ''))
         prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,
             key,
