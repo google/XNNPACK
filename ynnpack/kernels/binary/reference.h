@@ -6,7 +6,6 @@
 #ifndef XNNPACK_YNNPACK_KERNELS_BINARY_REFERENCE_H_
 #define XNNPACK_YNNPACK_KERNELS_BINARY_REFERENCE_H_
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -75,22 +74,22 @@ struct divide : public binary_op_info {
 };
 
 struct min : public binary_op_info {
-  float operator()(float a, float b) const override { return std::min(a, b); }
+  float operator()(float a, float b) const override { return ynn::min(a, b); }
   double operator()(double a, double b) const override {
-    return std::min(a, b);
+    return ynn::min(a, b);
   }
   int32_t operator()(int32_t a, int32_t b) const override {
-    return std::min(a, b);
+    return ynn::min(a, b);
   }
 };
 
 struct max : public binary_op_info {
-  float operator()(float a, float b) const override { return std::max(a, b); }
+  float operator()(float a, float b) const override { return ynn::max(a, b); }
   double operator()(double a, double b) const override {
-    return std::max(a, b);
+    return ynn::max(a, b);
   }
   int32_t operator()(int32_t a, int32_t b) const override {
-    return std::max(a, b);
+    return ynn::max(a, b);
   }
 };
 

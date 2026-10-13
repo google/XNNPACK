@@ -48,6 +48,8 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "arm32",
     match_any = [
+        "@platforms//cpu:aarch32",
+        "@platforms//cpu:arm",
         "@platforms//cpu:armv7",
     ],
 )

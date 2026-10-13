@@ -192,6 +192,10 @@ YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
   return concat(min(lo(a), lo(b)), min(hi(a), hi(b)));
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> min_no_nan(vec<T, N> a, vec<T, N> b) {
+  return min(a, b);
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, T b) {
   return concat(min(lo(a), b), min(hi(a), b));
 }
@@ -202,6 +206,10 @@ YNN_ALWAYS_INLINE vec<T, N> min(T a, vec<T, N> b) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
   return concat(max(lo(a), lo(b)), max(hi(a), hi(b)));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> max_no_nan(vec<T, N> a, vec<T, N> b) {
+  return max(a, b);
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, T b) {

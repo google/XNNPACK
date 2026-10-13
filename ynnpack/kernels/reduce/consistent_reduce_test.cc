@@ -8,8 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
-#include <ostream>
 #include <set>
 #include <string>
 #include <tuple>
@@ -38,7 +36,7 @@ struct KernelInfo {
 };
 
 KernelInfo all_kernels[] = {
-#define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, type_a, type_c)            \
+#define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, type_a, type_c, flags)     \
   KernelInfo{                                                                 \
       arch_flags, name, #name, current_op, multi_type_of(type_a(), type_c()), \
       k_dim},

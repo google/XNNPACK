@@ -21,6 +21,45 @@
 
 namespace ynn {
 
+using std::isfinite;
+using std::isinf;
+using std::isnan;
+
+#ifndef _MSC_VER
+inline bool isinf(int x) { return false; }
+inline bool isnan(int x) { return false; }
+inline bool isfinite(int x) { return true; }
+#endif  // _MSC_VER
+
+// std::min/std::max don't handle NaN correctly, these do.
+// These works because if a or b is NaN, a < b is false. If b is NaN, that's
+// fine, we were going to return that anyways, but if a is NaN, we need to
+// return a.
+template <typename T>
+T min(T a, T b) {
+  return a < b || isnan(a) ? a : b;
+}
+
+template <typename T>
+T max(T a, T b) {
+  return a > b || isnan(a) ? a : b;
+}
+
+template <typename T>
+T min_no_nan(T a, T b) {
+  return a < b ? a : b;
+}
+
+template <typename T>
+T max_no_nan(T a, T b) {
+  return a > b ? a : b;
+}
+
+template <typename T>
+T clamp(T x, T a, T b) {
+  return min(max(x, a), b);
+}
+
 // Clamp a float to the range of the given integer or quantized integer type.
 template <typename Int>
 float clamp_float_to_int(float x) {
@@ -31,8 +70,8 @@ float clamp_float_to_int(float x) {
   // determined a constant that when added to the min/max float values, results
   // in the upper bound of the integer range.
   constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
-  x = std::max<float>(x, type_info<Unwrapped>::min());
-  x = std::min<float>(x, type_info<Unwrapped>::max() - half_mantissa);
+  x = max<float>(x, type_info<Unwrapped>::min());
+  x = min<float>(x, type_info<Unwrapped>::max() - half_mantissa);
   return x;
 }
 
@@ -306,16 +345,6 @@ T exp2_round(T a) {
 constexpr size_t pow(size_t base, size_t exp) {
   return (exp == 0) ? 1 : base * pow(base, exp - 1);
 }
-
-using std::isfinite;
-using std::isinf;
-using std::isnan;
-
-#ifndef _MSC_VER
-inline bool isinf(int x) { return false; }
-inline bool isnan(int x) { return false; }
-inline bool isfinite(int x) { return true; }
-#endif  // _MSC_VER
 
 }  // namespace ynn
 

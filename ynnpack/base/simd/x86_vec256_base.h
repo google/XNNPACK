@@ -795,16 +795,16 @@ YNN_ALWAYS_INLINE u8x32 sub_sat(u8x32 a, u8x32 b) {
 }
 #endif  // YNN_ARCH_X86_AVX2
 
-YNN_ALWAYS_INLINE f64x4 min(f64x4 a, f64x4 b) {
+YNN_ALWAYS_INLINE f64x4 min_no_nan(f64x4 a, f64x4 b) {
   return f64x4{_mm256_min_pd(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f32x8 min(f32x8 a, f32x8 b) {
+YNN_ALWAYS_INLINE f32x8 min_no_nan(f32x8 a, f32x8 b) {
   return f32x8{_mm256_min_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f64x4 max(f64x4 a, f64x4 b) {
+YNN_ALWAYS_INLINE f64x4 max_no_nan(f64x4 a, f64x4 b) {
   return f64x4{_mm256_max_pd(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f32x8 max(f32x8 a, f32x8 b) {
+YNN_ALWAYS_INLINE f32x8 max_no_nan(f32x8 a, f32x8 b) {
   return f32x8{_mm256_max_ps(a.v, b.v)};
 }
 
@@ -824,11 +824,11 @@ YNN_ALWAYS_INLINE f64x4 max(f64x4 a, double b) {
   return f64x4{_mm256_max_pd(_mm256_set1_pd(b), a.v)};
 }
 #ifdef YNN_ARCH_FP16_ARITHMETIC
-YNN_ALWAYS_INLINE f16x16 min(f16x16 a, f16x16 b) {
+YNN_ALWAYS_INLINE f16x16 min_no_nan(f16x16 a, f16x16 b) {
   return f16x16{_mm256_castph_si256(
       _mm256_min_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
 }
-YNN_ALWAYS_INLINE f16x16 max(f16x16 a, f16x16 b) {
+YNN_ALWAYS_INLINE f16x16 max_no_nan(f16x16 a, f16x16 b) {
   return f16x16{_mm256_castph_si256(
       _mm256_max_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
 }
@@ -1079,6 +1079,19 @@ YNN_ALWAYS_INLINE s8x32 operator>(s8x32 a, s8x32 b) {
   return s8x32{_mm256_cmpgt_epi8(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s8x32 operator<(s8x32 a, s8x32 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s16x16 isnan(bf16x16 a) {
+  __m256i abs_a = _mm256_and_si256(a.v, _mm256_set1_epi16(0x7fff));
+  return s16x16{_mm256_cmpgt_epi16(abs_a, _mm256_set1_epi16(0x7f80))};
+}
+YNN_ALWAYS_INLINE s16x16 isinf(bf16x16 a) {
+  __m256i abs_a = _mm256_and_si256(a.v, _mm256_set1_epi16(0x7fff));
+  return s16x16{_mm256_cmpeq_epi16(abs_a, _mm256_set1_epi16(0x7f80))};
+}
+YNN_ALWAYS_INLINE s16x16 isfinite(bf16x16 a) {
+  __m256i abs_a = _mm256_and_si256(a.v, _mm256_set1_epi16(0x7fff));
+  return s16x16{_mm256_cmpgt_epi16(_mm256_set1_epi16(0x7f80), abs_a)};
+}
 #endif  // YNN_ARCH_X86_AVX2
 
 YNN_ALWAYS_INLINE s32x8 isnan(f32x8 a) {
@@ -1177,6 +1190,9 @@ YNN_ALWAYS_INLINE s16x16 select(s16x16 cond, s16x16 a, s16x16 b) {
 YNN_ALWAYS_INLINE u16x16 select(s16x16 cond, u16x16 a, u16x16 b) {
   return u16x16{_mm256_blendv_epi8(b.v, a.v, cond.v)};
 }
+YNN_ALWAYS_INLINE bf16x16 select(s16x16 cond, bf16x16 a, bf16x16 b) {
+  return bf16x16{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
 YNN_ALWAYS_INLINE s8x32 select(s8x32 cond, s8x32 a, s8x32 b) {
   return s8x32{_mm256_blendv_epi8(b.v, a.v, cond.v)};
 }
@@ -1191,6 +1207,27 @@ YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
   return s32x8{_mm256_castps_si256(_mm256_blendv_ps(mb, ma, mc))};
 }
 #endif  // YNN_ARCH_X86_AVX2
+
+YNN_ALWAYS_INLINE f64x4 min(f64x4 a, f64x4 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f32x8 min(f32x8 a, f32x8 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f64x4 max(f64x4 a, f64x4 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f32x8 max(f32x8 a, f32x8 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 min(f16x16 a, f16x16 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f16x16 max(f16x16 a, f16x16 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+#endif
 
 YNN_ALWAYS_INLINE bool any(s8x32 x) { return !_mm256_testz_si256(x.v, x.v); }
 YNN_ALWAYS_INLINE bool any(s16x16 x) { return !_mm256_testz_si256(x.v, x.v); }

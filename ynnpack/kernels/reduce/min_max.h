@@ -19,9 +19,6 @@
 
 namespace ynn {
 
-using std::max;
-using std::min;
-
 template <typename T>
 struct scalar_type_of {
   using type = T;
@@ -72,14 +69,16 @@ class sign_magnitude {
 
   operator T() const { return sign_complement(value_); }  // NOLINT
 
-  friend sign_magnitude min(sign_magnitude a, T b) {
+  friend sign_magnitude min_no_nan(sign_magnitude a, T b) {
     a.value_ = min(a.value_, sign_complement(b));
     return a;
   }
-  friend sign_magnitude max(sign_magnitude a, T b) {
+  friend sign_magnitude max_no_nan(sign_magnitude a, T b) {
     a.value_ = max(a.value_, sign_complement(b));
     return a;
   }
+  friend sign_magnitude min(sign_magnitude a, T b) { return min_no_nan(a, b); }
+  friend sign_magnitude max(sign_magnitude a, T b) { return max_no_nan(a, b); }
 
  private:
   T value_;
@@ -138,14 +137,14 @@ struct dummy_t {
 
 // We need to implement the operations min_max_accumulator expects, to be no-ops
 // for the dummy type.
-inline dummy_t min(dummy_t, dummy_t) { return {}; }
-inline dummy_t max(dummy_t, dummy_t) { return {}; }
+inline dummy_t min_no_nan(dummy_t, dummy_t) { return {}; }
+inline dummy_t max_no_nan(dummy_t, dummy_t) { return {}; }
 template <typename T>
-dummy_t min(dummy_t, T) {
+dummy_t min_no_nan(dummy_t, T) {
   return {};
 }
 template <typename T>
-dummy_t max(dummy_t, T) {
+dummy_t max_no_nan(dummy_t, T) {
   return {};
 }
 template <typename N>
@@ -188,14 +187,14 @@ struct min_max_accumulator {
     auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), K, undef) : a_0;
     auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), K, undef) : a_1;
     auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), K, undef) : a_2;
-    acc_min[0] = min(acc_min[0], a_0);
-    acc_min[1] = min(acc_min[1], a_1);
-    acc_min[2] = min(acc_min[2], a_2);
-    acc_min[3] = min(acc_min[3], a_3);
-    acc_max[0] = max(acc_max[0], a_0);
-    acc_max[1] = max(acc_max[1], a_1);
-    acc_max[2] = max(acc_max[2], a_2);
-    acc_max[3] = max(acc_max[3], a_3);
+    acc_min[0] = min_no_nan(acc_min[0], a_0);
+    acc_min[1] = min_no_nan(acc_min[1], a_1);
+    acc_min[2] = min_no_nan(acc_min[2], a_2);
+    acc_min[3] = min_no_nan(acc_min[3], a_3);
+    acc_max[0] = max_no_nan(acc_max[0], a_0);
+    acc_max[1] = max_no_nan(acc_max[1], a_1);
+    acc_max[2] = max_no_nan(acc_max[2], a_2);
+    acc_max[3] = max_no_nan(acc_max[3], a_3);
   }
 
   template <typename AT, typename NT>
@@ -219,30 +218,30 @@ struct min_max_accumulator {
     auto a_3_max =
         3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, id_max) : a_0_max;
 
-    acc_min[0] = min(acc_min[0], a_0_min);
-    acc_max[0] = max(acc_max[0], a_0_max);
-    acc_min[1] = min(acc_min[1], a_1_min);
-    acc_max[1] = max(acc_max[1], a_1_max);
-    acc_min[2] = min(acc_min[2], a_2_min);
-    acc_max[2] = max(acc_max[2], a_2_max);
-    acc_min[3] = min(acc_min[3], a_3_min);
-    acc_max[3] = max(acc_max[3], a_3_max);
+    acc_min[0] = min_no_nan(acc_min[0], a_0_min);
+    acc_max[0] = max_no_nan(acc_max[0], a_0_max);
+    acc_min[1] = min_no_nan(acc_min[1], a_1_min);
+    acc_max[1] = max_no_nan(acc_max[1], a_1_max);
+    acc_min[2] = min_no_nan(acc_min[2], a_2_min);
+    acc_max[2] = max_no_nan(acc_max[2], a_2_max);
+    acc_min[3] = min_no_nan(acc_min[3], a_3_min);
+    acc_max[3] = max_no_nan(acc_max[3], a_3_max);
   }
 
   template <typename AccT>
   void accumulate_min(T* __restrict C, size_t n, const AccT* __restrict acc) {
     switch (n) {
       case 4:
-        C[3] = min(C[3], horizontal_min(acc[3]));
+        C[3] = min(horizontal_min(acc[3]), C[3]);
         [[fallthrough]];
       case 3:
-        C[2] = min(C[2], horizontal_min(acc[2]));
+        C[2] = min(horizontal_min(acc[2]), C[2]);
         [[fallthrough]];
       case 2:
-        C[1] = min(C[1], horizontal_min(acc[1]));
+        C[1] = min(horizontal_min(acc[1]), C[1]);
         [[fallthrough]];
       case 1:
-        C[0] = min(C[0], horizontal_min(acc[0]));
+        C[0] = min(horizontal_min(acc[0]), C[0]);
     }
   }
 
@@ -250,16 +249,16 @@ struct min_max_accumulator {
   void accumulate_max(T* __restrict C, size_t n, const AccT* __restrict acc) {
     switch (n) {
       case 4:
-        C[3] = max(C[3], horizontal_max(acc[3]));
+        C[3] = max(horizontal_max(acc[3]), C[3]);
         [[fallthrough]];
       case 3:
-        C[2] = max(C[2], horizontal_max(acc[2]));
+        C[2] = max(horizontal_max(acc[2]), C[2]);
         [[fallthrough]];
       case 2:
-        C[1] = max(C[1], horizontal_max(acc[1]));
+        C[1] = max(horizontal_max(acc[1]), C[1]);
         [[fallthrough]];
       case 1:
-        C[0] = max(C[0], horizontal_max(acc[0]));
+        C[0] = max(horizontal_max(acc[0]), C[0]);
     }
   }
 
@@ -290,12 +289,12 @@ struct min_max_accumulator_k1_1 {
 
   template <typename NT>
   void accumulate_min(T* __restrict C, const AccMinT& acc, NT n) {
-    store(C, min(acc, load(C, n, simd::undef<N>{})), n);
+    store(C, min_no_nan(acc, load(C, n, simd::undef<N>{})), n);
   }
 
   template <typename NT>
   void accumulate_max(T* __restrict C, const AccMaxT& acc, NT n) {
-    store(C, max(acc, load(C, n, simd::undef<N>{})), n);
+    store(C, max_no_nan(acc, load(C, n, simd::undef<N>{})), n);
   }
 
   template <typename AT, typename NT, typename K2T>
@@ -325,12 +324,12 @@ struct min_max_accumulator_k1_1 {
     AccMinT acc_min = static_cast<AccMinT>(a_0_min);
     AccMaxT acc_max = static_cast<AccMaxT>(a_0_max);
 
-    acc_min = min(acc_min, a_1_min);
-    acc_max = max(acc_max, a_1_max);
-    acc_min = min(acc_min, a_2_min);
-    acc_max = max(acc_max, a_2_max);
-    acc_min = min(acc_min, a_3_min);
-    acc_max = max(acc_max, a_3_max);
+    acc_min = min_no_nan(acc_min, a_1_min);
+    acc_max = max_no_nan(acc_max, a_1_max);
+    acc_min = min_no_nan(acc_min, a_2_min);
+    acc_max = max_no_nan(acc_max, a_2_max);
+    acc_min = min_no_nan(acc_min, a_3_min);
+    acc_max = max_no_nan(acc_max, a_3_max);
 
     if (!std::is_same<AccMinT, dummy_t>::value) {
       if (!std::is_same<AccMaxT, dummy_t>::value) {

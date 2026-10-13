@@ -140,6 +140,10 @@ vec<T, N> min(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> max(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
+vec<T, N> min_no_nan(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+vec<T, N> max_no_nan(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
 vec<T, N> floor(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> floor_log2(vec<T, N> a);
@@ -340,11 +344,19 @@ YNN_ALWAYS_INLINE vec<T, 1> operator/(vec<T, 1> a, vec<T, 1> b) {
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {
-  return vec<T, 1>{std::min(a.v, b.v)};
+  return vec<T, 1>{ynn::min(a.v, b.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> max(vec<T, 1> a, vec<T, 1> b) {
-  return vec<T, 1>{std::max(a.v, b.v)};
+  return vec<T, 1>{ynn::max(a.v, b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> min_no_nan(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{ynn::min_no_nan(a.v, b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> max_no_nan(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{ynn::max_no_nan(a.v, b.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> floor(vec<T, 1> a) {

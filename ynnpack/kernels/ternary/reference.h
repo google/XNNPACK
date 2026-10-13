@@ -78,14 +78,14 @@ struct subtract_multiply {
 };
 
 struct clamp {
-  int32_t operator()(int32_t a, int32_t mn, int32_t mx) const {
-    return std::min(std::max(a, mn), mx);
+  int32_t operator()(int32_t a, int32_t min, int32_t max) const {
+    return ynn::clamp(a, min, max);
   }
-  float operator()(float a, float mn, float mx) const {
-    return std::min(std::max(a, mn), mx);
+  float operator()(float a, float min, float max) const {
+    return ynn::clamp(a, min, max);
   }
-  double operator()(double a, double mn, double mx) const {
-    return std::min(std::max(a, mn), mx);
+  double operator()(double a, double min, double max) const {
+    return ynn::clamp(a, min, max);
   }
 
   double tolerance(double a, double b, double c, ynn_type type) const {

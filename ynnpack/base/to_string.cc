@@ -116,6 +116,8 @@ const char* to_string(enum ynn_reduce_operator op) {
       return "reduce_min";
     case ynn_reduce_min_max:
       return "reduce_min_max";
+    case ynn_reduce_propagate_nan:
+      return "reduce_propagate_nan";
     case ynn_reduce_invalid:
       return "invalid";
   }

@@ -94,14 +94,14 @@ void pi_sum_squared(uint64_t arch_flags, reduce_kernel_fn kernel) {
   }
 }
 
-#define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, type_a, type_c) \
+#define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, type_a, type_c, flags) \
   TEST(pi_sum, name) { pi_sum<type_a, type_c>(arch_flags, name); }
 #include "ynnpack/kernels/reduce/sum.inc"
 #undef YNN_REDUCE_KERNEL
 
-#define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, type_a, type_c) \
-  TEST(pi_sum_squared, name) {                                     \
-    pi_sum_squared<type_a, type_c>(arch_flags, name);              \
+#define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, type_a, type_c, flags) \
+  TEST(pi_sum_squared, name) {                                            \
+    pi_sum_squared<type_a, type_c>(arch_flags, name);                     \
   }
 #include "ynnpack/kernels/reduce/sum_squared.inc"
 #undef YNN_REDUCE_KERNEL

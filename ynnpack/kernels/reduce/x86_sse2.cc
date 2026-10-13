@@ -17,6 +17,7 @@
 #include "ynnpack/base/simd/x86_vec128.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max.h"
+#include "ynnpack/kernels/reduce/propagate_nan.h"
 #include "ynnpack/kernels/reduce/reduce.h"
 #include "ynnpack/kernels/reduce/sum.h"
 
@@ -119,5 +120,8 @@ SUM_FLOAT_K1_KERNEL(sum_squared_k1_bf16_fp32_sse2, bfloat16, float, 0, 2,
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_bf16_fp32_sse2, bfloat16, float, 8, square);
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp32_sse2, float, float, 0, 1, square);
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp32_sse2, float, float, 4, square);
+
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp32_sse2, float, 4);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp32_sse2, float, 4);
 
 }  // namespace ynn

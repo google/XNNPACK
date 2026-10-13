@@ -13,8 +13,8 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op) {
   static add add;
   static copysign copysign;
   static divide div;
-  static max max;
-  static min min;
+  static struct max max;
+  static struct min min;
   static multiply mul;
   static struct pow pow;
   static squared_difference squared_difference;

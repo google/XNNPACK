@@ -320,10 +320,10 @@ struct sigmoid_op {
 struct hardswish_op {
   explicit hardswish_op(const unary_params& = {}) {}
   float operator()(float x) const {
-    return (x * (1.0f / 6.0f)) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
+    return (x * (1.0f / 6.0f)) * clamp(x + 3.0f, 0.0f, 6.0f);
   }
   double operator()(double x) const {
-    return (x * (1.0 / 6.0)) * std::max(std::min(x + 3.0, 6.0), 0.0);
+    return (x * (1.0 / 6.0)) * clamp(x + 3.0, 0.0, 6.0);
   }
 };
 

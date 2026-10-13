@@ -1081,10 +1081,10 @@ YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, int b) {
   return a & s16x8((int16_t)b);
 }
 
-YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
+YNN_ALWAYS_INLINE f32x4 min_no_nan(f32x4 a, f32x4 b) {
   return f32x4{_mm_min_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f64x2 min(f64x2 a, f64x2 b) {
+YNN_ALWAYS_INLINE f64x2 min_no_nan(f64x2 a, f64x2 b) {
   return f64x2{_mm_min_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 min(s16x8 a, s16x8 b) {
@@ -1094,10 +1094,10 @@ YNN_ALWAYS_INLINE u8x16 min(u8x16 a, u8x16 b) {
   return u8x16{_mm_min_epu8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
+YNN_ALWAYS_INLINE f32x4 max_no_nan(f32x4 a, f32x4 b) {
   return f32x4{_mm_max_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f64x2 max(f64x2 a, f64x2 b) {
+YNN_ALWAYS_INLINE f64x2 max_no_nan(f64x2 a, f64x2 b) {
   return f64x2{_mm_max_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 max(s16x8 a, s16x8 b) {
@@ -1124,11 +1124,11 @@ YNN_ALWAYS_INLINE f64x2 max(f64x2 a, double b) {
 }
 
 #ifdef YNN_ARCH_FP16_ARITHMETIC
-YNN_ALWAYS_INLINE f16x8 min(f16x8 a, f16x8 b) {
+YNN_ALWAYS_INLINE f16x8 min_no_nan(f16x8 a, f16x8 b) {
   return f16x8{_mm_castph_si128(
       _mm_min_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
 }
-YNN_ALWAYS_INLINE f16x8 max(f16x8 a, f16x8 b) {
+YNN_ALWAYS_INLINE f16x8 max_no_nan(f16x8 a, f16x8 b) {
   return f16x8{_mm_castph_si128(
       _mm_max_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
 }
@@ -1580,6 +1580,22 @@ YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
 }
 #endif  // YNN_ARCH_X86_SSE41
 
+// SSE2 doesn't have select, which makes the select(isnan(a), min_no_nan(a, b))
+// quite slow. This implementation does not preserve the sign of the NaN
+// correctly.
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
+  return f32x4{_mm_or_ps(_mm_min_ps(a.v, b.v), _mm_min_ps(b.v, a.v))};
+}
+YNN_ALWAYS_INLINE f64x2 min(f64x2 a, f64x2 b) {
+  return f64x2{_mm_or_pd(_mm_min_pd(a.v, b.v), _mm_min_pd(b.v, a.v))};
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
+  return f32x4{_mm_or_ps(_mm_max_ps(a.v, b.v), _mm_max_ps(b.v, a.v))};
+}
+YNN_ALWAYS_INLINE f64x2 max(f64x2 a, f64x2 b) {
+  return f64x2{_mm_or_pd(_mm_max_pd(a.v, b.v), _mm_max_pd(b.v, a.v))};
+}
+
 #ifdef YNN_ARCH_X86_SSE41
 YNN_ALWAYS_INLINE bool any(s8x16 x) { return !_mm_testz_si128(x.v, x.v); }
 YNN_ALWAYS_INLINE bool any(s16x8 x) { return !_mm_testz_si128(x.v, x.v); }
@@ -1622,6 +1638,12 @@ YNN_ALWAYS_INLINE bool all(s64x2 x) { return _mm_movemask_epi8(x.v) == 0xFFFF; }
 YNN_ALWAYS_INLINE f16x8 select(__mmask8 cond, f16x8 a, f16x8 b) {
   return f16x8{_mm_castph_si128(
       _mm_mask_blend_ph(cond, _mm_castsi128_ph(b.v), _mm_castsi128_ph(a.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 min(f16x8 a, f16x8 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f16x8 max(f16x8 a, f16x8 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
 }
 #endif
 
