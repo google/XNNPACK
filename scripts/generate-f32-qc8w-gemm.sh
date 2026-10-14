@@ -178,10 +178,21 @@ tools/xngen src/f32-gemm/neon-ld64.c.in -D MR=6 -D NR=8 -D FMA=0 -D INC=0 -D DUP
 
 ### LD128 micro-kernels
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D ACCUMULATORS=4 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-acc4.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-aarch64-neonfma-lane-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=16 -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-aarch64-neonfma-lane-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=16 -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=8 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x8-minmax-aarch64-neonfma-lane-ld128.c &
+
+### LD128 micro-kernels with TBL + magic bias int8 -> f32 conversion
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D ACCUMULATORS=4 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128-fmagic-acc4.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=6 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=8 -D NR=8  -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x8-minmax-aarch64-neonfma-lane-ld128-fmagic.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=1 -D NR=16 -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-aarch64-neonfma-lane-ld128-fmagic.c &
+tools/xngen src/f32-gemm/neon-ld128.c.in -D MR=4 -D NR=16 -D INC=0 -D FMA=1 -D DUP=0 -D DATATYPE=QC8 -D CVT=FMAGIC -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x16-minmax-aarch64-neonfma-lane-ld128-fmagic.c &
 
 ################################### ARM SVE2 ##################################
 ### LD128 micro-kernels
