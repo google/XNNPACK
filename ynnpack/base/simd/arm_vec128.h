@@ -2287,6 +2287,10 @@ YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
 }
 #endif
 
+using f8_e4m3x16 = vec<fp8_e4m3, 16>;
+using f8_e5m2x16 = vec<fp8_e5m2, 16>;
+using f16x16 = vec<half, 16>;
+
 #ifdef YNN_ARCH_ARM64_NEONFP8
 YNN_ALWAYS_INLINE bf16x8 cast(f8_e4m3x8 a, bfloat16) {
   fpm_t fpm = __arm_fpm_init();
@@ -2312,10 +2316,6 @@ YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
   return f16x8{
       vreinterpretq_u16_f16(vcvt1_f16_mf8_fpm(vreinterpret_mf8_u8(a.v), fpm))};
 }
-
-using f8_e4m3x16 = vec<fp8_e4m3, 16>;
-using f8_e5m2x16 = vec<fp8_e5m2, 16>;
-using f16x16 = vec<half, 16>;
 
 YNN_ALWAYS_INLINE f8_e4m3x8 cast(f32x8 a, fp8_e4m3) {
   fpm_t fpm = __arm_fpm_init();
@@ -2350,12 +2350,24 @@ YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
 }
 #else
 
-using f8_e5m2x8 = vec<fp8_e5m2, 8>;
-using f16x8 = vec<half, 8>;
-
 YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
   return f16x8{vshll_n_u8(a.v, 8)};
 }
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f8_e5m2x16 load(const fp8_e5m2* ptr, decltype(f8_e5m2x16::N),
+                                  f8_e5m2x16 = {}) {
+  uint8x16_t v = vld1q_u8(reinterpret_cast<const uint8_t*>(ptr));
+  return {f8_e5m2x8{vget_low_u8(v)}, f8_e5m2x8{vget_high_u8(v)}};
+}
+YNN_ALWAYS_INLINE f16x16 cast(f8_e5m2x16 a, half) {
+  const uint8x16_t vzero = vdupq_n_u8(0);
+  const uint8x16_t va = vcombine_u8(lo(a).v, hi(a).v);
+  return {
+      f16x8{vreinterpretq_u16_u8(vzip1q_u8(vzero, va))},
+      f16x8{vreinterpretq_u16_u8(vzip2q_u8(vzero, va))},
+  };
+}
+#endif
 YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
   uint16x8_t u = a.v;
   uint16x8_t is_nan = vcgtq_u16(vshlq_n_u16(u, 1), vdupq_n_u16(0xF800));

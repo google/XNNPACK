@@ -35,7 +35,7 @@ class Type:
     return self.type_class == "uint"
 
   def is_float(self):
-    return self.type_class in ("float", "bfloat")
+    return self.type_class in ("float", "bfloat", "fp8_e4m3", "fp8_e5m2")
 
   def __str__(self):
     if self.lanes == 1:
@@ -89,6 +89,8 @@ class Type:
         result += "double"
       elif self.type_class == "bfloat" and self.size == 16:
         result += "bfloat16"
+      elif self.type_class in ("fp8_e4m3", "fp8_e5m2") and self.size == 8:
+        result += self.type_class
       else:
         result += self.type_class + str(self.size)
       if self.lanes > 1:
@@ -135,6 +137,10 @@ def Float(size, lanes=1):
 
 def BFloat(size, lanes=1):  # pylint: disable=invalid-name
   return Type("bfloat", size, lanes)
+
+
+def FP8_E5M2(lanes=1):  # pylint: disable=invalid-name
+  return Type("fp8_e5m2", 8, lanes)
 
 
 fn_ops = []

@@ -16,6 +16,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -41,6 +42,10 @@ constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
       return std::forward<F>(f)(half());
     case ynn_type_bf16:
       return std::forward<F>(f)(bfloat16());
+    case ynn_type_fp8_e5m2:
+      return std::forward<F>(f)(fp8_e5m2());
+    case ynn_type_fp8_e4m3:
+      return std::forward<F>(f)(fp8_e4m3());
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
     case ynn_type_fp64:
