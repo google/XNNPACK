@@ -14,6 +14,7 @@ cc_library(
     hdrs = [
         "generic.h",
         "min_max.h",
+        "propagate_nan.h",
         "sum.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
@@ -30,6 +31,7 @@ ynn_cc_library(
         "max.inc",
         "min.inc",
         "min_max.inc",
+        "propagate_nan.inc",
         "reduce.h",
         "sum.inc",
         "sum_squared.inc",
@@ -97,6 +99,7 @@ cc_test(
     }),
     deps = [
         ":reduce",
+        "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:fuzz_test",
@@ -115,6 +118,7 @@ cc_test(
     tags = ["noemulator"],
     deps = [
         ":reduce",
+        "//ynnpack:ynnpack_h",
         "//ynnpack/base",
     ] + ynn_test_deps(),
 )
@@ -127,6 +131,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":reduce",
+        "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
         "@com_google_benchmark//:benchmark",

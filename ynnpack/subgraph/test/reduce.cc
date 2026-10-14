@@ -8,7 +8,9 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
+#include <numeric>
 #include <random>
 #include <tuple>
 #include <type_traits>
@@ -46,9 +48,9 @@ std::function<T(T, T)> GetReferenceOp(ynn_reduce_operator op) {
     case ynn_reduce_sum_squared:
       return [](T a, T b) { return a + b * b; };
     case ynn_reduce_min:
-      return [](T a, T b) { return std::min(a, b); };
+      return [](T a, T b) { return ynn::min(a, b); };
     case ynn_reduce_max:
-      return [](T a, T b) { return std::max(a, b); };
+      return [](T a, T b) { return ynn::max(a, b); };
     default:
       YNN_UNREACHABLE;
   }
@@ -97,13 +99,14 @@ void ReferenceImpl(ynn_reduce_operator op, const std::vector<int32_t>& axes,
         reduced = a_c.reduce(axes, std::plus<C>());
         break;
       case ynn_reduce_min:
-        reduced = a_c.reduce(axes, [](C a, C b) { return std::min<C>(a, b); });
+        reduced = a_c.reduce(axes, [](C a, C b) { return ynn::min<C>(a, b); });
         break;
       case ynn_reduce_max:
-        reduced = a_c.reduce(axes, [](C a, C b) { return std::max<C>(a, b); });
+        reduced = a_c.reduce(axes, [](C a, C b) { return ynn::max<C>(a, b); });
         break;
       case ynn_reduce_invalid:
       case ynn_reduce_min_max:
+      case ynn_reduce_propagate_nan:
         YNN_UNREACHABLE;
     }
 
@@ -339,10 +342,13 @@ void TestMinMax(T) {
 
   TestScheduler scheduler(3);
 
-  const float max_abs_value = 10.0f;
-
   for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
     const bool keep_dims = random_bool(rng);
+    const bool propagate_nan = type_info<T>::has_nan() && random_bool(rng);
+
+    uint32_t flags = 0;
+    if (keep_dims) flags |= YNN_NODE_FLAG_KEEP_DIMS;
+    if (propagate_nan) flags |= YNN_NODE_FLAG_PROPAGATE_NAN;
 
     const size_t input_rank = rank_dist(rng);
     const size_t num_k_dims =
@@ -368,7 +374,7 @@ void TestMinMax(T) {
         .AddOutput(type_of<T>(), output_rank, output_id);
 
     const bool init_c = random_bool(rng);
-    const T init_value = random_value<T>(rng, -max_abs_value, max_abs_value);
+    const T init_value = random_value<T>(rng, /*min=*/-10.0f, /*max=*/10.0f);
     if (init_c) {
       subgraph.AddScalar<T>(init_value, c_id);
     } else {
@@ -376,7 +382,7 @@ void TestMinMax(T) {
     }
 
     subgraph.AddReduce(ynn_reduce_min_max, reduce_axes, a_id, c_id, output_id,
-                       keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0);
+                       flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -394,7 +400,11 @@ void TestMinMax(T) {
       c_shape.insert(c_shape.begin(), 2);
 
       Tensor<T> a(a_shape);
-      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+      if (propagate_nan) {
+        fill_uniform_random_bits(a.data(), a.size(), rng);
+      } else {
+        fill_random(a.data(), a.size(), rng);
+      }
 
       runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
 
@@ -402,8 +412,7 @@ void TestMinMax(T) {
       if (init_c) {
         expected.fill(type_info<T>::get(&init_value, 0));
       } else {
-        fill_random(expected.data(), expected.size(), rng, -max_abs_value,
-                    max_abs_value);
+        fill_random(expected.data(), expected.size(), rng);
       }
 
       std::vector<size_t> expected_shape = c_shape;
@@ -433,10 +442,10 @@ void TestMinMax(T) {
       Tensor<T> expected_max = expected.slice(0, 1).remove_dim(0);
 
       if (!a.empty()) {
-        Tensor<T> reduced_min =
-            a.reduce(reduce_axes, [](T x, T y) { return std::min(x, y); });
-        Tensor<T> reduced_max =
-            a.reduce(reduce_axes, [](T x, T y) { return std::max(x, y); });
+        auto min_fn = ynn::min<T>;
+        auto max_fn = ynn::max<T>;
+        Tensor<T> reduced_min = a.reduce(reduce_axes, min_fn);
+        Tensor<T> reduced_max = a.reduce(reduce_axes, max_fn);
 
         Tensor<T> reduced_min_reshaped =
             reduced_min.reshape(expected_min.extents());
@@ -444,14 +453,24 @@ void TestMinMax(T) {
             reduced_max.reshape(expected_max.extents());
 
         for (const auto& i : EnumerateIndices(expected_min.shape())) {
-          expected_min(i) = std::min(expected_min(i), reduced_min_reshaped(i));
-          expected_max(i) = std::max(expected_max(i), reduced_max_reshaped(i));
+          expected_min(i) = min_fn(expected_min(i), reduced_min_reshaped(i));
+          expected_max(i) = max_fn(expected_max(i), reduced_max_reshaped(i));
         }
       }
 
       // Verify results.
       for (const auto& i : EnumerateIndices(c_shape)) {
-        ASSERT_EQ(c(i), expected(i));
+        if (propagate_nan && ynn::isnan(c(i))) {
+          ASSERT_TRUE(ynn::isnan(expected(i)));
+        } else if (propagate_nan &&
+                   std::abs(static_cast<float>(c(i))) <=
+                       type_info<T>::smallest_normal() &&
+                   std::abs(static_cast<float>(expected(i))) <=
+                       type_info<T>::smallest_normal()) {
+          // Both are zero or denormal, which may be flushed to zero by FTZ/DAZ.
+        } else {
+          ASSERT_EQ(c(i), expected(i));
+        }
       }
     }
   }

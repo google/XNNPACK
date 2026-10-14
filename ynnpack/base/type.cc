@@ -135,6 +135,20 @@ size_t type_exponent_bits(ynn_type t) {
   }
 }
 
+bool type_has_nan(ynn_type t) {
+  switch (t) {
+    case ynn_type_fp8_e5m2:
+    case ynn_type_fp8_e4m3:
+    case ynn_type_fp16:
+    case ynn_type_bf16:
+    case ynn_type_fp32:
+    case ynn_type_fp64:
+      return true;
+    default:
+      return false;
+  }
+}
+
 bool is_convert_lossless(ynn_type from, ynn_type to) {
   return type_mantissa_bits(from) <= type_mantissa_bits(to) &&
          type_exponent_bits(from) <= type_exponent_bits(to);

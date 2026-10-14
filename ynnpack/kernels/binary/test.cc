@@ -237,15 +237,20 @@ const std::vector<Shape> all_shapes = []() {
   class kernel##_test : public testing::TestWithParam<Shape> {};              \
   TEST_P(kernel##_test, no_broadcast) {                                       \
     KernelInfo kernel_info(arch_flags, kernel);                               \
-    TestOp<type_a, type_b, type_x>(kernel_info, op{}, GetParam());            \
+    struct op op_info;                                                        \
+    TestOp<type_a, type_b, type_x>(kernel_info, op_info, GetParam());         \
   }                                                                           \
   TEST_P(kernel##_test, op_broadcast_a) {                                     \
     KernelInfo kernel_info(arch_flags, kernel);                               \
-    TestOpBroadcastA<type_a, type_b, type_x>(kernel_info, op{}, GetParam());  \
+    struct op op_info;                                                        \
+    TestOpBroadcastA<type_a, type_b, type_x>(kernel_info, op_info,            \
+                                             GetParam());                     \
   }                                                                           \
   TEST_P(kernel##_test, op_broadcast_b) {                                     \
     KernelInfo kernel_info(arch_flags, kernel);                               \
-    TestOpBroadcastB<type_a, type_b, type_x>(kernel_info, op{}, GetParam());  \
+    struct op op_info;                                                        \
+    TestOpBroadcastB<type_a, type_b, type_x>(kernel_info, op_info,            \
+                                             GetParam());                     \
   }                                                                           \
   INSTANTIATE_TEST_SUITE_P(test, kernel##_test, ValuesIn(all_shapes),         \
                            [](const auto& i) { return to_string(i.param); });

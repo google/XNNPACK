@@ -570,12 +570,14 @@ struct ynn_node {
     ynn::axes_set k_dims;
     ynn_reduce_operator op;
     bool keep_dims;
+    int32_t channel_dim = ynn::max_tensor_rank;
     friend bool operator==(const reduce& a, const reduce& b) {
-      return a.k_dims == b.k_dims && a.op == b.op && a.keep_dims == b.keep_dims;
+      return a.k_dims == b.k_dims && a.op == b.op &&
+             a.keep_dims == b.keep_dims && a.channel_dim == b.channel_dim;
     }
     friend bool operator<(const reduce& a, const reduce& b) {
-      return std::tie(a.op, a.keep_dims, a.k_dims) <
-             std::tie(b.op, b.keep_dims, b.k_dims);
+      return std::tie(a.op, a.keep_dims, a.k_dims, a.channel_dim) <
+             std::tie(b.op, b.keep_dims, b.k_dims, b.channel_dim);
     }
   };
   struct dequantize_dot {

@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
@@ -30,17 +31,30 @@ inline constexpr std::integral_constant<size_t, 1> kn = {};
 
 }  // namespace reduce_dim
 
+namespace reduce_flag {
+
+enum {
+  none = 0,
+
+  // Indicates the kernel produces undefined output if any inputs are NaN.
+  no_nan = 1 << 0,
+};
+
+}  // namespace reduce_flag
+
 struct reduce_kernel {
   reduce_kernel_fn k1 = nullptr;
   reduce_kernel_fn kn = nullptr;
+  uint32_t flags = 0;
 };
 
-#define YNN_REDUCE_KERNEL(arch, name, k_dim, type_a, type_c)                \
+#define YNN_REDUCE_KERNEL(arch, name, k_dim, type_a, type_c, flags)         \
   void name(size_t n, size_t k, size_t a_stride_n, const void* a, void* x0, \
             void* x1);
 #include "ynnpack/kernels/reduce/max.inc"
 #include "ynnpack/kernels/reduce/min.inc"
 #include "ynnpack/kernels/reduce/min_max.inc"
+#include "ynnpack/kernels/reduce/propagate_nan.inc"
 #include "ynnpack/kernels/reduce/sum.inc"
 #include "ynnpack/kernels/reduce/sum_squared.inc"
 #undef YNN_REDUCE_KERNEL
@@ -51,6 +65,7 @@ reduce_kernel get_sum_squared_kernel(ynn_type a_type, ynn_type c_type);
 reduce_kernel get_min_kernel(ynn_type type);
 reduce_kernel get_max_kernel(ynn_type type);
 reduce_kernel get_min_max_kernel(ynn_type type);
+reduce_kernel get_propagate_nan_kernel(ynn_type type);
 
 reduce_kernel get_reduce_kernel(ynn_reduce_operator op, ynn_type a_type,
                                 ynn_type c_type);

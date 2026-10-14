@@ -265,13 +265,9 @@ inline bool isinf(fp8_e5m2 x) {
   return !isfinite(x) && (x.to_bits() & 0x03) == 0;
 }
 
-inline bool isfinite(fp8_e4m3 x) { return (x.to_bits() & 0x78) != 0x78; }
-inline bool isnan(fp8_e4m3 x) {
-  return !isfinite(x) && (x.to_bits() & 0x07) != 0;
-}
-inline bool isinf(fp8_e4m3 x) {
-  return !isfinite(x) && (x.to_bits() & 0x07) == 0;
-}
+inline bool isfinite(fp8_e4m3 x) { return (x.to_bits() & 0x7f) != 0x7f; }
+inline bool isnan(fp8_e4m3 x) { return !isfinite(x); }
+inline bool isinf(fp8_e4m3 x) { return false; }
 
 }  // namespace ynn
 
