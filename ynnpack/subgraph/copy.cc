@@ -224,6 +224,35 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
   };
 }
 
+void define_static_reshape(ynn_subgraph& subgraph, ynn_node& node,
+                           std::vector<size_t> new_dims, uint32_t input_id,
+                           uint32_t* output_id) {
+  const ynn_value& input = subgraph.value(input_id);
+  ynn_value& output = subgraph.get_output_value(output_id, input);
+
+  ynn_node::static_reshape op;
+  op.new_dims = std::move(new_dims);
+
+  node.inputs = {input_id};
+  node.outputs = {*output_id};
+
+  // Propagate shape.
+  output.extents = to_exprs(op.new_dims);
+  deduce_reshape_extent(node, 0, subgraph, input.extents, output.extents);
+
+  node.op = std::move(op);
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    output.make_buffer(runtime, input.buffer->elem_size());
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
+  };
+}
+
 void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
                              std::vector<size_t> new_dims, uint32_t input_id,
                              uint32_t* output_id) {
@@ -334,33 +363,12 @@ ynn_status ynn_define_static_reshape(ynn_subgraph_t subgraph, size_t rank,
                                              "output_id", output_id));
   YNN_RETURN_IF_ERROR(validate_new_shape("static_reshape", rank, new_dims));
 
-  const ynn_value& input = subgraph->value(input_id);
-
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-
-  ynn_node::static_reshape op;
-  op.new_dims.assign(new_dims, new_dims + rank);
-  std::reverse(op.new_dims.begin(), op.new_dims.end());
+  std::vector<size_t> op_new_dims(new_dims, new_dims + rank);
+  std::reverse(op_new_dims.begin(), op_new_dims.end());
 
   ynn_node node;
-  node.inputs = {input_id};
-  node.outputs = {*output_id};
-
-  // Propagate shape.
-  output.extents = to_exprs(op.new_dims);
-  deduce_reshape_extent(node, 0, *subgraph, input.extents, output.extents);
-
-  node.op = std::move(op);
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
-    ynn_runtime_value& output = runtime.value(node.outputs[0]);
-
-    output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
-                             output.buffer, output.physical_extents());
-    runtime.funcs.push_back(std::move(func));
-    return ynn_status_success;
-  };
+  define_static_reshape(*subgraph, node, std::move(op_new_dims), input_id,
+                        output_id);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
