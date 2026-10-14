@@ -505,7 +505,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:SSE2"],
     ),
     "sse41": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:sse41_enabled",
         copts = _x86_align_stack(16),
         gcc_x86_copts = [
             "-msse4.1",
