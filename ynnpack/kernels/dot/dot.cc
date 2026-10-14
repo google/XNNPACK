@@ -51,6 +51,7 @@
 #include "ynnpack/kernels/dot/cost_model/neoverse_n1.h"
 #include "ynnpack/kernels/dot/cost_model/neoverse_v2.h"
 #include "ynnpack/kernels/dot/cost_model/oryon.h"
+#include "ynnpack/kernels/dot/cost_model/oryon_v3.h"
 #endif  // YNN_ARCH_ARM
 
 namespace ynn {
@@ -643,8 +644,9 @@ const dot_cost_models& get_dot_cost_models() {
       case cpuinfo_uarch_neoverse_v2:
         return neoverse_v2;
       case cpuinfo_uarch_oryon:
-      case cpuinfo_uarch_oryon_v3:
         return oryon;
+      case cpuinfo_uarch_oryon_v3:
+        return oryon_v3;
       case cpuinfo_uarch_swift:
       case cpuinfo_uarch_cyclone:
       case cpuinfo_uarch_typhoon:
