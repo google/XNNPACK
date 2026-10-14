@@ -1353,7 +1353,14 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // the fly as if B were dynamic).
     return true;
   }
-  const int block_m = unpacked_kernel.block_m;
+  int block_m = unpacked_kernel.block_m;
+  if (unpacked_kernel.block_n * type_size_bytes(b.type) < YNN_CACHE_LINE_SIZE &&
+      !slinky::prove_true(b.extent(0) * type_size_bytes(b.type) < 16384)) {
+    // If the unpacked kernel reads less than a cache line per row of B and B
+    // has a large row stride, strided accesses across K have poor cache
+    // locality and cache line utilization, so packing B pays off at smaller M.
+    block_m = std::min(block_m, 3);
+  }
   slinky::expr a_batch = 1;
   slinky::expr b_batch = 1;
   for (size_t i = num_k_dims + 1; i < a.extents.size(); ++i) {
@@ -1367,7 +1374,13 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   slinky::expr blocks_m =
       slinky::ceil_div<slinky::expr>(a.extent(num_k_dims), block_m);
 
-  if (slinky::prove_true(blocks_m * a_batch <= b_batch * 10)) {
+  int max_unpacked_blocks = 1;
+  if ((unpacked_kernel.flags & dot_flag::fast_unaligned_b) != 0) {
+    // Packing B for a kernel with tile_k > 1 is more expensive, but it can
+    // enable a much faster kernel, so we need fewer blocks of M to amortize it.
+    max_unpacked_blocks = kernel.tile_k == 1 ? 10 : 2;
+  }
+  if (slinky::prove_true(blocks_m * a_batch <= b_batch * max_unpacked_blocks)) {
     // A is small relative to B, we should not bother packing B because we're
     // not going to read it very much, and packing itself costs a read of B.
     return false;
@@ -1471,7 +1484,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // be implemented, and let a global cost optimization decide what to do...
   } else {
     unpacked_kernel = kernel;
-    if (kernel.tile_k != 1) {
+    if (kernel.tile_k != 1 || (kernel.flags & dot_flag::unaligned_b) == 0) {
       unpacked_kernel = get_dot_kernel(type, cost_models, shape, no_tile_k,
                                        kernel_flags | dot_flag::unaligned_b);
     }
@@ -1483,6 +1496,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   uint32_t packed_b_id = input_b_id;
   if (pack_b) {
     packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims, input_b_id);
+  } else {
+    kernel = unpacked_kernel;
   }
 
   ynn_node node;
@@ -1559,9 +1574,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size, unpacked_kernel.block_n);
   // Estimate the throughput of the kernel we expect to run from its cost model
   // (for the shape it was selected for), to decide how small tasks can be.
-  const dot_kernel& expected_kernel = pack_b ? kernel : unpacked_kernel;
   const float seconds_per_mac =
-      expected_kernel.cost /
+      kernel.cost /
       (static_cast<float>(std::max<size_t>(1, shape.m)) *
        std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
   node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,

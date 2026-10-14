@@ -47,6 +47,57 @@ class x86_avx2_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx):
   def __init__(self, arch="avx2", bits=256, tile_shape=(1, 8, 1)):
     super().__init__(arch, bits, tile_shape)
 
+  def header(self):
+    return super().header() + """
+
+namespace {
+
+YNN_INTRINSIC __m128i partial_load_8x16b(const std::uint16_t* ptr, size_t n) {
+  if (n >= 8) {
+    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr));
+  }
+  std::uint64_t lo = 0;
+  std::uint64_t hi = 0;
+  if (n & 4) {
+    memcpy(&lo, ptr, 4 * sizeof(std::uint16_t));
+    ptr += 4;
+    if (n & 2) {
+      std::uint32_t v32;
+      memcpy(&v32, ptr, 2 * sizeof(std::uint16_t));
+      hi = v32;
+      ptr += 2;
+    }
+    if (n & 1) {
+      hi |= static_cast<std::uint64_t>(*ptr) << ((n & 2) * 16);
+    }
+  } else {
+    if (n & 2) {
+      std::uint32_t v32;
+      memcpy(&v32, ptr, 2 * sizeof(std::uint16_t));
+      lo = v32;
+      ptr += 2;
+    }
+    if (n & 1) {
+      lo |= static_cast<std::uint64_t>(*ptr) << ((n & 2) * 16);
+    }
+  }
+  return _mm_set_epi64x(hi, lo);
+}
+
+}  // namespace
+"""
+
+  def load_b_tile(self, k, j):
+    if self.n == "N" and "dot_flag::unaligned_b" in self.flags:
+      bits = self.bits
+      mm = self._mm()
+      cast = f"{mm}_castsi{bits}_ps"
+      b_ptr = self.b_ptr(k, j)
+      b = f"partial_load_8x16b({b_ptr}, sub_sat(N, {j}))"
+      b = f"{mm}_cvtepi16_epi32({b})"
+      return f"__m{bits} b_{k}_{j} = {cast}({mm}_slli_epi32({b}, 16));\n"
+    return super().load_b_tile(k, j)
+
   def product(self, i, j, k):
     c_ij = f"c_{i}_{j}"
     a_ik = f"a_{i}_{k}"
@@ -65,10 +116,40 @@ class x86_avx2_fma3_bf16_bf16_fp32_k1(x86_avx2_bf16_bf16_fp32_k1):
     return f"{c_ij} = {mm}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, {c_ij});\n"
 
 
+# AVX2 has no 16-bit masked loads, so loading a partial tile of B is much more
+# expensive than loading a whole tile. We generate this variant separately so
+# kernels using packed (padded) B can continue to load whole tiles.
+class x86_avx2_fma3_bf16_bf16_fp32_k1_unaligned_b(
+    x86_avx2_fma3_bf16_bf16_fp32_k1
+):
+
+  def __init__(self):
+    super().__init__()
+    self.kind += "_unaligned_b"
+    self.flags += ["dot_flag::unaligned_b"]
+    self.dot_cost_model = "x86_avx2_fma3_bf16_bf16_fp32_k1"
+
+
 class x86_avx512_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx512):
 
   def __init__(self, arch="avx512", bits=512, tile_shape=(1, 16, 1)):
     super().__init__(arch, bits, tile_shape)
+    self.flags += ["dot_flag::unaligned_b"]
+
+  def load_b_tile(self, k, j):
+    if self.n == "N":
+      bits = self.bits
+      mm = self._mm()
+      cast = f"{mm}_castsi{bits}_ps"
+      b_ptr = self.b_ptr(k, j)
+      mask = f"_cvtu32_mask16((uint32_t)((1 << min(16, sub_sat(N, {j}))) - 1))"
+      b = f"_mm256_maskz_loadu_epi16(mask_{k}_{j}, {b_ptr})"
+      b = f"{mm}_cvtepi16_epi32({b})"
+      return f"""\
+__mmask16 mask_{k}_{j} = {mask};
+__m{bits} b_{k}_{j} = {cast}({mm}_slli_epi32({b}, 16));
+"""
+    return super().load_b_tile(k, j)
 
   def product(self, i, j, k):
     c_ij = f"c_{i}_{j}"
@@ -89,6 +170,9 @@ generate_dot_kernels(
         (8, 8, 1),
         (10, 8, 1),
     ],
+    # These have the same cost as the aligned kernels, which come first and win
+    # ties when B is aligned.
+    variants=[x86_avx2_fma3_bf16_bf16_fp32_k1_unaligned_b()],
 )
 
 generate_dot_kernels(

@@ -60,11 +60,22 @@ YNN_INTRINSIC int16_t unaligned_load_int8x2(const int8_t* ptr) {
     j1 = j + self.tile_shape[1] // 2
 
     # We're loading two tiles at once.
-    b0 = f"{mm_2}_loadu_si{bits // 2}({self.b_ptr(k + 0, j, m_2)})"
-    if self.block_shape[2] % 2 == 0:
-      b1 = f"{mm_2}_loadu_si{bits // 2}({self.b_ptr(k + 1, j, m_2)})"
+    if self.n != "N" or "dot_flag::unaligned_b" not in self.flags:
+      b0 = f"{mm_2}_loadu_si{bits // 2}({self.b_ptr(k + 0, j, m_2)})"
+      if self.block_shape[2] % 2 == 0:
+        b1 = f"{mm_2}_loadu_si{bits // 2}({self.b_ptr(k + 1, j, m_2)})"
+      else:
+        b1 = f"{mm_2}_setzero_si{bits // 2}()"
     else:
-      b1 = f"{mm_2}_setzero_si{bits // 2}()"
+      mask = (
+          f"_cvtu32_mask32((uint32_t)((1ULL << min(32, sub_sat({self.n}, {j})))"
+          " - 1))"
+      )
+      b0 = f"{mm_2}_maskz_loadu_epi8({mask}, {self.b_ptr(k + 0, j)})"
+      if self.block_shape[2] % 2 == 0:
+        b1 = f"{mm_2}_maskz_loadu_epi8({mask}, {self.b_ptr(k + 1, j)})"
+      else:
+        b1 = f"{mm_2}_setzero_si{bits // 2}()"
 
     return f"""
 const {m_2} b_r0_{k}_{j} = {b0};
@@ -108,7 +119,7 @@ class x86_avx512_int8_int8_int32_k1(x86_avx512, x86_int8_int8_int32_k1):
     )
     self.a_type = "int8_t"
     self.b_type = "int8_t"
-    self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::consistent_arithmetic", "dot_flag::unaligned_b"]
 
   def finalize_c_tile(self, i, j):
     c0 = f"c_{i}_{j}"

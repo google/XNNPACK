@@ -54,7 +54,7 @@ YNN_INTRINSIC __m{self.bits}d unaligned_load_broadcast(const double* ptr) {{
 class x86_avx_fp64(x86_fp64, x86_avx):
   def __init__(self, arch="avx"):
     super().__init__(arch, 256, (1, 4, 1))
-    self.flags += ["dot_flag::unaligned_b"]
+    self.flags += ["dot_flag::unaligned_b", "dot_flag::fast_unaligned_b"]
 
   def b_alignment_bytes(self):
     return 8
@@ -84,7 +84,7 @@ class x86_avx512_fp64(x86_fp64, x86_avx512):
   def __init__(self):
     super().__init__("avx512", 512, (1, 8, 1))
     self.flags += ["dot_flag::consistent_arithmetic"]
-    self.flags += ["dot_flag::unaligned_b"]
+    self.flags += ["dot_flag::unaligned_b", "dot_flag::fast_unaligned_b"]
 
   def b_alignment_bytes(self):
     return 8
