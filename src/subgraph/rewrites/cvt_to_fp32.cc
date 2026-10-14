@@ -850,6 +850,26 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
 
     // Handle node parameters that may have been stored as a 16-bit type.
     switch (CurrentNode().type) {
+      case xnn_node_type_batch_matrix_multiply:
+      case xnn_node_type_convolution_2d:
+      case xnn_node_type_deconvolution_2d:
+      case xnn_node_type_fully_connected: {
+        if (from_dt == xnn_datatype_fp16 &&
+            CurrentNode().packed_input_datatype == xnn_datatype_pfp16 &&
+            subgraph->values[CurrentNode().inputs[0]].datatype ==
+                xnn_datatype_fp32) {
+          if (IsValid(xnn_init_pf32_gemm_config()) &&
+              !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
+            CurrentNode().packed_input_datatype = xnn_datatype_pfp32;
+            if (CurrentNode().type == xnn_node_type_deconvolution_2d) {
+              RemoveFlag(CurrentNode().flags, XNN_FLAG_INLINE_LHS_PACKING);
+            }
+          } else {
+            CurrentNode().packed_input_datatype = xnn_datatype_invalid;
+            RemoveFlag(CurrentNode().flags, XNN_FLAG_INLINE_LHS_PACKING);
+          }
+        }
+      } break;
       case xnn_node_type_static_constant_pad: {
         uint32_t from_val = CurrentNode().params.static_pad.padding_value;
         float fp32_float =
