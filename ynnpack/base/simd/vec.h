@@ -433,15 +433,15 @@ YNN_ALWAYS_INLINE vec<T, 1> operator<<(vec<T, 1> a, int bits) {
 
 template <typename T>
 YNN_ALWAYS_INLINE vec<bool, 1> isinf(vec<T, 1> a) {
-  return vec<bool, 1>{ynn::isinf(a.v)};
+  return vec<bool, 1>{static_cast<bool>(ynn::isinf(a.v))};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<bool, 1> isnan(vec<T, 1> a) {
-  return vec<bool, 1>{ynn::isnan(a.v)};
+  return vec<bool, 1>{static_cast<bool>(ynn::isnan(a.v))};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<bool, 1> isfinite(vec<T, 1> a) {
-  return vec<bool, 1>{ynn::isfinite(a.v)};
+  return vec<bool, 1>{static_cast<bool>(ynn::isfinite(a.v))};
 }
 
 template <typename T>
