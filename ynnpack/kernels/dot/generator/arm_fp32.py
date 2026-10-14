@@ -18,7 +18,30 @@ class arm_neon_fp32(arm_neon):
     super().__init__(arch, "fp32", "float", tile_shape)
     self.a_type = "float"
     self.b_type = "float"
-    self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::consistent_arithmetic", "dot_flag::unaligned_b"]
+
+  def header(self):
+    return super().header() + """
+
+namespace {
+
+YNN_INTRINSIC float32x4_t partial_load_4x32b(const float* ptr, size_t n) {
+  if (n >= 4) {
+    return vld1q_f32(ptr);
+  }
+  alignas(16) float lanes[4] = {};
+  if (n & 2) {
+    memcpy(lanes, ptr, 2 * sizeof(float));
+    ptr += 2;
+  }
+  if (n & 1) {
+    lanes[n & 2] = *ptr;
+  }
+  return vld1q_f32(lanes);
+}
+
+}  // namespace
+"""
 
   def load_a_tile_k_tail(self, i, k, nk):
     a_ptr = self.a_ptr(i, k)
@@ -33,7 +56,13 @@ class arm_neon_fp32(arm_neon):
       return ""
 
   def load_b_tile(self, k, j):
-    return f"float32x4_t b_{k}_{j} = vld1q_f32({self.b_ptr(k, j)});\n"
+    b_ptr = self.b_ptr(k, j)
+    if self.n == "N":
+      return (
+          f"float32x4_t b_{k}_{j} = partial_load_4x32b({b_ptr},"
+          f" sub_sat(N, {j}));\n"
+      )
+    return f"float32x4_t b_{k}_{j} = vld1q_f32({b_ptr});\n"
 
 
 class arm64_neon_fp32(arm_neon_fp32):
