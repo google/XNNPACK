@@ -58,11 +58,13 @@ IF(XNNPACK_BUILD_LIBRARY)
       space-to-depth-2d
       split-fuse
       static-constant-pad
+      static-expand-dims
       static-reduce
       static-reshape
       static-resize-bilinear-2d
       static-slice
       static-transpose
+      stencil
       unary
       unpooling-2d)
   FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
