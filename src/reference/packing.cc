@@ -3144,10 +3144,11 @@ void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
 }
 
 static void transpose_weights_x16(const uint16_t* in, uint16_t* out,
-                                  size_t height, size_t width) {
+                                  size_t height, size_t width,
+                                  size_t input_stride) {
   for (size_t j = 0; j < width; ++j) {
     for (size_t i = 0; i < height; ++i) {
-      out[j * height + i] = in[i * width + j];
+      out[j * height + i] = in[i * input_stride + j];
     }
   }
 }
@@ -3432,9 +3433,50 @@ void xnn_pack_kai_f16_weights_and_biases_sme2(
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
+  if (groups == 0 || input_channels == 0 || output_channels == 0) {
+    return;
+  }
   assert(extra_data0 == nullptr);
   assert(extra_data1 == nullptr);
   const uint32_t nr = gemm_config->nr;
+
+  const size_t weights_group_rows =
+      (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? input_channels : output_channels;
+  size_t weights_group_elements;
+  size_t weights_group_stride;
+  if (!xnn_safe_mul(weights_group_rows, k_stride, &weights_group_elements) ||
+      !xnn_safe_mul(weights_group_elements, sizeof(uint16_t),
+                    &weights_group_stride)) {
+    xnn_log_error("KleidiAI SME2 weights group stride overflows size_t");
+    assert(false);
+    return;
+  }
+
+  size_t transpose_size = 0;
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0) {
+    size_t transpose_elements;
+    if (!xnn_safe_mul(input_channels, output_channels,
+                      &transpose_elements) ||
+        !xnn_safe_mul(transpose_elements, sizeof(uint16_t),
+                      &transpose_size)) {
+      xnn_log_error(
+          "KleidiAI SME2 weight transpose buffer size overflows size_t");
+      assert(false);
+      return;
+    }
+  }
+
+  const struct kai_matmul_pack_rhs_uker_config config = {};
+  const struct kai_matmul_pack_rhs_uker_api api =
+      xnn_kleidiai_pf16_rhs_pack_api();
+  const size_t n_step = api.get_step(&config).n;
+  if (n_step == 0 || nr % n_step != 0) {
+    xnn_log_error(
+        "KleidiAI SME2 RHS packer N step %zu is incompatible with NR %zu",
+        n_step, nr);
+    assert(false);
+    return;
+  }
 
   uint16_t* zero_bias = nullptr;
   if (accumulator_init == nullptr) {
@@ -3453,15 +3495,14 @@ void xnn_pack_kai_f16_weights_and_biases_sme2(
 
   uint16_t* transposed_weights = nullptr;
   if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0) {
-  // TODO: Remove this O(NK) temporary once a NxK variant of the
-  // x16p4vsx2 RHS packer is available
-    transposed_weights = static_cast<uint16_t*>(malloc(
-        input_channels * output_channels * sizeof(uint16_t)));
+    // TODO: Remove this O(NK) temporary once a NxK variant of the
+    // x16p4vsx2 RHS packer is available.
+    transposed_weights = static_cast<uint16_t*>(malloc(transpose_size));
     if (transposed_weights == nullptr) {
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME2 weight transpose "
           "buffer",
-          input_channels * output_channels * sizeof(uint16_t));
+          transpose_size);
       if (zero_bias != nullptr) {
         free(zero_bias);
       }
@@ -3470,16 +3511,11 @@ void xnn_pack_kai_f16_weights_and_biases_sme2(
     }
   }
 
-  const size_t weights_group_stride =
-      sizeof(uint16_t) * input_channels * output_channels;
   const size_t n_stride = round_up(output_channels, nr);
   const size_t packed_weights_group_stride =
       n_stride * xnn_packed_stride_kai_f16_weights_and_biases_sme2(
                      gemm_config, input_channels, unused_block_size,
                      /*unused_k_stride=*/0, /*unused_extra_bytes=*/0);
-  const struct kai_matmul_pack_rhs_uker_config config = {};
-  const struct kai_matmul_pack_rhs_uker_api api =
-      xnn_kleidiai_pf16_rhs_pack_api();
   const struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args packed_shape = {
       output_channels, input_channels};
   const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args packed_stride =
@@ -3492,7 +3528,7 @@ void xnn_pack_kai_f16_weights_and_biases_sme2(
     size_t rhs_stride_k = k_stride * sizeof(uint16_t);
     if (transposed_weights != nullptr) {
       transpose_weights_x16(group_weights, transposed_weights,
-                            output_channels, input_channels);
+                            output_channels, input_channels, k_stride);
       rhs = transposed_weights;
       rhs_stride_k = output_channels * sizeof(uint16_t);
     }
@@ -3848,7 +3884,7 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
   for (size_t g_idx = 0; g_idx < g; ++g_idx) {
     // TODO: Remove transpose_weights_x16 if KleidiAI release imatmul_pack_nxk
     // packing variant
-    transpose_weights_x16(k, tmp_data, nc, ks * kc);
+    transpose_weights_x16(k, tmp_data, nc, ks * kc, ks * kc);
     // Pass FP16 bias directly to the rhs_imatmul packer which expects FP16 bias
     // for this kernel.
     kai_run_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(

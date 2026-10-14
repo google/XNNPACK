@@ -350,6 +350,88 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
 }
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+TEST(PACK_KAI_F16_WEIGHTS_AND_BIASES_SME2,
+     groups_and_padded_k_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+
+  constexpr size_t groups = 2;
+  constexpr size_t output_channels = 3;
+  constexpr size_t input_channels = 5;
+  constexpr size_t padding = 2;
+
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr = std::max<size_t>(
+      16, xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr());
+  gemm_config.log2_kr = 1;
+  gemm_config.log2_sr = 0;
+
+  const size_t packed_stride =
+      xnn_packed_stride_kai_f16_weights_and_biases_sme2(
+          &gemm_config, input_channels, /*unused_block_size=*/0,
+          /*unused_k_stride=*/0, /*extra_bytes=*/0);
+  const size_t packed_group_size =
+      round_up(output_channels, gemm_config.nr) * packed_stride;
+  std::vector<uint16_t> bias(groups * output_channels);
+  std::iota(bias.begin(), bias.end(), UINT16_C(0x3800));
+
+  for (const uint32_t flags :
+       {UINT32_C(0), uint32_t{XNN_FLAG_TRANSPOSE_WEIGHTS}}) {
+    SCOPED_TRACE(flags);
+    const size_t rows = (flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+        ? input_channels : output_channels;
+    const size_t columns = (flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+        ? output_channels : input_channels;
+    const size_t k_stride = columns + padding;
+    const size_t weights_group_stride = rows * k_stride;
+    const size_t dense_group_stride = rows * columns;
+    std::vector<uint16_t> padded_weights(
+        groups * weights_group_stride, UINT16_C(0xFFFF));
+    std::vector<uint16_t> dense_weights(groups * dense_group_stride);
+    for (size_t group = 0; group < groups; group++) {
+      for (size_t row = 0; row < rows; row++) {
+        for (size_t column = 0; column < columns; column++) {
+          const uint16_t value = static_cast<uint16_t>(
+              UINT16_C(0x3000) + group * 0x100 + row * 0x10 + column);
+          padded_weights[group * weights_group_stride + row * k_stride +
+                         column] = value;
+          dense_weights[group * dense_group_stride + row * columns +
+                        column] = value;
+        }
+      }
+    }
+
+    std::vector<uint8_t> grouped_packed_weights(
+        groups * packed_group_size, UINT8_C(0xA5));
+    std::vector<uint8_t> expected_packed_weights(
+        groups * packed_group_size, UINT8_C(0xA5));
+    xnn_pack_kai_f16_weights_and_biases_sme2(
+        flags, &gemm_config, input_channels, output_channels, groups,
+        /*unused_block_size=*/0, k_stride, bias.data(), padded_weights.data(),
+        /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+        /*extra_data0_element_size=*/0,
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0, grouped_packed_weights.data(),
+        /*params=*/nullptr);
+
+    for (size_t group = 0; group < groups; group++) {
+      xnn_pack_kai_f16_weights_and_biases_sme2(
+          flags, &gemm_config, input_channels, output_channels,
+          /*groups=*/1, /*unused_block_size=*/0, columns,
+          bias.data() + group * output_channels,
+          dense_weights.data() + group * dense_group_stride,
+          /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+          /*extra_data0_element_size=*/0,
+          /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+          /*extra_data1_element_size=*/0,
+          expected_packed_weights.data() + group * packed_group_size,
+          /*params=*/nullptr);
+    }
+
+    EXPECT_THAT(grouped_packed_weights,
+                ElementsAreArray(expected_packed_weights));
+  }
+}
+
 TEST(PACK_KAI_QS2_WEIGHTS_AND_BIASES_SME2, groups_and_optional_bias) {
   TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
 
@@ -4076,4 +4158,3 @@ TEST(PACK_QS8_QC4W_GEMM_GOI_W_NON_PLANAR, n_stride) {
 }
 
 }  // namespace
-

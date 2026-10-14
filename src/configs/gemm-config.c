@@ -420,7 +420,8 @@ static void init_pf16_gemm_config(void) {
   const struct xnn_hardware_config* hardware_config =
   xnn_init_hardware_config();
   assert(hardware_config != NULL);
-if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+if (XNN_ENABLE_ARM_SME2 &&
+    (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
 #if XNN_ENABLE_ARM_SME2
     const size_t mr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr();
     size_t nr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr();
@@ -442,7 +443,8 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     pf16_gemm_config.nr = nr < nstep_min ? nstep_min : nr;
     pf16_gemm_config.log2_kr = 1;
 #endif // XNN_ENABLE_ARM_SME2
-  } else if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
+  } else if (XNN_ENABLE_ARM_SME &&
+             (hardware_config->arch_flags & xnn_arch_arm_sme)) {
 #if XNN_ENABLE_ARM_SME
     const size_t mr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme_get_mr();
     size_t nr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme_get_nr();
