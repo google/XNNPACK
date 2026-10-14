@@ -215,6 +215,30 @@ TEST(get_dot_kernel, large_tile_k_1) {
   EXPECT_EQ(fp32_large(arch_flags_avx512), "dot_fp32_5x64x1_1x16x1_avx512");
 }
 
+TEST(get_dot_kernel, bf16_avx2_unaligned_b) {
+  dot_type bf16 = {ynn_type_bf16, ynn_type_bf16, ynn_type_fp32};
+  dot_packed_shape tile_k_1 = {0, 1};
+
+  for (size_t n_i : {4, 22, n}) {
+    // When B is aligned (packed), we should use a kernel that loads whole tiles
+    // of B, even though there is a kernel with the same cost that supports an
+    // unaligned B.
+    dot_kernel aligned = get_dot_kernel(bf16, test_cost_models, {m, n_i, k},
+                                        tile_k_1, /*required_flags=*/0,
+                                        std::nullopt, arch_flags_avx2_fma3);
+    ASSERT_NE(aligned.kernel, nullptr);
+    EXPECT_EQ(aligned.flags & dot_flag::unaligned_b, 0)
+        << kernels[aligned.kernel];
+
+    dot_kernel unaligned = get_dot_kernel(bf16, test_cost_models, {m, n_i, k},
+                                          tile_k_1, dot_flag::unaligned_b,
+                                          std::nullopt, arch_flags_avx2_fma3);
+    ASSERT_NE(unaligned.kernel, nullptr);
+    EXPECT_NE(unaligned.flags & dot_flag::unaligned_b, 0)
+        << kernels[unaligned.kernel];
+  }
+}
+
 TEST(get_dot_kernel, uint8_int2_int32_avxvnni) {
   dot_type uint8_int2 = {ynn_type_uint8, ynn_type_int2, ynn_type_int32};
 
