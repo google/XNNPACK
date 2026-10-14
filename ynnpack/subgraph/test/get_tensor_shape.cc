@@ -30,7 +30,7 @@ template <typename Rng>
 ynn_type random_type(Rng& rng) {
   ynn_type types[] = {
       ynn_type_int2, ynn_type_int4, ynn_type_int8,
-      ynn_type_bf16, ynn_type_fp32,  ynn_type_int32,
+      ynn_type_bf16, ynn_type_fp32,  ynn_type_fp64, ynn_type_int32,
   };
   std::uniform_int_distribution<> type_dist(0, std::size(types) - 1);
   return types[type_dist(rng)];
@@ -125,6 +125,8 @@ constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
   switch (type) {
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
+    case ynn_type_fp64:
+      return std::forward<F>(f)(double());
     case ynn_type_int32:
       return std::forward<F>(f)(int32_t());
     default:
@@ -183,7 +185,8 @@ constexpr int max_rank_for_testing = 4;
 
 INSTANTIATE_TEST_SUITE_P(
     Test, GetTensorShape,
-    testing::Combine(testing::Values(ynn_type_fp32, ynn_type_int32),
+    testing::Combine(testing::Values(ynn_type_fp32, ynn_type_fp64,
+                                     ynn_type_int32),
                      testing::Range(1, max_rank_for_testing)),
     [](const testing::TestParamInfo<GetTensorShape::ParamType>& info) {
       return test_param_to_string(info);
