@@ -166,22 +166,19 @@ struct ynn_value {
   }
 
   slinky::expr physical_extent(size_t i) const {
-    if (i >= extents.size() || !extents[i].defined()) {
-      return {};
-    }
-    if (i == 0) {
+    if (i == 0 && i < extents.size()) {
       int elem_count = ynn::type_element_count(type);
       if (elem_count != 1) {
-        return slinky::ceil_div<slinky::expr>(extents[0], elem_count);
+        return slinky::ceil_div<slinky::expr>(extent(0), elem_count);
       }
     }
 
-    return extents[i];
+    return extent(i);
   }
 
   std::vector<slinky::expr> physical_extents() const {
     std::vector<slinky::expr> phys = extents;
-    if (!phys.empty()) {
+    if (!phys.empty() && phys[0].defined()) {
       phys[0] = physical_extent(0);
     }
     return phys;
