@@ -31,6 +31,7 @@
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
+#include "ynnpack/subgraph/mask.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/static_transpose.h"
@@ -254,11 +255,122 @@ const dot_cost_models& get_dot_cost_models(const slinky::eval_context& ctx) {
   return *reinterpret_cast<const dot_cost_models*>(ctx.user_data);
 }
 
+template <bool HasMask = false>
+struct row_mask {
+  row_mask(const slinky::call_stmt*, const slinky::eval_context&,
+           index_t /*c_min_m*/, index_t /*n*/, index_t /*c_stride_m*/,
+           index_t /*c_stride_n*/, index_t /*c_elem_size*/) {}
+
+  template <typename CallKernel>
+  void run(span<dot_loop> loops, index_t m, index_t n,
+           std::array<size_t, 3> k, index_t block_m, index_t block_n,
+           index_t block_k, index_t a_stride_m,
+           std::array<size_t, 3> a_k_strides, const slinky::raw_buffer& a,
+           std::array<size_t, 3> b_k_strides, index_t b_stride_n,
+           const slinky::raw_buffer& b, index_t init_c_stride_m,
+           const slinky::raw_buffer& init_c, index_t c_stride_m,
+           index_t c_stride_n, const slinky::raw_buffer& c,
+           index_t /*granularity*/, CallKernel call_kernel,
+           dot_kernel_state* kernel_state) const {
+    slinky::for_each_element(
+        [=](void* c, const void* a, const void* b, const void* init_c) {
+          run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m,
+                  a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
+                  init_c, c_stride_m, c_stride_n, c, call_kernel, kernel_state);
+        },
+        c, a, b, init_c);
+  }
+};
+
+template <>
+struct row_mask<true> {
+  slinky::raw_buffer mask;
+  index_t mask_stride_m = 0;
+  index_t mask_elem_size = 0;
+  index_t n;
+  index_t c_stride_m;
+  index_t c_stride_n;
+  index_t c_elem_size;
+
+  row_mask(const slinky::call_stmt* call, const slinky::eval_context& ctx,
+           index_t c_min_m, index_t n, index_t c_stride_m, index_t c_stride_n,
+           index_t c_elem_size)
+      : mask(*ctx.lookup_buffer(call->inputs[3])),
+        mask_elem_size(mask.elem_size),
+        n(n),
+        c_stride_m(c_stride_m),
+        c_stride_n(c_stride_n),
+        c_elem_size(c_elem_size) {
+    mask.slice(0);
+    if (is_broadcast(mask, 0)) {
+      mask.slice(0);
+    } else {
+      assert(!mask.dim(0).is_folded());
+      mask_stride_m = slice_dim0(mask, slinky::in_bounds{c_min_m}).stride();
+    }
+  }
+
+  void zero_rows(void* c, index_t begin, index_t end) const {
+    for (index_t i = begin; i < end; ++i) {
+      void* row = offset_bytes(c, i * c_stride_m);
+      if (c_stride_n == c_elem_size) {
+        memset(row, 0, n * c_elem_size);
+      } else {
+        for (index_t j = 0; j < n; ++j) {
+          memset(offset_bytes(row, j * c_stride_n), 0, c_elem_size);
+        }
+      }
+    }
+  }
+
+  template <typename CallKernel>
+  void run(span<dot_loop> loops, index_t m, index_t n,
+           std::array<size_t, 3> k, index_t block_m, index_t block_n,
+           index_t block_k, index_t a_stride_m,
+           std::array<size_t, 3> a_k_strides, const slinky::raw_buffer& a,
+           std::array<size_t, 3> b_k_strides, index_t b_stride_n,
+           const slinky::raw_buffer& b, index_t init_c_stride_m,
+           const slinky::raw_buffer& init_c, index_t c_stride_m,
+           index_t c_stride_n, const slinky::raw_buffer& c, index_t granularity,
+           CallKernel call_kernel, dot_kernel_state* kernel_state) const {
+    slinky::for_each_element(
+        [=](void* c, const void* a, const void* b, const void* init_c,
+            const void* mask_ptr) {
+          for_each_mask_run(
+              mask_ptr, mask_stride_m, mask_elem_size, m, granularity,
+              [&](index_t begin, index_t end) {
+                run_dot(
+                    loops, end - begin, n, k, block_m, block_n, block_k,
+                    a_stride_m, a_k_strides,
+                    offset_bytes(a, begin * a_stride_m), b_k_strides,
+                    b_stride_n, b, init_c_stride_m,
+                    init_c ? offset_bytes(init_c, begin * init_c_stride_m)
+                           : nullptr,
+                    c_stride_m, c_stride_n, offset_bytes(c, begin * c_stride_m),
+                    call_kernel, kernel_state);
+                if (granularity > 1 && mask_stride_m != 0) {
+                  for (index_t i = begin; i < end; ++i) {
+                    if (is_zero_mask(offset_bytes(mask_ptr, i * mask_stride_m),
+                                     mask_elem_size)) {
+                      zero_rows(c, i, i + 1);
+                    }
+                  }
+                }
+              },
+              [&](index_t begin, index_t end) { zero_rows(c, begin, end); });
+        },
+        c, a, b, init_c, mask);
+  }
+};
+
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
-auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
-                   bool transposed_a, bool pack_b, size_t num_k_dims,
-                   int thread_count) {
+template <bool HasMask = false>
+slinky::call_stmt::callable make_dot_impl(dot_type type,
+                                          bool consistent_arithmetic,
+                                          bool symmetric_b, bool transposed_a,
+                                          bool pack_b, size_t num_k_dims,
+                                          int thread_count) {
   uint32_t kernel_flags = 0;
   if (consistent_arithmetic) {
     kernel_flags |= dot_flag::consistent_arithmetic;
@@ -490,19 +602,18 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     // We need up to 3 loops per cache level.
     dot_loop loops_storage[std::size(cache_sizes) * 3];
 
+    // Transposed A is stored in un-splittable tiles of m.
+    const index_t mask_granularity = transposed_a ? a_mi.extent() : 1;
+    row_mask<HasMask> mask(call, ctx, c_min_m, n, c_stride_m, c_stride_n,
+                           c.elem_size);
+
     if (k1) {
       auto loops = schedule_dot(cache_sizes, m, n, k, block_m, block_n, block_k,
                                 a.elem_size, b.elem_size, loops_storage);
-
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m,
-                    a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
-                    init_c, c_stride_m, c_stride_n, c, call_kernel,
-                    &kernel_state);
-          },
-          c, a, b, init_c);
+      mask.run(loops, m, n, k, block_m, block_n, block_k, a_stride_m,
+               a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
+               init_c, c_stride_m, c_stride_n, c, mask_granularity, call_kernel,
+               &kernel_state);
     }
     if (k1_tail) {
       std::array<size_t, 3> k_tail = {
@@ -554,22 +665,16 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
               }
             }
           };
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            index_t tail_init_c_stride_m = init_c_stride_m;
-            if (k1 != 0) {
-              init_c = c;
-              tail_init_c_stride_m = c_stride_m;
-            }
-            a = offset_bytes(a, a_k_strides[0] * k1);
-            b = offset_bytes(b, b_k_strides[0] * k1);
-            run_dot(loops, m, n, k_tail, block_m, block_n, block_k, a_stride_m,
-                    a_k_strides, a, b_k_strides, b_stride_n, b,
-                    tail_init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
-                    call_kernel_tail, &kernel_state);
-          },
-          c, a, b, init_c);
+      if (k1 != 0) {
+        init_c = c;
+        init_c_stride_m = c_stride_m;
+        a.base = offset_bytes(a.base, a_k_strides[0] * k1);
+        b.base = offset_bytes(b.base, b_k_strides[0] * k1);
+      }
+      mask.run(loops, m, n, k_tail, block_m, block_n, block_k, a_stride_m,
+               a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
+               init_c, c_stride_m, c_stride_n, c, mask_granularity,
+               call_kernel_tail, &kernel_state);
     }
 
     return 0;
@@ -1258,8 +1363,8 @@ ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
 
 ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                       uint32_t input_a_id, uint32_t input_b_id,
-                      uint32_t input_c_id, uint32_t* output_id,
-                      uint32_t flags) {
+                      uint32_t input_c_id, uint32_t input_mask_id,
+                      uint32_t* output_id, uint32_t flags) {
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
@@ -1357,7 +1462,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   }
 
   ynn_node node;
-  node.inputs = {input_a_id, input_b_id, input_c_id};
+  node.inputs = {input_a_id, input_b_id, input_c_id, input_mask_id};
   node.outputs = {*output_id};
   node.op = ynn_node::dot{num_k_dims};
 
@@ -1388,6 +1493,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   if (c_rank >= 2) {
     subgraph.infer_elementwise_shape(node, 0, 0, num_k_dims, 1);
     subgraph.infer_elementwise_shape(node, 2, 0, 1, 1);
+    subgraph.infer_elementwise_shape(node, 3, 0, 1, 1);
   }
 
   // The rest of the dimensions are elementwise.
@@ -1395,6 +1501,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     subgraph.infer_elementwise_shape(node, 0, 0, d + num_k_dims - 1, d);
     subgraph.infer_elementwise_shape(node, 1, 0, d + num_k_dims - 1, d);
     subgraph.infer_elementwise_shape(node, 2, 0, d, d);
+    subgraph.infer_elementwise_shape(node, 3, 0, d, d);
   }
 
   // The k-dims must match.
@@ -1582,15 +1689,29 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     dot_type dot_type = {input_a.type, packed_b.type, output.type};
     const int thread_count =
         runtime.threadpool() ? runtime.threadpool()->thread_count() + 1 : 1;
-    auto func = slinky::func(
-        make_dot_impl(dot_type, consistent_arithmetic, symmetric_b, transpose_a,
-                      pack_b, num_k_dims, thread_count),
-        {{input_a.buffer, std::move(a_bounds)},
-         {packed_b.buffer, std::move(b_bounds)},
-         {input_c.buffer, std::move(c_bounds)}},
-        {{output.buffer, output_dims},
-         {reduction_buffer, std::move(reduction_dims)}},
-        {}, std::move(attrs));
+    std::vector<slinky::func::input> inputs = {
+        {input_a.buffer, std::move(a_bounds)},
+        {packed_b.buffer, std::move(b_bounds)},
+        {input_c.buffer, std::move(c_bounds)},
+    };
+    slinky::call_stmt::callable impl;
+    if (node.inputs[3] != YNN_INVALID_VALUE_ID) {
+      const ynn_runtime_value& mask = runtime.value(node.inputs[3]);
+      slinky::box_expr mask_bounds =
+          make_elementwise_bounds(output_dims, mask.physical_extents());
+      mask_bounds.resize(mask.rank(), slinky::point(0));
+      assert(mask_bounds.size() == mask.rank());
+      inputs.push_back({mask.buffer, std::move(mask_bounds)});
+      impl = make_dot_impl<true>(dot_type, consistent_arithmetic, symmetric_b,
+                                 transpose_a, pack_b, num_k_dims, thread_count);
+    } else {
+      impl = make_dot_impl(dot_type, consistent_arithmetic, symmetric_b,
+                           transpose_a, pack_b, num_k_dims, thread_count);
+    }
+    auto func = slinky::func(std::move(impl), std::move(inputs),
+                             {{output.buffer, output_dims},
+                              {reduction_buffer, std::move(reduction_dims)}},
+                             {}, std::move(attrs));
 
     slinky::expr block_n = pack_b ? packed_b.extent(1) : block_n_unpacked;
     slinky::expr n = output.extent(0);
@@ -1699,29 +1820,37 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   return ynn_status_success;
 }
 
-}  // namespace
-
-extern "C" {
-
-ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
-                          uint32_t input_a_id, uint32_t input_b_id,
-                          uint32_t input_c_id, uint32_t* output_id,
+ynn_status define_dot_api(const char* name, ynn_subgraph_t subgraph,
+                          size_t num_k_dims, uint32_t input_a_id,
+                          uint32_t input_b_id, uint32_t input_c_id,
+                          uint32_t input_mask_id, uint32_t* output_id,
                           uint32_t flags) {
   // Validate arguments.
-  YNN_RETURN_IF_ERROR(validate_subgraph("dot", subgraph));
+  YNN_RETURN_IF_ERROR(validate_subgraph(name, subgraph));
   YNN_RETURN_IF_ERROR(
-      validate_input_tensor("dot", subgraph, "input_a_id", input_a_id));
+      validate_input_tensor(name, subgraph, "input_a_id", input_a_id));
   YNN_RETURN_IF_ERROR(
-      validate_input_tensor("dot", subgraph, "input_b_id", input_b_id));
-  YNN_RETURN_IF_ERROR(validate_input_tensor("dot", subgraph, "input_c_id",
+      validate_input_tensor(name, subgraph, "input_b_id", input_b_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor(name, subgraph, "input_c_id",
                                             input_c_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(validate_input_tensor(name, subgraph, "input_scale_id",
+                                            input_mask_id, /*optional=*/true));
   YNN_RETURN_IF_ERROR(
-      validate_output_tensor("dot", subgraph, "output_id", output_id));
+      validate_output_tensor(name, subgraph, "output_id", output_id));
 
   if (num_k_dims == 0 || num_k_dims > 3) {
-    YNN_LOG_ERROR() << "For node `dot`, `num_k_dims` must be in [1, 3], got "
-                    << num_k_dims;
+    YNN_LOG_ERROR() << "For node `" << name
+                    << "`, `num_k_dims` must be in [1, 3], got " << num_k_dims;
     return ynn_status_invalid_parameter;
+  }
+
+  if (input_mask_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& mask = subgraph->value(input_mask_id);
+    if (mask.rank() >= 1 && !slinky::is_one(mask.extent(0))) {
+      YNN_LOG_ERROR() << "For node `" << name << "`, `input_scale_id` must "
+                      << "have extent 1 in dimension 0";
+      return ynn_status_invalid_parameter;
+    }
   }
 
   // TODO: b/531861696 - This and other dot graph rewrites should be done in a
@@ -1757,7 +1886,7 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   }
 
   YNN_RETURN_IF_ERROR(define_dot(*subgraph, num_k_dims, input_a_id, input_b_id,
-                                 input_c_id, output_id, flags));
+                                 input_c_id, input_mask_id, output_id, flags));
 
   if (convert_to_id != YNN_INVALID_VALUE_ID) {
     // We decided above to compute the output into an intermediate tensor, and
@@ -1768,6 +1897,37 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   }
 
   return ynn_status_success;
+}
+
+}  // namespace
+
+extern "C" {
+
+ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+                          uint32_t input_a_id, uint32_t input_b_id,
+                          uint32_t input_c_id, uint32_t* output_id,
+                          uint32_t flags) {
+  return define_dot_api("dot", subgraph, num_k_dims, input_a_id, input_b_id,
+                        input_c_id, /*input_mask_id=*/YNN_INVALID_VALUE_ID,
+                        output_id, flags);
+}
+
+ynn_status ynn_define_scaled_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                 uint32_t input_a_id, uint32_t input_b_id,
+                                 uint32_t input_c_id, uint32_t input_scale_id,
+                                 uint32_t* output_id, uint32_t flags) {
+  if (input_scale_id == YNN_INVALID_VALUE_ID) {
+    return ynn_define_dot(subgraph, num_k_dims, input_a_id, input_b_id,
+                          input_c_id, output_id, flags);
+  }
+
+  uint32_t unscaled_id = YNN_INVALID_VALUE_ID;
+  YNN_RETURN_IF_ERROR(define_dot_api("scaled_dot", subgraph, num_k_dims,
+                                     input_a_id, input_b_id, input_c_id,
+                                     input_scale_id, &unscaled_id, flags));
+
+  return ynn_define_binary(subgraph, ynn_binary_multiply, unscaled_id,
+                           input_scale_id, output_id, flags);
 }
 
 }  // extern "C"

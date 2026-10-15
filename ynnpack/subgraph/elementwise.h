@@ -33,7 +33,8 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                            uint32_t a_offset_id, uint32_t b_offset_id,
                            uint32_t a_scale_id, uint32_t b_scale_id,
                            uint32_t offset_id, uint32_t& output_id,
-                           const dequantize_dot_params& params);
+                           const dequantize_dot_params& params,
+                           uint32_t mask_id = YNN_INVALID_VALUE_ID);
 
 }  // namespace ynn
 
