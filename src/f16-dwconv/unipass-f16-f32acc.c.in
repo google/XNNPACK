@@ -3,11 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ARCH in ("scalar", "wasmrelaxedsimd")
+$assert ARCH in ("scalar", "wasmrelaxedsimd", "neonfp16")
 $SIMD_SIZE = {
 $  "scalar": 1,
 $  "wasmrelaxedsimd": 4,
+$  "neonfp16": 4,
 $}[ARCH]
+$SIMD_ARCH = {
+$  "neonfp16": "neon",
+$}.get(ARCH, ARCH)
 $assert CHANNEL_TILE % SIMD_SIZE == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
@@ -19,10 +23,12 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/simd/f32-${ARCH}.h"
+#include "src/xnnpack/simd/f32-${SIMD_ARCH}.h"
 $if ARCH == "wasmrelaxedsimd":
   #undef XNN_SIMD_HAS_NATIVE_FMA
-#include "src/xnnpack/simd/f16-${ARCH}.h"
+  #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
+$elif ARCH == "scalar":
+  #include "src/xnnpack/simd/f16-scalar.h"
 
 
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* input) {
