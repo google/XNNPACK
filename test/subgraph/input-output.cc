@@ -245,4 +245,214 @@ TEST_P(InputOutput, MultipleWrites) {
   ASSERT_THAT(persistent, testing::Each(a * a * a * a * a));
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+TEST(DeprecatedSubgraphTest, NullSubgraph) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_1d(
+                nullptr, -INFINITY, INFINITY, 0, 1, 0));
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_2d(
+                nullptr, -INFINITY, INFINITY, 0, 1, 0));
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_1d(
+                nullptr, -INFINITY, INFINITY, 0, 1, 0));
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_2d(
+                nullptr, -INFINITY, INFINITY, 0, 1, 0));
+  size_t pad[1] = {0};
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_define_static_constant_pad(
+                nullptr, pad, pad, 0.0f, 0, 1, 0));
+}
+
+TEST(DeprecatedSubgraphTest, OutputMinMaxValidation) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[2] = {2, 4};
+  uint32_t in_id = XNN_INVALID_VALUE_ID;
+  uint32_t out_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &in_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id));
+
+  // Invalid min > max
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_add2(subgraph, 5.0f, 2.0f, in_id, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_subtract(
+                subgraph, 5.0f, 2.0f, in_id, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_multiply2(
+                subgraph, 5.0f, 2.0f, in_id, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_divide(
+                subgraph, 5.0f, 2.0f, in_id, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_clamp(subgraph, 5.0f, 2.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_1d(
+                subgraph, 5.0f, 2.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_2d(
+                subgraph, 5.0f, 2.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_1d(
+                subgraph, 5.0f, 2.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_2d(
+                subgraph, 5.0f, 2.0f, in_id, out_id, 0));
+
+  // NaN bounds
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_add2(subgraph, NAN, 2.0f, in_id, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_add2(subgraph, 0.0f, NAN, in_id, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_clamp(subgraph, NAN, 1.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_clamp(subgraph, 0.0f, NAN, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_1d(
+                subgraph, NAN, 1.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_1d(
+                subgraph, 0.0f, NAN, in_id, out_id, 0));
+}
+
+TEST(DeprecatedSubgraphTest, PoolingRankUnderflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dim_1d[1] = {5};
+  const size_t dim_2d[2] = {2, 5};
+  uint32_t val_1d = XNN_INVALID_VALUE_ID;
+  uint32_t val_2d = XNN_INVALID_VALUE_ID;
+  uint32_t out_id = XNN_INVALID_VALUE_ID;
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, dim_1d,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &val_1d));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dim_2d,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &val_2d));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, dim_1d,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id));
+
+  // 1D global pooling requires rank >= 2
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_1d(
+                subgraph, -INFINITY, INFINITY, val_1d, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_1d(
+                subgraph, -INFINITY, INFINITY, val_1d, out_id, 0));
+
+  // 2D global pooling requires rank >= 3
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_average_pooling_2d(
+                subgraph, -INFINITY, INFINITY, val_2d, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_global_sum_pooling_2d(
+                subgraph, -INFINITY, INFINITY, val_2d, out_id, 0));
+}
+
+TEST(DeprecatedSubgraphTest, NullReductionAxesAndPadding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[2] = {2, 4};
+  uint32_t in_id = XNN_INVALID_VALUE_ID;
+  uint32_t out_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &in_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id));
+
+  // Null reduction axes when num_reduction_axes > 0
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_static_mean(subgraph, 1, nullptr, in_id, out_id, 0));
+
+  // Null pre/post padding when num_padding_dims > 0
+  size_t pad[2] = {1, 1};
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_static_constant_pad(
+                subgraph, nullptr, pad, 0.0f, in_id, out_id, 0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_static_constant_pad(
+                subgraph, pad, nullptr, 0.0f, in_id, out_id, 0));
+}
+
+TEST(DeprecatedSubgraphTest, ValidOperations) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims_2d[2] = {2, 4};
+  const size_t dims_3d[3] = {2, 3, 4};
+  const size_t dims_out_1d[1] = {4};
+  uint32_t val_2d = XNN_INVALID_VALUE_ID;
+  uint32_t val_3d = XNN_INVALID_VALUE_ID;
+  uint32_t out_1 = XNN_INVALID_VALUE_ID;
+  uint32_t out_2 = XNN_INVALID_VALUE_ID;
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims_2d,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &val_2d));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 3, dims_3d,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &val_3d));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1,
+                                    dims_out_1d, nullptr,
+                                    XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_1));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1,
+                                    dims_out_1d, nullptr,
+                                    XNN_INVALID_VALUE_ID,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_2));
+
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_global_average_pooling_1d(
+                subgraph, -INFINITY, INFINITY, val_2d, out_1, 0));
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_global_average_pooling_2d(
+                subgraph, -INFINITY, INFINITY, val_3d, out_2, 0));
+}
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
 }  // namespace xnnpack
