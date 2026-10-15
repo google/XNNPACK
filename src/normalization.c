@@ -14,7 +14,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 
-void xnn_normalize_slice(
+bool xnn_normalize_slice(
     const size_t num_dims,
     const size_t* offsets,
     const size_t* sizes,
@@ -31,24 +31,40 @@ void xnn_normalize_slice(
     normalized_output_shape[i] = 1;
   }
 
-  // First normalization pass will remove all slices of size 1, by merging it to an adjacent inner dimension.
+  // First normalization pass: remove all slices of size 1 by merging to
+  // an adjacent inner dimension.
   size_t num_size_one = 0;
   for (size_t i = 0; i < num_dims; i++) {
     const size_t offset = offsets[num_dims - 1 - i];
     const size_t input_dim = input_shape[num_dims - 1 - i];
-    const size_t size = sizes[num_dims - 1 - i] > 0 ? sizes[num_dims - 1 - i] : input_dim;
+    const size_t size =
+        sizes[num_dims - 1 - i] > 0
+            ? sizes[num_dims - 1 - i]
+            : input_dim;
 
-    // If the innermost dimension is size 1, we can't merge it anywhere, so skip it.
+    // If the innermost dimension is size 1, we can't merge it anywhere.
     if (size == 1 && i != 0) {
-      normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - i + 1 + num_size_one] +=
-          offset * normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i + 1 + num_size_one];
-      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i + 1 + num_size_one] *= input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i + 1 + num_size_one] *= size;
+      const size_t idx =
+          XNN_MAX_TENSOR_DIMS - 1 - i + 1 + num_size_one;
+      size_t merged_input = 0;
+      size_t merged_output = 0;
+      if (!xnn_safe_mul(normalized_input_shape[idx],
+                        input_dim, &merged_input) ||
+          !xnn_safe_mul(normalized_output_shape[idx],
+                        size, &merged_output)) {
+        return false;
+      }
+      normalized_offsets[idx] +=
+          offset * normalized_input_shape[idx];
+      normalized_input_shape[idx] = merged_input;
+      normalized_output_shape[idx] = merged_output;
       num_size_one++;
     } else {
-      normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - i + num_size_one] = offset;
-      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i + num_size_one] = input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i + num_size_one] = size;
+      const size_t idx =
+          XNN_MAX_TENSOR_DIMS - 1 - i + num_size_one;
+      normalized_offsets[idx] = offset;
+      normalized_input_shape[idx] = input_dim;
+      normalized_output_shape[idx] = size;
     }
   }
 
@@ -57,34 +73,48 @@ void xnn_normalize_slice(
   bool merge_previous_dim = false;
   size_t num_sliced_dims = 0;
   for (size_t i = 0; i < new_num_dims; i++) {
-    const size_t offset = normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - i];
-    const size_t size = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
-    const size_t input_dim = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    const size_t offset =
+        normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - i];
+    const size_t size =
+        normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    const size_t input_dim =
+        normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
 
-    const bool merge_current_dim = (offset == 0 && size == input_dim) ;
+    const bool merge_current_dim =
+        (offset == 0 && size == input_dim);
     if (merge_previous_dim) {
-      normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] =
-        offset * normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims];
-      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] *= input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] *= size;
+      const size_t dst = XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims;
+      size_t merged_input = 0;
+      size_t merged_output = 0;
+      if (!xnn_safe_mul(normalized_input_shape[dst],
+                        input_dim, &merged_input) ||
+          !xnn_safe_mul(normalized_output_shape[dst],
+                        size, &merged_output)) {
+        return false;
+      }
+      normalized_offsets[dst] =
+          offset * normalized_input_shape[dst];
+      normalized_input_shape[dst] = merged_input;
+      normalized_output_shape[dst] = merged_output;
       output_dims -= 1;
       if (!merge_current_dim) {
         num_sliced_dims += 1;
       }
     } else {
-      normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] = offset;
-      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] = input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] = size;
+      const size_t dst = XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims;
+      normalized_offsets[dst] = offset;
+      normalized_input_shape[dst] = input_dim;
+      normalized_output_shape[dst] = size;
       if (!merge_current_dim) {
-        // If merge_current_dim, we can merge current dimension with the next dim, so don't advance num_sliced_dims.
+        // If merge_current_dim, we can merge the current dimension with
+        // the next dim, so don't advance num_sliced_dims.
         num_sliced_dims += 1;
       }
     }
     merge_previous_dim = merge_current_dim;
   }
 
-  // new_num_dims <= num_dims due to merge of size == 1, so we are left with some extra values at the front of the
-  // normalized values, set them to default values.
+  // new_num_dims <= num_dims: zero-fill the extra leading slots.
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS - output_dims; i++) {
     normalized_offsets[i] = 0;
     normalized_input_shape[i] = 1;
@@ -92,6 +122,7 @@ void xnn_normalize_slice(
   }
 
   *num_normalized_dims = output_dims;
+  return true;
 }
 
 // Returns true if input stride and output stride are NULL or the expected input/output stride matches the actual input/output stride.
@@ -281,7 +312,7 @@ void xnn_normalize_transpose_permutation(
   *normalized_num_dims = output_dims;
 }
 
-void xnn_normalize_reduction(
+bool xnn_normalize_reduction(
     size_t* num_reduction_axes_ptr,
     size_t* reduction_axes,
     size_t* num_input_dims_ptr,
@@ -295,18 +326,19 @@ void xnn_normalize_reduction(
   // Running variables for tracking sequences of adjacent axes, e.g. 1, 2, 3
   size_t axes_sequence_start = SIZE_MAX;
   size_t axes_sequence_length = 0;
-  // Running product of input dimensions for a sequence of adjacent axes, e.g. input_dims[1] * input_dims[2] * ...
+  // Running product of input dimensions for a sequence of adjacent axes.
   size_t num_reduction_elements = 0;
 
   // Tracking variables for consumed and produced input dimensions.
   // Each consumed/produced input dimension is read/written only once.
-  // Invariant num_consumed_input_dims <= num_produced_input_dims holds at each iteration.
+  // Invariant: num_consumed_input_dims <= num_produced_input_dims.
   size_t num_consumed_input_dims = 0;
   size_t num_produced_input_dims = 0;
 
   // Tracking variables for consumed and produced reduction axes.
   // Each consumed/produced reduction axis is read/written only once.
-  // Invariant consumed_reduction_axes <= &reduction_axes[num_produced_reduction_axes] holds at each iteration.
+  // Invariant: consumed_reduction_axes <=
+  //   &reduction_axes[num_produced_reduction_axes].
   const size_t* consumed_reduction_axes = reduction_axes;
   size_t num_produced_reduction_axes = 0;
   for (; num_reduction_axes != 0; num_reduction_axes -= 1) {
@@ -316,7 +348,14 @@ void xnn_normalize_reduction(
       axes_sequence_length += 1;
 
       assert(axis == num_consumed_input_dims);
-      num_reduction_elements *= input_dims[num_consumed_input_dims++];
+      size_t product = 0;
+      if (!xnn_safe_mul(num_reduction_elements,
+                        input_dims[num_consumed_input_dims],
+                        &product)) {
+        return false;
+      }
+      num_reduction_elements = product;
+      num_consumed_input_dims++;
       assert(num_consumed_input_dims <= num_input_dims);
     } else {
       if (axes_sequence_length != 0) {
@@ -330,10 +369,17 @@ void xnn_normalize_reduction(
 
       assert(num_consumed_input_dims <= axis);
       if (num_consumed_input_dims != axis) {
-        // Merge input dimensions in the [num_consumed_input_dims:axis] range.
+        // Merge input dimensions in [num_consumed_input_dims:axis].
         size_t normalized_dim = input_dims[num_consumed_input_dims++];
         while (num_consumed_input_dims != axis) {
-          normalized_dim *= input_dims[num_consumed_input_dims++];
+          size_t product = 0;
+          if (!xnn_safe_mul(normalized_dim,
+                            input_dims[num_consumed_input_dims],
+                            &product)) {
+            return false;
+          }
+          normalized_dim = product;
+          num_consumed_input_dims++;
         }
         input_dims[num_produced_input_dims++] = normalized_dim;
         assert(num_produced_input_dims <= num_consumed_input_dims);
@@ -341,8 +387,10 @@ void xnn_normalize_reduction(
       assert(num_consumed_input_dims == axis);
 
       // Adjust and write out the reduction axis.
-      const size_t num_eliminated_input_dims = num_consumed_input_dims - num_produced_input_dims;
-      reduction_axes[num_produced_reduction_axes++] = axis - num_eliminated_input_dims;
+      const size_t num_eliminated_input_dims =
+          num_consumed_input_dims - num_produced_input_dims;
+      reduction_axes[num_produced_reduction_axes++] =
+          axis - num_eliminated_input_dims;
 
       // Reinitialize the running product of input dimensions.
       num_reduction_elements = input_dims[num_consumed_input_dims++];
@@ -351,18 +399,27 @@ void xnn_normalize_reduction(
   }
 
   // If we're tracking a sequence of adjacent reduction axes, terminate it.
-  if (num_consumed_input_dims == axes_sequence_start + axes_sequence_length) {
+  if (num_consumed_input_dims ==
+      axes_sequence_start + axes_sequence_length) {
     input_dims[num_produced_input_dims++] = num_reduction_elements;
   }
   assert(num_produced_input_dims <= num_consumed_input_dims);
   assert(num_consumed_input_dims <= num_input_dims);
 
-  // If there're input dims after the last reduction axis, normalize them.
+  // If there are input dims after the last reduction axis, normalize them.
   if (num_consumed_input_dims != num_input_dims) {
-    // Merge input dimensions in the [num_consumed_input_dims:num_input_dims] range.
+    // Merge input dimensions in
+    // [num_consumed_input_dims:num_input_dims].
     size_t normalized_dim = input_dims[num_consumed_input_dims++];
     while (num_consumed_input_dims != num_input_dims) {
-      normalized_dim *= input_dims[num_consumed_input_dims++];
+      size_t product = 0;
+      if (!xnn_safe_mul(normalized_dim,
+                        input_dims[num_consumed_input_dims],
+                        &product)) {
+        return false;
+      }
+      normalized_dim = product;
+      num_consumed_input_dims++;
     }
     input_dims[num_produced_input_dims++] = normalized_dim;
     assert(num_produced_input_dims <= num_consumed_input_dims);
@@ -372,4 +429,6 @@ void xnn_normalize_reduction(
 
   *num_input_dims_ptr = num_produced_input_dims;
   *num_reduction_axes_ptr = num_produced_reduction_axes;
+  return true;
 }
+
