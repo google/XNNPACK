@@ -185,6 +185,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   }
 
   if (batch_size == 0) {
+    *workspace_size = 0;
     resize_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
