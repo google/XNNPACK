@@ -198,6 +198,12 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
     *output_width_out = unpooling_op->convolution_op->output_width;
   }
 
+  if (unpooling_op->convolution_op->output_height == 0 ||
+      unpooling_op->convolution_op->output_width == 0) {
+    unpooling_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
   // Dummy output for initializing indirection buffers. Output needs to be earlier output due to valid_batch_size
   // optimization, where the smaller batch sizes are not re-initialized if we setup with different output.
   unpooling_op->convolution_op->output = unpooling_op->convolution_op->last_output;
