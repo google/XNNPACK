@@ -232,6 +232,24 @@ TEST(SplitDims, RejectsAxisOutOfRange) {
   subgraph.ReshapeExternalTensor(input_shape, input.data(), 0).ReshapeRuntime();
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
+
+TEST(SplitDims, OverflowSplitsProduct) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> input_shape = {4, 4};
+  Tensor<float> input(input_shape, XnnExtraBytes);
+  Tensor<float> output({4, 4, 4});
+
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(input_shape, input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.shape(), output.data(), /*external_id=*/1)
+      .AddSplitDim(/*axis=*/1, /*splits=*/{SIZE_MAX / 2, 3}, /*input_id=*/0,
+                   /*output_id=*/1);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  subgraph.ReshapeExternalTensor(input_shape, input.data(), 0).ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FuseAndSplitQS8, test) { FuseAndSplit<quantized<int8_t>>(); }
