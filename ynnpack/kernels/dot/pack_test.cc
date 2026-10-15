@@ -1,6 +1,7 @@
 #include "ynnpack/kernels/dot/pack.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
@@ -8,6 +9,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/type.h"
+#include "ynnpack/kernels/transpose/interleave.h"
 
 using ::testing::_;
 using ::testing::ElementsAreArray;
@@ -411,6 +413,56 @@ TEST(pack_subbyte, int2_non_aligned) {
   };
 
   EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack, interleave_block_matches_per_row) {
+  const size_t elem_size = sizeof(uint16_t);
+  const size_t tile_m = 2;
+
+  if (!get_interleave_block_kernel(elem_size * 8, tile_m)) {
+    GTEST_SKIP() << "No fused block interleave kernel on this machine.";
+  }
+
+  for (size_t tile_n : {16, 20, 32, 48, 96}) {
+    for (size_t n : {1, 7, 15, 16, 17, 20, 31, 48, 96, 100}) {
+      for (size_t m : {1, 2, 3, 8, 15, 16}) {
+        const size_t n_blocks = ceil_div(n, tile_n);
+        const size_t rows = ceil_div(m, tile_m);
+        const size_t output_stride = tile_n * tile_m * elem_size;
+        const size_t output_block_stride = rows * output_stride;
+        const size_t output_elems =
+            n_blocks * output_block_stride / sizeof(uint16_t);
+
+        std::vector<uint16_t> input(m * n);
+        for (size_t i = 0; i < input.size(); ++i) {
+          // Anything non-constant; the point is to catch misplaced elements.
+          input[i] = static_cast<uint16_t>(i * 2654435761u >> 11);
+        }
+
+        // Fill with a sentinel: both paths are expected to write every byte of
+        // the output, including the padding.
+        std::vector<uint16_t> expected(output_elems, 0xCDCD);
+        std::vector<uint16_t> actual(output_elems, 0xCDCD);
+
+        packer reference(/*transpose=*/false, elem_size * 8, tile_m, tile_n,
+                         /*allow_fused=*/false);
+        packer fused(/*transpose=*/false, elem_size * 8, tile_m, tile_n,
+                     /*allow_fused=*/true);
+
+        reference.pack(m, n, /*input_stride=*/n * elem_size, input.data(),
+                       output_stride, output_block_stride, expected.data());
+        fused.pack(m, n, /*input_stride=*/n * elem_size, input.data(),
+                   output_stride, output_block_stride, actual.data());
+
+        EXPECT_EQ(actual, expected)
+            << "tile_n=" << tile_n << " n=" << n << " m=" << m;
+        // Guard against the sweep silently testing nothing if the sentinel is
+        // never overwritten.
+        EXPECT_NE(expected.front(), 0xCDCD)
+            << "tile_n=" << tile_n << " n=" << n << " m=" << m;
+      }
+    }
+  }
 }
 
 }  // namespace ynn
