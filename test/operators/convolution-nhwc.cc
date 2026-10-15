@@ -2330,4 +2330,39 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
           convolution_op, overflow_batch, 1, 1, &workspace_size,
           nullptr, nullptr, nullptr));
 }
+TEST(CONVOLUTION_NHWC_F32, finalized_cache_rejects_uncached_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_weights_cache_t weights_cache = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_weights_cache(&weights_cache));
+  std::unique_ptr<xnn_weights_cache_provider,
+                  decltype(&xnn_delete_weights_cache)>
+      auto_cache(weights_cache, xnn_delete_weights_cache);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_finalize_weights_cache(
+                weights_cache, xnn_weights_cache_finalization_kind_soft));
+
+  constexpr size_t group_input_channels = 4;
+  constexpr size_t group_output_channels = 8;
+  std::vector<float> kernel(
+      3 * 3 * group_output_channels * group_input_channels, 0.01f);
+  std::vector<float> bias(group_output_channels, 0.5f);
+  xnn_operator_t op = nullptr;
+  const enum xnn_status status = xnn_create_convolution2d_nhwc_f32(
+      /*input_padding_top=*/0, /*input_padding_right=*/0,
+      /*input_padding_bottom=*/0, /*input_padding_left=*/0,
+      /*kernel_height=*/3, /*kernel_width=*/3, /*subsampling_height=*/1,
+      /*subsampling_width=*/1, /*dilation_height=*/1, /*dilation_width=*/1,
+      /*groups=*/1, group_input_channels, group_output_channels,
+      /*input_channel_stride=*/group_input_channels,
+      /*output_channel_stride=*/group_output_channels, kernel.data(),
+      bias.data(), -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), /*flags=*/0, weights_cache,
+      &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(xnn_status_out_of_memory, status);
+  EXPECT_EQ(nullptr, op);
+}
 }  // namespace
