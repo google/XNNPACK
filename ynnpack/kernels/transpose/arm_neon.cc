@@ -157,6 +157,12 @@ void interleave8_x4_neon(size_t factor, size_t m, size_t n, size_t stride_a,
   interleave<std::array<u8x16, 8>>(m, n, stride_a, a, x,
                                    std::integral_constant<size_t, 4>{});
 }
+void interleave8_x8_neon(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 8);
+  interleave<std::array<u8x16, 8>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 8>{});
+}
 
 void interleave16_x2_neon(size_t factor, size_t m, size_t n, size_t stride_a,
                           const void* a, void* x) {
