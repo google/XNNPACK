@@ -2342,6 +2342,9 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
   }
 
   if (batch_size == 0) {
+    if (workspace_size != NULL) {
+      *workspace_size = 0;
+    }
     deconvolution_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }

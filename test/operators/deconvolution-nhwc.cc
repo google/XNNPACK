@@ -3559,3 +3559,45 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
     ASSERT_EQ(output[i], reference_output[i]) << "at index " << i;
   }
 }
+
+TEST(DECONVOLUTION_NHWC_PQS8_QS8_QC8W, zero_batch_workspace) {
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
+  constexpr size_t group_input_channels = 4;
+  constexpr size_t group_output_channels = 4;
+  const size_t group_output_elements =
+      group_input_channels * group_output_channels;
+  std::vector<float> kernel_scale(group_output_channels, 0.5f);
+  std::vector<int8_t> kernel(group_output_elements);
+  std::vector<int32_t> bias(group_output_channels, 0);
+  for (size_t i = 0; i < kernel.size(); i++) {
+    kernel[i] = static_cast<int8_t>(i % 7);
+  }
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+          /*output_padding_top=*/0, /*output_padding_right=*/0,
+          /*output_padding_bottom=*/0, /*output_padding_left=*/0,
+          /*kernel_height=*/3, /*kernel_width=*/3, /*stride_height=*/1,
+          /*stride_width=*/1, /*dilation_height=*/1, /*dilation_width=*/1,
+          /*groups=*/1, group_input_channels, group_output_channels,
+          /*input_pixel_stride=*/group_input_channels,
+          /*output_pixel_stride=*/group_output_channels,
+          /*input_zero_point=*/0, /*input_scale=*/1.0f, kernel_scale.data(),
+          kernel.data(), bias.data(), /*output_zero_point=*/0,
+          /*output_scale=*/1.0f, /*output_min=*/-127, /*output_max=*/127,
+          /*flags=*/0, /*weights_cache=*/nullptr, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t workspace_size = SIZE_MAX;
+  size_t output_height = SIZE_MAX;
+  size_t output_width = SIZE_MAX;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+          auto_op.get(), /*batch_size=*/0, /*input_height=*/4,
+          /*input_width=*/4, /*adjustment_height=*/0, /*adjustment_width=*/0,
+          &output_height, &output_width, &workspace_size,
+          /*threadpool=*/nullptr));
+  EXPECT_EQ(workspace_size, 0u);
+}
