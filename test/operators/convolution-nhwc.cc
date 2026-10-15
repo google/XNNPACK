@@ -2331,3 +2331,23 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
           nullptr, nullptr, nullptr));
 }
 }  // namespace
+
+TEST(CONVOLUTION_NHWC_F32, zero_batch_writes_output_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  static float kernel[9] = {0};
+  static float bias[1] = {0.0f};
+  ASSERT_EQ(xnn_create_convolution2d_nhwc_f32(
+                0, 0, 0, 0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, kernel, bias,
+                -INFINITY, INFINITY, 0, nullptr, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t oh = SIZE_MAX, ow = SIZE_MAX, ws = SIZE_MAX;
+  ASSERT_EQ(xnn_reshape_convolution2d_nhwc_f32(op, 0, 4, 4, &ws, &oh, &ow,
+                                              nullptr),
+            xnn_status_success);
+  EXPECT_EQ(oh, 2u);
+  EXPECT_EQ(ow, 2u);
+}
+
