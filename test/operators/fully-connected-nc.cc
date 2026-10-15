@@ -3805,3 +3805,31 @@ TEST(FULLY_CONNECTED_NC_F32, overflow_create_weights_stride) {
                 /*flags=*/0, /*weights_cache=*/nullptr, &op));
 }
 
+
+TEST(FULLY_CONNECTED_NC_F32, finalized_cache_rejects_uncached_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_weights_cache_t weights_cache = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_weights_cache(&weights_cache));
+  std::unique_ptr<xnn_weights_cache_provider,
+                  decltype(&xnn_delete_weights_cache)>
+      auto_cache(weights_cache, xnn_delete_weights_cache);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_finalize_weights_cache(
+                weights_cache, xnn_weights_cache_finalization_kind_soft));
+
+  std::vector<float> kernel(10 * 10, 0.01f);
+  std::vector<float> bias(10, 0.5f);
+  xnn_operator_t op = nullptr;
+  const enum xnn_status status = xnn_create_fully_connected_nc_f32(
+      /*input_channels=*/10, /*output_channels=*/10, /*input_stride=*/10,
+      /*output_stride=*/10, kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), /*flags=*/0, weights_cache,
+      &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(xnn_status_out_of_memory, status);
+  EXPECT_EQ(nullptr, op);
+}
