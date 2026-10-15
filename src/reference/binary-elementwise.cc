@@ -229,6 +229,14 @@ struct SquaredDifferenceOp {
   T operator()(T a, T b) const { return (a - b) * (a - b); }
 };
 
+template <>
+struct SquaredDifferenceOp<int32_t> {
+  int32_t operator()(int32_t a, int32_t b) const {
+    const uint32_t diff = static_cast<uint32_t>(a) - static_cast<uint32_t>(b);
+    return static_cast<int32_t>(diff * diff);
+  }
+};
+
 template <typename T>
 struct PreluOp {
   T operator()(T a, T b) const { return (a < 0) ? static_cast<T>(a * b) : a; }
@@ -267,7 +275,11 @@ struct BitwiseXorOp {
 template <typename T>
 struct ShiftLeftOp {
   static constexpr T type_mask = sizeof(T) * 8 - 1;
-  T operator()(T a, T b) const { return a << (b & type_mask); }
+  T operator()(T a, T b) const {
+    return static_cast<T>(
+        static_cast<typename std::make_unsigned<T>::type>(a) <<
+        (b & type_mask));
+  }
 };
 
 template <typename T>
