@@ -594,5 +594,132 @@ TEST(RESIZE_BILINEAR_INDIRECTION, chw_f32_align_corners_no_oob) {
         << "indirection[" << i << "] points past the input buffer";
   }
 }
+
+TEST(INDIRECTION_HARDENING, conv2d_invalid_params) {
+  const void* buffer[4];
+  float input[4] = {0.0f};
+  float zero[4] = {0.0f};
+  // output_tile_size == 0
+  xnn_indirection_init_conv2d(0, 0, 1, buffer, input, zero, 1, 1, 1, 1, 1, 1,
+                              1, 1, 1, 1, 1, 0, 0);
+  // output_width == 0
+  xnn_indirection_init_conv2d(1, 0, 1, buffer, input, zero, 1, 1, 1, 1, 0, 1,
+                              1, 1, 1, 1, 1, 0, 0);
+  // output_height == 0
+  xnn_indirection_init_conv2d(1, 0, 1, buffer, input, zero, 1, 1, 1, 0, 1, 1,
+                              1, 1, 1, 1, 1, 0, 0);
+  // output_start >= output_end
+  xnn_indirection_init_conv2d(1, 1, 1, buffer, input, zero, 1, 1, 1, 1, 1, 1,
+                              1, 1, 1, 1, 1, 0, 0);
+  // null indirection_buffer
+  xnn_indirection_init_conv2d(1, 0, 1, nullptr, input, zero, 1, 1, 1, 1, 1, 1,
+                              1, 1, 1, 1, 1, 0, 0);
+}
+
+TEST(INDIRECTION_HARDENING, deconv2d_invalid_params) {
+  const void* buffer[4];
+  float input[4] = {0.0f};
+  float zero[4] = {0.0f};
+  // stride == 0
+  xnn_indirection_init_deconv2d(1, buffer, input, 1, zero, 1, 1, 1, 1, 1, 1,
+                                0, 1, 1, 1, 0, 0);
+  xnn_indirection_init_deconv2d(1, buffer, input, 1, zero, 1, 1, 1, 1, 1, 1,
+                                1, 0, 1, 1, 0, 0);
+  // output_width == 0
+  xnn_indirection_init_deconv2d(1, buffer, input, 1, zero, 1, 1, 1, 0, 1, 1,
+                                1, 1, 1, 1, 0, 0);
+  // output_tile_size == 0
+  xnn_indirection_init_deconv2d(0, buffer, input, 1, zero, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 0, 0);
+  // null buffer
+  xnn_indirection_init_deconv2d(1, nullptr, input, 1, zero, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 0, 0);
+}
+
+TEST(INDIRECTION_HARDENING, subconv2d_invalid_params) {
+  const void* buffer[4];
+  struct subconvolution_params params;
+  float input[4] = {0.0f};
+  float zero[4] = {0.0f};
+  // stride == 0
+  xnn_indirection_init_subconv2d(1, buffer, &params, input, 1, zero, 1, 1, 1,
+                                 1, 1, 1, 0, 1, 0, 0);
+  xnn_indirection_init_subconv2d(1, buffer, &params, input, 1, zero, 1, 1, 1,
+                                 1, 1, 1, 1, 0, 0, 0);
+  // null pointers
+  xnn_indirection_init_subconv2d(1, nullptr, &params, input, 1, zero, 1, 1, 1,
+                                 1, 1, 1, 1, 1, 0, 0);
+  xnn_indirection_init_subconv2d(1, buffer, nullptr, input, 1, zero, 1, 1, 1,
+                                 1, 1, 1, 1, 1, 0, 0);
+}
+
+TEST(INDIRECTION_HARDENING, maxpool2d_invalid_params) {
+  const void* buffer[4];
+  float input[4] = {0.0f};
+  // input dimensions == 0
+  xnn_indirection_init_maxpool2d(buffer, input, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+                                 1, 0, 0, 1, 1);
+  xnn_indirection_init_maxpool2d(buffer, input, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+                                 1, 0, 0, 1, 1);
+  // dilation == 0
+  xnn_indirection_init_maxpool2d(buffer, input, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                 1, 0, 0, 1, 1);
+  xnn_indirection_init_maxpool2d(buffer, input, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                 0, 0, 0, 1, 1);
+  // null buffer
+  xnn_indirection_init_maxpool2d(nullptr, input, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                 1, 0, 0, 1, 1);
+}
+
+TEST(INDIRECTION_HARDENING, pavgpool2d_divide_by_zero) {
+  float f32_weights[1] = {-1.0f};
+  xnn_float16 f16_weights[1] = {0};
+  // When padding is beyond input, area is 0; must not divide by zero.
+  xnn_indirection_init_pavgpool2d_f32(2, 2, 1, 1, 1, 1, 1, 1, 10, 10,
+                                      f32_weights);
+  EXPECT_EQ(f32_weights[0], 0.0f);
+
+  xnn_indirection_init_pavgpool2d_f16(2, 2, 1, 1, 1, 1, 1, 1, 10, 10,
+                                      f16_weights);
+  EXPECT_EQ(f16_weights[0], 0);
+
+  // null pointer
+  xnn_indirection_init_pavgpool2d_f32(2, 2, 1, 1, 1, 1, 1, 1, 0, 0, nullptr);
+  xnn_indirection_init_pavgpool2d_f16(2, 2, 1, 1, 1, 1, 1, 1, 0, 0, nullptr);
+}
+
+TEST(INDIRECTION_HARDENING, unpool2d_invalid_params) {
+  const void* buffer[4];
+  float output[4] = {0.0f};
+  // batch_start >= batch_size
+  xnn_indirection_init_unpool2d(buffer, output, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                                1);
+  // output_height == 0
+  xnn_indirection_init_unpool2d(buffer, output, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0,
+                                0);
+  // null buffer
+  xnn_indirection_init_unpool2d(nullptr, output, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                                0);
+}
+
+TEST(INDIRECTION_HARDENING, resize_bilinear_invalid_params) {
+  const void* buffer[4];
+  float weights[4] = {0.0f};
+  float input[4] = {0.0f};
+  // output_width == 0
+  xnn_indirection_init_resize_bilinear2d_hwc_f32(
+      0, 1, 1, 2, 2, 1, 0, input, buffer, weights, false, false);
+  // chw with input_width <= 1
+  xnn_indirection_init_resize_bilinear2d_chw_f32(
+      1, 2, 1, 1, 1, input, buffer, weights, false, false);
+  // null pointers
+  xnn_indirection_init_resize_bilinear2d_hwc_f32(
+      0, 1, 1, 2, 2, 1, 1, nullptr, buffer, weights, false, false);
+  xnn_indirection_init_resize_bilinear2d_hwc_f32(
+      0, 1, 1, 2, 2, 1, 1, input, nullptr, weights, false, false);
+  xnn_indirection_init_resize_bilinear2d_hwc_f32(
+      0, 1, 1, 2, 2, 1, 1, input, buffer, nullptr, false, false);
+}
+
 }  // namespace
 }  // namespace xnnpack
