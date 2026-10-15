@@ -254,11 +254,185 @@ const dot_cost_models& get_dot_cost_models(const slinky::eval_context& ctx) {
   return *reinterpret_cast<const dot_cost_models*>(ctx.user_data);
 }
 
+// Returns true if we think it is profitable to pack A one panel (block_m x
+// chunk of k1 x k2 x k3) at a time.
+bool should_pack_a_panel(index_t m, index_t n, span<const size_t> ks,
+                         index_t chunk_k, index_t block_m,
+                         index_t kernel_block_n, index_t a_elem_size,
+                         index_t b_elem_size, bool pack_b, index_t a_stride_m,
+                         span<const size_t> a_k_strides) {
+  // m is too small to pack.
+  if (m <= 1 || block_m <= 1) return false;
+
+  // When A is packed, the m loop is outside of the n loop. We want the kernel
+  // to re-read the same packed A panel at least twice (`n > kernel_block_n`)
+  // and across a large enough `n` (`n > min_n_to_pack_a`) to amortize the cost
+  // of packing.
+  constexpr index_t min_n_to_pack_a = 112;
+  if (n <= std::max<index_t>(min_n_to_pack_a, kernel_block_n)) return false;
+
+  const index_t k2 = ks[1];
+  const index_t k3 = ks[2];
+  if (pack_b && n * b_elem_size > m * a_elem_size &&
+      k2 * k3 * n * chunk_k * b_elem_size > cache_size_l2) {
+    // Packed B is larger than A and does not fit in L2 cache across n, so
+    // `schedule_dot` loops over n outside of m to keep panels of B in cache.
+    // Packing A would invert this loop order and thrash the L2 cache.
+    return false;
+  }
+
+  const index_t row_bytes = chunk_k * a_elem_size;
+  const bool rows_contiguous = a_stride_m == row_bytes;
+  const bool k2_contiguous =
+      k2 == 1 || static_cast<index_t>(a_k_strides[1]) == block_m * row_bytes;
+  const bool k3_contiguous = k3 == 1 || static_cast<index_t>(a_k_strides[2]) ==
+                                            k2 * block_m * row_bytes;
+  // If the panel is already contiguous, packing can't help.
+  return !(rows_contiguous && k2_contiguous && k3_contiguous);
+}
+
+// Pack panels of `A` into a buffer with `k1` contiguous (and zero-padded to a
+// multiple of `tile_k`), and run `dot` one chunk of `k1` at a time.
+template <typename CallKernel>
+YNN_NO_INLINE void run_dot_packed_a_panel(
+    index_t m, index_t n, const std::array<size_t, 3>& k, index_t chunk_k,
+    index_t block_m, index_t block_n, index_t tile_k, index_t a_stride_m,
+    const std::array<size_t, 3>& a_k_strides, const slinky::raw_buffer& a,
+    const std::array<size_t, 3>& b_k_strides, index_t b_stride_n,
+    const slinky::raw_buffer& b, index_t init_c_stride_m,
+    const slinky::raw_buffer& init_c, index_t c_stride_m, index_t c_stride_n,
+    const slinky::raw_buffer& c, const CallKernel& call_kernel,
+    dot_kernel_state* kernel_state) {
+  const index_t k1_unpadded = k[0];
+  const index_t k1 = align_up(k1_unpadded, tile_k);
+  const index_t k2 = k[1];
+  const index_t k3 = k[2];
+  chunk_k = std::min(k1, align_up(chunk_k, tile_k));
+
+  // Packed A is a single panel of max_panel_m x chunk of k1 (x k2 x k3) values,
+  // with k1 contiguous. We pack each panel of A once per m-block and reuse it
+  // across all n-blocks.
+  const index_t max_panel_m = std::min(m, block_m);
+  const size_t panel_size = k3 * k2 * max_panel_m * chunk_k * a.elem_size;
+  constexpr size_t max_alloca_size = 64 * 1024;
+  std::unique_ptr<uint8_t[]> panel_storage;
+  void* panel = nullptr;
+  if (panel_size <= max_alloca_size) {
+    panel = YNN_ALLOCA(uint8_t, panel_size);
+  } else {
+    panel_storage.reset(new uint8_t[panel_size]);
+    panel = panel_storage.get();
+  }
+
+  // The layout of the panel for the current chunk of k.
+  index_t panel_stride_m = 0;
+  size_t copy_bytes = 0;
+  std::array<size_t, 3> panel_k_strides = {static_cast<size_t>(a.elem_size), 0,
+                                           0};
+
+  auto pack_and_run_n = [&](index_t m, index_t n, span<const size_t> k,
+                            const void* a_src, size_t a_stride_m,
+                            span<const size_t> a_k_strides, const void* b,
+                            span<const size_t> b_k_strides,
+                            index_t init_c_stride_m, const void* init_c,
+                            void* c, dot_kernel_state* state = nullptr) {
+    if ((k[1] | k[2]) == 1) {
+      for (index_t i = 0; i < m; ++i) {
+        memcpy(offset_bytes(panel, i * panel_stride_m),
+               offset_bytes(a_src, i * a_stride_m), copy_bytes);
+      }
+    } else {
+      for (size_t K3 = 0; K3 < k[2]; ++K3) {
+        for (size_t K2 = 0; K2 < k[1]; ++K2) {
+          const void* src_k =
+              offset_bytes(a_src, K3 * a_k_strides[2] + K2 * a_k_strides[1]);
+          void* dst_k = offset_bytes(
+              panel, K3 * panel_k_strides[2] + K2 * panel_k_strides[1]);
+          for (index_t i = 0; i < m; ++i) {
+            memcpy(offset_bytes(dst_k, i * panel_stride_m),
+                   offset_bytes(src_k, i * a_stride_m), copy_bytes);
+          }
+        }
+      }
+    }
+    block_dot_n(m, n, k, block_n, panel_stride_m, panel_k_strides, panel,
+                b_stride_n, b_k_strides, b, init_c_stride_m, init_c, c_stride_m,
+                c_stride_n, c, call_kernel, state);
+  };
+
+  auto run_chunks = [&](void* c, const void* a_ptr, const void* b_ptr,
+                        const void* init_c) {
+    index_t init_c_stride_m_k = init_c_stride_m;
+    for (index_t k_begin = 0; k_begin < k1; k_begin += chunk_k) {
+      const index_t chunk_extent = std::min(chunk_k, k1 - k_begin);
+      panel_stride_m = chunk_extent * a.elem_size;
+      copy_bytes = std::min(chunk_extent, k1_unpadded - k_begin) * a.elem_size;
+      panel_k_strides[1] = max_panel_m * panel_stride_m;
+      panel_k_strides[2] = k2 * panel_k_strides[1];
+      if (copy_bytes < static_cast<size_t>(panel_stride_m)) {
+        memset(panel, 0, k3 * panel_k_strides[2]);
+      }
+      const std::array<size_t, 3> k_chunk = {
+          static_cast<size_t>(chunk_extent),
+          static_cast<size_t>(k2),
+          static_cast<size_t>(k3),
+      };
+      const void* a_k = offset_bytes(a_ptr, k_begin * a_k_strides[0]);
+      const void* b_k = offset_bytes(b_ptr, k_begin * b_k_strides[0]);
+      block_dot_m(m, n, k_chunk, block_m, a_stride_m, a_k_strides, a_k,
+                  b_k_strides, b_k, init_c_stride_m_k, init_c, c_stride_m,
+                  c_stride_n, c, pack_and_run_n, kernel_state);
+      // Subsequent chunks of k accumulate into the output.
+      init_c = c;
+      init_c_stride_m_k = c_stride_m;
+    }
+  };
+  if ((c.rank | a.rank | b.rank | init_c.rank) == 0) {
+    run_chunks(c.base, a.base, b.base, init_c.base);
+  } else {
+    slinky::for_each_element(run_chunks, c, a, b, init_c);
+  }
+}
+
+// Dispatches a dot kernel when operand A is packed into 2D tiles along the K
+// dimension (of width `a_tile_k`).
+void call_dot_kernel_on_packed_a(
+    dot_kernel_fn kernel, index_t m, index_t n, span<const size_t> k,
+    const void* a, size_t a_stride_m, span<const size_t> a_k_strides,
+    index_t a_tile_k, index_t a_k1o_stride, const void* b,
+    span<const size_t> b_k_strides, index_t init_c_stride_m, const void* init_c,
+    index_t c_stride_m, void* c, dot_kernel_state* state = nullptr) {
+  const size_t tile_k_a = static_cast<size_t>(a_tile_k);
+  const size_t num_panels = k[0] / tile_k_a;
+  const size_t k0_rem = k[0] % tile_k_a;
+  const size_t b_panel_stride = b_k_strides[0] * tile_k_a;
+  for (size_t K3 = 0; K3 < k[2]; ++K3) {
+    const void* a_k3 = offset_bytes(a, K3 * a_k_strides[2]);
+    const void* b_k3 = offset_bytes(b, K3 * b_k_strides[2]);
+    if (num_panels > 0) {
+      kernel(m, n, k[1], num_panels, tile_k_a, a_stride_m, a_k_strides[1],
+             a_k1o_stride, a_k3, b_k_strides[1], b_panel_stride, b_k_strides[0],
+             b_k3, init_c_stride_m, init_c, c_stride_m, c, state);
+      init_c = c;
+      init_c_stride_m = c_stride_m;
+    }
+    if (k0_rem > 0) {
+      kernel(m, n, k[1], /*k2=*/1, k0_rem, a_stride_m, a_k_strides[1],
+             /*a_stride_k2=*/0, offset_bytes(a_k3, num_panels * a_k1o_stride),
+             b_k_strides[1], /*b_stride_k2=*/0, b_k_strides[0],
+             offset_bytes(b_k3, num_panels * b_panel_stride), init_c_stride_m,
+             init_c, c_stride_m, c, state);
+      init_c = c;
+      init_c_stride_m = c_stride_m;
+    }
+  }
+}
+
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
-                   bool transposed_a, bool pack_b, size_t num_k_dims,
-                   int thread_count) {
+                   bool transposed_a, bool pack_a, bool pack_b,
+                   size_t num_k_dims, int thread_count) {
   uint32_t kernel_flags = 0;
   if (consistent_arithmetic) {
     kernel_flags |= dot_flag::consistent_arithmetic;
@@ -271,7 +445,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
   }
   uint64_t arch_flags = get_supported_arch_flags();
 
-  return [type, kernel_flags, transposed_a, pack_b, num_k_dims, arch_flags,
+  return [type, kernel_flags, transposed_a, pack_a, pack_b, num_k_dims,
+          arch_flags,
           thread_count](const slinky::call_stmt* call,
                         const slinky::eval_context& ctx) -> index_t {
     slinky::raw_buffer a = *ctx.lookup_buffer(call->inputs[0]);
@@ -384,13 +559,17 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
       b.slice(0);
     }
 
-    const int a_k1_dim = transposed_a ? 2 : 0;
-    const slinky::dim& a_k1i = transposed_a ? a.dim(0) : dummy_dim;
+    const bool a_altered = transposed_a || pack_a;
+    const int a_k1_dim = a_altered ? 2 : 0;
+    const slinky::dim& a_k1i = a_altered ? a.dim(0) : dummy_dim;
     const index_t a_tile_k = a_k1i.extent();
-    const slinky::dim& a_mi = transposed_a ? a.dim(1) : dummy_dim;
+    const slinky::dim& a_mi = a_altered ? a.dim(1) : dummy_dim;
     const slinky::dim& a_m = a.dim(a_k1_dim + num_k_dims);
-    const index_t a_stride_m = transposed_a ? a_mi.stride() : a_m.stride();
+    const index_t a_stride_m = a_altered ? a_mi.stride() : a_m.stride();
+    const index_t a_stride_mo = pack_a ? a_m.stride() : 0;
+    const index_t pack_tile_m = pack_a ? a_mi.extent() : 0;
     const slinky::dim& a_k1o = a.dim(a_k1_dim);
+    const index_t a_k1o_stride = a_k1o.stride();
     const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(a_k1_dim + 1) : dummy_dim;
     const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(a_k1_dim + 2) : dummy_dim;
 
@@ -404,7 +583,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     assert(!a_k3.is_folded());
 
     std::array<size_t, 3> a_k_strides = {
-        static_cast<size_t>(a_k1o.stride() / a_tile_k),
+        static_cast<size_t>(a_k1o_stride / a_tile_k),
         static_cast<size_t>(a_k2.stride()),
         static_cast<size_t>(a_k3.stride()),
     };
@@ -415,8 +594,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
                     (r_k1.min() - a_k1o.min() * a_tile_k) * a_k_strides[0]);
 
     // The kernels assume that the column dimension of a is stride 1 element.
-    assert(transposed_a
-               ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
+    assert(a_altered
+               ? (a_mi.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
                : (a_k1o.extent() == 1 ||
                   a_k_strides[0] == static_cast<size_t>(a.elem_size)));
 
@@ -426,7 +605,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     for (size_t i = 0; i < a_k1_dim + num_k_dims; ++i) {
       a.slice(0);
     }
-    if (transposed_a) {
+    if (a_altered) {
       const index_t tile_m = a_mi.extent();
       assert(c_min_m % tile_m == 0);
       a.slice(0, slinky::in_bounds{c_min_m / tile_m});
@@ -434,9 +613,10 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
       a.slice(0, slinky::in_bounds{c_min_m});
     }
 
+    assert(r_k1.min() % tile_k == 0);
     const index_t k1_extent = r_k1.extent();
     const index_t k1 = k1_extent & ~(tile_k - 1);
-    const index_t k1_tail = k1_extent & (tile_k - 1);
+    index_t k1_tail = k1_extent & (tile_k - 1);
     const index_t k2 = r_k2.extent();
     const index_t k3 = r_k3.extent();
 
@@ -449,15 +629,19 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     // Find a kernel that is compatible with the packed data we have, and
     // matches whether A is transposed or not.
     std::optional<bool> require_transpose_a = std::make_optional(transposed_a);
-    if (a_stride_m == a_k_strides[0] * a_tile_k) {
-      // If the stride of m and k1 are the same (i.e. A is a vector of tile_k
-      // values), then we don't care if the kernel is transposed or not.
+    if (!pack_a && k1_tail == 0 && a_stride_m == a_k_strides[0] * tile_k) {
+      // If each row of A is a single aligned block of `tile_k` values (and no
+      // tail padding via `run_dot_packed_a_panel` is needed, which requires a
+      // non-`transpose_a` kernel), then transposed and non-transposed layouts
+      // are identical, so we don't care if the kernel is transposed or not.
       require_transpose_a = std::nullopt;
     }
     dot_shape shape;
-    shape.m = m;
+    shape.m = pack_a ? std::min(m, pack_tile_m) : m;
     shape.n = n;
-    shape.k1 = k1;
+    // Any unaligned tail is zero-padded up to `tile_k` when calling the kernel
+    // (and `k1` may be 0 when `k1_extent < tile_k`).
+    shape.k1 = align_up(k1_extent, tile_k);
     shape.k2 = k2;
     shape.k3 = k3;
     dot_packed_shape packed_shape;
@@ -469,7 +653,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
     const index_t block_m = kernel.block_m;
-    const index_t block_k = kernel.block_k;
+    const index_t block_k = pack_a
+                                ? slinky::lcm<index_t>(kernel.block_k, a_tile_k)
+                                : kernel.block_k;
 
     auto call_kernel = [transposed_a, c_stride_m, kernel = kernel.kernel](
                            index_t m, index_t n, span<const size_t> k,
@@ -484,92 +670,99 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     };
 
     dot_kernel_state kernel_state = {};
+    dot_loop loops_storage[3];
 
-    const size_t cache_sizes[] = {cache_size_l2};
-
-    // We need up to 3 loops per cache level.
-    dot_loop loops_storage[std::size(cache_sizes) * 3];
+    // We can only pack A panels if A is not already tiled and the kernel reads
+    // A with k contiguous.
+    const bool can_pack_a_panel =
+        !pack_a && !transposed_a && (kernel.flags & dot_flag::transpose_a) == 0;
 
     if (k1) {
-      auto loops = schedule_dot(cache_sizes, m, n, k, block_m, block_n, block_k,
-                                a.elem_size, b.elem_size, loops_storage);
-
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m,
+      auto loops =
+          schedule_dot(cache_size_l2, m, n, k, block_m, block_n, block_k,
+                       a.elem_size, b.elem_size, pack_a, pack_b, loops_storage);
+      const index_t chunk_k =
+          loops.front().dim == dot_loop::k
+              ? std::min<index_t>(k1, block_k * loops.front().blocks)
+              : k1_extent;
+      constexpr index_t min_k1_bytes_to_split_tail = 384;
+      const bool pack_a_panel =
+          can_pack_a_panel &&
+          ((k1_tail != 0 &&
+            k1_extent * a.elem_size < min_k1_bytes_to_split_tail) ||
+           should_pack_a_panel(m, n, k, chunk_k, block_m, kernel.block_n,
+                               a.elem_size, b.elem_size, pack_b, a_stride_m,
+                               a_k_strides));
+      if (pack_a_panel) {
+        k[0] = k1_extent;
+        k1_tail = 0;
+        // The packing below copies whole elements of A.
+        assert(type_element_count(type.a) == 1);
+        run_dot_packed_a_panel(
+            m, n, k, chunk_k, block_m, block_n, tile_k, a_stride_m, a_k_strides,
+            a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+            c_stride_n, c, call_kernel, &kernel_state);
+      } else if (pack_a) {
+        auto call_packed_a_kernel =
+            [a_tile_k, a_k1o_stride, a_stride_m, c_stride_m,
+             kernel = kernel.kernel](
+                index_t m, index_t n, span<const size_t> k, const void* a,
+                size_t /*a_stride_m*/, span<const size_t> a_k_strides,
+                const void* b, span<const size_t> b_k_strides,
+                index_t init_c_stride_m, const void* init_c, void* c,
+                dot_kernel_state* state = nullptr) {
+              call_dot_kernel_on_packed_a(kernel, m, n, k, a, a_stride_m,
+                                          a_k_strides, a_tile_k, a_k1o_stride,
+                                          b, b_k_strides, init_c_stride_m,
+                                          init_c, c_stride_m, c, state);
+            };
+        // Step `m` in chunks of `pack_tile_m` and advance `a` by `a_stride_mo`.
+        slinky::for_each_element(
+            [=, &kernel_state](void* c, const void* a, const void* b,
+                               const void* init_c) {
+              for (index_t m0 = 0; m0 < m; m0 += pack_tile_m) {
+                const index_t m_sub = std::min(pack_tile_m, m - m0);
+                run_dot(
+                    loops, m_sub, n, k, block_m, block_n, block_k, a_stride_m,
                     a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
-                    init_c, c_stride_m, c_stride_n, c, call_kernel,
-                    &kernel_state);
-          },
-          c, a, b, init_c);
+                    init_c ? offset_bytes(init_c, m0 * init_c_stride_m)
+                           : nullptr,
+                    c_stride_m, c_stride_n, offset_bytes(c, m0 * c_stride_m),
+                    call_packed_a_kernel, &kernel_state);
+                a = offset_bytes(a, a_stride_mo);
+              }
+            },
+            c, a, b, init_c);
+      } else {
+        slinky::for_each_element(
+            [=, &kernel_state](void* c, const void* a, const void* b,
+                               const void* init_c) {
+              run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m,
+                      a_k_strides, a, b_k_strides, b_stride_n, b,
+                      init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+                      call_kernel, &kernel_state);
+            },
+            c, a, b, init_c);
+      }
     }
     if (k1_tail) {
+      assert(can_pack_a_panel);
+      assert(type_element_count(type.a) == 1);
+      if (k1 != 0) {
+        init_c_stride_m = c_stride_m;
+        init_c = c;
+        a.base = offset_bytes(a.base, a_k_strides[0] * k1);
+        b.base = offset_bytes(b.base, b_k_strides[0] * k1);
+      }
       std::array<size_t, 3> k_tail = {
           static_cast<size_t>(k1_tail),
           static_cast<size_t>(k2),
           static_cast<size_t>(k3),
       };
-      auto loops =
-          schedule_dot(cache_sizes, m, n, k_tail, block_m, block_n, block_k,
-                       a.elem_size, b.elem_size, loops_storage);
-      // Dot kernels can't handle k1 not aligned to tile_k. We handle that
-      // here by making a padded copy of the unaligned elements and calling the
-      // kernel again.
-      //
-      // We do this padding+kernel call once for each value of k3, k2, which
-      // is pretty inefficient, but gives us an upper bound (tile_k * block_m)
-      // on the amount of memory we need to allocate for the padded area. If
-      // the performance of the tail case is an issue, we can improve this at
-      // the cost of a bit of complexity.
-      const index_t a_elem_size = a.elem_size;
-      const index_t a_padded_stride_m = a.elem_size * tile_k;
-      void* a_padded = YNN_ALLOCA(uint8_t, block_m* a_padded_stride_m);
-      memset(a_padded, 0, a_padded_stride_m * block_m);
-      auto call_kernel_tail =
-          [&](index_t m, index_t n, span<const size_t> k, const void* a,
-              size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
-              span<const size_t> b_k_strides, index_t init_c_stride_m,
-              const void* init_c, void* c, dot_kernel_state* state = nullptr) {
-            assert(m <= block_m);
-            assert(n <= block_n);
-            assert(k[0] < tile_k);
-            for (index_t K3 = 0; K3 < k3; ++K3) {
-              for (index_t K2 = 0; K2 < k2; ++K2) {
-                for (index_t i = 0; i < m; ++i) {
-                  memcpy(offset_bytes(a_padded, i * a_padded_stride_m),
-                         offset_bytes(a, i * a_stride_m + K3 * a_k_strides[2] +
-                                             K2 * a_k_strides[1]),
-                         k[0] * a_elem_size);
-                }
-                kernel.kernel(
-                    m, n, /*k3=*/1, /*k2=*/1, tile_k, a_padded_stride_m,
-                    /*a_stride_k3=*/0, /*a_stride_k2=*/0, a_padded,
-                    /*b_stride_k3=*/0,
-                    /*b_stride_k2=*/0, b_k_strides[0],
-                    offset_bytes(b, K3 * b_k_strides[2] + K2 * b_k_strides[1]),
-                    init_c_stride_m, init_c, c_stride_m, c, state);
-                init_c_stride_m = c_stride_m;
-                init_c = c;
-              }
-            }
-          };
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            index_t tail_init_c_stride_m = init_c_stride_m;
-            if (k1 != 0) {
-              init_c = c;
-              tail_init_c_stride_m = c_stride_m;
-            }
-            a = offset_bytes(a, a_k_strides[0] * k1);
-            b = offset_bytes(b, b_k_strides[0] * k1);
-            run_dot(loops, m, n, k_tail, block_m, block_n, block_k, a_stride_m,
-                    a_k_strides, a, b_k_strides, b_stride_n, b,
-                    tail_init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
-                    call_kernel_tail, &kernel_state);
-          },
-          c, a, b, init_c);
+      run_dot_packed_a_panel(m, n, k_tail, tile_k, block_m, block_n, tile_k,
+                             a_stride_m, a_k_strides, a, b_k_strides,
+                             b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+                             c_stride_n, c, call_kernel, &kernel_state);
     }
 
     return 0;
@@ -744,14 +937,21 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
     // nest (e.g. when it is constant folded). When it is fused, the splits
     // don't require their steps, so they adopt the loops of the dot as
     // before.
+    const auto& pack_b_op = std::get<ynn_node::pack_b>(node.op);
     std::vector<slinky::expr> given_splits = {output.physical_extent(0),
                                               output.physical_extent(1),
                                               output.physical_extent(2)};
-    auto sched =
-        runtime.make_schedule(dims, output.physical_extents(),
-                              output.buffer->elem_size(), given_splits);
+    auto sched = runtime.make_schedule(dims, output.physical_extents(),
+                                       pack_b_op.allow_skip_unmatched_loop
+                                           ? output.buffer->elem_size() * 8
+                                           : output.buffer->elem_size(),
+                                       given_splits);
     sched->loop_splits[0].step_is_required = true;
     sched->loop_splits[1].step_is_required = true;
+
+    if (pack_b_op.allow_skip_unmatched_loop) {
+      sched->allow_skip_unmatched_loop = true;
+    }
 
     // The real bounds of the input's n dimension are blocks of size block_n
     // indexed by `no`, which breaks the scheduler's source region inference.
@@ -775,9 +975,10 @@ namespace {
 // interleaving `tile_k` rows at a time.
 // TODO(b/454146513): We should try to combine both pack_b and transpose_a into
 // a `split_transpose` op that can handle padding, split, and transpose.
-auto make_transpose_a_impl(int m_dim) {
-  return [m_dim](slinky::buffer<const void, max_tensor_rank> input,
-                 slinky::buffer<void, max_tensor_rank> output) -> index_t {
+auto make_transpose_a_impl(int m_dim, bool is_pack_a) {
+  return [m_dim, is_pack_a](
+             slinky::buffer<const void, max_tensor_rank> input,
+             slinky::buffer<void, max_tensor_rank> output) -> index_t {
     const slinky::dim& input_k = input.dim(0);
     const slinky::dim& input_m = input.dim(m_dim);
     const slinky::dim& output_ki = output.dim(0);
@@ -792,8 +993,6 @@ auto make_transpose_a_impl(int m_dim) {
     assert(output_mi.min() == 0);
     assert(output_ki.extent() == 1 || output_ki.stride() == elem_size);
     assert(output_mi.extent() == 1 || output_mi.stride() == elem_size * tile_k);
-    assert(output_mo.extent() == 1 ||
-           output_mo.stride() == elem_size * tile_k * tile_m);
 
     // We need the intersection of the input and output bounds.
     const index_t m_begin = output_mo.begin() * tile_m;
@@ -807,34 +1006,41 @@ auto make_transpose_a_impl(int m_dim) {
         std::max<index_t>(0, std::min(k_end, input_k.end()) - k_begin);
 
     // We're transposing columns of the input to rows of the output, but
-    // doing tile_k of them at a time.
+    // doing tile_k of them at a time. When `is_pack_a` is false
+    // (`transpose_a`), `mo` is contiguous with `mi` inside `ko`, so we can
+    // transpose all `m` rows in one block without padding up to `tile_m`.
     // TODO(b/454131137): Support already transposed inputs here.
-    packer p(/*transpose=*/true, elem_size * 8, tile_k, /*tile_n=*/m);
+    packer p(/*transpose=*/true, elem_size * 8, tile_k, is_pack_a ? tile_m : m);
 
     const index_t input_m_stride = input_m.stride();
+    const index_t input_k_max = input_k.max();
+    const index_t input_m_max = input_m.max();
+    const index_t output_mo_stride = is_pack_a ? output_mo.stride() : 0;
     const index_t output_ko_stride = output_ko.stride();
 
-    input.slice(0, slinky::in_bounds{k_begin});
-    input.slice(m_dim - 1, slinky::in_bounds{m_begin});
+    input.slice(0, std::min(k_begin, input_k_max));
+    input.slice(m_dim - 1, std::min(m_begin, input_m_max));
     output.slice({0, 1, 2, static_cast<size_t>(m_dim + 2)});
 
     slinky::for_each_element(
         [=, &p](void* output, const void* input) {
           p.pack(k, m, input_m_stride, input, output_ko_stride,
-                 /*output_block_stride=*/0, output);
+                 output_mo_stride, output);
         },
         output, input);
     return 0;
   };
 }
 
-}  // namespace
-
-// Packing means transposing
-// a(k, m, ...) => a([0, tile_k), [0, tile_m), k/tile_k, ..., m/tile_m, ...)
-void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
-                        index_t tile_k, int m_dim, uint32_t input_a_id,
-                        uint32_t output_id) {
+// Splits and tiles (k1, m) into 2D tiles:
+// a(k1, k2..., m, batch...) =>
+//   output([0, tile_k), [0, tile_m), k1/tile_k, k2..., m/tile_m, batch...)
+// When `pack_a` is true, `output` is contiguous in dimension order so all k
+// panels of one m block are contiguous in memory. When `pack_a` is false
+// (`transpose_a`), `m/tile_m` is placed inside `k1/tile_k` in memory.
+void define_tile_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
+                   index_t tile_k, int m_dim, uint32_t input_a_id,
+                   uint32_t output_id, bool pack_a) {
   const ynn_value& a = subgraph.value(input_a_id);
   ynn_value& output = subgraph.get_output_value(&output_id, a.type);
   output.type = a.type;
@@ -853,80 +1059,116 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
 
   node.inputs = {input_a_id};
   node.outputs = {output.id};
-  node.op = ynn_node::transpose_a{static_cast<size_t>(tile_m),
-                                  static_cast<size_t>(tile_k), m_dim};
+  if (pack_a) {
+    node.op = ynn_node::pack_a{static_cast<size_t>(tile_m),
+                               static_cast<size_t>(tile_k), m_dim};
+  } else {
+    node.op = ynn_node::transpose_a{static_cast<size_t>(tile_m),
+                                    static_cast<size_t>(tile_k), m_dim};
+  }
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn_node::transpose_a& op = std::get<ynn_node::transpose_a>(node.op);
-    // pack_b gets tile_k, tile_n from the extents of the output buffer. Should
-    // we do the same here?
-    const index_t tile_m = op.tile_m;
-    const index_t tile_k = op.tile_k;
-    const int m_dim = op.m_dim;
-    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    const auto* pack_op = std::get_if<ynn_node::pack_a>(&node.op);
+    const bool is_pack_a = pack_op != nullptr;
+    const index_t tile_m =
+        is_pack_a ? pack_op->tile_m
+                  : std::get<ynn_node::transpose_a>(node.op).tile_m;
+    const index_t tile_k =
+        is_pack_a ? pack_op->tile_k
+                  : std::get<ynn_node::transpose_a>(node.op).tile_k;
+    const int m_dim = is_pack_a
+                          ? pack_op->m_dim
+                          : std::get<ynn_node::transpose_a>(node.op).m_dim;
+    ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     slinky::expr elem_size = input.buffer->elem_size();
-    output.make_buffer(runtime, elem_size);
-    output.buffer->dim(0).stride = elem_size;
-    output.buffer->dim(1).stride = elem_size * tile_k;
-    output.buffer->dim(m_dim + 2).stride = elem_size * tile_k * tile_m;
-    output.buffer->dim(2).stride = output.buffer->dim(m_dim + 2).stride *
-                                   output.buffer->dim(m_dim + 2).extent();
+    if (is_pack_a) {
+      require_contiguous(*input.buffer, m_dim + 1);
+      output.make_buffer(runtime, elem_size);
+      require_contiguous(*output.buffer, m_dim + 3);
+    } else {
+      output.make_buffer(runtime, elem_size);
+      output.buffer->dim(0).stride = elem_size;
+      output.buffer->dim(1).stride = elem_size * tile_k;
+      output.buffer->dim(m_dim + 2).stride = elem_size * tile_k * tile_m;
+      output.buffer->dim(2).stride = output.buffer->dim(m_dim + 2).stride *
+                                     output.buffer->dim(m_dim + 2).extent();
 
-    // Don't allow folding of dimensions we transpose.
-    output.buffer->dim(0).fold_factor = slinky::dim::unfolded;
-    output.buffer->dim(1).fold_factor = slinky::dim::unfolded;
-    output.buffer->dim(m_dim + 2).fold_factor = slinky::dim::unfolded;
-    output.buffer->dim(2).fold_factor = slinky::dim::unfolded;
+      // Don't allow folding of dimensions we transpose.
+      output.buffer->dim(0).fold_factor = slinky::dim::unfolded;
+      output.buffer->dim(1).fold_factor = slinky::dim::unfolded;
+      output.buffer->dim(m_dim + 2).fold_factor = slinky::dim::unfolded;
+      output.buffer->dim(2).fold_factor = slinky::dim::unfolded;
+    }
 
     // Split + Transpose
     std::vector<slinky::var> dims =
         runtime.globals.make_dims(output.buffer->rank());
 
-    slinky::expr ko = dims[2];
-    slinky::expr mo = dims[m_dim + 2];
+    slinky::var ko = dims[2];
+    slinky::var mo = dims[m_dim + 2];
 
     slinky::func::input func_input = {input.buffer};
     func_input.bounds.resize(input.buffer->rank());
     func_input.bounds[0] = slinky::min_extent(ko * tile_k, tile_k);
     for (int i = 1; i < m_dim; ++i) {
-      func_input.bounds[i] = slinky::point(dims[i + 2]);
+      func_input.bounds[i] =
+          is_pack_a ? elementwise_bounds(dims[i + 2], input.extents[i])
+                    : slinky::point(dims[i + 2]);
     }
-    func_input.bounds[m_dim] = slinky::min_extent(mo * tile_m, tile_m);
+    if (static_cast<size_t>(m_dim) < func_input.bounds.size()) {
+      func_input.bounds[m_dim] = slinky::min_extent(mo * tile_m, tile_m);
+    }
     for (size_t i = m_dim + 1; i < input.buffer->rank(); ++i) {
-      func_input.bounds[i] = slinky::point(dims[i + 2]);
+      func_input.bounds[i] =
+          is_pack_a ? elementwise_bounds(dims[i + 2], input.extents[i])
+                    : slinky::point(dims[i + 2]);
     }
 
-    // This transpose handles padding the input up to tile_k and tile_m.
+    // This packing/transpose handles padding the input up to tile_k and tile_m.
     func_input.input_crop.resize(input.buffer->rank());
-    func_input.input_crop[0] = all_bounds(input.extent(0));
-    func_input.input_crop[m_dim] = all_bounds(input.extent(m_dim));
+    func_input.input_crop[0] = all_bounds(input.physical_extent(0));
+    if (static_cast<size_t>(m_dim) < func_input.input_crop.size()) {
+      func_input.input_crop[m_dim] = all_bounds(input.physical_extent(m_dim));
+    }
 
     slinky::call_stmt::attributes attrs;
-    attrs.name = "transpose_a";
-    auto func = slinky::func::make(make_transpose_a_impl(m_dim),
+    attrs.name = is_pack_a ? "pack_a" : "transpose_a";
+    auto func = slinky::func::make(make_transpose_a_impl(m_dim, is_pack_a),
                                    {std::move(func_input)},
                                    {{output.buffer, dims}}, std::move(attrs));
 
-    // Pin ki, mi and the k dimensions to their full extents (the transpose
-    // kernel produces whole ki x mi tiles and all of ko at once), and let
-    // make_schedule pick splits and workers for the mo and batch dimensions.
-    // When it is fused, the splits don't require their steps, so they adopt
-    // the loops of the dot.
-    std::vector<slinky::expr> given_splits(m_dim + 2);
-    for (int i = 0; i < m_dim + 2; ++i) {
+    // Pin ki, mi and the k dimensions to their full extents (the packing/
+    // transpose kernel produces whole ki x mi tiles and all of ko at once), and
+    // let make_schedule pick splits and workers for the mo and batch
+    // dimensions. When it is fused, the splits don't require their steps, so
+    // they adopt the loops of the dot.
+    const int num_pinned_dims = m_dim + 2;
+    std::vector<slinky::expr> given_splits(num_pinned_dims);
+    for (int i = 0; i < num_pinned_dims; ++i) {
       given_splits[i] = output.physical_extent(i);
     }
-    auto sched =
-        runtime.make_schedule(dims, output.physical_extents(),
-                              output.buffer->elem_size(), given_splits);
+    auto sched = runtime.make_schedule(
+        dims, output.physical_extents(),
+        is_pack_a ? output.buffer->elem_size() * 8 : output.buffer->elem_size(),
+        given_splits);
+    if (is_pack_a) {
+      sched->loop_splits[0].step_is_required = true;
+      sched->loop_splits[1].step_is_required = true;
+      if (m_dim > 1) {
+        sched->force_root = true;
+      }
+    }
 
     // The real bounds of the input's m dimension are tiles of size tile_m
     // indexed by `mo`, which breaks the scheduler's source region inference.
-    // Declare a virtual 1-to-1 mapping with `mo` instead, so producers of the
-    // input can be fused with loops derived from it.
+    // Declare a virtual 1-to-1 mapping with `mo` (and `ko` for `pack_a`)
+    // instead, so producers/consumers can be fused with loops derived from it.
     sched->input_scheduler_bounds.resize(1);
     sched->input_scheduler_bounds[0].resize(m_dim + 1);
+    if (is_pack_a) {
+      sched->input_scheduler_bounds[0][0] = slinky::point(ko);
+    }
     sched->input_scheduler_bounds[0][m_dim] = slinky::point(mo);
 
     func.user_data() = sched.get();
@@ -935,6 +1177,25 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
+
+}  // namespace
+
+void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
+                        index_t tile_k, int m_dim, uint32_t input_a_id,
+                        uint32_t output_id) {
+  define_tile_a(subgraph, node, tile_m, tile_k, m_dim, input_a_id, output_id,
+                /*pack_a=*/false);
+}
+
+uint32_t define_pack_a(ynn_subgraph& subgraph, index_t tile_m, index_t tile_k,
+                       int m_dim, uint32_t input_a_id) {
+  ynn_node node;
+  ynn_value& output = subgraph.new_internal_value();
+  define_tile_a(subgraph, node, tile_m, tile_k, m_dim, input_a_id, output.id,
+                /*pack_a=*/true);
+  subgraph.add_node(std::move(node));
+  return output.id;
 }
 
 namespace {
@@ -958,8 +1219,9 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_m,
 // - mult_n: 11 bits (bits 0-10, [0, 2047]), multiplied by block_n (step size =
 //   block_n). Max representable split_n: 2047 * block_n (e.g. 131,008 for
 //   block_n = 64).
-// - mult_m: 11 bits (bits 11-21, [0, 2047]), multiplied by step_m (step size =
-//   16). Max representable split_m: 2047 * 16 = 32,752.
+// - mult_m: 11 bits (bits 11-21, [0, 2047]), multiplied by block_m (step size =
+//   block_m). Max representable split_m: 2047 * block_m (e.g. 32,752 for
+//   block_m = 16).
 // - mult_k: 9 bits (bits 22-30, [0, 511]), multiplied by step_k (step size =
 //   1024). Max representable split_k: 511 * 1024 = 523,264.
 //
@@ -976,11 +1238,13 @@ constexpr index_t max_multiplier_k = radix_k - 1;
 constexpr index_t step_m = 16;
 constexpr index_t step_k = 1024;
 
-std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
-                                                           index_t k,
-                                                           index_t block_n,
-                                                           size_t a_elem_size) {
+std::tuple<index_t, index_t, index_t> choose_split_factors(
+    index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
+    index_t block_m = step_m, index_t tile_k = 1,
+    bool pack_a_in_m_loop = false) {
   assert(block_n > 0);
+  assert(block_m > 0);
+  assert(tile_k > 0);
 
   // If k gets big, we're going to tile k anyways. It could be faster to
   // parallelize more finely, but it will waste CPU cycles due to more memory
@@ -1006,12 +1270,25 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   const index_t aspect_ratio = 4;
 
   index_t split_n = std::min<index_t>(n, block_n);
-  index_t split_m = std::min<index_t>(m, step_m);
+  index_t split_m = std::min<index_t>(m, block_m);
   while (true) {
     if (split_n * split_m >= min_area) {
       // We've reached the minimum tile size, should we stop?
       if ((split_m + split_n) * effective_k >= max_cost ||
           split_m * split_n >= max_area) {
+        if (split_m * split_n * effective_k *
+                    static_cast<index_t>(a_elem_size) <
+                4 * max_cost &&
+            split_m >= m && split_n < n) {
+          if (n >= 8 * split_n) {
+            split_n *= 2;
+          } else {
+            const index_t n_blocks = slinky::ceil_div(n, block_n);
+            if (n_blocks >= 8) {
+              split_n = slinky::ceil_div(n_blocks, index_t{8}) * block_n;
+            }
+          }
+        }
         // We've reached the maximum task size, we should stop.
         break;
       }
@@ -1027,9 +1304,29 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
     }
   }
 
+  if (pack_a_in_m_loop) {
+    // When `pack_a` is fused into the outer `m` loop, each `split_m` task
+    // streams across all N columns of B. A larger `split_m` reuses each B panel
+    // in L2 cache across `split_m / tile_m` M-blocks while keeping the packed A
+    // slice (`split_m * k * a_elem_size`) within L2 cache. For `m < 256`,
+    // setting `target_m_outer = 256` ensures the outer `m` loop runs a single
+    // iteration when `pack_b` skips `m` and fuses into `n`.
+    index_t target_m_outer = (m < 256 || m >= 512) ? 256 : 128;
+    if (m >= 512) {
+      const index_t max_m_for_l2 =
+          std::max<index_t>(block_m, (4 * cache_size_l2) / (k * a_elem_size));
+      target_m_outer = std::min<index_t>(
+          target_m_outer, align_down<index_t>(max_m_for_l2, block_m));
+    }
+    if (split_m < target_m_outer && split_m < m) {
+      split_m =
+          align_up<index_t>(std::min<index_t>(m, target_m_outer), block_m);
+    }
+  }
+
   // Trade-offs for splitting k:
   // - Benefit: For very large values of k, splitting the reduction dimension
-  //   keeps the active working set of inputs A and B within the L1 cache,
+  //   keeps the active working set of inputs A and B within the L1/L2 cache,
   //   preventing input cache lines from being evicted before they can be reused
   //   across the m and n tile loops.
   // - Cost: Splitting k across multiple serial iterations forces the
@@ -1043,38 +1340,39 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   //   (threshold for FP32), narrow inputs take only 8-16 KB (already fitting in
   //   L1).
   //
-  // Sizing rationale:
-  // - We set `k_threshold` so that k-splitting only triggers when a single
-  //   input slice along k reaches `cache_size_l1`.
-  // - We use half of `cache_size_l1` to set the split size so that both A and B
-  //   fit in L1.
+  // We set `k_threshold` so that k-splitting only triggers when a single input
+  // slice along k reaches `cache_size_l1`, and use half of `cache_size_l1` to
+  // set the split size so that both A and B fit in L1.
   assert(a_elem_size > 0);
   const index_t k_threshold = cache_size_l1 / a_elem_size;
   const index_t k_split_size = k_threshold / 2;
   index_t split_k = k >= k_threshold ? k_split_size : k;
+  assert(step_k % tile_k == 0);
   split_k = align_up<index_t>(split_k, step_k);
 
   // Ensure the split factors do not exceed the maximum representable numbers
   // in the 32-bit packing scheme (11 bits for n, 11 bits for m, 9 bits for k).
   split_n = std::min<index_t>(split_n, max_multiplier_n * block_n);
-  split_m = std::min<index_t>(split_m, max_multiplier_m * step_m);
+  split_m = std::min<index_t>(split_m, max_multiplier_m * block_m);
   split_k = std::min<index_t>(split_k, max_multiplier_k * step_k);
+  assert(split_k % tile_k == 0);
   return {split_n, split_m, split_k};
 }
 
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n, size_t a_elem_size) {
+    slinky::expr block_n, size_t a_elem_size, index_t block_m = step_m,
+    index_t tile_k = 1, bool pack_a_in_m_loop = false) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
     index_t n = evaluate(op->args[1], ctx);
     index_t k = evaluate(op->args[2], ctx);
     index_t block_n = evaluate(op->args[3], ctx);
-    auto [split_n, split_m, split_k] =
-        choose_split_factors(m, n, k, block_n, a_elem_size);
+    auto [split_n, split_m, split_k] = choose_split_factors(
+        m, n, k, block_n, a_elem_size, block_m, tile_k, pack_a_in_m_loop);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
-    index_t mult_m = std::max<index_t>(1, split_m / step_m);
+    index_t mult_m = std::max<index_t>(1, split_m / block_m);
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
     return (mult_k * radix_m + mult_m) * radix_n + mult_n;
   };
@@ -1087,7 +1385,7 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   slinky::expr mult_m = splits_m_k % radix_m;
   slinky::expr mult_k = splits_m_k / radix_m;
   slinky::expr split_n = slinky::min(n, mult_n * block_n);
-  slinky::expr split_m = slinky::min(m, mult_m * step_m);
+  slinky::expr split_m = slinky::min(m, mult_m * block_m);
   slinky::expr split_k = slinky::min(k, mult_k * step_k);
   split_n = runtime.globals.get(split_n, "split_n");
   split_m = runtime.globals.get(split_m, "split_m");
@@ -1100,7 +1398,7 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   // steps without evaluating the call.
   runtime.globals.learn_bounds(
       split_m,
-      {slinky::min(m, step_m), slinky::min(m, max_multiplier_m * step_m)});
+      {slinky::min(m, block_m), slinky::min(m, max_multiplier_m * block_m)});
   runtime.globals.learn_bounds(
       split_n,
       {slinky::min(n, block_n), slinky::min(n, max_multiplier_n * block_n)});
@@ -1435,8 +1733,16 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                     const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
+    const bool pack_a = op.pack_a;
+    const bool a_tiled = transpose_a || pack_a;
     ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
     ynn_runtime_value& packed_b = runtime.value(node.inputs[1]);
+    const index_t a_tile_k =
+        pack_a ? slinky::as_constant(input_a.extent(0)).value_or(tile_k)
+               : tile_k;
+    const index_t a_tile_m =
+        pack_a ? slinky::as_constant(input_a.extent(1)).value_or(tile_m)
+               : tile_m;
     ynn_runtime_value input_c;
     if (node.inputs[2] != YNN_INVALID_VALUE_ID) {
       input_c = runtime.value(node.inputs[2]);
@@ -1445,7 +1751,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
-    if (!transpose_a) {
+    if (pack_a) {
+      require_contiguous(*input_a.buffer, num_k_dims + 3);
+    } else if (!transpose_a) {
       require_contiguous(*input_a.buffer, 1);
     }
     if (pack_b) {
@@ -1472,9 +1780,13 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       all_dims.push_back(r_dim);
       reduction_dims.push_back(r_dim);
 
-      const int a_k_dim = transpose_a ? 2 : 0;
+      const int a_k_dim = a_tiled ? 2 : 0;
       slinky::expr k_extent = input_a.extent(a_k_dim + d);
-      if (transpose_a && d == 0) {
+      if (pack_a && d == 0) {
+        // Use the K1 extent from packed_b (which is aligned to b's tile_k and
+        // <= packed_a's padded extent).
+        k_extent = packed_b.extent(0) * packed_b.extent(2);
+      } else if (transpose_a && d == 0) {
         // When A is transposed, its K1 dimension is split into blocks of size
         // tile_k. The logical extent of the reduction dimension should be the
         // total number of elements, so we multiply the number of blocks by the
@@ -1496,18 +1808,20 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     // A: We need all of the k dims, i is elementwise.
-    const int num_a_k_dims = num_k_dims + (transpose_a ? 2 : 0);
+    const int k_offset = a_tiled ? 2 : 0;
+    const int num_a_k_dims = num_k_dims + k_offset;
     slinky::box_expr a_bounds(std::min<int>(input_a.rank(), num_a_k_dims));
-    if (transpose_a) {
+    if (a_tiled) {
       a_bounds[0] = all_bounds(input_a.physical_extent(0));
       a_bounds[1] = all_bounds(input_a.physical_extent(1));
-      a_bounds[2] = slinky::point(slinky::simplify(reduction_dims[0] / tile_k));
+      a_bounds[2] =
+          slinky::point(slinky::simplify(reduction_dims[0] / a_tile_k));
       for (size_t d = 1; d < num_k_dims; ++d) {
         a_bounds[2 + d] = slinky::point(reduction_dims[d]);
       }
       if (output_dims.size() >= 2) {
         slinky::var i = output_dims[1];
-        a_bounds.push_back(slinky::point(i) / tile_m);
+        a_bounds.push_back(slinky::point(i) / a_tile_m);
       } else {
         a_bounds.push_back(slinky::point(0));
       }
@@ -1543,7 +1857,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
     // Batch dims are elementwise too.
     for (size_t i = 1; i < output_dims.size(); ++i) {
-      if (transpose_a) {
+      if (a_tiled) {
         if (i >= 2 && i + num_a_k_dims - 1 < input_a.rank()) {
           a_bounds.push_back(elementwise_bounds(
               output_dims[i], input_a.physical_extent(i + num_a_k_dims - 1)));
@@ -1584,13 +1898,12 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
         runtime.threadpool() ? runtime.threadpool()->thread_count() + 1 : 1;
     auto func = slinky::func(
         make_dot_impl(dot_type, consistent_arithmetic, symmetric_b, transpose_a,
-                      pack_b, num_k_dims, thread_count),
+                      pack_a, pack_b, num_k_dims, thread_count),
         {{input_a.buffer, std::move(a_bounds)},
          {packed_b.buffer, std::move(b_bounds)},
          {input_c.buffer, std::move(c_bounds)}},
-        {{output.buffer, output_dims},
-         {reduction_buffer, std::move(reduction_dims)}},
-        {}, std::move(attrs));
+        {{output.buffer, output_dims}, {reduction_buffer, reduction_dims}}, {},
+        std::move(attrs));
 
     slinky::expr block_n = pack_b ? packed_b.extent(1) : block_n_unpacked;
     slinky::expr n = output.extent(0);
@@ -1602,13 +1915,18 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       k *= packed_b.extent(3 + d);
     }
 
+    const index_t m_step_align =
+        a_tiled ? slinky::lcm<index_t>(step_m, a_tile_m) : step_m;
     auto [split_n, split_m, split_k] = choose_split_factors(
-        runtime, m, n, k, block_n, type_size_bytes(input_a.type));
+        runtime, m, n, k, block_n, type_size_bytes(input_a.type), m_step_align,
+        tile_k, pack_a && op.pack_a_in_m_loop);
 
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
     std::vector<int> loop_order;
-    const bool pack_b_outer = rank >= 2 && pack_b && !packed_b.is_static();
+    const bool pack_b_outer = rank >= 2 &&
+                              ((pack_b && !packed_b.is_static()) || pack_a) &&
+                              !op.pack_a_in_m_loop;
     if (is_split_k) {
       if (pack_b_outer) {
         loop_order.push_back(num_k_dims + 1);  // m (innermost)
@@ -1678,10 +1996,16 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     sched->input_scheduler_bounds.resize(2);
     if (pack_b) {
       sched->input_scheduler_bounds[1].resize(4);
+      if (pack_a) {
+        sched->input_scheduler_bounds[1][2] = slinky::point(reduction_dims[0]);
+      }
       sched->input_scheduler_bounds[1][3] = slinky::point(j);
     }
-    if (transpose_a) {
+    if (a_tiled) {
       sched->input_scheduler_bounds[0].resize(num_a_k_dims + 1);
+      if (pack_a) {
+        sched->input_scheduler_bounds[0][2] = slinky::point(reduction_dims[0]);
+      }
       if (output_dims.size() >= 2) {
         slinky::var i = output_dims[1];
         sched->input_scheduler_bounds[0][num_a_k_dims] = slinky::point(i);
@@ -1697,6 +2021,169 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
   subgraph.add_node(std::move(node));
   return ynn_status_success;
+}
+
+bool should_pack_a(const ynn_subgraph& subgraph, const ynn_node& dot_node,
+                   const dot_kernel& kernel) {
+  const auto* op = std::get_if<ynn_node::dot>(&dot_node.op);
+  if (!op || op->pack_a) {
+    return false;
+  }
+  if (!kernel.kernel || (kernel.flags & dot_flag::transpose_a) != 0) {
+    return false;
+  }
+  // Only 2D-tile kernels (e.g. AMX kernels with `block_m >= 16` and
+  // `block_k >= 16`) benefit from a graph-level `pack_a` node. For non-2D-tile
+  // kernels (e.g. AVX512/AVX2/NEON), `make_dot_impl` packs each L2 K-chunk into
+  // a thread-local stack buffer (`run_dot_packed_a_panel`) at runtime when
+  // profitable.
+  if (kernel.block_m < 16 || kernel.block_k < 16) {
+    return false;
+  }
+
+  const size_t num_k_dims = op->num_k_dims;
+  const uint32_t input_a_id = dot_node.inputs[0];
+  const uint32_t packed_b_id = dot_node.inputs[1];
+  const uint32_t output_id = dot_node.outputs[0];
+  const ynn_value& a = subgraph.value(input_a_id);
+  const ynn_value& c = subgraph.value(output_id);
+
+  // If output is rank < 2 or A has no M dimension (vector-matrix dot), A has
+  // only 1 row and does not benefit from block packing.
+  if (c.rank() < 2 || static_cast<size_t>(a.rank()) <= num_k_dims) {
+    return false;
+  }
+
+  const ynn_node* a_producer = subgraph.get_producer(input_a_id);
+  if (a_producer &&
+      (std::holds_alternative<ynn_node::transpose_a>(a_producer->op) ||
+       std::holds_alternative<ynn_node::pack_a>(a_producer->op))) {
+    return false;
+  }
+
+  const index_t tile_m = kernel.block_m;
+  const index_t block_k = std::max<index_t>(1, kernel.block_k);
+  const index_t max_block_n =
+      std::max<index_t>(kernel.max_block_n, kernel.block_n);
+  const index_t a_elem_size = type_size_bytes(a.type);
+
+  slinky::expr m = c.extent(1);
+  slinky::expr n = c.extent(0);
+
+  // If M fits within a single block_m tile, packing into a `tile_m`-row block
+  // pads more than half the buffer with zeros that are never read by the 2x
+  // M-block kernel (`HasM1 = false`).
+  if (slinky::prove_true(m <= kernel.block_m)) {
+    return false;
+  }
+
+  slinky::expr k_expr = a.extent(0);
+  for (size_t d = 1; d < num_k_dims; ++d) {
+    k_expr *= a.extent(d);
+  }
+
+  // If A is constant, `pack_a` is constant-folded so the packing cost is not
+  // paid at runtime.
+  if (is_constant(subgraph, input_a_id)) {
+    return true;
+  }
+
+  // If A already fits in L1 cache or spans only a single K block, unpacked tile
+  // loads already hit in L1 with contiguous rows within the panel.
+  if (slinky::prove_true(k_expr <= block_k) ||
+      slinky::prove_true(m * k_expr * a_elem_size <= cache_size_l1)) {
+    return false;
+  }
+
+  // If A is consumed by multiple nodes, the packed buffer can be reused across
+  // consumers.
+  if (subgraph.count_consumers(input_a_id) > 1) {
+    return true;
+  }
+
+  const bool b_is_static =
+      is_constant_or_gather_of_constant(subgraph, packed_b_id);
+
+  // Pack A when K1 (`a.extent(0)`) is not a multiple of `kernel.tile_k`, N
+  // spans multiple blocks, and K is small (`< 192`, or B is static), so
+  // `pack_a` zero-pads the K1 tail once instead of running a separate tail pass
+  // in `make_dot_impl`.
+  if (slinky::prove_true(a.extent(0) % kernel.tile_k != 0) &&
+      slinky::prove_true(n > max_block_n) &&
+      (b_is_static || slinky::prove_true(k_expr < 192))) {
+    return true;
+  }
+
+  if (num_k_dims != 1 || !slinky::prove_true(m >= 2 * tile_m) ||
+      !slinky::prove_true(n >= 8 * max_block_n)) {
+    return false;
+  }
+
+  if (b_is_static) {
+    return true;
+  }
+
+  // When B is dynamic and K is aligned to `kernel.tile_k`:
+  // If a single `tile_m x K` panel of A fits within half of L1 cache (and total
+  // A is not huge), unpacked A rows stay hot in L1 across N panels.
+  if (slinky::prove_true(tile_m * k_expr * a_elem_size <= cache_size_l1 / 2) &&
+      slinky::prove_true(m * k_expr * a_elem_size <= 8 * cache_size_l2)) {
+    return false;
+  }
+
+  const index_t b_elem_size = type_size_bytes(subgraph.value(packed_b_id).type);
+  // With dynamic B and aligned K, packing A is profitable in three regimes:
+  // 1. Small M (`m < 256`) with `k <= 640` and A fitting in L2 cache: `m` runs
+  //    a single outer iteration while `pack_b` skips `m` and fuses into `n`,
+  //    keeping packed A in L2 across all N blocks.
+  // 2. Very large M (`m >= 4096`) with moderate K (`k <= 640`) and `m > n`:
+  //    fusing `pack_a` into `m` utilizes all threads while `packed_b` at root
+  //    stays in L2/L3 cache.
+  // 3. Wide N (`m >= 256` and `n >= 4 * m` with `a_elem_size >= 2`): root
+  //    parallel `pack_a` is amortized across many N blocks while `pack_b`
+  //    stays fused into `n`.
+  return (slinky::prove_true(m < 256) && slinky::prove_true(k_expr <= 640) &&
+          slinky::prove_true(m * k_expr * a_elem_size <= cache_size_l2)) ||
+         (slinky::prove_true(m >= 4096) && slinky::prove_true(k_expr <= 640) &&
+          slinky::prove_true(m * a_elem_size > n * b_elem_size)) ||
+         (a_elem_size >= 2 && slinky::prove_true(m >= 256) &&
+          slinky::prove_true(n >= 4 * m));
+}
+
+// Returns whether `pack_a` should be fused into the dot's outer `m` loop
+// rather than running once at root before `n`.
+bool should_pack_a_in_m_loop(const ynn_subgraph& subgraph,
+                             const ynn_node& dot_node) {
+  const auto& op = std::get<ynn_node::dot>(dot_node.op);
+  const uint32_t input_a_id = dot_node.inputs[0];
+  const uint32_t packed_b_id = dot_node.inputs[1];
+  const uint32_t output_id = dot_node.outputs[0];
+  if (op.num_k_dims != 1 || is_constant(subgraph, input_a_id) ||
+      subgraph.count_consumers(input_a_id) > 1) {
+    return false;
+  }
+  const ynn_value& a = subgraph.value(input_a_id);
+  const ynn_value& c = subgraph.value(output_id);
+  const index_t a_elem_size = type_size_bytes(a.type);
+  slinky::expr m = c.extent(1);
+  slinky::expr n = c.extent(0);
+  slinky::expr k = a.extent(0);
+  if (is_constant_or_gather_of_constant(subgraph, packed_b_id)) {
+    return slinky::prove_true(k * a_elem_size < 8192);
+  }
+  // With dynamic B, fuse `pack_a` into the outer `m` loop unless A is a small-M
+  // matrix that exceeds `2 * cache_size_l2` or N is much wider than M (`n >= 4
+  // * m`), where parallelizing `pack_a` at root while keeping `pack_b` fused
+  // into `n` is faster.
+  if (slinky::prove_true(m < 256) &&
+      slinky::prove_true(m * k * a_elem_size > 2 * cache_size_l2)) {
+    return false;
+  }
+  if (slinky::prove_true(m >= 256) && slinky::prove_true(m < 4096) &&
+      slinky::prove_true(n >= 4 * m)) {
+    return false;
+  }
+  return true;
 }
 
 }  // namespace
@@ -1773,3 +2260,92 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 }  // extern "C"
 
 }  // namespace ynn
+
+ynn_status ynn_subgraph::insert_pack_a() {
+  bool inserted = false;
+  const size_t num_nodes = nodes.size();
+  for (size_t node_idx = 0; node_idx < num_nodes; ++node_idx) {
+    ynn_node& node = nodes[node_idx];
+    if (!node.is_valid()) continue;
+    auto* dot_op = std::get_if<ynn_node::dot>(&node.op);
+    if (!dot_op || dot_op->pack_a) continue;
+
+    const size_t num_k_dims = dot_op->num_k_dims;
+    const uint32_t input_a_id = node.inputs[0];
+    const uint32_t packed_b_id = node.inputs[1];
+    const uint32_t output_id = node.outputs[0];
+    if (!is_valid_value(input_a_id) || !is_valid_value(packed_b_id) ||
+        !is_valid_value(output_id)) {
+      continue;
+    }
+
+    const ynn_value& a = value(input_a_id);
+    const ynn_value& packed_b = value(packed_b_id);
+    const ynn_value& c = value(output_id);
+
+    ynn::dot_type type = {a.type, packed_b.type, c.type};
+    ynn::dot_shape shape;
+    if (c.rank() >= 2) {
+      shape.m =
+          std::min<size_t>(480, slinky::as_constant(c.extent(1)).value_or(480));
+    }
+    shape.n =
+        std::min<size_t>(384, slinky::as_constant(c.extent(0)).value_or(384));
+    shape.k1 =
+        std::min<size_t>(256, slinky::as_constant(a.extent(0)).value_or(256));
+    shape.k2 =
+        num_k_dims >= 2 ? slinky::as_constant(a.extent(1)).value_or(256) : 1;
+    shape.k3 =
+        num_k_dims >= 3 ? slinky::as_constant(a.extent(2)).value_or(256) : 1;
+
+    const bool consistent_arithmetic =
+        (!ynn::type_is_integral(a.type) ||
+         !ynn::type_is_integral(packed_b.type)) &&
+        (flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
+    uint32_t kernel_flags =
+        consistent_arithmetic ? ynn::dot_flag::consistent_arithmetic : 0;
+    const ynn_node* b_producer = get_producer(packed_b_id);
+    if (!b_producer ||
+        !std::holds_alternative<ynn_node::pack_b>(b_producer->op)) {
+      kernel_flags |= ynn::dot_flag::unaligned_b;
+    }
+    ynn::dot_packed_shape packed_shape;
+    packed_shape.tile_k = static_cast<int>(
+        slinky::as_constant(packed_b.extent(0)).value_or(1) *
+        static_cast<slinky::index_t>(ynn::type_element_count(packed_b.type)));
+    const ynn::dot_kernel kernel = ynn::get_dot_kernel(
+        type, ynn::get_dot_cost_models(), shape, packed_shape, kernel_flags);
+
+    if (!ynn::should_pack_a(*this, node, kernel)) {
+      continue;
+    }
+
+    const slinky::index_t tile_m = kernel.block_m;
+    const slinky::index_t a_elem_size = ynn::type_size_bytes(a.type);
+    const slinky::index_t block_k =
+        std::max<slinky::index_t>(1, kernel.block_k);
+    const slinky::index_t tile_k = slinky::align_up<slinky::index_t>(
+        std::max<slinky::index_t>(block_k, YNN_CACHE_LINE_SIZE / a_elem_size),
+        block_k);
+    const bool pack_a_in_m_loop = ynn::should_pack_a_in_m_loop(*this, node);
+
+    const uint32_t packed_a_id =
+        ynn::define_pack_a(*this, tile_m, tile_k, num_k_dims, input_a_id);
+    node.inputs[0] = packed_a_id;
+    dot_op->pack_a = true;
+    dot_op->pack_a_in_m_loop = pack_a_in_m_loop;
+    if (pack_a_in_m_loop) {
+      if (ynn_node* b_producer = get_producer(packed_b_id)) {
+        if (auto* pb = std::get_if<ynn_node::pack_b>(&b_producer->op)) {
+          pb->allow_skip_unmatched_loop = true;
+        }
+      }
+    }
+    inserted = true;
+  }
+
+  if (inserted) {
+    topological_sort();
+  }
+  return ynn_status_success;
+}

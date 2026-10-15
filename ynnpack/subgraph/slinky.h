@@ -179,6 +179,11 @@ struct scheduling_info {
   std::vector<std::vector<slinky::interval_expr>> input_scheduler_bounds;
 
   bool force_root = false;
+  // If true, allows the scheduler to continue walking inward past an unmatched
+  // outer consumer loop (when its extent is small) to match and fuse into an
+  // inner loop, trading redundant recomputation across the unmatched outer loop
+  // for smaller intermediate buffers and inner-loop fusion.
+  bool allow_skip_unmatched_loop = false;
 };
 
 namespace internal {
