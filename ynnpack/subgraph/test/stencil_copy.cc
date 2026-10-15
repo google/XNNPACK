@@ -118,11 +118,19 @@ void TestImpl(T, size_t rank) {
 
       std::reverse(stencils.begin(), stencils.end());
 
+      std::vector<size_t> input_shape = random_shape(rng, rank, 0, 3);
+      for (StencilParams& stencil : stencils) {
+        if (input_shape[stencil.dim] != 0) {
+          input_shape[stencil.dim] =
+              stencil.input_extent(input_shape[stencil.dim]);
+        }
+      }
+
       // Define subgraph
       SubgraphBuilder subgraph(2);
       const uint32_t padding_id =
           bool_dist(rng) ? subgraph.DefineScalar<T>(0) : YNN_INVALID_VALUE_ID;
-      subgraph.AddInput(type_of<T>(), rank, 0)
+      subgraph.AddInput(type_of<T>(), input_shape, 0)
           .AddOutput(type_of<T>(), rank + num_stencils, 1)
           .AddStencilCopy(stencil_axes, new_axes, stencil_dims, stencil_strides,
                           stencil_dilations, 0, padding_id, 1);
@@ -131,9 +139,11 @@ void TestImpl(T, size_t rank) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       for (int reshape = 0; reshape < 2; ++reshape) {
-        std::vector<size_t> shape = random_shape(rng, rank);
+        std::vector<size_t> shape = random_shape(rng, input_shape);
         for (StencilParams& stencil : stencils) {
-          shape[stencil.dim] = stencil.input_extent(shape[stencil.dim]);
+          if (input_shape[stencil.dim] == 0) {
+            shape[stencil.dim] = stencil.input_extent(shape[stencil.dim]);
+          }
         }
 
         Tensor<T> input(shape);

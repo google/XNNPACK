@@ -1538,7 +1538,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // C: Elementwise
     slinky::box_expr c_bounds;
     if (input_c.rank() >= 1) {
-      c_bounds.push_back(elementwise_bounds(j, input_c.physical_extent(0)));
+      c_bounds.push_back(elementwise_bounds(j, input_c.extents[0]));
     }
 
     // Batch dims are elementwise too.
@@ -1546,21 +1546,21 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       if (transpose_a) {
         if (i >= 2 && i + num_a_k_dims - 1 < input_a.rank()) {
           a_bounds.push_back(elementwise_bounds(
-              output_dims[i], input_a.physical_extent(i + num_a_k_dims - 1)));
+              output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
         }
       } else {
         if (i + num_a_k_dims - 1 < input_a.rank()) {
           a_bounds.push_back(elementwise_bounds(
-              output_dims[i], input_a.physical_extent(i + num_a_k_dims - 1)));
+              output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
         }
       }
       if (i >= 2 && i + 2 + num_k_dims - 1 < packed_b.rank()) {
         b_bounds.push_back(elementwise_bounds(
-            output_dims[i], packed_b.physical_extent(i + 2 + num_k_dims - 1)));
+            output_dims[i], packed_b.extents[i + 2 + num_k_dims - 1]));
       }
       if (i < input_c.rank()) {
         c_bounds.push_back(
-            elementwise_bounds(output_dims[i], input_c.physical_extent(i)));
+            elementwise_bounds(output_dims[i], input_c.extents[i]));
       }
     }
 
