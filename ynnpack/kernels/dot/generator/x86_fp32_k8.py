@@ -9,7 +9,7 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.dot_base import dot_base
-from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
+from ynnpack.kernels.dot.generator.dot_base import get_output_path
 
 
 class x86_avx2_fma3_fp32_k8(dot_base):
@@ -23,9 +23,14 @@ class x86_avx2_fma3_fp32_k8(dot_base):
     self.tile_shape = (1, 1, 8)
 
   def header(self):
-    return """\
+    return (
+        """\
 #include <immintrin.h>
-""" + super().header() + """
+
+#include "ynnpack/base/bfloat16.h"
+"""
+        + super().header()
+        + """
 namespace {
 
 YNN_INTRINSIC float horizontal_sum(__m256 x) {
@@ -37,8 +42,14 @@ YNN_INTRINSIC float horizontal_sum(__m256 x) {
   return _mm_cvtss_f32(sum1);
 }
 
+YNN_INTRINSIC __m256 load_bf16x8(const bfloat16* ptr) {
+  __m128i v = _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr));
+  return _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(v), 16));
+}
+
 }  // namespace
 """
+    )
 
   def init_c_tile(self, i, j):
     return f"__m256 c_{i}_{j} = _mm256_setzero_ps();\n"
@@ -75,12 +86,43 @@ YNN_INTRINSIC float horizontal_sum(__m256 x) {
     return self.store_c_tile(i, j)
 
 
-generate_dot_kernels(
-    x86_avx2_fma3_fp32_k8(),
-    [
-        (1, 1, 8),
-        (2, 1, 8),
-        (4, 1, 8),
-        (8, 1, 8),
-    ],
-)
+class x86_avx2_fma3_bf16_bf16_fp32_k8(x86_avx2_fma3_fp32_k8):
+  """bf16 AVX2-FMA3 dot kernel specialized for n == 1."""
+
+  def __init__(self):
+    super().__init__()
+    self.kind = "bf16_bf16_fp32"
+    self.a_type = "bfloat16"
+    self.b_type = "bfloat16"
+    self.c_type = "float"
+    self.dot_cost_model = "x86_avx2_fma3_fp32_k8"
+
+  def load_a_tile(self, i, k):
+    return f"__m256 a_{i}_{k} = load_bf16x8({self.a_ptr(i, k)});\n"
+
+  def load_b_tile(self, k, j):
+    return f"__m256 b_{k}_{j} = load_bf16x8({self.b_ptr(k, j)});\n"
+
+
+_BLOCK_SHAPES = [
+    (1, 1, 8),
+    (2, 1, 8),
+    (4, 1, 8),
+    (8, 1, 8),
+]
+
+_fp32_gen = x86_avx2_fma3_fp32_k8()
+_bf16_gen = x86_avx2_fma3_bf16_bf16_fp32_k8()
+_src = _fp32_gen.header()
+_inc = ""
+for _gen in (_fp32_gen, _bf16_gen):
+  for _m, _n, _k in _BLOCK_SHAPES:
+    _src_i, _inc_i = _gen.generate_dot(_m, _n, _k)
+    _src += _src_i
+    _inc += _inc_i
+_src += _fp32_gen.footer()
+
+with open(get_output_path("x86_avx2_fma3_fp32_k8.cc"), "w") as _f:
+  _f.write(_src)
+with open(get_output_path("x86_avx2_fma3_fp32_k8.inc"), "w") as _f:
+  _f.write(_inc)
