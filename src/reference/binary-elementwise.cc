@@ -267,7 +267,10 @@ struct BitwiseXorOp {
 template <typename T>
 struct ShiftLeftOp {
   static constexpr T type_mask = sizeof(T) * 8 - 1;
-  T operator()(T a, T b) const { return a << (b & type_mask); }
+  T operator()(T a, T b) const {
+    using U = typename std::make_unsigned<T>::type;
+    return static_cast<T>(static_cast<U>(a) << (b & type_mask));
+  }
 };
 
 template <typename T>
