@@ -48,7 +48,11 @@ size_t xnn_compute_convolution_output_dimension(
   size_t dilation_dimension,
   size_t subsampling_dimension)
 {
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
+  size_t eff_product;
+  if (!xnn_safe_mul(kernel_dimension - 1, dilation_dimension, &eff_product)) {
+    return 1;
+  }
+  const size_t effective_kernel_dimension = eff_product + 1;
   return doz(padded_input_dimension, effective_kernel_dimension) / subsampling_dimension + 1;
 }
 
@@ -60,7 +64,11 @@ size_t xnn_compute_deconvolution_output_dimension(
   size_t dilation_dimension,
   size_t stride_dimension)
 {
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
+  size_t eff_product;
+  if (!xnn_safe_mul(kernel_dimension - 1, dilation_dimension, &eff_product)) {
+    return 0;
+  }
+  const size_t effective_kernel_dimension = eff_product + 1;
   return doz(
     stride_dimension * (input_dimension - 1) + adjustment_dimension + effective_kernel_dimension,
     output_padding_dimension);
