@@ -234,6 +234,67 @@ TEST(SplitDims, RejectsAxisOutOfRange) {
 }
 #endif  // XNNPACK_USE_YNNPACK
 
+// Forge a giant leading dimension directly into the runtime value to bypass
+// xnn_reshape_external_value's shape-product guard, confirming that
+// resize_fuse_dims_output_tensor catches the overflow and returns
+// xnn_status_out_of_memory rather than wrapping to a small allocation size.
+class FuseAndSplitTester : public SubgraphTester {
+ public:
+  using SubgraphTester::SubgraphTester;
+  xnn_runtime_t Runtime() const { return runtime_.get(); }
+};
+
+TEST(FuseDims, OverflowOutputTensorSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // Input [2, 3, 4]: fuse dims 0-1 → output [6, 4].
+  const std::vector<size_t> input_shape = {2, 3, 4};
+  Tensor<float> input(input_shape, XnnExtraBytes);
+  Tensor<float> output({6, 4});
+
+  FuseAndSplitTester tester(2);
+  tester.AddInputTensor(input_shape, input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.shape(), output.data(), /*external_id=*/1)
+      .AddFuseDims(/*first_dim=*/0, /*num_dims=*/2,
+                   /*input_id=*/0, /*output_id=*/1);
+  ASSERT_EQ(xnn_status_success, tester.CreateRuntime());
+
+  // Forge dimensions that would cause the fused dimension to overflow size_t.
+  // dim[0] * dim[1] overflows, so the product of fused dims is not
+  // representable.
+  xnn_runtime_t rt = tester.Runtime();
+  ASSERT_NE(rt, nullptr);
+  rt->values[0].shape.dim[0] = SIZE_MAX / 2 + 1;
+  rt->values[0].shape.dim[1] = 3;
+
+  EXPECT_EQ(xnn_reshape_runtime(rt), xnn_status_out_of_memory);
+}
+
+TEST(SplitDims, OverflowOutputTensorSize) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // Input [6, 4]: split dim 0 into [2, 3] → output [2, 3, 4].
+  const std::vector<size_t> input_shape = {6, 4};
+  Tensor<float> input(input_shape, XnnExtraBytes);
+  Tensor<float> output({2, 3, 4});
+
+  FuseAndSplitTester tester(2);
+  tester.AddInputTensor(input_shape, input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.shape(), output.data(), /*external_id=*/1)
+      .AddSplitDim(/*axis=*/0, /*splits=*/{2, 3},
+                   /*input_id=*/0, /*output_id=*/1);
+  ASSERT_EQ(xnn_status_success, tester.CreateRuntime());
+
+  // Forge a giant non-axis dimension (dim[1]) so that the output tensor's
+  // element product overflows size_t even though dim[0] itself is small.
+  xnn_runtime_t rt = tester.Runtime();
+  ASSERT_NE(rt, nullptr);
+  rt->values[0].shape.dim[0] = 6;
+  rt->values[0].shape.dim[1] = SIZE_MAX / 4;
+
+  EXPECT_EQ(xnn_reshape_runtime(rt), xnn_status_out_of_memory);
+}
+
 TEST(FuseAndSplitQS8, test) { FuseAndSplit<quantized<int8_t>>(); }
 TEST(FuseAndSplitQU8, test) { FuseAndSplit<quantized<uint8_t>>(); }
 TEST(FuseAndSplitBF16, test) { FuseAndSplit<xnn_bfloat16>(); }
