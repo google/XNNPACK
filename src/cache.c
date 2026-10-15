@@ -436,6 +436,7 @@ size_t xnn_internal_get_or_insert_weights_cache(
       // 2. incoming packed weights is already in cache
       if (!cache_has_space(cache, size)) {
         xnn_log_error("insufficient extra space in finalized weights cache buffer");
+        xnn_mutex_unlock(&cache->mutex);
         return XNN_CACHE_NOT_FOUND;
       }
 
