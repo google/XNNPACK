@@ -303,6 +303,42 @@ TEST(BatchMatMulTest, batch_size_overflow_fails) {
           &workspace_size, nullptr));
 }
 
+TEST(BatchMatMulTest, n_stride_overflow_fails) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_batch_matrix_multiply_nc_f32(
+                0, &batch_matrix_multiply_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      batch_matrix_multiply_op, xnn_delete_operator);
+
+  const size_t batch_dims[1] = {1};
+  size_t workspace_size = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          batch_matrix_multiply_op, 1, batch_dims, batch_dims, 1, 1,
+          (SIZE_MAX / 2) + 1, &workspace_size, nullptr));
+}
+
+TEST(BatchMatMulTest, k_stride_overflow_fails) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_batch_matrix_multiply_nc_f32(
+                0, &batch_matrix_multiply_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      batch_matrix_multiply_op, xnn_delete_operator);
+
+  const size_t batch_dims[1] = {1};
+  size_t workspace_size = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          batch_matrix_multiply_op, 1, batch_dims, batch_dims, 1,
+          (SIZE_MAX / 2) + 1, 1, &workspace_size, nullptr));
+}
+
 TEST(BatchMatMulTest, ga_stride_overflow_fails) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
   xnn_operator_t batch_matrix_multiply_op = nullptr;
