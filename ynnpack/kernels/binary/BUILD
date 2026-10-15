@@ -14,6 +14,7 @@ py_binary(
         "generator.py",
         "kernels.py",
     ],
+    legacy_create_init = False,
     tags = [
         "manual",
         "notap",
