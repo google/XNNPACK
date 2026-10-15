@@ -32,8 +32,8 @@ namespace {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_kai_f16_weights_and_biases,
-      xnn_packed_stride_kai_f16_weights_and_biases,
+      xnn_pack_kai_f16_weights_and_biases_sme2,
+      xnn_packed_stride_kai_f16_weights_and_biases_sme2,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -72,8 +72,8 @@ namespace {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_kai_f16_weights_and_biases,
-      xnn_packed_stride_kai_f16_weights_and_biases,
+      xnn_pack_kai_f16_weights_and_biases_sme2,
+      xnn_packed_stride_kai_f16_weights_and_biases_sme2,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -117,8 +117,8 @@ namespace {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_kai_f16_weights_and_biases,
-      xnn_packed_stride_kai_f16_weights_and_biases,
+      xnn_pack_kai_f16_weights_and_biases_sme,
+      xnn_packed_stride_kai_f16_weights_and_biases_sme,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -157,8 +157,8 @@ namespace {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_kai_f16_weights_and_biases,
-      xnn_packed_stride_kai_f16_weights_and_biases,
+      xnn_pack_kai_f16_weights_and_biases_sme,
+      xnn_packed_stride_kai_f16_weights_and_biases_sme,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
