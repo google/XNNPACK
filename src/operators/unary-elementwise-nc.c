@@ -787,7 +787,7 @@ static enum xnn_status setup_unary_elementwise_nc(
 
   switch (unary_elementwise_op->state) {
     case xnn_run_state_skip:
-      return xnn_status_success;
+      break;
     case xnn_run_state_invalid:
       xnn_log_error(
           "failed to setup %s operator: operator has not been reshaped yet",
@@ -798,6 +798,11 @@ static enum xnn_status setup_unary_elementwise_nc(
     case xnn_run_state_ready:
       // Operator has been reshaped, and we are setting up with different pointers.
       break;
+  }
+
+  if (unary_elementwise_op->batch_size == 0 ||
+      unary_elementwise_op->channels == 0) {
+    return xnn_status_success;
   }
 
   if (input == output && is_copy_operator(expected_operator_type)) {
