@@ -450,6 +450,54 @@ TEST(WEIGHTS_CACHE, reserve_overflow) {
   EXPECT_EQ(xnn_status_success, xnn_internal_release_weights_cache(&cache));
 }
 
+TEST(WEIGHTS_CACHE, create_operator_with_uncached_weights_on_finalized_cache) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_weights_cache_t weights_cache = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_weights_cache(&weights_cache));
+
+  // Create an operator whose packed weights are inserted into the cache. These
+  // weights determine the `max_weights_size` of the cache once it is
+  // finalized.
+  {
+    std::vector<float> kernel(1 * 8 * 3 * 3 * 8, 0.001f);
+    std::vector<float> bias(8, 0.0f);
+    xnn_operator_t op = nullptr;
+    const xnn_status status = xnn_create_convolution2d_nhwc_f32(
+        0, 0, 0, 0, 3, 3, 1, 1, 1, 1, 1, 8, 8, 8, 8, kernel.data(),
+        bias.data(), -1e30f, 1e30f, 0, weights_cache, &op);
+    if (status == xnn_status_unsupported_hardware) {
+      EXPECT_EQ(xnn_status_success, xnn_delete_weights_cache(weights_cache));
+      GTEST_SKIP();
+    }
+    ASSERT_EQ(xnn_status_success, status);
+    ASSERT_NE(nullptr, op);
+    EXPECT_EQ(xnn_status_success, xnn_delete_operator(op));
+  }
+
+  // Soft-finalizing leaves enough space for the largest cached weights, but
+  // only allows inserting packed weights that are already in the cache.
+  ASSERT_EQ(xnn_status_success,
+            xnn_finalize_weights_cache(
+                weights_cache, xnn_weights_cache_finalization_kind_soft));
+
+  // Create a second operator with different (uncached) weights that fit within
+  // the space available in the finalized cache. Operator creation must fail
+  // instead of returning success with a bogus packed weights offset.
+  {
+    std::vector<float> kernel(1 * 16 * 1 * 1 * 16, 0.001f);
+    std::vector<float> bias(16, 0.0f);
+    xnn_operator_t op = nullptr;
+    const xnn_status status = xnn_create_convolution2d_nhwc_f32(
+        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 16, 16, 16, 16, kernel.data(),
+        bias.data(), -1e30f, 1e30f, 0, weights_cache, &op);
+    EXPECT_NE(xnn_status_success, status);
+    EXPECT_EQ(nullptr, op);
+  }
+
+  EXPECT_EQ(xnn_status_success, xnn_delete_weights_cache(weights_cache));
+}
+
 TEST(WEIGHTS_CACHE, offset_to_addr_bounds) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_internal_weights_cache cache;
