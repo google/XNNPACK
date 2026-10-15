@@ -17,6 +17,36 @@
 #include "include/xnnpack.h"
 #include "src/operators/fingerprint_id.h"
 #include "src/xnnpack/cache.h"
+#include "src/xnnpack/params.h"
+
+namespace {
+
+class FailingAllocatorGuard {
+ public:
+  FailingAllocatorGuard() : saved_allocator_(xnn_params.allocator) {
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.allocate = FailingAllocate;
+    xnn_params.allocator.aligned_allocate = FailingAlignedAllocate;
+  }
+  ~FailingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+  FailingAllocatorGuard(const FailingAllocatorGuard&) = delete;
+  FailingAllocatorGuard& operator=(const FailingAllocatorGuard&) = delete;
+
+ private:
+  static void* FailingAllocate(void* /*context*/, size_t /*size*/) {
+    return nullptr;
+  }
+
+  static void* FailingAlignedAllocate(
+      void* /*context*/, size_t /*alignment*/, size_t /*size*/) {
+    return nullptr;
+  }
+
+  const struct xnn_allocator saved_allocator_;
+};
+
+}  // namespace
 
 using ::testing::Eq;
 using ::testing::Not;
@@ -127,3 +157,17 @@ TEST_F(FingerprintCacheTest, ReserveAndWrite) {
   EXPECT_THAT(fingerprint->id, Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
   EXPECT_THAT(fingerprint->value, Not(Eq(0)));
 }
+
+TEST_F(FingerprintCacheTest, AllocationFailureReturnsOutOfMemory) {
+  const enum xnn_fingerprint_id absent_id =
+      xnn_fingerprint_id_test_f16_f32_qc8w_nr2;
+  struct fingerprint_context context;
+  {
+    FailingAllocatorGuard guard;
+    context = create_fingerprint_context(absent_id);
+  }
+  EXPECT_THAT(context.status, Eq(xnn_status_out_of_memory));
+  EXPECT_THAT(context.cache.context, Eq(nullptr));
+  finalize_fingerprint_context(&context);
+}
+
