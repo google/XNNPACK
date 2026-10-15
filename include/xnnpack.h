@@ -88,6 +88,15 @@ extern "C" {
 /// Assume transposed input in a batch matrix multiply operator.
 #define XNN_FLAG_TRANSPOSE_A 0x00000002
 
+/// Keep a separate INT8-to-FP32 conversion on the right-hand side of a Batch Matrix Multiply Node.
+///
+/// Prevents the Subgraph optimizer from replacing this conversion and an FP32 BMM with an FP32/QC8W BMM.
+/// This can improve performance when many query rows reuse the converted operand, at the cost of additional
+/// FP32 workspace. Other optimizations remain enabled. This flag applies only to xnn_define_batch_matrix_multiply;
+/// it is not a Runtime flag and does not change a BMM whose right-hand operand is already QC8W.
+/// The choice persists across reshapes; it is not an automatic shape-dependent selection policy.
+#define XNN_FLAG_NO_BMM_DEQUANTIZATION_FUSION 0x00008000
+
 /// Match behaviour of TensorFlow 1.x.
 #define XNN_FLAG_TENSORFLOW_LEGACY_MODE 0x00000004
 
@@ -2006,7 +2015,7 @@ XNN_DEPRECATED enum xnn_status xnn_define_bankers_rounding(
 ///                    @a subgraph. It must be at least 3D. The first N-2 dimensions must match the first and second
 ///                    input tensors . The last 2 dimensions must be [M, N].
 /// @param flags - binary features of the Batch Matrix Multiply Node. The only currently supported values are
-///                XNN_FLAG_TRANSPOSE_B and XNN_FLAG_NO_BROADCAST.
+///                XNN_FLAG_TRANSPOSE_B, XNN_FLAG_NO_BROADCAST, and XNN_FLAG_NO_BMM_DEQUANTIZATION_FUSION.
 enum xnn_status xnn_define_batch_matrix_multiply(
   xnn_subgraph_t subgraph,
   uint32_t input1_id,

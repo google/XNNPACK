@@ -1,0 +1,7 @@
+[
+  {"id": "broadcast_m1_tail", "m": 1, "k": 33, "n": 65, "batch_a": 8, "batch_b": 1, "transpose_b": 0, "positive_a": 0},
+  {"id": "independent_rhs", "m": 8, "k": 65, "n": 33, "batch_a": 8, "batch_b": 8, "transpose_b": 1, "positive_a": 0},
+  {"id": "broadcast_lhs", "m": 1, "k": 257, "n": 17, "batch_a": 1, "batch_b": 8, "transpose_b": 0, "positive_a": 0},
+  {"id": "m6_tail", "m": 6, "k": 511, "n": 513, "batch_a": 1, "batch_b": 1, "transpose_b": 1, "positive_a": 0},
+  {"id": "m7_tail", "m": 7, "k": 513, "n": 511, "batch_a": 1, "batch_b": 1, "transpose_b": 0, "positive_a": 0}
+]
