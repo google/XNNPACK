@@ -28,20 +28,28 @@ TEST(HardwareConfigResetTest, HardwareConfigResetAndInitialization) {
   const struct xnn_unary_elementwise_config* supported_abs =
       xnn_init_f16_abs_config();
   ASSERT_NE(supported_abs, nullptr);
-  EXPECT_NE(supported_abs->ukernel, nullptr);
+  ASSERT_NE(supported_abs->ukernel, nullptr);
+  const xnn_vunary_ukernel_fn supported_ukernel = supported_abs->ukernel;
 
   xnn_hardware_config mock_no_support{};
   xnn_set_hardware_config(&mock_no_support);
 
   const struct xnn_unary_elementwise_config* no_support_abs =
       xnn_init_f16_abs_config();
-  EXPECT_EQ(no_support_abs, nullptr);
+  ASSERT_NE(no_support_abs, nullptr);
+  EXPECT_NE(no_support_abs->ukernel, nullptr);
+#if (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR) || \
+    (XNN_ARCH_X86_64 && XNN_ENABLE_SSE2)
+  EXPECT_NE(no_support_abs->ukernel, supported_ukernel);
+#endif
 
   xnn_set_hardware_config(&mock_supported);
 
   const struct xnn_unary_elementwise_config* restored_abs =
       xnn_init_f16_abs_config();
+  ASSERT_NE(restored_abs, nullptr);
   EXPECT_EQ(restored_abs, supported_abs);
+  EXPECT_EQ(restored_abs->ukernel, supported_ukernel);
 
   xnn_reset_hardware_config();
 }
