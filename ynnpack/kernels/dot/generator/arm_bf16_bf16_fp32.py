@@ -19,7 +19,7 @@ class arm_neon_bf16_bf16_fp32(arm_neon):
     self.a_load_type = "uint16_t"
     self.b_type = "bfloat16"
     self.b_load_type = "uint16_t"
-    self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::consistent_arithmetic", "dot_flag::unaligned_b"]
 
   def header(self):
     return super().header() + """
@@ -28,6 +28,21 @@ namespace {
 
 YNN_INTRINSIC float32x4_t bf16_to_f32(uint16x4_t x) {
   return vreinterpretq_f32_u32(vshll_n_u16(x, 16));
+}
+
+YNN_INTRINSIC uint16x4_t partial_load_4x16b(const uint16_t* ptr, size_t n) {
+  if (n >= 4) {
+    return vld1_u16(ptr);
+  }
+  alignas(8) uint16_t lanes[4] = {};
+  if (n & 2) {
+    memcpy(lanes, ptr, 2 * sizeof(uint16_t));
+    ptr += 2;
+  }
+  if (n & 1) {
+    lanes[n & 2] = *ptr;
+  }
+  return vld1_u16(lanes);
 }
 
 }  // namespace
@@ -45,6 +60,11 @@ YNN_INTRINSIC float32x4_t bf16_to_f32(uint16x4_t x) {
 
   def load_b_tile(self, k, j):
     b_ptr = self.b_ptr(k, j)
+    if self.n == "N":
+      return (
+          f"float32x4_t b_{k}_{j} = bf16_to_f32(partial_load_4x16b({b_ptr},"
+          f" sub_sat(N, {j})));\n"
+      )
     return f"float32x4_t b_{k}_{j} = bf16_to_f32(vld1_u16({b_ptr}));\n"
 
 
