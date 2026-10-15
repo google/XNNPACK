@@ -2936,6 +2936,10 @@ static enum xnn_status reshape_igemm(
     uint32_t log2_filter_element_size, uint32_t extra_weights_elements_size,
     uint32_t log2_output_element_size, bool dynamic_quantization,
     size_t* workspace_size, size_t num_threads) {
+  size_t workspace_size_local = 0;
+  if (workspace_size == NULL) {
+    workspace_size = &workspace_size_local;
+  }
   const size_t batch_size = convolution_op->batch_size;
   const size_t input_height = convolution_op->convolution_op->input_height;
   const size_t input_width = convolution_op->convolution_op->input_width;

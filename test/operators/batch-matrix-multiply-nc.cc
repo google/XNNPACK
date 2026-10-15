@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/operator.h"
 #include "test/operators/batch-matrix-multiply-operator-tester.h"
 
 struct BatchMatMulTesterParams {
@@ -339,4 +340,19 @@ TEST(BatchMatMulTest, gc_stride_overflow_fails) {
       xnn_reshape_batch_matrix_multiply_nc_f32(
           batch_matrix_multiply_op, 1, batch_dims, batch_dims, overflow_m, 1,
           4, &workspace_size, nullptr));
+}
+
+
+TEST(BATCH_MATRIX_MULTIPLY_NC_QD8_F32_QC8W, null_workspace_size_inline_lhs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                XNN_FLAG_INLINE_LHS_PACKING, &op),
+            xnn_status_success);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  static float scale[1] = {1.0f};
+  EXPECT_EQ(xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                op, 0, nullptr, nullptr, 2, 8, 4, scale, nullptr, nullptr),
+            xnn_status_success);
 }

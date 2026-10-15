@@ -1801,6 +1801,11 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
     size_t* workspace_size, size_t num_threads) {
   assert(deconvolution_op->ukernel.type == xnn_microkernel_type_igemm);
 
+  size_t workspace_size_local = 0;
+  if (workspace_size == NULL) {
+    workspace_size = &workspace_size_local;
+  }
+
   const size_t input_height = deconvolution_op->convolution_op->input_height;
   const size_t input_width = deconvolution_op->convolution_op->input_width;
   const size_t output_height = deconvolution_op->convolution_op->output_height;
