@@ -213,7 +213,6 @@ TEST(Slice, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
-#endif  // XNNPACK_USE_YNNPACK
 
 TEST(Slice, RejectsNumDimsLessThanInputRank) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -254,5 +253,6 @@ TEST(Slice, RejectsNumDimsLessThanInputRank) {
                                        ends4.data(), /*strides=*/nullptr,
                                        input_id, output_id, /*flags=*/0));
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
