@@ -65,7 +65,8 @@ std::unique_ptr<T[]> ones(size_t n) {
 
 template <typename A, typename B, typename Output>
 void bench(benchmark::State& state, ynn_threadpool_t threadpool,
-           bool transpose_b, bool static_b, int m, int n, int k) {
+           bool transpose_a, bool transpose_b, bool static_b, int m, int n,
+           int k) {
   subgraph_ptr subgraph = create_subgraph(3);
 
   // If we have static shapes, set them now.
@@ -75,6 +76,9 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool,
   if (m > 0) a_shape[0] = output_shape[0] = m;
   if (n > 0) b_shape[1] = output_shape[1] = n;
   if (k > 0) a_shape[1] = b_shape[0] = k;
+  if (transpose_a) {
+    std::swap(a_shape[0], a_shape[1]);
+  }
   if (transpose_b) {
     std::swap(b_shape[0], b_shape[1]);
   }
@@ -96,6 +100,15 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool,
   ynn_define_tensor(subgraph.get(), type_of<Output>(), 2, nullptr, nullptr,
                     /*flags=*/YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
 
+  uint32_t a_dot_id = a_id;
+  if (transpose_a) {
+    a_dot_id = YNN_INVALID_VALUE_ID;
+    ynn_define_tensor(subgraph.get(), type_of<A>(), 2, nullptr, nullptr,
+                      /*flags=*/0, &a_dot_id);
+    const int32_t perm[2] = {1, 0};
+    ynn_define_static_transpose(subgraph.get(), 2, perm, a_id, &a_dot_id, 0);
+  }
+
   uint32_t b_dot_id = b_id;
   if (transpose_b) {
     b_dot_id = YNN_INVALID_VALUE_ID;
@@ -105,7 +118,7 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool,
     ynn_define_static_transpose(subgraph.get(), 2, perm, b_id, &b_dot_id, 0);
   }
 
-  ynn_define_dot(subgraph.get(), /*num_k_dims=*/1, a_id, b_dot_id,
+  ynn_define_dot(subgraph.get(), /*num_k_dims=*/1, a_dot_id, b_dot_id,
                  YNN_INVALID_VALUE_ID, &output_id, 0);
 
   ynn_optimize_subgraph(subgraph.get(), threadpool, /*flags=*/0);
@@ -123,6 +136,9 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool,
   a_shape[1] = k;
   b_shape[0] = k;
   b_shape[1] = n;
+  if (transpose_a) {
+    std::swap(a_shape[0], a_shape[1]);
+  }
   if (transpose_b) {
     std::swap(b_shape[0], b_shape[1]);
   }
@@ -161,11 +177,11 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool,
 }
 
 void bench(benchmark::State& state, ynn_threadpool_t threadpool,
-           multi_type type, bool transpose_b, bool static_b, int m, int n,
-           int k) {
+           multi_type type, bool transpose_a, bool transpose_b, bool static_b,
+           int m, int n, int k) {
   SwitchThreeTypes(type, [&](auto a, auto b, auto output) {
     bench<decltype(a), decltype(b), decltype(output)>(
-        state, threadpool, transpose_b, static_b, m, n, k);
+        state, threadpool, transpose_a, transpose_b, static_b, m, n, k);
   });
 }
 
@@ -206,6 +222,7 @@ void usage(const char* name) {
 Options:
   --thread_count=N
   --type=t1,t2,...     (int8, int8_int4, int8_int2, bf16, fp16, fp32)
+  --transpose_a=b1,... (0, 1, false, true)
   --transpose_b=b1,... (0, 1, false, true)
   --static_b=b1,...    (0, 1, false, true)
   --shape=m,n,k
@@ -214,16 +231,17 @@ Options:
   -k=k1,k2,...
 
 Notes:
-  Multiple --type, --transpose_b, --shape, -m, -n, -k options are allowed. These
+  Multiple --type, --transpose_a, --transpose_b, --shape, -m, -n, -k options are allowed. These
   options form lists. The Cartesian product of the -m, -n, and -k lists are added
   to the --shape list. The full set of benchmarks is then the Cartesian product
-  of the --shape, --type, --transpose_b, and --static_b lists.
+  of the --shape, --type, --transpose_a, --transpose_b, and --static_b lists.
 
   If a shape value is positive, it is a static shape. If it is negative, it is a
   dynamic shape of the same magnitude. If static_b is true, the B shape must be
-  // static.
+  static.
 
   --type indicates the type of the inputs and outputs.
+  --transpose_a transposes the A matrix input.
   --transpose_b transposes the B matrix input.
 )";
 }
@@ -237,6 +255,7 @@ int main(int argc, char** argv) {
   std::vector<int> ks;
   std::vector<std::array<int, 3>> shapes;
   std::vector<ynn::multi_type> types;
+  std::vector<bool> transpose_as;
   std::vector<bool> transpose_bs;
   std::vector<bool> static_bs;
   benchmark::Initialize(&argc, argv);
@@ -266,6 +285,15 @@ int main(int argc, char** argv) {
       argc -= 1;
     } else if (strncmp(argv[i], "--type=", 7) == 0) {
       parse_list(argv[i] + 7, types);
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--transpose_a=", 14) == 0) {
+      const char* eq = strchr(argv[i], '=');
+      parse_list(eq + 1, transpose_as);
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strcmp(argv[i], "--transpose_a") == 0) {
+      transpose_as.push_back(true);
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else if (strncmp(argv[i], "--transpose_b=", 14) == 0) {
@@ -305,6 +333,10 @@ int main(int argc, char** argv) {
              ynn::multi_type::fp16_fp16_fp32,  ynn::multi_type::fp32};
   }
 
+  if (transpose_as.empty()) {
+    transpose_as = {false};
+  }
+
   if (transpose_bs.empty()) {
     transpose_bs = {false};
   }
@@ -340,31 +372,36 @@ int main(int argc, char** argv) {
       return -1;
     }
 
-    for (bool transpose_b : transpose_bs) {
-      for (bool static_b : static_bs) {
-        std::stringstream name("dot_");
-        name << ynn::to_string(type);
-        if (transpose_b) {
-          name << "_transpose_b";
-        }
-        auto* dot_bench = benchmark::RegisterBenchmark(
-            name.str(), [=, &threadpool](benchmark::State& state) {
-              const int m = state.range(0);
-              const int n = state.range(1);
-              const int k = state.range(2);
-              ynn::bench(state, threadpool.get(), type, transpose_b, static_b,
-                         m, n, k);
-            });
-        dot_bench->ArgNames({"m", "n", "k"});
-        dot_bench->UseRealTime();
-        dot_bench->MeasureProcessCPUTime();
-        for (const auto& shape : shapes) {
-          dot_bench->Args({shape[0], shape[1], shape[2]});
-        }
-        for (int m : ms) {
-          for (int n : ns) {
-            for (int k : ks) {
-              dot_bench->Args({m, n, k});
+    for (bool transpose_a : transpose_as) {
+      for (bool transpose_b : transpose_bs) {
+        for (bool static_b : static_bs) {
+          std::stringstream name("dot_");
+          name << ynn::to_string(type);
+          if (transpose_a) {
+            name << "_transpose_a";
+          }
+          if (transpose_b) {
+            name << "_transpose_b";
+          }
+          auto* dot_bench = benchmark::RegisterBenchmark(
+              name.str(), [=, &threadpool](benchmark::State& state) {
+                const int m = state.range(0);
+                const int n = state.range(1);
+                const int k = state.range(2);
+                ynn::bench(state, threadpool.get(), type, transpose_a,
+                           transpose_b, static_b, m, n, k);
+              });
+          dot_bench->ArgNames({"m", "n", "k"});
+          dot_bench->UseRealTime();
+          dot_bench->MeasureProcessCPUTime();
+          for (const auto& shape : shapes) {
+            dot_bench->Args({shape[0], shape[1], shape[2]});
+          }
+          for (int m : ms) {
+            for (int n : ns) {
+              for (int k : ks) {
+                dot_bench->Args({m, n, k});
+              }
             }
           }
         }
