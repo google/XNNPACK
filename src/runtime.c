@@ -763,6 +763,7 @@ enum xnn_status xnn_create_runtime_v4(
     if (workspace == NULL) {
       xnn_log_error("failed to allocate %zu bytes for non-shared workspace",
                     sizeof(struct xnn_workspace));
+      status = xnn_status_out_of_memory;
       goto error;
     }
   }
@@ -775,6 +776,7 @@ enum xnn_status xnn_create_runtime_v4(
   return xnn_status_success;
 
 error:
+  *runtime_out = NULL;
   xnn_delete_runtime(runtime);
   return status;
 }
