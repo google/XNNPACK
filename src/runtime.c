@@ -707,6 +707,22 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->num_values = subgraph->num_values;
   // No more optimizations should be performed on subgraph at this point, since modifications on the subgraph will not
   // be copied to the runtime's values.
+  for (uint32_t i = 0; i < runtime->num_values; i++) {
+    struct xnn_runtime_value* value = &runtime->values[i];
+    if (!xnn_value_is_valid(value->type)) {
+      continue;
+    }
+
+    if ((value->flags &
+         (XNN_VALUE_FLAG_FP16_COMPATIBLE | XNN_VALUE_FLAG_NEEDS_CLEANUP)) &&
+        xnn_value_is_static(value->allocation_type)) {
+      // Value is static and has been converted to FP16 in a new buffer.
+      value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+      // Runtime takes ownership of the data from subgraph.
+      value->data = subgraph->values[i].data;
+      subgraph->values[i].data = NULL;
+    }
+  }
 
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
     const struct xnn_node* node = subgraph->nodes + i;
@@ -739,22 +755,6 @@ enum xnn_status xnn_create_runtime_v4(
   }
 
   runtime->threadpool = threadpool;
-
-  for (uint32_t i = 0; i < runtime->num_values; i++) {
-    struct xnn_runtime_value* value = &runtime->values[i];
-    if (!xnn_value_is_valid(value->type)) {
-      continue;
-    }
-
-    if (value->flags & (XNN_VALUE_FLAG_FP16_COMPATIBLE | XNN_VALUE_FLAG_NEEDS_CLEANUP) &&
-        xnn_value_is_static(value->allocation_type)) {
-      // Value is static and has been converted to FP16 in a new buffer.
-      value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
-      // Runtime takes ownership of the data from subgraph.
-      value->data = subgraph->values[i].data;
-      subgraph->values[i].data = NULL;
-    }
-  }
 
   // Create and/or add a workspace.
   if (workspace == NULL) {
