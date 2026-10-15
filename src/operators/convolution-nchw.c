@@ -249,8 +249,17 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_conv2d_hwc2chw_path(
         !xnn_safe_mul(packed_weights_size, (size_t)1 << log2_filter_element_size, &packed_weights_size)) {
       return xnn_status_out_of_memory;
     }
-    const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-    void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
+    const size_t aligned_total_weights_size =
+        round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+    if (aligned_total_weights_size < packed_weights_size) {
+      xnn_log_error(
+          "failed to create %s operator: aligned total weights size overflows "
+          "size_t",
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_out_of_memory;
+    }
+    void* weights_ptr = xnn_get_pointer_to_write_weights(
+        convolution_op, aligned_total_weights_size);
     if (weights_ptr == NULL) {
       xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
                     aligned_total_weights_size,
@@ -314,7 +323,15 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
         !xnn_safe_mul(packed_weights_size, (size_t)1 << log2_filter_element_size, &packed_weights_size)) {
       return xnn_status_out_of_memory;
     }
-    const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+    const size_t aligned_total_weights_size =
+        round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+    if (aligned_total_weights_size < packed_weights_size) {
+      xnn_log_error(
+          "failed to create %s operator: aligned total weights size overflows "
+          "size_t",
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_out_of_memory;
+    }
     void* weights_ptr = xnn_get_pointer_to_write_weights(
         convolution_op, aligned_total_weights_size);
     if (weights_ptr == NULL) {
