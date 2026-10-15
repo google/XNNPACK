@@ -2358,6 +2358,12 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
           adjustment_height, deconvolution_op->convolution_op->kernel_height,
           deconvolution_op->convolution_op->dilation_height,
           deconvolution_op->convolution_op->stride_height);
+  if (deconvolution_op->convolution_op->output_height == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: output height overflows size_t",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
   deconvolution_op->convolution_op->output_width =
       xnn_compute_deconvolution_output_dimension(
           input_width,
@@ -2366,6 +2372,12 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
           adjustment_width, deconvolution_op->convolution_op->kernel_width,
           deconvolution_op->convolution_op->dilation_width,
           deconvolution_op->convolution_op->stride_width);
+  if (deconvolution_op->convolution_op->output_width == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: output width overflows size_t",
+        xnn_operator_type_to_string_v2(deconvolution_op));
+    return xnn_status_out_of_memory;
+  }
 
   if (deconvolution_op->convolution_op->output_height == 0 ||
       deconvolution_op->convolution_op->output_width == 0) {
