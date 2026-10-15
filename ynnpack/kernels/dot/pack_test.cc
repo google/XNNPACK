@@ -11,6 +11,7 @@
 
 using ::testing::_;
 using ::testing::ElementsAreArray;
+using ::testing::ExplainMatchResult;
 using ::testing::Matcher;
 
 namespace ynn {
@@ -70,16 +71,17 @@ TEST_P(pack, tile_1x1) {
   const int tile_m = 1;
   const int tile_n = 1;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -116,16 +118,17 @@ TEST_P(pack, tile_1x2) {
   const int tile_m = 1;
   const int tile_n = 2;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -156,16 +159,17 @@ TEST_P(pack, tile_1x4) {
   const int tile_m = 1;
   const int tile_n = 4;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -190,16 +194,17 @@ TEST_P(pack, tile_2x1) {
   const int tile_m = 2;
   const int tile_n = 1;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -229,16 +234,17 @@ TEST_P(pack, tile_2x2) {
   const int tile_m = 2;
   const int tile_n = 2;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -264,16 +270,17 @@ TEST_P(pack, tile_2x4) {
   const int tile_m = 2;
   const int tile_n = 4;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -295,16 +302,17 @@ TEST_P(pack, tile_4x2) {
   const int tile_m = 4;
   const int tile_n = 2;
 
-  packer p(transpose, elem_size * 8, tile_m, tile_n);
-
   const int m = 5;
   const int n = 3;
+
+  const size_t stride_m = (transpose ? 1 : n) * elem_size;
+  const size_t stride_n = (transpose ? m : 1) * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n);
 
   std::vector<int> input = iota_columns<int>(transpose, m, n);
   std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
 
-  p.pack(m, n, /*input_stride=*/(transpose ? m : n) * elem_size,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/elem_size * tile_m * tile_n,
          /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
          /*output=*/output.data());
@@ -321,22 +329,72 @@ TEST_P(pack, tile_4x2) {
   EXPECT_THAT(output, ElementsAreArray(expected));
 }
 
+TEST(pack, broadcast_1x1) {
+  const int elem_size = sizeof(int);
+  const int tile_m = 1;
+  const int tile_n = 1;
+
+  packer p(/*stride_m=*/0, /*stride_n=*/0, elem_size * 8, tile_m, tile_n);
+
+  const int m = 5;
+  const int n = 3;
+
+  int input = 42;
+  std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
+
+  p.pack(m, n, /*input=*/&input,
+         /*output_stride=*/elem_size * tile_m * tile_n,
+         /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
+         /*output=*/output.data());
+
+  std::vector<Matcher<int>> expected(m * n, 42);
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack, broadcast_2x2) {
+  const int elem_size = sizeof(int);
+  const int tile_m = 2;
+  const int tile_n = 2;
+
+  packer p(/*stride_m=*/0, /*stride_n=*/0, elem_size * 8, tile_m, tile_n);
+
+  const int m = 3;
+  const int n = 3;
+
+  int input = 42;
+  std::vector<int> output(align_up(m, tile_m) * align_up(n, tile_n), -1);
+
+  p.pack(m, n, /*input=*/&input,
+         /*output_stride=*/elem_size * tile_m * tile_n,
+         /*output_block_stride=*/elem_size * align_up(m, tile_m) * tile_n,
+         /*output=*/output.data());
+
+  std::vector<Matcher<int>> expected = {
+      // clang-format off
+      42, 42, 42, 42,
+      42, 0, 42, 0,
+
+      42, 42, 0, 0,
+      42, 0, 0, 0,
+      // clang-format on
+  };
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
 TEST(pack_subbyte, int2_transpose_false) {
-  const bool transpose = false;
   const int element_size_bits = 2;
   const int tile_m = 4;
   const int tile_n = 4;
 
-  packer p(transpose, element_size_bits, tile_m, tile_n);
+  packer p(/*stride_m=*/1, /*stride_n=*/1, element_size_bits, tile_m, tile_n);
 
   const int m = 8;
   const int n = 4;
 
-  std::vector<int2x4> input = iota_columns<int2x4>(transpose, m, n);
+  std::vector<int2x4> input = iota_columns<int2x4>(/*transposed=*/false, m, n);
   std::vector<int2x4> output(8);
 
-  p.pack(m, n, /*input_stride=*/1,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/4,
          /*output_block_stride=*/8,
          /*output=*/output.data());
@@ -352,21 +410,19 @@ TEST(pack_subbyte, int2_transpose_false) {
 }
 
 TEST(pack_subbyte, int4_transpose_false) {
-  const bool transpose = false;
   const int element_size_bits = 4;
   const int tile_m = 4;
   const int tile_n = 4;
 
-  packer p(transpose, element_size_bits, tile_m, tile_n);
+  packer p(/*stride_m=*/2, /*stride_n=*/1, element_size_bits, tile_m, tile_n);
 
   const int m = 8;
   const int n = 4;
 
-  std::vector<int4x2> input = iota_columns<int4x2>(transpose, m, n);
+  std::vector<int4x2> input = iota_columns<int4x2>(/*transposed=*/false, m, n);
   std::vector<int4x2> output(16);
 
-  p.pack(m, n, /*input_stride=*/2,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/8,
          /*output_block_stride=*/16,
          /*output=*/output.data());
@@ -384,21 +440,19 @@ TEST(pack_subbyte, int4_transpose_false) {
 }
 
 TEST(pack_subbyte, int2_non_aligned) {
-  const bool transpose = false;
   const int element_size_bits = 2;
   const int tile_m = 4;
   const int tile_n = 4;
 
-  packer p(transpose, element_size_bits, tile_m, tile_n);
+  packer p(/*stride_m=*/1, /*stride_n=*/1, element_size_bits, tile_m, tile_n);
 
   const int m = 5;
   const int n = 4;
 
-  std::vector<int2x4> input = iota_columns<int2x4>(transpose, m, n);
+  std::vector<int2x4> input = iota_columns<int2x4>(/*transposed=*/false, m, n);
   std::vector<int2x4> output(8);
 
-  p.pack(m, n, /*input_stride=*/1,
-         /*input=*/input.data(),
+  p.pack(m, n, /*input=*/input.data(),
          /*output_stride=*/4,
          /*output_block_stride=*/8,
          /*output=*/output.data());

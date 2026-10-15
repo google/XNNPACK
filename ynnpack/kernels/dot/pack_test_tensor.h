@@ -48,9 +48,10 @@ Tensor<T> pack_b(Tensor<T> b, size_t tile_k, size_t tile_n) {
 
   // Make the result.
   Tensor<T> result(extents, Alignment({.bytes = tile_k * tile_n * sizeof(T)}));
-  packer p(/*transpose=*/false, elem_size_bits, tile_k, align_up(n, tile_n));
+  packer p(b.stride_bytes(b.rank() - 2), b.stride_bytes(b.rank() - 1),
+           elem_size_bits, tile_k, align_up(n, tile_n));
   for (const auto& i : EnumerateIndices(batch_extents)) {
-    p.pack(k, n, b.stride_bytes(b.rank() - 2), b.slice_leading(i).base(),
+    p.pack(k, n, b.slice_leading(i).base(),
            result.stride_bytes(result.rank() - 3), 0,
            result.slice_leading(i).base());
   }
@@ -81,10 +82,10 @@ Tensor<T> transpose_a(Tensor<T> a, size_t tile_m, size_t tile_k) {
 
   // Make the result.
   Tensor<T> result(extents);
-  packer p(/*transpose=*/true, elem_size_bits, tile_k,
-           align_up(m, tile_m) * tile_k);
+  packer p(a.stride_bytes(a.rank() - 1), a.stride_bytes(a.rank() - 2),
+           elem_size_bits, tile_k, align_up(m, tile_m) * tile_k);
   for (const auto& i : EnumerateIndices(batch_extents)) {
-    p.pack(k, m, a.stride_bytes(a.rank() - 2), a.slice_leading(i).data(),
+    p.pack(k, m, a.slice_leading(i).data(),
            result.stride_bytes(result.rank() - 2), 0,
            result.slice_leading(i).data());
   }
