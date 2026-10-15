@@ -512,7 +512,10 @@ static void init_hardware_config(void) {
     // Print what we think we know about the microarchs.
     xnn_log_info("cpuinfo_get_uarchs_count: %u.", cpuinfo_get_uarchs_count());
     for (int i = 0; i < cpuinfo_get_uarchs_count(); i++) {
-      xnn_log_info("cpu_get_uarch(%i): 0x%x", i, cpuinfo_get_uarch(i)->uarch);
+      const struct cpuinfo_uarch_info* uarch = cpuinfo_get_uarch(i);
+      if (uarch != NULL) {
+        xnn_log_info("cpu_get_uarch(%i): 0x%x", i, uarch->uarch);
+      }
     }
 #endif  // XNN_MAX_UARCH_TYPES > 1
     for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
