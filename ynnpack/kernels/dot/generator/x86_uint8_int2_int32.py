@@ -162,10 +162,10 @@ class x86_avxvnni_uint8_int2_int32(x86_avx2_uint8_int2_int32):
   def product(self, i, j, k):
     mm = self._mm()
     return f"""
-c_{i}_{j} = {mm}_dpbusd_epi32(c_{i}_{j}, a_{i}_{k+0}, b_{k+0}_{j});
-c_{i}_{j} = {mm}_dpbusd_epi32(c_{i}_{j}, a_{i}_{k+1}, b_{k+1}_{j});
-c_{i}_{j} = {mm}_dpbusd_epi32(c_{i}_{j}, a_{i}_{k+2}, b_{k+2}_{j});
-c_{i}_{j} = {mm}_dpbusd_epi32(c_{i}_{j}, a_{i}_{k+3}, b_{k+3}_{j});
+c_{i}_{j} = {mm}_dpbusd_avx_epi32(c_{i}_{j}, a_{i}_{k+0}, b_{k+0}_{j});
+c_{i}_{j} = {mm}_dpbusd_avx_epi32(c_{i}_{j}, a_{i}_{k+1}, b_{k+1}_{j});
+c_{i}_{j} = {mm}_dpbusd_avx_epi32(c_{i}_{j}, a_{i}_{k+2}, b_{k+2}_{j});
+c_{i}_{j} = {mm}_dpbusd_avx_epi32(c_{i}_{j}, a_{i}_{k+3}, b_{k+3}_{j});
 """
 
 generate_dot_kernels(

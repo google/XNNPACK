@@ -65,6 +65,11 @@ class x86_avxvnni_uint8_int8_int32(x86_uint8_int8_int32, x86_avx):
   def __init__(self, arch="avxvnni", vector_bits=256):
     super().__init__(arch, vector_bits, tile_shape=(1, 8, 4))
 
+  def product(self, i, j, k):
+    mm = self._mm()
+    c_ij = f"c_{i}_{j}"
+    return f"{c_ij} = {mm}_dpbusd_avx_epi32({c_ij}, a_{i}_{k}, b_{k}_{j});\n"
+
 
 generate_dot_kernels(
     x86_avx512vnni_uint8_int8_int32(),
