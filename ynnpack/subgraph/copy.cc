@@ -302,6 +302,103 @@ void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   };
 }
 
+void define_fuse_dim(ynn_subgraph& subgraph, ynn_node& node, int axis,
+                     size_t axes_count, uint32_t input_id,
+                     uint32_t* output_id) {
+  ynn_value& output =
+      subgraph.get_output_value(output_id, subgraph.value(input_id));
+  const ynn_value& input = subgraph.value(input_id);
+  const int rank = input.rank();
+
+  ynn_node::fuse_dim op;
+  op.axis = axis;
+  op.axes_count = axes_count;
+
+  // Propagate shape.
+  slinky::expr fused_elements = 1;
+  for (int d = op.axis; d < op.axis + static_cast<int>(op.axes_count); ++d) {
+    if (input.extents[d].defined()) {
+      fused_elements *= input.extents[d];
+    }
+  }
+  fused_elements = slinky::simplify(fused_elements);
+
+  output.extents.clear();
+  output.extents.reserve(rank - op.axes_count + 1);
+
+  for (int d = 0; d < rank; ++d) {
+    if (op.axis <= d && d < op.axis + static_cast<int>(op.axes_count)) {
+      // This is a fused dimension.
+      if (fused_elements.defined()) {
+        output.extents.push_back(slinky::is_one(fused_elements)
+                                     ? slinky::expr{}
+                                     : fused_elements);
+        fused_elements = {};
+      }
+    } else {
+      output.extents.push_back(input.extents[d]);
+    }
+  }
+
+  node.inputs = {input_id};
+  node.outputs = {*output_id};
+  node.op = std::move(op);
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    output.make_buffer(runtime, input.buffer->elem_size());
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
+  };
+}
+
+void define_split_dim(ynn_subgraph& subgraph, ynn_node& node, int axis,
+                      std::vector<size_t> new_dims, uint32_t input_id,
+                      uint32_t* output_id) {
+  ynn_value& output =
+      subgraph.get_output_value(output_id, subgraph.value(input_id));
+  const ynn_value& input = subgraph.value(input_id);
+
+  ynn_node::split_dim op;
+  op.axis = axis;
+  op.new_dims = std::move(new_dims);
+
+  node.inputs = {input_id};
+  node.outputs = {*output_id};
+
+  // Propagate shape.
+  // Split dims is essentially a standard reshape of 1 dimension into N.
+  std::vector<slinky::expr> split_extents = to_exprs(op.new_dims);
+  deduce_reshape_extent(node, 0, subgraph, {input.extents[op.axis]},
+                        split_extents);
+
+  // And the rest of the dimensions are treated as batch dimensions.
+  output.extents.clear();
+  output.extents.reserve(input.rank() + op.new_dims.size() - 1);
+  std::copy_n(input.extents.begin(), op.axis,
+              std::back_inserter(output.extents));
+  std::copy(split_extents.begin(), split_extents.end(),
+            std::back_inserter(output.extents));
+  std::copy(input.extents.begin() + op.axis + 1, input.extents.end(),
+            std::back_inserter(output.extents));
+
+  node.op = std::move(op);
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    output.make_buffer(runtime, input.buffer->elem_size());
+
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
+  };
+}
+
 extern "C" {
 
 ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
@@ -335,7 +432,6 @@ ynn_status ynn_define_static_reshape(ynn_subgraph_t subgraph, size_t rank,
   YNN_RETURN_IF_ERROR(validate_new_shape("static_reshape", rank, new_dims));
 
   const ynn_value& input = subgraph->value(input_id);
-
   ynn_value& output = subgraph->get_output_value(output_id, input);
 
   ynn_node::static_reshape op;
@@ -405,7 +501,6 @@ ynn_status ynn_define_fuse_dim(ynn_subgraph_t subgraph, int32_t axis,
   const int rank = input.rank();
   YNN_RETURN_IF_ERROR(validate_axis("fuse_dim", "input", input.rank(), axis));
 
-  ynn_node::fuse_dim op;
   auto clamped_axis_to_slinky_dim = [](int rank, int axis) {
     axis = axis < 0 ? axis + rank : axis;
     return std::max(0, std::min(rank - 1 - axis, rank - 1));
@@ -414,47 +509,10 @@ ynn_status ynn_define_fuse_dim(ynn_subgraph_t subgraph, int32_t axis,
   // with clamping, and recompute the axis and axes_count from that.
   int first = clamped_axis_to_slinky_dim(rank, axis + axes_count - 1);
   int last = clamped_axis_to_slinky_dim(rank, axis);
-  op.axis = first;
-  op.axes_count = last - first + 1;
-
-  // Propagate shape.
-  slinky::expr fused_elements = 1;
-  for (int d = op.axis; d < op.axis + op.axes_count; ++d) {
-    if (input.extents[d].defined()) {
-      fused_elements *= input.extents[d];
-    }
-  }
-
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-  output.extents.clear();
-  output.extents.reserve(rank - op.axes_count + 1);
-
-  for (size_t d = 0; d < rank; ++d) {
-    if (op.axis <= d && d < op.axis + op.axes_count) {
-      // This is a fused dimension.
-      if (fused_elements.defined()) {
-        output.extents.push_back(fused_elements);
-        fused_elements = {};
-      }
-    } else {
-      output.extents.push_back(input.extents[d]);
-    }
-  }
 
   ynn_node node;
-  node.inputs = {input_id};
-  node.outputs = {*output_id};
-  node.op = std::move(op);
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
-    ynn_runtime_value& output = runtime.value(node.outputs[0]);
-
-    output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
-                             output.buffer, output.physical_extents());
-    runtime.funcs.push_back(std::move(func));
-    return ynn_status_success;
-  };
+  define_fuse_dim(*subgraph, node, first, last - first + 1, input_id,
+                  output_id);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
@@ -479,45 +537,12 @@ ynn_status ynn_define_split_dim(ynn_subgraph_t subgraph, int32_t axis,
       validate_rank("split_dim", "output", input.rank() + num_splits - 1));
   YNN_RETURN_IF_ERROR(validate_axis("split_dim", "input", input.rank(), axis));
 
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-
-  ynn_node::split_dim op;
-  op.axis = axis_to_slinky_dim(input.rank(), axis);
-  op.new_dims.assign(splits, splits + num_splits);
-  std::reverse(op.new_dims.begin(), op.new_dims.end());
+  std::vector<size_t> new_dims(splits, splits + num_splits);
+  std::reverse(new_dims.begin(), new_dims.end());
 
   ynn_node node;
-  node.inputs = {input_id};
-  node.outputs = {*output_id};
-
-  // Propagate shape.
-  // Split dims is essentially a standard reshape of 1 dimension into N.
-  std::vector<slinky::expr> split_extents = to_exprs(op.new_dims);
-  deduce_reshape_extent(node, 0, *subgraph, {input.extents[op.axis]},
-                        split_extents);
-
-  // And the rest of the dimensions are treated as batch dimensions.
-  output.extents.clear();
-  output.extents.reserve(input.rank() + op.new_dims.size() - 1);
-  std::copy_n(input.extents.begin(), op.axis,
-              std::back_inserter(output.extents));
-  std::copy(split_extents.begin(), split_extents.end(),
-            std::back_inserter(output.extents));
-  std::copy(input.extents.begin() + op.axis + 1, input.extents.end(),
-            std::back_inserter(output.extents));
-
-  node.op = std::move(op);
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
-    ynn_runtime_value& output = runtime.value(node.outputs[0]);
-
-    output.make_buffer(runtime, input.buffer->elem_size());
-
-    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
-                             output.buffer, output.physical_extents());
-    runtime.funcs.push_back(std::move(func));
-    return ynn_status_success;
-  };
+  define_split_dim(*subgraph, node, axis_to_slinky_dim(input.rank(), axis),
+                   std::move(new_dims), input_id, output_id);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
