@@ -69,6 +69,8 @@ _ISA_LIST = frozenset({
     'rvv',
     'rvvfp16arith',
     'scalar',
+    'sme',
+    'sme2',
     'sse',
     'sse2',
     'sse2fma',

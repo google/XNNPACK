@@ -21,10 +21,6 @@ PROD_NEONSME2_MICROKERNEL_SRCS = [
     "src/qp8-f16-qc8w-gemm/qp8-f16-qc8w-gemm-minmax-16x64c4-neonsme2.c",
     "src/qp8-f32-qc2w-gemm/qp8-f32-qc2w-gemm-minmax-1x64c4-neonsme2.c",
     "src/qp8-f32-qc2w-gemm/qp8-f32-qc2w-gemm-minmax-16x64c4-neonsme2.c",
-    "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x64c4-neonsme2.c",
-    "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-16x64c4-neonsme2.c",
-    "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-1x64c4-neonsme2.c",
-    "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-16x64c4-neonsme2.c",
     "src/x8-pack-lh/x8-packlh-igemm-neonsme2.c",
     "src/x8-pack-lh/x8-packlh-neonsme2.c",
     "src/x16-pack-lh/x16-packlh-igemm-neonsme2.c",
@@ -35,6 +31,10 @@ PROD_NEONSME2_MICROKERNEL_SRCS = [
 
 NON_PROD_NEONSME2_MICROKERNEL_SRCS = [
     "src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-1x64c4-minmax-neonsme2.c",
+    "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x64c4-neonsme2.c",
+    "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-16x64c4-neonsme2.c",
+    "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-1x64c4-neonsme2.c",
+    "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-16x64c4-neonsme2.c",
 ]
 
 ALL_NEONSME2_MICROKERNEL_SRCS = PROD_NEONSME2_MICROKERNEL_SRCS + NON_PROD_NEONSME2_MICROKERNEL_SRCS
