@@ -3,9 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <atomic>
+#include <cstddef>
 #include <cstdint>
+#include <new>
 
 #include <gtest/gtest.h>
+#include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -110,4 +114,50 @@ TEST(runtime, cross_runtime_isolation) {
   }
 }
 
+constexpr std::align_val_t kAlignment{256};
+std::atomic<int> allocations{0};
+std::atomic<int> frees{0};
+
+void* Allocate(void* context, size_t size, size_t alignment) {
+  if (alignment > static_cast<size_t>(kAlignment)) return nullptr;
+  ++allocations;
+  return ::operator new(size, kAlignment);
+}
+
+void Free(void* context, void* ptr, size_t size) {
+  ++frees;
+  ::operator delete(ptr, kAlignment);
+}
+
+TEST(runtime, allocator) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t b_id = 1;
+  constexpr uint32_t c_id = 2;
+  uint32_t exp_id = YNN_INVALID_VALUE_ID;
+
+  // dot(a, exp(b)) needs an internal buffer for exp(b).
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), 2, a_id)
+      .AddInput(type_of<float>(), 2, b_id)
+      .AddOutput(type_of<float>(), 2, c_id)
+      .AddTensor(type_of<float>(), 2, exp_id)
+      .AddUnary(ynn_unary_exp, b_id, exp_id)
+      .AddDot(1, a_id, exp_id, YNN_INVALID_VALUE_ID, c_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(ynn_set_runtime_allocator(runtime.get(), Allocate, Free, nullptr),
+            ynn_status_success);
+
+  Tensor<float> a({16, 512});
+  Tensor<float> b({512, 1024});
+  Tensor<float> c({16, 1024});
+  runtime.ReshapeExternalTensor({16, 512}, a.data(), a_id)
+      .ReshapeExternalTensor({512, 1024}, b.data(), b_id)
+      .ReshapeRuntime()
+      .SetupExternalTensor(c.data(), c_id)
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_GT(allocations, 0);
+  EXPECT_EQ(frees, allocations);
+}
 }  // namespace ynn

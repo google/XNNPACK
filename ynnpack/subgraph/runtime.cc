@@ -1300,6 +1300,31 @@ ynn_status ynn_update_runtime_with_threadpool(ynn_runtime_t runtime,
   return ynn_status_success;
 }
 
+ynn_status ynn_set_runtime_allocator(ynn_runtime_t runtime,
+                                     ynn_allocate_fn allocate_fn,
+                                     ynn_free_fn free_fn, void* context) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
+  if ((allocate_fn == nullptr) != (free_fn == nullptr)) {
+    YNN_LOG_ERROR() << "allocate_fn and free_fn must both be null or non-null";
+    return ynn_status_invalid_parameter;
+  }
+  runtime->eval_context.free_pool();
+  if (allocate_fn == nullptr) {
+    const slinky::eval_config defaults;
+    runtime->eval_config.allocate = defaults.allocate;
+    runtime->eval_config.free = defaults.free;
+    return ynn_status_success;
+  }
+  runtime->eval_config.allocate = [allocate_fn, context](
+                                      std::size_t size, std::size_t alignment) {
+    return allocate_fn(context, size, alignment);
+  };
+  runtime->eval_config.free = [free_fn, context](void* ptr, std::size_t size) {
+    free_fn(context, ptr, size);
+  };
+  return ynn_status_success;
+}
+
 ynn_status ynn_runtime::invoke() {
   if (!pipeline.body.defined()) {
     // This pipeline is a no-op.

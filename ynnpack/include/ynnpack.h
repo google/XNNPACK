@@ -689,6 +689,18 @@ enum ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
 enum ynn_status ynn_update_runtime_with_threadpool(ynn_runtime_t runtime,
                                                    ynn_threadpool_t threadpool);
 
+// Allocates `size` bytes aligned to `alignment`. Returns NULL on failure.
+typedef void* (*ynn_allocate_fn)(void* context, size_t size, size_t alignment);
+
+// Frees `ptr`, allocated with `size` by a `ynn_allocate_fn`.
+typedef void (*ynn_free_fn)(void* context, void* ptr, size_t size);
+
+// Sets the allocator for the internal buffers of `runtime`. Both functions may
+// be called concurrently. Passing NULL for both restores the default allocator.
+enum ynn_status ynn_set_runtime_allocator(ynn_runtime_t runtime,
+                                          ynn_allocate_fn allocate_fn,
+                                          ynn_free_fn free_fn, void* context);
+
 enum ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
                                              uint32_t external_id, size_t rank,
                                              const size_t* dims);
