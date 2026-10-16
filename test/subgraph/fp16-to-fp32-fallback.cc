@@ -1495,6 +1495,175 @@ TEST_F(Fp16ToFp32FallbackTest, OverflowStaticInputSizeReturnsError) {
             xnn_status_out_of_memory);
 }
 
+TEST_F(Fp16ToFp32FallbackTest, UpdatesPackedInputDatatypeWhenLoweredToFp32) {
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor weights({.type = Type::kFP16,
+                       .shape = {2, 4},
+                       .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                           {1, 2, 3, 4, 5, 6, 7, 8})});
+    XnnTensor output = FullyConnected(input, weights);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  xnn_subgraph_t subgraph = graph->GetSubgraph();
+  xnn_node* fc_node = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_node = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_node, nullptr);
+  fc_node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+  fc_node->packed_input_datatype = xnn_datatype_pfp16;
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  const xnn_node* fc_after = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_after = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_after, nullptr);
+  EXPECT_EQ(subgraph->values[fc_after->inputs[0]].datatype, xnn_datatype_fp32);
+  EXPECT_EQ(subgraph->values[fc_after->outputs[0]].datatype, xnn_datatype_fp32);
+  if (xnn_init_pf32_gemm_config() != nullptr) {
+    EXPECT_EQ(fc_after->packed_input_datatype, xnn_datatype_pfp32);
+    EXPECT_NE(fc_after->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  } else {
+    EXPECT_EQ(fc_after->packed_input_datatype, xnn_datatype_invalid);
+    EXPECT_EQ(fc_after->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  }
+}
+
+TEST_F(Fp16ToFp32FallbackTest,
+       ClearsPackedInputDatatypeWhenNoInlinedLhsPackingFlagIsSet) {
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor weights({.type = Type::kFP16,
+                       .shape = {2, 4},
+                       .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                           {1, 2, 3, 4, 5, 6, 7, 8})});
+    XnnTensor output = FullyConnected(input, weights);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  xnn_subgraph_t subgraph = graph->GetSubgraph();
+  xnn_node* fc_node = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_node = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_node, nullptr);
+  fc_node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+  fc_node->packed_input_datatype = xnn_datatype_pfp16;
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(
+                  subgraph, XNN_FLAG_NO_INLINED_LHS_PACKING),
+              Eq(xnn_status_success));
+
+  const xnn_node* fc_after = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_after = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_after, nullptr);
+  EXPECT_EQ(subgraph->values[fc_after->inputs[0]].datatype, xnn_datatype_fp32);
+  EXPECT_EQ(fc_after->packed_input_datatype, xnn_datatype_invalid);
+  EXPECT_EQ(fc_after->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+}
+
+TEST_F(Fp16ToFp32FallbackTest, Bf16PassDoesNotModifyUnloweredFp16PackedLhs) {
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor weights({.type = Type::kFP16,
+                       .shape = {2, 4},
+                       .buffer = std::vector<float>{1, 2, 3, 4, 5, 6, 7, 8}});
+    XnnTensor bf16_bias({.type = Type::kBF16, .shape = {2}});
+    XnnTensor bias = Cast(Abs(bf16_bias), Type::kFP32);
+    XnnTensor output = FullyConnected(input, weights, bias);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  xnn_subgraph_t subgraph = graph->GetSubgraph();
+  xnn_node* fc_node = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_node = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_node, nullptr);
+  ASSERT_EQ(subgraph->values[fc_node->inputs[0]].datatype, xnn_datatype_fp16);
+  ASSERT_EQ(subgraph->values[fc_node->inputs[2]].datatype, xnn_datatype_fp32);
+  ASSERT_EQ(subgraph->values[fc_node->outputs[0]].datatype, xnn_datatype_fp16);
+  fc_node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+  fc_node->packed_input_datatype = xnn_datatype_pfp16;
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  const xnn_node* fc_after = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_after = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_after, nullptr);
+  EXPECT_EQ(subgraph->values[fc_after->inputs[0]].datatype, xnn_datatype_fp16);
+  EXPECT_EQ(subgraph->values[fc_after->outputs[0]].datatype, xnn_datatype_fp16);
+  EXPECT_EQ(fc_after->packed_input_datatype, xnn_datatype_pfp16);
+  EXPECT_NE(fc_after->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+}
+
+TEST(Fp16ToFp32FallbackSme2Test, Bf16PassPreservesFp16PackedLhsInOptimize) {
+  if (xnn_init_pf16_gemm_config() == nullptr ||
+      xnn_init_pf32_gemm_config() == nullptr) {
+    GTEST_SKIP() << "Requires pf16 and pf32 GEMM configs (Arm SME2).";
+  }
+
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor weights({.type = Type::kFP16,
+                       .shape = {2, 4},
+                       .buffer = std::vector<float>{1, 2, 3, 4, 5, 6, 7, 8}});
+    XnnTensor bf16_bias({.type = Type::kBF16, .shape = {2}});
+    XnnTensor bias = Cast(Abs(bf16_bias), Type::kFP32);
+    XnnTensor output = FullyConnected(input, weights, bias);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  xnn_subgraph_t subgraph = graph->GetSubgraph();
+  ASSERT_THAT(xnn_subgraph_optimize(subgraph, /*flags=*/0),
+              Eq(xnn_status_success));
+
+  const xnn_node* fc_after = nullptr;
+  for (uint32_t i = 0; i < subgraph->num_nodes; ++i) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_after = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_after, nullptr);
+  EXPECT_EQ(subgraph->values[fc_after->outputs[0]].datatype, xnn_datatype_fp16);
+  EXPECT_EQ(fc_after->packed_input_datatype, xnn_datatype_pfp16);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     BinaryOps, Fp16ToFp32FallbackBinaryOpTest,
     testing::ValuesIn<BinaryOpParam>({
