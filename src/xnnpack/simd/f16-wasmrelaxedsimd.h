@@ -17,6 +17,10 @@
 
 // SIMD vector type for f16 using WASMRELAXEDSIMD.
 typedef v128_t xnn_simd_f16_t;
+typedef struct {
+  v128_t lo;
+  v128_t hi;
+} xnn_simd_f16_accumulator_t;
 #define xnn_simd_size_f16 8
 #define xnn_simd_log2_size_f16 3
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(uint16_t))
@@ -173,6 +177,31 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
   return wasm_v128_and(eq, wasm_v128_and(a_is_not_nan, b_is_not_nan));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
+                                               xnn_simd_f16_t b) {
+  const v128_t sign_a = wasm_i16x8_shr(a, 15);
+  const v128_t sign_b = wasm_i16x8_shr(b, 15);
+  const v128_t sign_bit = wasm_i16x8_splat((int16_t)0x8000);
+  const v128_t ordered_a =
+    wasm_v128_xor(a, wasm_v128_or(sign_a, sign_bit));
+  const v128_t ordered_b =
+    wasm_v128_xor(b, wasm_v128_or(sign_b, sign_bit));
+  const v128_t less = wasm_u16x8_lt(ordered_a, ordered_b);
+
+  const v128_t abs_mask = wasm_i16x8_splat(0x7FFF);
+  const v128_t inf = wasm_i16x8_splat(0x7C00);
+    const v128_t zero = wasm_i16x8_splat(0);
+    const v128_t abs_a = wasm_v128_and(a, abs_mask);
+    const v128_t abs_b = wasm_v128_and(b, abs_mask);
+    const v128_t both_zero =
+      wasm_v128_and(wasm_i16x8_eq(abs_a, zero), wasm_i16x8_eq(abs_b, zero));
+    const v128_t a_is_not_nan = wasm_i16x8_le(abs_a, inf);
+    const v128_t b_is_not_nan = wasm_i16x8_le(abs_b, inf);
+    return wasm_v128_and(
+      less, wasm_v128_and(wasm_v128_not(both_zero),
+                wasm_v128_and(a_is_not_nan, b_is_not_nan)));
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
   return wasm_v128_load(ptr);
@@ -277,6 +306,32 @@ static XNN_INLINE v128_t xnn_cvt_f16_f32(v128_t f) {
       (int16_t) xnn_float16_to_bits(xnn_float16_from_float(f2)),
       (int16_t) xnn_float16_to_bits(xnn_float16_from_float(f3)),
       0, 0, 0, 0);
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_zero_f16_accumulator() {
+  const v128_t zero = wasm_f32x4_splat(0.0f);
+  xnn_simd_f16_accumulator_t accumulator;
+  accumulator.lo = zero;
+  accumulator.hi = zero;
+  return accumulator;
+}
+
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
+    xnn_simd_f16_accumulator_t accumulator, xnn_simd_f16_t value) {
+  accumulator.lo =
+      wasm_f32x4_add(accumulator.lo, xnn_cvt_f32_f16(value));
+  accumulator.hi = wasm_f32x4_add(
+      accumulator.hi,
+      xnn_cvt_f32_f16(wasm_v64x2_shuffle(value, value, 1, 1)));
+  return accumulator;
+}
+
+static XNN_INLINE float xnn_reduce_f16_accumulator(
+    xnn_simd_f16_accumulator_t accumulator) {
+  v128_t sum = wasm_f32x4_add(accumulator.lo, accumulator.hi);
+  sum = wasm_f32x4_add(sum, wasm_v64x2_shuffle(sum, sum, 1, 1));
+  return wasm_f32x4_extract_lane(sum, 0) +
+         wasm_f32x4_extract_lane(sum, 1);
 }
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_WASMRELAXEDSIMD_H_

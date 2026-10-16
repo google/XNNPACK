@@ -1,0 +1,88 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f16-raddstoreexpminusmax/rr2-p2.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/simd/f16-scalar.h"
+
+
+static XNN_INLINE xnn_simd_f16_t fmadd_f16(
+    xnn_simd_f16_t a, xnn_simd_f16_t b, xnn_simd_f16_t c)
+{
+  return xnn_float16_from_float(
+      (xnn_float16_to_float(a) * xnn_float16_to_float(b)) +
+      xnn_float16_to_float(c));
+}
+
+static XNN_INLINE xnn_simd_f16_t cmplt_f16(
+    xnn_simd_f16_t a, xnn_simd_f16_t b)
+{
+  XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
+  return xnn_float16_to_float(a) < xnn_float16_to_float(b)
+      ? ones : xnn_zero_f16();
+}
+
+static XNN_INLINE xnn_simd_f16_t expminusmax_f16(
+    xnn_simd_f16_t vx, xnn_simd_f16_t vmax)
+{
+  XNN_SIMD_CONST_F16_FROM_INT16(vlog2e, 0x3DC5);
+  XNN_SIMD_CONST_F16_FROM_INT16(vmagic_bias, 0x660F);
+  XNN_SIMD_CONST_F16_FROM_INT16(vminus_ln2_hi, 0xB98C);
+  XNN_SIMD_CONST_F16_FROM_INT16(vminus_ln2_lo, 0x0AF4);
+  XNN_SIMD_CONST_F16_FROM_INT16(vc2, 0x37F9);
+  XNN_SIMD_CONST_F16_FROM_INT16(vc1, 0x3C0E);
+  XNN_SIMD_CONST_F16_FROM_INT16(vdenorm_cutoff, 0xC8DA);
+
+  vx = xnn_sub_f16(vx, vmax);
+  xnn_simd_f16_t vn = fmadd_f16(vx, vlog2e, vmagic_bias);
+  const xnn_simd_f16_t vs = xnn_sll_f16(vn, 10);
+  vn = xnn_sub_f16(vn, vmagic_bias);
+
+  xnn_simd_f16_t vt = fmadd_f16(vn, vminus_ln2_hi, vx);
+  vt = fmadd_f16(vn, vminus_ln2_lo, vt);
+  const xnn_simd_f16_t vp = fmadd_f16(vc2, vt, vc1);
+  vt = xnn_mul_f16(vt, vs);
+
+  const xnn_simd_f16_t vf = fmadd_f16(vp, vt, vs);
+  return xnn_andnot_f16(cmplt_f16(vx, vdenorm_cutoff), vf);
+}
+
+void xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1(
+    size_t batch,
+    const xnn_float16* input,
+    const xnn_float16* max,
+    xnn_float16* output,
+    float* sum,
+    const void* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(xnn_float16) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
+
+  const xnn_simd_f16_t vmax = xnn_set1_f16(*max);
+  float vacc = 0.0f;
+  for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
+    const xnn_simd_f16_t vf = expminusmax_f16(xnn_loadu_f16(input), vmax);
+    input += xnn_simd_size_f16;
+    xnn_storeu_f16(output, vf);
+    output += xnn_simd_size_f16;
+    vacc += xnn_float16_to_float(vf);
+  }
+
+  float vsum = vacc;
+  *sum = vsum;
+}
