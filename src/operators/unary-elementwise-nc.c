@@ -392,6 +392,9 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
   pthreadpool_t threadpool) {
   op->state = xnn_run_state_invalid;
 
+  op->batch_size = batch_size;
+  op->channels = channels;
+
   if (batch_size == 0 || channels == 0) {
     op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -413,8 +416,6 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
     return xnn_status_invalid_parameter;
   }
 
-  op->batch_size = batch_size;
-  op->channels = channels;
   op->input_pixel_stride = input_stride;
   op->output_pixel_stride = output_stride;
 
@@ -696,6 +697,9 @@ static enum xnn_status reshape_unary_elementwise_nc(
   }
   unary_elementwise_op->state = xnn_run_state_invalid;
 
+  unary_elementwise_op->batch_size = batch_size;
+  unary_elementwise_op->channels = channels;
+
   if (batch_size == 0 || channels == 0) {
     unary_elementwise_op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -719,8 +723,6 @@ static enum xnn_status reshape_unary_elementwise_nc(
     return xnn_status_invalid_parameter;
   }
 
-  unary_elementwise_op->batch_size = batch_size;
-  unary_elementwise_op->channels = channels;
   unary_elementwise_op->input_pixel_stride = input_stride;
   unary_elementwise_op->output_pixel_stride = output_stride;
 

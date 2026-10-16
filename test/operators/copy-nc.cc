@@ -210,3 +210,58 @@ TEST(COPY_NC_X32, InPlaceSetupThenOutOfPlaceSetupStillCopies) {
 
   EXPECT_EQ(xnn_status_success, xnn_delete_operator(op));
 }
+
+TEST(COPY_NC_X32, NonZeroReshapeThenZeroReshapeThenSetupSkips) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const size_t batch_size = 4;
+  const size_t channels = 8;
+  std::vector<uint32_t> source(batch_size * channels, 1);
+  std::vector<uint32_t> destination(batch_size * channels, 0);
+
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(/*flags=*/0, &op));
+  ASSERT_NE(op, nullptr);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_copy_nc_x32(op, batch_size, channels,
+                                    /*input_stride=*/channels,
+                                    /*output_stride=*/channels,
+                                    /*threadpool=*/nullptr));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_copy_nc_x32(op, /*batch_size=*/0, channels,
+                                    /*input_stride=*/channels,
+                                    /*output_stride=*/channels,
+                                    /*threadpool=*/nullptr));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_copy_nc_x32(op, source.data(), destination.data()));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+  for (size_t i = 0; i < destination.size(); i++) {
+    ASSERT_EQ(destination[i], 0) << "index " << i;
+  }
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_copy_nc_x32(op, batch_size, channels,
+                                    /*input_stride=*/channels,
+                                    /*output_stride=*/channels,
+                                    /*threadpool=*/nullptr));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_copy_nc_x32(op, batch_size, /*channels=*/0,
+                                    /*input_stride=*/0,
+                                    /*output_stride=*/0,
+                                    /*threadpool=*/nullptr));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_copy_nc_x32(op, source.data(), destination.data()));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+  for (size_t i = 0; i < destination.size(); i++) {
+    ASSERT_EQ(destination[i], 0) << "index " << i;
+  }
+
+  EXPECT_EQ(xnn_status_success, xnn_delete_operator(op));
+}
