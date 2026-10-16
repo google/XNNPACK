@@ -79,11 +79,32 @@ ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {
 #if XNN_ENABLE_CPUINFO
 static enum xnn_uarch cpuinfo_to_xnn_uarch(enum cpuinfo_uarch uarch) {
   switch (uarch) {
+    case cpuinfo_uarch_broadwell: return xnn_uarch_broadwell;
+    case cpuinfo_uarch_coyote_cove: return xnn_uarch_coyote_cove;
+    case cpuinfo_uarch_crestmont: return xnn_uarch_crestmont;
+    case cpuinfo_uarch_darkmont: return xnn_uarch_darkmont;
     case cpuinfo_uarch_dhyana: return xnn_uarch_dhyana;
+    case cpuinfo_uarch_golden_cove: return xnn_uarch_golden_cove;
+    case cpuinfo_uarch_gracemont: return xnn_uarch_gracemont;
+    case cpuinfo_uarch_haswell: return xnn_uarch_haswell;
+    case cpuinfo_uarch_ivy_bridge: return xnn_uarch_ivy_bridge;
+    case cpuinfo_uarch_palm_cove: return xnn_uarch_palm_cove;
+    case cpuinfo_uarch_raptor_cove: return xnn_uarch_raptor_cove;
+    case cpuinfo_uarch_redwood_cove: return xnn_uarch_redwood_cove;
+    case cpuinfo_uarch_sky_lake: return xnn_uarch_sky_lake;
+    case cpuinfo_uarch_sunny_cove: return xnn_uarch_sunny_cove;
+    case cpuinfo_uarch_willow_cove: return xnn_uarch_willow_cove;
     case cpuinfo_uarch_zen: return xnn_uarch_zen;
+    case cpuinfo_uarch_zen2: return xnn_uarch_zen2;
+    case cpuinfo_uarch_zen3: return xnn_uarch_zen3;
     case cpuinfo_uarch_zen4: return xnn_uarch_zen4;
     case cpuinfo_uarch_zen5: return xnn_uarch_zen5;
+    case cpuinfo_uarch_zen6: return xnn_uarch_zen6;
 
+    case cpuinfo_uarch_avalanche: return xnn_uarch_avalanche;
+    case cpuinfo_uarch_blizzard: return xnn_uarch_blizzard;
+    case cpuinfo_uarch_coll_everest: return xnn_uarch_coll_everest;
+    case cpuinfo_uarch_coll_sawtooth: return xnn_uarch_coll_sawtooth;
     case cpuinfo_uarch_cortex_a5: return xnn_uarch_cortex_a5;
     case cpuinfo_uarch_cortex_a7: return xnn_uarch_cortex_a7;
     case cpuinfo_uarch_cortex_a32: return xnn_uarch_cortex_a32;
@@ -98,25 +119,49 @@ static enum xnn_uarch cpuinfo_to_xnn_uarch(enum cpuinfo_uarch uarch) {
     case cpuinfo_uarch_cortex_a76: return xnn_uarch_cortex_a76;
     case cpuinfo_uarch_cortex_a77: return xnn_uarch_cortex_a77;
     case cpuinfo_uarch_cortex_a78: return xnn_uarch_cortex_a78;
+    case cpuinfo_uarch_cortex_a320: return xnn_uarch_cortex_a320;
     case cpuinfo_uarch_cortex_a510: return xnn_uarch_cortex_a510;
+    case cpuinfo_uarch_cortex_a520: return xnn_uarch_cortex_a520;
     case cpuinfo_uarch_cortex_a710: return xnn_uarch_cortex_a710;
     case cpuinfo_uarch_cortex_a715: return xnn_uarch_cortex_a715;
+    case cpuinfo_uarch_cortex_a720: return xnn_uarch_cortex_a720;
+    case cpuinfo_uarch_cortex_a725: return xnn_uarch_cortex_a725;
     case cpuinfo_uarch_cortex_x1: return xnn_uarch_cortex_x1;
     case cpuinfo_uarch_cortex_x2: return xnn_uarch_cortex_x2;
     case cpuinfo_uarch_cortex_x3: return xnn_uarch_cortex_x3;
     case cpuinfo_uarch_cortex_x4: return xnn_uarch_cortex_x4;
+    case cpuinfo_uarch_cortex_x925: return xnn_uarch_cortex_x925;
+    case cpuinfo_uarch_donan_everest: return xnn_uarch_donan_everest;
+    case cpuinfo_uarch_donan_sawtooth: return xnn_uarch_donan_sawtooth;
+    case cpuinfo_uarch_everest: return xnn_uarch_everest;
     case cpuinfo_uarch_exynos_m1: return xnn_uarch_exynos_m1;
     case cpuinfo_uarch_exynos_m2: return xnn_uarch_exynos_m2;
     case cpuinfo_uarch_exynos_m3: return xnn_uarch_exynos_m3;
     case cpuinfo_uarch_exynos_m4: return xnn_uarch_exynos_m4;
     case cpuinfo_uarch_exynos_m5: return xnn_uarch_exynos_m5;
+    case cpuinfo_uarch_firestorm: return xnn_uarch_firestorm;
+    case cpuinfo_uarch_icestorm: return xnn_uarch_icestorm;
     case cpuinfo_uarch_krait: return xnn_uarch_krait;
     case cpuinfo_uarch_kryo: return xnn_uarch_kryo;
+    case cpuinfo_uarch_lumex_c1_nano: return xnn_uarch_lumex_c1_nano;
+    case cpuinfo_uarch_lumex_c1_premium: return xnn_uarch_lumex_c1_premium;
+    case cpuinfo_uarch_lumex_c1_pro: return xnn_uarch_lumex_c1_pro;
+    case cpuinfo_uarch_lumex_c1_ultra: return xnn_uarch_lumex_c1_ultra;
     case cpuinfo_uarch_neoverse_n1: return xnn_uarch_neoverse_n1;
     case cpuinfo_uarch_neoverse_n2: return xnn_uarch_neoverse_n2;
     case cpuinfo_uarch_neoverse_v1: return xnn_uarch_neoverse_v1;
     case cpuinfo_uarch_neoverse_v2: return xnn_uarch_neoverse_v2;
     case cpuinfo_uarch_oryon: return xnn_uarch_oryon;
+    case cpuinfo_uarch_oryon_v3: return xnn_uarch_oryon_v3;
+    case cpuinfo_uarch_sawtooth: return xnn_uarch_sawtooth;
+    case cpuinfo_uarch_sotra_performance: return xnn_uarch_sotra_performance;
+    case cpuinfo_uarch_sotra_super: return xnn_uarch_sotra_super;
+    case cpuinfo_uarch_tahiti_everest: return xnn_uarch_tahiti_everest;
+    case cpuinfo_uarch_tahiti_sawtooth: return xnn_uarch_tahiti_sawtooth;
+    case cpuinfo_uarch_tilos_everest: return xnn_uarch_tilos_everest;
+    case cpuinfo_uarch_tilos_sawtooth: return xnn_uarch_tilos_sawtooth;
+    case cpuinfo_uarch_tupai_everest: return xnn_uarch_tupai_everest;
+    case cpuinfo_uarch_tupai_sawtooth: return xnn_uarch_tupai_sawtooth;
     default: return xnn_uarch_unknown;
   }
 }
@@ -125,19 +170,29 @@ static enum xnn_uarch cpuinfo_to_xnn_uarch(enum cpuinfo_uarch uarch) {
 #if XNN_ENABLE_CPUINFO && XNN_ARCH_ARM
 static bool cpuinfo_uarch_to_dot(enum cpuinfo_uarch uarch) {
   switch (uarch) {
-    case cpuinfo_uarch_cortex_a76:  return true;
-    case cpuinfo_uarch_cortex_a77:  return true;
-    case cpuinfo_uarch_cortex_a78:  return true;
-    case cpuinfo_uarch_cortex_a510: return true;
-    case cpuinfo_uarch_cortex_a710: return true;
-    case cpuinfo_uarch_cortex_a715: return true;
-    case cpuinfo_uarch_cortex_x1:   return true;
-    case cpuinfo_uarch_cortex_x2:   return true;
-    case cpuinfo_uarch_cortex_x3:   return true;
-    case cpuinfo_uarch_cortex_x4:   return true;
-    case cpuinfo_uarch_neoverse_n2: return true;
-    case cpuinfo_uarch_neoverse_v2: return true;
-    case cpuinfo_uarch_oryon:       return true;
+    case cpuinfo_uarch_cortex_a76:       return true;
+    case cpuinfo_uarch_cortex_a77:       return true;
+    case cpuinfo_uarch_cortex_a78:       return true;
+    case cpuinfo_uarch_cortex_a320:      return true;
+    case cpuinfo_uarch_cortex_a510:      return true;
+    case cpuinfo_uarch_cortex_a520:      return true;
+    case cpuinfo_uarch_cortex_a710:      return true;
+    case cpuinfo_uarch_cortex_a715:      return true;
+    case cpuinfo_uarch_cortex_a720:      return true;
+    case cpuinfo_uarch_cortex_a725:      return true;
+    case cpuinfo_uarch_cortex_x1:        return true;
+    case cpuinfo_uarch_cortex_x2:        return true;
+    case cpuinfo_uarch_cortex_x3:        return true;
+    case cpuinfo_uarch_cortex_x4:        return true;
+    case cpuinfo_uarch_cortex_x925:      return true;
+    case cpuinfo_uarch_lumex_c1_nano:    return true;
+    case cpuinfo_uarch_lumex_c1_premium: return true;
+    case cpuinfo_uarch_lumex_c1_pro:     return true;
+    case cpuinfo_uarch_lumex_c1_ultra:   return true;
+    case cpuinfo_uarch_neoverse_n2:      return true;
+    case cpuinfo_uarch_neoverse_v2:      return true;
+    case cpuinfo_uarch_oryon:            return true;
+    case cpuinfo_uarch_oryon_v3:         return true;
     default: return false;
   }
 }
