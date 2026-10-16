@@ -67,6 +67,7 @@ cc_library(
         "//litert/tensor",
         "//litert/tensor:arithmetic",
         "//litert/tensor:datatypes",
+        "//litert/tensor/backends/testing:quantized_test_utils",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
