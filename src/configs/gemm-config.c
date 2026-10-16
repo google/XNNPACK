@@ -4475,7 +4475,7 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
         qdu8_f32_qc4w_gemm_config.planes = 2;
       } else
     #endif
-    #if XNN_ENABLE_AVX512SKX
+    #if XNN_ENABLE_AVX512SKX && XNN_ENABLE_SSE2
       if (hardware_config->arch_flags & xnn_arch_x86_avx512skx) {
         qdu8_f32_qc4w_gemm_config.arch = xnn_arch_x86_avx512skx;
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm);
@@ -4483,8 +4483,8 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
         qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
         qdu8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
         qdu8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_gio_w;
-        // TODO(fbarchard): generate avx512/avx2 packw instead of scalar in future
-        qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x16c8__scalar;
+        // TODO(fbarchard): generate avx512/avx2 packw instead of sse2 in future
+        qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x16c8__sse2;
         qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
         qdu8_f32_qc4w_gemm_config.mr = 8;
         qdu8_f32_qc4w_gemm_config.nr = 16;
@@ -5472,14 +5472,14 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.log2_kr = 3;
       } else
     #endif
-    #if XNN_ENABLE_AVX512SKX
+    #if XNN_ENABLE_AVX512SKX && XNN_ENABLE_SSE2
       if (hardware_config->arch_flags & xnn_arch_x86_avx512skx) {
         qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx512skx;
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx_madd_prfm);
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c8__avx512skx_madd_prfm);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-        // TODO(fbarchard): generate avx512/avx2 packw instead of scalar in future
-        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x16c8__scalar;
+        // TODO(fbarchard): generate avx512/avx2 packw instead of sse2 in future
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x16c8__sse2;
         qs8_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_gio_w;
         qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qs8_qc4w_gemm_config.packed_stride_weights_and_biases = NULL;

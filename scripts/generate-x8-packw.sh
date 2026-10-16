@@ -77,16 +77,20 @@ tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QC4UW -D IZ
 ### QC4W SSE2 packing
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x4c8-gemm-goi-sse2.c &
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-sse2.c &
 
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x4c8-gemm-goi-sse2.c &
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-sse2.c &
 
 ### QC4UW SSE2 packing
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x4c8-gemm-goi-sse2.c &
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x8c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=16 -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x16c8-gemm-goi-sse2.c &
 
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x4c8-gemm-goi-sse2.c &
 tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x8c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=16 -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x16c8-gemm-goi-sse2.c &
 
 
 ### AVXVNNI micro-kernels
