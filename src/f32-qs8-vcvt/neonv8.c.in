@@ -47,6 +47,10 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH
   assert(input != NULL);
   assert(output != NULL);
 
+  $if IDATATYPE == "BF16":
+    #if XNN_ARCH_ARM64
+      const uint16x8_t vzero = vdupq_n_u16(0);
+    #endif
   $if IDATATYPE in ["BF16", "F16"]:
     // Don't let the scale be 0, which can happen for large scales, and should
     // not happen because this value is a reciprocal.
@@ -59,8 +63,13 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH
       $if IDATATYPE == "BF16":
         $for N in range(0, BATCH_TILE, 8):
           const uint16x8_t vbf${ABC[N:N+8]} = vld1q_u16((const uint16_t*) input); input += 8;
-          float32x4_t vx${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf${ABC[N:N+8]}), 16));
-          float32x4_t vx${ABC[N+4:N+8]} = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf${ABC[N:N+8]}), 16));
+          #if XNN_ARCH_ARM64
+            float32x4_t vx${ABC[N:N+4]} = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf${ABC[N:N+8]}));
+            float32x4_t vx${ABC[N+4:N+8]} = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf${ABC[N:N+8]}));
+          #else
+            float32x4_t vx${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf${ABC[N:N+8]}), 16));
+            float32x4_t vx${ABC[N+4:N+8]} = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf${ABC[N:N+8]}), 16));
+          #endif
       $elif IDATATYPE == "F16":
         $for N in range(0, BATCH_TILE, 8):
           const float16x8_t vfp${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input)); input += 8;
@@ -97,8 +106,13 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH
   for (; batch >= 8 * sizeof(${INPUT_T}); batch -= 8 * sizeof(${INPUT_T})) {
     $if IDATATYPE == "BF16":
       const uint16x8_t vbf = vld1q_u16((const uint16_t*) input); input += 8;
-      float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-      float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+      #if XNN_ARCH_ARM64
+        float32x4_t vx_lo = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf));
+        float32x4_t vx_hi = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf));
+      #else
+        float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+        float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+      #endif
     $elif IDATATYPE == "F16":
       const float16x8_t vfp = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input)); input += 8;
       float32x4_t vx_lo = vcvt_f32_f16(vget_low_f16(vfp));
@@ -124,8 +138,13 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH
     assert(batch <= 7 * sizeof(${INPUT_T}));
     $if IDATATYPE == "BF16":
       const uint16x8_t vbf = vld1q_u16((const uint16_t*) input);
-      float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-      float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+      #if XNN_ARCH_ARM64
+        float32x4_t vx_lo = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf));
+        float32x4_t vx_hi = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf));
+      #else
+        float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+        float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+      #endif
     $elif IDATATYPE == "F16":
       const float16x8_t vfp = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input));
       float32x4_t vx_lo = vcvt_f32_f16(vget_low_f16(vfp));
