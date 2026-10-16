@@ -173,10 +173,6 @@ TEST(Unpooling2D, reshape_changing_channels) {
   DatatypeGenerator<float> value_gen(-10.0f, 20.0f);
   DatatypeGenerator<int32_t> index_gen(0, kh.size * kw.size - 1);
 
-  // Keep the spatial extents fixed and only change the channel count between
-  // reshapes. The operator caches its indirection buffer and compute context
-  // keyed on the input height and width, so the per-pixel strides and channel
-  // count must be picked up again on each reshape.
   const size_t channel_counts[] = {16, 4, 32};
   for (const size_t channels : channel_counts) {
     const std::vector<size_t> input_shape = {1, 4, 4, channels};

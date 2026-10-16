@@ -199,9 +199,6 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   // optimization, where the smaller batch sizes are not re-initialized if we setup with different output.
   unpooling_op->convolution_op->output = unpooling_op->convolution_op->last_output;
 
-  // The indirection buffer bakes in the output pixel stride and the compute
-  // context holds the channel count and input strides, so both can only be
-  // reused when all of them match the previous reshape.
   size_t valid_batch_size = 0;
   if (input_height == unpooling_op->convolution_op->last_input_height &&
       input_width == unpooling_op->convolution_op->last_input_width &&
