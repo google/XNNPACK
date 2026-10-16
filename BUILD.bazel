@@ -1365,6 +1365,18 @@ config_setting(
     define_values = {"xnn_enable_hvx": "false"},
 )
 
+# Enables usage of Hexagon HMX kernels.
+config_setting(
+    name = "xnn_enable_hmx_explicit_true",
+    define_values = {"xnn_enable_hmx": "true"},
+)
+
+# Disables usage of Hexagon HMX kernels.
+config_setting(
+    name = "xnn_enable_hmx_explicit_false",
+    define_values = {"xnn_enable_hmx": "false"},
+)
+
 # Enables usage of RISC-V Vector kernels.
 config_setting(
     name = "xnn_enable_riscv_vector_explicit_true",
@@ -2044,6 +2056,22 @@ alias(
         ":xnn_enable_hvx_explicit_true": ":xnn_enable_hvx_explicit_true",
         ":xnn_enable_hvx_explicit_false": ":xnn_enable_hvx_explicit_true",
         "//conditions:default": ":hvx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "hmx_enabled_by_default",
+    match_any = [
+        "//build_config:hexagon",
+    ],
+)
+
+alias(
+    name = "hmx_enabled",
+    actual = select({
+        ":xnn_enable_hmx_explicit_true": ":xnn_enable_hmx_explicit_true",
+        ":xnn_enable_hmx_explicit_false": ":xnn_enable_hmx_explicit_true",
+        "//conditions:default": ":hmx_enabled_by_default",
     }),
 )
 

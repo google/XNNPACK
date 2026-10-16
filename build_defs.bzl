@@ -167,6 +167,10 @@ def xnnpack_configurable_defines():
         "//:hvx_enabled",
         ["XNN_ENABLE_HVX=1"],
         ["XNN_ENABLE_HVX=0"],
+    ) + xnnpack_select_if(
+        "//:hmx_enabled",
+        ["XNN_ENABLE_HMX=1"],
+        ["XNN_ENABLE_HMX=0"],
     ) + xnnpack_kleidiai_defines() + xnnpack_select_if(
         "//:arm_sme_enabled",
         ["XNN_ENABLE_ARM_SME=1"],

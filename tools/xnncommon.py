@@ -77,6 +77,7 @@ _ISA_TO_MACRO_MAP = {
     "avx512fp16": "XNN_ENABLE_AVX512FP16",
     "avx512bf16": "XNN_ENABLE_AVX512BF16",
     "hvx": "XNN_ENABLE_HVX",
+    "hmx": "XNN_ENABLE_HMX",
 }
 
 _ISA_TO_ARCH_MAP = {
@@ -118,6 +119,7 @@ _ISA_TO_ARCH_MAP = {
     "avx256vnnigfni": ["x86-32", "x86-64"],
     "hexagon": ["hexagon"],
     "hvx": ["hexagon"],
+    "hmx": ["hexagon"],
     "rvv": ["riscv"],
     "rvvfp16arith": ["riscv"],
     "wasm32": ["wasm", "wasmsimd"],
@@ -169,6 +171,7 @@ _ISA_TO_ARCH_FLAGS_MAP = {
     "avx256vnni": "xnn_arch_x86_avx256vnni",
     "avx256vnnigfni": "xnn_arch_x86_avx256vnnigfni",
     "hvx": "xnn_arch_hvx",
+    "hmx": "xnn_arch_hmx",
     "rvv": "xnn_arch_riscv_vector",
     "rvvfp16arith": "xnn_arch_riscv_vector_fp16_arith",
     "wasmpshufb": "xnn_arch_wasm_pshufb",
