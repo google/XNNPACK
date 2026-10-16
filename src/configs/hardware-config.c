@@ -33,6 +33,7 @@
 #endif  // XNN_ENABLE_CPUINFO
 #if XNN_ARCH_HEXAGON
 // TODO - use CPUINFO
+#include <HAP_compute_res.h>
 #include <qurt.h>
 #include "HAP_farf.h"
 #include "HAP_power.h"  // NOLINT - part of the hexagon SDK
@@ -382,6 +383,34 @@ static void init_hardware_config(void) {
   if (arch_version >= 0x69) {
     set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
   }
+
+#if XNN_ENABLE_HMX
+  // HMX FP16 is supported on Hexagon V73+ (Snapdragon 8 Gen 2 and newer) when
+  // the HMX hardware unit is present, can be powered on, and can be locked in
+  // the current protection domain.
+  if (arch_version >= 0x73) {
+    int power_ctx = 0;
+    HAP_power_request_t request = {0};
+    request.type = HAP_power_set_HMX;
+    request.hmx.power_up = 1;
+    if (HAP_power_set(&power_ctx, &request) == AEE_SUCCESS) {
+      compute_res_attr_t compute_res;
+      HAP_compute_res_attr_init(&compute_res);
+      HAP_compute_res_attr_set_hmx_param(&compute_res, 1);
+      unsigned int context_id = HAP_compute_res_acquire(&compute_res, 10000);
+      if (context_id != 0) {
+        if (HAP_compute_res_hmx_lock(context_id) == 0) {
+          set_arch_flag(xnn_arch_hmx, true);
+          HAP_compute_res_hmx_unlock(context_id);
+        }
+        HAP_compute_res_release(context_id);
+      }
+      request.hmx.power_up = 0;
+      HAP_power_set(&power_ctx, &request);
+    }
+    HAP_power_destroy(&power_ctx);
+  }
+#endif  // XNN_ENABLE_HMX
 
   unsigned int max_hthreads = 1;
   qurt_sysenv_max_hthreads_t hardware_threads = {0};

@@ -1,0 +1,503 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR == 64
+$assert KR == 2
+#include <assert.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+#include <hvx_hexagon_protos.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packw.h"
+
+static XNN_INLINE void l2fetch_2d(
+    const void* p,
+    uint32_t stride,
+    uint32_t width,
+    uint32_t height) {
+  const uint64_t control = ((uint64_t) stride << 32) |
+                           ((uint64_t) width << 16) |
+                           (uint64_t) height;
+  __asm__ __volatile__("l2fetch(%0,%1)" : : "r"(p), "r"(control));
+}
+
+// 5-stage radix-2 butterfly transpose of 32 rows x 64 uint16_t (viewed as
+// 32x32 uint32_t pairs of KR=2 elements) into 32 HVX vectors stored at
+// out_vec[0, 2, ..., 62].
+static XNN_INLINE void transpose_32x32_store_full(
+    HVX_Vector v5_0, HVX_Vector v5_1, HVX_Vector v5_2, HVX_Vector v5_3,
+    HVX_Vector v5_4, HVX_Vector v5_5, HVX_Vector v5_6, HVX_Vector v5_7,
+    HVX_Vector v5_8, HVX_Vector v5_9, HVX_Vector v5_10, HVX_Vector v5_11,
+    HVX_Vector v5_12, HVX_Vector v5_13, HVX_Vector v5_14, HVX_Vector v5_15,
+    HVX_Vector v5_16, HVX_Vector v5_17, HVX_Vector v5_18, HVX_Vector v5_19,
+    HVX_Vector v5_20, HVX_Vector v5_21, HVX_Vector v5_22, HVX_Vector v5_23,
+    HVX_Vector v5_24, HVX_Vector v5_25, HVX_Vector v5_26, HVX_Vector v5_27,
+    HVX_Vector v5_28, HVX_Vector v5_29, HVX_Vector v5_30, HVX_Vector v5_31,
+    HVX_Vector* restrict out_vec) {
+  int rt = -4;
+  const HVX_VectorPair v4_0 = Q6_W_vshuff_VVR(v5_1, v5_0, rt);
+  const HVX_VectorPair v4_1 = Q6_W_vshuff_VVR(v5_3, v5_2, rt);
+  const HVX_VectorPair v4_2 = Q6_W_vshuff_VVR(v5_5, v5_4, rt);
+  const HVX_VectorPair v4_3 = Q6_W_vshuff_VVR(v5_7, v5_6, rt);
+  const HVX_VectorPair v4_4 = Q6_W_vshuff_VVR(v5_9, v5_8, rt);
+  const HVX_VectorPair v4_5 = Q6_W_vshuff_VVR(v5_11, v5_10, rt);
+  const HVX_VectorPair v4_6 = Q6_W_vshuff_VVR(v5_13, v5_12, rt);
+  const HVX_VectorPair v4_7 = Q6_W_vshuff_VVR(v5_15, v5_14, rt);
+  const HVX_VectorPair v4_8 = Q6_W_vshuff_VVR(v5_17, v5_16, rt);
+  const HVX_VectorPair v4_9 = Q6_W_vshuff_VVR(v5_19, v5_18, rt);
+  const HVX_VectorPair v4_10 = Q6_W_vshuff_VVR(v5_21, v5_20, rt);
+  const HVX_VectorPair v4_11 = Q6_W_vshuff_VVR(v5_23, v5_22, rt);
+  const HVX_VectorPair v4_12 = Q6_W_vshuff_VVR(v5_25, v5_24, rt);
+  const HVX_VectorPair v4_13 = Q6_W_vshuff_VVR(v5_27, v5_26, rt);
+  const HVX_VectorPair v4_14 = Q6_W_vshuff_VVR(v5_29, v5_28, rt);
+  const HVX_VectorPair v4_15 = Q6_W_vshuff_VVR(v5_31, v5_30, rt);
+
+  rt <<= 1;  // -8
+  const HVX_VectorPair v3_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_1), Q6_V_lo_W(v4_0), rt);
+  const HVX_VectorPair v3_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_1), Q6_V_hi_W(v4_0), rt);
+  const HVX_VectorPair v3_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_3), Q6_V_lo_W(v4_2), rt);
+  const HVX_VectorPair v3_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_3), Q6_V_hi_W(v4_2), rt);
+  const HVX_VectorPair v3_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_5), Q6_V_lo_W(v4_4), rt);
+  const HVX_VectorPair v3_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_5), Q6_V_hi_W(v4_4), rt);
+  const HVX_VectorPair v3_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_7), Q6_V_lo_W(v4_6), rt);
+  const HVX_VectorPair v3_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_7), Q6_V_hi_W(v4_6), rt);
+  const HVX_VectorPair v3_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_9), Q6_V_lo_W(v4_8), rt);
+  const HVX_VectorPair v3_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_9), Q6_V_hi_W(v4_8), rt);
+  const HVX_VectorPair v3_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_11), Q6_V_lo_W(v4_10), rt);
+  const HVX_VectorPair v3_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_11), Q6_V_hi_W(v4_10), rt);
+  const HVX_VectorPair v3_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_13), Q6_V_lo_W(v4_12), rt);
+  const HVX_VectorPair v3_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_13), Q6_V_hi_W(v4_12), rt);
+  const HVX_VectorPair v3_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_15), Q6_V_lo_W(v4_14), rt);
+  const HVX_VectorPair v3_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_15), Q6_V_hi_W(v4_14), rt);
+
+  rt <<= 1;  // -16
+  const HVX_VectorPair v2_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_2), Q6_V_lo_W(v3_0), rt);
+  const HVX_VectorPair v2_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_2), Q6_V_hi_W(v3_0), rt);
+  const HVX_VectorPair v2_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_3), Q6_V_lo_W(v3_1), rt);
+  const HVX_VectorPair v2_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_3), Q6_V_hi_W(v3_1), rt);
+  const HVX_VectorPair v2_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_6), Q6_V_lo_W(v3_4), rt);
+  const HVX_VectorPair v2_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_6), Q6_V_hi_W(v3_4), rt);
+  const HVX_VectorPair v2_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_7), Q6_V_lo_W(v3_5), rt);
+  const HVX_VectorPair v2_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_7), Q6_V_hi_W(v3_5), rt);
+  const HVX_VectorPair v2_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_10), Q6_V_lo_W(v3_8), rt);
+  const HVX_VectorPair v2_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_10), Q6_V_hi_W(v3_8), rt);
+  const HVX_VectorPair v2_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_11), Q6_V_lo_W(v3_9), rt);
+  const HVX_VectorPair v2_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_11), Q6_V_hi_W(v3_9), rt);
+  const HVX_VectorPair v2_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_14), Q6_V_lo_W(v3_12), rt);
+  const HVX_VectorPair v2_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_14), Q6_V_hi_W(v3_12), rt);
+  const HVX_VectorPair v2_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_15), Q6_V_lo_W(v3_13), rt);
+  const HVX_VectorPair v2_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_15), Q6_V_hi_W(v3_13), rt);
+
+  rt <<= 1;  // -32
+  const HVX_VectorPair v1_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_4), Q6_V_lo_W(v2_0), rt);
+  const HVX_VectorPair v1_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_4), Q6_V_hi_W(v2_0), rt);
+  const HVX_VectorPair v1_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_5), Q6_V_lo_W(v2_1), rt);
+  const HVX_VectorPair v1_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_5), Q6_V_hi_W(v2_1), rt);
+  const HVX_VectorPair v1_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_6), Q6_V_lo_W(v2_2), rt);
+  const HVX_VectorPair v1_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_6), Q6_V_hi_W(v2_2), rt);
+  const HVX_VectorPair v1_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_7), Q6_V_lo_W(v2_3), rt);
+  const HVX_VectorPair v1_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_7), Q6_V_hi_W(v2_3), rt);
+  const HVX_VectorPair v1_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_12), Q6_V_lo_W(v2_8), rt);
+  const HVX_VectorPair v1_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_12), Q6_V_hi_W(v2_8), rt);
+  const HVX_VectorPair v1_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_13), Q6_V_lo_W(v2_9), rt);
+  const HVX_VectorPair v1_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_13), Q6_V_hi_W(v2_9), rt);
+  const HVX_VectorPair v1_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_14), Q6_V_lo_W(v2_10), rt);
+  const HVX_VectorPair v1_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_14), Q6_V_hi_W(v2_10), rt);
+  const HVX_VectorPair v1_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_15), Q6_V_lo_W(v2_11), rt);
+  const HVX_VectorPair v1_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_15), Q6_V_hi_W(v2_11), rt);
+
+  rt <<= 1;  // -64
+  const HVX_VectorPair v0_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_8), Q6_V_lo_W(v1_0), rt);
+  const HVX_VectorPair v0_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_8), Q6_V_hi_W(v1_0), rt);
+  const HVX_VectorPair v0_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_9), Q6_V_lo_W(v1_1), rt);
+  const HVX_VectorPair v0_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_9), Q6_V_hi_W(v1_1), rt);
+  const HVX_VectorPair v0_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_10), Q6_V_lo_W(v1_2), rt);
+  const HVX_VectorPair v0_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_10), Q6_V_hi_W(v1_2), rt);
+  const HVX_VectorPair v0_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_11), Q6_V_lo_W(v1_3), rt);
+  const HVX_VectorPair v0_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_11), Q6_V_hi_W(v1_3), rt);
+  const HVX_VectorPair v0_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_12), Q6_V_lo_W(v1_4), rt);
+  const HVX_VectorPair v0_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_12), Q6_V_hi_W(v1_4), rt);
+  const HVX_VectorPair v0_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_13), Q6_V_lo_W(v1_5), rt);
+  const HVX_VectorPair v0_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_13), Q6_V_hi_W(v1_5), rt);
+  const HVX_VectorPair v0_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_14), Q6_V_lo_W(v1_6), rt);
+  const HVX_VectorPair v0_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_14), Q6_V_hi_W(v1_6), rt);
+  const HVX_VectorPair v0_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_15), Q6_V_lo_W(v1_7), rt);
+  const HVX_VectorPair v0_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_15), Q6_V_hi_W(v1_7), rt);
+
+  out_vec[0] = Q6_V_lo_W(v0_0);
+  out_vec[2] = Q6_V_hi_W(v0_0);
+  out_vec[4] = Q6_V_lo_W(v0_1);
+  out_vec[6] = Q6_V_hi_W(v0_1);
+  out_vec[8] = Q6_V_lo_W(v0_2);
+  out_vec[10] = Q6_V_hi_W(v0_2);
+  out_vec[12] = Q6_V_lo_W(v0_3);
+  out_vec[14] = Q6_V_hi_W(v0_3);
+  out_vec[16] = Q6_V_lo_W(v0_4);
+  out_vec[18] = Q6_V_hi_W(v0_4);
+  out_vec[20] = Q6_V_lo_W(v0_5);
+  out_vec[22] = Q6_V_hi_W(v0_5);
+  out_vec[24] = Q6_V_lo_W(v0_6);
+  out_vec[26] = Q6_V_hi_W(v0_6);
+  out_vec[28] = Q6_V_lo_W(v0_7);
+  out_vec[30] = Q6_V_hi_W(v0_7);
+  out_vec[32] = Q6_V_lo_W(v0_8);
+  out_vec[34] = Q6_V_hi_W(v0_8);
+  out_vec[36] = Q6_V_lo_W(v0_9);
+  out_vec[38] = Q6_V_hi_W(v0_9);
+  out_vec[40] = Q6_V_lo_W(v0_10);
+  out_vec[42] = Q6_V_hi_W(v0_10);
+  out_vec[44] = Q6_V_lo_W(v0_11);
+  out_vec[46] = Q6_V_hi_W(v0_11);
+  out_vec[48] = Q6_V_lo_W(v0_12);
+  out_vec[50] = Q6_V_hi_W(v0_12);
+  out_vec[52] = Q6_V_lo_W(v0_13);
+  out_vec[54] = Q6_V_hi_W(v0_13);
+  out_vec[56] = Q6_V_lo_W(v0_14);
+  out_vec[58] = Q6_V_hi_W(v0_14);
+  out_vec[60] = Q6_V_lo_W(v0_15);
+  out_vec[62] = Q6_V_hi_W(v0_15);
+}
+
+static XNN_INLINE void transpose_32x32_store_partial(
+    const HVX_Vector r[32],
+    HVX_Vector* restrict out_vec,
+    size_t k_pairs) {
+  int rt = -4;
+  const HVX_VectorPair v4_0 = Q6_W_vshuff_VVR(r[1], r[0], rt);
+  const HVX_VectorPair v4_1 = Q6_W_vshuff_VVR(r[3], r[2], rt);
+  const HVX_VectorPair v4_2 = Q6_W_vshuff_VVR(r[5], r[4], rt);
+  const HVX_VectorPair v4_3 = Q6_W_vshuff_VVR(r[7], r[6], rt);
+  const HVX_VectorPair v4_4 = Q6_W_vshuff_VVR(r[9], r[8], rt);
+  const HVX_VectorPair v4_5 = Q6_W_vshuff_VVR(r[11], r[10], rt);
+  const HVX_VectorPair v4_6 = Q6_W_vshuff_VVR(r[13], r[12], rt);
+  const HVX_VectorPair v4_7 = Q6_W_vshuff_VVR(r[15], r[14], rt);
+  const HVX_VectorPair v4_8 = Q6_W_vshuff_VVR(r[17], r[16], rt);
+  const HVX_VectorPair v4_9 = Q6_W_vshuff_VVR(r[19], r[18], rt);
+  const HVX_VectorPair v4_10 = Q6_W_vshuff_VVR(r[21], r[20], rt);
+  const HVX_VectorPair v4_11 = Q6_W_vshuff_VVR(r[23], r[22], rt);
+  const HVX_VectorPair v4_12 = Q6_W_vshuff_VVR(r[25], r[24], rt);
+  const HVX_VectorPair v4_13 = Q6_W_vshuff_VVR(r[27], r[26], rt);
+  const HVX_VectorPair v4_14 = Q6_W_vshuff_VVR(r[29], r[28], rt);
+  const HVX_VectorPair v4_15 = Q6_W_vshuff_VVR(r[31], r[30], rt);
+
+  rt <<= 1;
+  const HVX_VectorPair v3_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_1), Q6_V_lo_W(v4_0), rt);
+  const HVX_VectorPair v3_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_1), Q6_V_hi_W(v4_0), rt);
+  const HVX_VectorPair v3_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_3), Q6_V_lo_W(v4_2), rt);
+  const HVX_VectorPair v3_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_3), Q6_V_hi_W(v4_2), rt);
+  const HVX_VectorPair v3_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_5), Q6_V_lo_W(v4_4), rt);
+  const HVX_VectorPair v3_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_5), Q6_V_hi_W(v4_4), rt);
+  const HVX_VectorPair v3_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_7), Q6_V_lo_W(v4_6), rt);
+  const HVX_VectorPair v3_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_7), Q6_V_hi_W(v4_6), rt);
+  const HVX_VectorPair v3_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_9), Q6_V_lo_W(v4_8), rt);
+  const HVX_VectorPair v3_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_9), Q6_V_hi_W(v4_8), rt);
+  const HVX_VectorPair v3_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_11), Q6_V_lo_W(v4_10), rt);
+  const HVX_VectorPair v3_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_11), Q6_V_hi_W(v4_10), rt);
+  const HVX_VectorPair v3_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_13), Q6_V_lo_W(v4_12), rt);
+  const HVX_VectorPair v3_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_13), Q6_V_hi_W(v4_12), rt);
+  const HVX_VectorPair v3_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_15), Q6_V_lo_W(v4_14), rt);
+  const HVX_VectorPair v3_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_15), Q6_V_hi_W(v4_14), rt);
+
+  rt <<= 1;
+  const HVX_VectorPair v2_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_2), Q6_V_lo_W(v3_0), rt);
+  const HVX_VectorPair v2_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_2), Q6_V_hi_W(v3_0), rt);
+  const HVX_VectorPair v2_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_3), Q6_V_lo_W(v3_1), rt);
+  const HVX_VectorPair v2_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_3), Q6_V_hi_W(v3_1), rt);
+  const HVX_VectorPair v2_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_6), Q6_V_lo_W(v3_4), rt);
+  const HVX_VectorPair v2_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_6), Q6_V_hi_W(v3_4), rt);
+  const HVX_VectorPair v2_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_7), Q6_V_lo_W(v3_5), rt);
+  const HVX_VectorPair v2_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_7), Q6_V_hi_W(v3_5), rt);
+  const HVX_VectorPair v2_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_10), Q6_V_lo_W(v3_8), rt);
+  const HVX_VectorPair v2_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_10), Q6_V_hi_W(v3_8), rt);
+  const HVX_VectorPair v2_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_11), Q6_V_lo_W(v3_9), rt);
+  const HVX_VectorPair v2_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_11), Q6_V_hi_W(v3_9), rt);
+  const HVX_VectorPair v2_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_14), Q6_V_lo_W(v3_12), rt);
+  const HVX_VectorPair v2_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_14), Q6_V_hi_W(v3_12), rt);
+  const HVX_VectorPair v2_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_15), Q6_V_lo_W(v3_13), rt);
+  const HVX_VectorPair v2_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_15), Q6_V_hi_W(v3_13), rt);
+
+  rt <<= 1;
+  const HVX_VectorPair v1_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_4), Q6_V_lo_W(v2_0), rt);
+  const HVX_VectorPair v1_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_4), Q6_V_hi_W(v2_0), rt);
+  const HVX_VectorPair v1_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_5), Q6_V_lo_W(v2_1), rt);
+  const HVX_VectorPair v1_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_5), Q6_V_hi_W(v2_1), rt);
+  const HVX_VectorPair v1_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_6), Q6_V_lo_W(v2_2), rt);
+  const HVX_VectorPair v1_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_6), Q6_V_hi_W(v2_2), rt);
+  const HVX_VectorPair v1_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_7), Q6_V_lo_W(v2_3), rt);
+  const HVX_VectorPair v1_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_7), Q6_V_hi_W(v2_3), rt);
+  const HVX_VectorPair v1_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_12), Q6_V_lo_W(v2_8), rt);
+  const HVX_VectorPair v1_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_12), Q6_V_hi_W(v2_8), rt);
+  const HVX_VectorPair v1_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_13), Q6_V_lo_W(v2_9), rt);
+  const HVX_VectorPair v1_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_13), Q6_V_hi_W(v2_9), rt);
+  const HVX_VectorPair v1_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_14), Q6_V_lo_W(v2_10), rt);
+  const HVX_VectorPair v1_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_14), Q6_V_hi_W(v2_10), rt);
+  const HVX_VectorPair v1_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_15), Q6_V_lo_W(v2_11), rt);
+  const HVX_VectorPair v1_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_15), Q6_V_hi_W(v2_11), rt);
+
+  rt <<= 1;
+  HVX_Vector cols[32];
+  const HVX_VectorPair v0_0 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_8), Q6_V_lo_W(v1_0), rt);
+  cols[0] = Q6_V_lo_W(v0_0);
+  cols[1] = Q6_V_hi_W(v0_0);
+  const HVX_VectorPair v0_1 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_8), Q6_V_hi_W(v1_0), rt);
+  cols[2] = Q6_V_lo_W(v0_1);
+  cols[3] = Q6_V_hi_W(v0_1);
+  const HVX_VectorPair v0_2 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_9), Q6_V_lo_W(v1_1), rt);
+  cols[4] = Q6_V_lo_W(v0_2);
+  cols[5] = Q6_V_hi_W(v0_2);
+  const HVX_VectorPair v0_3 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_9), Q6_V_hi_W(v1_1), rt);
+  cols[6] = Q6_V_lo_W(v0_3);
+  cols[7] = Q6_V_hi_W(v0_3);
+  const HVX_VectorPair v0_4 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_10), Q6_V_lo_W(v1_2), rt);
+  cols[8] = Q6_V_lo_W(v0_4);
+  cols[9] = Q6_V_hi_W(v0_4);
+  const HVX_VectorPair v0_5 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_10), Q6_V_hi_W(v1_2), rt);
+  cols[10] = Q6_V_lo_W(v0_5);
+  cols[11] = Q6_V_hi_W(v0_5);
+  const HVX_VectorPair v0_6 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_11), Q6_V_lo_W(v1_3), rt);
+  cols[12] = Q6_V_lo_W(v0_6);
+  cols[13] = Q6_V_hi_W(v0_6);
+  const HVX_VectorPair v0_7 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_11), Q6_V_hi_W(v1_3), rt);
+  cols[14] = Q6_V_lo_W(v0_7);
+  cols[15] = Q6_V_hi_W(v0_7);
+  const HVX_VectorPair v0_8 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_12), Q6_V_lo_W(v1_4), rt);
+  cols[16] = Q6_V_lo_W(v0_8);
+  cols[17] = Q6_V_hi_W(v0_8);
+  const HVX_VectorPair v0_9 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_12), Q6_V_hi_W(v1_4), rt);
+  cols[18] = Q6_V_lo_W(v0_9);
+  cols[19] = Q6_V_hi_W(v0_9);
+  const HVX_VectorPair v0_10 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_13), Q6_V_lo_W(v1_5), rt);
+  cols[20] = Q6_V_lo_W(v0_10);
+  cols[21] = Q6_V_hi_W(v0_10);
+  const HVX_VectorPair v0_11 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_13), Q6_V_hi_W(v1_5), rt);
+  cols[22] = Q6_V_lo_W(v0_11);
+  cols[23] = Q6_V_hi_W(v0_11);
+  const HVX_VectorPair v0_12 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_14), Q6_V_lo_W(v1_6), rt);
+  cols[24] = Q6_V_lo_W(v0_12);
+  cols[25] = Q6_V_hi_W(v0_12);
+  const HVX_VectorPair v0_13 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_14), Q6_V_hi_W(v1_6), rt);
+  cols[26] = Q6_V_lo_W(v0_13);
+  cols[27] = Q6_V_hi_W(v0_13);
+  const HVX_VectorPair v0_14 = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_15), Q6_V_lo_W(v1_7), rt);
+  cols[28] = Q6_V_lo_W(v0_14);
+  cols[29] = Q6_V_hi_W(v0_14);
+  const HVX_VectorPair v0_15 = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_15), Q6_V_hi_W(v1_7), rt);
+  cols[30] = Q6_V_lo_W(v0_15);
+  cols[31] = Q6_V_hi_W(v0_15);
+
+  for (size_t kp = 0; kp < k_pairs; ++kp) {
+    out_vec[2 * kp] = cols[kp];
+  }
+}
+
+void xnn_x16_packw_gemm_goi_ukernel_x${NR}c${KR}__hvx(
+    size_t g,
+    size_t nc,
+    size_t kc,
+    size_t nr,
+    size_t kr,
+    size_t sr,
+    size_t n_stride,
+    const uint16_t* weights,
+    const uint16_t* bias,
+    const void* scale,
+    uint16_t* packed_weights,
+    size_t extra_bytes,
+    const void* params) {
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == ${KR});
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+  (void) nr;
+  (void) kr;
+  (void) sr;
+  (void) scale;
+  (void) params;
+
+  const HVX_Vector vzero = Q6_V_vzero();
+  const uint16_t* b = bias;
+  uint16_t* packed_w = packed_weights;
+  const uint32_t stride_bytes = (uint32_t) (n_stride * sizeof(uint16_t));
+  const int can_l2fetch = (stride_bytes < 65536);
+
+  do {
+    const uint16_t* w0 = weights;
+    const uint16_t* const w_end = weights + (nc - 1) * n_stride + kc;
+    size_t n = nc;
+
+    for (; n >= 64; n -= 64) {
+      if XNN_LIKELY(b != NULL) {
+        *((HVX_Vector*) packed_w) = *((const HVX_UVector*) b);
+        b += 64;
+      } else {
+        *((HVX_Vector*) packed_w) = vzero;
+      }
+      packed_w += 64;
+
+      const uint16_t* w_cur = w0;
+      HVX_Vector* restrict out_vec = (HVX_Vector*) packed_w;
+      size_t k = kc;
+
+      if (can_l2fetch && k >= 64) {
+        l2fetch_2d(w_cur, stride_bytes, 128, 64);
+      }
+
+      for (; k >= 64; k -= 64) {
+        if (can_l2fetch && k >= 128) {
+          l2fetch_2d(w_cur + 64, stride_bytes, 128, 64);
+        }
+        const uint16_t* r = w_cur;
+        $for I in range(32):
+          const HVX_Vector v${I} = *((const HVX_UVector*) r); r += n_stride;
+        transpose_32x32_store_full(
+            v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14,
+            v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27,
+            v28, v29, v30, v31, out_vec + 0);
+
+        $for I in range(32):
+          const HVX_Vector u${I} = *((const HVX_UVector*) r);${" r += n_stride;" if I < 31 else ""}
+        transpose_32x32_store_full(
+            u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14,
+            u15, u16, u17, u18, u19, u20, u21, u22, u23, u24, u25, u26, u27,
+            u28, u29, u30, u31, out_vec + 1);
+
+        w_cur += 64;
+        out_vec += 64;
+      }
+
+      if XNN_UNLIKELY(k != 0) {
+        const size_t k_pairs = (k + 1) >> 1;
+        const HVX_VectorPred q_k = Q6_Q_vsetq_R(k * sizeof(uint16_t));
+        XNN_ALIGN(128) uint16_t pad_buf[64];
+        memset(pad_buf, 0, sizeof(pad_buf));
+        HVX_Vector rows[32];
+        const uint16_t* r = w_cur;
+        for (size_t i = 0; i < 32; ++i, r += n_stride) {
+          if XNN_LIKELY(r + 64 <= w_end) {
+            rows[i] = Q6_V_vand_QV(q_k, *((const HVX_UVector*) r));
+          } else {
+            memcpy(pad_buf, r, k * sizeof(uint16_t));
+            rows[i] = *((const HVX_Vector*) pad_buf);
+          }
+        }
+        transpose_32x32_store_partial(rows, out_vec + 0, k_pairs);
+        for (size_t i = 0; i < 32; ++i, r += n_stride) {
+          if XNN_LIKELY(r + 64 <= w_end) {
+            rows[i] = Q6_V_vand_QV(q_k, *((const HVX_UVector*) r));
+          } else {
+            memcpy(pad_buf, r, k * sizeof(uint16_t));
+            rows[i] = *((const HVX_Vector*) pad_buf);
+          }
+        }
+        transpose_32x32_store_partial(rows, out_vec + 1, k_pairs);
+        out_vec += 2 * k_pairs;
+      }
+
+      packed_w = (uint16_t*) ((uintptr_t) out_vec + extra_bytes);
+      w0 += 64 * n_stride;
+    }
+
+    if XNN_UNLIKELY(n != 0) {
+      if XNN_LIKELY(b != NULL) {
+        XNN_ALIGN(128) uint16_t pad_b[64];
+        memset(pad_b, 0, sizeof(pad_b));
+        memcpy(pad_b, b, n * sizeof(uint16_t));
+        *((HVX_Vector*) packed_w) = *((const HVX_Vector*) pad_b);
+        b += n;
+      } else {
+        *((HVX_Vector*) packed_w) = vzero;
+      }
+      packed_w += 64;
+
+      const uint16_t* w_cur = w0;
+      HVX_Vector* restrict out_vec = (HVX_Vector*) packed_w;
+      const size_t n0 = min(n, 32);
+      const size_t n1 = (n > 32) ? (n - 32) : 0;
+      size_t k = kc;
+
+      for (; k >= 64; k -= 64) {
+        HVX_Vector rows[32];
+        const uint16_t* r = w_cur;
+        for (size_t i = 0; i < n0; ++i, r += n_stride) {
+          rows[i] = *((const HVX_UVector*) r);
+        }
+        for (size_t i = n0; i < 32; ++i) {
+          rows[i] = vzero;
+        }
+        transpose_32x32_store_partial(rows, out_vec + 0, 32);
+
+        if (n1 != 0) {
+          for (size_t i = 0; i < n1; ++i, r += n_stride) {
+            rows[i] = *((const HVX_UVector*) r);
+          }
+          for (size_t i = n1; i < 32; ++i) {
+            rows[i] = vzero;
+          }
+          transpose_32x32_store_partial(rows, out_vec + 1, 32);
+        } else {
+          for (size_t kp = 0; kp < 32; ++kp) {
+            out_vec[2 * kp + 1] = vzero;
+          }
+        }
+        w_cur += 64;
+        out_vec += 64;
+      }
+
+      if (k != 0) {
+        const size_t k_pairs = (k + 1) >> 1;
+        const HVX_VectorPred q_k = Q6_Q_vsetq_R(k * sizeof(uint16_t));
+        XNN_ALIGN(128) uint16_t pad_buf[64];
+        memset(pad_buf, 0, sizeof(pad_buf));
+        HVX_Vector rows[32];
+        const uint16_t* r = w_cur;
+        for (size_t i = 0; i < n0; ++i, r += n_stride) {
+          if XNN_LIKELY(r + 64 <= w_end) {
+            rows[i] = Q6_V_vand_QV(q_k, *((const HVX_UVector*) r));
+          } else {
+            memcpy(pad_buf, r, k * sizeof(uint16_t));
+            rows[i] = *((const HVX_Vector*) pad_buf);
+          }
+        }
+        for (size_t i = n0; i < 32; ++i) {
+          rows[i] = vzero;
+        }
+        transpose_32x32_store_partial(rows, out_vec + 0, k_pairs);
+
+        if (n1 != 0) {
+          for (size_t i = 0; i < n1; ++i, r += n_stride) {
+            if XNN_LIKELY(r + 64 <= w_end) {
+              rows[i] = Q6_V_vand_QV(q_k, *((const HVX_UVector*) r));
+            } else {
+              memcpy(pad_buf, r, k * sizeof(uint16_t));
+              rows[i] = *((const HVX_Vector*) pad_buf);
+            }
+          }
+          for (size_t i = n1; i < 32; ++i) {
+            rows[i] = vzero;
+          }
+          transpose_32x32_store_partial(rows, out_vec + 1, k_pairs);
+        } else {
+          for (size_t kp = 0; kp < k_pairs; ++kp) {
+            out_vec[2 * kp + 1] = vzero;
+          }
+        }
+        out_vec += 2 * k_pairs;
+      }
+
+      packed_w = (uint16_t*) ((uintptr_t) out_vec + extra_bytes);
+    }
+
+    weights += nc * n_stride;
+  } while (--g != 0);
+}

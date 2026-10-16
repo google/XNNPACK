@@ -142,4 +142,12 @@ tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -o src/f16-gemm/gen/f1
 tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=4 -D NR=m4 -o src/f16-gemm/gen/f16-gemm-4x4v-minmax-rvvfp16arith.c &
 tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -o src/f16-gemm/gen/f16-gemm-7x4v-minmax-rvvfp16arith.c &
 
+################################## Hexagon HVX #################################
+tools/xngen src/f16-gemm/c2-hvx.c.in -D MR=1 -D NR=64 -o src/f16-gemm/gen/f16-gemm-1x64c2-minmax-hvx.c &
+tools/xngen src/f16-gemm/c2-hvx.c.in -D MR=4 -D NR=64 -o src/f16-gemm/gen/f16-gemm-4x64c2-minmax-hvx.c &
+
+################################## Hexagon HMX #################################
+tools/xngen src/f16-gemm/c2-hmx.c.in -D MR=32 -D NR=64 -D PINGPONG=0 -o src/f16-gemm/gen/f16-gemm-32x64c2-minmax-hmx.c &
+tools/xngen src/f16-gemm/c2-hmx.c.in -D MR=32 -D NR=64 -D PINGPONG=1 -o src/f16-gemm/gen/f16-gemm-32x64c2-minmax-hmx-pingpong.c &
+
 wait
