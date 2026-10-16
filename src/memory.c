@@ -28,6 +28,16 @@
 #include <errno.h>
 #if XNN_HAS_MMAP
 #include <sys/mman.h>
+#if XNN_PLATFORM_LINUX
+#include <sys/prctl.h>
+// Added to mainline Linux UAPI <linux/prctl.h> in 5.17; older sysroots omit it.
+#ifndef PR_SET_VMA
+#define PR_SET_VMA 0x53564d41
+#endif
+#ifndef PR_SET_VMA_ANON_NAME
+#define PR_SET_VMA_ANON_NAME 0
+#endif
+#endif  // XNN_PLATFORM_LINUX
 #endif
 #include <unistd.h>
 #endif  // XNN_PLATFORM_WINDOWS
@@ -50,6 +60,7 @@
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
 
 static size_t system_page_size = 0;
+static const char weights_vma_name[] = "xnnpack-weights-cache";
 
 XNN_INIT_ONCE_GUARD(memory);
 
@@ -79,8 +90,21 @@ static size_t get_page_size() {
   return system_page_size;
 }
 
+static void set_vma_name(void* p, size_t size, const char* name) {
+#if XNN_PLATFORM_LINUX && XNN_HAS_MMAP
+  if (name != NULL && prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, (unsigned long)p,
+                            size, name) == -1) {
+    xnn_log_debug("prctl(PR_SET_VMA_ANON_NAME) failed, error code: %d", errno);
+  }
+#else
+  (void)p;
+  (void)size;
+  (void)name;
+#endif
+}
+
 // Maps `size` bytes of memory, returns pointer to allocation, NULL if failed.
-static void* allocate_buffer(size_t size) {
+static void* allocate_buffer(size_t size, const char* vma_name) {
   xnn_log_debug("allocating buffer of size %zu", size);
   assert(size % get_page_size() == 0);
 #if XNN_PLATFORM_WINDOWS
@@ -111,6 +135,7 @@ static void* allocate_buffer(size_t size) {
     return NULL;
   }
 #endif
+  set_vma_name(p, size, vma_name);
   return p;
 }
 
@@ -141,41 +166,45 @@ static enum xnn_status release_memory(void* start, size_t capacity) {
 // new_capacity_out, which can be >= new_size due to page alignment requirements.
 // Returns a pointer to a buffer which might be the same as old_pointer if we can remap virtual memory, otherwise we
 // allocate a new buffer and copy contents of old_buffer over.
-static void* resize_buffer(
-  void* old_pointer,
-  size_t old_size,
-  size_t old_capacity,
-  size_t new_size,
-  size_t* new_capacity_out)
-{
+static void* resize_buffer(void* old_pointer, size_t old_size,
+                           size_t old_capacity, size_t new_size,
+                           const char* vma_name, size_t* new_capacity_out) {
   const size_t page_size = get_page_size();
   if (new_size > SIZE_MAX - (page_size - 1)) {
     xnn_log_error("resize_buffer: new_size %zu causes overflow", new_size);
     return NULL;
   }
   const size_t new_capacity = round_up_po2(new_size, page_size);
-  #if XNN_PLATFORM_LINUX
-    void* new_pointer = mremap(old_pointer, old_capacity, new_capacity, MREMAP_MAYMOVE, NULL);
-    if (new_pointer == MAP_FAILED) {
-      xnn_log_error("mremap failed with errno: %d", errno);
-      return NULL;
-    }
-    xnn_log_debug("resize_buffer: remap, old capacity %zu to new capacity %zu", old_capacity, new_capacity);
-  #else
-    void* new_pointer = allocate_buffer(new_capacity);
-    if (new_pointer == NULL) {
-      xnn_log_error("allocate_buffer failed");
-      return NULL;
-    }
-    memcpy(new_pointer, old_pointer, old_size);
-    // Release old code_buffer.
-    const enum xnn_status status = release_memory(old_pointer, old_capacity);
-    if (status != xnn_status_success) {
-      xnn_log_error("releasing old buffer failed, this could be a leak of %zu bytes", old_capacity);
-      // Log but proceed as per normal since we successfully allocated a new memory that can be used by the caller.
-    }
-    xnn_log_debug("resize_buffer: allocate memory, old capacity %zu to new capacity %zu", old_capacity, new_capacity);
-  #endif
+#if XNN_PLATFORM_LINUX
+  void* new_pointer =
+      mremap(old_pointer, old_capacity, new_capacity, MREMAP_MAYMOVE, NULL);
+  if (new_pointer == MAP_FAILED) {
+    xnn_log_error("mremap failed with errno: %d", errno);
+    return NULL;
+  }
+  set_vma_name(new_pointer, new_capacity, vma_name);
+  xnn_log_debug("resize_buffer: remap, old capacity %zu to new capacity %zu",
+                old_capacity, new_capacity);
+#else
+  void* new_pointer = allocate_buffer(new_capacity, vma_name);
+  if (new_pointer == NULL) {
+    xnn_log_error("allocate_buffer failed");
+    return NULL;
+  }
+  memcpy(new_pointer, old_pointer, old_size);
+  // Release old code_buffer.
+  const enum xnn_status status = release_memory(old_pointer, old_capacity);
+  if (status != xnn_status_success) {
+    xnn_log_error(
+        "releasing old buffer failed, this could be a leak of %zu bytes",
+        old_capacity);
+    // Log but proceed as per normal since we successfully allocated a new
+    // memory that can be used by the caller.
+  }
+  xnn_log_debug(
+      "resize_buffer: allocate memory, old capacity %zu to new capacity %zu",
+      old_capacity, new_capacity);
+#endif
   *new_capacity_out = new_capacity;
   return new_pointer;
 }
@@ -292,7 +321,7 @@ enum xnn_status xnn_allocate_weights_memory(
     return xnn_status_out_of_memory;
   }
   const size_t page_aligned_size = round_up_po2(size, page_size);
-  buffer->start = allocate_buffer(page_aligned_size);
+  buffer->start = allocate_buffer(page_aligned_size, weights_vma_name);
   if (buffer->start == NULL) {
     return xnn_status_out_of_memory;
   }
@@ -337,9 +366,9 @@ enum xnn_status xnn_reserve_weights_memory(
   }
 
   size_t new_capacity = 0;
-  void* new_start = resize_buffer(
-    buffer->start, buffer->size, buffer->capacity, required_capacity,
-    &new_capacity);
+  void* new_start =
+      resize_buffer(buffer->start, buffer->size, buffer->capacity,
+                    required_capacity, weights_vma_name, &new_capacity);
   if (new_start == NULL) {
     xnn_log_error("failed to reserve weights memory");
     return xnn_status_out_of_memory;
@@ -360,5 +389,11 @@ enum xnn_status xnn_finalize_weights_memory(struct xnn_weights_buffer* buffer) {
     return xnn_status_success;
   }
 
-  return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_only);
+  const enum xnn_status perm_status = set_memory_permission(
+      buffer->start, buffer->size, xnn_memory_permission_read_only);
+  if (perm_status != xnn_status_success) {
+    return perm_status;
+  }
+  set_vma_name(buffer->start, buffer->capacity, weights_vma_name);
+  return xnn_status_success;
 }
