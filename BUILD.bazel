@@ -845,6 +845,14 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "arm_sme_abi_stubs",
+    srcs = [
+        "src/arm-sme-abi-stubs.c",
+    ],
+    deps = [":common"],
+)
+
+xnnpack_cc_library(
     name = "sanitizers",
     srcs = [
         "src/sanitizers.c",
@@ -1443,6 +1451,12 @@ config_setting(
     define_values = {"xnn_enable_hmp": "false"},
 )
 
+# Enables usage of ARM SME2 ACLE kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_acle_explicit_true",
+    define_values = {"xnn_enable_arm_sme2_acle": "true"},
+)
+
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
 config_setting(
     name = "xnn_enable_wasm_revectorize_explicit_true",
@@ -1691,6 +1705,12 @@ alias(
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
         "//conditions:default": ":arm_sme2_enabled_by_default",
     }),
+)
+
+# ARM SME2 ACLE kernels are only enabled if explicitly enabled (default off)
+alias(
+    name = "arm_sme2_acle_enabled",
+    actual = ":xnn_enable_arm_sme2_acle_explicit_true",
 )
 
 selects.config_setting_group(

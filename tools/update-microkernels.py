@@ -69,6 +69,7 @@ _ISA_LIST = frozenset({
     'rvv',
     'rvvfp16arith',
     'scalar',
+    'sme2',
     'sse',
     'sse2',
     'sse2fma',
@@ -85,6 +86,7 @@ _ISA_LIST = frozenset({
 })
 
 _ISA_MAP = {
+    'sme2': 'neonsme2',
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',

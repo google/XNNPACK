@@ -32,6 +32,33 @@ XNN_INIT_ONCE_GUARD(x16_pack_lh);
 XNN_INIT_ONCE_GUARD(x32_pack_lh);
 XNN_INIT_ONCE_GUARD(x32_igemm_pack_lh);
 XNN_INIT_ONCE_GUARD(x8_igemm_pack_lh);
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
+// The SME2 LHS packer only supports a subset of packing parameters, so all
+// other parameters are dispatched to the generic packer. This dispatch lives
+// here rather than inside the SME2 microkernel so that
+// tools/update-microkernels.py does not mistake the calls
+// to the generic packers for duplicate microkernel definitions.
+static void pack_qp8_lh_sme2_with_fallback(size_t m, size_t k, size_t mr,
+                                           size_t kr, size_t sr,
+                                           size_t m_idx_start, const void* lhs,
+                                           size_t lhs_stride,
+                                           void* lhs_packed) {
+  if (xnn_x8_packq_f32qp8_sme2_is_supported(k, mr, kr, sr, lhs_stride)) {
+    xnn_x8_packq_f32qp8_ukernel__sme2(m, k, mr, kr, sr, m_idx_start,
+                                      (const float*)lhs, lhs_stride,
+                                      lhs_packed);
+    return;
+  }
+#if XNN_ENABLE_KLEIDIAI
+  xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(
+      m, k, mr, kr, sr, m_idx_start, (const float*)lhs, lhs_stride, lhs_packed);
+#else
+  xnn_x8_packq_f32qp8_ukernel__scalar_u1(
+      m, k, mr, kr, sr, m_idx_start, (const float*)lhs, lhs_stride, lhs_packed);
+#endif  // XNN_ENABLE_KLEIDIAI
+}
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
 XNN_INIT_ONCE_GUARD(x16_igemm_pack_lh);
 
 static void init_qp8_pack_lh_config(void) {
@@ -42,6 +69,14 @@ static void init_qp8_pack_lh_config(void) {
   qp8_pack_lh_config.pack_lh_fn =
       (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__scalar_u1;
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+    qp8_pack_lh_config.pack_lh_fn = pack_qp8_lh_sme2_with_fallback;
+  }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME2_ACLE
   qp8_pack_lh_config.size_fn =
       (xnn_pack_lh_size_fn)xnn_x8_packq_f32qp8_packed_size;
   qp8_pack_lh_config.offset_fn =
