@@ -25,12 +25,30 @@ cc_library(
         "numerical_test_suite.h",
     ],
     deps = [
+        ":quantized_test_utils",
         "//litert/tensor",
         "//litert/tensor:arithmetic",
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
+        "@abseil-cpp//absl/base:no_destructor",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest",  # lib test only
+    ],
+)
+
+# Quantized weights and float references for backend tests.
+cc_library(
+    name = "quantized_test_utils",
+    testonly = 1,
+    hdrs = ["quantized_test_utils.h"],
+    deps = [
+        "//litert/tensor",
+        "//litert/tensor:datatypes",
+        "@abseil-cpp//absl/log:absl_check",
+        "@abseil-cpp//absl/types:span",
     ],
 )
