@@ -102,4 +102,19 @@ uint64_t get_supported_arch_flags() {
   return flags;
 }
 
+size_t get_l2_cache_size() {
+  static const size_t size = []() -> size_t {
+#ifdef YNN_ENABLE_CPUINFO
+    if (cpuinfo_initialize()) {
+      const cpuinfo_cache* cache = cpuinfo_get_l2_cache(0);
+      if (cache && cache->size > 0) {
+        return cache->size;
+      }
+    }
+#endif  // YNN_ENABLE_CPUINFO
+    return 512 * 1024;
+  }();
+  return size;
+}
+
 }  // namespace ynn

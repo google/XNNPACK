@@ -173,9 +173,8 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
 
   double t = benchmark([&]() {
     dot_kernel_state kernel_state = {};
-    run_dot(loops, m, n, ks, kernel.block_m, kernel.block_n, kernel.block_k,
-            a_stride_m, a_k_strides, a.base(), b_k_strides, b_stride_n,
-            b.base(), 0, nullptr, c_stride_m, c_stride_n, c.base(),
+    run_dot(loops, m, n, ks, a_stride_m, a_k_strides, a.base(), b_k_strides,
+            b_stride_n, b.base(), 0, nullptr, c_stride_m, c_stride_n, c.base(),
             kernel_wrapper, &kernel_state);
   });
   // Check that the kernel didn't compute the wrong thing. We assume the kernel
@@ -208,7 +207,7 @@ int main(int argc, char** argv) {
   std::vector<ynn::dot_loop> loops;
   for (int i = 3; i < argc; ++i) {
     ynn::dot_loop loop = ynn::parse_dot_loop(argv[i]);
-    if (loop.dim < 0 || loop.blocks == 0) {
+    if (loop.dim < 0 || loop.step == 0) {
       std::cerr << "Error parsing loop specifier: " << argv[i] << std::endl;
       return 1;
     }
@@ -223,24 +222,24 @@ int main(int argc, char** argv) {
   }
 
   // Kernels require an outer loop for m, make sure we have one.
-  size_t min_block_m = -1;
-  // The dot loops are interpreted as a multiple of blocks. To make this CLI
-  // easier to use, we convert the input to blocks from elements.
+  size_t min_step_m = -1;
   for (ynn::dot_loop& loop : loops) {
     switch (loop.dim) {
       case ynn::dot_loop::m:
-        loop.blocks = ynn::ceil_div(loop.blocks, kernel.block_m);
-        min_block_m = std::min(min_block_m, loop.blocks);
+        loop.step = ynn::align_up(loop.step, kernel.block_m);
+        min_step_m = std::min(min_step_m, loop.step);
         break;
       case ynn::dot_loop::n:
-        loop.blocks = ynn::ceil_div(loop.blocks, kernel.block_n);
+        loop.step = ynn::align_up(loop.step, kernel.block_n);
         break;
       case ynn::dot_loop::k:
-        loop.blocks = ynn::ceil_div(loop.blocks, kernel.block_k);
+        loop.step = ynn::align_up(loop.step, kernel.block_k);
         break;
     }
   }
-  if (min_block_m > 1) loops.push_back({ynn::dot_loop::m, 1});
+  if (min_step_m > kernel.block_m) {
+    loops.push_back({ynn::dot_loop::m, kernel.block_m});
+  }
 
   double t = ynn::SwitchThreeTypes(kernel.type, [&](auto a, auto b, auto c) {
     return ynn::run_benchmark(a, b, c, kernel, shape.m, shape.n, shape.k,
