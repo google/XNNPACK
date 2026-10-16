@@ -364,7 +364,8 @@ class GemmMicrokernelTester {
   void Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
             xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
             xnn_pack_weights_and_biases_fn pack,
-            xnn_packed_stride_weights_and_biases_fn packed_stride);
+            xnn_packed_stride_weights_and_biases_fn packed_stride,
+            xnn_x8_packq_f32qp8_ukernel_fn packq = nullptr);
 
   void Test_QP8F32QC2W(
       xnn_qp8_f32_qc2w_gemm_minmax_ukernel_fn gemm,
@@ -375,7 +376,8 @@ class GemmMicrokernelTester {
   void Test_QP8F32QC8W(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_fn gemm,
                        xnn_init_f32_minmax_params_fn init_minmax_params,
                        xnn_pack_weights_and_biases_fn pack,
-                       xnn_packed_stride_weights_and_biases_fn packed_stride);
+                       xnn_packed_stride_weights_and_biases_fn packed_stride,
+                       xnn_x8_packq_f32qp8_ukernel_fn packq = nullptr);
 
   void Test(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,
             xnn_init_f32_qb4w_minmax_params_fn init_minmax_params,
