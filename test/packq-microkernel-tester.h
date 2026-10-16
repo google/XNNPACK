@@ -66,6 +66,13 @@ class PackQMicrokernelTester {
 
   bool nullbias() const { return this->nullbias_; }
 
+  PackQMicrokernelTester& check_k_padding(bool check_k_padding) {
+    this->check_k_padding_ = check_k_padding;
+    return *this;
+  }
+
+  bool check_k_padding() const { return this->check_k_padding_; }
+
   void Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const;
 
  private:
@@ -75,6 +82,7 @@ class PackQMicrokernelTester {
   size_t kr_{1};
   size_t sr_{1};
   bool nullbias_{false};
+  bool check_k_padding_{true};
 };
 
 };  // namespace xnnpack
