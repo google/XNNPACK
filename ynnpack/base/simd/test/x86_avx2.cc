@@ -83,6 +83,7 @@ TEST_HORIZONTAL_MAX(x86_avx2, s32, 8);
 
 TEST_CAST(x86_avx2, f32, bf16x16);
 TEST_CAST(x86_avx2, f32, bf16x8);
+TEST_CAST(x86_avx2, f16, f8_e5m2x16);
 TEST_CAST(x86_avx2, bf16, f32x16);
 TEST_CAST(x86_avx2, bf16, f32x8);
 TEST_CAST(x86_avx2, s32, u8x16);

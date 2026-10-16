@@ -19,7 +19,7 @@
 
 
 static inline float32x4_t load_bf16_as_f32(const uint16_t* input) {
-  return vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vld1_u16(input)), 16));
+  return vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(input), 16));
 }
 
 static inline uint16x4_t convert_f32_to_bf16(float32x4_t value) {
@@ -132,11 +132,20 @@ void xnn_bf16_vsqr_ukernel__neon_u8(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
+  #if XNN_ARCH_ARM64
+    const uint16x8_t vzero = vdupq_n_u16(0);
+  #endif
   for (; batch >= 8 * sizeof(xnn_bfloat16);
        batch -= 8 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx0 = load_bf16_as_f32(i + 0);
-    const float32x4_t vx1 = load_bf16_as_f32(i + 4);
+    const uint16x8_t vbf0 = vld1q_u16(i + 0);
     i += 8;
+    #if XNN_ARCH_ARM64
+      const float32x4_t vx0 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf0));
+      const float32x4_t vx1 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf0));
+    #else
+      const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf0), 16));
+      const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf0), 16));
+    #endif
 
     const float32x4_t vy0 = vmulq_f32(vx0, vx0);
     const float32x4_t vy1 = vmulq_f32(vx1, vx1);
@@ -174,11 +183,20 @@ void xnn_bf16_vrsqrt_ukernel__neon_u8(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
+  #if XNN_ARCH_ARM64
+    const uint16x8_t vzero = vdupq_n_u16(0);
+  #endif
   for (; batch >= 8 * sizeof(xnn_bfloat16);
        batch -= 8 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx0 = load_bf16_as_f32(i + 0);
-    const float32x4_t vx1 = load_bf16_as_f32(i + 4);
+    const uint16x8_t vbf0 = vld1q_u16(i + 0);
     i += 8;
+    #if XNN_ARCH_ARM64
+      const float32x4_t vx0 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf0));
+      const float32x4_t vx1 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf0));
+    #else
+      const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf0), 16));
+      const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf0), 16));
+    #endif
 
     const float32x4_t vy0 = rsqrt_f32(vx0);
     const float32x4_t vy1 = rsqrt_f32(vx1);
@@ -216,11 +234,20 @@ void xnn_bf16_vsigmoid_ukernel__neon_u8(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
+  #if XNN_ARCH_ARM64
+    const uint16x8_t vzero = vdupq_n_u16(0);
+  #endif
   for (; batch >= 8 * sizeof(xnn_bfloat16);
        batch -= 8 * sizeof(xnn_bfloat16)) {
-    const float32x4_t vx0 = load_bf16_as_f32(i + 0);
-    const float32x4_t vx1 = load_bf16_as_f32(i + 4);
+    const uint16x8_t vbf0 = vld1q_u16(i + 0);
     i += 8;
+    #if XNN_ARCH_ARM64
+      const float32x4_t vx0 = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf0));
+      const float32x4_t vx1 = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf0));
+    #else
+      const float32x4_t vx0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf0), 16));
+      const float32x4_t vx1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf0), 16));
+    #endif
 
     const float32x4_t vy0 = sigmoid_f32(vx0);
     const float32x4_t vy1 = sigmoid_f32(vx1);

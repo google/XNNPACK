@@ -145,14 +145,15 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__aarch64_neondot(
           out += ${4*NR*KR};
         }
 
+        const uint16x8_t vzero = vdupq_n_u16(0);
         $for N in range(0, NR, 8):
-          uint16x8_t bf_scales${N//8} = vdupq_n_u16(0);
+          uint16x8_t bf_scales${N//8} = vzero;
           $for N_I in range(0, 8):
             bf_scales${N//8} = vsetq_lane_u16(s${N + N_I}[0], bf_scales${N//8}, ${N_I});
 
         $for N in range(0, NR, 8):
-          float32x4_t f_scales${N//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales${N//8}), 16));
-          float32x4_t f_scales${(N+4)//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(bf_scales${N//8}), 16));
+          float32x4_t f_scales${N//4} = vreinterpretq_f32_u16(vzip1q_u16(vzero, bf_scales${N//8}));
+          float32x4_t f_scales${(N+4)//4} = vreinterpretq_f32_u16(vzip2q_u16(vzero, bf_scales${N//8}));
 
         $for N in range(0, NR):
           s${N} += 1;

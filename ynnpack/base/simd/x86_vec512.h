@@ -1205,6 +1205,10 @@ YNN_ALWAYS_INLINE f32x16 cast(bf16x16 a, float) {
       _mm512_cvtepu16_epi32(a.v), 16))};
 }
 
+YNN_ALWAYS_INLINE f16x32 cast(f8_e5m2x32 a, half) {
+  return f16x32{_mm512_slli_epi16(_mm512_cvtepu8_epi16(a.v), 8)};
+}
+
 YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
 #ifdef YNN_ARCH_X86_AVX512BF16
   return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(hi(a).v, lo(a).v)};
