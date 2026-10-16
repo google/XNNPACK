@@ -24,7 +24,6 @@ cc_library(
 
 define_build_option(
     name = "ynn_enable_perfetto",
-    default_all = [],
 )
 
 cc_library(

@@ -1101,10 +1101,12 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
 #endif
 #ifdef YNN_ENABLE_TSL_PROFILER
   if (ynn_traceme_enabled()) {
+#ifdef YNN_ENABLE_PERFETTO
     if (ynn::perfetto_session::global()) {
       YNN_LOG_WARNING()
           << "tsl::profiler tracing is overriding perfetto tracing.";
     }
+#endif
     eval_config.trace_begin = [](const char* name) {
       return static_cast<slinky::index_t>(
           tsl::profiler::TraceMe::ActivityStart(name));
