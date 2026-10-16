@@ -593,12 +593,12 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qdu8_f32_qc8w(
 enum xnn_status xnn_reshape_deconvolution2d_nhwc_qdu8_f32_qc8w(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_qdu8_f32_qc8w(
     xnn_operator_t deconvolution_op, const int8_t* input, float* output,
-    const struct xnn_quantization_params* quantization_params);
+    const struct xnn_quantization_params* quantization_params, void* workspace);
 
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w(
     size_t input_channels, size_t output_channels, size_t input_stride,

@@ -97,6 +97,8 @@ void xnn_indirection_init_conv2d(
 
 void xnn_indirection_init_deconv2d(
   size_t output_tile_size,
+  size_t output_start,
+  size_t output_end,
   const void** indirection_buffer,
   const void* input,
   const size_t input_pixel_stride,
@@ -114,16 +116,17 @@ void xnn_indirection_init_deconv2d(
   const size_t padding_top,
   const size_t padding_left)
 {
+  assert(output_height != 0);
+  assert(output_width != 0);
   const size_t output_size = output_height * output_width;
-  const size_t tiled_output_size = round_up(output_size, output_tile_size);
   const size_t kernel_size = kernel_height * kernel_width;
 
-  size_t cur_oy = 0;
-  size_t cur_ox = 0;
+  size_t cur_oy = output_start / output_width;
+  size_t cur_ox = output_start % output_width;
   const size_t clamp_oy = (output_size - 1) / output_width;
   const size_t clamp_ox = (output_size - 1) % output_width;
 
-  for (size_t output_tile_start = 0; output_tile_start < tiled_output_size; output_tile_start += output_tile_size) {
+  for (size_t output_tile_start = output_start; output_tile_start < output_end; output_tile_start += output_tile_size) {
     size_t oy = cur_oy;
     size_t ox = cur_ox;
     for (size_t output_tile_offset = 0; output_tile_offset < output_tile_size; output_tile_offset++) {
@@ -163,15 +166,14 @@ void xnn_indirection_init_deconv2d(
 
 void xnn_indirection_init_subconv2d(
   size_t output_tile_size,
-  const void** indirection_buffer,
-  struct subconvolution_params* subconvolution_params,
+  size_t output_y_start,
+  size_t output_y_end,
+  const struct subconvolution_params* subconvolution_params,
   const void* input,
   const size_t input_pixel_stride,
   const void* zero,
   const size_t input_height,
   const size_t input_width,
-  const size_t output_height,
-  const size_t output_width,
   const size_t kernel_height,
   const size_t kernel_width,
   const size_t stride_height,
@@ -182,17 +184,18 @@ void xnn_indirection_init_subconv2d(
   const size_t modulo_padding_top = padding_top % stride_height;
   const size_t modulo_padding_left = padding_left % stride_width;
   for (size_t offset_y = 0; offset_y < stride_height; offset_y++) {
-    const size_t output_y_start = subtract_modulo(offset_y, modulo_padding_top, stride_height);
+    const size_t slice_output_y_start = subtract_modulo(offset_y, modulo_padding_top, stride_height);
     for (size_t offset_x = 0; offset_x < stride_width; offset_x++) {
-      const size_t output_x_start = subtract_modulo(offset_x, modulo_padding_left, stride_width);
-      const size_t sliced_output_width = divide_round_up(doz(output_width, output_x_start), stride_width);
+      const size_t slice_output_x_start = subtract_modulo(offset_x, modulo_padding_left, stride_width);
+      const size_t sliced_output_height = subconvolution_params->slice_height;
+      const size_t sliced_output_width = subconvolution_params->slice_width;
+      const size_t slice_y_end = min(output_y_end, sliced_output_height);
+      const void** indirection_buffer =
+          (const void**) ((uintptr_t) subconvolution_params->indirection_buffer +
+                          output_y_start * subconvolution_params->indirection_y_stride);
 
-      subconvolution_params->indirection_buffer = indirection_buffer;
-      subconvolution_params->indirection_y_stride =
-        subconvolution_params->indirection_x_stride * round_up(sliced_output_width, output_tile_size);
-      ++subconvolution_params;
-
-      for (size_t output_y = output_y_start; output_y < output_height; output_y += stride_height) {
+      for (size_t slice_y = output_y_start; slice_y < slice_y_end; slice_y++) {
+        const size_t output_y = slice_output_y_start + slice_y * stride_height;
         for (size_t output_tile_start = 0; output_tile_start < sliced_output_width; output_tile_start += output_tile_size) {
           for (size_t kernel_y = offset_y; kernel_y < kernel_height; kernel_y += stride_height) {
             assert(doz(output_y + padding_top, kernel_y) % stride_height == 0);
@@ -202,7 +205,7 @@ void xnn_indirection_init_subconv2d(
             for (size_t kernel_x = offset_x; kernel_x < kernel_width; kernel_x += stride_width) {
               for (size_t output_tile_offset = 0; output_tile_offset < output_tile_size; output_tile_offset++) {
                 const size_t sliced_output_x = min(output_tile_start + output_tile_offset, sliced_output_width - 1);
-                const size_t output_x = output_x_start + sliced_output_x * stride_width;
+                const size_t output_x = slice_output_x_start + sliced_output_x * stride_width;
 
                 assert(doz(output_x + padding_left, kernel_x) % stride_width == 0);
                 const size_t x = output_x + padding_left - kernel_x;
@@ -219,6 +222,7 @@ void xnn_indirection_init_subconv2d(
           }
         }
       }
+      ++subconvolution_params;
     }
   }
 }

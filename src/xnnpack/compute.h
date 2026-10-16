@@ -604,6 +604,10 @@ XNN_PRIVATE void xnn_compute_conv2d_igemm_indirection(
     struct conv2d_igemm_indirection_init_context* context,
     size_t output_tile_start, size_t output_tile_size);
 
+XNN_PRIVATE void xnn_compute_deconv2d_igemm_indirection(
+    struct conv2d_igemm_indirection_init_context* context,
+    size_t output_tile_start, size_t output_tile_size);
+
 XNN_PRIVATE void xnn_compute_inline_packed_igemm(
     struct igemm_context* context, uint32_t thread_id, size_t batch_index,
     size_t group_index, size_t mr_block_start, size_t mr_block_size);
@@ -667,6 +671,27 @@ XNN_PRIVATE void xnn_compute_dqsubconv2d(
     struct subconv_context* context, size_t batch_index, size_t group_index,
     size_t subkernel_index, size_t slice_y, size_t slice_x_start,
     size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
+
+// Context for initializing the indirection buffer for subconv2d.
+struct subconv2d_indirection_init_context {
+  const struct subconvolution_params* subconvolution_params;
+  const void* input;
+  const void* zero_buffer;
+  size_t input_pixel_stride;
+  size_t input_height;
+  size_t input_width;
+  size_t kernel_height;
+  size_t kernel_width;
+  size_t stride_height;
+  size_t stride_width;
+  size_t padding_top;
+  size_t padding_left;
+  size_t mr;
+};
+
+XNN_PRIVATE void xnn_compute_subconv2d_indirection(
+    struct subconv2d_indirection_init_context* context, size_t slice_y_start,
+    size_t slice_y_size);
 
 struct conv2d_context {
   size_t input_height;

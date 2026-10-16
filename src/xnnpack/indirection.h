@@ -67,7 +67,8 @@ XNN_INTERNAL void xnn_indirection_init_dwconv2d(
     size_t step_height, size_t step_width, size_t primary_tile);
 
 XNN_INTERNAL void xnn_indirection_init_deconv2d(
-    size_t output_tile_size, const void** indirection_buffer, const void* input,
+    size_t output_tile_size, size_t output_start, size_t output_end,
+    const void** indirection_buffer, const void* input,
     size_t input_pixel_stride, const void* zero, size_t input_height,
     size_t input_width, size_t output_height, size_t output_width,
     size_t kernel_height, size_t kernel_width, size_t stride_height,
@@ -75,12 +76,12 @@ XNN_INTERNAL void xnn_indirection_init_deconv2d(
     size_t padding_top, size_t padding_left);
 
 XNN_INTERNAL void xnn_indirection_init_subconv2d(
-    size_t output_tile_size, const void** indirection_buffer,
-    struct subconvolution_params* subconvolution_params, const void* input,
-    size_t input_pixel_stride, const void* zero, size_t input_height,
-    size_t input_width, size_t output_height, size_t output_width,
-    size_t kernel_height, size_t kernel_width, size_t stride_height,
-    size_t stride_width, size_t padding_top, size_t padding_left);
+    size_t output_tile_size, size_t output_y_start, size_t output_y_end,
+    const struct subconvolution_params* subconvolution_params,
+    const void* input, size_t input_pixel_stride, const void* zero,
+    size_t input_height, size_t input_width, size_t kernel_height,
+    size_t kernel_width, size_t stride_height, size_t stride_width,
+    size_t padding_top, size_t padding_left);
 
 XNN_INTERNAL void xnn_indirection_init_maxpool2d(
     const void** indirection_buffer, const void* input,

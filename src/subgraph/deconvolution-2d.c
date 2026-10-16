@@ -70,7 +70,7 @@ static enum xnn_status create_deconvolution_operator(
     case xnn_datatype_fp16: {
       uint32_t flags = node->flags;
       if (filter_datatype == xnn_datatype_fp32) {
-        flags = XNN_FLAG_FP32_STATIC_WEIGHTS;
+        flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
       }
       status = xnn_create_deconvolution2d_nhwc_f16(
           node->params.deconvolution_2d.padding_top,
@@ -440,49 +440,49 @@ static enum xnn_status reshape_deconvolution_operator(
 
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
-  size_t output_height, output_width;
+  size_t output_height = 0, output_width = 0;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_deconvolution_nhwc_f16:
       status = xnn_reshape_deconvolution2d_nhwc_f16(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_f32:
       status = xnn_reshape_deconvolution2d_nhwc_f32(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_qs8:
       status = xnn_reshape_deconvolution2d_nhwc_qs8(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_qs8_qc8w:
       status = xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_qu8:
       status = xnn_reshape_deconvolution2d_nhwc_qu8(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w:
       status = xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_qdu8_f32_qc8w:
       status = xnn_reshape_deconvolution2d_nhwc_qdu8_f32_qc8w(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           opdata->adjustment_height, opdata->adjustment_width, &output_height,
-          &output_width, threadpool);
+          &output_width, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w:
       status = xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
@@ -546,23 +546,28 @@ static enum xnn_status setup_deconvolution_operator(
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_deconvolution_nhwc_f16:
       return xnn_setup_deconvolution2d_nhwc_f16(opdata->operator_objects[0],
-                                                input_data, output_data);
+                                                input_data, output_data,
+                                                opdata->workspace);
       break;
     case xnn_operator_type_deconvolution_nhwc_f32:
       return xnn_setup_deconvolution2d_nhwc_f32(opdata->operator_objects[0],
-                                                input_data, output_data);
+                                                input_data, output_data,
+                                                opdata->workspace);
       break;
     case xnn_operator_type_deconvolution_nhwc_qs8:
       return xnn_setup_deconvolution2d_nhwc_qs8(opdata->operator_objects[0],
-                                                input_data, output_data);
+                                                input_data, output_data,
+                                                opdata->workspace);
       break;
     case xnn_operator_type_deconvolution_nhwc_qs8_qc8w:
       return xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
-          opdata->operator_objects[0], input_data, output_data);
+          opdata->operator_objects[0], input_data, output_data,
+          opdata->workspace);
       break;
     case xnn_operator_type_deconvolution_nhwc_qu8:
       return xnn_setup_deconvolution2d_nhwc_qu8(opdata->operator_objects[0],
-                                                input_data, output_data);
+                                                input_data, output_data,
+                                                opdata->workspace);
       break;
     case xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w: {
       const void* quantization_params =
@@ -570,7 +575,7 @@ static enum xnn_status setup_deconvolution_operator(
       assert(quantization_params != NULL);
       return xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
           opdata->operator_objects[0], input_data, output_data,
-          quantization_params);
+          quantization_params, opdata->workspace);
     } break;
     case xnn_operator_type_deconvolution_nhwc_qdu8_f32_qc8w: {
       const void* quantization_params =
@@ -578,7 +583,7 @@ static enum xnn_status setup_deconvolution_operator(
       assert(quantization_params != NULL);
       return xnn_setup_deconvolution2d_nhwc_qdu8_f32_qc8w(
           opdata->operator_objects[0], input_data, output_data,
-          quantization_params);
+          quantization_params, opdata->workspace);
     } break;
     case xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w:
       return xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
@@ -766,6 +771,15 @@ enum xnn_status xnn_define_deconvolution_2d(
                                              output_min, output_max);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  const uint32_t invalid_flags = flags & ~XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+  if (invalid_flags != 0) {
+    xnn_log_error("failed to define %s operator with 0x%08" PRIx32
+                  " flags: invalid flags 0x%08" PRIx32,
+                  xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
+                  flags, invalid_flags);
+    return xnn_status_invalid_parameter;
   }
 
   if ((status = xnn_subgraph_check_input_node_id(

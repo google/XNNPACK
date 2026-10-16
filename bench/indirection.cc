@@ -64,11 +64,11 @@ static void BM_indirection_init_deconv2d(benchmark::State& state) {
 
   for (auto _ : state) {
     xnn_indirection_init_deconv2d(
-      output_tile_size,
-      indirection_buffer.data(), input.data(), input_pixel_stride, zero_buffer.data(),
-      input_height, input_width, output_height, output_width,
-      kernel_height, kernel_width, stride_height, stride_width,
-      dilation_height, dilation_width, padding_top, padding_left);
+        output_tile_size, 0, output_height * output_width,
+        indirection_buffer.data(), input.data(), input_pixel_stride,
+        zero_buffer.data(), input_height, input_width, output_height,
+        output_width, kernel_height, kernel_width, stride_height, stride_width,
+        dilation_height, dilation_width, padding_top, padding_left);
   }
 }
 BENCHMARK(BM_indirection_init_deconv2d)->Args({224, 224})->Args({64, 64});
