@@ -2810,11 +2810,57 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
   }
 }
 
+static void PackQp8Lhs(xnn_x8_packq_f32qp8_ukernel_fn packq, size_t m, size_t k,
+                       size_t mr_packed, size_t kr, size_t sr,
+                       const float* input, int8_t* input_qp8) {
+  if (packq == nullptr) {
+    xnn_x8_packq_f32qp8_ukernel__scalar_u1(m, k, mr_packed, kr, sr,
+                                           /*m_idx_start=*/0, input,
+                                           /*lhs_stride=*/k * sizeof(float),
+                                           input_qp8);
+    return;
+  }
+  packq(m, k, mr_packed, kr, sr, 0, input, k * sizeof(float), input_qp8);
+
+  const size_t input_packed_size =
+      xnn_x8_packq_f32qp8_packed_size(m, k, mr_packed, kr, sr);
+  xnnpack::Buffer<int8_t> input_qp8_ref(input_packed_size);
+  xnn_x8_packq_f32qp8_ukernel__scalar_u1(m, k, mr_packed, kr, sr, 0, input,
+                                         k * sizeof(float),
+                                         input_qp8_ref.data());
+
+  for (size_t m_index = 0; m_index < m; m_index++) {
+    ASSERT_EQ(xnn_x8_packq_f32qp8_get_neg_nudged_zp(m_index, input_qp8, k,
+                                                    mr_packed, kr, sr),
+              xnn_x8_packq_f32qp8_get_neg_nudged_zp(
+                  m_index, input_qp8_ref.data(), k, mr_packed, kr, sr))
+        << "packq zero point mismatch at row " << m_index << ", M x K = " << m
+        << " x " << k << ", mr_packed = " << mr_packed;
+    ASSERT_EQ(xnn_x8_packq_f32qp8_get_recip_scale(m_index, input_qp8, k,
+                                                  mr_packed, kr, sr),
+              xnn_x8_packq_f32qp8_get_recip_scale(m_index, input_qp8_ref.data(),
+                                                  k, mr_packed, kr, sr))
+        << "packq scale mismatch at row " << m_index << ", M x K = " << m
+        << " x " << k << ", mr_packed = " << mr_packed;
+    for (size_t k_index = 0; k_index < k; k_index++) {
+      const int32_t q = xnn_x8_packq_f32qp8_get_quantized(
+          m_index, k_index, input_qp8, k, mr_packed, kr, sr);
+      const int32_t q_ref = xnn_x8_packq_f32qp8_get_quantized(
+          m_index, k_index, input_qp8_ref.data(), k, mr_packed, kr, sr);
+      ASSERT_EQ(q, q_ref) << "packq quantized value mismatch at " << m_index
+                          << ", " << k_index << ": reference = " << q_ref
+                          << ", optimized = " << q << ", M x K = " << m << " x "
+                          << k << ", mr_packed = " << mr_packed;
+    }
+  }
+}
+
 void GemmMicrokernelTester::Test(
     xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
     xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
     xnn_pack_weights_and_biases_fn pack,
-    xnn_packed_stride_weights_and_biases_fn packed_stride) {
+    xnn_packed_stride_weights_and_biases_fn packed_stride,
+    xnn_x8_packq_f32qp8_ukernel_fn packq) {
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -2857,10 +2903,11 @@ void GemmMicrokernelTester::Test(
   const size_t input_packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k2, mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
-  xnn_x8_packq_f32qp8_ukernel__scalar_u1(m(), k2, mr_packed(), kr(), sr(),
-                                         /*m_idx_start=*/0, input_f32.data(),
-                                         /*lhs_stride=*/k2 * sizeof(float),
-                                         input_qp8.data());
+  PackQp8Lhs(packq, m(), k2, mr_packed(), kr(), sr(), input_f32.data(),
+             input_qp8.data());
+  if (::testing::Test::HasFatalFailure()) {
+    return;
+  }
 
   std::generate(b.begin(), b.end(), std::ref(w8rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -2938,7 +2985,8 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
     xnn_qp8_f32_qc8w_gemm_minmax_ukernel_fn gemm,
     xnn_init_f32_minmax_params_fn init_minmax_params,
     xnn_pack_weights_and_biases_fn pack,
-    xnn_packed_stride_weights_and_biases_fn packed_stride) {
+    xnn_packed_stride_weights_and_biases_fn packed_stride,
+    xnn_x8_packq_f32qp8_ukernel_fn packq) {
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -2979,11 +3027,13 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
   // Quantize the left-hand operand.
   const size_t input_packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k(), mr_packed(), kr(), sr());
-  xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
-  xnn_x8_packq_f32qp8_ukernel__scalar_u1(m(), k(), mr_packed(), kr(), sr(),
-                                         /*m_idx_start=*/0, input_f32.data(),
-                                         /*lhs_stride=*/k() * sizeof(float),
-                                         input_qp8.data());
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input_qp8(
+      input_packed_size);
+  PackQp8Lhs(packq, m(), k(), mr_packed(), kr(), sr(), input_f32.data(),
+             input_qp8.data());
+  if (::testing::Test::HasFatalFailure()) {
+    return;
+  }
 
   std::generate(b.begin(), b.end(), std::ref(w8rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));

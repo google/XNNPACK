@@ -13,4 +13,12 @@ XNN_UKERNEL(xnn_arch_none, xnn_x8_packq_f32qp8_ukernel__scalar_u1, 1)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2, 2)
 #endif  // XNN_ENABLE_KLEIDIAI
 
+#if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_sme, xnn_x8_packq_f32qp8_ukernel__sme, 1)
+#endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_packq_f32qp8_ukernel__sme2, 1)
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+
 
