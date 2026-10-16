@@ -6,8 +6,8 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_DOT_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_DOT_H_
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/dot.h"
@@ -26,7 +26,7 @@ bool prefer_uint8_dot(ynn_type b_type);
 
 uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
-                       bool consistent_arithmetic, uint32_t input_b_id);
+                       uint32_t input_b_id);
 
 }  // namespace ynn
 
