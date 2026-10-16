@@ -51,10 +51,13 @@ static void init_f16_spmm_config(void) {
       f16_spmm_config.nr = 1;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
-      f16_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f16_spmm_minmax_ukernel_8vx1__rvvfp16arith);
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) &&
+        hardware_config->vlenb >= sizeof(xnn_float16)) {
+      f16_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(
+          xnn_f16_spmm_minmax_ukernel_8vx1__rvvfp16arith);
       f16_spmm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(xnn_float16);
       f16_spmm_config.nr = 1;
@@ -95,12 +98,23 @@ static void init_f32_spmm_config(void) {
       }
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    f32_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8vx1__rvv);
-    f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    f32_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(float);
-    f32_spmm_config.nr = 1;
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_spmm_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8vx1__rvv);
+      f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(float);
+      f32_spmm_config.nr = 1;
+    } else {
+      f32_spmm_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x1__scalar);
+      f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm_config.mr = 8;
+      f32_spmm_config.nr = 1;
+    }
   #elif XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -158,11 +172,23 @@ static void init_f32_spmm2_config(void) {
     f32_spmm2_config.mr = 32;
     f32_spmm2_config.nr = 2;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    f32_spmm2_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8vx2__rvv);
-    f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    f32_spmm2_config.mr = 8 * hardware_config->vlenb / sizeof(float);
-    f32_spmm2_config.nr = 2;
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_spmm2_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8vx2__rvv);
+      f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm2_config.mr = 8 * hardware_config->vlenb / sizeof(float);
+      f32_spmm2_config.nr = 2;
+    } else {
+      f32_spmm2_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x2__scalar);
+      f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm2_config.mr = 8;
+      f32_spmm2_config.nr = 2;
+    }
   #else
     f32_spmm2_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x2__scalar);
     f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -183,11 +209,23 @@ static void init_f32_spmm4_config(void) {
     f32_spmm4_config.mr = 32;
     f32_spmm4_config.nr = 4;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    f32_spmm4_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_4vx4__rvv);
-    f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    f32_spmm4_config.mr = 4 * hardware_config->vlenb / sizeof(float);
-    f32_spmm4_config.nr = 4;
+    const struct xnn_hardware_config* hardware_config =
+        xnn_init_hardware_config();
+    if (hardware_config != NULL &&
+        (hardware_config->arch_flags & xnn_arch_riscv_vector) &&
+        hardware_config->vlenb >= sizeof(float)) {
+      f32_spmm4_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_4vx4__rvv);
+      f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm4_config.mr = 4 * hardware_config->vlenb / sizeof(float);
+      f32_spmm4_config.nr = 4;
+    } else {
+      f32_spmm4_config.ukernel =
+          XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x4__scalar);
+      f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_spmm4_config.mr = 8;
+      f32_spmm4_config.nr = 4;
+    }
   #else
     f32_spmm4_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x4__scalar);
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
