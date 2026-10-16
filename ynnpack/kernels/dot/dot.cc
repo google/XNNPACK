@@ -193,6 +193,7 @@ void dot_fp32_1xNx1_1x1x1(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
             static_cast<float*>(c_out));
 }
 
+#ifdef YNN_ENABLE_FP64
 void dot_fp64_1xNx1_1x1x1(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
                           size_t a_stride_m, size_t a_stride_k3,
                           size_t a_stride_k2, const void* a, size_t b_stride_k3,
@@ -206,6 +207,7 @@ void dot_fp64_1xNx1_1x1x1(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
             static_cast<const double*>(c_in), c_out_stride_m,
             static_cast<double*>(c_out));
 }
+#endif
 
 void dot_fp16_fp16_fp32_1xNx1_1x1x1(size_t m, size_t n, size_t k3, size_t k2,
                                     size_t k1, size_t a_stride_m,
@@ -534,7 +536,9 @@ dot_kernel get_dot_kernel(const dot_type& type,
                                    required_flags, transpose_a, arch_flags, \
                                    thread_count);
   switch (dot_type_id(type.a, type.b, type.c)) {
+#ifdef YNN_ENABLE_FP64
     GET_DOT_KERNEL_CASE(double, double, double);
+#endif
     GET_DOT_KERNEL_CASE(float, float, float);
     GET_DOT_KERNEL_CASE(half, half, float);
     GET_DOT_KERNEL_CASE(bfloat16, bfloat16, float);

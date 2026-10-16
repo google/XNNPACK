@@ -37,9 +37,11 @@ using float32x1_t = float;
 using float64x1_t = double;
 #endif
 
-// TODO: b/501068911 - When we have an option to disable fp64 support, we should
-// make this float when fp64 is disabled.
+#ifdef YNN_ENABLE_FP64
 using real = double;
+#else
+using real = float;
+#endif
 
 // Returns true if the type is an integer type.
 bool type_is_integral(ynn_type t);
@@ -358,8 +360,10 @@ constexpr decltype(auto) SwitchRealType(ynn_type type, F&& f) {
       return std::forward<F>(f)(fp8_e4m3());
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
+#ifdef YNN_ENABLE_FP64
     case ynn_type_fp64:
       return std::forward<F>(f)(double());
+#endif
     default:
       YNN_UNREACHABLE;
   }

@@ -1817,4 +1817,11 @@ class Target:
         f" {flags}, {types})\n"
     )
 
+    is_f64 = any(b.ty == Float(64) for b in buffer_args) or any(
+        s.ty == Float(64) for s in scalar_args
+    )
+    if is_f64:
+      src = "#ifdef YNN_ENABLE_FP64\n" + src + "#endif  // YNN_ENABLE_F64\n"
+      inc = "#ifdef YNN_ENABLE_FP64\n" + inc + "#endif  // YNN_ENABLE_F64\n"
+
     return src, inc

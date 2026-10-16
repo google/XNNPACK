@@ -23,8 +23,10 @@
 
 namespace ynn {
 
+#ifdef YNN_ENABLE_FP64
 SUM_FLOAT_K1_KERNEL(sum_k1_fp64, double, double, 0, 1, identity);
 SUM_FLOAT_KN_KERNEL(sum_kn_fp64, double, double, 1, identity);
+#endif
 SUM_FLOAT_K1_KERNEL(sum_k1_fp32, float, float, 0, 1, identity);
 SUM_FLOAT_KN_KERNEL(sum_kn_fp32, float, float, 1, identity);
 SUM_FLOAT_K1_KERNEL(sum_k1_bf16_fp32, bfloat16, float, 0, 1, identity);
@@ -38,8 +40,10 @@ SUM_KN_KERNEL(sum_kn_int8_int32, int8_t, int32_t, 1, identity);
 SUM_K1_KERNEL(sum_k1_uint8_int32, uint8_t, int32_t, 1, 1, identity);
 SUM_KN_KERNEL(sum_kn_uint8_int32, uint8_t, int32_t, 1, identity);
 
+#ifdef YNN_ENABLE_FP64
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp64, double, double, 0, 1, square);
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp64, double, double, 1, square);
+#endif
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp32, float, float, 0, 1, square);
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp32, float, float, 1, square);
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_bf16_fp32, bfloat16, float, 0, 1, square);
@@ -54,7 +58,9 @@ SUM_K1_KERNEL(sum_squared_k1_uint8_int32, uint8_t, int32_t, 1, 1, square);
 SUM_KN_KERNEL(sum_squared_kn_uint8_int32, uint8_t, int32_t, 1, square);
 
 // min/max kernels
+#ifdef YNN_ENABLE_FP64
 using f64x1 = simd::vec<double, 1>;
+#endif
 using f32x1 = simd::vec<float, 1>;
 using s32x1 = simd::vec<int32_t, 1>;
 using s8x1 = simd::vec<int8_t, 1>;
@@ -62,8 +68,10 @@ using u8x1 = simd::vec<uint8_t, 1>;
 using xf16x1 = sign_magnitude<simd::vec<int16_t, 1>>;
 using xf8x1 = sign_magnitude<simd::vec<int8_t, 1>>;
 
+#ifdef YNN_ENABLE_FP64
 MIN_MAX_K1_KERNEL(min_k1_fp64, f64x1, dummy_t, double, 1);
 MIN_MAX_KN_KERNEL(min_kn_fp64, f64x1, dummy_t, double, 1);
+#endif
 MIN_MAX_K1_KERNEL(min_k1_fp32, f32x1, dummy_t, float, 1);
 MIN_MAX_KN_KERNEL(min_kn_fp32, f32x1, dummy_t, float, 1);
 MIN_MAX_K1_KERNEL(min_k1_xf16, xf16x1, dummy_t, int16_t, 1);
@@ -75,8 +83,10 @@ MIN_MAX_KN_KERNEL(min_kn_uint8, u8x1, dummy_t, uint8_t, 1);
 MIN_MAX_K1_KERNEL(min_k1_xf8, xf8x1, dummy_t, int8_t, 1);
 MIN_MAX_KN_KERNEL(min_kn_xf8, xf8x1, dummy_t, int8_t, 1);
 
+#ifdef YNN_ENABLE_FP64
 MIN_MAX_K1_KERNEL(max_k1_fp64, dummy_t, f64x1, double, 1);
 MIN_MAX_KN_KERNEL(max_kn_fp64, dummy_t, f64x1, double, 1);
+#endif
 MIN_MAX_K1_KERNEL(max_k1_fp32, dummy_t, f32x1, float, 1);
 MIN_MAX_KN_KERNEL(max_kn_fp32, dummy_t, f32x1, float, 1);
 MIN_MAX_K1_KERNEL(max_k1_xf16, dummy_t, xf16x1, int16_t, 1);
@@ -88,8 +98,10 @@ MIN_MAX_KN_KERNEL(max_kn_uint8, dummy_t, u8x1, uint8_t, 1);
 MIN_MAX_K1_KERNEL(max_k1_xf8, dummy_t, xf8x1, int8_t, 1);
 MIN_MAX_KN_KERNEL(max_kn_xf8, dummy_t, xf8x1, int8_t, 1);
 
+#ifdef YNN_ENABLE_FP64
 MIN_MAX_K1_KERNEL(min_max_k1_fp64, f64x1, f64x1, double, 1);
 MIN_MAX_KN_KERNEL(min_max_kn_fp64, f64x1, f64x1, double, 1);
+#endif
 MIN_MAX_K1_KERNEL(min_max_k1_fp32, f32x1, f32x1, float, 1);
 MIN_MAX_KN_KERNEL(min_max_kn_fp32, f32x1, f32x1, float, 1);
 MIN_MAX_K1_KERNEL(min_max_k1_xf16, xf16x1, xf16x1, int16_t, 1);
@@ -103,8 +115,10 @@ MIN_MAX_KN_KERNEL(min_max_kn_xf8, xf8x1, xf8x1, int8_t, 1);
 
 PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp32, float, 1);
 PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp32, float, 1);
+#ifdef YNN_ENABLE_FP64
 PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp64, double, 1);
 PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp64, double, 1);
+#endif
 PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp16, half, 1);
 PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp16, half, 1);
 PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_bf16, bfloat16, 1);

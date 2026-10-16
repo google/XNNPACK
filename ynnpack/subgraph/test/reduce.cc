@@ -295,8 +295,7 @@ TEST_P(Reduce, Test) {
 }
 
 multi_type sum_types[] = {
-#if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
-    // TODO(b/501068911): Replace this with YNN_ENABLE_FP64
+#if defined(YNN_ENABLE_FP64)
     multi_type::fp64,
 #endif
     multi_type::fp32,          multi_type::fp16,
@@ -308,8 +307,7 @@ multi_type sum_types[] = {
 };
 
 multi_type min_max_types[] = {
-#if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
-    // TODO(b/501068911): Replace this with YNN_ENABLE_FP64
+#if defined(YNN_ENABLE_FP64)
     multi_type::fp64,
 #endif
     multi_type::fp32,     multi_type::fp16,     multi_type::bf16,

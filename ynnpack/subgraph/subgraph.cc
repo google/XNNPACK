@@ -246,7 +246,11 @@ std::optional<ynn::real> ynn_value::as_scalar() const {
   if (!is_static_scalar()) return std::nullopt;
   switch (type) {
     case ynn_type_fp64:
+#ifdef YNN_ENABLE_FP64
       return static_cast<ynn::real>(static_scalar_value<double>());
+#else
+      break;
+#endif
     case ynn_type_fp32:
       return static_scalar_value<float>();
     case ynn_type_fp16:

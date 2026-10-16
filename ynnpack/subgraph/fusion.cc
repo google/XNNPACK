@@ -165,7 +165,7 @@ std::optional<scalar_arithmetic> is_scalar_arithmetic(
       case ynn_binary_multiply:
         return scalar_arithmetic{&node, node.inputs[0], *b, 0.0};
       case ynn_binary_divide:
-        return scalar_arithmetic{&node, node.inputs[0], 1.0 / *b, 0.0};
+        return scalar_arithmetic{&node, node.inputs[0], real(1.0) / *b, 0.0};
       default:
         return std::nullopt;
     }
@@ -1213,7 +1213,9 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_value* x = &subgraph.value(x_id);
 
   switch (x->type) {
+#ifdef YNN_ENABLE_FP64
     case ynn_type_fp64:
+#endif
     case ynn_type_fp32:
     case ynn_type_int32:
       break;

@@ -2,8 +2,10 @@
 
 #ifdef YNN_ARCH_ARM_NEON
 #ifdef YNN_ARCH_ARM64
+#ifdef YNN_ENABLE_FP64
 YNN_REDUCE_KERNEL(arch_flag::neon, max_k1_fp64_neon, reduce_dim::k1, double, double, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::neon, max_kn_fp64_neon, reduce_dim::kn, double, double, reduce_flag::none)
+#endif  // YNN_ENABLE_FP64
 YNN_REDUCE_KERNEL(arch_flag::neon, max_k1_fp32_neon, reduce_dim::k1, float, float, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::neon, max_kn_fp32_neon, reduce_dim::kn, float, float, reduce_flag::none)
 #else
@@ -65,8 +67,10 @@ YNN_REDUCE_KERNEL(arch_flag::avx512, max_k1_uint8_avx512, reduce_dim::k1, uint8_
 YNN_REDUCE_KERNEL(arch_flag::avx512, max_kn_uint8_avx512, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::avx512, max_k1_fp32_avx512, reduce_dim::k1, float, float, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::avx512, max_kn_fp32_avx512, reduce_dim::kn, float, float, reduce_flag::no_nan)
+#ifdef YNN_ENABLE_FP64
 YNN_REDUCE_KERNEL(arch_flag::avx512, max_k1_fp64_avx512, reduce_dim::k1, double, double, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::avx512, max_kn_fp64_avx512, reduce_dim::kn, double, double, reduce_flag::no_nan)
+#endif  // YNN_ENABLE_FP64
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 YNN_REDUCE_KERNEL(arch_flag::avx2, max_k1_xf16_avx2, reduce_dim::k1, bfloat16, bfloat16, reduce_flag::no_nan)
@@ -85,8 +89,10 @@ YNN_REDUCE_KERNEL(arch_flag::avx2, max_kn_uint8_avx2, reduce_dim::kn, uint8_t, u
 #ifdef YNN_ARCH_X86_AVX
 YNN_REDUCE_KERNEL(arch_flag::avx, max_k1_fp32_avx, reduce_dim::k1, float, float, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::avx, max_kn_fp32_avx, reduce_dim::kn, float, float, reduce_flag::no_nan)
+#ifdef YNN_ENABLE_FP64
 YNN_REDUCE_KERNEL(arch_flag::avx, max_k1_fp64_avx, reduce_dim::k1, double, double, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::avx, max_kn_fp64_avx, reduce_dim::kn, double, double, reduce_flag::no_nan)
+#endif  // YNN_ENABLE_FP64
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_SSE41
 YNN_REDUCE_KERNEL(arch_flag::sse41, max_k1_xf8_sse41, reduce_dim::k1, fp8_e5m2, fp8_e5m2, reduce_flag::no_nan)
@@ -107,8 +113,10 @@ YNN_REDUCE_KERNEL(arch_flag::sse2, max_kn_uint8_sse2, reduce_dim::kn, uint8_t, u
 
 YNN_REDUCE_KERNEL(arch_flag::none, max_k1_fp32, reduce_dim::k1, float, float, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::none, max_kn_fp32, reduce_dim::kn, float, float, reduce_flag::no_nan)
+#ifdef YNN_ENABLE_FP64
 YNN_REDUCE_KERNEL(arch_flag::none, max_k1_fp64, reduce_dim::k1, double, double, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::none, max_kn_fp64, reduce_dim::kn, double, double, reduce_flag::no_nan)
+#endif  // YNN_ENABLE_FP64
 YNN_REDUCE_KERNEL(arch_flag::none, max_k1_xf16, reduce_dim::k1, bfloat16, bfloat16, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::none, max_kn_xf16, reduce_dim::kn, bfloat16, bfloat16, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::none, max_k1_xf16, reduce_dim::k1, half, half, reduce_flag::no_nan)

@@ -220,8 +220,10 @@ multi_type multi_type_for_input_type(ynn_reduce_operator op,
         return multi_type::bf16_fp32;
       case ynn_type_fp32:
         return multi_type::fp32;
+#ifdef YNN_ENABLE_FP64
       case ynn_type_fp64:
         return multi_type::fp64;
+#endif
       default:
         std::cerr << "Unsupported input type: " << ynn::to_string(input_type);
         std::abort();
@@ -244,8 +246,10 @@ multi_type multi_type_for_input_type(ynn_reduce_operator op,
         return multi_type::bf16;
       case ynn_type_fp32:
         return multi_type::fp32;
+#ifdef YNN_ENABLE_FP64
       case ynn_type_fp64:
         return multi_type::fp64;
+#endif
       default:
         std::cerr << "Unsupported input type: " << ynn::to_string(input_type);
         std::abort();
@@ -259,7 +263,9 @@ multi_type multi_type_for_input_type(ynn_reduce_operator op,
 ynn_type output_type_for_input_type(ynn_reduce_operator op,
                                     ynn_type input_type) {
   if (op == ynn_reduce_sum) {
+#ifdef YNN_ENABLE_FP64
     if (input_type == ynn_type_fp64) return ynn_type_fp64;
+#endif
     if (ynn::type_is_floating_point(input_type)) return ynn_type_fp32;
     return ynn_type_int32;
   }
@@ -283,7 +289,9 @@ ynn_type parse(const char* str, ynn_type) {
   if (strcmp(str, "fp16") == 0) return ynn_type_fp16;
   if (strcmp(str, "bf16") == 0) return ynn_type_bf16;
   if (strcmp(str, "fp32") == 0) return ynn_type_fp32;
+#ifdef YNN_ENABLE_FP64
   if (strcmp(str, "fp64") == 0) return ynn_type_fp64;
+#endif
   return ynn_type_invalid;
 }
 

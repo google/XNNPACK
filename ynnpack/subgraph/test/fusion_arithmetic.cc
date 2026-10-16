@@ -861,6 +861,7 @@ TEST(fusion, no_fast_math_tanh) {
   EXPECT_THAT(node, IsUnary(ynn_unary_tanh));
 }
 
+#ifdef YNN_ENABLE_FP64
 TEST(fusion, fast_math_erf_fp64) {
   const uint32_t a_id = 0;
   const uint32_t x_id = 1;
@@ -880,6 +881,7 @@ TEST(fusion, fast_math_erf_fp64) {
       node, IsUnary(ynn_unary_approx_erf));  // Now successfully rewrites to
                                              // approx_erf via standard fallback
 }
+#endif  // YNN_ENABLE_FP64
 
 TEST(fusion, fast_math_erf_folded) {
   const uint32_t x_id = 0;

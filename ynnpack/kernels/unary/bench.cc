@@ -80,9 +80,13 @@ void Params(benchmark::Benchmark* b) {
       ->Apply(Params<type, type>)                                  \
       ->UseRealTime();
 
+#ifdef YNN_ENABLE_FP64
 #define BENCHMARK_FLOAT_REFERENCE(op) \
   BENCHMARK_REFERENCE(op, float);     \
   BENCHMARK_REFERENCE(op, double);
+#else
+#define BENCHMARK_FLOAT_REFERENCE(op) BENCHMARK_REFERENCE(op, float);
+#endif  // YNN_ENABLE_FP64
 
 BENCHMARK_FLOAT_REFERENCE(abs);
 BENCHMARK_FLOAT_REFERENCE(floor);

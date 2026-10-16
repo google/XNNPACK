@@ -176,8 +176,10 @@ binary_kernel_fn get_binary_reference_kernel(ynn_binary_operator op,
                                              ynn_type type) {
   if (type == ynn_type_fp32) {
     return get_float_binary_reference_kernel<float>(op);
+#ifdef YNN_ENABLE_FP64
   } else if (type == ynn_type_fp64) {
     return get_float_binary_reference_kernel<double>(op);
+#endif
   } else if (type == ynn_type_int32) {
     switch (op) {
       case ynn_binary_add:
@@ -217,11 +219,14 @@ binary_kernel_fn get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
   }
 #include "ynnpack/kernels/binary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
+#ifdef YNN_ENABLE_FP64
   if (type_a == ynn_type_fp64 && type_b == ynn_type_fp64 &&
       type_x == ynn_type_fp64) {
     return get_binary_reference_kernel(op, type_x);
-  } else if (type_a == ynn_type_fp32 && type_b == ynn_type_fp32 &&
-             type_x == ynn_type_fp32) {
+  } else  // NOLINT
+#endif
+      if (type_a == ynn_type_fp32 && type_b == ynn_type_fp32 &&
+          type_x == ynn_type_fp32) {
     return get_binary_reference_kernel(op, type_x);
   } else if (type_a == ynn_type_int32 && type_b == ynn_type_int32 &&
              type_x == ynn_type_int32) {

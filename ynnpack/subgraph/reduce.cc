@@ -251,9 +251,11 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
 }
 
 ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
+#ifdef YNN_ENABLE_FP64
   if (a_type == ynn_type_fp64) {
     return ynn_type_fp64;
   }
+#endif
   switch (op) {
     case ynn_reduce_sum:
     case ynn_reduce_sum_squared:

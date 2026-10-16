@@ -18,6 +18,7 @@
 
 namespace ynn {
 
+#ifdef YNN_ENABLE_FP64
 using simd::f64x2;
 
 MIN_MAX_K1_KERNEL(min_max_k1_fp64_neon, f64x2, f64x2, double, 2);
@@ -32,5 +33,6 @@ SUM_FLOAT_KN_KERNEL(sum_kn_fp64_neon, double, double, 4, identity);
 
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp64_neon, double, double, 2, 1, square);
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp64_neon, double, double, 4, square);
+#endif  // YNN_ENABLE_FP64
 
 }  // namespace ynn

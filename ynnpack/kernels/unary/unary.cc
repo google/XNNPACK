@@ -77,8 +77,10 @@ unary_kernel_fn get_convert_kernel(TIn, TOut) {
 template <typename TIn>
 unary_kernel_fn get_convert_kernel(ynn_type output) {
   switch (output) {
+#ifdef YNN_ENABLE_FP64
     case ynn_type_fp64:
       return get_convert_kernel(TIn(), double());
+#endif
     case ynn_type_fp32:
       return get_convert_kernel(TIn(), float());
     case ynn_type_fp16:
@@ -433,8 +435,10 @@ unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op, ynn_type type,
                                            uint32_t required_flags) {
   if (type == ynn_type_fp32) {
     return get_float_unary_reference_kernel<float>(op, required_flags);
+#ifdef YNN_ENABLE_FP64
   } else if (type == ynn_type_fp64) {
     return get_float_unary_reference_kernel<double>(op, required_flags);
+#endif
   } else if (type == ynn_type_int32) {
     switch (op) {
       case ynn_unary_abs:
@@ -455,8 +459,10 @@ unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op, ynn_type type,
 unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type,
                                              uint32_t required_flags) {
   switch (a_type) {
+#ifdef YNN_ENABLE_FP64
     case ynn_type_fp64:
       return get_convert_kernel<double>(x_type);
+#endif
     case ynn_type_fp32:
       return get_convert_kernel<float>(x_type);
     case ynn_type_fp16:
@@ -508,9 +514,12 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
     case ynn_unary_convert:
       return get_convert_reference_kernel(a_type, x_type, required_flags);
     default:
+#ifdef YNN_ENABLE_FP64
       if (a_type == ynn_type_fp64 && x_type == ynn_type_fp64) {
         return get_unary_reference_kernel(op, x_type, required_flags);
-      } else if (a_type == ynn_type_fp32 && x_type == ynn_type_fp32) {
+      } else  // NOLINT
+#endif
+          if (a_type == ynn_type_fp32 && x_type == ynn_type_fp32) {
         return get_unary_reference_kernel(op, x_type, required_flags);
       } else if (a_type == ynn_type_int32 && x_type == ynn_type_int32) {
         return get_unary_reference_kernel(op, x_type, required_flags);

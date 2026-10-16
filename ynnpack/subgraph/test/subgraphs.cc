@@ -54,21 +54,26 @@ TEST(subgraphs, static_tensor_cache) {
   uint32_t id1 = YNN_INVALID_VALUE_ID;
   uint32_t id2 = YNN_INVALID_VALUE_ID;
   uint32_t id3 = YNN_INVALID_VALUE_ID;
+#ifdef YNN_ENABLE_FP64
   uint32_t id4 = YNN_INVALID_VALUE_ID;
+#endif
 
   float data1[] = {1.0f, 2.0f, 3.0f};
   float data2[] = {1.0f, 2.0f, 3.0f};
   float data3[] = {1.0f, 2.0f, 4.0f};
-  double data4[] = {1.0f, 2.0f, 3.0f};
 
   builder.AddTensor(ynn_type_fp32, {3}, id1, data1, YNN_VALUE_FLAG_COPY_DATA);
   builder.AddTensor(ynn_type_fp32, {3}, id2, data2, YNN_VALUE_FLAG_COPY_DATA);
   builder.AddTensor(ynn_type_fp32, {3}, id3, data3, YNN_VALUE_FLAG_COPY_DATA);
-  builder.AddTensor(ynn_type_fp64, {3}, id4, data4, YNN_VALUE_FLAG_COPY_DATA);
 
   EXPECT_EQ(id1, id2);
   EXPECT_NE(id1, id3);
+
+#ifdef YNN_ENABLE_FP64
+  double data4[] = {1.0f, 2.0f, 3.0f};
+  builder.AddTensor(ynn_type_fp64, {3}, id4, data4, YNN_VALUE_FLAG_COPY_DATA);
   EXPECT_NE(id1, id4);
+#endif
 
   // Test with dims = nullptr (scalar)
   uint32_t id5 = YNN_INVALID_VALUE_ID;

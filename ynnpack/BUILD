@@ -125,6 +125,14 @@ define_build_option(
 )
 
 define_build_option(
+    name = "ynn_enable_fp64",
+    default_any = [
+        ":x86",
+        ":arm64",
+    ],
+)
+
+define_build_option(
     name = "ynn_enable_arm_neon",
     default_all = [":arm"],
 )

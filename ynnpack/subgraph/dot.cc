@@ -1246,9 +1246,12 @@ ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
   // The rules here are:
   // - If either input is float, the result should be float, otherwise integer.
   // - The output should be max(max(a_bits, b_bits), 32) bits wide
+#ifdef YNN_ENABLE_FP64
   if (a_type == ynn_type_fp64 || b_type == ynn_type_fp64) {
     return ynn_type_fp64;
-  } else if (type_is_floating_point(a_type) || type_is_floating_point(b_type)) {
+  } else  // NOLINT
+#endif
+      if (type_is_floating_point(a_type) || type_is_floating_point(b_type)) {
     return ynn_type_fp32;
   } else {
     assert(type_is_integral(a_type) && type_is_integral(b_type));
