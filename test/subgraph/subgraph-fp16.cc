@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <map>
 #include <memory>
 #include <random>
 #include <vector>
@@ -16,9 +17,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/subgraph/rewrites/cvt_to_fp32.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
@@ -403,6 +406,136 @@ TEST(SUBGRAPH_FP16, static_buffer_allocation_failure) {
   EXPECT_CALL(mock_allocator, allocate(_, 22)).WillOnce(Return(nullptr));
 
   tester.RewriteForFp16WithFailure();
+}
+
+TEST(SUBGRAPH_FP16, fallback_static_alloc_fail_does_not_double_free) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/1, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+
+  MockAllocator mock_allocator;
+  std::unique_ptr<MockAllocator, decltype(&RestoreDefaultAllocator)>
+      auto_mock_allocator(&mock_allocator, &RestoreDefaultAllocator);
+  SetUpMockAllocator(&mock_allocator);
+
+  uint16_t static_data[4] = {0};
+  const std::vector<size_t> dims = {1};
+  uint32_t weight_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                static_data, XNN_INVALID_VALUE_ID, /*flags=*/0, &weight_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  xnn_hardware_config mock_config{};
+  xnn_set_hardware_config(&mock_config);
+
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr,
+                             weight_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  void* owned_buffer =
+      xnn_default_allocator.allocate(xnn_default_allocator.context,
+                                     sizeof(static_data));
+  ASSERT_NE(owned_buffer, nullptr);
+  subgraph->values[weight_id].data = owned_buffer;
+  subgraph->values[weight_id].flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+
+  // Simulate a shape that fits in size_t when multiplied by sizeof(float),
+  // but overflows when XNN_EXTRA_BYTES is added by xnn_safe_add.
+  subgraph->values[weight_id].shape.dim[0] = SIZE_MAX / sizeof(float);
+
+  EXPECT_CALL(mock_allocator, allocate(_, _)).Times(AnyNumber());
+
+  std::map<void*, size_t> dealloc_counts;
+  EXPECT_CALL(mock_allocator, deallocate(_, _))
+      .WillRepeatedly([&](void* context, void* ptr) {
+        if (ptr != nullptr) {
+          dealloc_counts[ptr]++;
+        }
+        xnn_default_allocator.deallocate(context, ptr);
+      });
+
+  EXPECT_EQ(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                    /*optimization_flags=*/0),
+            xnn_status_out_of_memory);
+
+  EXPECT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+  EXPECT_EQ(dealloc_counts[owned_buffer], 1);
+
+  xnn_reset_hardware_config();
+}
+
+TEST(SUBGRAPH_FP16, fallback_static_alloc_succeeds_and_owns_buffer) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/1, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+
+  MockAllocator mock_allocator;
+  std::unique_ptr<MockAllocator, decltype(&RestoreDefaultAllocator)>
+      auto_mock_allocator(&mock_allocator, &RestoreDefaultAllocator);
+  SetUpMockAllocator(&mock_allocator);
+
+  uint16_t static_data[3 + XNN_EXTRA_BYTES / sizeof(uint16_t)] = {0};
+  const std::vector<size_t> dims = {3};
+  uint32_t weight_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                static_data, XNN_INVALID_VALUE_ID, /*flags=*/0, &weight_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  xnn_hardware_config mock_config{};
+  xnn_set_hardware_config(&mock_config);
+
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr,
+                             weight_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  void* owned_buffer =
+      xnn_default_allocator.allocate(xnn_default_allocator.context,
+                                     sizeof(static_data));
+  ASSERT_NE(owned_buffer, nullptr);
+  subgraph->values[weight_id].data = owned_buffer;
+  subgraph->values[weight_id].flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+
+  EXPECT_CALL(mock_allocator, allocate(_, _)).Times(AnyNumber());
+
+  std::map<void*, size_t> success_dealloc_counts;
+  EXPECT_CALL(mock_allocator, deallocate(_, _))
+      .WillRepeatedly([&](void* context, void* ptr) {
+        if (ptr != nullptr) {
+          success_dealloc_counts[ptr]++;
+        }
+        xnn_default_allocator.deallocate(context, ptr);
+      });
+
+  EXPECT_EQ(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                    /*optimization_flags=*/0),
+            xnn_status_success);
+
+  EXPECT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+  EXPECT_EQ(success_dealloc_counts[owned_buffer], 1);
+
+  xnn_reset_hardware_config();
 }
 
 TEST(SUBGRAPH_FP16, convolution_weights_used_by_another_node) {

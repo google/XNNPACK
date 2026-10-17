@@ -281,7 +281,8 @@ OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
       if (filter.datatype == xnn_datatype_qbint4) {
         const xnn_value& input = subgraph->values[node.inputs[0]];
         const xnn_value& output = subgraph->values[node.outputs[0]];
-        const bool inline_lhs_packing = node.flags & XNN_FLAG_INLINE_LHS_PACKING;
+        const bool inline_lhs_packing =
+            node.flags & XNN_FLAG_INLINE_LHS_PACKING;
         const xnn_datatype packed_input_datatype =
             inline_lhs_packing ? node.packed_input_datatype : input.datatype;
         switch (packed_input_datatype) {
@@ -460,7 +461,14 @@ CloneValueRet CloneValue(xnn_subgraph_t subgraph, const xnn_value*& value) {
   }
   value = &subgraph->values[value_id];
   xnn_value_copy(&subgraph->values[subgraph->num_values - 1], value);
-  return {xnn_status_success, subgraph->values[subgraph->num_values - 1]};
+  // The clone aliases `value->data`; it does not own it. Clearing the flag
+  // keeps `xnn_delete_subgraph` from releasing the buffer twice when a
+  // caller returns early. Callers that allocate a fresh buffer take
+  // ownership back with `|= XNN_VALUE_FLAG_NEEDS_CLEANUP`.
+  xnn_value& clone = subgraph->values[subgraph->num_values - 1];
+  clone.flags &= ~XNN_VALUE_FLAG_NEEDS_CLEANUP;
+  clone.to_fp32_fallback.original_data = nullptr;
+  return {xnn_status_success, clone};
 }
 
 CloneValueRet CloneValue(xnn_subgraph_t subgraph, xnn_value*& value) {
@@ -703,6 +711,9 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
           size_t allocation_size = 0;
           if (!xnn_safe_add(fp32_value.size, XNN_EXTRA_BYTES,
                             &allocation_size)) {
+            xnn_log_error(
+                "size overflow for %s fp32 fallback output buffer",
+                xnn_datatype_to_string(from_dt));
             return xnn_status_out_of_memory;
           }
           fp32_value.data = xnn_allocate_zero_memory(allocation_size);
@@ -793,6 +804,9 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
             size_t allocation_size = 0;
             if (!xnn_safe_add(fp32_value.size, XNN_EXTRA_BYTES,
                               &allocation_size)) {
+              xnn_log_error(
+                  "size overflow for %s fp32 fallback static conversion",
+                  xnn_datatype_to_string(from_dt));
               return xnn_status_out_of_memory;
             }
             fp32_value.data = xnn_allocate_zero_memory(allocation_size);
