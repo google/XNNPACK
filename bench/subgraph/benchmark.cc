@@ -83,10 +83,13 @@ class TrackingAllocator {
 
 static TrackingAllocator global_tracking_allocator;
 
+static constexpr size_t kTrackingHeaderSize =
+    std::max(sizeof(size_t), alignof(std::max_align_t));
+
 static void TrackingDeallocate(void* context, void* pointer) {
   if (!pointer) return;
   auto* self = static_cast<TrackingAllocator*>(context);
-  void* original_ptr = static_cast<char*>(pointer) - sizeof(size_t);
+  void* original_ptr = static_cast<char*>(pointer) - kTrackingHeaderSize;
   size_t size = *static_cast<size_t*>(original_ptr);
   self->RecordFree(size);
   std::free(original_ptr);
@@ -94,19 +97,19 @@ static void TrackingDeallocate(void* context, void* pointer) {
 
 static void* TrackingAllocate(void* context, size_t size) {
   auto* self = static_cast<TrackingAllocator*>(context);
-  size_t total_size = size + sizeof(size_t);
+  size_t total_size = size + kTrackingHeaderSize;
   void* ptr = std::malloc(total_size);
   if (!ptr) return nullptr;
   *static_cast<size_t*>(ptr) = size;
   self->RecordAlloc(size);
-  return static_cast<char*>(ptr) + sizeof(size_t);
+  return static_cast<char*>(ptr) + kTrackingHeaderSize;
 }
 
 static void* TrackingReallocate(void* context, void* pointer, size_t size) {
   if (!pointer) {
     return TrackingAllocate(context, size);
   }
-  void* old_original_ptr = static_cast<char*>(pointer) - sizeof(size_t);
+  void* old_original_ptr = static_cast<char*>(pointer) - kTrackingHeaderSize;
   size_t old_size = *static_cast<size_t*>(old_original_ptr);
 
   void* new_payload = TrackingAllocate(context, size);
