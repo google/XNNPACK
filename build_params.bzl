@@ -99,17 +99,12 @@ register_extension_info(
 _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
     "avx": xnnpack_select_if("//build_config:x86", ["-mavx"]),
     "avx2": xnnpack_select_if("//build_config:x86", ["-mavx2"]),
-    "avx512f": xnnpack_select_if("//build_config:x86", ["-mavx512f"]),
+    "avx512f": [],
     "avx512skx": xnnpack_select_if(
         "//build_config:x86",
         [
             "-mf16c",
             "-mfma",
-            "-mavx512f",
-            "-mavx512cd",
-            "-mavx512bw",
-            "-mavx512dq",
-            "-mavx512vl",
         ],
     ),
     "avx512fp16": xnnpack_select_if(
@@ -117,14 +112,6 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
         [
             "-mf16c",
             "-mfma",
-            "-mavx512f",
-            "-mavx512cd",
-            "-mavx512bw",
-            "-mavx512dq",
-            "-mavx512vl",
-            "-mavx512vnni",
-            "-mgfni",
-            "-mavx512fp16",
         ],
     ),
     "avx512bf16": xnnpack_select_if(

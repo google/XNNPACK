@@ -25,7 +25,22 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
+
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f"))), apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f")
+#endif
+
 #include "src/xnnpack/simd/s32-avx512f.h"
+
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -45,6 +60,13 @@ class S32SimdAVX512FTest : public ::testing::Test {
   std::vector<int32_t> inputs_;
   std::vector<int32_t> output_;
 };
+
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f"))), apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f")
+#endif
 
 TEST_F(S32SimdAVX512FTest, Mul) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
@@ -99,6 +121,11 @@ TEST_F(S32SimdAVX512FTest, StoreTail) {
     }
   }
 }
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
 }  // namespace xnnpack
 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

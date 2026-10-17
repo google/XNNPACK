@@ -22,7 +22,22 @@
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
+
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,avx512vnni,gfni,avx512fp16,fma,f16c"))), apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,avx512vnni,gfni,avx512fp16,fma,f16c")
+#endif
+
 #include "src/xnnpack/simd/f16-avx512fp16.h"
+
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+
 #include "test/replicable_random_device.h"
 
 // By default --copt='-ffp-contract=off' is set, so no implicit FMA. However, 
@@ -59,6 +74,13 @@ class F16SimdAVX512FP16Test : public ::testing::Test {
   std::vector<xnn_float16> inputs_;
   std::vector<xnn_float16> output_;
 };
+
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,avx512vnni,gfni,avx512fp16,fma,f16c"))), apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,avx512vnni,gfni,avx512fp16,fma,f16c")
+#endif
 
 TEST_F(F16SimdAVX512FP16Test, ConstF16FromFloat) {
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.125f);
@@ -594,6 +616,12 @@ TEST_F(F16SimdAVX512FP16Test, StoreTail) {
     }
   }
 }
+
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
 
 }  // namespace xnnpack
 
