@@ -33,9 +33,11 @@ void xnn_qs8_vcvt_ukernel__avx_u16(
 
   const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
   const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
+  const __m128i vshift = _mm_cvtsi32_si128((int) params->scalar.shift);
   const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
   XNN_FORCE_REALIZATION(vinput_zero_point);
   XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vshift);
   XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     __m128i vacc0 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input));
@@ -45,8 +47,8 @@ void xnn_qs8_vcvt_ukernel__avx_u16(
     vacc0 = _mm_sub_epi16(vinput_zero_point, vacc0);
     vacc1 = _mm_sub_epi16(vinput_zero_point, vacc1);
 
-    vacc0 = _mm_slli_epi16(vacc0, 7);
-    vacc1 = _mm_slli_epi16(vacc1, 7);
+    vacc0 = _mm_sll_epi16(vacc0, vshift);
+    vacc1 = _mm_sll_epi16(vacc1, vshift);
 
     vacc0 = _mm_mulhrs_epi16(vacc0, vmultiplier);
     vacc1 = _mm_mulhrs_epi16(vacc1, vmultiplier);
@@ -62,7 +64,7 @@ void xnn_qs8_vcvt_ukernel__avx_u16(
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     __m128i vacc = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input));
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
-    vacc = _mm_slli_epi16(vacc, 7);
+    vacc = _mm_sll_epi16(vacc, vshift);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
     input += 8;
@@ -77,7 +79,7 @@ void xnn_qs8_vcvt_ukernel__avx_u16(
 
     __m128i vacc = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input));
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
-    vacc = _mm_slli_epi16(vacc, 7);
+    vacc = _mm_sll_epi16(vacc, vshift);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
 
