@@ -4345,7 +4345,11 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
         qdu8_f32_qc8w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
         qdu8_f32_qc8w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
         qdu8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
-        qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+        #if XNN_ENABLE_AVX256VNNI
+          qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_packw_gemm_goi_ukernel_x64c4__avx256vnni_prfm;
+        #else
+          qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_packw_gemm_goi_ukernel_x64c4__scalar;
+        #endif
         qdu8_f32_qc8w_gemm_config.mr = 5;
         qdu8_f32_qc8w_gemm_config.nr = 64;
         qdu8_f32_qc8w_gemm_config.log2_kr = 2;
