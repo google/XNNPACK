@@ -32,10 +32,11 @@ void xnn_qu8_vcvt_ukernel__neon_u8(
   const uint16x8_t vinput_zero_point = vdupq_n_u16(params->scalar.input_zero_point);
   const int16x8_t vmultiplier = vdupq_n_s16(-params->scalar.multiplier);
   const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
+  const int16x8_t vshift = vdupq_n_s16(params->scalar.shift);
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     const uint8x8_t vx = vld1_u8(input); input += 8;
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
-    vacc = vshlq_n_s16(vacc, 7);
+    vacc = vshlq_s16(vacc, vshift);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     const uint8x8_t vy = vqmovun_s16(vacc);
@@ -47,7 +48,7 @@ void xnn_qu8_vcvt_ukernel__neon_u8(
 
     const uint8x8_t vx = vld1_u8(input);
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
-    vacc = vshlq_n_s16(vacc, 7);
+    vacc = vshlq_s16(vacc, vshift);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     uint8x8_t vy = vqmovun_s16(vacc);
