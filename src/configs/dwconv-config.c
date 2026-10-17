@@ -580,24 +580,24 @@ static void init_f32_dwconv_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->arch_flags & xnn_arch_hvx) {
-      f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p32c__hvx);
+      f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p64c__hvx_acc2);
       f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[0].channel_tile = 32;
+      f32_dwconv_config[0].channel_tile = 64;
       f32_dwconv_config[0].primary_tile = 3;
 
-      f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_4p32c__hvx);
+      f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_4p64c__hvx_acc2);
       f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[1].channel_tile = 32;
+      f32_dwconv_config[1].channel_tile = 64;
       f32_dwconv_config[1].primary_tile = 4;
 
-      f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_9p32c__hvx);
+      f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_9p64c__hvx_acc2);
       f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[2].channel_tile = 32;
+      f32_dwconv_config[2].channel_tile = 64;
       f32_dwconv_config[2].primary_tile = 9;
 
-      f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_25p32c__hvx);
+      f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_25p64c__hvx_acc2);
       f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[3].channel_tile = 32;
+      f32_dwconv_config[3].channel_tile = 64;
       f32_dwconv_config[3].primary_tile = 25;
     }
   #else
