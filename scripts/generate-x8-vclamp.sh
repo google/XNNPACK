@@ -15,4 +15,7 @@ tools/xngen src/s8-vclamp/rvv.c.in -D LMUL=2 -D DATATYPE=U8 -o src/u8-vclamp/gen
 tools/xngen src/s8-vclamp/rvv.c.in -D LMUL=4 -D DATATYPE=U8 -o src/u8-vclamp/gen/u8-vclamp-rvv-u4v.c &
 tools/xngen src/s8-vclamp/rvv.c.in -D LMUL=8 -D DATATYPE=U8 -o src/u8-vclamp/gen/u8-vclamp-rvv-u8v.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/s8-vclamp/simd.c.in -D ARCH=hvx -D BATCH_TILES=128,256 -o src/s8-vclamp/gen/s8-vclamp-hvx.c &
+
 wait

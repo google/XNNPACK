@@ -34,4 +34,7 @@ tools/xngen src/qs8-rdsum/wasmsimd.c.in -D CHANNELS=64 -D ACCUMULATORS=7 -D DATA
 tools/xngen src/qs8-rdsum/rvv.c.in -D LMUL=1 -D ACCUMULATORS=7 -D DATATYPE=QS8 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-rvv-u1v.c &
 tools/xngen src/qs8-rdsum/rvv.c.in -D LMUL=2 -D ACCUMULATORS=7 -D DATATYPE=QS8 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-rvv-u2v.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/qs8-rdsum/hvx.c.in -D CHANNELS=64 -D ACCUMULATORS=7 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-hvx-u64.c &
+
 wait

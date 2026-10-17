@@ -483,4 +483,9 @@ tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25
 tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9  -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-9p8vc-minmax-fp32-rvv.c &
 tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-25p8vc-minmax-fp32-rvv.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/qs8-dwconv/unipass-hvx.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=3  -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p32c-minmax-fp32-hvx.c &
+tools/xngen src/qs8-dwconv/unipass-hvx.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p32c-minmax-fp32-hvx.c &
+tools/xngen src/qs8-dwconv/unipass-hvx.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p32c-minmax-fp32-hvx.c &
+
 wait
