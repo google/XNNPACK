@@ -63,7 +63,7 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      if (std::isnan(y_ref[i])) {
+      if (std::isnan(static_cast<float>(y_ref[i]))) {
         // TODO: We could check if y[i] is NaN, but not all our kernels do this.
       } else {
         ASSERT_NEAR(
