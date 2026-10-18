@@ -32,6 +32,13 @@ def convert_bf16_to_fp32(a, x):
   return store(cast(Float(32), load(a)), x)
 
 
+@const_buffer("a", FP8_E5M2())
+@buffer("x", Float(16))
+@operator_name("convert")
+def convert_fp8_e5m2_to_fp16(a, x):
+  return store(cast(Float(16), load(a)), x)
+
+
 @const_buffer("a", Float(64))
 @buffer("x", Float(32))
 @operator_name("convert")

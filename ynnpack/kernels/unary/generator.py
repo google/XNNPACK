@@ -334,6 +334,7 @@ def main(argv: Sequence[str]) -> None:
           (ceil_fp32, (8, 1), consistent),
           (convert_bf16_to_fp32, (16, 1), consistent),
           (convert_fp32_to_bf16, (16, 1), consistent),
+          (convert_fp8_e5m2_to_fp16, (16, 1), consistent),
           (cos_fp32, (32, 1)),
           (erf_fp32, (16, 1)),
           (exp_fp32, (16, 1)),

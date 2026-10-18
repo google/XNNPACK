@@ -28,7 +28,7 @@ static void init_x8_lut_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
 
-    #if XNN_ENABLE_AVX256VBMI
+    #if XNN_ENABLE_AVX512VBMI
       if (hardware_config->arch_flags & xnn_arch_x86_avx512vbmi) {
         x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u128;
       } else

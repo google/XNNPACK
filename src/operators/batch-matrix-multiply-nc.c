@@ -566,7 +566,7 @@ enum xnn_status create_batch_matrix_multiply_nc_helper(
 
 error:
   variant->cleanup(variant, context);
-  return xnn_status_success;
+  return status;
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(

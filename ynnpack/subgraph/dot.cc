@@ -1246,9 +1246,12 @@ ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
   // The rules here are:
   // - If either input is float, the result should be float, otherwise integer.
   // - The output should be max(max(a_bits, b_bits), 32) bits wide
+#ifdef YNN_ENABLE_FP64
   if (a_type == ynn_type_fp64 || b_type == ynn_type_fp64) {
     return ynn_type_fp64;
-  } else if (type_is_floating_point(a_type) || type_is_floating_point(b_type)) {
+  } else  // NOLINT
+#endif
+      if (type_is_floating_point(a_type) || type_is_floating_point(b_type)) {
     return ynn_type_fp32;
   } else {
     assert(type_is_integral(a_type) && type_is_integral(b_type));
@@ -1538,7 +1541,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // C: Elementwise
     slinky::box_expr c_bounds;
     if (input_c.rank() >= 1) {
-      c_bounds.push_back(elementwise_bounds(j, input_c.physical_extent(0)));
+      c_bounds.push_back(elementwise_bounds(j, input_c.extents[0]));
     }
 
     // Batch dims are elementwise too.
@@ -1546,21 +1549,21 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       if (transpose_a) {
         if (i >= 2 && i + num_a_k_dims - 1 < input_a.rank()) {
           a_bounds.push_back(elementwise_bounds(
-              output_dims[i], input_a.physical_extent(i + num_a_k_dims - 1)));
+              output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
         }
       } else {
         if (i + num_a_k_dims - 1 < input_a.rank()) {
           a_bounds.push_back(elementwise_bounds(
-              output_dims[i], input_a.physical_extent(i + num_a_k_dims - 1)));
+              output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
         }
       }
       if (i >= 2 && i + 2 + num_k_dims - 1 < packed_b.rank()) {
         b_bounds.push_back(elementwise_bounds(
-            output_dims[i], packed_b.physical_extent(i + 2 + num_k_dims - 1)));
+            output_dims[i], packed_b.extents[i + 2 + num_k_dims - 1]));
       }
       if (i < input_c.rank()) {
         c_bounds.push_back(
-            elementwise_bounds(output_dims[i], input_c.physical_extent(i)));
+            elementwise_bounds(output_dims[i], input_c.extents[i]));
       }
     }
 

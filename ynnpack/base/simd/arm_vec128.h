@@ -1345,12 +1345,16 @@ YNN_ALWAYS_INLINE u8x8 operator^(u8x8 a, u8x8 b) {
 }
 YNN_ALWAYS_INLINE u8x8 operator~(u8x8 a) { return u8x8{vmvn_u8(a.v)}; }
 
+#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{vminq_f32(a.v, b.v)};
 }
-#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 min(f64x2 a, f64x2 b) {
   return f64x2{vminq_f64(a.v, b.v)};
+}
+#else
+YNN_ALWAYS_INLINE f32x4 min_no_nan(f32x4 a, f32x4 b) {
+  return f32x4{vminq_f32(a.v, b.v)};
 }
 #endif
 YNN_ALWAYS_INLINE s32x4 min(s32x4 a, s32x4 b) {
@@ -1366,12 +1370,16 @@ YNN_ALWAYS_INLINE s8x16 min(s8x16 a, s8x16 b) {
   return s8x16{vminq_s8(a.v, b.v)};
 }
 
+#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
   return f32x4{vmaxq_f32(a.v, b.v)};
 }
-#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 max(f64x2 a, f64x2 b) {
   return f64x2{vmaxq_f64(a.v, b.v)};
+}
+#else
+YNN_ALWAYS_INLINE f32x4 max_no_nan(f32x4 a, f32x4 b) {
+  return f32x4{vmaxq_f32(a.v, b.v)};
 }
 #endif
 YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
@@ -1603,6 +1611,15 @@ YNN_ALWAYS_INLINE s8x16 select(s8x16 cond, s8x16 a, s8x16 b) {
 YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
   return u8x16{vbslq_u8(vreinterpretq_u8_s8(cond.v), a.v, b.v)};
 }
+
+#ifdef YNN_ARCH_ARM32
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+#endif
 
 #ifdef YNN_ARCH_FP16_ARITHMETIC
 YNN_ALWAYS_INLINE f16x8 floor_log2(f16x8 a) {
@@ -1927,10 +1944,10 @@ YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x4 a) {
 
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE double horizontal_min(f64x2 a) {
-  return std::min(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
+  return ynn::min(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
 }
 YNN_ALWAYS_INLINE double horizontal_max(f64x2 a) {
-  return std::max(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
+  return ynn::max(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));
 }
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {
   return vgetq_lane_f64(a.v, 0) + vgetq_lane_f64(a.v, 1);
@@ -2270,6 +2287,10 @@ YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
 }
 #endif
 
+using f8_e4m3x16 = vec<fp8_e4m3, 16>;
+using f8_e5m2x16 = vec<fp8_e5m2, 16>;
+using f16x16 = vec<half, 16>;
+
 #ifdef YNN_ARCH_ARM64_NEONFP8
 YNN_ALWAYS_INLINE bf16x8 cast(f8_e4m3x8 a, bfloat16) {
   fpm_t fpm = __arm_fpm_init();
@@ -2295,10 +2316,6 @@ YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
   return f16x8{
       vreinterpretq_u16_f16(vcvt1_f16_mf8_fpm(vreinterpret_mf8_u8(a.v), fpm))};
 }
-
-using f8_e4m3x16 = vec<fp8_e4m3, 16>;
-using f8_e5m2x16 = vec<fp8_e5m2, 16>;
-using f16x16 = vec<half, 16>;
 
 YNN_ALWAYS_INLINE f8_e4m3x8 cast(f32x8 a, fp8_e4m3) {
   fpm_t fpm = __arm_fpm_init();
@@ -2333,12 +2350,24 @@ YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
 }
 #else
 
-using f8_e5m2x8 = vec<fp8_e5m2, 8>;
-using f16x8 = vec<half, 8>;
-
 YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
   return f16x8{vshll_n_u8(a.v, 8)};
 }
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f8_e5m2x16 load(const fp8_e5m2* ptr, decltype(f8_e5m2x16::N),
+                                  f8_e5m2x16 = {}) {
+  uint8x16_t v = vld1q_u8(reinterpret_cast<const uint8_t*>(ptr));
+  return {f8_e5m2x8{vget_low_u8(v)}, f8_e5m2x8{vget_high_u8(v)}};
+}
+YNN_ALWAYS_INLINE f16x16 cast(f8_e5m2x16 a, half) {
+  const uint8x16_t vzero = vdupq_n_u8(0);
+  const uint8x16_t va = vcombine_u8(lo(a).v, hi(a).v);
+  return {
+      f16x8{vreinterpretq_u16_u8(vzip1q_u8(vzero, va))},
+      f16x8{vreinterpretq_u16_u8(vzip2q_u8(vzero, va))},
+  };
+}
+#endif
 YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
   uint16x8_t u = a.v;
   uint16x8_t is_nan = vcgtq_u16(vshlq_n_u16(u, 1), vdupq_n_u16(0xF800));

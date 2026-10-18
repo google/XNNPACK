@@ -720,26 +720,26 @@ YNN_ALWAYS_INLINE f16x32 fma(f16x32 a, f16x32 b, f16x32 acc) {
 #define YNN_HAVE_FMA
 
 #ifdef YNN_ARCH_FP16_ARITHMETIC
-YNN_ALWAYS_INLINE f16x32 min(f16x32 a, f16x32 b) {
+YNN_ALWAYS_INLINE f16x32 min_no_nan(f16x32 a, f16x32 b) {
   return f16x32{_mm512_castph_si512(
       _mm512_min_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
 }
-YNN_ALWAYS_INLINE f16x32 max(f16x32 a, f16x32 b) {
+YNN_ALWAYS_INLINE f16x32 max_no_nan(f16x32 a, f16x32 b) {
   return f16x32{_mm512_castph_si512(
       _mm512_max_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
 }
 #endif
 
-YNN_ALWAYS_INLINE f64x8 min(f64x8 a, f64x8 b) {
+YNN_ALWAYS_INLINE f64x8 min_no_nan(f64x8 a, f64x8 b) {
   return f64x8{_mm512_min_pd(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f32x16 min(f32x16 a, f32x16 b) {
+YNN_ALWAYS_INLINE f32x16 min_no_nan(f32x16 a, f32x16 b) {
   return f32x16{_mm512_min_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f64x8 max(f64x8 a, f64x8 b) {
+YNN_ALWAYS_INLINE f64x8 max_no_nan(f64x8 a, f64x8 b) {
   return f64x8{_mm512_max_pd(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f32x16 max(f32x16 a, f32x16 b) {
+YNN_ALWAYS_INLINE f32x16 max_no_nan(f32x16 a, f32x16 b) {
   return f32x16{_mm512_max_ps(a.v, b.v)};
 }
 
@@ -910,6 +910,19 @@ YNN_ALWAYS_INLINE __mmask32 isfinite(f16x32 a) {
 }
 #endif  // YNN_ARCH_FP16_ARITHMETIC
 
+YNN_ALWAYS_INLINE __mmask32 isnan(bf16x32 a) {
+  __m512i abs_a = _mm512_and_si512(a.v, _mm512_set1_epi16(0x7fff));
+  return _mm512_cmpgt_epi16_mask(abs_a, _mm512_set1_epi16(0x7f80));
+}
+YNN_ALWAYS_INLINE __mmask32 isinf(bf16x32 a) {
+  __m512i abs_a = _mm512_and_si512(a.v, _mm512_set1_epi16(0x7fff));
+  return _mm512_cmpeq_epi16_mask(abs_a, _mm512_set1_epi16(0x7f80));
+}
+YNN_ALWAYS_INLINE __mmask32 isfinite(bf16x32 a) {
+  __m512i abs_a = _mm512_and_si512(a.v, _mm512_set1_epi16(0x7fff));
+  return _mm512_cmplt_epi16_mask(abs_a, _mm512_set1_epi16(0x7f80));
+}
+
 YNN_ALWAYS_INLINE __mmask16 operator==(f32x16 a, f32x16 b) {
   return _mm512_cmp_ps_mask(a.v, b.v, _CMP_EQ_OQ);
 }
@@ -1066,12 +1079,36 @@ YNN_ALWAYS_INLINE s16x32 select(__mmask32 cond, s16x32 a, s16x32 b) {
 YNN_ALWAYS_INLINE u16x32 select(__mmask32 cond, u16x32 a, u16x32 b) {
   return u16x32{_mm512_mask_blend_epi16(cond, b.v, a.v)};
 }
+YNN_ALWAYS_INLINE bf16x32 select(__mmask32 cond, bf16x32 a, bf16x32 b) {
+  return bf16x32{_mm512_mask_blend_epi16(cond, b.v, a.v)};
+}
 YNN_ALWAYS_INLINE s8x64 select(__mmask64 cond, s8x64 a, s8x64 b) {
   return s8x64{_mm512_mask_blend_epi8(cond, b.v, a.v)};
 }
 YNN_ALWAYS_INLINE u8x64 select(__mmask64 cond, u8x64 a, u8x64 b) {
   return u8x64{_mm512_mask_blend_epi8(cond, b.v, a.v)};
 }
+
+YNN_ALWAYS_INLINE f64x8 min(f64x8 a, f64x8 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f32x16 min(f32x16 a, f32x16 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f64x8 max(f64x8 a, f64x8 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f32x16 max(f32x16 a, f32x16 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 min(f16x32 a, f16x32 b) {
+  return select(isnan(a), a, min_no_nan(a, b));
+}
+YNN_ALWAYS_INLINE f16x32 max(f16x32 a, f16x32 b) {
+  return select(isnan(a), a, max_no_nan(a, b));
+}
+#endif
 
 template <int Index>
 YNN_ALWAYS_INLINE s32x4 extract(s32x16 x, decltype(s32x4::N)) {

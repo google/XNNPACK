@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "ynnpack/base/algorithm.h"
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
@@ -40,6 +41,7 @@ float get_reduce_identity(ynn_reduce_operator op) {
   switch (op) {
     case ynn_reduce_sum:
     case ynn_reduce_sum_squared:
+    case ynn_reduce_propagate_nan:
       return 0.0f;
     case ynn_reduce_max:
       return -std::numeric_limits<float>::infinity();
@@ -130,11 +132,8 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
     }
 
     // Slice off the "channel" dimension if any.
-    slinky::index_t c_stride_m = 0;
-    if (op.op == ynn_reduce_min_max) {
-      c_stride_m = c.dim(c.rank - 1).stride();
-      c.rank -= 1;
-    }
+    slinky::index_t c_stride_m = c.dim(op.channel_dim).stride();
+    c.slice(op.channel_dim);
 
     // Conceptually, a reduction is c = f(c, a) for all indices of a. We need to
     // do a few things to implement this:
@@ -252,9 +251,11 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
 }
 
 ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
+#ifdef YNN_ENABLE_FP64
   if (a_type == ynn_type_fp64) {
     return ynn_type_fp64;
   }
+#endif
   switch (op) {
     case ynn_reduce_sum:
     case ynn_reduce_sum_squared:
@@ -262,6 +263,7 @@ ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
     case ynn_reduce_max:
     case ynn_reduce_min:
     case ynn_reduce_min_max:
+    case ynn_reduce_propagate_nan:
       return a_type;
     default:
       YNN_UNREACHABLE;
@@ -400,8 +402,13 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     }
   }
 
-  if (op == ynn_reduce_min_max) {
+  int channel_dim = max_tensor_rank;
+  if ((op == ynn_reduce_min_max) ||
+      (input_b_id != YNN_INVALID_VALUE_ID &&
+       subgraph.value(input_b_id).extents.size() ==
+           output.extents.size() + 1)) {
     // This reduction adds a dimension for the min/max index.
+    channel_dim = output.extents.size();
     output.extents.push_back(2);
   }
 
@@ -420,7 +427,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
   node.inputs = {input_a_id, input_b_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::reduce{k_dims, op, keep_dims};
+  node.op = ynn_node::reduce{k_dims, op, keep_dims, channel_dim};
 
   node.create = [split_factors](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::reduce& op = std::get<ynn_node::reduce>(node.op);
@@ -507,6 +514,9 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     slinky::box_expr c_bounds =
         make_elementwise_bounds(output_dims, input_c.physical_extents());
+    while (c_bounds.size() < input_c.rank()) {
+      c_bounds.push_back(all_bounds(input_c.physical_extent(c_bounds.size())));
+    }
 
     slinky::call_stmt::attributes attrs;
     attrs.name = node.to_string();
@@ -589,6 +599,21 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
   ynn_type target_accumulator_type = get_accumulator_type(op, a_ptr->type);
   reduce_kernel kernel =
       get_reduce_kernel(op, a_ptr->type, target_accumulator_type);
+
+  if ((flags & YNN_NODE_FLAG_PROPAGATE_NAN) &&
+      (kernel.flags & reduce_flag::no_nan) && type_has_nan(a_ptr->type)) {
+    // We've been asked to propagate NaNs, but this operation will not do so.
+    // First, do the operation normally, which will fail to propagate NaNs.
+    uint32_t min_max_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(
+        ynn_define_reduce(subgraph, op, num_axes, axes, input_a_id, input_b_id,
+                          &min_max_id, flags & ~YNN_NODE_FLAG_PROPAGATE_NAN));
+
+    // Do a follow-up pass that propagates NaN where appropriate.
+    return ynn_define_reduce(subgraph, ynn_reduce_propagate_nan, num_axes, axes,
+                             input_a_id, min_max_id, output_id,
+                             flags & ~YNN_NODE_FLAG_PROPAGATE_NAN);
+  }
   if (!kernel.k1 || !kernel.kn) {
     if (type_element_count(a_ptr->type) == 1 ||
         (op != ynn_reduce_min && op != ynn_reduce_max &&
@@ -625,7 +650,7 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
     }
   }
 
-  if (op != ynn_reduce_min_max) {
+  if (op != ynn_reduce_min_max && op != ynn_reduce_propagate_nan) {
     std::vector<slinky::expr> alignments =
         compute_reduce_alignments(stored_type, a.extents, k_dims);
     std::vector<slinky::expr> split_factors = make_split_factors(

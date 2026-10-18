@@ -884,6 +884,33 @@ void xnn_compute_conv2d_igemm_indirection(
   }
 }
 
+// `output_tile_start` and `output_tile_size` should be multiples of igemm.mr
+// (tile size).
+void xnn_compute_deconv2d_igemm_indirection(
+    struct conv2d_igemm_indirection_init_context* restrict context,
+    size_t output_tile_start, size_t output_tile_size) {
+  xnn_indirection_init_deconv2d(
+      context->mr, output_tile_start, output_tile_start + output_tile_size,
+      context->indirection_buffer, context->input, context->input_pixel_stride,
+      context->zero_buffer, context->input_height, context->input_width,
+      context->output_height, context->output_width, context->kernel_height,
+      context->kernel_width, context->stride_height, context->stride_width,
+      context->dilation_height, context->dilation_width,
+      context->input_padding_top, context->input_padding_left);
+}
+
+void xnn_compute_subconv2d_indirection(
+    struct subconv2d_indirection_init_context* restrict context,
+    size_t slice_y_start, size_t slice_y_size) {
+  xnn_indirection_init_subconv2d(
+      context->mr, slice_y_start, slice_y_start + slice_y_size,
+      context->subconvolution_params, context->input,
+      context->input_pixel_stride, context->zero_buffer, context->input_height,
+      context->input_width, context->kernel_height, context->kernel_width,
+      context->stride_height, context->stride_width, context->padding_top,
+      context->padding_left);
+}
+
 XNN_NO_SANITIZE_FUNCTION void xnn_compute_subconv2d(
     struct subconv_context* restrict context, size_t batch_index,
     size_t group_index, size_t subkernel_index, size_t slice_y,

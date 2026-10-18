@@ -13,9 +13,9 @@ namespace {
 
 TEST(HardwareConfigResetTest, HardwareConfigResetAndInitialization) {
   xnn_hardware_config mock_supported{};
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
   mock_supported.arch_flags |= xnn_arch_arm_neon_fp16_arith;
-#elif XNN_ARCH_X86_64
+#elif XNN_ARCH_X86_64 && XNN_ENABLE_SSE2 && XNN_ENABLE_AVX && XNN_ENABLE_F16C
   mock_supported.arch_flags |= xnn_arch_x86_sse2;
   mock_supported.arch_flags |= xnn_arch_x86_avx;
   mock_supported.arch_flags |= xnn_arch_x86_f16c;

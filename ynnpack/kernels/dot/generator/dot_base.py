@@ -580,11 +580,17 @@ def generate_dot_kernels_impl(
     block_shapes: Sequence[Tuple[int, int, int]],
     build_predicate: str | None = None,
 ):
+  if (
+      gen.kind == "fp64" or "double" in (gen.a_type, gen.b_type, gen.c_type)
+  ) and not build_predicate:
+    build_predicate = "defined(YNN_ENABLE_FP64)"
+
   src = gen.header()
   inc = ""
 
   if build_predicate:
     src += "#if " + build_predicate + "\n"
+    inc += "#if " + build_predicate + "\n"
 
   for m, n, k in block_shapes:
     src_i, inc_i = gen.generate_dot(m, n, k)
@@ -594,6 +600,7 @@ def generate_dot_kernels_impl(
 
   if build_predicate:
     src += "#endif\n"
+    inc += "#endif\n"
 
   src += gen.footer()
 

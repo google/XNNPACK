@@ -164,6 +164,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
 #define YNN_NODE_FLAG_LESS_ZERO (1 << 3)
 #define YNN_NODE_FLAG_SYMMETRIC_B (1 << 4)
+#define YNN_NODE_FLAG_PROPAGATE_NAN (1 << 5)
 
 // -----------------------------------------------------------------------------
 // Section 3. Elementwise operations
@@ -607,6 +608,9 @@ enum ynn_reduce_operator {
   ynn_reduce_min_max = 3,
   ynn_reduce_sum = 4,
   ynn_reduce_sum_squared = 5,
+
+  // Internal use only.
+  ynn_reduce_propagate_nan,
 };
 
 // Performs the operation:

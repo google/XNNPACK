@@ -246,7 +246,11 @@ std::optional<ynn::real> ynn_value::as_scalar() const {
   if (!is_static_scalar()) return std::nullopt;
   switch (type) {
     case ynn_type_fp64:
+#ifdef YNN_ENABLE_FP64
       return static_cast<ynn::real>(static_scalar_value<double>());
+#else
+      break;
+#endif
     case ynn_type_fp32:
       return static_scalar_value<float>();
     case ynn_type_fp16:
@@ -435,14 +439,15 @@ size_t static_size_of_inputs(const ynn_subgraph& subgraph,
 }
 
 bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
-  if (std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
+  const auto* transpose = std::get_if<ynn_node::static_transpose>(&node.op);
+  if ((transpose && transpose->alias) ||
+      std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
       std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
       std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
       std::holds_alternative<ynn_node::split_dim>(node.op) ||
       std::holds_alternative<ynn_node::split_dims>(node.op) ||
       std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
-      std::holds_alternative<ynn_node::static_reshape>(node.op) ||
-      std::holds_alternative<ynn_node::static_transpose>(node.op)) {
+      std::holds_alternative<ynn_node::static_reshape>(node.op)) {
     // Don't constant fold these "free" ops. If we allowed them to constant
     // fold and the heuristic below allowed it, it's possible we would produce
     // two copies of the same value.

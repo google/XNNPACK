@@ -67,6 +67,7 @@ YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave4_x16_neon, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave4_x32_neon, 4, 32)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave8_x2_neon, 8, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave8_x4_neon, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave8_x8_neon, 8, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave16_x2_neon, 16, 2)
 #endif  // YNN_ARCH_ARM_NEON
 

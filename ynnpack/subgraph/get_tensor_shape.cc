@@ -59,6 +59,11 @@ void implement_get_tensor_shape(ynn::span<const slinky::expr> extents,
                                               ctx);
   } else if (type == ynn_type_fp32) {
     implement_get_tensor_shape_typed<float>(extents, output.cast<float>(), ctx);
+#ifdef YNN_ENABLE_FP64
+  } else if (type == ynn_type_fp64) {
+    implement_get_tensor_shape_typed<double>(extents, output.cast<double>(),
+                                             ctx);
+#endif
   } else {
     YNN_UNREACHABLE;
   }

@@ -48,6 +48,8 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "arm32",
     match_any = [
+        "@platforms//cpu:aarch32",
+        "@platforms//cpu:arm",
         "@platforms//cpu:armv7",
     ],
 )
@@ -119,6 +121,14 @@ define_build_option(
     default_any = [
         ":arm",
         ":x86",
+    ],
+)
+
+define_build_option(
+    name = "ynn_enable_fp64",
+    default_any = [
+        ":x86",
+        ":arm64",
     ],
 )
 

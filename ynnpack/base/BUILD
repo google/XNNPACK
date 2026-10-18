@@ -116,6 +116,11 @@ cc_library(
             "YNN_ARCH_WASM",
         ],
         "//conditions:default": [],
+    }) + select({
+        "//ynnpack:ynn_enable_fp64": [
+            "YNN_ENABLE_FP64",
+        ],
+        "//conditions:default": [],
     }),
     local_defines = select({
         "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],

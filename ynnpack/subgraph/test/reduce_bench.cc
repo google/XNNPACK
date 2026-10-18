@@ -17,11 +17,8 @@
 #include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
-#include "ynnpack/base/base.h"
-#include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/bit_cast.h"
-#include "ynnpack/base/half.h"
 #include "ynnpack/base/test/util.h"
+#include "ynnpack/base/to_string.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/test/scheduler.h"
@@ -67,8 +64,9 @@ std::unique_ptr<T[]> ones(size_t n) {
 }
 
 template <typename Input, typename Output>
-void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
-           int dim1, int dim2, int kdims) {
+void bench(benchmark::State& state, ynn_threadpool_t threadpool,
+           ynn_reduce_operator op, bool propagate_nan, int dim0, int dim1,
+           int dim2, int kdims) {
   subgraph_ptr subgraph = create_subgraph(2);
 
   // If we have static shapes, set them now.
@@ -103,10 +101,14 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
     return;
   }
 
-  if (ynn_define_reduce(
-          subgraph.get(), ynn_reduce_sum, reduce_axes.size(),
-          reduce_axes.data(), input_id, YNN_INVALID_VALUE_ID, &output_id,
-          /*flags=*/YNN_NODE_FLAG_KEEP_DIMS) != ynn_status_success) {
+  uint32_t flags = YNN_NODE_FLAG_KEEP_DIMS;
+  if (propagate_nan) {
+    flags |= YNN_NODE_FLAG_PROPAGATE_NAN;
+  }
+
+  if (ynn_define_reduce(subgraph.get(), op, reduce_axes.size(),
+                        reduce_axes.data(), input_id, YNN_INVALID_VALUE_ID,
+                        &output_id, flags) != ynn_status_success) {
     state.SkipWithError("Failed to define reduce node");
     return;
   }
@@ -156,9 +158,11 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
   }
 
   float expected_val = 1.0f;
-  const int dims[3] = {dim0, dim1, dim2};
-  for (int axis : reduce_axes) {
-    expected_val *= dims[axis];
+  if (op == ynn_reduce_sum) {
+    const int dims[3] = {dim0, dim1, dim2};
+    for (int axis : reduce_axes) {
+      expected_val *= dims[axis];
+    }
   }
   const Output expected = static_cast<Output>(expected_val);
 
@@ -178,52 +182,94 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
 }
 
 void bench(benchmark::State& state, ynn_threadpool_t threadpool,
-           multi_type type, int dim0, int dim1, int dim2, int kdims) {
+           ynn_reduce_operator op, bool propagate_nan, multi_type type,
+           int dim0, int dim1, int dim2, int kdims) {
   SwitchTwoTypes(type, [&](auto input_val, auto output_val) {
     using Input = decltype(input_val);
     using Output = decltype(output_val);
-    bench<Input, Output>(state, threadpool, dim0, dim1, dim2, kdims);
+    bench<Input, Output>(state, threadpool, op, propagate_nan, dim0, dim1, dim2,
+                         kdims);
   });
 }
 
-multi_type multi_type_for_input_type(ynn_type input_type) {
-  switch (input_type) {
-    case ynn_type_int2:
-      return multi_type::int2_int32;
-    case ynn_type_uint2:
-      return multi_type::uint2_int32;
-    case ynn_type_int4:
-      return multi_type::int4_int32;
-    case ynn_type_uint4:
-      return multi_type::uint4_int32;
-    case ynn_type_int8:
-      return multi_type::int8_int32;
-    case ynn_type_uint8:
-      return multi_type::uint8_int32;
-    case ynn_type_int32:
-      return multi_type::int32;
-    case ynn_type_fp8_e5m2:
-      return multi_type::fp8_e5m2_fp32;
-    case ynn_type_fp8_e4m3:
-      return multi_type::fp8_e4m3_fp32;
-    case ynn_type_fp16:
-      return multi_type::fp16_fp32;
-    case ynn_type_bf16:
-      return multi_type::bf16_fp32;
-    case ynn_type_fp32:
-      return multi_type::fp32;
-    case ynn_type_fp64:
-      return multi_type::fp64;
-    default:
-      std::cerr << "Unsupported input type: " << ynn::to_string(input_type);
-      std::abort();
+multi_type multi_type_for_input_type(ynn_reduce_operator op,
+                                     ynn_type input_type) {
+  if (op == ynn_reduce_sum) {
+    switch (input_type) {
+      case ynn_type_int2:
+        return multi_type::int2_int32;
+      case ynn_type_uint2:
+        return multi_type::uint2_int32;
+      case ynn_type_int4:
+        return multi_type::int4_int32;
+      case ynn_type_uint4:
+        return multi_type::uint4_int32;
+      case ynn_type_int8:
+        return multi_type::int8_int32;
+      case ynn_type_uint8:
+        return multi_type::uint8_int32;
+      case ynn_type_int32:
+        return multi_type::int32;
+      case ynn_type_fp8_e5m2:
+        return multi_type::fp8_e5m2_fp32;
+      case ynn_type_fp8_e4m3:
+        return multi_type::fp8_e4m3_fp32;
+      case ynn_type_fp16:
+        return multi_type::fp16_fp32;
+      case ynn_type_bf16:
+        return multi_type::bf16_fp32;
+      case ynn_type_fp32:
+        return multi_type::fp32;
+#ifdef YNN_ENABLE_FP64
+      case ynn_type_fp64:
+        return multi_type::fp64;
+#endif
+      default:
+        std::cerr << "Unsupported input type: " << ynn::to_string(input_type);
+        std::abort();
+    }
+  } else if (op == ynn_reduce_min || op == ynn_reduce_max) {
+    switch (input_type) {
+      case ynn_type_int8:
+        return multi_type::int8;
+      case ynn_type_uint8:
+        return multi_type::uint8;
+      case ynn_type_int32:
+        return multi_type::int32;
+      case ynn_type_fp8_e5m2:
+        return multi_type::fp8_e5m2;
+      case ynn_type_fp8_e4m3:
+        return multi_type::fp8_e4m3;
+      case ynn_type_fp16:
+        return multi_type::fp16;
+      case ynn_type_bf16:
+        return multi_type::bf16;
+      case ynn_type_fp32:
+        return multi_type::fp32;
+#ifdef YNN_ENABLE_FP64
+      case ynn_type_fp64:
+        return multi_type::fp64;
+#endif
+      default:
+        std::cerr << "Unsupported input type: " << ynn::to_string(input_type);
+        std::abort();
+    }
+  } else {
+    std::cerr << "Unsupported op: " << ynn::to_string(op);
+    std::abort();
   }
 }
 
-ynn_type output_type_for_input_type(ynn_type input_type) {
-  if (input_type == ynn_type_fp64) return ynn_type_fp64;
-  if (ynn::type_is_floating_point(input_type)) return ynn_type_fp32;
-  return ynn_type_int32;
+ynn_type output_type_for_input_type(ynn_reduce_operator op,
+                                    ynn_type input_type) {
+  if (op == ynn_reduce_sum) {
+#ifdef YNN_ENABLE_FP64
+    if (input_type == ynn_type_fp64) return ynn_type_fp64;
+#endif
+    if (ynn::type_is_floating_point(input_type)) return ynn_type_fp32;
+    return ynn_type_int32;
+  }
+  return input_type;
 }
 
 }  // namespace ynn
@@ -243,8 +289,17 @@ ynn_type parse(const char* str, ynn_type) {
   if (strcmp(str, "fp16") == 0) return ynn_type_fp16;
   if (strcmp(str, "bf16") == 0) return ynn_type_bf16;
   if (strcmp(str, "fp32") == 0) return ynn_type_fp32;
+#ifdef YNN_ENABLE_FP64
   if (strcmp(str, "fp64") == 0) return ynn_type_fp64;
+#endif
   return ynn_type_invalid;
+}
+
+ynn_reduce_operator parse(const char* str, ynn_reduce_operator) {
+  if (strcmp(str, "sum") == 0) return ynn_reduce_sum;
+  if (strcmp(str, "min") == 0) return ynn_reduce_min;
+  if (strcmp(str, "max") == 0) return ynn_reduce_max;
+  return ynn_reduce_invalid;
 }
 
 int parse_kdims(const char* str) {
@@ -279,6 +334,8 @@ void usage(const char* name) {
   std::cout << R"(
 Options:
   --thread_count=N
+  --op=op1,op2,...  (sum, min, max)
+  --propagate_nan[=true|false]
   --type=t1,t2,...  (int2, uint2, int4, uint4, int8, uint8, fp8_e5m2, fp8_e4m3, fp16, bf16, fp32, fp64)
   --shape=d0,d1,d2
   -d0=d0_1,d0_2,...
@@ -287,17 +344,23 @@ Options:
   -kdims=r1,r2,...  (e.g., 0, 1, 01, 012)
 
 Notes:
-  Multiple --type, --shape, -d0, -d1, -d2, and -kdims options are allowed.
+  Multiple --op, --type, --shape, -d0, -d1, -d2, and -kdims options are allowed.
   These options form lists. The Cartesian product of the -d0, -d1, -d2, and
   -kdims lists are registered. If --shape is given, the Cartesian product
   of --shape and -kdims is registered. The full set of benchmarks is then the
-  Cartesian product of the shape/dimension configurations and the --type options.
+  Cartesian product of the shape/dimension configurations, the --type options,
+  and the --op options.
 
   If a shape value is positive, it is a static shape. If it is negative, it is a
   dynamic shape of the same magnitude.
 
-  --type specifies the input type. Output type is int32 for integral input types,
-  fp32 for floating-point input types (except fp64 which outputs fp64).
+  --op specifies reduction operations to benchmark (default: sum, min, max).
+
+  --propagate_nan enables NaN propagation for reductions.
+
+  --type specifies the input type. For sum, output type is int32 for integral
+  input types, fp32 for floating-point input types (except fp64 which outputs fp64).
+  For min and max, output type is the same as the input type.
 
   -kdims specifies reduction dimensions as digit strings (e.g., 012 reduces dimensions 0, 1, and 2).
 )";
@@ -312,6 +375,8 @@ int main(int argc, char** argv) {
   std::vector<int> kdims_list;
   std::vector<std::array<int, 3>> shapes;
   std::vector<ynn_type> types;
+  std::vector<ynn_reduce_operator> ops;
+  bool propagate_nan = false;
   benchmark::Initialize(&argc, argv);
 
   for (int i = 1; i < argc;) {
@@ -345,6 +410,14 @@ int main(int argc, char** argv) {
       parse_list(argv[i] + 7, types);
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
+    } else if (strncmp(argv[i], "--op=", 5) == 0) {
+      parse_list(argv[i] + 5, ops);
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strcmp(argv[i], "--propagate_nan") == 0) {
+      propagate_nan = true;
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
     } else if (strncmp(argv[i], "--thread_count=", 15) == 0) {
       thread_count = std::stoi(argv[i] + 15);
       std::copy(argv + i + 1, argv + argc, argv + i);
@@ -358,12 +431,34 @@ int main(int argc, char** argv) {
     }
   }
 
+  if (ops.empty()) {
+    ops = {
+        ynn_reduce_sum,
+        ynn_reduce_min,
+        ynn_reduce_max,
+    };
+  } else {
+    for (ynn_reduce_operator op : ops) {
+      if (op == ynn_reduce_invalid) {
+        usage(argv[0]);
+        return -1;
+      }
+    }
+  }
+
   if (types.empty()) {
     types = {
         ynn_type_int2,  ynn_type_int4,     ynn_type_int8,
         ynn_type_uint8, ynn_type_fp8_e5m2, ynn_type_fp8_e4m3,
         ynn_type_fp16,  ynn_type_bf16,     ynn_type_fp32,
     };
+  } else {
+    for (ynn_type type : types) {
+      if (type == ynn_type_invalid) {
+        usage(argv[0]);
+        return -1;
+      }
+    }
   }
 
   if (thread_count < 1) {
@@ -392,37 +487,45 @@ int main(int argc, char** argv) {
   ynn::threadpool_ptr threadpool =
       ynn::create_threadpool(scheduler.scheduler(), &scheduler);
 
-  for (ynn_type input_type : types) {
-    ynn::multi_type type = ynn::multi_type_for_input_type(input_type);
-    if (type == static_cast<ynn::multi_type>(-1)) {
-      usage(argv[0]);
-      return -1;
-    }
-
-    std::stringstream name("reduce_");
-    name << ynn::to_string(input_type) << "_"
-         << ynn::to_string(ynn::output_type_for_input_type(input_type));
-    auto* reduce_bench = benchmark::RegisterBenchmark(
-        name.str(), [=, &threadpool](benchmark::State& state) {
-          const int dim0 = state.range(0);
-          const int dim1 = state.range(1);
-          const int dim2 = state.range(2);
-          const int kdims = state.range(3);
-          ynn::bench(state, threadpool.get(), type, dim0, dim1, dim2, kdims);
-        });
-    reduce_bench->ArgNames({"dim0", "dim1", "dim2", "kdims"});
-    reduce_bench->UseRealTime();
-    reduce_bench->MeasureProcessCPUTime();
-    for (const auto& shape : shapes) {
-      for (int r : kdims_list) {
-        reduce_bench->Args({shape[0], shape[1], shape[2], r});
+  for (ynn_reduce_operator op : ops) {
+    for (ynn_type input_type : types) {
+      if ((op == ynn_reduce_min || op == ynn_reduce_max) &&
+          ynn::type_element_count(input_type) > 1) {
+        continue;
       }
-    }
-    for (int d0 : dim0s) {
-      for (int d1 : dim1s) {
-        for (int d2 : dim2s) {
-          for (int r : kdims_list) {
-            reduce_bench->Args({d0, d1, d2, r});
+
+      ynn::multi_type type = ynn::multi_type_for_input_type(op, input_type);
+
+      std::stringstream name;
+      name << ynn::to_string(op) << "_" << ynn::to_string(input_type) << "_"
+           << ynn::to_string(ynn::output_type_for_input_type(op, input_type));
+      if (propagate_nan) {
+        name << "_propagate_nan";
+      }
+
+      auto* reduce_bench = benchmark::RegisterBenchmark(
+          name.str(), [=, &threadpool](benchmark::State& state) {
+            const int dim0 = state.range(0);
+            const int dim1 = state.range(1);
+            const int dim2 = state.range(2);
+            const int kdims = state.range(3);
+            ynn::bench(state, threadpool.get(), op, propagate_nan, type, dim0,
+                       dim1, dim2, kdims);
+          });
+      reduce_bench->ArgNames({"dim0", "dim1", "dim2", "kdims"});
+      reduce_bench->UseRealTime();
+      reduce_bench->MeasureProcessCPUTime();
+      for (const auto& shape : shapes) {
+        for (int r : kdims_list) {
+          reduce_bench->Args({shape[0], shape[1], shape[2], r});
+        }
+      }
+      for (int d0 : dim0s) {
+        for (int d1 : dim1s) {
+          for (int d2 : dim2s) {
+            for (int r : kdims_list) {
+              reduce_bench->Args({d0, d1, d2, r});
+            }
           }
         }
       }

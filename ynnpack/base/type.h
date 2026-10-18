@@ -37,9 +37,11 @@ using float32x1_t = float;
 using float64x1_t = double;
 #endif
 
-// TODO: b/501068911 - When we have an option to disable fp64 support, we should
-// make this float when fp64 is disabled.
+#ifdef YNN_ENABLE_FP64
 using real = double;
+#else
+using real = float;
+#endif
 
 // Returns true if the type is an integer type.
 bool type_is_integral(ynn_type t);
@@ -59,6 +61,9 @@ size_t type_mantissa_bits(ynn_type t);
 
 // Returns the number of bits in the exponent of the type.
 size_t type_exponent_bits(ynn_type t);
+
+// Returns true if the type has an NaN.
+bool type_has_nan(ynn_type t);
 
 // Returns true if converting a value of `from` to `to` can be done without
 // losing information.
@@ -355,8 +360,10 @@ constexpr decltype(auto) SwitchRealType(ynn_type type, F&& f) {
       return std::forward<F>(f)(fp8_e4m3());
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
+#ifdef YNN_ENABLE_FP64
     case ynn_type_fp64:
       return std::forward<F>(f)(double());
+#endif
     default:
       YNN_UNREACHABLE;
   }
@@ -386,6 +393,9 @@ class type_info {
   }
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T nan() { return std::numeric_limits<T>::quiet_NaN(); }
+  static constexpr bool has_nan() {
+    return std::numeric_limits<T>::has_quiet_NaN;
+  }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
   static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }
@@ -412,6 +422,7 @@ class type_info<half> {
   static constexpr half epsilon() { return half::epsilon(); }
   static constexpr half infinity() { return half::infinity(); }
   static constexpr half nan() { return half::nan(); }
+  static constexpr bool has_nan() { return true; }
   static constexpr half min() { return half::min(); }
   static constexpr half max() { return half::max(); }
   static constexpr half smallest_normal() { return half::smallest_normal(); }
@@ -438,6 +449,7 @@ class type_info<bfloat16> {
   }
   static constexpr bfloat16 infinity() { return bfloat16::from_bits(0x7f80); }
   static constexpr bfloat16 nan() { return bfloat16::from_bits(0x7fc0); }
+  static constexpr bool has_nan() { return true; }
   static constexpr bfloat16 min() { return bfloat16::from_bits(0xff7f); }
   static constexpr bfloat16 max() { return bfloat16::from_bits(0x7f7f); }
   static constexpr bfloat16 smallest_normal() {
@@ -469,6 +481,7 @@ class type_info<fp8_e5m2> {
 
   static constexpr fp8_e5m2 epsilon() { return fp8_e5m2::epsilon(); }
   static constexpr fp8_e5m2 infinity() { return fp8_e5m2::infinity(); }
+  static constexpr bool has_nan() { return false; }
   static constexpr fp8_e5m2 min() { return fp8_e5m2::min(); }
   static constexpr fp8_e5m2 max() { return fp8_e5m2::max(); }
   static constexpr fp8_e5m2 smallest_normal() {
@@ -496,6 +509,7 @@ class type_info<fp8_e4m3> {
 
   static constexpr fp8_e4m3 epsilon() { return fp8_e4m3::epsilon(); }
   static constexpr fp8_e4m3 infinity() { return fp8_e4m3::infinity(); }
+  static constexpr bool has_nan() { return false; }
   static constexpr fp8_e4m3 min() { return fp8_e4m3::min(); }
   static constexpr fp8_e4m3 max() { return fp8_e4m3::max(); }
   static constexpr fp8_e4m3 smallest_normal() {
@@ -525,6 +539,7 @@ class type_info<int8_t> {
   static constexpr int8_t min() { return -128; }
   static constexpr int8_t max() { return 127; }
   static constexpr int8_t smallest_normal() { return 0; }
+  static constexpr bool has_nan() { return false; }
   static constexpr int8_t min_identity() { return max(); }
   static constexpr int8_t max_identity() { return min(); }
   static constexpr int8_t sum_identity() { return 0; }
@@ -549,6 +564,7 @@ class type_info<uint8_t> {
   static constexpr uint8_t min() { return 0; }
   static constexpr uint8_t max() { return 255; }
   static constexpr uint8_t smallest_normal() { return 0; }
+  static constexpr bool has_nan() { return false; }
   static constexpr uint8_t min_identity() { return max(); }
   static constexpr uint8_t max_identity() { return min(); }
   static constexpr uint8_t sum_identity() { return 0; }
@@ -603,6 +619,7 @@ class type_info<int4x2> {
   static constexpr int32_t min() { return -8; }
   static constexpr int32_t max() { return 7; }
   static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr bool has_nan() { return false; }
   static constexpr int32_t min_identity() { return max(); }
   static constexpr int32_t max_identity() { return min(); }
 
@@ -628,6 +645,7 @@ class type_info<int2x4> {
   static constexpr int32_t min() { return -2; }
   static constexpr int32_t max() { return 1; }
   static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr bool has_nan() { return false; }
   static constexpr int32_t min_identity() { return max(); }
   static constexpr int32_t max_identity() { return min(); }
 
@@ -653,6 +671,7 @@ class type_info<uint4x2> {
   static constexpr int32_t min() { return 0; }
   static constexpr int32_t max() { return 15; }
   static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr bool has_nan() { return false; }
   static constexpr int32_t min_identity() { return max(); }
   static constexpr int32_t max_identity() { return min(); }
 
@@ -678,6 +697,7 @@ class type_info<uint2x4> {
   static constexpr int32_t min() { return 0; }
   static constexpr int32_t max() { return 3; }
   static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr bool has_nan() { return false; }
   static constexpr int32_t min_identity() { return max(); }
   static constexpr int32_t max_identity() { return min(); }
 
@@ -703,6 +723,7 @@ class type_info<quantized<T>> {
   static quantized<T> min() { return {type_info<T>::min()}; }
   static quantized<T> max() { return {type_info<T>::max()}; }
   static quantized<T> smallest_normal() { return {0}; }
+  static constexpr bool has_nan() { return false; }
   static quantized<T> min_identity() { return max(); }
   static quantized<T> max_identity() { return min(); }
 

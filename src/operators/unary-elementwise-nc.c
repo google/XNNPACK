@@ -392,6 +392,9 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
   pthreadpool_t threadpool) {
   op->state = xnn_run_state_invalid;
 
+  op->batch_size = batch_size;
+  op->channels = channels;
+
   if (batch_size == 0 || channels == 0) {
     op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -413,8 +416,6 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
     return xnn_status_invalid_parameter;
   }
 
-  op->batch_size = batch_size;
-  op->channels = channels;
   op->input_pixel_stride = input_stride;
   op->output_pixel_stride = output_stride;
 
@@ -696,6 +697,9 @@ static enum xnn_status reshape_unary_elementwise_nc(
   }
   unary_elementwise_op->state = xnn_run_state_invalid;
 
+  unary_elementwise_op->batch_size = batch_size;
+  unary_elementwise_op->channels = channels;
+
   if (batch_size == 0 || channels == 0) {
     unary_elementwise_op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -719,8 +723,6 @@ static enum xnn_status reshape_unary_elementwise_nc(
     return xnn_status_invalid_parameter;
   }
 
-  unary_elementwise_op->batch_size = batch_size;
-  unary_elementwise_op->channels = channels;
   unary_elementwise_op->input_pixel_stride = input_stride;
   unary_elementwise_op->output_pixel_stride = output_stride;
 
@@ -787,7 +789,7 @@ static enum xnn_status setup_unary_elementwise_nc(
 
   switch (unary_elementwise_op->state) {
     case xnn_run_state_skip:
-      return xnn_status_success;
+      break;
     case xnn_run_state_invalid:
       xnn_log_error(
           "failed to setup %s operator: operator has not been reshaped yet",
@@ -798,6 +800,11 @@ static enum xnn_status setup_unary_elementwise_nc(
     case xnn_run_state_ready:
       // Operator has been reshaped, and we are setting up with different pointers.
       break;
+  }
+
+  if (unary_elementwise_op->batch_size == 0 ||
+      unary_elementwise_op->channels == 0) {
+    return xnn_status_success;
   }
 
   if (input == output && is_copy_operator(expected_operator_type)) {

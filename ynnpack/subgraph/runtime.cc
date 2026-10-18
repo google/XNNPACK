@@ -1025,9 +1025,8 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         assert(i.data);
         assert(i.data->rank == i.rank());
         for (size_t d = 0; d < i.rank(); ++d) {
-          slinky::expr extent_d = i.physical_extent(d);
-          i.data->dims[d].set_min_extent(
-              0, extent_d.defined() ? evaluate(extent_d, ctx) : 1);
+          slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
+          i.data->dims[d].set_min_extent(0, extent_d);
         }
         ynn::init_buffer_strides(*i.data);
       }
@@ -1102,10 +1101,12 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
 #endif
 #ifdef YNN_ENABLE_TSL_PROFILER
   if (ynn_traceme_enabled()) {
+#ifdef YNN_ENABLE_PERFETTO
     if (ynn::perfetto_session::global()) {
       YNN_LOG_WARNING()
           << "tsl::profiler tracing is overriding perfetto tracing.";
     }
+#endif
     eval_config.trace_begin = [](const char* name) {
       return static_cast<slinky::index_t>(
           tsl::profiler::TraceMe::ActivityStart(name));
@@ -1135,10 +1136,9 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
       value.make_buffer(*this);
 
       for (size_t d = 0; d < value.extents.size(); ++d) {
-        slinky::expr extent_d = i.physical_extent(d);
-        if (!extent_d.defined()) {
+        if (!value.extents[d].defined()) {
           value.buffer->dim(d).bounds = slinky::point(0);
-        } else if (const auto v = as_constant(extent_d)) {
+        } else if (const auto v = as_constant(i.physical_extent(d))) {
           value.buffer->dim(d).bounds = slinky::range(0, *v);
         }
       }

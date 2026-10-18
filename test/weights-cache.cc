@@ -5,7 +5,9 @@
 
 #include <algorithm>  // For std::rotate.
 #include <cstdint>    // For uintptr_t.
+#include <cstdio>     // For std::sscanf.
 #include <cstring>    // For memcpy.
+#include <fstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -15,6 +17,19 @@
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/memory.h"
+
+#if XNN_PLATFORM_LINUX && XNN_HAS_MMAP
+#include <sys/mman.h>
+#include <sys/prctl.h>
+#include <unistd.h>
+// Added to mainline Linux UAPI <linux/prctl.h> in 5.17; older sysroots omit it.
+#ifndef PR_SET_VMA
+#define PR_SET_VMA 0x53564d41
+#endif
+#ifndef PR_SET_VMA_ANON_NAME
+#define PR_SET_VMA_ANON_NAME 0
+#endif
+#endif
 
 static void* cache_end(const struct xnn_internal_weights_cache* cache) {
   return reinterpret_cast<void*>(
@@ -128,6 +143,67 @@ TEST(WEIGHTS_MEMORY, allocate_and_release) {
             xnn_allocate_weights_memory(&b, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
 }
+
+#if XNN_PLATFORM_LINUX && XNN_HAS_MMAP
+static bool has_vma_name_in_proc_maps(const void* ptr,
+                                      const char* expected_name) {
+  std::ifstream maps("/proc/self/maps");
+  if (!maps.is_open()) {
+    return false;
+  }
+  const uintptr_t target = reinterpret_cast<uintptr_t>(ptr);
+  std::string line;
+  while (std::getline(maps, line)) {
+    uintptr_t start = 0;
+    uintptr_t end = 0;
+    if (std::sscanf(line.c_str(), "%zx-%zx", &start, &end) == 2) {
+      if (target >= start && target < end) {
+        return std::strstr(line.c_str(), expected_name) != nullptr;
+      }
+    }
+  }
+  return false;
+}
+
+static bool anon_vma_naming_supported() {
+  const int64_t sys_page_size = sysconf(_SC_PAGESIZE);
+  const size_t page_size =
+      sys_page_size > 0 ? static_cast<size_t>(sys_page_size) : 4096;
+  void* probe = mmap(nullptr, page_size, PROT_READ | PROT_WRITE,
+                     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if (probe == MAP_FAILED) {
+    return false;
+  }
+  const bool supported =
+      (prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME,
+             reinterpret_cast<uintptr_t>(probe), page_size,
+             reinterpret_cast<uintptr_t>("xnnpack-probe")) == 0) &&
+      has_vma_name_in_proc_maps(probe, "[anon:xnnpack-probe]");
+  munmap(probe, page_size);
+  return supported;
+}
+
+TEST(WEIGHTS_MEMORY, vma_name) {
+  if (!anon_vma_naming_supported()) {
+    GTEST_SKIP() << "PR_SET_VMA_ANON_NAME is not supported in this environment";
+  }
+  constexpr char kExpectedVmaName[] = "[anon:xnnpack-weights-cache]";
+  xnn_weights_buffer b;
+  ASSERT_EQ(xnn_status_success,
+            xnn_allocate_weights_memory(&b, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));
+  EXPECT_TRUE(has_vma_name_in_proc_maps(b.start, kExpectedVmaName));
+
+  b.size = b.capacity;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reserve_weights_memory(&b, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));
+  EXPECT_TRUE(has_vma_name_in_proc_maps(b.start, kExpectedVmaName));
+
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
+  EXPECT_TRUE(has_vma_name_in_proc_maps(b.start, kExpectedVmaName));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+#endif  // XNN_PLATFORM_LINUX && XNN_HAS_MMAP
 
 TEST(WEIGHTS_MEMORY, grow) {
   xnn_weights_buffer b;

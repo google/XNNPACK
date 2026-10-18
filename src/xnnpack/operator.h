@@ -167,6 +167,11 @@ struct igemm_op_context {
   struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
 };
 
+struct subconv_op_context {
+  struct subconv_context subconv;
+  struct subconv2d_indirection_init_context subconv2d_indirection_init;
+};
+
 struct xnn_convolution_operator {
   uint32_t padding_top;
   uint32_t padding_right;
@@ -370,7 +375,6 @@ struct xnn_operator {
     struct resize_bilinear_chw_context resize_bilinear_chw;
     struct slice_context slice;
     struct spmm_context spmm;
-    struct subconv_context subconv;
     struct transpose_context transpose;
     struct floating_point_softmax_context floating_point_softmax;
     struct u8_softmax_context u8_softmax;
@@ -390,6 +394,7 @@ struct xnn_operator {
     struct kai_dwconv_op_context* kai_dwconv;
     struct gemm_op_context* gemm;
     struct igemm_op_context* igemm;
+    struct subconv_op_context* subconv;
     struct reduce_context* reduce;
     struct pad_context* pad;
   } dynamic_context;

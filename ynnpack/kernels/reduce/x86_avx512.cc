@@ -15,6 +15,7 @@
 #include "ynnpack/base/simd/x86_vec512.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max.h"
+#include "ynnpack/kernels/reduce/propagate_nan.h"
 #include "ynnpack/kernels/reduce/reduce.h"
 #include "ynnpack/kernels/reduce/sum.h"
 
@@ -144,7 +145,9 @@ using simd::bf16x32;
 using simd::f16x32;
 using simd::f32x16;
 using simd::f32x32;
+#ifdef YNN_ENABLE_FP64
 using simd::f64x8;
+#endif
 using simd::s16x32;
 using simd::s32x16;
 using simd::s32x32;
@@ -195,6 +198,7 @@ MIN_MAX_KN_KERNEL(max_kn_uint8_avx512, dummy_t, u8x64, uint8_t, 64);
 MIN_MAX_K1_KERNEL(max_k1_int8_avx512, dummy_t, s8x64, int8_t, 64);
 MIN_MAX_KN_KERNEL(max_kn_int8_avx512, dummy_t, s8x64, int8_t, 64);
 
+#ifdef YNN_ENABLE_FP64
 MIN_MAX_K1_KERNEL(min_max_k1_fp64_avx512, f64x8, f64x8, double, 8);
 MIN_MAX_KN_KERNEL(min_max_kn_fp64_avx512, f64x8, f64x8, double, 8);
 MIN_MAX_K1_KERNEL(min_k1_fp64_avx512, f64x8, dummy_t, double, 8);
@@ -204,6 +208,7 @@ MIN_MAX_KN_KERNEL(max_kn_fp64_avx512, dummy_t, f64x8, double, 8);
 
 SUM_FLOAT_K1_KERNEL(sum_k1_fp64_avx512, double, double, 0, 1, identity);
 SUM_FLOAT_KN_KERNEL(sum_kn_fp64_avx512, double, double, 8, identity);
+#endif
 SUM_FLOAT_K1_KERNEL(sum_k1_fp32_avx512, float, float, 0, 1, identity);
 SUM_FLOAT_KN_KERNEL(sum_kn_fp32_avx512, float, float, 16, identity);
 SUM_FLOAT_K1_KERNEL(sum_k1_bf16_fp32_avx512, bfloat16, float, 0, 2, identity);
@@ -217,8 +222,10 @@ SUM_KN_KERNEL(sum_kn_uint8_int32_avx512, uint8_t, int32_t, 64, identity);
 SUM_K1_KERNEL(sum_k1_int32_avx512, int32_t, int32_t, 16, 1, identity);
 SUM_KN_KERNEL(sum_kn_int32_avx512, int32_t, int32_t, 16, identity);
 
+#ifdef YNN_ENABLE_FP64
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp64_avx512, double, double, 0, 1, square);
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp64_avx512, double, double, 8, square);
+#endif
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp32_avx512, float, float, 0, 1, square);
 SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp32_avx512, float, float, 16, square);
 SUM_FLOAT_K1_KERNEL(sum_squared_k1_bf16_fp32_avx512, bfloat16, float, 0, 2,
@@ -232,5 +239,14 @@ SUM_KN_KERNEL(sum_squared_kn_int8_int32_avx512, int8_t, int32_t, 16, square);
 SUM_K1_KERNEL(sum_squared_k1_uint8_int32_avx512, uint8_t, int32_t, 16, 4,
               square);
 SUM_KN_KERNEL(sum_squared_kn_uint8_int32_avx512, uint8_t, int32_t, 64, square);
+
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp32_avx512, float, 16);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp32_avx512, float, 16);
+#ifdef YNN_ENABLE_FP64
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_fp64_avx512, double, 8);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_fp64_avx512, double, 8);
+#endif
+PROPAGATE_NAN_K1_KERNEL(propagate_nan_k1_bf16_avx512, bfloat16, 32);
+PROPAGATE_NAN_KN_KERNEL(propagate_nan_kn_bf16_avx512, bfloat16, 32);
 
 }  // namespace ynn

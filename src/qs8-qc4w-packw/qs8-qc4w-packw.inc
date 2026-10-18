@@ -26,13 +26,17 @@ XNN_QC4UW_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x16
 #if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x4c8__sse2, 4, 8, 1, 16, 1, 0)
 XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2, 8, 8, 1, 16, 1, 0)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__sse2, 16, 8, 1, 16, 1, 0)
 XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x4c8__sse2, 4, 8, 1, 16, 1, 128)
 XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x8c8__sse2, 8, 8, 1, 16, 1, 128)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__sse2, 16, 8, 1, 16, 1, 128)
 
 XNN_QC4UW_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2, 4, 8, 1, 16, 1, 0)
 XNN_QC4UW_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x8c8__sse2, 8, 8, 1, 16, 1, 0)
+XNN_QC4UW_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x16c8__sse2, 16, 8, 1, 16, 1, 0)
 XNN_QC4UW_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2, 4, 8, 1, 16, 1, 128)
 XNN_QC4UW_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x8c8__sse2, 8, 8, 1, 16, 1, 128)
+XNN_QC4UW_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x16c8__sse2, 16, 8, 1, 16, 1, 128)
 #endif
 
 #if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86_64 || XNN_ARCH_X86)

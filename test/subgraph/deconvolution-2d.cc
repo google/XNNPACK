@@ -520,6 +520,120 @@ TEST(Deconvolution2D, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+namespace {
+
+template <typename Data = float>
+void TestTransientIndirectionBuffer(uint32_t padding, uint32_t kernel_size,
+                                    uint32_t stride, uint32_t groups) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  constexpr size_t batch_size = 2, input_height = 6, input_width = 5;
+  constexpr size_t group_input_channels = 8, group_output_channels = 12;
+  const size_t input_channels = groups * group_input_channels;
+  const size_t output_channels = groups * group_output_channels;
+
+  DeconvolutionParams params;
+  params.padding = {padding, padding, padding, padding};
+  params.adjustment = {0, 0};
+  params.kernel = {kernel_size, kernel_size};
+  params.upsampling = {stride, stride};
+  params.dilation = {1, 1};
+  params.groups = groups;
+  params.group_input_channels = group_input_channels;
+  params.group_output_channels = group_output_channels;
+
+  ReplicableRandomDevice rng;
+  auto f32_gen = MakeDatatypeGenerator(float());
+  auto data_gen = MakeDatatypeGenerator(Data());
+  Tensor<float> filter({output_channels, kernel_size, kernel_size,
+                        group_input_channels},
+                       XnnExtraBytes);
+  Tensor<float> bias({output_channels}, XnnExtraBytes);
+  filter.generate([&]() { return f32_gen(rng); });
+  bias.generate([&]() { return f32_gen(rng); });
+
+  auto build = [&](SubgraphTester& tester) {
+    tester.AddInputTensor(4, xnn_datatype_of<Data>(), 0)
+        .AddStaticTensor(filter.extents(), 1, filter.base())
+        .AddStaticTensor(bias.extents(), 2, bias.base())
+        .AddOutputTensor(4, xnn_datatype_of<Data>(), 3)
+        .AddDeconvolution2D(params, 0, 1, 2, 3);
+  };
+
+  SubgraphTester ref_tester(4);
+  build(ref_tester);
+  if (ref_tester.CreateRuntime(/*threadpool=*/nullptr, /*flags=*/0) ==
+      xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool(
+      pthreadpool_create(4), pthreadpool_destroy);
+  xnn_workspace_t workspace = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)>
+      auto_workspace(workspace, xnn_release_workspace);
+
+  SubgraphTester tester(4);
+  build(tester);
+  ASSERT_EQ(xnn_status_success,
+            tester.CreateRuntime(/*weights_cache=*/nullptr, workspace,
+                                 auto_threadpool.get(),
+                                 XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER));
+
+  size_t prev_workspace_size = 0;
+  for (size_t grow : {size_t{0}, size_t{2}}) {
+    const std::vector<size_t> in_shape = {batch_size, input_height + grow,
+                                          input_width + grow, input_channels};
+    Tensor<Data> in1(in_shape, XnnExtraBytes), in2(in_shape, XnnExtraBytes);
+    in1.generate([&]() { return data_gen(rng); });
+    in2.generate([&]() { return data_gen(rng); });
+
+    ref_tester.ReshapeExternalTensor(in_shape, in1.base(), 0).ReshapeRuntime();
+    tester.ReshapeExternalTensor(in_shape, in1.base(), 0).ReshapeRuntime();
+    EXPECT_GT(workspace->size, prev_workspace_size);
+    prev_workspace_size = workspace->size;
+
+    const std::vector<size_t> out_shape = tester.GetExternalTensorShape(3);
+    for (Tensor<Data>* in : {&in1, &in2}) {
+      Tensor<Data> ref_out(out_shape), out(out_shape);
+      ref_tester.SetupExternalTensor(in->base(), 0)
+          .SetupExternalTensor(ref_out.base(), 3)
+          .SetupRuntime()
+          .InvokeRuntime();
+      tester.SetupExternalTensor(in->base(), 0)
+          .SetupExternalTensor(out.base(), 3)
+          .SetupRuntime()
+          .InvokeRuntime();
+      for (size_t i = 0; i < out.size(); ++i) {
+        ASSERT_NEAR(static_cast<float>(out.base()[i]),
+                    static_cast<float>(ref_out.base()[i]), 1.0e-4f);
+      }
+    }
+  }
+}
+
+}  // namespace
+
+TEST(Deconvolution2D, TransientIndirectionBufferIgemm) {
+  TestTransientIndirectionBuffer(/*padding=*/1, /*kernel_size=*/3, /*stride=*/1,
+                                 /*groups=*/2);
+}
+
+TEST(Deconvolution2D, TransientIndirectionBufferSubconv2D) {
+  TestTransientIndirectionBuffer(/*padding=*/1, /*kernel_size=*/4, /*stride=*/2,
+                                 /*groups=*/2);
+}
+
+TEST(Deconvolution2D, TransientIndirectionBufferIgemmF16Fp32Weights) {
+  TestTransientIndirectionBuffer<xnn_float16>(/*padding=*/1, /*kernel_size=*/3,
+                                              /*stride=*/1, /*groups=*/2);
+}
+
+TEST(Deconvolution2D, TransientIndirectionBufferSubconv2DF16Fp32Weights) {
+  TestTransientIndirectionBuffer<xnn_float16>(/*padding=*/1, /*kernel_size=*/4,
+                                              /*stride=*/2, /*groups=*/2);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

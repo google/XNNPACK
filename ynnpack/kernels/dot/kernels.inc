@@ -213,11 +213,13 @@ YNN_DOT_KERNEL(arch_flag::none, dot_fp32_1xNx1_1x1x1,
                YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
                float, float, float,
                dot_cost_avoid)
+#ifdef YNN_ENABLE_FP64
 YNN_DOT_KERNEL(arch_flag::none, dot_fp64_1xNx1_1x1x1,
                1, 32, 1, 1, 1, 1,
                YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
                double, double, double,
                dot_cost_avoid)
+#endif
 YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32_1xNx1_1x1x1,
                1, 32, 1, 1, 1, 1,
                dot_flag::consistent_arithmetic, half, half, float,

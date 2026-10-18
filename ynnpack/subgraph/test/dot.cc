@@ -723,14 +723,23 @@ TEST_P(Dot, BroadcastExtent1) {
   });
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    Test, Dot,
-    testing::Values(multi_type::fp64, multi_type::fp32, multi_type::fp16,
-                    multi_type::bf16, multi_type::fp16_fp16_fp32,
-                    multi_type::bf16_bf16_fp32, multi_type::int8_int8_int32,
-                    multi_type::int8_int4_int32, multi_type::uint8_int8_int32),
-    [](const testing::TestParamInfo<multi_type>& info) {
-      return to_string(info.param);
-    });
+multi_type dot_types[] = {
+#ifdef YNN_ENABLE_FP64
+    multi_type::fp64,
+#endif
+    multi_type::fp32,
+    multi_type::fp16,
+    multi_type::bf16,
+    multi_type::fp16_fp16_fp32,
+    multi_type::bf16_bf16_fp32,
+    multi_type::int8_int8_int32,
+    multi_type::int8_int4_int32,
+    multi_type::uint8_int8_int32,
+};
+
+INSTANTIATE_TEST_SUITE_P(Test, Dot, testing::ValuesIn(dot_types),
+                         [](const testing::TestParamInfo<multi_type>& info) {
+                           return to_string(info.param);
+                         });
 
 }  // namespace ynn

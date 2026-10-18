@@ -425,6 +425,16 @@ class DeconvolutionOperatorTester {
 
   bool use_weights_cache() const { return this->use_weights_cache_; }
 
+  DeconvolutionOperatorTester& transient_indirection_buffer(
+      bool transient_indirection_buffer) {
+    this->transient_indirection_buffer_ = transient_indirection_buffer;
+    return *this;
+  }
+
+  bool transient_indirection_buffer() const {
+    return this->transient_indirection_buffer_;
+  }
+
   void TestQC8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -489,6 +499,9 @@ class DeconvolutionOperatorTester {
         }
       }
 
+      const uint32_t flags = transient_indirection_buffer()
+                                 ? XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER
+                                 : 0;
       ASSERT_EQ(
           xnn_status_success,
           xnn_create_deconvolution2d_nhwc_qs8_qc8w(
@@ -500,8 +513,8 @@ class DeconvolutionOperatorTester {
               /*input_scale=*/1.0f, requantization_scales.data(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
               /*output_scale=*/1.f, static_cast<int8_t>(qmin() - 0x80),
-              static_cast<int8_t>(qmax() - 0x80),
-              /*flags=*/0, auto_weights_cache.get(), &deconvolution_op));
+              static_cast<int8_t>(qmax() - 0x80), flags,
+              auto_weights_cache.get(), &deconvolution_op));
 
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -513,16 +526,21 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    transient_indirection_buffer() ? &workspace_size : nullptr,
                     /*threadpool=*/nullptr));
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
-                    deconvolution_op, input.data(), output.data()));
+                    deconvolution_op, input.data(), output.data(),
+                    transient_indirection_buffer() ? workspace.data()
+                                                   : nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -561,11 +579,12 @@ class DeconvolutionOperatorTester {
                 deconvolution_op2, batch_size(), input_height(), input_width(),
                 adjustment_height(), adjustment_width(),
                 /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                /*threadpool=*/nullptr));
+                /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
-                      deconvolution_op2, input.data(), output2.data()));
+                      deconvolution_op2, input.data(), output2.data(),
+                      /*workspace=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
@@ -642,6 +661,9 @@ class DeconvolutionOperatorTester {
       }
 
       uint32_t flags = XNN_FLAG_INLINE_LHS_PACKING;
+      if (transient_indirection_buffer()) {
+        flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+      }
       enum xnn_status status = xnn_create_deconvolution2d_nhwc_pqs8_qs8_qc8w(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           kernel_height(), kernel_width(), stride_height(), stride_width(),
@@ -668,6 +690,20 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      if (transient_indirection_buffer()) {
+        size_t zero_batch_h = 0, zero_batch_w = 0;
+        size_t zero_batch_workspace_size = SIZE_MAX;
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                      deconvolution_op, /*batch_size=*/0, input_height(),
+                      input_width(), adjustment_height(), adjustment_width(),
+                      &zero_batch_h, &zero_batch_w, &zero_batch_workspace_size,
+                      /*threadpool=*/nullptr));
+        EXPECT_EQ(zero_batch_h, output_height());
+        EXPECT_EQ(zero_batch_w, output_width());
+        EXPECT_EQ(zero_batch_workspace_size, 0);
+      }
+
       size_t workspace_size = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
@@ -689,6 +725,18 @@ class DeconvolutionOperatorTester {
 
       VerifyQC8(batch_size(), output_height(), output_width(),
                 /*output_zero_point=*/0, output, output_ref);
+
+      if (transient_indirection_buffer()) {
+        std::fill(output.begin(), output.end(), 0);
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                      deconvolution_op, input.data(), output.data(),
+                      workspace.data()));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
+        VerifyQC8(batch_size(), output_height(), output_width(),
+                  /*output_zero_point=*/0, output, output_ref);
+      }
 
       if (use_weights_cache()) {
         xnn_operator_t deconvolution_op2 = nullptr;
@@ -1081,6 +1129,9 @@ class DeconvolutionOperatorTester {
         }
       }
 
+      const uint32_t flags = transient_indirection_buffer()
+                                 ? XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER
+                                 : 0;
       ASSERT_EQ(
           xnn_status_success,
           xnn_create_deconvolution2d_nhwc_qu8(
@@ -1092,8 +1143,8 @@ class DeconvolutionOperatorTester {
               1.0f /* input scale */, kernel_zero_point,
               1.0f /* kernel scale */, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
-              output_scale, qmin(), qmax(),
-              /*flags=*/0, auto_weights_cache.get(), &deconvolution_op));
+              output_scale, qmin(), qmax(), flags, auto_weights_cache.get(),
+              &deconvolution_op));
 
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -1105,16 +1156,21 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_deconvolution2d_nhwc_qu8(
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    transient_indirection_buffer() ? &workspace_size : nullptr,
                     /*threadpool=*/nullptr));
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_deconvolution2d_nhwc_qu8(
-                    deconvolution_op, input.data(), output.data()));
+                    deconvolution_op, input.data(), output.data(),
+                    transient_indirection_buffer() ? workspace.data()
+                                                   : nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -1151,11 +1207,12 @@ class DeconvolutionOperatorTester {
                 deconvolution_op2, batch_size(), input_height(), input_width(),
                 adjustment_height(), adjustment_width(),
                 /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                /*threadpool=*/nullptr));
+                /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_deconvolution2d_nhwc_qu8(
-                      deconvolution_op2, input.data(), output.data()));
+                      deconvolution_op2, input.data(), output.data(),
+                      /*workspace=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
@@ -1373,6 +1430,9 @@ class DeconvolutionOperatorTester {
       if (weights_type() == WeightsType::FP32) {
         flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
       }
+      if (transient_indirection_buffer()) {
+        flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+      }
       const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           kernel_height(), kernel_width(), stride_height(), stride_width(),
@@ -1396,16 +1456,21 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_deconvolution2d_nhwc_f16(
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    transient_indirection_buffer() ? &workspace_size : nullptr,
                     /*threadpool=*/nullptr));
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_deconvolution2d_nhwc_f16(
-                    deconvolution_op, input.data(), output.data()));
+                    deconvolution_op, input.data(), output.data(),
+                    transient_indirection_buffer() ? workspace.data()
+                                                   : nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -1440,11 +1505,12 @@ class DeconvolutionOperatorTester {
                 deconvolution_op2, batch_size(), input_height(), input_width(),
                 adjustment_height(), adjustment_width(),
                 /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                /*threadpool=*/nullptr));
+                /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_deconvolution2d_nhwc_f16(
-                      deconvolution_op2, input.data(), output2.data()));
+                      deconvolution_op2, input.data(), output2.data(),
+                      /*workspace=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
@@ -1691,6 +1757,9 @@ class DeconvolutionOperatorTester {
         }
       }
 
+      const uint32_t flags = transient_indirection_buffer()
+                                 ? XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER
+                                 : 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
                     padding_top(), padding_right(), padding_bottom(),
@@ -1700,7 +1769,7 @@ class DeconvolutionOperatorTester {
                     group_output_channels(), input_pixel_stride(),
                     output_pixel_stride(), kernel_scale.data(), kernel.data(),
                     has_bias() ? bias.data() : nullptr, output_min, output_max,
-                    /*flags=*/0, auto_weights_cache.get(), &deconvolution_op));
+                    flags, auto_weights_cache.get(), &deconvolution_op));
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(
@@ -1712,18 +1781,23 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    transient_indirection_buffer() ? &workspace_size : nullptr,
                     /*threadpool=*/nullptr));
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
                     deconvolution_op, input.data(), output.data(),
                     reinterpret_cast<const struct xnn_quantization_params*>(
-                        quantization_params.data())));
+                        quantization_params.data()),
+                    transient_indirection_buffer() ? workspace.data()
+                                                   : nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -1758,13 +1832,14 @@ class DeconvolutionOperatorTester {
                 deconvolution_op2, batch_size(), input_height(), input_width(),
                 adjustment_height(), adjustment_width(),
                 /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                /*threadpool=*/nullptr));
+                /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
                       deconvolution_op2, input.data(), output2.data(),
                       reinterpret_cast<const struct xnn_quantization_params*>(
-                          quantization_params.data())));
+                          quantization_params.data()),
+                      /*workspace=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
@@ -1946,6 +2021,9 @@ class DeconvolutionOperatorTester {
         }
       }
 
+      const uint32_t flags = transient_indirection_buffer()
+                                 ? XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER
+                                 : 0;
       ASSERT_EQ(
           xnn_status_success,
           xnn_create_deconvolution2d_nhwc_f32(
@@ -1954,8 +2032,8 @@ class DeconvolutionOperatorTester {
               dilation_height(), dilation_width(), groups(),
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), kernel.data(),
-              has_bias() ? bias.data() : nullptr, output_min, output_max,
-              /*flags=*/0, auto_weights_cache.get(), &deconvolution_op));
+              has_bias() ? bias.data() : nullptr, output_min, output_max, flags,
+              auto_weights_cache.get(), &deconvolution_op));
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(
@@ -1967,21 +2045,51 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      if (transient_indirection_buffer()) {
+        size_t zero_batch_h = 0, zero_batch_w = 0;
+        size_t zero_batch_workspace_size = SIZE_MAX;
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_deconvolution2d_nhwc_f32(
+                      deconvolution_op, /*batch_size=*/0, input_height(),
+                      input_width(), adjustment_height(), adjustment_width(),
+                      &zero_batch_h, &zero_batch_w, &zero_batch_workspace_size,
+                      /*threadpool=*/nullptr));
+        EXPECT_EQ(zero_batch_h, output_height());
+        EXPECT_EQ(zero_batch_w, output_width());
+        EXPECT_EQ(zero_batch_workspace_size, 0);
+      }
+
+      size_t workspace_size = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_deconvolution2d_nhwc_f32(
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    transient_indirection_buffer() ? &workspace_size : nullptr,
                     /*threadpool=*/nullptr));
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_deconvolution2d_nhwc_f32(
-                    deconvolution_op, input.data(), output.data()));
+                    deconvolution_op, input.data(), output.data(),
+                    transient_indirection_buffer() ? workspace.data()
+                                                   : nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
 
       VerifyF32(output, output_ref, output_max, output_min);
+
+      if (transient_indirection_buffer()) {
+        std::fill(output.begin(), output.end(), 0.0f);
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_f32(
+                      deconvolution_op, input.data(), output.data(),
+                      workspace.data()));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
+        VerifyF32(output, output_ref, output_max, output_min);
+      }
 
       if (use_weights_cache()) {
         xnn_operator_t deconvolution_op2 = nullptr;
@@ -2011,11 +2119,12 @@ class DeconvolutionOperatorTester {
                 deconvolution_op2, batch_size(), input_height(), input_width(),
                 adjustment_height(), adjustment_width(),
                 /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                /*threadpool=*/nullptr));
+                /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_deconvolution2d_nhwc_f32(
-                      deconvolution_op2, input.data(), output2.data()));
+                      deconvolution_op2, input.data(), output2.data(),
+                      /*workspace=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
@@ -2209,12 +2318,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_f32(deconvolution_op,
-                                                   inputs[iteration].data(),
-                                                   outputs[iteration].data()));
+                xnn_setup_deconvolution2d_nhwc_f32(
+                    deconvolution_op, inputs[iteration].data(),
+                    outputs[iteration].data(), /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -2370,11 +2479,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_qs8(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_qs8(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -2400,11 +2510,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, next_batch_size(), next_input_height(),
                     next_input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_qs8(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_qs8(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -2839,11 +2950,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_qu8(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_qu8(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -2981,11 +3093,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, next_batch_size(), next_input_height(),
                     next_input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_qu8(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_qu8(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -3192,11 +3305,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_f16(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_f16(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -3325,11 +3439,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, next_batch_size(), next_input_height(),
                     next_input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_f16(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_f16(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -3532,11 +3647,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, batch_size(), input_height(),
                     input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_f32(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_f32(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -3665,11 +3781,12 @@ class DeconvolutionOperatorTester {
                     deconvolution_op, next_batch_size(), next_input_height(),
                     next_input_width(), adjustment_height(), adjustment_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                    /*threadpool=*/nullptr));
+                    /*workspace_size=*/nullptr, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_deconvolution2d_nhwc_f32(
-                    deconvolution_op, input.data(), output.data()));
+                xnn_setup_deconvolution2d_nhwc_f32(deconvolution_op,
+                                                   input.data(), output.data(),
+                                                   /*workspace=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
@@ -3758,6 +3875,7 @@ class DeconvolutionOperatorTester {
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   bool use_weights_cache_{false};
+  bool transient_indirection_buffer_{false};
 };
 
 #endif  // XNNPACK_TEST_OPERATORS_DECONVOLUTION_OPERATOR_TESTER_H_

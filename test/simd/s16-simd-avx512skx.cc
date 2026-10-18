@@ -26,7 +26,22 @@
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
+
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c"))), apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c")
+#endif
+
 #include "src/xnnpack/simd/s16-avx512skx.h"
+
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -46,6 +61,13 @@ class S16SimdAVX512SKXTest : public ::testing::Test {
   std::vector<int16_t> inputs_;
   std::vector<int16_t> output_;
 };
+
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c"))), apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c")
+#endif
 
 TEST_F(S16SimdAVX512SKXTest, Min) {
   const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
@@ -101,6 +123,12 @@ TEST_F(S16SimdAVX512SKXTest, StoreTail) {
     }
   }
 }
+
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
 
 }  // namespace xnnpack
 

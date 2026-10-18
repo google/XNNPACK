@@ -79,10 +79,13 @@ void Params(benchmark::Benchmark* b) {
       get_binary_reference_kernel(ynn_binary_##op, type_of<type>())) \
       ->Apply(Params<type, type, type>)                              \
       ->UseRealTime();
-
+#ifdef YNN_ENABLE_FP64
 #define BENCHMARK_FLOAT_REFERENCE(op) \
   BENCHMARK_REFERENCE(op, float);     \
   BENCHMARK_REFERENCE(op, double);
+#else
+#define BENCHMARK_FLOAT_REFERENCE(op) BENCHMARK_REFERENCE(op, float);
+#endif  // YNN_ENABLE_FP64
 
 BENCHMARK_FLOAT_REFERENCE(add);
 BENCHMARK_FLOAT_REFERENCE(copysign);

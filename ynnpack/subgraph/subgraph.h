@@ -166,22 +166,19 @@ struct ynn_value {
   }
 
   slinky::expr physical_extent(size_t i) const {
-    if (i >= extents.size() || !extents[i].defined()) {
-      return {};
-    }
-    if (i == 0) {
+    if (i == 0 && i < extents.size()) {
       int elem_count = ynn::type_element_count(type);
       if (elem_count != 1) {
-        return slinky::ceil_div<slinky::expr>(extents[0], elem_count);
+        return slinky::ceil_div<slinky::expr>(extent(0), elem_count);
       }
     }
 
-    return extents[i];
+    return extent(i);
   }
 
   std::vector<slinky::expr> physical_extents() const {
     std::vector<slinky::expr> phys = extents;
-    if (!phys.empty()) {
+    if (!phys.empty() && phys[0].defined()) {
       phys[0] = physical_extent(0);
     }
     return phys;
@@ -570,12 +567,14 @@ struct ynn_node {
     ynn::axes_set k_dims;
     ynn_reduce_operator op;
     bool keep_dims;
+    int32_t channel_dim = ynn::max_tensor_rank;
     friend bool operator==(const reduce& a, const reduce& b) {
-      return a.k_dims == b.k_dims && a.op == b.op && a.keep_dims == b.keep_dims;
+      return a.k_dims == b.k_dims && a.op == b.op &&
+             a.keep_dims == b.keep_dims && a.channel_dim == b.channel_dim;
     }
     friend bool operator<(const reduce& a, const reduce& b) {
-      return std::tie(a.op, a.keep_dims, a.k_dims) <
-             std::tie(b.op, b.keep_dims, b.k_dims);
+      return std::tie(a.op, a.keep_dims, a.k_dims, a.channel_dim) <
+             std::tie(b.op, b.keep_dims, b.k_dims, b.channel_dim);
     }
   };
   struct dequantize_dot {

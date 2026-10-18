@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $TESTNAME = f"F32Simd{ARCH.upper()}Test"
+$TARGET_ATTR = {"avx512f": "avx512f", "avx512skx": "avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c", "avx512fp16": "avx512f,avx512cd,avx512bw,avx512dq,avx512vl,avx512vnni,gfni,avx512fp16,fma,f16c"}.get(ARCH, "")
 
 $if ARCH_MACRO:
   // This header needs to go first for the arch test macros.
@@ -22,7 +23,24 @@ $if ARCH_MACRO:
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
+
+$if TARGET_ATTR:
+  #if defined(__clang__)
+  #pragma clang attribute push(__attribute__((target("${TARGET_ATTR}"))), apply_to = function)
+  #elif defined(__GNUC__)
+  #pragma GCC push_options
+  #pragma GCC target("${TARGET_ATTR}")
+  #endif
+
 #include "src/xnnpack/simd/f32-${ARCH}.h"
+
+$if TARGET_ATTR:
+  #if defined(__clang__)
+  #pragma clang attribute pop
+  #elif defined(__GNUC__)
+  #pragma GCC pop_options
+  #endif
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -43,6 +61,14 @@ class ${TESTNAME} : public ::testing::Test {
   std::vector<float> inputs_;
   std::vector<float> output_;
 };
+
+$if TARGET_ATTR:
+  #if defined(__clang__)
+  #pragma clang attribute push(__attribute__((target("${TARGET_ATTR}"))), apply_to = function)
+  #elif defined(__GNUC__)
+  #pragma GCC push_options
+  #pragma GCC target("${TARGET_ATTR}")
+  #endif
 
 TEST_F(${TESTNAME}, SetZero) {
   xnn_storeu_f32(output_.data(), xnn_zero_f32());
@@ -444,6 +470,13 @@ TEST_F(${TESTNAME}, StoreTail) {
     }
   }
 }
+
+$if TARGET_ATTR:
+  #if defined(__clang__)
+  #pragma clang attribute pop
+  #elif defined(__GNUC__)
+  #pragma GCC pop_options
+  #endif
 
 }  // namespace xnnpack
 

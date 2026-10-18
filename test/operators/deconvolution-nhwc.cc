@@ -1516,6 +1516,18 @@ static std::vector<DeconvolutionTestCase> CreateDeconvolutionTests(
           .group_output_channels(gemm_config->nr * 2 + 3)
           .use_weights_cache(true));
 
+  tests.push_back({"transient_indirection_batched_grouped_3x3", {}});
+  tests.back().second.push_back(
+      DeconvolutionOperatorTester()
+          .batch_size(2)
+          .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+          .padding(1)
+          .kernel_size(3, 3)
+          .groups(2)
+          .group_input_channels(15)
+          .group_output_channels(gemm_config->nr * 2 + 3)
+          .transient_indirection_buffer(true));
+
   /************************** SUBCONV2D/IGEMM path ****************************/
   tests.push_back({"kernel_3x3s2", {}});
   tests.back().second.push_back(
@@ -2540,6 +2552,19 @@ static std::vector<DeconvolutionTestCase> CreateDeconvolutionTests(
           .group_output_channels(gemm_config->nr * 2 + 3)
           .use_weights_cache(true));
 
+  tests.push_back({"transient_indirection_batched_grouped_3x3s2", {}});
+  tests.back().second.push_back(
+      DeconvolutionOperatorTester()
+          .batch_size(2)
+          .input_size(kStridedInputHeight, kStridedInputWidth)
+          .padding(1)
+          .kernel_size(3, 3)
+          .stride(2)
+          .groups(2)
+          .group_input_channels(17)
+          .group_output_channels(gemm_config->nr * 2 + 3)
+          .transient_indirection_buffer(true));
+
   /*************************** SUBCONV2D/GEMM path ****************************/
   tests.push_back({"kernel_2x2s2", {}});
   tests.back().second.push_back(
@@ -3235,6 +3260,18 @@ static std::vector<DeconvolutionTestCase> CreateDeconvolutionTests(
           .group_input_channels(17)
           .group_output_channels(gemm_config->nr * 2 + 3)
           .use_weights_cache(true));
+
+  tests.push_back({"transient_indirection_batched_grouped_2x2s2", {}});
+  tests.back().second.push_back(
+      DeconvolutionOperatorTester()
+          .batch_size(2)
+          .input_size(kStridedInputHeight, kStridedInputWidth)
+          .kernel_size(2, 2)
+          .stride(2)
+          .groups(2)
+          .group_input_channels(17)
+          .group_output_channels(gemm_config->nr * 2 + 3)
+          .transient_indirection_buffer(true));
   return tests;
 }
 static const DeconvolutionTestCase kDeconvolutionSetupTests[] = {
@@ -3513,7 +3550,8 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
   ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
                 reference_op.get(), batch_size, input_height, input_width,
                 /*adjustment_height=*/1, /*adjustment_width=*/1,
-                &reference_height, &reference_width, /*threadpool=*/nullptr),
+                &reference_height, &reference_width,
+                /*workspace_size=*/nullptr, /*threadpool=*/nullptr),
             xnn_status_success);
   ASSERT_EQ(reference_height, 8);
   ASSERT_EQ(reference_width, 8);
@@ -3521,7 +3559,8 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
                                           reference_width * groups *
                                           group_output_channels);
   ASSERT_EQ(xnn_setup_deconvolution2d_nhwc_f32(reference_op.get(), input.data(),
-                                               reference_output.data()),
+                                               reference_output.data(),
+                                               /*workspace=*/nullptr),
             xnn_status_success);
   ASSERT_EQ(xnn_run_operator(reference_op.get(), /*threadpool=*/nullptr),
             xnn_status_success);
@@ -3535,7 +3574,8 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
   ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
                 op.get(), batch_size, input_height, input_width,
                 /*adjustment_height=*/0, /*adjustment_width=*/0, &small_height,
-                &small_width, /*threadpool=*/nullptr),
+                &small_width, /*workspace_size=*/nullptr,
+                /*threadpool=*/nullptr),
             xnn_status_success);
   ASSERT_EQ(small_height, 7);
   ASSERT_EQ(small_width, 7);
@@ -3543,14 +3583,16 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
   ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
                 op.get(), batch_size, input_height, input_width,
                 /*adjustment_height=*/1, /*adjustment_width=*/1, &output_height,
-                &output_width, /*threadpool=*/nullptr),
+                &output_width, /*workspace_size=*/nullptr,
+                /*threadpool=*/nullptr),
             xnn_status_success);
   ASSERT_EQ(output_height, 8);
   ASSERT_EQ(output_width, 8);
   xnnpack::Buffer<float> output(batch_size * output_height * output_width *
                                 groups * group_output_channels);
   ASSERT_EQ(
-      xnn_setup_deconvolution2d_nhwc_f32(op.get(), input.data(), output.data()),
+      xnn_setup_deconvolution2d_nhwc_f32(op.get(), input.data(), output.data(),
+                                         /*workspace=*/nullptr),
       xnn_status_success);
   ASSERT_EQ(xnn_run_operator(op.get(), /*threadpool=*/nullptr),
             xnn_status_success);

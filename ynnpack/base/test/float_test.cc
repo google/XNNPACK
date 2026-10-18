@@ -176,14 +176,15 @@ TEST(is_convert_lossless, is_convert_lossless) {
 }
 
 TEST(arithmetic, fast_log2) {
-  constexpr float relative_tolerance = 0.06f;
+  // fast_log2 linearly interpolates log2(1 + m) with m on [0, 1).
+  // The maximum absolute error is log2(1/ln(2)) - (1/ln(2) - 1) ≈ 0.08607.
+  constexpr float absolute_tolerance = 0.0861f;
 
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::seconds(1))) {
     const float x = random_value<float>(rng, 1.0f, 1e9f);
     const float expected = std::log2(x);
-    const float tolerance = relative_tolerance * expected;
-    EXPECT_NEAR(fast_log2(x), expected, tolerance) << "x = " << x;
+    EXPECT_NEAR(fast_log2(x), expected, absolute_tolerance) << "x = " << x;
   }
 }
 

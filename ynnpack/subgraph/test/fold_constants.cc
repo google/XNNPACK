@@ -360,4 +360,60 @@ TEST(fold_constants, mix_cached_uncached) {
   }
 }
 
+TEST(fold_constants, static_transpose) {
+  constexpr float constant_values[] = {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+
+  // A transpose that rearranges the contiguous (last) dimension cannot alias
+  // its input (`alias == false`), so it executes a transpose kernel and should
+  // be constant-folded.
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t constant_id = 2;
+    uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(3);
+    builder.AddInput(type_of<float>(), {3, 2}, input_id)
+        .AddOutput(type_of<float>(), {3, 2}, output_id)
+        .AddTensor(type_of<float>(), {2, 3}, constant_id, &constant_values)
+        .AddTensor(type_of<float>(), {3, 2}, transposed_id);
+
+    builder.AddTranspose({1, 0}, constant_id, transposed_id)
+        .AddBinary(ynn_binary_add, input_id, transposed_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    const ynn_value& transposed = subgraph->value(transposed_id);
+    EXPECT_TRUE(transposed.is_static());
+    EXPECT_THAT(ValuesIn<float>(transposed),
+                ElementsAre(0.0f, 3.0f, 1.0f, 4.0f, 2.0f, 5.0f));
+    EXPECT_THAT(subgraph, HasValidNodeCount(1));
+  }
+
+  // A transpose that preserves the contiguous (last) dimension aliases its
+  // input (`alias == true`), so it is free and should not be constant-folded.
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t constant_id = 2;
+    uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(3);
+    builder.AddInput(type_of<float>(), {3, 1, 2}, input_id)
+        .AddOutput(type_of<float>(), {3, 1, 2}, output_id)
+        .AddTensor(type_of<float>(), {1, 3, 2}, constant_id, &constant_values)
+        .AddTensor(type_of<float>(), {3, 1, 2}, transposed_id);
+
+    builder.AddTranspose({1, 0, 2}, constant_id, transposed_id)
+        .AddBinary(ynn_binary_add, input_id, transposed_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    EXPECT_FALSE(subgraph->value(transposed_id).is_static());
+    EXPECT_THAT(subgraph, HasValidNodeCount(2));
+  }
+}
+
 }  // namespace ynn

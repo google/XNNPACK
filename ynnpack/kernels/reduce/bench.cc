@@ -62,13 +62,14 @@ void bench(benchmark::State& state, uint64_t arch_flags,
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 }
 
-#define YNN_REDUCE_KERNEL(arch_flags, kernel, k_dim, a_type, c_type)    \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, k_dim, a_type{}, \
-                    c_type{})                                           \
+#define YNN_REDUCE_KERNEL(arch_flags, kernel, k_dim, a_type, c_type, flags) \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, k_dim, a_type{},     \
+                    c_type{})                                               \
       ->UseRealTime();
 #include "ynnpack/kernels/reduce/max.inc"
 #include "ynnpack/kernels/reduce/min.inc"
 #include "ynnpack/kernels/reduce/min_max.inc"
+#include "ynnpack/kernels/reduce/propagate_nan.inc"
 #include "ynnpack/kernels/reduce/sum.inc"
 #include "ynnpack/kernels/reduce/sum_squared.inc"
 #undef YNN_REDUCE_KERNEL

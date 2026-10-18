@@ -855,14 +855,15 @@ xnn_status xnn_create_deconvolution2d_nhwc_f16(
 xnn_status xnn_reshape_deconvolution2d_nhwc_f16(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
 
 xnn_status xnn_setup_deconvolution2d_nhwc_f16(xnn_operator_t deconvolution_op,
-                                              const void* input, void* output) {
+                                              const void* input, void* output,
+                                              void* workspace) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
@@ -896,15 +897,15 @@ xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
 xnn_status xnn_reshape_deconvolution2d_nhwc_f32(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
 
 xnn_status xnn_setup_deconvolution2d_nhwc_f32(xnn_operator_t deconvolution_op,
-                                              const float* input,
-                                              float* output) {
+                                              const float* input, float* output,
+                                              void* workspace) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
@@ -926,7 +927,7 @@ xnn_status xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
 xnn_status xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
@@ -934,7 +935,7 @@ xnn_status xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
 
 xnn_status xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
     xnn_operator_t deconvolution_op, const int8_t* input, float* output,
-    const xnn_quantization_params* quantization_params) {
+    const xnn_quantization_params* quantization_params, void* workspace) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
@@ -957,7 +958,7 @@ xnn_status xnn_create_deconvolution2d_nhwc_qs8(
 xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
@@ -965,7 +966,7 @@ xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
 
 xnn_status xnn_setup_deconvolution2d_nhwc_qs8(xnn_operator_t deconvolution_op,
                                               const int8_t* input,
-                                              int8_t* output) {
+                                              int8_t* output, void* workspace) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
@@ -988,14 +989,15 @@ xnn_status xnn_create_deconvolution2d_nhwc_qs8_qc8w(
 xnn_status xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
 
 xnn_status xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
-    xnn_operator_t deconvolution_op, const int8_t* input, int8_t* output) {
+    xnn_operator_t deconvolution_op, const int8_t* input, int8_t* output,
+    void* workspace) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }
@@ -1019,7 +1021,7 @@ xnn_status xnn_create_deconvolution2d_nhwc_qu8(
 xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
     xnn_operator_t deconvolution_op, size_t batch_size, size_t input_height,
     size_t input_width, uint32_t adjustment_height, uint32_t adjustment_width,
-    size_t* output_height_out, size_t* output_width_out,
+    size_t* output_height_out, size_t* output_width_out, size_t* workspace_size,
     pthreadpool_t threadpool) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
@@ -1027,7 +1029,8 @@ xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
 
 xnn_status xnn_setup_deconvolution2d_nhwc_qu8(xnn_operator_t deconvolution_op,
                                               const uint8_t* input,
-                                              uint8_t* output) {
+                                              uint8_t* output,
+                                              void* workspace) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }

@@ -669,6 +669,7 @@ enum xnn_status xnn_create_runtime_v4(
       struct xnn_node* node = subgraph->nodes + i;
       switch (node->type) {
         case xnn_node_type_convolution_2d:
+        case xnn_node_type_deconvolution_2d:
         case xnn_node_type_depthwise_convolution_2d:
         case xnn_node_type_static_resize_bilinear_2d:
           node->flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;

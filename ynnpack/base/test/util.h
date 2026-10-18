@@ -175,8 +175,10 @@ inline multi_type multi_type_of(fp8_e4m3, fp8_e4m3, float) {
 template <typename F>
 constexpr decltype(auto) SwitchOneType(multi_type type, F&& f) {
   switch (type) {
+#ifdef YNN_ENABLE_FP64
     case multi_type::fp64:
       return std::forward<F>(f)(double());
+#endif
     case multi_type::fp32:
       return std::forward<F>(f)(float());
     case multi_type::fp16:
@@ -201,8 +203,10 @@ constexpr decltype(auto) SwitchOneType(multi_type type, F&& f) {
 template <typename F>
 constexpr decltype(auto) SwitchTwoTypes(multi_type type, F&& f) {
   switch (type) {
+#ifdef YNN_ENABLE_FP64
     case multi_type::fp64:
       return std::forward<F>(f)(double(), double());
+#endif
     case multi_type::fp32:
       return std::forward<F>(f)(float(), float());
     case multi_type::fp16:
@@ -247,8 +251,10 @@ constexpr decltype(auto) SwitchTwoTypes(multi_type type, F&& f) {
 template <typename F>
 constexpr decltype(auto) SwitchThreeTypes(multi_type type, F&& f) {
   switch (type) {
+#ifdef YNN_ENABLE_FP64
     case multi_type::fp64:
       return std::forward<F>(f)(double(), double(), double());
+#endif
     case multi_type::fp32:
       return std::forward<F>(f)(float(), float(), float());
     case multi_type::bf16:

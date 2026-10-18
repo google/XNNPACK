@@ -3655,12 +3655,14 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_f16(
   uint32_t adjustment_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_f16(
   xnn_operator_t deconvolution_op,
   const void* input,
-  void* output);
+  void* output,
+  void* workspace);
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   uint32_t output_padding_top,
@@ -3719,12 +3721,14 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_f32(
   uint32_t adjustment_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
   xnn_operator_t deconvolution_op,
   const float* input,
-  float* output);
+  float* output,
+  void* workspace);
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
   uint32_t output_padding_top,
@@ -3760,13 +3764,15 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
   uint32_t adjustment_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
   xnn_operator_t deconvolution_op,
   const int8_t* input,
   float* output,
-  const struct xnn_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params,
+  void* workspace);
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
   uint32_t output_padding_top,
@@ -3806,12 +3812,14 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
   uint32_t adjustment_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8(
   xnn_operator_t deconvolution_op,
   const int8_t* input,
-  int8_t* output);
+  int8_t* output,
+  void* workspace);
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_qs8_qc8w(
   uint32_t output_padding_top,
@@ -3851,12 +3859,14 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
   uint32_t adjustment_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
   xnn_operator_t deconvolution_op,
   const int8_t* input,
-  int8_t* output);
+  int8_t* output,
+  void* workspace);
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
   uint32_t output_padding_top,
@@ -3897,12 +3907,14 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
   uint32_t adjustment_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
   xnn_operator_t deconvolution_op,
   const uint8_t* input,
-  uint8_t* output);
+  uint8_t* output,
+  void* workspace);
 
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x16(
   uint32_t block_size,
