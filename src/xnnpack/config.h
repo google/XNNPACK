@@ -430,6 +430,10 @@ xnn_init_qdu8_f32_qc8w_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
+// Returns a qs8-qc8w config with NEON dot-product micro-kernels (kr = 4) for
+// GEMMs with very few channels per kernel tap, or NULL if the default qs8-qc8w
+// config already avoids the kr = 8 I8MM micro-kernels on this CPU.
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_dot_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qu8_gemm_config();
 
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f16_maxpool_config();

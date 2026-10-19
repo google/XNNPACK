@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
@@ -75,6 +76,7 @@ static struct xnn_gemm_config qdu8_f16_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc2w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
+static struct xnn_gemm_config qs8_qc8w_dot_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
 
 XNN_INIT_ONCE_GUARD(bf16_f32_gemm);
@@ -115,6 +117,7 @@ XNN_INIT_ONCE_GUARD(qdu8_f16_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qs8_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qs8_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qs8_qc8w_gemm);
+XNN_INIT_ONCE_GUARD(qs8_qc8w_dot_gemm);
 XNN_INIT_ONCE_GUARD(qu8_gemm);
 
 // Macros to log the microkernel names if and when they are registered.
@@ -6629,6 +6632,43 @@ static void init_qs8_qc8w_gemm_config(void) {
   assert(qs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
 }
 
+// Alternative qs8-qc8w config for GEMMs with very few channels per kernel
+// tap. The I8MM micro-kernels pad the channels of every tap to a multiple of 8
+// (kr = 8) while the NEON dot-product micro-kernels pad to a multiple of 4
+// (kr = 4), so with <= 4 channels the dot-product kernels perform up to 2x
+// fewer multiply-accumulates. Only populated on AArch64 CPUs where the default
+// qs8-qc8w config uses I8MM; otherwise left empty (mr == 0).
+static void init_qs8_qc8w_dot_gemm_config(void) {
+  #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!(hardware_config->arch_flags & xnn_arch_arm_neon_i8mm) ||
+        !(hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
+      return;
+    }
+    const struct xnn_gemm_config* default_config = xnn_init_qs8_qc8w_gemm_config();
+    assert(default_config != NULL);
+    // Start from the default config so that the packing functions and element
+    // sizes stay in sync, then replace the micro-kernels and the K blocking.
+    qs8_qc8w_dot_gemm_config = *default_config;
+    memset(&qs8_qc8w_dot_gemm_config.minmax, 0, sizeof(qs8_qc8w_dot_gemm_config.minmax));
+    #if XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC && !XNN_PLATFORM_WINDOWS
+      qs8_qc8w_dot_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128);
+      qs8_qc8w_dot_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128);
+    #else
+      qs8_qc8w_dot_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__neondot);
+      qs8_qc8w_dot_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__neondot);
+    #endif
+    qs8_qc8w_dot_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__neondot);
+    qs8_qc8w_dot_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__neondot);
+    qs8_qc8w_dot_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params;
+    qs8_qc8w_dot_gemm_config.mr = 4;
+    qs8_qc8w_dot_gemm_config.nr = 16;
+    qs8_qc8w_dot_gemm_config.log2_kr = 2;
+    qs8_qc8w_dot_gemm_config.log2_sr = 0;
+  #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
+}
+
 static void init_qu8_gemm_config(void) {
   // Common parameters.
   qu8_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_UINT8_T;
@@ -7303,6 +7343,14 @@ const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config() {
   }
   XNN_INIT_ONCE(qs8_qc8w_gemm);
   return &qs8_qc8w_gemm_config;
+}
+
+const struct xnn_gemm_config* xnn_init_qs8_qc8w_dot_gemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qs8_qc8w_dot_gemm);
+  return qs8_qc8w_dot_gemm_config.mr != 0 ? &qs8_qc8w_dot_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_qu8_gemm_config() {

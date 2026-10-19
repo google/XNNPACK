@@ -1801,10 +1801,18 @@ static enum xnn_status select_gemm_config(
       context->gemm_config = xnn_init_qu8_gemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_qs8:
-      context->gemm_config = xnn_init_qs8_qc8w_gemm_config();
-      break;
     case xnn_operator_type_convolution_nhwc_qc8:
       context->gemm_config = xnn_init_qs8_qc8w_gemm_config();
+      if (context->group_input_channels <= 4) {
+        // The channels of every kernel tap are padded to a multiple of kr.
+        // With <= 4 channels, kr = 4 micro-kernels do up to 2x less work than
+        // the kr = 8 I8MM micro-kernels.
+        const struct xnn_gemm_config* dot_gemm_config =
+            xnn_init_qs8_qc8w_dot_gemm_config();
+        if (dot_gemm_config != NULL) {
+          context->gemm_config = dot_gemm_config;
+        }
+      }
       break;
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
       context->gemm_config = xnn_init_pqs8_qc8w_gemm_config();
