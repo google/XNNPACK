@@ -78,12 +78,12 @@ XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_vlog_ukernel__wasmrelaxedsimd_rational
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
-// XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
-// XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
-// XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_div_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
-// XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_nr_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
-// XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_nr_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
-// XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_nr_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_div_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_nr_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_nr_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vlog_ukernel__hvx_rational_1_3_nr_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
