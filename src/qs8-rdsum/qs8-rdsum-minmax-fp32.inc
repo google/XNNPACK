@@ -40,3 +40,7 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v, 7, 1, tr
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v, 7, 2, true, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
 #endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+XNN_UKERNEL(xnn_arch_hvx, xnn_qs8_rdsum_ukernel_7p7x__hvx_u64, 7, 64, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+

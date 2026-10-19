@@ -4209,6 +4209,14 @@ static void init_s8_clamp_config(void) {
     s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__wasmsimd_u64);
     s8_clamp_config.element_tile = 64;
     s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_hvx) {
+      s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__hvx_u256);
+      s8_clamp_config.element_tile = 256;
+      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
+    }
   #else
     s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__scalar_u4);
     s8_clamp_config.element_tile = 4;

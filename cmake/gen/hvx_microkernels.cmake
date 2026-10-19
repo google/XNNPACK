@@ -78,10 +78,14 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vsqr-hvx.c
   src/qs8-packw/gen/qs8-packw-x128c4-gemm-gio-hvx.c
   src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c
+  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p32c-minmax-fp32-hvx.c
+  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p32c-minmax-fp32-hvx.c
+  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p32c-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x128c4-minmax-fp32-hvx.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-hvx-u64.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u128.c
   src/s8-rdminmax/gen/s8-rdmax-2p2x-hvx-u128.c
@@ -89,6 +93,7 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/s8-rminmax/gen/s8-rmax-hvx-u256-acc2.c
   src/s8-rminmax/gen/s8-rmin-hvx-u256-acc2.c
   src/s8-rminmax/gen/s8-rminmax-hvx-u256-acc2.c
+  src/s8-vclamp/gen/s8-vclamp-hvx.c
   src/u8-rdminmax/gen/u8-rdmax-2p2x-hvx-u128.c
   src/u8-rdminmax/gen/u8-rdmin-2p2x-hvx-u128.c
   src/u8-rminmax/gen/u8-rmax-hvx-u256-acc2.c
