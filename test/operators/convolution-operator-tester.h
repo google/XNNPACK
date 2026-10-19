@@ -545,6 +545,9 @@ class ConvolutionOperatorTester {
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
     std::uniform_int_distribution<int32_t> w8dist(
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
@@ -814,6 +817,9 @@ class ConvolutionOperatorTester {
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
     std::uniform_int_distribution<int32_t> w8dist(
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
@@ -1364,8 +1370,14 @@ class ConvolutionOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
     std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
-    std::uniform_int_distribution<int32_t> w8dist(
+    std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
+    std::uniform_int_distribution<int32_t> w8dist(
+        -std::numeric_limits<int8_t>::max(),
+        std::numeric_limits<int8_t>::max());
 
     xnnpack::Buffer<int8_t> input(
         batch_size() *
@@ -1399,7 +1411,7 @@ class ConvolutionOperatorTester {
           auto_threadpool.reset(threadpool);
         }
       }
-      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -1407,7 +1419,7 @@ class ConvolutionOperatorTester {
                     [&]() { return f32idist(rng); });
       std::generate(
           quantization_params.begin(), quantization_params.end(), [&]() {
-            return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
+            return xnn_qd8_quantization_params{i8dist(rng), f32idist(rng)};
           });
 
       // Compute reference results.
@@ -1580,6 +1592,9 @@ class ConvolutionOperatorTester {
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
     std::uniform_int_distribution<int32_t> w8dist(
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
@@ -3720,6 +3735,9 @@ class ConvolutionOperatorTester {
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
     std::uniform_int_distribution<int32_t> w8dist(
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
@@ -3870,6 +3888,9 @@ class ConvolutionOperatorTester {
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
     std::uniform_int_distribution<int32_t> w8dist(
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
@@ -4160,6 +4181,9 @@ class ConvolutionOperatorTester {
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Symmetric QC8W weights must be in [-127, 127] (-max() to max()) to avoid
+    // int16_t overflow in microkernels that accumulate pairs of int8_t * int8_t
+    // products in 16-bit lanes (e.g. (-128)*(-128) + (-128)*(-128) = 32768).
     std::uniform_int_distribution<int32_t> w8dist(
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
