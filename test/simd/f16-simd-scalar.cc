@@ -17,7 +17,11 @@
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/math.h"
+
+
 #include "src/xnnpack/simd/f16-scalar.h"
+
+
 #include "test/replicable_random_device.h"
 
 // By default --copt='-ffp-contract=off' is set, so no implicit FMA. However, 
@@ -53,6 +57,7 @@ class F16SimdSCALARTest : public ::testing::Test {
   std::vector<xnn_float16> inputs_;
   std::vector<xnn_float16> output_;
 };
+
 
 TEST_F(F16SimdSCALARTest, ConstF16FromFloat) {
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.125f);
@@ -588,6 +593,7 @@ TEST_F(F16SimdSCALARTest, StoreTail) {
     }
   }
 }
+
 
 }  // namespace xnnpack
 

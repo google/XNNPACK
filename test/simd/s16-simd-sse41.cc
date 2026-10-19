@@ -26,7 +26,11 @@
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
+
+
 #include "src/xnnpack/simd/s16-sse41.h"
+
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -46,6 +50,7 @@ class S16SimdSSE41Test : public ::testing::Test {
   std::vector<int16_t> inputs_;
   std::vector<int16_t> output_;
 };
+
 
 TEST_F(S16SimdSSE41Test, Min) {
   const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
@@ -101,6 +106,7 @@ TEST_F(S16SimdSSE41Test, StoreTail) {
     }
   }
 }
+
 
 }  // namespace xnnpack
 
