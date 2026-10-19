@@ -149,6 +149,12 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p8vc
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p8vc__rvv, 8, false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)), 25, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)
 #endif // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+XNN_UKERNEL(xnn_arch_hvx, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p32c__hvx, 32, false, 32, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p32c__hvx, 32, false, 32, 9, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p32c__hvx, 32, false, 32, 25, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p1c__scalar_fmagic, 1, false, 1, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p2c__scalar_imagic, 2, false, 2, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p2c__scalar_lrintf, 2, false, 2, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params)

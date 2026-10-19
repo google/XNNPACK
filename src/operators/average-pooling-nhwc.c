@@ -302,7 +302,6 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
   size_t output_pixel_stride,
   uint32_t log2_data_element_size,
   uint32_t log2_weight_element_size,
-  uint32_t log2_accumulator_element_size,
   xnn_indirection_init_pavgpool2d_fn indirection_init_pavgpool2d,
   const struct xnn_avgpool_config* avgpool,
   const void* params,
@@ -618,9 +617,12 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     return xnn_status_out_of_memory;
   }
 
+  // The pixelwise buffer holds one multiplier (a weight element, not a data
+  // element) per output pixel, so its row stride must use the same element size
+  // as its allocation above.
   size_t pixelwise_buffer_height_stride = 0;
   if (is_pixelwise) {
-    if (!xnn_safe_mul(output_width, (size_t) 1 << log2_data_element_size,
+    if (!xnn_safe_mul(output_width, (size_t) 1 << log2_weight_element_size,
                       &pixelwise_buffer_height_stride)) {
       xnn_log_error(
           "failed to reshape %s operator: pixelwise buffer height stride "
@@ -692,7 +694,6 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
     batch_size, input_height, input_width, channels, input_pixel_stride, output_pixel_stride,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
-    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f16,
     average_pooling_op->avgpool_config,
     pooling_params, pooling_params_size,
@@ -735,7 +736,6 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f32(
     batch_size, input_height, input_width, channels, input_pixel_stride, output_pixel_stride,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f32,
     average_pooling_op->avgpool_config,
     pooling_params, pooling_params_size,
