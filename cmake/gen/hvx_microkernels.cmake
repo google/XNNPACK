@@ -17,16 +17,18 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f16-vsin/gen/f16-f32acc-vsin-hvx-poly-3.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-hvx-rational-5-4-div.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-hvx-u32.c
-  src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-hvx.c
-  src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-hvx.c
-  src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-hvx.c
-  src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-3p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx-acc2.c
   src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-5x64-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-7x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c
+  src/f32-igemm/gen/f32-igemm-1x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c
-  src/f32-igemm/gen/f32-igemm-5x64-minmax-hvx-broadcast.c
+  src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c
+  src/f32-igemm/gen/f32-igemm-8x32-minmax-hvx-broadcast.c
   src/f32-maxpool/gen/f32-maxpool-9p-minmax-hvx-u32.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u256.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc2.c
@@ -107,16 +109,16 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f16-vlog/gen/f16-f32acc-vlog-hvx-rational-1-3-nr.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-hvx-rational-5-4-nr.c
   src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-hvx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-3p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-3p64c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-hvx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-4p64c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-hvx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-9p64c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx.c
   src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-2x32-minmax-hvx-broadcast.c
@@ -129,12 +131,12 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-4x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x128-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x32-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-5x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x128-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x128-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x32-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-7x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x128-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x128-minmax-hvx-broadcast.c
@@ -142,7 +144,6 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-9x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-10x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-10x64-minmax-hvx-broadcast.c
-  src/f32-igemm/gen/f32-igemm-1x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-1x128-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-2x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-2x64-minmax-hvx-broadcast.c
@@ -154,14 +155,13 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-4x64-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x128-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x32-minmax-hvx-broadcast.c
+  src/f32-igemm/gen/f32-igemm-5x64-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x128-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-6x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-6x64-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-6x128-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x32-minmax-hvx-broadcast.c
-  src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x128-minmax-hvx-broadcast.c
-  src/f32-igemm/gen/f32-igemm-8x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x64-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x128-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-9x32-minmax-hvx-broadcast.c
