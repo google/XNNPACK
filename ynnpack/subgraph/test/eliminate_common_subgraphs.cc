@@ -277,4 +277,43 @@ TEST(eliminate_common_subgraphs, no_merge_different_output_rank) {
                                      output1_id, output2_id)));
 }
 
+TEST(eliminate_common_subgraphs, no_merge_different_params) {
+  // Graph:
+  // input_id -> log1p(input, 1.0) -> t1 \
+  //                                       -> add(t1, t2) -> output_id
+  // input_id -> log1p(input, -1.0) -> t2 /
+  // Must NOT be merged by CSE.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  uint32_t t1_id = YNN_INVALID_VALUE_ID;
+  uint32_t t2_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(2);
+  builder.AddInput(type_of<float>(), 1, input_id)
+      .AddOutput(type_of<float>(), 1, output_id)
+      .AddTensor(type_of<float>(), 1, t1_id)
+      .AddTensor(type_of<float>(), 1, t2_id);
+
+  builder.AddUnary(ynn_unary_log1p, input_id, t1_id);
+  builder.AddUnary(ynn_unary_log1p, input_id, t2_id);
+  builder.AddBinary(ynn_binary_add, t1_id, t2_id, output_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node* producer2 = subgraph.get_producer(t2_id);
+  ASSERT_NE(producer2, nullptr);
+  std::get<ynn_node::unary_elementwise>(producer2->op)
+      .params.log1p.input_multiplier = -1.0f;
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(3));  // log1p, log1p, add.
+
+  subgraph.eliminate_common_subgraphs();
+  subgraph.invalidate_dead_values();
+
+  // Must not be merged because params differ.
+  EXPECT_THAT(subgraph,
+              AllOf(HasValidNodeCount(3),
+                    HasValidValueIds(input_id, t1_id, t2_id, output_id)));
+  EXPECT_THAT(ProducerOf(output_id, subgraph), InputsAre(t1_id, t2_id));
+}
+
 }  // namespace ynn
