@@ -2080,15 +2080,21 @@ YNN_ALWAYS_INLINE f32x4 cast(bf16x4 a, float) {
   return f32x4{vreinterpretq_f32_u32(vshll_n_u16(a.v, 16))};
 }
 
-#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
   const uint16x8_t vzero = vdupq_n_u16(0);
+#ifdef YNN_ARCH_ARM64
   return {
       f32x4{vreinterpretq_f32_u16(vzip1q_u16(vzero, a.v))},
       f32x4{vreinterpretq_f32_u16(vzip2q_u16(vzero, a.v))},
   };
-}
+#else
+  const uint16x8x2_t zipped = vzipq_u16(vzero, a.v);
+  return {
+      f32x4{vreinterpretq_f32_u16(zipped.val[0])},
+      f32x4{vreinterpretq_f32_u16(zipped.val[1])},
+  };
 #endif
+}
 
 YNN_ALWAYS_INLINE bf16x4 cast(f32x4 a, bfloat16) {
   uint32x4_t u = vreinterpretq_u32_f32(a.v);
@@ -2353,7 +2359,6 @@ YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
 YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
   return f16x8{vshll_n_u8(a.v, 8)};
 }
-#ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f8_e5m2x16 load(const fp8_e5m2* ptr, decltype(f8_e5m2x16::N),
                                   f8_e5m2x16 = {}) {
   uint8x16_t v = vld1q_u8(reinterpret_cast<const uint8_t*>(ptr));
@@ -2362,12 +2367,19 @@ YNN_ALWAYS_INLINE f8_e5m2x16 load(const fp8_e5m2* ptr, decltype(f8_e5m2x16::N),
 YNN_ALWAYS_INLINE f16x16 cast(f8_e5m2x16 a, half) {
   const uint8x16_t vzero = vdupq_n_u8(0);
   const uint8x16_t va = vcombine_u8(lo(a).v, hi(a).v);
+#ifdef YNN_ARCH_ARM64
   return {
       f16x8{vreinterpretq_u16_u8(vzip1q_u8(vzero, va))},
       f16x8{vreinterpretq_u16_u8(vzip2q_u8(vzero, va))},
   };
-}
+#else
+  const uint8x16x2_t zipped = vzipq_u8(vzero, va);
+  return {
+      f16x8{vreinterpretq_u16_u8(zipped.val[0])},
+      f16x8{vreinterpretq_u16_u8(zipped.val[1])},
+  };
 #endif
+}
 YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
   uint16x8_t u = a.v;
   uint16x8_t is_nan = vcgtq_u16(vshlq_n_u16(u, 1), vdupq_n_u16(0xF800));

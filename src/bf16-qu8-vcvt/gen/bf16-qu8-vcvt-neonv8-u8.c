@@ -32,14 +32,22 @@ void xnn_bf16_qu8_vcvt_ukernel__neonv8_u8(
   assert(input != NULL);
   assert(output != NULL);
 
+  #if XNN_ARCH_ARM64
+    const uint16x8_t vzero = vdupq_n_u16(0);
+  #endif
   // Don't let the scale be 0, which can happen for large scales, and should
   // not happen because this value is a reciprocal.
   const float32x4_t vscale = vdupq_n_f32(math_max_f32(FLT_MIN, xnn_bfloat16_to_float(params->scalar.scale)));
   const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
   for (; batch >= 8 * sizeof(xnn_bfloat16); batch -= 8 * sizeof(xnn_bfloat16)) {
     const uint16x8_t vbf = vld1q_u16((const uint16_t*) input); input += 8;
-    float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-    float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    #if XNN_ARCH_ARM64
+      float32x4_t vx_lo = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf));
+      float32x4_t vx_hi = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf));
+    #else
+      float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+      float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    #endif
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -57,8 +65,13 @@ void xnn_bf16_qu8_vcvt_ukernel__neonv8_u8(
     assert(batch >= 1 * sizeof(xnn_bfloat16));
     assert(batch <= 7 * sizeof(xnn_bfloat16));
     const uint16x8_t vbf = vld1q_u16((const uint16_t*) input);
-    float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
-    float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    #if XNN_ARCH_ARM64
+      float32x4_t vx_lo = vreinterpretq_f32_u16(vzip1q_u16(vzero, vbf));
+      float32x4_t vx_hi = vreinterpretq_f32_u16(vzip2q_u16(vzero, vbf));
+    #else
+      float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+      float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    #endif
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);

@@ -42,11 +42,19 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_u8(
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
+  #if XNN_ARCH_ARM64
+    const uint16x8_t vzero = vdupq_n_u16(0);
+  #endif
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const uint16x8_t vh = vld1q_u16(i); i += 8;
 
-    const uint32x4_t vw_lo = vshll_n_u16(vget_low_u16(vh), 16);
-    const uint32x4_t vw_hi = vshll_n_u16(vget_high_u16(vh), 16);
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vw_lo = vreinterpretq_u32_u16(vzip1q_u16(vzero, vh));
+      const uint32x4_t vw_hi = vreinterpretq_u32_u16(vzip2q_u16(vzero, vh));
+    #else
+      const uint32x4_t vw_lo = vshll_n_u16(vget_low_u16(vh), 16);
+      const uint32x4_t vw_hi = vshll_n_u16(vget_high_u16(vh), 16);
+    #endif
 
     const uint32x4_t vsign_lo = vandq_u32(vw_lo, vsign_mask);
     const uint32x4_t vsign_hi = vandq_u32(vw_hi, vsign_mask);
@@ -72,8 +80,13 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_u8(
   if XNN_UNPREDICTABLE(batch != 0) {
     const uint16x8_t vh = vld1q_u16(i); i += 8;
 
-    const uint32x4_t vw_lo = vshll_n_u16(vget_low_u16(vh), 16);
-    const uint32x4_t vw_hi = vshll_n_u16(vget_high_u16(vh), 16);
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vw_lo = vreinterpretq_u32_u16(vzip1q_u16(vzero, vh));
+      const uint32x4_t vw_hi = vreinterpretq_u32_u16(vzip2q_u16(vzero, vh));
+    #else
+      const uint32x4_t vw_lo = vshll_n_u16(vget_low_u16(vh), 16);
+      const uint32x4_t vw_hi = vshll_n_u16(vget_high_u16(vh), 16);
+    #endif
 
     const uint32x4_t vsign_lo = vandq_u32(vw_lo, vsign_mask);
     const uint32x4_t vsign_hi = vandq_u32(vw_hi, vsign_mask);
