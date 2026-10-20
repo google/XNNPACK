@@ -18,7 +18,7 @@
 #include "src/xnnpack/vunary.h"
 
 
-static inline float32x4_t load_bf16_as_f32(const uint16_t* input) {
+static inline float32x4_t load_bf16_as_f32(const uint16_t* input) XNN_OOB_READS {
   return vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vld1_u16(input)), 16));
 }
 
