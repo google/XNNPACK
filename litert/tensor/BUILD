@@ -128,6 +128,7 @@ cc_test(
         ":buffer",
         ":datatypes",
         ":tensor",
+        "//litert/tensor/internal:arithmetic_helpers",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
         "//litert/tensor/utils:matchers",
