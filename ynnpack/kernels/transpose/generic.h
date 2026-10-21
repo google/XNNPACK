@@ -458,6 +458,57 @@ static void interleave(size_t m, size_t n, size_t stride_a, const void* a,
   }
 }
 
+// For sub-byte types, it is faster (and less code) to do an interleave followed
+// by a transpose. This enables usage of wider SIMD vectors without excessive
+// registers.
+template <size_t ElemSize, size_t M = 256, size_t N = 128,
+          typename InterleaveFn, typename TransposeFn>
+static void interleave_and_transpose(size_t m, size_t n, size_t n_bytes_a,
+                                     size_t stride_a, const void* a,
+                                     size_t stride_x, void* x,
+                                     InterleaveFn interleave_fn,
+                                     TransposeFn transpose_fn) {
+  constexpr size_t P = 8 / ElemSize;
+  alignas(64) uint8_t temp[N * M / P];
+
+  for (size_t m_start = 0; m_start < m; m_start += M) {
+    const size_t m_chunk = std::min(M, m - m_start);
+    const size_t m_start_bytes = m_start * ElemSize / 8;
+
+    size_t valid_bytes = 0;
+    if (m_start_bytes < n_bytes_a) {
+      valid_bytes = n_bytes_a - m_start_bytes;
+    }
+    const size_t valid_elements = std::min(m_chunk, valid_bytes * 8 / ElemSize);
+    const size_t m_interleave = align_up(valid_elements, P);
+
+    for (size_t n_start = 0; n_start < n; n_start += N) {
+      const size_t n_chunk = std::min(N, n - n_start);
+      const size_t n_start_bytes = n_start * ElemSize / 8;
+
+      const void* a_tile = offset_bytes(a, n_start * stride_a + m_start_bytes);
+      void* x_tile = offset_bytes(x, m_start * stride_x + n_start_bytes);
+
+      const size_t k_groups = ceil_div(n_chunk, P);
+      for (size_t k = 0; k < k_groups; ++k) {
+        const size_t rows_in_group = std::min(P, n_chunk - k * P);
+        const void* a_group = offset_bytes(a_tile, k * P * stride_a);
+        uint8_t* temp_row = temp + k * M;
+
+        if (m_interleave > 0) {
+          interleave_fn(P, rows_in_group, m_interleave, stride_a, a_group,
+                        temp_row);
+        }
+        if (valid_elements < m_chunk) {
+          memset(temp_row + valid_elements, 0, m_chunk - valid_elements);
+        }
+      }
+
+      transpose_fn(m_chunk, k_groups, m_chunk, M, temp, stride_x, x_tile);
+    }
+  }
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_KERNELS_TRANSPOSE_GENERIC_H_
