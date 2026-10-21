@@ -50,4 +50,9 @@ tools/xngen src/f32-vlrelu/avx.c.in -D BATCH_TILE=16 -o src/f32-vlrelu/gen/f32-v
 tools/xngen src/f32-vlrelu/avx512f.c.in -D BATCH_TILE=16 -o src/f32-vlrelu/gen/f32-vlrelu-avx512f-u16.c &
 tools/xngen src/f32-vlrelu/avx512f.c.in -D BATCH_TILE=32 -o src/f32-vlrelu/gen/f32-vlrelu-avx512f-u32.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/f32-vlrelu/hvx.c.in -D BATCH_TILE=32  -o src/f32-vlrelu/gen/f32-vlrelu-hvx-u32.c &
+tools/xngen src/f32-vlrelu/hvx.c.in -D BATCH_TILE=64  -o src/f32-vlrelu/gen/f32-vlrelu-hvx-u64.c &
+tools/xngen src/f32-vlrelu/hvx.c.in -D BATCH_TILE=128 -o src/f32-vlrelu/gen/f32-vlrelu-hvx-u128.c &
+
 wait

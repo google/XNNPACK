@@ -22,5 +22,6 @@ tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=neon    -D BATCH_TILES=4,8,16 
 tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=sse2    -D BATCH_TILES=4,8,16   -o src/f32-vsqrt/gen/f32-vsqrt-sse2-rsqrt.c &
 tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=avx     -D BATCH_TILES=8,16,32  -o src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt.c &
 tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=avx512f -D BATCH_TILES=16,32,48 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt.c &
+tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=hvx     -D BATCH_TILES=32,64,128 -o src/f32-vsqrt/gen/f32-vsqrt-hvx-rsqrt.c &
 
 wait

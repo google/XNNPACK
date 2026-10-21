@@ -19,6 +19,7 @@ tools/xngen src/f32-vrsqrt/simd-rsqrt.c.in -D ARCH=neon     -D BATCH_TILES=4,8,1
 tools/xngen src/f32-vrsqrt/simd-rsqrt.c.in -D ARCH=sse2     -D BATCH_TILES=4,8,16   -o src/f32-vrsqrt/gen/f32-vrsqrt-sse2-rsqrt.c &
 tools/xngen src/f32-vrsqrt/simd-rsqrt.c.in -D ARCH=avx      -D BATCH_TILES=8,16,32  -o src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt.c &
 tools/xngen src/f32-vrsqrt/simd-rsqrt.c.in -D ARCH=avx512f  -D BATCH_TILES=16,32,48 -o src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt.c &
+tools/xngen src/f32-vrsqrt/simd-rsqrt.c.in -D ARCH=hvx      -D BATCH_TILES=32,64,128 -o src/f32-vrsqrt/gen/f32-vrsqrt-hvx-rsqrt.c &
 
 ################################ SIMD sqrt #####################################
 tools/xngen src/f32-vrsqrt/simd-sqrt.c.in -D ARCH=scalar    -D BATCH_TILES=1,2,4    -o src/f32-vrsqrt/gen/f32-vrsqrt-scalar-sqrt.c &

@@ -6,6 +6,7 @@
 #
 
 PROD_HVX_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u128.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-hvx-rational-6-4-div.c",
     "src/f16-vcos/gen/f16-f32acc-vcos-hvx-poly-3.c",
     "src/f16-vexp/gen/f16-f32acc-vexp-hvx-poly-3.c",
@@ -18,6 +19,7 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-4p64c-minmax-hvx-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-9p64c-minmax-hvx-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx-acc2.c",
+    "src/f32-f16-vcvt/gen/f32-f16-vcvt-hvx-u128.c",
     "src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-7x64-minmax-hvx-broadcast.c",
@@ -66,11 +68,14 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c",
     "src/f32-vhswish/gen/f32-vhswish-hvx.c",
     "src/f32-vlog/gen/f32-vlog-hvx-rational-3-3-div.c",
+    "src/f32-vlrelu/gen/f32-vlrelu-hvx-u128.c",
     "src/f32-vrnd/gen/f32-vrndd-hvx-u128.c",
     "src/f32-vrnd/gen/f32-vrndne-hvx-u128.c",
     "src/f32-vrnd/gen/f32-vrndu-hvx-u128.c",
     "src/f32-vrnd/gen/f32-vrndz-hvx-u128.c",
+    "src/f32-vrsqrt/gen/f32-vrsqrt-hvx-rsqrt.c",
     "src/f32-vsin/gen/f32-vsin-hvx-rational-5-4-div.c",
+    "src/f32-vsqrt/gen/f32-vsqrt-hvx-rsqrt.c",
     "src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-div.c",
     "src/f32-vunary/gen/f32-vabs-hvx.c",
     "src/f32-vunary/gen/f32-vneg-hvx.c",
@@ -111,6 +116,8 @@ PROD_HVX_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_HVX_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u32.c",
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u64.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-hvx-rational-6-4-nr.c",
     "src/f16-vlog/gen/f16-f32acc-vlog-hvx-rational-1-3-nr.c",
     "src/f16-vtanh/gen/f16-f32acc-vtanh-hvx-rational-5-4-nr.c",
@@ -128,6 +135,8 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx.c",
     "src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx.c",
+    "src/f32-f16-vcvt/gen/f32-f16-vcvt-hvx-u32.c",
+    "src/f32-f16-vcvt/gen/f32-f16-vcvt-hvx-u64.c",
     "src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-2x32-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-2x64-minmax-hvx-broadcast.c",
@@ -258,6 +267,8 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsubc-hvx-u32.c",
     "src/f32-vbinary/gen/f32-vsubc-hvx-u64.c",
     "src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-nr.c",
+    "src/f32-vlrelu/gen/f32-vlrelu-hvx-u32.c",
+    "src/f32-vlrelu/gen/f32-vlrelu-hvx-u64.c",
     "src/f32-vrnd/gen/f32-vrndd-hvx-u32.c",
     "src/f32-vrnd/gen/f32-vrndd-hvx-u64.c",
     "src/f32-vrnd/gen/f32-vrndne-hvx-u32.c",

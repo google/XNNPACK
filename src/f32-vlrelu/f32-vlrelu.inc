@@ -55,6 +55,12 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_u4
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_u8, 8, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vlrelu_ukernel__hvx_u32, 32, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vlrelu_ukernel__hvx_u64, 64, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vlrelu_ukernel__hvx_u128, 128, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vlrelu_ukernel__scalar_u1, 1, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vlrelu_ukernel__scalar_u2, 2, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vlrelu_ukernel__scalar_u4, 4, false, float, struct xnn_f32_lrelu_params, xnn_init_f32_lrelu_scalar_params)
