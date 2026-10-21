@@ -206,4 +206,48 @@ TEST(Reshape, DotBitcastSliceReduceRegression) {
   runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
 }
 
+TEST(Reshape, ReshapeBroadcastBinaryRegression) {
+  std::vector<size_t> input_shape = {4, 4, 8};
+  std::vector<size_t> reshape1_shape = {16, 1, 8};
+  std::vector<size_t> reshape2_shape = {1, 16, 8};
+  std::vector<size_t> output_shape = {16, 16, 8};
+
+  Tensor<float> input(input_shape);
+  Tensor<float> output(output_shape);
+
+  ReplicableRandomDevice rng;
+  fill_random(input.data(), input.size(), rng);
+
+  uint32_t input_id = 0;
+  uint32_t output_id = 1;
+  uint32_t reshape1_id = YNN_INVALID_VALUE_ID;
+  uint32_t reshape2_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(ynn_type_fp32, input_shape, input_id)
+      .AddOutput(ynn_type_fp32, output_shape, output_id)
+      .AddTensor(ynn_type_fp32, reshape1_shape, reshape1_id)
+      .AddTensor(ynn_type_fp32, reshape2_shape, reshape2_id)
+      .AddReshape(reshape1_shape, input_id, reshape1_id)
+      .AddReshape(reshape2_shape, input_id, reshape2_id)
+      .AddBinary(ynn_binary_subtract, reshape1_id, reshape2_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(input_shape, input.base(), input_id)
+      .ReshapeRuntime();
+
+  runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
+
+  for (size_t i = 0; i < 16; ++i) {
+    for (size_t j = 0; j < 16; ++j) {
+      for (size_t k = 0; k < 8; ++k) {
+        ASSERT_EQ(output(i, j, k),
+                  input.data()[i * 8 + k] - input.data()[j * 8 + k]);
+      }
+    }
+  }
+}
+
 }  // namespace ynn

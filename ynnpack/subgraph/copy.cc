@@ -97,51 +97,74 @@ slinky::func make_reshape(ynn_runtime& runtime,
   const size_t out_rank = output_extents.size();
   assert(out_rank == output_buf->rank());
 
+  auto is_broadcast = [](const slinky::expr& e) {
+    return !e.defined() || slinky::is_constant(e, 1);
+  };
+  if (std::any_of(input_extents.begin(), input_extents.end(), is_broadcast)) {
+    slinky::box_expr bounds(in_rank, slinky::point(0));
+    std::vector<slinky::expr> squeezed_extents;
+    std::vector<slinky::var> dims;
+    for (size_t d = 0; d < in_rank; ++d) {
+      if (!is_broadcast(input_extents[d])) {
+        dims.push_back(runtime.globals.make_dim(dims.size()));
+        bounds[d] = slinky::point(dims.back());
+        squeezed_extents.push_back(input_extents[d]);
+      }
+    }
+    slinky::buffer_expr_ptr squeezed_buf = runtime.globals.make_buffer_expr(
+        "reshape_in", squeezed_extents.size(), input_buf->elem_size());
+    runtime.funcs.push_back(slinky::func::make_copy(
+        {input_buf, std::move(bounds)}, {squeezed_buf, std::move(dims)}));
+    return make_reshape(runtime, squeezed_buf, squeezed_extents, output_buf,
+                        output_extents);
+  }
+
   std::vector<slinky::var> dims = runtime.globals.make_dims(out_rank);
+  if (std::any_of(output_extents.begin(), output_extents.end(), is_broadcast)) {
+    slinky::box_expr bounds;
+    std::vector<slinky::expr> squeezed_extents;
+    for (size_t d = 0; d < out_rank; ++d) {
+      if (!is_broadcast(output_extents[d])) {
+        bounds.push_back(slinky::point(dims[d]));
+        squeezed_extents.push_back(output_extents[d]);
+      }
+    }
+    slinky::buffer_expr_ptr squeezed_buf = runtime.globals.make_buffer_expr(
+        "reshape_out", squeezed_extents.size(), output_buf->elem_size());
+    runtime.funcs.push_back(make_reshape(runtime, input_buf, input_extents,
+                                         squeezed_buf, squeezed_extents));
+    return slinky::func::make_copy({squeezed_buf, std::move(bounds)},
+                                   {output_buf, std::move(dims)});
+  }
+
   slinky::box_expr bounds(in_rank);
 
   // Compute the "flat" index of the coordinates in the output.
   slinky::expr flat_out(0);
   for (size_t d = 0; d < out_rank; ++d) {
     slinky::expr current_term = dims[d];
-
     for (size_t d1 = 0; d1 < d; ++d1) {
-      if (output_extents[d1].defined()) {
-        current_term *= output_extents[d1];
-      }
+      current_term *= output_extents[d1];
     }
-
     flat_out += current_term;
   }
 
   slinky::expr input_extents_cum_prod = 1;
   for (size_t d = 0; d < in_rank; ++d) {
-    if (input_extents[d].defined()) {
-      bounds[d] =
-          slinky::point((flat_out / input_extents_cum_prod) % input_extents[d]);
-      input_extents_cum_prod *= input_extents[d];
-    } else {
-      bounds[d] = slinky::point(0);
-    }
+    bounds[d] =
+        slinky::point((flat_out / input_extents_cum_prod) % input_extents[d]);
+    input_extents_cum_prod *= input_extents[d];
   }
 
   // We also need to assume that we compute at least the min = 0... element of
   // the input and output.
   for (size_t d = 0; d < in_rank; ++d) {
-    if (input_extents[d].defined()) {
-      input_buf->dim(d).bounds.min = 0;
-      input_buf->dim(d).bounds.max = input_extents[d] - 1;
-    } else {
-      input_buf->dim(d).bounds = slinky::point(0);
-    }
+    input_buf->dim(d).bounds.min = 0;
+    input_buf->dim(d).bounds.max = input_extents[d] - 1;
   }
   for (size_t d = 0; d < out_rank; ++d) {
-    if (output_extents[d].defined()) {
-      output_buf->dim(d).bounds.min = 0;
-      output_buf->dim(d).bounds.max = output_extents[d] - 1;
-    } else {
-      output_buf->dim(d).bounds = slinky::point(0);
-    }
+    output_buf->dim(d).bounds.min = 0;
+    output_buf->dim(d).bounds.max = output_extents[d] - 1;
   }
 
   // Reshape's definition assumes that there is no padding between dimensions.
