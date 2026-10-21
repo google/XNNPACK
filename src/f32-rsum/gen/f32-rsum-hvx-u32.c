@@ -35,7 +35,7 @@ void xnn_f32_rsum_ukernel__hvx_u32(
     const size_t head_size = alignment_size > batch ? batch : alignment_size;
     const xnn_simd_f32_t vt = xnn_loadu_f32(input);
     HVX_VectorPred mask = Q6_Q_vsetq_R(head_size);
-    vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vmux_QVV(mask, vt, xnn_zero_f32()));
+    vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vand_QV(mask, vt));
     batch -= head_size;
     input = (const float*)((intptr_t)input + head_size);
   }
