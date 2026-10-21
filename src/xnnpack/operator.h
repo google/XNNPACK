@@ -243,12 +243,16 @@ struct xnn_operator {
   size_t output_pixel_stride;
   const void* quantization_params;
 
-  union {
-    // Pointer to allocated packed weights. Use this if weights_cache is NULL.
-    void* pointer;
-    // Offset into the weights cache where the packed weights are. Only valid if
-    // weights_cache is not NULL.
-    size_t offset;
+  struct {
+    union {
+      // Pointer to allocated packed weights. Use this if weights_cache is NULL.
+      void* pointer;
+      // Offset into the weights cache where the packed weights are. Only valid
+      // if weights_cache is not NULL.
+      size_t offset;
+    };
+    // Size in bytes of allocated packed weights.
+    size_t size;
   } packed_weights;
   // Stride between each set of packed weights.
   size_t weights_stride;

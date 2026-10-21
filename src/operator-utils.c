@@ -26,6 +26,7 @@ void* xnn_get_pointer_to_write_weights(
   size_t aligned_weights_size)
 {
   assert(aligned_weights_size % XNN_ALLOCATION_ALIGNMENT == 0);
+  op->packed_weights.size = aligned_weights_size;
   if (use_weights_cache(op)) {
     void* weights_ptr = op->weights_cache->reserve_space(op->weights_cache->context, aligned_weights_size);
     // Some implementations of the weights cache return pointers that seg fault

@@ -171,6 +171,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_spmm_path(
       packed_weights_size, xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
+  convolution_op->packed_weights.size = packed_weights_size;
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
     packed_weights_size, xnn_operator_type_to_string(context->operator_type));
 

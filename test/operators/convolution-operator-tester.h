@@ -2390,6 +2390,7 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      EXPECT_GT(convolution_op->packed_weights.size, 0);
       if (expected_microkernel_type.has_value()) {
         ASSERT_EQ(*expected_microkernel_type, convolution_op->ukernel.type);
       }

@@ -238,6 +238,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nchw(
         packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
       return xnn_status_out_of_memory;
     }
+    resize_op->packed_weights.size = packed_weights_size;
   }
 
   const size_t input_pixel_stride_in_bytes = 1 << log2_data_element_size; // Since the layout in CHW the pixels
