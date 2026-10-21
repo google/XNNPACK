@@ -65,6 +65,14 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rsum2_ukernel__rvv_u4v, 4, true, floa
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rsum2_ukernel__rvv_u8v, 8, true, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rsum2_ukernel__hvx_u32, 32, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rsum2_ukernel__hvx_u64_acc2, 64, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rsum2_ukernel__hvx_u96_acc3, 96, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rsum2_ukernel__hvx_u128_acc2, 128, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rsum2_ukernel__hvx_u128_acc4, 128, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__scalar_u1, 1, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__scalar_u2, 2, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__scalar_u2_acc2, 2, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)

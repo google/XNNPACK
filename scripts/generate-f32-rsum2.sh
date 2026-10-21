@@ -16,4 +16,11 @@ tools/xngen src/f32-rsum2/simd.c.in -D ARCH=scalar -D BATCH_TILES=1,2,3,4 -o src
 tools/xngen src/f32-rsum2/rvv.c.in -D LMUL=4 -o src/f32-rsum2/gen/f32-rsum2-rvv-u4v.c &
 tools/xngen src/f32-rsum2/rvv.c.in -D LMUL=8 -o src/f32-rsum2/gen/f32-rsum2-rvv-u8v.c &
 
+################################## Hexagon HVX ################################
+tools/xngen src/f32-rsum2/hvx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f32-rsum2/gen/f32-rsum2-hvx-u32.c &
+tools/xngen src/f32-rsum2/hvx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-rsum2/gen/f32-rsum2-hvx-u64-acc2.c &
+tools/xngen src/f32-rsum2/hvx.c.in -D BATCH_TILE=96 -D ACCUMULATORS=3 -o src/f32-rsum2/gen/f32-rsum2-hvx-u96-acc3.c &
+tools/xngen src/f32-rsum2/hvx.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -o src/f32-rsum2/gen/f32-rsum2-hvx-u128-acc2.c &
+tools/xngen src/f32-rsum2/hvx.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -o src/f32-rsum2/gen/f32-rsum2-hvx-u128-acc4.c &
+
 wait
