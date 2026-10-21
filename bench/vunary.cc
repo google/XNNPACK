@@ -187,6 +187,9 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                              \
           benchmark::utils::UnaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
+#include "src/bf16-vrsqrt/bf16-vrsqrt.inc"
+#include "src/bf16-vsigmoid/bf16-vsigmoid.inc"
+#include "src/bf16-vsqr/bf16-vsqr.inc"
 #include "src/f16-vabs/f16-vabs.inc"
 #include "src/f16-vapproxgelu/f16-vapproxgelu.inc"
 #include "src/f16-vcos/f16-vcos.inc"
