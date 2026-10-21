@@ -171,7 +171,7 @@ TEST_F(Fp16ToFp32FallbackTest, OpChainRewrite) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    a = Abs(a);
+    a = Square(a);
     a = Sqrt(a);
     XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
     a = Add(a, b);
@@ -186,7 +186,7 @@ TEST_F(Fp16ToFp32FallbackTest, OpChainRewrite) {
     b = Cast(b, Type::kFP32);
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Sqrt(a);
     a = Add(a, b);
     XnnTensor c({.type = Type::kFP16, .shape = {3, 4}});
@@ -209,7 +209,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReshapeAllowsFp16Inputs) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Reshape(a, {6, 2});
-    a = Abs(a);
+    a = Square(a);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
 
@@ -218,7 +218,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReshapeAllowsFp16Inputs) {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Reshape(a, {6, 2});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
@@ -236,7 +236,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    a = Abs(a);
+    a = Square(a);
     a = Reshape(a, {6, 2});
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
@@ -245,7 +245,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Reshape(a, {6, 2});
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
@@ -262,7 +262,7 @@ TEST_F(Fp16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    a = Abs(a);
+    a = Square(a);
     a = Cast(a, Type::kFP32);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
@@ -271,7 +271,7 @@ TEST_F(Fp16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
@@ -287,7 +287,7 @@ TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalInput) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP16);
-    a = Abs(a);
+    a = Square(a);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
 
@@ -295,7 +295,7 @@ TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalInput) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
@@ -311,7 +311,7 @@ TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalOutput) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    a = Abs(a);
+    a = Square(a);
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
@@ -320,7 +320,7 @@ TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalOutput) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
@@ -359,7 +359,7 @@ TEST_F(Fp16ToFp32FallbackTest, HandleExternalOutputThatIsReused) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    a = Abs(a);
+    a = Square(a);
     XnnTensor b = Cast(a, Type::kFP32);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a, b}));
   }
@@ -368,7 +368,7 @@ TEST_F(Fp16ToFp32FallbackTest, HandleExternalOutputThatIsReused) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    XnnTensor b = Abs(a);
+    XnnTensor b = Square(a);
     a = Cast(b, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a, b}));
   }
@@ -386,7 +386,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeAllowsFp16Inputs) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Transpose(a, {1, 0});
-    a = Abs(a);
+    a = Square(a);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
 
@@ -395,7 +395,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeAllowsFp16Inputs) {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Transpose(a, {1, 0});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
@@ -413,7 +413,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeHandlesRewrittenInputs) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    a = Abs(a);
+    a = Square(a);
     a = Transpose(a, {1, 0});
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
   }
@@ -422,7 +422,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeHandlesRewrittenInputs) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    a = Abs(a);
+    a = Square(a);
     a = Transpose(a, {1, 0});
     a = Cast(a, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
@@ -441,7 +441,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
-    XnnTensor b = Abs(a);
+    XnnTensor b = Square(a);
     XnnTensor c = Sqrt(a);
     XnnTensor d = Add(b, c);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({d}));
@@ -451,7 +451,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
     a = Cast(a, Type::kFP32);
-    XnnTensor b = Abs(a);
+    XnnTensor b = Square(a);
     XnnTensor c = Sqrt(a);
     XnnTensor d = Add(b, c);
     d = Cast(d, Type::kFP16);
@@ -474,8 +474,8 @@ TEST_F(Fp16ToFp32FallbackTest, SplitAllowsFp16Inputs) {
                     .shape = {1},
                     .buffer = OwningCpuBuffer::Copy<Type::kI32>({0})});
     std::vector<XnnTensor> outputs = Split(input, axis, 2);
-    XnnTensor out0 = Abs(outputs[0]);
-    XnnTensor out1 = Abs(outputs[1]);
+    XnnTensor out0 = Square(outputs[0]);
+    XnnTensor out1 = Square(outputs[1]);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({out0, out1}));
   }
 
@@ -489,11 +489,11 @@ TEST_F(Fp16ToFp32FallbackTest, SplitAllowsFp16Inputs) {
     std::vector<XnnTensor> outputs = Split(input, axis, 2);
 
     XnnTensor out0 = Cast(outputs[0], Type::kFP32);
-    out0 = Abs(out0);
+    out0 = Square(out0);
     out0 = Cast(out0, Type::kFP16);
 
     XnnTensor out1 = Cast(outputs[1], Type::kFP32);
-    out1 = Abs(out1);
+    out1 = Square(out1);
     out1 = Cast(out1, Type::kFP16);
 
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
@@ -513,7 +513,7 @@ TEST_F(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {2, 4}});
-    input = Abs(input);
+    input = Square(input);
     XnnTensor axis({.type = Type::kI32,
                     .shape = {1},
                     .buffer = OwningCpuBuffer::Copy<Type::kI32>({0})});
@@ -526,7 +526,7 @@ TEST_F(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
   {
     XnnTensor input({.type = Type::kFP16, .shape = {2, 4}});
     input = Cast(input, Type::kFP32);
-    input = Abs(input);
+    input = Square(input);
     XnnTensor axis({.type = Type::kI32,
                     .shape = {1},
                     .buffer = OwningCpuBuffer::Copy<Type::kI32>({0})});
@@ -1034,8 +1034,8 @@ TEST_P(Fp16ToFp32FallbackUnaryOpTest, Rewrite) {
         XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
         // These ops have software emulation fallbacks and will therefore not be
         // converted.
-        if (param.name == "Cos" || param.name == "HardSwish" ||
-            param.name == "Sin") {
+        if (param.name == "Abs" || param.name == "Cos" ||
+            param.name == "HardSwish" || param.name == "Sin") {
           XnnTensor output = param.op_builder(input);
           return BuildXnnpackGraph({output});
         } else {
@@ -1446,7 +1446,7 @@ TEST_F(Fp16ToFp32FallbackTest, OverflowOutputSizeReturnsError) {
                 XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
             xnn_status_success);
 
-  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr,
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_square, /*params=*/nullptr,
                              input_id, output_id, /*flags=*/0),
             xnn_status_success);
 
@@ -1483,7 +1483,7 @@ TEST_F(Fp16ToFp32FallbackTest, OverflowStaticInputSizeReturnsError) {
                 XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
             xnn_status_success);
 
-  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr,
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_square, /*params=*/nullptr,
                              static_input_id, output_id, /*flags=*/0),
             xnn_status_success);
 
@@ -1704,7 +1704,7 @@ TEST_F(Fp16ToFp32PackedGemmSupportTest,
     XnnTensor weights({.type = Type::kFP16,
                        .shape = {2, 4},
                        .buffer = std::vector<float>{1, 2, 3, 4, 5, 6, 7, 8}});
-    XnnTensor output = FullyConnected(Abs(input), weights);
+    XnnTensor output = FullyConnected(Square(input), weights);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
 
@@ -1726,7 +1726,7 @@ TEST_F(Fp16ToFp32PackedGemmSupportTest,
   {
     XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
     XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
-    XnnTensor output = BatchMatMul(Abs(x), y);
+    XnnTensor output = BatchMatMul(Square(x), y);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
 
@@ -1755,7 +1755,7 @@ TEST_F(Fp16ToFp32PackedGemmSupportTest,
     XnnTensor bias({.type = Type::kFP32,
                     .shape = {8},
                     .buffer = std::vector<float>(8, 1.0f)});
-    XnnTensor output = Conv2D(Abs(input), filter, bias, /*stride_h=*/1,
+    XnnTensor output = Conv2D(Square(input), filter, bias, /*stride_h=*/1,
                               /*stride_w=*/1, litert::tensor::kPaddingSame);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
@@ -1785,9 +1785,10 @@ TEST_F(Fp16ToFp32PackedGemmSupportTest,
     XnnTensor bias({.type = Type::kFP16,
                     .shape = {8},
                     .buffer = std::vector<float>(8, 1.0f)});
-    XnnTensor output = TransposeConv2D(filter, Abs(input), bias, {1, 5, 5, 8},
-                                       litert::tensor::kPaddingSame,
-                                       /*stride_h=*/1, /*stride_w=*/1);
+    XnnTensor output =
+        TransposeConv2D(filter, Square(input), bias, {1, 5, 5, 8},
+                        litert::tensor::kPaddingSame,
+                        /*stride_h=*/1, /*stride_w=*/1);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
 
@@ -1814,7 +1815,7 @@ TEST_F(Fp16ToFp32PackedGemmSupportTest,
     XnnTensor weights({.type = Type::kFP16,
                        .shape = {2, 4},
                        .buffer = std::vector<float>{1, 2, 3, 4, 5, 6, 7, 8}});
-    XnnTensor output = FullyConnected(Abs(input), weights);
+    XnnTensor output = FullyConnected(Square(input), weights);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
 
