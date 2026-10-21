@@ -193,21 +193,21 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     } else {
       for (; k >= 8 * sizeof(int8_t); k -= 8 * sizeof(int8_t)) {
         const HVX_Vector va0x0123 = Q6_V_vsplat_R(*((const int32_t*)a0));
-        const HVX_Vector va0x4567 = Q6_V_vsplat_R(*((const int32_t*)a0+4)); a0 += 8;
+        const HVX_Vector va0x4567 = Q6_V_vsplat_R(*((const int32_t*)(a0+4))); a0 += 8;
         const HVX_Vector va1x0123 = Q6_V_vsplat_R(*((const int32_t*)a1));
-        const HVX_Vector va1x4567 = Q6_V_vsplat_R(*((const int32_t*)a1+4)); a1 += 8;
+        const HVX_Vector va1x4567 = Q6_V_vsplat_R(*((const int32_t*)(a1+4))); a1 += 8;
         const HVX_Vector va2x0123 = Q6_V_vsplat_R(*((const int32_t*)a2));
-        const HVX_Vector va2x4567 = Q6_V_vsplat_R(*((const int32_t*)a2+4)); a2 += 8;
+        const HVX_Vector va2x4567 = Q6_V_vsplat_R(*((const int32_t*)(a2+4))); a2 += 8;
         const HVX_Vector va3x0123 = Q6_V_vsplat_R(*((const int32_t*)a3));
-        const HVX_Vector va3x4567 = Q6_V_vsplat_R(*((const int32_t*)a3+4)); a3 += 8;
+        const HVX_Vector va3x4567 = Q6_V_vsplat_R(*((const int32_t*)(a3+4))); a3 += 8;
         const HVX_Vector va4x0123 = Q6_V_vsplat_R(*((const int32_t*)a4));
-        const HVX_Vector va4x4567 = Q6_V_vsplat_R(*((const int32_t*)a4+4)); a4 += 8;
+        const HVX_Vector va4x4567 = Q6_V_vsplat_R(*((const int32_t*)(a4+4))); a4 += 8;
         const HVX_Vector va5x0123 = Q6_V_vsplat_R(*((const int32_t*)a5));
-        const HVX_Vector va5x4567 = Q6_V_vsplat_R(*((const int32_t*)a5+4)); a5 += 8;
+        const HVX_Vector va5x4567 = Q6_V_vsplat_R(*((const int32_t*)(a5+4))); a5 += 8;
         const HVX_Vector va6x0123 = Q6_V_vsplat_R(*((const int32_t*)a6));
-        const HVX_Vector va6x4567 = Q6_V_vsplat_R(*((const int32_t*)a6+4)); a6 += 8;
+        const HVX_Vector va6x4567 = Q6_V_vsplat_R(*((const int32_t*)(a6+4))); a6 += 8;
         const HVX_Vector va7x0123 = Q6_V_vsplat_R(*((const int32_t*)a7));
-        const HVX_Vector va7x4567 = Q6_V_vsplat_R(*((const int32_t*)a7+4)); a7 += 8;
+        const HVX_Vector va7x4567 = Q6_V_vsplat_R(*((const int32_t*)(a7+4))); a7 += 8;
 
         const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb0x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;

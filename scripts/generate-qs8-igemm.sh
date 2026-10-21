@@ -1189,4 +1189,7 @@ tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=6  -D NR=128 -D DATATYPE=QC8 -D REQU
 tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=7  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x128c4-minmax-fp32-hvx.c &
 tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x128c4-minmax-fp32-hvx.c &
 
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=128 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x128c4-minmax-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=128 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x128c4-minmax-hvx.c &
+
 wait

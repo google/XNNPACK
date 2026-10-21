@@ -1598,3 +1598,13 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 1
+
+# Hexagon HVX
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x128c4__hvx
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x128c4__hvx
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8

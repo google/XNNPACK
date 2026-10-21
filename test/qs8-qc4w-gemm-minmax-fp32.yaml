@@ -819,3 +819,15 @@
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 2
   planes: 2
+
+# Hexagon HVX
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x128c4__hvx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 8
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_2x128c4__hvx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 8
+  planes: 2

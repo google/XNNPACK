@@ -15,9 +15,10 @@
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
-#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/igemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"  // for Q6_V_vstu_variable
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 // multiply vacc by vscale and return result as int
@@ -99,8 +100,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x128c4__hvx(
     HVX_Vector vacc1x1 = vacc0x1;
     HVX_Vector vacc1x2 = vacc0x2;
     HVX_Vector vacc1x3 = vacc0x3;
-
-    w = (const int32_t*) w + 128;
 
     size_t p = ks;
     do {
