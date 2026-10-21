@@ -219,6 +219,123 @@ YNN_ALWAYS_INLINE static void interleave_in_place(
   tie(x[30], x[31]) = interleave(elem_size_x16, get<3>(x16_3), get<3>(x16_7));
 }
 
+template <typename T, size_t ElemSize>
+YNN_ALWAYS_INLINE static void interleave_in_place(
+    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 64>& x) {
+  std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
+  std::integral_constant<size_t, ElemSize * 16> elem_size_x16;
+  using t4x4 = std::tuple<T, T, T, T>;
+
+  using std::get;
+  using std::tie;
+
+  // Transpose 4x4
+  t4x4 x4[] = {
+      interleave(elem_size, x[0], x[1], x[2], x[3]),
+      interleave(elem_size, x[4], x[5], x[6], x[7]),
+      interleave(elem_size, x[8], x[9], x[10], x[11]),
+      interleave(elem_size, x[12], x[13], x[14], x[15]),
+      interleave(elem_size, x[16], x[17], x[18], x[19]),
+      interleave(elem_size, x[20], x[21], x[22], x[23]),
+      interleave(elem_size, x[24], x[25], x[26], x[27]),
+      interleave(elem_size, x[28], x[29], x[30], x[31]),
+      interleave(elem_size, x[32], x[33], x[34], x[35]),
+      interleave(elem_size, x[36], x[37], x[38], x[39]),
+      interleave(elem_size, x[40], x[41], x[42], x[43]),
+      interleave(elem_size, x[44], x[45], x[46], x[47]),
+      interleave(elem_size, x[48], x[49], x[50], x[51]),
+      interleave(elem_size, x[52], x[53], x[54], x[55]),
+      interleave(elem_size, x[56], x[57], x[58], x[59]),
+      interleave(elem_size, x[60], x[61], x[62], x[63]),
+  };
+
+  // Transpose 4x4 of 4x4
+  t4x4 x16_0 = interleave(elem_size_x4, get<0>(x4[0]), get<0>(x4[1]),
+                          get<0>(x4[2]), get<0>(x4[3]));
+  t4x4 x16_4 = interleave(elem_size_x4, get<0>(x4[4]), get<0>(x4[5]),
+                          get<0>(x4[6]), get<0>(x4[7]));
+  t4x4 x16_8 = interleave(elem_size_x4, get<0>(x4[8]), get<0>(x4[9]),
+                          get<0>(x4[10]), get<0>(x4[11]));
+  t4x4 x16_12 = interleave(elem_size_x4, get<0>(x4[12]), get<0>(x4[13]),
+                           get<0>(x4[14]), get<0>(x4[15]));
+  // Transpose 4x4 of 4x4 of 4x4
+  tie(x[0], x[1], x[2], x[3]) =
+      interleave(elem_size_x16, get<0>(x16_0), get<0>(x16_4), get<0>(x16_8),
+                 get<0>(x16_12));
+  tie(x[4], x[5], x[6], x[7]) =
+      interleave(elem_size_x16, get<1>(x16_0), get<1>(x16_4), get<1>(x16_8),
+                 get<1>(x16_12));
+  tie(x[8], x[9], x[10], x[11]) =
+      interleave(elem_size_x16, get<2>(x16_0), get<2>(x16_4), get<2>(x16_8),
+                 get<2>(x16_12));
+  tie(x[12], x[13], x[14], x[15]) =
+      interleave(elem_size_x16, get<3>(x16_0), get<3>(x16_4), get<3>(x16_8),
+                 get<3>(x16_12));
+
+  t4x4 x16_1 = interleave(elem_size_x4, get<1>(x4[0]), get<1>(x4[1]),
+                          get<1>(x4[2]), get<1>(x4[3]));
+  t4x4 x16_5 = interleave(elem_size_x4, get<1>(x4[4]), get<1>(x4[5]),
+                          get<1>(x4[6]), get<1>(x4[7]));
+  t4x4 x16_9 = interleave(elem_size_x4, get<1>(x4[8]), get<1>(x4[9]),
+                          get<1>(x4[10]), get<1>(x4[11]));
+  t4x4 x16_13 = interleave(elem_size_x4, get<1>(x4[12]), get<1>(x4[13]),
+                           get<1>(x4[14]), get<1>(x4[15]));
+  tie(x[16], x[17], x[18], x[19]) =
+      interleave(elem_size_x16, get<0>(x16_1), get<0>(x16_5), get<0>(x16_9),
+                 get<0>(x16_13));
+  tie(x[20], x[21], x[22], x[23]) =
+      interleave(elem_size_x16, get<1>(x16_1), get<1>(x16_5), get<1>(x16_9),
+                 get<1>(x16_13));
+  tie(x[24], x[25], x[26], x[27]) =
+      interleave(elem_size_x16, get<2>(x16_1), get<2>(x16_5), get<2>(x16_9),
+                 get<2>(x16_13));
+  tie(x[28], x[29], x[30], x[31]) =
+      interleave(elem_size_x16, get<3>(x16_1), get<3>(x16_5), get<3>(x16_9),
+                 get<3>(x16_13));
+
+  t4x4 x16_2 = interleave(elem_size_x4, get<2>(x4[0]), get<2>(x4[1]),
+                          get<2>(x4[2]), get<2>(x4[3]));
+  t4x4 x16_6 = interleave(elem_size_x4, get<2>(x4[4]), get<2>(x4[5]),
+                          get<2>(x4[6]), get<2>(x4[7]));
+  t4x4 x16_10 = interleave(elem_size_x4, get<2>(x4[8]), get<2>(x4[9]),
+                           get<2>(x4[10]), get<2>(x4[11]));
+  t4x4 x16_14 = interleave(elem_size_x4, get<2>(x4[12]), get<2>(x4[13]),
+                           get<2>(x4[14]), get<2>(x4[15]));
+  tie(x[32], x[33], x[34], x[35]) =
+      interleave(elem_size_x16, get<0>(x16_2), get<0>(x16_6), get<0>(x16_10),
+                 get<0>(x16_14));
+  tie(x[36], x[37], x[38], x[39]) =
+      interleave(elem_size_x16, get<1>(x16_2), get<1>(x16_6), get<1>(x16_10),
+                 get<1>(x16_14));
+  tie(x[40], x[41], x[42], x[43]) =
+      interleave(elem_size_x16, get<2>(x16_2), get<2>(x16_6), get<2>(x16_10),
+                 get<2>(x16_14));
+  tie(x[44], x[45], x[46], x[47]) =
+      interleave(elem_size_x16, get<3>(x16_2), get<3>(x16_6), get<3>(x16_10),
+                 get<3>(x16_14));
+
+  t4x4 x16_3 = interleave(elem_size_x4, get<3>(x4[0]), get<3>(x4[1]),
+                          get<3>(x4[2]), get<3>(x4[3]));
+  t4x4 x16_7 = interleave(elem_size_x4, get<3>(x4[4]), get<3>(x4[5]),
+                          get<3>(x4[6]), get<3>(x4[7]));
+  t4x4 x16_11 = interleave(elem_size_x4, get<3>(x4[8]), get<3>(x4[9]),
+                           get<3>(x4[10]), get<3>(x4[11]));
+  t4x4 x16_15 = interleave(elem_size_x4, get<3>(x4[12]), get<3>(x4[13]),
+                           get<3>(x4[14]), get<3>(x4[15]));
+  tie(x[48], x[49], x[50], x[51]) =
+      interleave(elem_size_x16, get<0>(x16_3), get<0>(x16_7), get<0>(x16_11),
+                 get<0>(x16_15));
+  tie(x[52], x[53], x[54], x[55]) =
+      interleave(elem_size_x16, get<1>(x16_3), get<1>(x16_7), get<1>(x16_11),
+                 get<1>(x16_15));
+  tie(x[56], x[57], x[58], x[59]) =
+      interleave(elem_size_x16, get<2>(x16_3), get<2>(x16_7), get<2>(x16_11),
+                 get<2>(x16_15));
+  tie(x[60], x[61], x[62], x[63]) =
+      interleave(elem_size_x16, get<3>(x16_3), get<3>(x16_7), get<3>(x16_11),
+                 get<3>(x16_15));
+}
+
 // These templates support loading simd::vec<uint8_t, N> tiles. These maintain
 // the compile-time constant-ness of `n_bytes`, to appropriately dispatch to
 // the partial or full simd::load/store implementation.

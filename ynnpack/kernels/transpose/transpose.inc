@@ -1,4 +1,5 @@
 #ifdef YNN_ARCH_X86_AVX512
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x2_avx512, 2)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x4_avx512, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x8_avx512, 8)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x16_avx512, 16)
@@ -18,6 +19,7 @@ YNN_TRANSPOSE_KERNEL(arch_flag::avx, transpose_x1024_avx, 1024)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx, transpose_x2048_avx, 2048)
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_SSE2
+YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x2_sse2, 2)
 YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x4_sse2, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x8_sse2, 8)
 YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x16_sse2, 16)
@@ -30,6 +32,7 @@ YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x1024_sse2, 1024)
 #endif  // YNN_ARCH_X86_SSE2
 
 #ifdef YNN_ARCH_ARM64_SVE
+YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x2_sve, 2)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x4_sve, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x8_sve, 8)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x16_sve, 16)
@@ -38,6 +41,7 @@ YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x64_sve, 64)
 #endif  // YNN_ARCH_ARM64_SVE
 
 #ifdef YNN_ARCH_ARM_NEON
+YNN_TRANSPOSE_KERNEL(arch_flag::neon, transpose_x2_neon, 2)
 YNN_TRANSPOSE_KERNEL(arch_flag::neon, transpose_x4_neon, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::neon, transpose_x8_neon, 8)
 YNN_TRANSPOSE_KERNEL(arch_flag::neon, transpose_x16_neon, 16)
