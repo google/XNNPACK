@@ -48,6 +48,8 @@ import("gen/neoni8mmbf16_microkernels.bzl")
 import("gen/neonsme2_microkernels.bzl")
 import("gen/neonsme_microkernels.bzl")
 import("gen/neonv8_microkernels.bzl")
+import("gen/sme2_microkernels.bzl")
+import("gen/sme_microkernels.bzl")
 
 import("gen/amd64_microkernels.bzl")
 import("gen/avx256skx_microkernels.bzl")
@@ -606,13 +608,14 @@ if (current_cpu == "arm64") {
 
   xnnpack_source_set("sme_microkernels") {
     deps = [
+      ":arm_sme_abi_stubs",
       ":microkernel_defs",
       ":microkernel_headers",
     ]
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONSME_MICROKERNEL_SRCS
+    sources = ALL_NEONSME_MICROKERNEL_SRCS + ALL_SME_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -622,17 +625,27 @@ if (current_cpu == "arm64") {
     ]
   }
 
+  xnnpack_source_set("arm_sme_abi_stubs") {
+    sources = [ "src/arm-sme-abi-stubs.c" ]
+    deps = [ ":xnnpack_headers" ]
+  }
+
   xnnpack_source_set("sme2_microkernels") {
     deps = [
+      ":arm_sme_abi_stubs",
       ":microkernel_defs",
       ":microkernel_headers",
     ]
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONSME2_MICROKERNEL_SRCS
+    sources = ALL_NEONSME2_MICROKERNEL_SRCS + ALL_SME2_MICROKERNEL_SRCS
 
     cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+sme",
       "-Xclang",
       "-target-feature",
       "-Xclang",

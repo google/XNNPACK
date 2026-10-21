@@ -69,6 +69,8 @@ _ISA_LIST = frozenset({
     'rvv',
     'rvvfp16arith',
     'scalar',
+    'sme',
+    'sme2',
     'sse',
     'sse2',
     'sse2fma',
@@ -358,6 +360,8 @@ def main(args):
 #   Generator: tools/update-microkernels.py
 #
 
+"""Microkernel filenames lists."""
+
 ''')
     prod_c_vars_per_arch = dict()
     non_prod_c_vars_per_arch = dict()
@@ -371,14 +375,25 @@ def main(args):
     for key in keys:
       arch_microkernels_bzl_filename = key + '_microkernels.bzl'
       with io.StringIO() as arch_microkernels_bzl:
-        arch_microkernels_bzl.write(f'''\
+        arch_microkernels_bzl.write(
+            f"""\
 #
 # Microkernel filenames lists for {key}.
 #
 # Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 #
-''' + (f'\n"""Microkernel filenames lists for {key}."""\n' if key == 'sve2' else ''))
+"""
+            + (
+                f'\n"""Microkernel filenames lists for {key}."""\n'
+                if key == 'sve2'
+                else (
+                    '\n# buildifier: disable=module-docstring'
+                    if key in ('sme', 'sme2')
+                    else ''
+                )
+            )
+        )
         prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,
             key,

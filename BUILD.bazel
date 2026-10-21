@@ -618,7 +618,7 @@ genrule(
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],
-    cmd = "$(location generate_build_identifier_py) --output $@ --input_file_list $(location :build_identifier_ukernel_srcs_list)",
+    cmd = "$(execpath :generate_build_identifier_py) --output $@ --input_file_list $(execpath :build_identifier_ukernel_srcs_list)",
     tools = [":generate_build_identifier_py"],
 )
 
@@ -842,6 +842,14 @@ xnnpack_cc_library(
         "//src/configs:microkernel_configs",
         "@pthreadpool",
     ],
+)
+
+xnnpack_cc_library(
+    name = "arm_sme_abi_stubs",
+    srcs = [
+        "src/arm-sme-abi-stubs.c",
+    ],
+    deps = [":common"],
 )
 
 xnnpack_cc_library(
@@ -1673,6 +1681,7 @@ alias(
     actual = select({
         ":xnn_enable_arm_sme_explicit_true": ":xnn_enable_arm_sme_explicit_true",
         ":xnn_enable_arm_sme_explicit_false": ":xnn_enable_arm_sme_explicit_true",
+        "//build_config:windows_arm64": ":xnn_enable_arm_sme_explicit_true",
         "//conditions:default": ":arm_sme_enabled_by_default",
     }),
 )
@@ -1689,6 +1698,7 @@ alias(
     actual = select({
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
+        "//build_config:windows_arm64": ":xnn_enable_arm_sme2_explicit_true",
         "//conditions:default": ":arm_sme2_enabled_by_default",
     }),
 )
