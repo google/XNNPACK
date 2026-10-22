@@ -888,19 +888,27 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
 
     slinky::func::input func_input = {input.buffer};
     func_input.bounds.resize(input.buffer->rank());
-    func_input.bounds[0] = slinky::min_extent(ko * tile_k, tile_k);
-    for (int i = 1; i < m_dim; ++i) {
+    if (input.buffer->rank() > 0) {
+      func_input.bounds[0] = slinky::min_extent(ko * tile_k, tile_k);
+    }
+    for (int i = 1; i < std::min<int>(m_dim, input.buffer->rank()); ++i) {
       func_input.bounds[i] = slinky::point(dims[i + 2]);
     }
-    func_input.bounds[m_dim] = slinky::min_extent(mo * tile_m, tile_m);
+    if (static_cast<size_t>(m_dim) < input.buffer->rank()) {
+      func_input.bounds[m_dim] = slinky::min_extent(mo * tile_m, tile_m);
+    }
     for (size_t i = m_dim + 1; i < input.buffer->rank(); ++i) {
       func_input.bounds[i] = slinky::point(dims[i + 2]);
     }
 
     // This transpose handles padding the input up to tile_k and tile_m.
     func_input.input_crop.resize(input.buffer->rank());
-    func_input.input_crop[0] = all_bounds(input.extent(0));
-    func_input.input_crop[m_dim] = all_bounds(input.extent(m_dim));
+    if (input.buffer->rank() > 0) {
+      func_input.input_crop[0] = all_bounds(input.extent(0));
+    }
+    if (static_cast<size_t>(m_dim) < input.buffer->rank()) {
+      func_input.input_crop[m_dim] = all_bounds(input.extent(m_dim));
+    }
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "transpose_a";
