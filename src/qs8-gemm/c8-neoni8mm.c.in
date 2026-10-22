@@ -9,6 +9,8 @@ $assert 8 <= NR <= 32
 $assert REQUANTIZATION in ["FP16", "FP32", "RNDNU"] or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QS8", "QS8_QC4", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32", "QB4_BF16"]
 $assert DATATYPE not in ["QC8", "QS8_QC4"] or REQUANTIZATION == "FP32"
+$VLD1_ACTIVATIONS = locals().get("VLD1_ACTIVATIONS", 0)
+$assert not VLD1_ACTIVATIONS or MR % 2 == 0
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -193,22 +195,32 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         ${_}va${M}${M+1}x${ABC[0:16]}.val[1] = vdupq_n_u64(0);
 
     ${_}while (k >= 16 * sizeof(int8_t)) {
-      ${_}// Load a ${MR}x16 block of activations.
-      $for M in range(0, PAIRED_MR, 2):
-        ${_}va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}, 0); a${M} += 16;
-      $for M in range(0, PAIRED_MR, 2):
-        $if M + 1 < MR:
-          ${_}va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}, 1); a${M+1} += 16;
-      $if PAIRED_MR < MR:
-        ${_}// Row ${MR} does not exist and its half of each SMMLA operand is ignored, so load row ${MR-1}
-        ${_}// with 64-bit loads, which zero the upper half, instead of inserting lanes.
-        ${_}const int8x16_t va${MR-1}${MR}x${ABC[0:8]} = vcombine_s8(vld1_s8(a${MR-1}), vdup_n_s8(0));
-        ${_}const int8x16_t va${MR-1}${MR}x${ABC[8:16]} = vcombine_s8(vld1_s8(a${MR-1} + 8), vdup_n_s8(0)); a${MR-1} += 16;
-      $if PAIRED_MR > 0:
-
+      $if VLD1_ACTIVATIONS:
+        ${_}// Load a ${MR}x16 block of activations with full 16-byte loads and
+        ${_}// interleave each row pair into the 2x8 operands of SMMLA.
+        $for M in range(0, MR, 2):
+          ${_}const uint64x2_t vr${M} = vreinterpretq_u64_s8(vld1q_s8(a${M})); a${M} += 16;
+          ${_}const uint64x2_t vr${M+1} = vreinterpretq_u64_s8(vld1q_s8(a${M+1})); a${M+1} += 16;
+        $for M in range(0, MR, 2):
+          ${_}const int8x16_t va${M}${M+1}x${ABC[0:8]} = vreinterpretq_s8_u64(vzip1q_u64(vr${M}, vr${M+1}));
+          ${_}const int8x16_t va${M}${M+1}x${ABC[8:16]} = vreinterpretq_s8_u64(vzip2q_u64(vr${M}, vr${M+1}));
+      $else:
+        ${_}// Load a ${MR}x16 block of activations.
         $for M in range(0, PAIRED_MR, 2):
-          ${_}const int8x16_t va${M}${M+1}x${ABC[0:8]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[0]);
-          ${_}const int8x16_t va${M}${M+1}x${ABC[8:16]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[1]);
+          ${_}va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}, 0); a${M} += 16;
+        $for M in range(0, PAIRED_MR, 2):
+          $if M + 1 < MR:
+            ${_}va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}, 1); a${M+1} += 16;
+        $if PAIRED_MR < MR:
+          ${_}// Row ${MR} does not exist and its half of each SMMLA operand is ignored, so load row ${MR-1}
+          ${_}// with 64-bit loads, which zero the upper half, instead of inserting lanes.
+          ${_}const int8x16_t va${MR-1}${MR}x${ABC[0:8]} = vcombine_s8(vld1_s8(a${MR-1}), vdup_n_s8(0));
+          ${_}const int8x16_t va${MR-1}${MR}x${ABC[8:16]} = vcombine_s8(vld1_s8(a${MR-1} + 8), vdup_n_s8(0)); a${MR-1} += 16;
+        $if PAIRED_MR > 0:
+
+          $for M in range(0, PAIRED_MR, 2):
+            ${_}const int8x16_t va${M}${M+1}x${ABC[0:8]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[0]);
+            ${_}const int8x16_t va${M}${M+1}x${ABC[8:16]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[1]);
 
       ${_}// Load a 16x${NR} block of weights.
       $if DATATYPE in ["QS8_QC4", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32", "QB4_BF16"]:
