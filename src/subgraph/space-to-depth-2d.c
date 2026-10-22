@@ -93,7 +93,7 @@ static enum xnn_status reshape_space_to_depth_operator(
   const size_t input_channels = input_value->shape.dim[3];
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
-  size_t output_height, output_width, output_channels;
+  size_t output_height = 0, output_width = 0, output_channels = 0;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_space_to_depth_nhwc_x16:
       status = xnn_reshape_space_to_depth_nhwc_x16(

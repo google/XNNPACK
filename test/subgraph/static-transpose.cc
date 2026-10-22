@@ -209,4 +209,32 @@ TEST(Transpose, ReshapeOverflowOutputSize) {
 // an error.
 #endif  // XNNPACK_USE_YNNPACK
 
+TEST(StaticTransposeTest, NullPermRejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[3] = {2, 2, 2};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_static_transpose(subgraph, 3, nullptr, input_id, output_id,
+                                  /*flags=*/0));
+}
+
 }  // namespace xnnpack

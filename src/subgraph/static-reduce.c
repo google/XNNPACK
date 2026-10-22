@@ -30,20 +30,22 @@ static enum xnn_status rewrite_reduction_axes_for_nchw(
     return xnn_status_invalid_parameter;
   }
   bool mask[4] = {false};
-  int64_t original_reduction_axes[4];
-  memcpy(original_reduction_axes, reduction_axes,
-         num_reduction_axes * sizeof(int64_t));
-
   for (size_t idx = 0; idx < num_reduction_axes; ++idx) {
-    reduction_axes[idx] = NCHW_AXES_MAPPING[original_reduction_axes[idx]];
-    mask[reduction_axes[idx]] = true;
+    const int64_t axis = reduction_axes[idx];
+    if (axis < 0 || axis >= 4) {
+      xnn_log_error(
+          "failed to rewrite reduction axes for NCHW: axis %" PRId64
+          " is out of bounds",
+          axis);
+      return xnn_status_invalid_parameter;
+    }
+    mask[NCHW_AXES_MAPPING[axis]] = true;
   }
 
   size_t counter = 0;
-  for (size_t idx = 0; idx < num_reduction_axes; ++idx) {
-    while (mask[counter]) {
-      reduction_axes[counter++] = idx;
-      mask[idx] = false;
+  for (size_t axis = 0; axis < 4; ++axis) {
+    if (mask[axis]) {
+      reduction_axes[counter++] = (int64_t) axis;
     }
   }
   return xnn_status_success;
@@ -280,6 +282,13 @@ enum xnn_status xnn_define_static_reduce(
         num_reduction_axes, (size_t) XNN_MAX_TENSOR_DIMS);
     return xnn_status_invalid_parameter;
   }
+  if (num_reduction_axes > 0 && reduction_axes == NULL) {
+    xnn_log_error(
+        "failed to define %s operator: reduction_axes must be non-NULL",
+        xnn_node_type_to_string(
+            xnn_reduce_operator_to_node_type(reduce_operator)));
+    return xnn_status_invalid_parameter;
+  }
   int64_t signed_reduction_axes[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_reduction_axes; i++) {
     signed_reduction_axes[i] = reduction_axes[i];
@@ -362,6 +371,13 @@ enum xnn_status xnn_define_static_reduce_v2(
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must not exceed %zu",
       xnn_node_type_to_string(node_type), num_reduction_axes, (size_t) XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (reduction_axes == NULL) {
+    xnn_log_error(
+        "failed to define %s operator: reduction_axes must be non-NULL",
+        xnn_node_type_to_string(node_type));
     return xnn_status_invalid_parameter;
   }
 
