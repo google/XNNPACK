@@ -1,13 +1,13 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f16-raddstoreexpminusmax/rr1-p2.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$SIMD_SIZE = {
-$  "wasmrelaxedsimd": 4,
-$  "f16c": 8,
-$  "avx512f": 16,
-$}[ARCH]
 #include <assert.h>
 #include <stddef.h>
 
@@ -15,16 +15,8 @@ $}[ARCH]
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
-$SIMD_ARCH = {
-$  "f16c": "avx",
-$}.get(ARCH, ARCH)
-#include "src/xnnpack/simd/f32-${SIMD_ARCH}.h"
+#include "src/xnnpack/simd/f32-avx512f.h"
 
-$if ARCH == "wasmrelaxedsimd":
-  #undef XNN_SIMD_HAS_NATIVE_FMA
-  #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
-$elif ARCH not in ("f16c", "avx512f"):
-  #include "src/xnnpack/simd/f16-scalar.h"
 
 
 static XNN_INLINE xnn_simd_f32_t load_f16_f32(const xnn_float16* input) {
@@ -41,10 +33,7 @@ static XNN_INLINE void store_f32_f16(
     xnn_float16* output, xnn_simd_f32_t value)
 {
   const xnn_simd_f16_t rounded = xnn_cvt_f16_f32(value);
-  $if ARCH == "wasmrelaxedsimd":
-    xnn_store_tail_f16(output, rounded, xnn_simd_size_f32);
-  $else:
-    xnn_storeu_f16(output, rounded);
+  xnn_storeu_f16(output, rounded);
 }
 
 static XNN_INLINE void store_tail_f32_f16(
@@ -79,7 +68,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${SIMD_SIZE}(
+void xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
@@ -96,28 +85,27 @@ void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${SIMD_SIZE}(
 
   const xnn_simd_f32_t vmax = xnn_set1_f32(xnn_float16_to_float(*max));
   xnn_simd_f32_t vacc = xnn_zero_f32();
-  for (; batch >= ${SIMD_SIZE} * sizeof(xnn_float16);
-       batch -= ${SIMD_SIZE} * sizeof(xnn_float16)) {
+  for (; batch >= 16 * sizeof(xnn_float16);
+       batch -= 16 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf = expminusmax_f32(load_f16_f32(input), vmax);
-    input += ${SIMD_SIZE};
+    input += 16;
     store_f32_f16(output, vf);
-    output += ${SIMD_SIZE};
+    output += 16;
     vacc = xnn_add_f32(vacc, vf);
   }
 
   float vsum = xnn_reduce_add_f32(vacc);
-  $if SIMD_SIZE > 1:
-    if XNN_UNLIKELY(batch != 0) {
-      const size_t num_elements = batch / sizeof(xnn_float16);
-      const xnn_simd_f32_t vf =
-          expminusmax_f32(load_tail_f16_f32(input, num_elements), vmax);
-      store_tail_f32_f16(output, vf, num_elements);
+  if XNN_UNLIKELY(batch != 0) {
+    const size_t num_elements = batch / sizeof(xnn_float16);
+    const xnn_simd_f32_t vf =
+        expminusmax_f32(load_tail_f16_f32(input, num_elements), vmax);
+    store_tail_f32_f16(output, vf, num_elements);
 
-      XNN_ALIGN(128) float values[xnn_simd_size_f32];
-      xnn_storeu_f32(values, vf);
-      for (size_t i = 0; i < num_elements; i++) {
-        vsum += values[i];
-      }
+    XNN_ALIGN(128) float values[xnn_simd_size_f32];
+    xnn_storeu_f32(values, vf);
+    for (size_t i = 0; i < num_elements; i++) {
+      vsum += values[i];
     }
+  }
   *sum = vsum;
 }

@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-raddstoreexpminusmax/f16-f32acc-rr1-p2.c.in
+//   Template: src/f16-raddstoreexpminusmax/rr1-p2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -68,7 +68,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8(
+void xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
