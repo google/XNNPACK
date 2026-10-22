@@ -984,6 +984,15 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "x16_x32_packw_test",
+    srcs = [
+        "packw-microkernel-tester.h",
+        "x16-x32-packw.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
 [xnnpack_unit_test(
     name = "%s_test" % kernel,
     srcs = [
