@@ -68,6 +68,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_ARM_SVE2=1"],
         ["XNN_ENABLE_ARM_SVE2=0"],
     ) + xnnpack_select_if(
+        "//:riscv_vector_enabled",
+        ["XNN_ENABLE_RISCV_VECTOR=1"],
+        ["XNN_ENABLE_RISCV_VECTOR=0"],
+    ) + xnnpack_select_if(
         "//:riscv_fp16_vector_enabled",
         ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
         ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
