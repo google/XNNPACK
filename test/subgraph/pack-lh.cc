@@ -90,6 +90,34 @@ TEST(PackLH, DefineRejectsUnsupportedDatatype) {
       xnn_status_invalid_parameter,
       xnn_define_pack_lh(subgraph, input_id, output_id, 0));
 }
+
+TEST(PackLH, DefineRejectsDatatypeMismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t input_dims[2] = {2, 4};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 2, input_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp16, 2, input_dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_pack_lh(subgraph, input_id, output_id, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
