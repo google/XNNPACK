@@ -434,12 +434,21 @@ create_batch_matrix_multiply_nc_const_weights(
   const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.sr;
   const size_t extra_bytes = scale_b_size + extra_weights_bytes;
   const size_t k_stride = round_up_po2(k, kr * sr);
-  const size_t weights_stride =
-      gemm_config->packed_stride_weights_and_biases
-          ? gemm_config->packed_stride_weights_and_biases(
-                gemm_config, k, /*block_size=*/0, k_stride, extra_bytes)
-          : (k_stride << log2_kernel_element_size) + bias_element_size +
-                extra_bytes;
+  size_t weights_stride = 0;
+  if (gemm_config->packed_stride_weights_and_biases != NULL) {
+    weights_stride = gemm_config->packed_stride_weights_and_biases(
+        gemm_config, k, /*block_size=*/0, k_stride, extra_bytes);
+  } else if (!xnn_safe_mul(k_stride,
+                           (size_t) 1 << log2_kernel_element_size,
+                           &weights_stride) ||
+             !xnn_safe_add(weights_stride, bias_element_size,
+                           &weights_stride) ||
+             !xnn_safe_add(weights_stride, extra_bytes, &weights_stride)) {
+    xnn_log_error(
+        "failed to create %s operator: weights stride overflows size_t",
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+    return xnn_status_out_of_memory;
+  }
   batch_matrix_multiply_op->weights_stride = weights_stride;
 
   // If the packed data has not been cached, pack and cache it.
