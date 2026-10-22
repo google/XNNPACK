@@ -19,21 +19,26 @@ namespace ynn {
 class packer {
  public:
   // Prepare to run a packing operation for the given packing parameters.
-  // If `transpose` is true, the input is transposed prior to the above reshape
-  // and transpose operation.
+  // `stride_m` and `stride_n` are the strides in bytes of the two input
+  // dimensions.
   // `tile_m` must be a power of 2.
-  packer(bool transpose, size_t elem_size_bits, size_t tile_m, size_t tile_n);
+  packer(size_t stride_m, size_t stride_n, size_t elem_size_bits, size_t tile_m,
+         size_t tile_n, size_t output_stride);
 
   // Run the packing operation for input and output buffers. The input has an
   // un-transposed shape of `m` x `n`. The output will be rounded up to a
   // multiple of the tile size.
-  void pack(size_t m, size_t n, size_t input_stride, const void* input,
-            size_t output_stride, size_t output_block_stride, void* output);
+  void pack(size_t m, size_t n, const void* input, size_t output_block_stride,
+            void* output);
 
  protected:
+  size_t stride_m;
+  size_t stride_n;
   size_t elem_size_bits;
   size_t tile_m;
   size_t tile_n;
+  size_t output_stride;
+  size_t input_stride = 0;
   interleave_kernel_fn interleave_fn = nullptr;
   transpose_kernel_fn transpose_fn = nullptr;
   ynn::transpose_fn transpose_blocks_fn = nullptr;

@@ -18,13 +18,13 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/span.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
-#include "slinky/runtime/stmt.h"
 
 #define XNN_ALLOCA(T, N) reinterpret_cast<T*>(alloca((N) * sizeof(T)))
 
@@ -266,6 +266,14 @@ YNN_ALWAYS_INLINE const slinky::dim& slice_dim0(slinky::raw_buffer& buffer,
   const slinky::dim& dim0 = buffer.dim(0);
   buffer.slice(0, at);
   return dim0;
+}
+
+YNN_ALWAYS_INLINE void slice_dims(slinky::raw_buffer& buffer,
+                                  size_t num_dims_to_slice) {
+  if (num_dims_to_slice < buffer.rank) {
+    buffer.dims += num_dims_to_slice;
+  }
+  buffer.rank = sub_sat(buffer.rank, num_dims_to_slice);
 }
 
 namespace internal {

@@ -407,6 +407,19 @@ void TestDynamicB(A, B, C) {
         .AddInput(type_of<B>(), b_rank, b_id)
         .AddOutput(type_of<C>(), output_rank, output_id);
 
+    std::vector<int> a_perm;
+    uint32_t a_tr_id = a_id;
+    if (type_element_count(type_of<A>()) == 1) {
+      a_perm = iota(0, a_rank);
+      std::shuffle(a_perm.begin(), a_perm.end(), rng);
+      if (a_perm[a_perm.size() - 1] == a_perm.size() - 1 ||
+          a_perm[a_perm.size() - 2] == a_perm.size() - 1 || random_bool(rng)) {
+        a_tr_id = YNN_INVALID_VALUE_ID;
+        subgraph.AddTensor(type_of<A>(), a_rank, a_tr_id);
+        subgraph.AddTranspose(a_perm, a_id, a_tr_id);
+      }
+    }
+
     std::vector<int> b_perm;
     uint32_t b_tr_id = b_id;
     // `Tensor::transpose` doesn't support type_element_count != 1, so it's
@@ -440,11 +453,12 @@ void TestDynamicB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    uint32_t dot_flags = 0;
+    uint32_t dot_flags_dyn = 0;
     if (random_bool(rng)) {
-      dot_flags |= YNN_NODE_FLAG_SYMMETRIC_B;
+      dot_flags_dyn |= YNN_NODE_FLAG_SYMMETRIC_B;
     }
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
+    subgraph.AddDot(num_k_dims, a_tr_id, b_tr_id, c_id, output_id,
+                    dot_flags_dyn);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -465,6 +479,17 @@ void TestDynamicB(A, B, C) {
       fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
       fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
+      Tensor<A> a_tr = a;
+      if (a_tr_id != a_id) {
+        // Apply the inverse of the permutation, so the shape arrives as
+        // expected.
+        std::vector<int> inv_a_perm = iota(0, a_perm.size());
+        std::sort(inv_a_perm.begin(), inv_a_perm.end(),
+                  [&](int i, int j) { return a_perm[i] < a_perm[j]; });
+        a_tr = a.transpose(inv_a_perm).deep_copy();
+        shapes.a = permute(inv_a_perm, shapes.a);
+      }
+
       Tensor<B> b_tr = b;
       if (b_tr_id != b_id) {
         // Apply the inverse of the permutation, so the shape arrives as
@@ -476,7 +501,7 @@ void TestDynamicB(A, B, C) {
         shapes.b = permute(inv_b_perm, shapes.b);
       }
 
-      runtime.ReshapeExternalTensor(shapes.a, a.data(), a_id)
+      runtime.ReshapeExternalTensor(shapes.a, a_tr.data(), a_id)
           .ReshapeExternalTensor(shapes.b, b_tr.data(), b_id);
 
       Tensor<C> c(shapes.c);
@@ -535,6 +560,25 @@ void TestStaticShapeDynamicB(A, B, C) {
 
     ASSERT_EQ(shapes.b.size(), b_rank);
 
+    std::vector<int> a_perm = iota(0, a_rank);
+    // `Tensor::transpose` doesn't support type_element_count != 1, so it's
+    // tricky to test that codepath.
+    if (type_element_count(type_of<A>()) == 1) {
+      // Make a random transpose.
+      std::shuffle(a_perm.begin(), a_perm.end(), rng);
+      if (a_perm[a_perm.size() - 1] == a_perm.size() - 1 ||
+          a_perm[a_perm.size() - 2] == a_perm.size() - 1) {
+        // This transpose affects the innermost dimension.
+      } else if (!random_bool(rng)) {
+        a_perm = iota(0, a_rank);
+      }
+    }
+    std::vector<int> inv_a_perm = a_perm;
+    // Apply the inverse of the permutation, so the shape arrives as
+    // expected.
+    std::sort(inv_a_perm.begin(), inv_a_perm.end(),
+              [&](int i, int j) { return a_perm[i] < a_perm[j]; });
+
     std::vector<int> b_perm = iota(0, b_rank);
     // `Tensor::transpose` doesn't support type_element_count != 1, so it's
     // tricky to test that codepath.
@@ -564,7 +608,7 @@ void TestStaticShapeDynamicB(A, B, C) {
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;
-    subgraph.AddInput(type_of<A>(), shapes.a, a_id)
+    subgraph.AddInput(type_of<A>(), permute(inv_a_perm, shapes.a), a_id)
         .AddInput(type_of<B>(), permute(inv_b_perm, shapes.b), b_id)
         .AddOutput(type_of<C>(), shapes.c, output_id);
 
@@ -583,6 +627,13 @@ void TestStaticShapeDynamicB(A, B, C) {
       subgraph.AddInput(type_of<C>(), shapes.c, c_id);
     }
 
+    uint32_t a_tr_id = a_id;
+    if (a_perm != iota(0, a_rank)) {
+      a_tr_id = YNN_INVALID_VALUE_ID;
+      subgraph.AddTensor(type_of<A>(), a_rank, a_tr_id);
+      subgraph.AddTranspose(a_perm, a_id, a_tr_id);
+    }
+
     uint32_t b_tr_id = b_id;
     if (b_perm != iota(0, b_rank)) {
       b_tr_id = YNN_INVALID_VALUE_ID;
@@ -590,18 +641,19 @@ void TestStaticShapeDynamicB(A, B, C) {
       subgraph.AddTranspose(b_perm, b_id, b_tr_id);
     }
 
-    uint32_t dot_flags = 0;
+    uint32_t dot_flags_static = 0;
     if (random_bool(rng)) {
-      dot_flags |= YNN_NODE_FLAG_SYMMETRIC_B;
+      dot_flags_static |= YNN_NODE_FLAG_SYMMETRIC_B;
     }
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
+    subgraph.AddDot(num_k_dims, a_tr_id, b_tr_id, c_id, output_id,
+                    dot_flags_static);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int revalue = 0; revalue < 2; ++revalue) {
-      Tensor<A> a(shapes.a);
+      Tensor<A> a(permute(inv_a_perm, shapes.a));
       Tensor<B> b(permute(inv_b_perm, shapes.b));
       fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
       fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
@@ -630,6 +682,9 @@ void TestStaticShapeDynamicB(A, B, C) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       // Apply the transpose so we can compute the reference result.
+      if (a_perm != iota(0, a_rank)) {
+        a = a.transpose(a_perm).deep_copy();
+      }
       if (b_perm != iota(0, b_rank)) {
         b = b.transpose(b_perm).deep_copy();
       }
