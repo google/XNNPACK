@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -199,8 +200,24 @@ static enum xnn_status reshape_convert_operator(
 
       if (num_channels > 0 && qc8_batch_size > 0) {
         xnn_operator_t op = opdata->operator_objects[0];
-        const size_t bytes_needed =
-            num_channels * sizeof(float) * qc8_batch_size;
+        size_t num_elements = 0;
+        if (!xnn_safe_mul(num_channels, qc8_batch_size, &num_elements)) {
+          xnn_log_error(
+              "failed to reshape %s operator: integer overflow in scale buffer "
+              "elements",
+              xnn_operator_type_to_string(
+                  xnn_operator_type_convert_nc_qs8_qc8));
+          return xnn_status_invalid_parameter;
+        }
+        size_t bytes_needed = 0;
+        if (!xnn_safe_mul(num_elements, sizeof(float), &bytes_needed)) {
+          xnn_log_error(
+              "failed to reshape %s operator: integer overflow in scale buffer "
+              "size",
+              xnn_operator_type_to_string(
+                  xnn_operator_type_convert_nc_qs8_qc8));
+          return xnn_status_invalid_parameter;
+        }
         if (op->channelwise_quantization_buffer_capacity < bytes_needed) {
           xnn_release_memory(op->channelwise_quantization_buffer);
           op->channelwise_quantization_buffer = xnn_allocate_memory(bytes_needed);
@@ -213,7 +230,8 @@ static enum xnn_status reshape_convert_operator(
         float* channelwise_scale = (float*)op->channelwise_quantization_buffer;
         for (size_t b = 0; b < qc8_batch_size; b++) {
           for (size_t c = 0; c < num_channels; c++) {
-            channelwise_scale[b * num_channels + c] = input_value->quantization.scale;
+            channelwise_scale[b * num_channels + c] =
+                input_value->quantization.scale;
           }
         }
         output->quantization.channelwise_scale = channelwise_scale;
