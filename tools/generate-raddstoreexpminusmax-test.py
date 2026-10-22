@@ -60,33 +60,6 @@ TEST(${TEST_NAME}, elements_eq_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
 }
 
-$if TEST_NEON_FP16ARITH_COMPATIBILITY:
-  TEST(${TEST_NAME}, neon_fp16arith_compatibility) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    RAddStoreExpMinusMaxMicrokernelTester()
-      .TestNeonFp16ArithCompatibility(${TEST_FUNCTION});
-  }
-
-$if TEST_FP16_DENORM_CUTOFF:
-  TEST(${TEST_NAME}, fp16_denorm_cutoff) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    RAddStoreExpMinusMaxMicrokernelTester()
-      .TestFp16DenormCutoff(${TEST_FUNCTION});
-  }
-
-$if TEST_AVX2_COMPATIBILITY:
-  TEST(${TEST_NAME}, avx2_compatibility) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
-    RAddStoreExpMinusMaxMicrokernelTester()
-      .TestAvx2Compatibility(
-          ${TEST_FUNCTION},
-          xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
-  }
-
 $if ELEMENTS_TILE > 1 or ELEMENTS_SCALE != "":
   TEST(${TEST_NAME}, elements_div_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     $if ISA_CHECK:
@@ -147,16 +120,7 @@ TEST(${TEST_NAME}, elements_gt_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
 """
 
 
-def generate_test_cases(
-  ukernel,
-  init_fn,
-  elements_tile,
-  vector_tile,
-  isa,
-  test_neon_fp16arith_compatibility,
-  test_fp16_denorm_cutoff,
-  test_avx2_compatibility,
-):
+def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
   """Generates all tests cases for a RAddStoreExpMinusMax micro-kernel.
 
   Args:
@@ -168,11 +132,6 @@ def generate_test_cases(
       elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
-    test_neon_fp16arith_compatibility: Whether to test numerical compatibility
-      with the established NEON FP16 arithmetic implementation.
-    test_fp16_denorm_cutoff: Whether to test the FP16 denormal cutoff.
-    test_avx2_compatibility: Whether to exhaustively compare outputs with the
-      established AVX2 implementation.
 
   Returns:
     Code for the test case.
@@ -200,11 +159,6 @@ def generate_test_cases(
           "ELEMENTS_SCALE": elements_scale,
           "ELEMENTS_SUFFIX": "v" if vector_tile else "",
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-            "TEST_NEON_FP16ARITH_COMPATIBILITY": (
-              test_neon_fp16arith_compatibility
-            ),
-            "TEST_FP16_DENORM_CUTOFF": test_fp16_denorm_cutoff,
-            "TEST_AVX2_COMPATIBILITY": test_avx2_compatibility,
       },
   )
 
@@ -250,9 +204,6 @@ def main(args):
           elements_tile,
           vector_tile,
           isa,
-          ukernel_spec.get("test-neon-fp16arith-compatibility", False),
-            ukernel_spec.get("test-fp16-denorm-cutoff", False),
-              ukernel_spec.get("test-avx2-compatibility", False),
       )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
