@@ -95,15 +95,15 @@ auto make_record_calls(std::vector<dot_call>& calls) {
 }
 
 TEST(run_dot, loop_m) {
-  const dot_loop loops[] = {{dot_loop::m, 1}};
+  const dot_loop loops[] = {{dot_loop::m, block_m}};
   const size_t ks[] = {k};
   const size_t a_k_strides[] = {a_stride_k};
   const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
-          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-          c_stride_n, c, make_record_calls(calls));
+  run_dot(loops, m, n, ks, a_stride_m, a_k_strides, a, b_k_strides, b_stride_n,
+          b, init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+          make_record_calls(calls));
   ASSERT_THAT(calls,
               ElementsAre(dot_call_at(block_m, n, k, 0 * block_m, 0, 0),
                           dot_call_at(block_m, n, k, 1 * block_m, 0, 0),
@@ -111,15 +111,15 @@ TEST(run_dot, loop_m) {
 }
 
 TEST(run_dot, loop_n) {
-  const dot_loop loops[] = {{dot_loop::n, 1}};
+  const dot_loop loops[] = {{dot_loop::n, block_n}};
   const size_t ks[] = {k};
   const size_t a_k_strides[] = {a_stride_k};
   const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
-          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-          c_stride_n, c, make_record_calls(calls));
+  run_dot(loops, m, n, ks, a_stride_m, a_k_strides, a, b_k_strides, b_stride_n,
+          b, init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+          make_record_calls(calls));
 
   ASSERT_THAT(calls,
               ElementsAre(dot_call_at(m, block_n, k, 0, 0 * block_n, 0),
@@ -130,15 +130,15 @@ TEST(run_dot, loop_n) {
 }
 
 TEST(run_dot, loop_n_tail) {
-  const dot_loop loops[] = {{dot_loop::n, 2}};
+  const dot_loop loops[] = {{dot_loop::n, 2 * block_n}};
   const size_t ks[] = {k};
   const size_t a_k_strides[] = {a_stride_k};
   const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
-          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-          c_stride_n, c, make_record_calls(calls));
+  run_dot(loops, m, n, ks, a_stride_m, a_k_strides, a, b_k_strides, b_stride_n,
+          b, init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+          make_record_calls(calls));
 
   ASSERT_THAT(
       calls,
@@ -148,21 +148,43 @@ TEST(run_dot, loop_n_tail) {
 }
 
 TEST(run_dot, loop_k) {
-  const dot_loop loops[] = {{dot_loop::k, 1}};
+  const dot_loop loops[] = {{dot_loop::k, block_k}};
   const size_t ks[] = {k};
   const size_t a_k_strides[] = {a_stride_k};
   const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
-          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-          c_stride_n, c, make_record_calls(calls));
+  run_dot(loops, m, n, ks, a_stride_m, a_k_strides, a, b_k_strides, b_stride_n,
+          b, init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+          make_record_calls(calls));
 
   ASSERT_THAT(calls,
               ElementsAre(dot_call_at(m, n, block_k, 0, 0, 0 * block_k),
                           dot_call_at(m, n, block_k, 0, 0, 1 * block_k),
                           dot_call_at(m, n, block_k, 0, 0, 2 * block_k),
                           dot_call_at(m, n, block_k, 0, 0, 3 * block_k)));
+}
+
+TEST(schedule_dot, k_loop_independent_of_cpu_params) {
+  const size_t ks[] = {2000, 3, 1};
+  dot_loop storage_a[8];
+  dot_loop storage_b[8];
+  const size_t caches_a[] = {32 * 1024, 256 * 1024};
+  const size_t caches_b[] = {64 * 1024, 1024 * 1024};
+
+  auto loops_a = schedule_dot(caches_a, /*m=*/128, /*n=*/16, ks, /*block_m=*/4,
+                              /*block_n=*/16, /*a_elem_size=*/4,
+                              /*b_elem_size=*/4, storage_a);
+  auto loops_b = schedule_dot(caches_b, /*m=*/64, /*n=*/256, ks, /*block_m=*/16,
+                              /*block_n=*/64, /*a_elem_size=*/4,
+                              /*b_elem_size=*/4, storage_b);
+
+  ASSERT_FALSE(loops_a.empty());
+  ASSERT_FALSE(loops_b.empty());
+  EXPECT_EQ(loops_a[0].dim, dot_loop::k);
+  EXPECT_EQ(loops_b[0].dim, dot_loop::k);
+  EXPECT_EQ(loops_a[0].step, loops_b[0].step);
+  EXPECT_EQ(loops_a[0].step % 64, 0);
 }
 
 }  // namespace ynn

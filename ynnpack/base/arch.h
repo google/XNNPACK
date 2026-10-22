@@ -6,6 +6,8 @@
 #ifndef XNNPACK_YNNPACK_BASE_ARCH_H_
 #define XNNPACK_YNNPACK_BASE_ARCH_H_
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 
 namespace ynn {
@@ -64,6 +66,8 @@ enum {
 }  // namespace arch_flag
 
 uint64_t get_supported_arch_flags();
+// Returns the per-core {L1, L2, L3} cache sizes in bytes (0 if unknown).
+std::array<size_t, 3> get_cache_sizes();
 
 inline bool is_arch_supported(
     uint64_t arch_flags,

@@ -5,6 +5,8 @@
 
 #include "ynnpack/base/arch.h"
 
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 
@@ -100,6 +102,43 @@ uint64_t get_supported_arch_flags() {
     return result;
   }();
   return flags;
+}
+
+#ifdef YNN_ENABLE_CPUINFO
+size_t get_cache_size_per_core(const cpuinfo_cache* cache) {
+  if (!cache || cache->size == 0) {
+    return 0;
+  }
+  const uint32_t processors = std::max<uint32_t>(1, cache->processor_count);
+  const cpuinfo_processor* proc = cpuinfo_get_processor(cache->processor_start);
+  const uint32_t threads_per_core =
+      (proc && proc->core) ? std::max<uint32_t>(1, proc->core->processor_count)
+                           : 1;
+  const uint32_t cores_sharing =
+      std::max<uint32_t>(1, processors / threads_per_core);
+  return cache->size / cores_sharing;
+}
+#endif  // YNN_ENABLE_CPUINFO
+
+std::array<size_t, 3> get_cache_sizes() {
+  static const std::array<size_t, 3> sizes = []() {
+    // Unlike L1 and L2, many CPUs (e.g., mobile SoCs) do not have an L3 cache,
+    // or cpuinfo is disabled/unable to detect it. Default L3 to 0 so callers
+    // know no L3 cache is available and can skip L3-level tiling.
+    std::array<size_t, 3> result = {32 * 1024, 512 * 1024, 0};
+#ifdef YNN_ENABLE_CPUINFO
+    if (cpuinfo_initialize()) {
+      const size_t l1 = get_cache_size_per_core(cpuinfo_get_l1d_cache(0));
+      const size_t l2 = get_cache_size_per_core(cpuinfo_get_l2_cache(0));
+      const size_t l3 = get_cache_size_per_core(cpuinfo_get_l3_cache(0));
+      if (l1 > 0) result[0] = l1;
+      if (l2 > 0) result[1] = l2;
+      if (l3 > 0) result[2] = l3;
+    }
+#endif  // YNN_ENABLE_CPUINFO
+    return result;
+  }();
+  return sizes;
 }
 
 }  // namespace ynn
