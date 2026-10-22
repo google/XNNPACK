@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -129,57 +130,94 @@ static enum xnn_status reshape_convert_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
   const struct xnn_runtime_value* output_value = values + output_id;
-  // Channel stride depends on number of non batch dims.
-  size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
-  size_t dq_batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
-  size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&input_value->shape, num_input_dims - num_nonbatch_dims);
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_convert_nc_f16_qd8: {
-      status = xnn_reshape_convert_nc_f16_qd8(
-        opdata->operator_objects[0],
-        dq_batch_size,
-        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
-        threadpool);
-      break;
-    }
-    case xnn_operator_type_convert_nc_f32_qd8: {
-      status = xnn_reshape_convert_nc_f32_qd8(
-        opdata->operator_objects[0],
-        dq_batch_size,
-        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
-        threadpool);
-      break;
-    }
-    case xnn_operator_type_convert_nc_f32_qdu8: {
-      status = xnn_reshape_convert_nc_f32_qdu8(
-        opdata->operator_objects[0],
-        dq_batch_size,
-        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
-        threadpool);
-      break;
-    }
+    case xnn_operator_type_convert_nc_f16_qd8:
+    case xnn_operator_type_convert_nc_f32_qd8:
+    case xnn_operator_type_convert_nc_f32_qdu8:
     case xnn_operator_type_convert_nc_f16_qdu8: {
-      status = xnn_reshape_convert_nc_f16_qdu8(
-        opdata->operator_objects[0],
-        dq_batch_size,
-        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
-        threadpool);
+      const size_t num_nonbatch_dims =
+          output_value->quantization.num_nonbatch_dims;
+      if (num_nonbatch_dims > num_input_dims) {
+        xnn_log_error(
+            "failed to reshape %s operator with output ID #%" PRIu32
+            ": num_nonbatch_dims (%zu) must be <= num_input_dims (%zu)",
+            xnn_node_type_to_string(xnn_node_type_convert), output_id,
+            num_nonbatch_dims, num_input_dims);
+        return xnn_status_invalid_parameter;
+      }
+      const size_t dq_batch_size = xnn_shape_multiply_batch_dims(
+          &input_value->shape, num_nonbatch_dims);
+      const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(
+          &input_value->shape, num_input_dims - num_nonbatch_dims);
+      if (dq_batch_size == SIZE_MAX || dq_channel_stride == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator with output ID #%" PRIu32
+            ": batch size or channel stride overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_convert), output_id);
+        return xnn_status_out_of_memory;
+      }
+      switch (opdata->operator_objects[0]->type) {
+        case xnn_operator_type_convert_nc_f16_qd8:
+          status = xnn_reshape_convert_nc_f16_qd8(
+              opdata->operator_objects[0], dq_batch_size,
+              /*channels=*/dq_channel_stride,
+              /*input_stride=*/dq_channel_stride,
+              /*output_stride=*/dq_channel_stride, threadpool);
+          break;
+        case xnn_operator_type_convert_nc_f32_qd8:
+          status = xnn_reshape_convert_nc_f32_qd8(
+              opdata->operator_objects[0], dq_batch_size,
+              /*channels=*/dq_channel_stride,
+              /*input_stride=*/dq_channel_stride,
+              /*output_stride=*/dq_channel_stride, threadpool);
+          break;
+        case xnn_operator_type_convert_nc_f32_qdu8:
+          status = xnn_reshape_convert_nc_f32_qdu8(
+              opdata->operator_objects[0], dq_batch_size,
+              /*channels=*/dq_channel_stride,
+              /*input_stride=*/dq_channel_stride,
+              /*output_stride=*/dq_channel_stride, threadpool);
+          break;
+        case xnn_operator_type_convert_nc_f16_qdu8:
+          status = xnn_reshape_convert_nc_f16_qdu8(
+              opdata->operator_objects[0], dq_batch_size,
+              /*channels=*/dq_channel_stride,
+              /*input_stride=*/dq_channel_stride,
+              /*output_stride=*/dq_channel_stride, threadpool);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
     }
     case xnn_operator_type_convert_nc_f32_qp8: {
       if (num_input_dims < 2) {
         xnn_log_error(
-          "failed to reshape %s operator with input ID #%" PRIu32
-          ": number of dimensions (%zu) must be at least 2",
-          xnn_node_type_to_string(xnn_node_type_convert), input_id,
-          num_input_dims);
+            "failed to reshape %s operator with input ID #%" PRIu32
+            ": number of dimensions (%zu) must be at least 2",
+            xnn_node_type_to_string(xnn_node_type_convert), input_id,
+            num_input_dims);
         return xnn_status_invalid_parameter;
       }
-      size_t num_groups = xnn_shape_multiply_batch_dims(&input_value->shape, 2);
+      size_t num_groups =
+          xnn_shape_multiply_batch_dims(&input_value->shape, 2);
+      if (num_groups == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator with input ID #%" PRIu32
+            ": num_groups overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_convert), input_id);
+        return xnn_status_out_of_memory;
+      }
       size_t batch_size = input_value->shape.dim[num_input_dims - 2];
       const size_t channels = input_value->shape.dim[num_input_dims - 1];
       if (output_value->flags & XNN_FLAG_SQUASH_GROUPS) {
-        batch_size *= num_groups;
+        if (!xnn_safe_mul(batch_size, num_groups, &batch_size)) {
+          xnn_log_error(
+              "failed to reshape %s operator with input ID #%" PRIu32
+              ": squashed batch size overflows size_t",
+              xnn_node_type_to_string(xnn_node_type_convert), input_id);
+          return xnn_status_out_of_memory;
+        }
         num_groups = 1;
       }
       status = xnn_reshape_convert_nc_f32_qp8(
@@ -189,21 +227,43 @@ static enum xnn_status reshape_convert_operator(
     }
     case xnn_operator_type_convert_nc_qs8_qc8: {
       struct xnn_runtime_value* output = values + output_id;
-      const size_t channel_dimension =
-          output->quantization.channel_dimension;
+      const size_t channel_dimension = output->quantization.channel_dimension;
       const size_t num_channels =
           input_value->shape.num_dims > channel_dimension
-              ? input_value->shape.dim[channel_dimension] : 0;
-      const size_t qc8_batch_size = 
+              ? input_value->shape.dim[channel_dimension]
+              : 0;
+      const size_t qc8_batch_size =
           xnn_shape_multiply_batch_dims(&input_value->shape, 2);
+      if (qc8_batch_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator with input ID #%" PRIu32
+            ": batch size overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_convert), input_id);
+        return xnn_status_out_of_memory;
+      }
 
       if (num_channels > 0 && qc8_batch_size > 0) {
         xnn_operator_t op = opdata->operator_objects[0];
-        const size_t bytes_needed =
-            num_channels * sizeof(float) * qc8_batch_size;
+        size_t total_elements = 0;
+        if (!xnn_safe_mul(num_channels, qc8_batch_size, &total_elements)) {
+          xnn_log_error(
+              "failed to reshape %s operator with input ID #%" PRIu32
+              ": quantization buffer element count overflows size_t",
+              xnn_node_type_to_string(xnn_node_type_convert), input_id);
+          return xnn_status_out_of_memory;
+        }
+        size_t bytes_needed = 0;
+        if (!xnn_safe_mul(total_elements, sizeof(float), &bytes_needed)) {
+          xnn_log_error(
+              "failed to reshape %s operator with input ID #%" PRIu32
+              ": quantization buffer size overflows size_t",
+              xnn_node_type_to_string(xnn_node_type_convert), input_id);
+          return xnn_status_out_of_memory;
+        }
         if (op->channelwise_quantization_buffer_capacity < bytes_needed) {
           xnn_release_memory(op->channelwise_quantization_buffer);
-          op->channelwise_quantization_buffer = xnn_allocate_memory(bytes_needed);
+          op->channelwise_quantization_buffer =
+              xnn_allocate_memory(bytes_needed);
           if (op->channelwise_quantization_buffer == NULL) {
             op->channelwise_quantization_buffer_capacity = 0;
             return xnn_status_out_of_memory;
@@ -213,26 +273,24 @@ static enum xnn_status reshape_convert_operator(
         float* channelwise_scale = (float*)op->channelwise_quantization_buffer;
         for (size_t b = 0; b < qc8_batch_size; b++) {
           for (size_t c = 0; c < num_channels; c++) {
-            channelwise_scale[b * num_channels + c] = input_value->quantization.scale;
+            channelwise_scale[b * num_channels + c] =
+                input_value->quantization.scale;
           }
         }
         output->quantization.channelwise_scale = channelwise_scale;
         output->quantization.channelwise_zero_point = NULL;
       }
       status = xnn_reshape_convert_nc_qs8_qc8(
-          opdata->operator_objects[0],
-          batch_size,
+          opdata->operator_objects[0], batch_size,
           /*channels=*/channel_dim, /*input_stride=*/channel_dim,
-          /*output_stride=*/channel_dim,
-          threadpool);
+          /*output_stride=*/channel_dim, threadpool);
       break;
     }
     default:
       status = xnn_reshape_unary_elementwise_nc(
-        opdata->operator_objects[0],
-        batch_size,
-        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
-        threadpool);
+          opdata->operator_objects[0], batch_size,
+          /*channels=*/channel_dim, /*input_stride=*/channel_dim,
+          /*output_stride=*/channel_dim, threadpool);
       break;
   }
   if (status != xnn_status_success) {
