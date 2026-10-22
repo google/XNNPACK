@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
@@ -363,3 +364,95 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_swap_height_and_width) {
       .channels(24)
       .TestSetupF32();
 }
+
+TEST(ARGMAX_POOLING_NHWC_F32, output_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t argmax_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_argmax_pooling2d_nhwc_f32(
+                /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0,
+                /*pooling_height=*/1, /*pooling_width=*/1,
+                /*flags=*/0, &argmax_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      argmax_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t overflow_stride = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_argmax_pooling2d_nhwc_f32(
+                argmax_op, /*batch_size=*/1, /*input_height=*/1,
+                /*input_width=*/1, /*channels=*/1,
+                /*input_pixel_stride=*/1,
+                /*output_pixel_stride=*/overflow_stride,
+                &output_height, &output_width, /*threadpool=*/nullptr));
+}
+
+TEST(ARGMAX_POOLING_NHWC_F32, input_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t argmax_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_argmax_pooling2d_nhwc_f32(
+                /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0,
+                /*pooling_height=*/1, /*pooling_width=*/1,
+                /*flags=*/0, &argmax_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      argmax_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t overflow_stride = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_argmax_pooling2d_nhwc_f32(
+                argmax_op, /*batch_size=*/1, /*input_height=*/1,
+                /*input_width=*/1, /*channels=*/1,
+                /*input_pixel_stride=*/overflow_stride,
+                /*output_pixel_stride=*/1,
+                &output_height, &output_width, /*threadpool=*/nullptr));
+}
+
+TEST(ARGMAX_POOLING_NHWC_F32, index_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t argmax_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_argmax_pooling2d_nhwc_f32(
+                /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0,
+                /*pooling_height=*/1, /*pooling_width=*/1,
+                /*flags=*/0, &argmax_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      argmax_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t overflow_channels = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_argmax_pooling2d_nhwc_f32(
+                argmax_op, /*batch_size=*/1, /*input_height=*/1,
+                /*input_width=*/1, /*channels=*/overflow_channels,
+                /*input_pixel_stride=*/overflow_channels,
+                /*output_pixel_stride=*/overflow_channels,
+                &output_height, &output_width, /*threadpool=*/nullptr));
+}
+
+TEST(ARGMAX_POOLING_NHWC_F32, batch_stride_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t argmax_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_argmax_pooling2d_nhwc_f32(
+                /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0,
+                /*pooling_height=*/1, /*pooling_width=*/1,
+                /*flags=*/0, &argmax_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      argmax_op, xnn_delete_operator);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const size_t overflow_batch = (SIZE_MAX / 4) + 1;
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_argmax_pooling2d_nhwc_f32(
+                argmax_op, /*batch_size=*/overflow_batch,
+                /*input_height=*/1, /*input_width=*/1, /*channels=*/1,
+                /*input_pixel_stride=*/1, /*output_pixel_stride=*/1,
+                &output_height, &output_width, /*threadpool=*/nullptr));
+}
+
