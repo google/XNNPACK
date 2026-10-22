@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -134,6 +135,14 @@ static enum xnn_status resize_copy_output_tensor(
   }
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator with output ID #%" PRIu32
+        ": output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_static_reshape),
+        output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -192,6 +201,14 @@ static enum xnn_status resize_expand_dims_output_tensor(
   }
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to expand dims in %s operator with output ID #%" PRIu32
+        ": output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_static_expand_dims),
+        output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -231,7 +248,17 @@ static enum xnn_status resize_fuse_dims_output_tensor(
   }
   output_shape->dim[first_dim] = 1;
   for (size_t k = first_dim; k < first_dim + num_dims; k++) {
-    output_shape->dim[first_dim] *= input_shape->dim[k];
+    if (!xnn_safe_mul(output_shape->dim[first_dim],
+                      input_shape->dim[k],
+                      &output_shape->dim[first_dim])) {
+      xnn_log_error(
+          "failed to fuse dims in %s operator with input ID #%" PRIu32
+          " and output ID #%" PRIu32
+          ": product of fused dimensions overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_fuse_dims),
+          input_id, output_id);
+      return xnn_status_out_of_memory;
+    }
   }
   for (size_t k = first_dim + num_dims; k < input_shape->num_dims; k++) {
     output_shape->dim[k - num_dims + 1] = input_shape->dim[k];
@@ -239,6 +266,14 @@ static enum xnn_status resize_fuse_dims_output_tensor(
   output_shape->num_dims = input_shape->num_dims - num_dims + 1;
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to fuse dims in %s operator with output ID #%" PRIu32
+        ": output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_fuse_dims),
+        output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -318,6 +353,14 @@ static enum xnn_status resize_split_dims_output_tensor(
   output_shape->num_dims = input_shape->num_dims + num_dims - 1;
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to split dims in %s operator with output ID #%" PRIu32
+        ": output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_split_dims),
+        output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;

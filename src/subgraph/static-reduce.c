@@ -224,6 +224,13 @@ static enum xnn_status reshape_reduce_operator(
     output_value->shape.num_dims = input_num_dims - num_skip_axis;
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape Reduce operator with output ID #%" PRIu32
+        ": output tensor size overflows size_t",
+        output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output_value->size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
