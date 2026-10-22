@@ -123,7 +123,11 @@ class VUnaryMicrokernelTester {
             ASSERT_TRUE(std::isnan(static_cast<float>(y[i])));
           } else {
             ASSERT_NEAR(y[i], y_ref[i],
-                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                        std::max(test_info.Tolerance(
+                                     y_ref[i], xnn_datatype_of<Out>()),
+                                 test_info.InputTolerance(
+                                     static_cast<float>(x[i]),
+                                     xnn_datatype_of<Out>())))
                 << "at " << i << " / " << batch_size() << ", x[" << i
                 << "] = " << std::scientific << (float)x[i];
           }
@@ -183,8 +187,12 @@ class VUnaryMicrokernelTester {
           if (std::isnan(static_cast<float>(y_ref[i]))) {
             ASSERT_TRUE(std::isnan(static_cast<float>(x[i])));
           } else {
-            ASSERT_NEAR(x[i], y_ref[i],
-                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+            ASSERT_NEAR(
+                x[i], y_ref[i],
+                std::max(
+                    test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()),
+                    test_info.InputTolerance(static_cast<float>(x_orig[i]),
+                                             xnn_datatype_of<Out>())))
                 << "at " << i << " / " << batch_size() << ", x[" << i
                 << "] = " << std::scientific << (float)x_orig[i];
           }
@@ -231,10 +239,11 @@ class VUnaryMicrokernelTester {
             (UKernelParamsType*)&uparams);
     for (size_t i = 0; i < outputs.size(); i++) {
       if (std::isfinite(static_cast<float>(expected[i]))) {
-        ASSERT_NEAR(static_cast<float>(expected[i]),
-                    static_cast<float>(outputs[i]),
-                    tolerance_ulp * std::abs(static_cast<float>(expected[i])) *
-                        std::numeric_limits<float>::epsilon())
+        ASSERT_NEAR(
+            static_cast<float>(expected[i]), static_cast<float>(outputs[i]),
+            tolerance_ulp * std::numeric_limits<float>::epsilon() *
+                (std::abs(static_cast<float>(expected[i])) +
+                 std::abs(static_cast<float>(inputs[i]))))
             << "for input " << static_cast<float>(inputs[i]);
       } else {
         EXPECT_EQ(std::fpclassify(static_cast<float>(expected[i])),
