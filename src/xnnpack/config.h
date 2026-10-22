@@ -264,7 +264,13 @@ XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f16_pavgpool_config();
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_pavgpool_config();
 
 #define XNN_MAX_F16_DWCONV_UKERNELS 4
+#if XNN_ARCH_RISCV
+// Two f32 unipass kernels per filter size (LMUL=4 and LMUL=8), see
+// find_dwconv_ukernel.
+#define XNN_MAX_F32_DWCONV_UKERNELS 8
+#else
 #define XNN_MAX_F32_DWCONV_UKERNELS 4
+#endif
 #define XNN_MAX_QC8_DWCONV_UKERNELS 3
 #define XNN_MAX_QS8_DWCONV_UKERNELS 2
 #define XNN_MAX_QU8_DWCONV_UKERNELS 2

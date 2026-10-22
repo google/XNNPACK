@@ -151,7 +151,7 @@ static inline size_t compute_output_dimension_with_tf_same_padding(
 }
 
 static inline const struct xnn_dwconv_config* find_dwconv_ukernel(
-    size_t kernel_size, const struct xnn_dwconv_config* ukernel,
+    size_t kernel_size, size_t groups, const struct xnn_dwconv_config* ukernel,
     size_t num_ukernels) {
   const struct xnn_dwconv_config* best_ukernel = NULL;
   while (num_ukernels-- != 0) {
@@ -161,6 +161,19 @@ static inline const struct xnn_dwconv_config* find_dwconv_ukernel(
       if (best_ukernel == NULL ||
           ukernel->primary_tile < best_ukernel->primary_tile) {
         best_ukernel = ukernel;
+      } else if (ukernel->primary_tile == best_ukernel->primary_tile &&
+                 ukernel->channel_tile != best_ukernel->channel_tile) {
+        // Same filter size, two kernels of different vector length. The narrow
+        // kernel processes two output pixels per weight load, which only pays
+        // off when every channel tile it uses is full.
+        const struct xnn_dwconv_config* narrow =
+            ukernel->channel_tile < best_ukernel->channel_tile
+                ? ukernel
+                : best_ukernel;
+        const struct xnn_dwconv_config* wide =
+            narrow == ukernel ? best_ukernel : ukernel;
+        best_ukernel =
+            groups >= 2 * (size_t) narrow->channel_tile ? narrow : wide;
       }
     }
     ukernel++;
@@ -1332,7 +1345,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_qu8(
     return xnn_status_unsupported_parameter;
   }
   context->dwconv_ukernel =
-      find_dwconv_ukernel(kernel_size, dwconv_config, XNN_MAX_QU8_DWCONV_UKERNELS);
+      find_dwconv_ukernel(
+          kernel_size, context->groups, dwconv_config,
+          XNN_MAX_QU8_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.qu8(
         &context->dwconv_params.qu8, context->kernel_zero_point,
@@ -1361,7 +1376,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_qs8_qc8w(
     return xnn_status_unsupported_parameter;
   }
   context->dwconv_ukernel =
-      find_dwconv_ukernel(kernel_size, dwconv_config, XNN_MAX_QC8_DWCONV_UKERNELS);
+      find_dwconv_ukernel(
+          kernel_size, context->groups, dwconv_config,
+          XNN_MAX_QC8_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.qs8_qc8w(
         &context->dwconv_params.qs8_qc8w, context->output_zero_point,
@@ -1387,7 +1404,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f16(
     return xnn_status_unsupported_parameter;
   }
   context->dwconv_ukernel =
-      find_dwconv_ukernel(kernel_size, dwconv_config, XNN_MAX_F16_DWCONV_UKERNELS);
+      find_dwconv_ukernel(
+          kernel_size, context->groups, dwconv_config,
+          XNN_MAX_F16_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.f16(&context->dwconv_params.f16,
                                       context->fp16_output_min,
@@ -1431,7 +1450,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
                             context->output_max);
   } else {
     context->dwconv_ukernel = find_dwconv_ukernel(
-        kernel_size, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
+        kernel_size, context->groups, dwconv_config,
+        XNN_MAX_F32_DWCONV_UKERNELS);
     if XNN_LIKELY (context->dwconv_ukernel != NULL) {
       context->dwconv_ukernel->init.f32(
           &context->dwconv_params.f32, context->output_min,
