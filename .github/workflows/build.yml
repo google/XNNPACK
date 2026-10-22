@@ -893,6 +893,8 @@ jobs:
       CC: gcc-13
       CXX: g++-13
       BAZEL_DEFINES: |
+        --define=xnn_enable_arm_sme=false
+        --define=xnn_enable_arm_sme2=false
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
         --define=ynn_enable_arm64_sve=false

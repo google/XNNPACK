@@ -437,6 +437,28 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
+    "sme": _create_params(
+        cond = "//:arm_sme_enabled",
+        copts = select({
+            "//build_config:ios": ["-march=armv8.2-a+sme"],
+            "//build_config:macos": ["-march=armv8.2-a+sme"],
+            "//conditions:default": ["-march=armv8.2-a+sve+sme"],
+        }),
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
+    ),
+    "sme2": _create_params(
+        cond = "//:arm_sme2_enabled",
+        copts = select({
+            "//build_config:ios": ["-march=armv8.2-a+sme2"],
+            "//build_config:macos": ["-march=armv8.2-a+sme2"],
+            "//conditions:default": ["-march=armv8.2-a+sve+sme2"],
+        }),
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
+    ),
     "aarch32": _create_params(
         cond = "//build_config:aarch32",
         copts = [
