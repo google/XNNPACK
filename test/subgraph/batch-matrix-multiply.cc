@@ -748,6 +748,135 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_large_m_not_rewritten) {
 #endif  // XNNPACK_USE_YNNPACK
 
 #ifndef XNNPACK_USE_YNNPACK
+TEST(BatchMatrixMultiplyDequantBmmRewrite, disabled_per_node) {
+  // Identical shapes, but only one BMM opts out. The ordinary FP32 packing
+  // optimizations remain enabled, and the other BMM must still be rewritten.
+  for (uint32_t transpose : {0u, uint32_t(XNN_FLAG_TRANSPOSE_B)}) {
+    SCOPED_TRACE(transpose);
+    SubgraphTester tester(/*external_value_ids=*/6);
+    for (uint32_t i = 0; i < 2; ++i) {
+      uint32_t dequantized_b = XNN_INVALID_VALUE_ID;
+      const TensorShape b_shape =
+          transpose ? TensorShape{1, 7, 17} : TensorShape{1, 17, 7};
+      tester.AddInputTensorF32({1, 1, 17}, 3 * i)
+          .AddInputTensorQS8(0, 0.037f, b_shape, 3 * i + 1)
+          .AddInternalDynamicTensorF32(b_shape, &dequantized_b)
+          .AddOutputTensor({1, 1, 7}, xnn_datatype_fp32, 3 * i + 2)
+          .AddConvert(3 * i + 1, dequantized_b)
+          .AddBatchMatrixMultiply(
+              3 * i, dequantized_b, 3 * i + 2,
+              transpose | XNN_FLAG_NO_BROADCAST |
+                  (i == 0 ? XNN_FLAG_NO_BMM_DEQUANTIZATION_FUSION : 0));
+    }
+    tester.Optimize();
+    size_t bmm_count = 0;
+    size_t dequant_count = 0;
+    for (size_t i = 0; i < tester.NumNodes(); ++i) {
+      const xnn_node* node = tester.Node(i);
+      if (node->type == xnn_node_type_batch_matrix_multiply) {
+        ++bmm_count;
+        const bool disabled = node->outputs[0] == 2;
+        EXPECT_EQ(tester.Value(node->inputs[1])->datatype,
+                  disabled ? xnn_datatype_fp32 : xnn_datatype_qcint8);
+      } else if (node->type == xnn_node_type_unary_elementwise &&
+                 node->unary_operator == xnn_unary_convert &&
+                 tester.Value(node->inputs[0])->datatype ==
+                     xnn_datatype_qint8 &&
+                 tester.Value(node->outputs[0])->datatype ==
+                     xnn_datatype_fp32) {
+        ++dequant_count;
+      }
+    }
+    EXPECT_EQ(bmm_count, 2);
+    EXPECT_EQ(dequant_count, 1);
+  }
+}
+
+class BatchMatrixMultiplyDequantBmmControl
+    : public testing::TestWithParam<std::tuple<bool, bool, bool>> {};
+
+TEST_P(BatchMatrixMultiplyDequantBmmControl, reshape_and_execute) {
+  const auto [transpose, broadcast, disable_rewrite] = GetParam();
+  const size_t a_batches = 2;
+  const size_t b_batches = broadcast ? 1 : a_batches;
+  const uint32_t flags =
+      (transpose ? XNN_FLAG_TRANSPOSE_B : 0) |
+      (broadcast ? 0 : XNN_FLAG_NO_BROADCAST) |
+      (disable_rewrite ? XNN_FLAG_NO_BMM_DEQUANTIZATION_FUSION : 0);
+  // Include a non-power-of-two scale: this exercises dequantization rounding,
+  // rather than relying only on the exactly representable benchmark scale.
+  for (float scale : {0.03125f, 0.037f}) {
+    SCOPED_TRACE(scale);
+    SubgraphTester tester(/*external_value_ids=*/3);
+    uint32_t dequantized_b = XNN_INVALID_VALUE_ID;
+    const TensorShape initial_b = transpose ? TensorShape{b_batches, 9, 17}
+                                            : TensorShape{b_batches, 17, 9};
+    tester.AddInputTensorF32({a_batches, 1, 17}, 0)
+        .AddInputTensorQS8(0, scale, initial_b, 1)
+        .AddInternalDynamicTensorF32(initial_b, &dequantized_b)
+        .AddOutputTensor({a_batches, 1, 9}, xnn_datatype_fp32, 2)
+        .AddConvert(1, dequantized_b)
+        .AddBatchMatrixMultiply(0, dequantized_b, 2, flags);
+    const xnn_status status = tester.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+    }
+    ASSERT_EQ(status, xnn_status_success);
+
+    // Exercise growth and shrinkage of query rows, reduction depth, and output
+    // columns, rebinding fresh inputs after each reshape of the same runtime.
+    for (const auto& dims : {std::tuple<size_t, size_t, size_t>{1, 17, 9},
+                             {128, 31, 13},
+                             {8, 257, 7},
+                             {2, 3, 5}}) {
+      const auto [m, k, n] = dims;
+      SCOPED_TRACE(testing::Message() << m << "," << k << "," << n);
+      std::vector<float> a(a_batches * m * k + XNN_EXTRA_BYTES / sizeof(float));
+      std::vector<int8_t> b(b_batches * k * n + XNN_EXTRA_BYTES);
+      std::vector<float> c(a_batches * m * n);
+      for (size_t i = 0; i < a.size(); ++i) {
+        a[i] = (int32_t(i % 29) - 14) * 0.0625f;
+      }
+      for (size_t i = 0; i < b.size(); ++i) {
+        b[i] = int32_t((i * 7) % 255) - 127;
+      }
+      const TensorShape b_shape = transpose ? TensorShape{b_batches, n, k}
+                                            : TensorShape{b_batches, k, n};
+      tester.ReshapeExternalTensor({a_batches, m, k}, a.data(), 0)
+          .ReshapeExternalTensor(b_shape, b.data(), 1)
+          .SetupExternalTensor(c.data(), 2)
+          .ReshapeRuntime()
+          .SetupRuntime();
+      ASSERT_EQ(tester.InvokeRuntime(), xnn_status_success);
+      for (size_t batch = 0; batch < a_batches; ++batch) {
+        for (size_t row = 0; row < m; ++row) {
+          for (size_t col = 0; col < n; ++col) {
+            double expected = 0.0;
+            double magnitude = 0.0;
+            for (size_t inner = 0; inner < k; ++inner) {
+              const size_t b_index =
+                  (broadcast ? 0 : batch * k * n) +
+                  (transpose ? col * k + inner : inner * n + col);
+              const float dequantized = float(b[b_index]) * scale;
+              const double product =
+                  double(a[(batch * m + row) * k + inner]) * dequantized;
+              expected += product;
+              magnitude += std::abs(product);
+            }
+            EXPECT_NEAR(c[(batch * m + row) * n + col], expected,
+                        1.0e-3 * std::max(1.0, magnitude));
+          }
+        }
+      }
+    }
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(DequantizationControl,
+                         BatchMatrixMultiplyDequantBmmControl,
+                         testing::Combine(testing::Bool(), testing::Bool(),
+                                          testing::Bool()));
+
 TEST(BatchMatrixMultiply, ReshapeOverflowInputAElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
