@@ -379,6 +379,21 @@ TEST_P(Dot, TileAlignedK) {
   });
 }
 
+// Covers k values that are made up of both whole k blocks and a partial
+// trailing block. Kernels can handle these two parts quite differently, so the
+// combination needs its own coverage.
+TEST_P(Dot, BlockUnalignedK) {
+  KernelInfo kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  const DotShape& block_shape = kernel.block_shape;
+  SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
+    for (size_t k = block_shape.k + kernel.tile_k; k < 2 * block_shape.k;
+         k += kernel.tile_k) {
+      TestMatMul(a_type, b_type, c_type, block_shape.with_k(k), kernel);
+    }
+  });
+}
+
 TEST_P(Dot, UnalignedM) {
   KernelInfo kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();

@@ -82,6 +82,80 @@ namespace internal {
 
 constexpr size_t tile_row_bytes = 64;
 
+// The two helpers below copy the K remainder ("tail") of `A` and `B` into
+// zero-padded, tile-shaped local buffers, so that the tail can be consumed by
+// ordinary, full-sized (64 byte row) tile loads.
+//
+// This copy looks wasteful, but it is the only option for kernels that use all
+// 8 tile registers (e.g. the 2x2 kernels: 4 accumulators + 2 A + 2 B). In these
+// kernels, the tail case requires a dedicated tile configuration change in the
+// middle of a k loop, zeroing all tiles and destroying partially accumulated
+// C tiles. By creating a local copy, we avoid this, and keep the main loop
+// running with full 64-byte rows.
+template <typename TAB>
+YNN_ALWAYS_INLINE static void prepare_a_tail_local(size_t M_rows, size_t k_tail,
+                                                   const void* A_src,
+                                                   size_t A_stride_m,
+                                                   TAB* a_tail_local) {
+  constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
+  if constexpr (sizeof(TAB) == 2) {
+    const __mmask32 k_mask =
+        (k_tail >= 32) ? 0xFFFFFFFFU : ((1U << k_tail) - 1U);
+    for (size_t r = 0; r < M_rows; ++r) {
+      const void* row_src = offset_bytes(A_src, r * A_stride_m);
+      __m512i v = _mm512_maskz_loadu_epi16(k_mask, row_src);
+      _mm512_store_si512(reinterpret_cast<void*>(a_tail_local + r * k_block),
+                         v);
+    }
+  } else if constexpr (sizeof(TAB) == 1) {
+    const __mmask64 k_mask = (k_tail >= 64) ? ~0ULL : ((1ULL << k_tail) - 1ULL);
+    for (size_t r = 0; r < M_rows; ++r) {
+      const void* row_src = offset_bytes(A_src, r * A_stride_m);
+      __m512i v = _mm512_maskz_loadu_epi8(k_mask, row_src);
+      _mm512_store_si512(reinterpret_cast<void*>(a_tail_local + r * k_block),
+                         v);
+    }
+  } else {
+    for (size_t r = 0; r < M_rows; ++r) {
+      const char* row_src =
+          reinterpret_cast<const char*>(offset_bytes(A_src, r * A_stride_m));
+      char* row_dst = reinterpret_cast<char*>(a_tail_local + r * k_block);
+      size_t copy_bytes = std::min(k_tail * sizeof(TAB), tile_row_bytes);
+      std::memcpy(row_dst, row_src, copy_bytes);
+      std::memset(row_dst + copy_bytes, 0, tile_row_bytes - copy_bytes);
+    }
+  }
+}
+
+template <int NumCols, typename TAB, typename TC>
+YNN_ALWAYS_INLINE static void prepare_b_tail_local(size_t k_tail,
+                                                   size_t align_k,
+                                                   const void* B_src,
+                                                   size_t B_stride_k1,
+                                                   TAB* b_tail_local) {
+  constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
+  const size_t valid_rows = (k_tail + align_k - 1) / align_k;
+  const size_t total_rows = k_block / align_k;
+  constexpr size_t col_bytes = 16 * sizeof(TC);
+  for (int col = 0; col < NumCols; ++col) {
+    char* col_dst = reinterpret_cast<char*>(b_tail_local) +
+                    col * (total_rows * tile_row_bytes);
+    const char* col_src =
+        reinterpret_cast<const char*>(B_src) + col * col_bytes;
+    for (size_t r = 0; r < valid_rows; ++r) {
+      std::memcpy(col_dst + r * tile_row_bytes, col_src + r * B_stride_k1,
+                  col_bytes);
+      if constexpr (col_bytes < tile_row_bytes) {
+        std::memset(col_dst + r * tile_row_bytes + col_bytes, 0,
+                    tile_row_bytes - col_bytes);
+      }
+    }
+    for (size_t r = valid_rows; r < total_rows; ++r) {
+      std::memset(col_dst + r * tile_row_bytes, 0, tile_row_bytes);
+    }
+  }
+}
+
 template <typename TA, typename TB, typename TC>
 static void load_tile_config_1x4(size_t m, size_t n, size_t ktail,
                                  dot_kernel_state& state) {
@@ -369,13 +443,15 @@ static void load_config_2x2(size_t m, size_t n, size_t k_len, size_t align_k,
 // If !HasM1 && !HasN1, loops over the K dimension of a 1x1 output tile.
 //
 // Tiles 0, 1, 2, and 3 are the accumulator tiles.
-template <template <int, int, int> class TileOp, bool HasM1, bool HasN1>
+template <typename TAB, typename TC, template <int, int, int> class TileOp,
+          bool HasM1, bool HasN1, bool HasKTail = false>
 YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
-    size_t K3, size_t K2, size_t k1_iters, size_t A_stride_m,
-    size_t A_stride_k3, size_t A_stride_k2, size_t A_stride_k1, const void* A,
-    size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
-    size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out) {
+    size_t M, size_t K3, size_t K2, size_t k1_iters, size_t k_tail,
+    size_t A_stride_m, size_t A_stride_k3, size_t A_stride_k2,
+    size_t A_stride_k1, const void* A, size_t B_stride_k3, size_t B_stride_k2,
+    size_t B_stride_k1, size_t B_stride_k1_block, const void* B,
+    size_t C_in_stride_m, const void* C_in, size_t C_out_stride_m,
+    void* C_out) {
   // Initialize accumulator tiles.
   if (C_in) {
     _tile_loadd(0, offset_bytes(C_in, 0), C_in_stride_m);
@@ -438,6 +514,50 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
         B_k1 = offset_bytes(B_k1, B_stride_k1_block);
         A_k1 = offset_bytes(A_k1, A_stride_k1);
       }
+      if constexpr (HasKTail) {
+        constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
+        constexpr size_t align_k = 4 / sizeof(TAB);
+        constexpr int kCols = HasN1 ? 2 : 1;
+        alignas(64) TAB a_tail_local[(HasM1 ? 32 : 16) * k_block];
+        alignas(64) TAB b_tail_local[kCols * (k_block / align_k) * k_block];
+        prepare_a_tail_local(M, k_tail, A_k1, A_stride_m, a_tail_local);
+        prepare_b_tail_local<kCols, TAB, TC>(k_tail, align_k, B_k1, B_stride_k1,
+                                             b_tail_local);
+        if constexpr (HasM1 && HasN1) {  // 2x2 case.
+          _tile_loadd(4, a_tail_local, tile_row_bytes);
+          _tile_loadd(5, offset_bytes(b_tail_local, 0), tile_row_bytes);
+          _tile_loadd(6, offset_bytes(a_tail_local, 16 * tile_row_bytes),
+                      tile_row_bytes);
+          _tile_loadd(
+              7,
+              offset_bytes(b_tail_local, (k_block / align_k) * tile_row_bytes),
+              tile_row_bytes);
+          TileOp<0, 4, 5>()();
+          TileOp<2, 6, 5>()();
+          TileOp<1, 4, 7>()();
+          TileOp<3, 6, 7>()();
+        } else if constexpr (!HasM1 && HasN1) {  // 1x2 case.
+          _tile_loadd(4, a_tail_local, tile_row_bytes);
+          _tile_loadd(5, offset_bytes(b_tail_local, 0), tile_row_bytes);
+          _tile_loadd(
+              7,
+              offset_bytes(b_tail_local, (k_block / align_k) * tile_row_bytes),
+              tile_row_bytes);
+          TileOp<0, 4, 5>()();
+          TileOp<1, 4, 7>()();
+        } else if constexpr (HasM1 && !HasN1) {  // 2x1 case.
+          _tile_loadd(4, a_tail_local, tile_row_bytes);
+          _tile_loadd(5, b_tail_local, tile_row_bytes);
+          _tile_loadd(6, offset_bytes(a_tail_local, 16 * tile_row_bytes),
+                      tile_row_bytes);
+          TileOp<0, 4, 5>()();
+          TileOp<2, 6, 5>()();
+        } else {  // 1x1 case.
+          _tile_loadd(4, a_tail_local, tile_row_bytes);
+          _tile_loadd(5, b_tail_local, tile_row_bytes);
+          TileOp<0, 4, 5>()();
+        }
+      }
       k2 -= 1;
       B_k2 = offset_bytes(B_k2, B_stride_k2);
       A_k2 = offset_bytes(A_k2, A_stride_k2);
@@ -462,24 +582,24 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
 }
 
 template <typename TAB, typename TC, template <int, int, int> class TileOp,
-          bool HasM1>
+          bool HasM1, bool HasKTail = false>
 YNN_ALWAYS_INLINE static void n_loops_2x2_impl(
     size_t M, size_t n_loops, size_t n_tail, size_t K3, size_t K2,
-    size_t k_iters, size_t k_len, size_t align_k, size_t A_stride_m,
-    size_t A_stride_k3, size_t A_stride_k2, size_t A_stride_k1, const void* A,
-    size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
-    size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out,
+    size_t k_iters, size_t k_tail, size_t k_len, size_t align_k,
+    size_t A_stride_m, size_t A_stride_k3, size_t A_stride_k2,
+    size_t A_stride_k1, const void* A, size_t B_stride_k3, size_t B_stride_k2,
+    size_t B_stride_k1, size_t B_stride_k1_block, const void* B,
+    size_t C_in_stride_m, const void* C_in, size_t C_out_stride_m, void* C_out,
     dot_kernel_state& state) {
   if (n_loops > 0) {
     const size_t c_step2 = C_in ? 2 * tile_row_bytes : 0;
     load_config_2x2<TAB, TC>(M, 32, k_len, align_k, state);
 
     for (size_t i = 0; i < n_loops; ++i) {
-      k_loops_2x2_impl<TileOp, HasM1, /*HasN1=*/true>(
-          K3, K2, k_iters, A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A,
-          B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
-          C_in_stride_m, C_in, C_out_stride_m, C_out);
+      k_loops_2x2_impl<TAB, TC, TileOp, HasM1, /*HasN1=*/true, HasKTail>(
+          M, K3, K2, k_iters, k_tail, A_stride_m, A_stride_k3, A_stride_k2,
+          A_stride_k1, A, B_stride_k3, B_stride_k2, B_stride_k1,
+          B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 
       C_in = offset_bytes(C_in, c_step2);
       C_out = offset_bytes(C_out, 2 * tile_row_bytes);
@@ -490,15 +610,15 @@ YNN_ALWAYS_INLINE static void n_loops_2x2_impl(
   if (n_tail > 0) {
     load_config_2x2<TAB, TC>(M, n_tail, k_len, align_k, state);
     if (n_tail > 16) {
-      k_loops_2x2_impl<TileOp, HasM1, /*HasN1=*/true>(
-          K3, K2, k_iters, A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A,
-          B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
-          C_in_stride_m, C_in, C_out_stride_m, C_out);
+      k_loops_2x2_impl<TAB, TC, TileOp, HasM1, /*HasN1=*/true, HasKTail>(
+          M, K3, K2, k_iters, k_tail, A_stride_m, A_stride_k3, A_stride_k2,
+          A_stride_k1, A, B_stride_k3, B_stride_k2, B_stride_k1,
+          B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
     } else {
-      k_loops_2x2_impl<TileOp, HasM1, /*HasN1=*/false>(
-          K3, K2, k_iters, A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A,
-          B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
-          C_in_stride_m, C_in, C_out_stride_m, C_out);
+      k_loops_2x2_impl<TAB, TC, TileOp, HasM1, /*HasN1=*/false, HasKTail>(
+          M, K3, K2, k_iters, k_tail, A_stride_m, A_stride_k3, A_stride_k2,
+          A_stride_k1, A, B_stride_k3, B_stride_k2, B_stride_k1,
+          B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
     }
   }
 }
@@ -529,37 +649,33 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2_impl(
 
   // We load this many rows of B at a time.
   B_stride_k1 *= align_k;
-  assert(K1 % align_k == 0);
 
   const size_t k_tail = K1 & (k_block - 1);
   const size_t k1_iters = K1 / k_block;
   const size_t n_loops = N / 32;
   const size_t n_tail = N % 32;
 
-  // 1. Handle M == 32 (or M == 16 if !HasM1), N <= 32, K == 32.
-  if (k1_iters > 0) {
-    n_loops_2x2_impl<TAB, TC, TileOp, HasM1>(
-        M, n_loops, n_tail, K3, K2, k1_iters, k_block, align_k, A_stride_m,
-        A_stride_k3, A_stride_k2, tile_row_bytes, A, B_stride_k3, B_stride_k2,
-        B_stride_k1, B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m,
-        C_out, state);
-
-    // For the tail, we want to read C_out instead of C_in.
-    C_in = C_out;
-    C_in_stride_m = C_out_stride_m;
-
-    // And we only want to handle the tail.
-    A = offset_bytes(A, k1_iters * tile_row_bytes);
-    B = offset_bytes(B, k1_iters * B_stride_k1_block);
-  }
-
-  // 2. Handle M == 32 (or M == 16 if !HasM1), N <= 32, K < 32.
-  if (k_tail > 0) {
-    n_loops_2x2_impl<TAB, TC, TileOp, HasM1>(
-        M, n_loops, n_tail, K3, K2, /*k_iters=*/1, k_tail, align_k, A_stride_m,
-        A_stride_k3, A_stride_k2, /*A_stride_k1=*/0, A, B_stride_k3,
-        B_stride_k2, B_stride_k1, /*B_stride_k1_block=*/0, B, C_in_stride_m,
-        C_in, C_out_stride_m, C_out, state);
+  if (k_tail == 0) {
+    n_loops_2x2_impl<TAB, TC, TileOp, HasM1, /*HasKTail=*/false>(
+        M, n_loops, n_tail, K3, K2, k1_iters, /*k_tail=*/0, /*k_len=*/k_block,
+        align_k, A_stride_m, A_stride_k3, A_stride_k2, tile_row_bytes, A,
+        B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
+        C_in_stride_m, C_in, C_out_stride_m, C_out, state);
+  } else if (k1_iters == 0 && k_tail % align_k == 0) {
+    // For small K1, there is no full pass to amortize the `HasKTail` staging
+    // against, so narrow tiles are read directly from A and B.
+    n_loops_2x2_impl<TAB, TC, TileOp, HasM1, /*HasKTail=*/false>(
+        M, n_loops, n_tail, K3, K2, /*k_iters=*/1, /*k_tail=*/0,
+        /*k_len=*/k_tail, align_k, A_stride_m, A_stride_k3, A_stride_k2,
+        /*A_stride_k1=*/0, A, B_stride_k3, B_stride_k2, B_stride_k1,
+        /*B_stride_k1_block=*/0, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
+        state);
+  } else {
+    n_loops_2x2_impl<TAB, TC, TileOp, HasM1, /*HasKTail=*/true>(
+        M, n_loops, n_tail, K3, K2, k1_iters, k_tail, /*k_len=*/k_block,
+        align_k, A_stride_m, A_stride_k3, A_stride_k2, tile_row_bytes, A,
+        B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
+        C_in_stride_m, C_in, C_out_stride_m, C_out, state);
   }
 }
 }  // namespace internal
@@ -636,13 +752,15 @@ static void load_config_2x3(size_t m, size_t k_len, size_t align_k,
   load_if_needed(state, config);
 }
 
-template <template <int, int, int> class TileOp, bool HasM1>
+template <typename TAB, typename TC, template <int, int, int> class TileOp,
+          bool HasM1, bool HasKTail = false>
 YNN_ALWAYS_INLINE static void k_loops_2x3_impl(
-    size_t K3, size_t K2, size_t k1_iters, size_t A_stride_m,
-    size_t A_stride_k3, size_t A_stride_k2, size_t A_stride_k1, const void* A,
-    size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
-    size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out) {
+    size_t M, size_t K3, size_t K2, size_t k1_iters, size_t k_tail,
+    size_t A_stride_m, size_t A_stride_k3, size_t A_stride_k2,
+    size_t A_stride_k1, const void* A, size_t B_stride_k3, size_t B_stride_k2,
+    size_t B_stride_k1, size_t B_stride_k1_block, const void* B,
+    size_t C_in_stride_m, const void* C_in, size_t C_out_stride_m,
+    void* C_out) {
   // Initialize accumulator tiles.
   if (C_in) {
     _tile_loadd(0, offset_bytes(C_in, 0), C_in_stride_m);
@@ -719,6 +837,61 @@ YNN_ALWAYS_INLINE static void k_loops_2x3_impl(
         B_k1 = offset_bytes(B_k1, B_stride_k1_block);
         A_k1 = offset_bytes(A_k1, A_stride_k1);
       }
+      if constexpr (HasKTail) {
+        constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
+        constexpr size_t align_k = 4 / sizeof(TAB);
+        alignas(64) TAB a_tail_local[(HasM1 ? 32 : 16) * k_block];
+        alignas(64) TAB b_tail_local[3 * (k_block / align_k) * k_block];
+        prepare_a_tail_local(M, k_tail, A_k1, A_stride_m, a_tail_local);
+        prepare_b_tail_local<3, TAB, TC>(k_tail, align_k, B_k1, B_stride_k1,
+                                         b_tail_local);
+        if constexpr (HasM1) {
+          _tile_loadd(6, a_tail_local, tile_row_bytes);
+          _tile_loadd(7, offset_bytes(b_tail_local, 0), tile_row_bytes);
+          TileOp<0, 6, 7>()();
+
+          _tile_loadd(
+              7,
+              offset_bytes(b_tail_local, (k_block / align_k) * tile_row_bytes),
+              tile_row_bytes);
+          TileOp<1, 6, 7>()();
+
+          _tile_loadd(7,
+                      offset_bytes(b_tail_local,
+                                   2 * (k_block / align_k) * tile_row_bytes),
+                      tile_row_bytes);
+          TileOp<2, 6, 7>()();
+
+          _tile_loadd(6, offset_bytes(a_tail_local, 16 * tile_row_bytes),
+                      tile_row_bytes);
+          TileOp<5, 6, 7>()();
+
+          _tile_loadd(7, offset_bytes(b_tail_local, 0), tile_row_bytes);
+          TileOp<3, 6, 7>()();
+
+          _tile_loadd(
+              7,
+              offset_bytes(b_tail_local, (k_block / align_k) * tile_row_bytes),
+              tile_row_bytes);
+          TileOp<4, 6, 7>()();
+        } else {
+          _tile_loadd(6, a_tail_local, tile_row_bytes);
+          _tile_loadd(7, offset_bytes(b_tail_local, 0), tile_row_bytes);
+          TileOp<0, 6, 7>()();
+
+          _tile_loadd(
+              7,
+              offset_bytes(b_tail_local, (k_block / align_k) * tile_row_bytes),
+              tile_row_bytes);
+          TileOp<1, 6, 7>()();
+
+          _tile_loadd(7,
+                      offset_bytes(b_tail_local,
+                                   2 * (k_block / align_k) * tile_row_bytes),
+                      tile_row_bytes);
+          TileOp<2, 6, 7>()();
+        }
+      }
       k2 -= 1;
       B_k2 = offset_bytes(B_k2, B_stride_k2);
       A_k2 = offset_bytes(A_k2, A_stride_k2);
@@ -742,24 +915,24 @@ YNN_ALWAYS_INLINE static void k_loops_2x3_impl(
 }
 
 template <typename TAB, typename TC, template <int, int, int> class TileOp,
-          bool HasM1>
+          bool HasM1, bool HasKTail = false>
 YNN_ALWAYS_INLINE static void n_loops_2x3_impl(
     size_t M, size_t n_loops, size_t n_tail, size_t K3, size_t K2,
-    size_t k_iters, size_t k_len, size_t align_k, size_t A_stride_m,
-    size_t A_stride_k3, size_t A_stride_k2, size_t A_stride_k1, const void* A,
-    size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
-    size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out,
+    size_t k_iters, size_t k_tail, size_t k_len, size_t align_k,
+    size_t A_stride_m, size_t A_stride_k3, size_t A_stride_k2,
+    size_t A_stride_k1, const void* A, size_t B_stride_k3, size_t B_stride_k2,
+    size_t B_stride_k1, size_t B_stride_k1_block, const void* B,
+    size_t C_in_stride_m, const void* C_in, size_t C_out_stride_m, void* C_out,
     dot_kernel_state& state) {
   if (n_loops > 0) {
     const size_t c_step3 = C_in ? 3 * tile_row_bytes : 0;
     const size_t b_step_n = 3 * tile_row_bytes;
     load_config_2x3<TAB, TC>(M, k_len, align_k, state);
     for (size_t i = 0; i < n_loops; ++i) {
-      k_loops_2x3_impl<TileOp, HasM1>(
-          K3, K2, k_iters, A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A,
-          B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
-          C_in_stride_m, C_in, C_out_stride_m, C_out);
+      k_loops_2x3_impl<TAB, TC, TileOp, HasM1, HasKTail>(
+          M, K3, K2, k_iters, k_tail, A_stride_m, A_stride_k3, A_stride_k2,
+          A_stride_k1, A, B_stride_k3, B_stride_k2, B_stride_k1,
+          B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 
       C_in = offset_bytes(C_in, c_step3);
       C_out = offset_bytes(C_out, 3 * tile_row_bytes);
@@ -769,8 +942,8 @@ YNN_ALWAYS_INLINE static void n_loops_2x3_impl(
 
   // Handle remaining N columns (< 48) with 2x2, 2x1, 1x2, or 1x1.
   if (n_tail > 0) {
-    n_loops_2x2_impl<TAB, TC, TileOp, HasM1>(
-        M, n_tail / 32, n_tail % 32, K3, K2, k_iters, k_len, align_k,
+    n_loops_2x2_impl<TAB, TC, TileOp, HasM1, HasKTail>(
+        M, n_tail / 32, n_tail % 32, K3, K2, k_iters, k_tail, k_len, align_k,
         A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B_stride_k1_block, B, C_in_stride_m, C_in,
         C_out_stride_m, C_out, state);
@@ -798,33 +971,33 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x3_impl(
   const size_t B_stride_k1_block = B_stride_k1 * k_block;
 
   B_stride_k1 *= align_k;
-  assert(K1 % align_k == 0);
 
   const size_t k_tail = K1 & (k_block - 1);
   const size_t k1_iters = K1 / k_block;
   const size_t n_loops = N / 48;
   const size_t n_tail = N % 48;
 
-  if (k1_iters > 0) {
-    n_loops_2x3_impl<TAB, TC, TileOp, HasM1>(
-        M, n_loops, n_tail, K3, K2, k1_iters, k_block, align_k, A_stride_m,
-        A_stride_k3, A_stride_k2, tile_row_bytes, A, B_stride_k3, B_stride_k2,
-        B_stride_k1, B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m,
-        C_out, state);
-
-    C_in = C_out;
-    C_in_stride_m = C_out_stride_m;
-
-    A = offset_bytes(A, k1_iters * tile_row_bytes);
-    B = offset_bytes(B, k1_iters * B_stride_k1_block);
-  }
-
-  if (k_tail > 0) {
-    n_loops_2x3_impl<TAB, TC, TileOp, HasM1>(
-        M, n_loops, n_tail, K3, K2, /*k_iters=*/1, k_tail, align_k, A_stride_m,
-        A_stride_k3, A_stride_k2, /*A_stride_k1=*/0, A, B_stride_k3,
-        B_stride_k2, B_stride_k1, /*B_stride_k1_block=*/0, B, C_in_stride_m,
-        C_in, C_out_stride_m, C_out, state);
+  if (k_tail == 0) {
+    n_loops_2x3_impl<TAB, TC, TileOp, HasM1, /*HasKTail=*/false>(
+        M, n_loops, n_tail, K3, K2, k1_iters, /*k_tail=*/0, /*k_len=*/k_block,
+        align_k, A_stride_m, A_stride_k3, A_stride_k2, tile_row_bytes, A,
+        B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
+        C_in_stride_m, C_in, C_out_stride_m, C_out, state);
+  } else if (k1_iters == 0 && k_tail % align_k == 0) {
+    // For small K1, there is no full pass to amortize the `HasKTail` staging
+    // against, so narrow tiles are read directly from A and B.
+    n_loops_2x3_impl<TAB, TC, TileOp, HasM1, /*HasKTail=*/false>(
+        M, n_loops, n_tail, K3, K2, /*k_iters=*/1, /*k_tail=*/0,
+        /*k_len=*/k_tail, align_k, A_stride_m, A_stride_k3, A_stride_k2,
+        /*A_stride_k1=*/0, A, B_stride_k3, B_stride_k2, B_stride_k1,
+        /*B_stride_k1_block=*/0, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
+        state);
+  } else {
+    n_loops_2x3_impl<TAB, TC, TileOp, HasM1, /*HasKTail=*/true>(
+        M, n_loops, n_tail, K3, K2, k1_iters, k_tail, /*k_len=*/k_block,
+        align_k, A_stride_m, A_stride_k3, A_stride_k2, tile_row_bytes, A,
+        B_stride_k3, B_stride_k2, B_stride_k1, B_stride_k1_block, B,
+        C_in_stride_m, C_in, C_out_stride_m, C_out, state);
   }
 }
 
