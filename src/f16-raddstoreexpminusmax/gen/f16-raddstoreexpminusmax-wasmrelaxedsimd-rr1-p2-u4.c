@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-raddstoreexpminusmax/f16-f32acc-rr1-p2.c.in
+//   Template: src/f16-raddstoreexpminusmax/rr1-p2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -15,8 +15,10 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
-#include "src/xnnpack/simd/f32-avx512f.h"
+#include "src/xnnpack/simd/f32-wasmrelaxedsimd.h"
 
+#undef XNN_SIMD_HAS_NATIVE_FMA
+#include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 
 
 static XNN_INLINE xnn_simd_f32_t load_f16_f32(const xnn_float16* input) {
@@ -33,7 +35,7 @@ static XNN_INLINE void store_f32_f16(
     xnn_float16* output, xnn_simd_f32_t value)
 {
   const xnn_simd_f16_t rounded = xnn_cvt_f16_f32(value);
-  xnn_storeu_f16(output, rounded);
+  xnn_store_tail_f16(output, rounded, xnn_simd_size_f32);
 }
 
 static XNN_INLINE void store_tail_f32_f16(
@@ -68,7 +70,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16(
+void xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
@@ -85,12 +87,12 @@ void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16(
 
   const xnn_simd_f32_t vmax = xnn_set1_f32(xnn_float16_to_float(*max));
   xnn_simd_f32_t vacc = xnn_zero_f32();
-  for (; batch >= 16 * sizeof(xnn_float16);
-       batch -= 16 * sizeof(xnn_float16)) {
+  for (; batch >= 4 * sizeof(xnn_float16);
+       batch -= 4 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf = expminusmax_f32(load_f16_f32(input), vmax);
-    input += 16;
+    input += 4;
     store_f32_f16(output, vf);
-    output += 16;
+    output += 4;
     vacc = xnn_add_f32(vacc, vf);
   }
 
