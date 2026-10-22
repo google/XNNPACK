@@ -120,7 +120,7 @@ TEST_F(F16SimdNEONFP16ARITHTest, Fmadd) {
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA || XNN_HAVE_FLOAT16
+#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(TruncToF16(inputs_f32[k] *
                                     inputs_f32[k + xnn_simd_size_f16]) +

@@ -100,6 +100,28 @@ TEST_F(F16SimdSCALARTest, Mul) {
   }
 }
 
+TEST_F(F16SimdSCALARTest, Accumulate) {
+  std::fill(inputs_.begin(), inputs_.begin() + xnn_simd_size_f16,
+            xnn_float16_from_bits(UINT16_C(0x7BFF)));
+  const xnn_simd_f16_t value = xnn_loadu_f16(inputs_.data());
+  xnn_simd_f16_accumulator_t accumulator = xnn_zero_f16_accumulator();
+  accumulator = xnn_accumulate_f16(accumulator, value);
+  accumulator = xnn_accumulate_f16(accumulator, value);
+  ASSERT_EQ(xnn_reduce_f16_accumulator(accumulator),
+        2.0f * 65504.0f * xnn_simd_size_f16);
+}
+
+TEST_F(F16SimdSCALARTest, FmaddRounding) {
+  const xnn_simd_f16_t value =
+      xnn_set1_f16(xnn_float16_from_bits(0x3C01));
+  const xnn_simd_f16_t offset =
+      xnn_set1_f16(xnn_float16_from_bits(0xBC02));
+  xnn_storeu_f16(output_.data(), xnn_fmadd_f16(value, value, offset));
+  for (size_t index = 0; index < xnn_simd_size_f16; index++) {
+    ASSERT_EQ(xnn_float16_to_bits(output_[index]), 0x0010);
+  }
+}
+
 TEST_F(F16SimdSCALARTest, Fmadd) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
@@ -114,7 +136,7 @@ TEST_F(F16SimdSCALARTest, Fmadd) {
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA || XNN_HAVE_FLOAT16
+#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(TruncToF16(inputs_f32[k] *
                                     inputs_f32[k + xnn_simd_size_f16]) +
@@ -571,6 +593,43 @@ TEST_F(F16SimdSCALARTest, CmpEq) {
                       xnn_float16_to_bits(inputs_[k + xnn_simd_size_f16])
                   ? 0xFFFF
                   : 0);
+  }
+}
+
+TEST_F(F16SimdSCALARTest, CmpLt) {
+  const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
+  const xnn_simd_f16_t b =
+      xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
+  const xnn_simd_f16_t res = xnn_cmplt_f16(a, b);
+  xnn_storeu_f16(output_.data(), res);
+  std::vector<float> inputs_f32 = ToFloat32(inputs_);
+  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+    ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+              inputs_f32[k] < inputs_f32[k + xnn_simd_size_f16]
+                  ? 0xFFFF : 0);
+  }
+}
+
+TEST_F(F16SimdSCALARTest, CmpLtSpecial) {
+  const uint16_t input_bits[][2] = {
+      {0x8000, 0x0000}, {0x0000, 0x8000}, {0x7E00, 0x3C00},
+      {0x3C00, 0x7E00}, {0xFC00, 0x7C00}, {0x7C00, 0xFC00},
+      {0xBC00, 0x3C00}, {0x3C00, 0xBC00}, {0x3C00, 0x3C00}};
+  for (const auto& bits : input_bits) {
+    const xnn_float16 lhs = xnn_float16_from_bits(bits[0]);
+    const xnn_float16 rhs = xnn_float16_from_bits(bits[1]);
+    std::fill(inputs_.begin(), inputs_.begin() + xnn_simd_size_f16, lhs);
+    std::fill(inputs_.begin() + xnn_simd_size_f16,
+              inputs_.begin() + 2 * xnn_simd_size_f16, rhs);
+    const xnn_simd_f16_t result = xnn_cmplt_f16(
+        xnn_loadu_f16(inputs_.data()),
+        xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16));
+    xnn_storeu_f16(output_.data(), result);
+    for (size_t index = 0; index < xnn_simd_size_f16; index++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[index]),
+                xnn_float16_to_float(lhs) < xnn_float16_to_float(rhs)
+                    ? 0xFFFF : 0);
+    }
   }
 }
 
