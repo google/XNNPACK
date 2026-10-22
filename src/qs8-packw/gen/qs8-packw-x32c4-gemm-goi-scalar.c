@@ -1641,6 +1641,10 @@ void xnn_qs8_packw_gemm_goi_ukernel_x32c4__scalar(
         out[122] = v30x2;
         out[123] = v30x3;
         w30 += 4;
+        out[124] = 0;
+        out[125] = 0;
+        out[126] = 0;
+        out[127] = 0;
         out += 128;
       }
 
