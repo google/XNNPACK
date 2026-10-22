@@ -3766,6 +3766,9 @@ static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
   const uint32_t transpose_node_id = weights_value->producer;
   struct xnn_node* transpose_node = &subgraph->nodes[transpose_node_id];
   const size_t num_perm_dims = transpose_node->params.transpose.num_dims;
+  if (num_perm_dims < 2) {
+    return xnn_status_success;
+  }
   size_t* perm = transpose_node->params.transpose.perm;
   bool is_last_dims = true;
   for (int k = 0; is_last_dims && k < num_perm_dims - 2; k++) {
