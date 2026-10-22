@@ -114,6 +114,8 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/u8-rminmax/gen/u8-rmin-hvx-u256-acc2.c",
     "src/u8-rminmax/gen/u8-rminmax-hvx-u256-acc2.c",
     "src/x32-packw/gen/x32-packw-gio-hvx-u2.c",
+    "src/x32-packw/gen/x32-packw-x32-gemm-goi-hvx-u32.c",
+    "src/x32-packw/gen/x32-packw-x64-gemm-goi-hvx-u32.c",
     "src/x32-transposec/gen/x32-transposec-32x32-multi-multi-hvx.c",
 ]
 

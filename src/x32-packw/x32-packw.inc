@@ -128,6 +128,8 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u8, 8
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_goi_ukernel_x32__hvx_u32, 32, 1, 1, 8, 1)
+XNN_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_goi_ukernel_x64__hvx_u32, 64, 1, 1, 8, 1)
 XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_gio_ukernel_x32__hvx_u2, 32, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2, 64, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_gio_ukernel_x96__hvx_u2, 96, 1, 1, 1, 1)

@@ -136,6 +136,8 @@ tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=
 tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=0 -D KBLOCK=2 -D ARCH=wasmsimd -o src/x32-packw/gen/x32-packw-gio-wasmsimd-u2.c
 
 ################################## Hexagon HVX #################################
+tools/xngen src/x32-packw/hvx.c.in -D NR=32 -D KBLOCK=32 -o src/x32-packw/gen/x32-packw-x32-gemm-goi-hvx-u32.c &
+tools/xngen src/x32-packw/hvx.c.in -D NR=64 -D KBLOCK=32 -o src/x32-packw/gen/x32-packw-x64-gemm-goi-hvx-u32.c &
 tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=32,64,96,128 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=hvx      -o src/x32-packw/gen/x32-packw-gio-hvx-u2.c
 
 wait

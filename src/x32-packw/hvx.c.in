@@ -1,0 +1,211 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR in [32, 64]
+$assert KBLOCK == 32
+$SIMD_TILE = NR // 32
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/simd/s32-hvx.h"
+
+
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__hvx_u${KBLOCK}(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t n_stride,
+  const uint32_t* weights,
+  const uint32_t* bias,
+  const void* scale,
+  uint32_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == 1);
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  const xnn_simd_s32_t vzero = xnn_set1_s32(0);
+  int32_t* out = (int32_t*) packed_weights;
+  const int32_t* b = (const int32_t*) bias;
+
+  do {
+    // NC main loop multiple of ${NR}
+    const int32_t* w0 = (const int32_t*) weights;
+    size_t n = nc;
+    for (; n >= ${NR}; n -= ${NR}) {
+      if XNN_LIKELY(b != NULL) {
+        $for N in range(SIMD_TILE):
+          const xnn_simd_s32_t vb${N} = xnn_loadu_s32(b + ${N*32});
+        $for N in range(SIMD_TILE):
+          xnn_store_s32(out + ${N*32}, vb${N});
+        b += ${NR};
+      } else {
+        $for N in range(SIMD_TILE):
+          xnn_store_s32(out + ${N*32}, vzero);
+      }
+      out += ${NR};
+
+      $for N in range(1, NR):
+        const int32_t* w${N} = w${N-1} + n_stride;
+
+      // KC main loop multiple of ${NR}x32 using 32x32 HVX butterfly transpose
+      size_t k = kc;
+      for (; k >= 32; k -= 32) {
+        $for N_OFFSET in range(0, NR, 32):
+          {
+            $for N in range(32):
+              const HVX_Vector v5_${N} = xnn_loadu_s32(w${N_OFFSET + N});
+              w${N_OFFSET + N} += 32;
+
+            $for N in range(16):
+              const HVX_VectorPair v4_${N} = Q6_W_vshuff_VVR(v5_${2*N+1}, v5_${2*N}, -4);
+
+            $for N in range(8):
+              const HVX_VectorPair v3_${2*N} = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_${2*N+1}), Q6_V_lo_W(v4_${2*N}), -8);
+              const HVX_VectorPair v3_${2*N+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_${2*N+1}), Q6_V_hi_W(v4_${2*N}), -8);
+
+            $for N in range(0, 16, 4):
+              $for O in range(2):
+                const HVX_VectorPair v2_${N+2*O} = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_${N+O+2}), Q6_V_lo_W(v3_${N+O}), -16);
+                const HVX_VectorPair v2_${N+2*O+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_${N+O+2}), Q6_V_hi_W(v3_${N+O}), -16);
+
+            $for N in range(0, 16, 8):
+              $for O in range(4):
+                const HVX_VectorPair v1_${N+2*O} = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_${N+O+4}), Q6_V_lo_W(v2_${N+O}), -32);
+                const HVX_VectorPair v1_${N+2*O+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_${N+O+4}), Q6_V_hi_W(v2_${N+O}), -32);
+
+            $for O in range(8):
+              const HVX_VectorPair v0_${2*O} = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_${O+8}), Q6_V_lo_W(v1_${O}), -64);
+              const HVX_VectorPair v0_${2*O+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_${O+8}), Q6_V_hi_W(v1_${O}), -64);
+
+            $for K in range(16):
+              xnn_store_s32(out + ${(2*K)*NR + N_OFFSET}, Q6_V_lo_W(v0_${K}));
+              xnn_store_s32(out + ${(2*K+1)*NR + N_OFFSET}, Q6_V_hi_W(v0_${K}));
+          }
+        out += ${NR*32};
+      }
+
+      // KC remainder (1..31)
+      for (; k >= 2; k -= 2) {
+        $for N in range(NR):
+          const int32_t v${N}_0 = w${N}[0];
+          const int32_t v${N}_1 = w${N}[1];
+          w${N} += 2;
+        $for N in range(NR):
+          out[${N}] = v${N}_0;
+          out[${N+NR}] = v${N}_1;
+        out += ${NR*2};
+      }
+      for (; k != 0; --k) {
+        $for N in range(NR):
+          const int32_t v${N} = *w${N}++;
+          out[${N}] = v${N};
+        out += ${NR};
+      }
+      out = (int32_t*) ((uintptr_t) out + extra_bytes);
+      w0 = w${NR-1} + n_stride - kc;
+    }
+
+    // NC remainder (1..${NR-1})
+    if XNN_UNLIKELY(n != 0) {
+      if XNN_LIKELY(b != NULL) {
+        size_t nb = n;
+        do {
+          *out++ = *b++;
+        } while (--nb != 0);
+        out += (${NR} - n);
+      } else {
+        $for N in range(SIMD_TILE):
+          xnn_store_s32(out + ${N*32}, vzero);
+        out += ${NR};
+      }
+
+      // NR remainder has less than ${NR} rows so last row is not loaded
+      $for N in range(1, NR-1):
+        const int32_t* w${N} = w${N-1} + n_stride;
+        $if N % 2 == 0:
+          if XNN_UNPREDICTABLE(n <= ${N}) {
+            w${N} = w${N-1};
+          }
+        $else:
+          if XNN_UNPREDICTABLE(n < ${N+1}) {
+            w${N} = w${N-1};
+          }
+
+      // KC main loop multiple of ${NR}x32 using 32x32 HVX butterfly transpose
+      size_t k = kc;
+      for (; k >= 32; k -= 32) {
+        $for N_OFFSET in range(0, NR, 32):
+          {
+            $for N in range(32):
+              $if N_OFFSET + N < NR - 1:
+                const HVX_Vector v5_${N} = xnn_loadu_s32(w${N_OFFSET + N});
+                w${N_OFFSET + N} += 32;
+              $else:
+                const HVX_Vector v5_${N} = vzero;
+
+            $for N in range(16):
+              const HVX_VectorPair v4_${N} = Q6_W_vshuff_VVR(v5_${2*N+1}, v5_${2*N}, -4);
+
+            $for N in range(8):
+              const HVX_VectorPair v3_${2*N} = Q6_W_vshuff_VVR(Q6_V_lo_W(v4_${2*N+1}), Q6_V_lo_W(v4_${2*N}), -8);
+              const HVX_VectorPair v3_${2*N+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v4_${2*N+1}), Q6_V_hi_W(v4_${2*N}), -8);
+
+            $for N in range(0, 16, 4):
+              $for O in range(2):
+                const HVX_VectorPair v2_${N+2*O} = Q6_W_vshuff_VVR(Q6_V_lo_W(v3_${N+O+2}), Q6_V_lo_W(v3_${N+O}), -16);
+                const HVX_VectorPair v2_${N+2*O+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v3_${N+O+2}), Q6_V_hi_W(v3_${N+O}), -16);
+
+            $for N in range(0, 16, 8):
+              $for O in range(4):
+                const HVX_VectorPair v1_${N+2*O} = Q6_W_vshuff_VVR(Q6_V_lo_W(v2_${N+O+4}), Q6_V_lo_W(v2_${N+O}), -32);
+                const HVX_VectorPair v1_${N+2*O+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v2_${N+O+4}), Q6_V_hi_W(v2_${N+O}), -32);
+
+            $for O in range(8):
+              const HVX_VectorPair v0_${2*O} = Q6_W_vshuff_VVR(Q6_V_lo_W(v1_${O+8}), Q6_V_lo_W(v1_${O}), -64);
+              const HVX_VectorPair v0_${2*O+1} = Q6_W_vshuff_VVR(Q6_V_hi_W(v1_${O+8}), Q6_V_hi_W(v1_${O}), -64);
+
+            $for K in range(16):
+              xnn_store_s32(out + ${(2*K)*NR + N_OFFSET}, Q6_V_lo_W(v0_${K}));
+              xnn_store_s32(out + ${(2*K+1)*NR + N_OFFSET}, Q6_V_hi_W(v0_${K}));
+          }
+        out += ${NR*32};
+      }
+
+      // KC remainder (1..31)
+      for (; k >= 2; k -= 2) {
+        $for N in range(NR-1):
+          const int32_t v${N}_0 = w${N}[0];
+          const int32_t v${N}_1 = w${N}[1];
+          w${N} += 2;
+        $for N in range(NR-1):
+          out[${N}] = v${N}_0;
+          out[${N+NR}] = v${N}_1;
+        out += ${NR*2};
+      }
+      for (; k != 0; --k) {
+        $for N in range(NR-1):
+          const int32_t v${N} = *w${N}++;
+          out[${N}] = v${N};
+        out += ${NR};
+      }
+      out = (int32_t*) ((uintptr_t) out + extra_bytes);
+    }
+    weights += nc * n_stride;
+  } while (--g != 0);
+}
