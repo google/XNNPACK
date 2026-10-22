@@ -831,5 +831,40 @@ INSTANTIATE_TEST_SUITE_P(
       });
 #endif  // XNN_ENABLE_AVX512BF16 && XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
 
+// Every case in CreateTests1 uses nc == nr, so the nr_block_start loop inside
+// xnn_pack_bf16_f32_gemm_goi_w never iterates more than once and the second
+// and later blocks are never packed. With kc and nr both odd the running
+// offset lands 2 mod 4, which made the bias store misaligned.
+TEST(BF16_F32_GEMM_MINMAX, pack_goi_w_nc_greater_than_nr) {
+  const size_t g = 1, nc = 7, kc = 3, nr = 3, kr = 1, sr = 1;
+  const size_t n_stride = kc;
+  std::vector<xnn_bfloat16> kernel(g * nc * n_stride, xnn_bfloat16(1.0f));
+  std::vector<float> bias(g * nc);
+  for (size_t i = 0; i < bias.size(); i++) {
+    bias[i] = 100.0f + static_cast<float>(i);
+  }
+  const size_t packed_elements = nc * (kc + 2 * nr) + 4 * nr + 16;
+  std::vector<uint8_t> packed(packed_elements * sizeof(xnn_bfloat16), 0);
+
+  xnn_pack_bf16_f32_gemm_goi_w(g, nc, kc, nr, kr, sr, n_stride, kernel.data(),
+                               bias.data(), /*scale=*/nullptr, packed.data(),
+                               /*extra_bytes=*/0, /*params=*/nullptr);
+
+  // The bias is laid out as floats at the head of each nr block.
+  const float* packed_f32 = reinterpret_cast<const float*>(packed.data());
+  for (size_t i = 0; i < nr; i++) {
+    EXPECT_EQ(packed_f32[i], bias[i]) << "at bias index " << i;
+  }
+
+  // Same again with a null bias, which takes the fill path instead of the copy.
+  std::fill(packed.begin(), packed.end(), uint8_t(0xAB));
+  xnn_pack_bf16_f32_gemm_goi_w(g, nc, kc, nr, kr, sr, n_stride, kernel.data(),
+                               /*bias=*/nullptr, /*scale=*/nullptr,
+                               packed.data(), /*extra_bytes=*/0,
+                               /*params=*/nullptr);
+  for (size_t i = 0; i < nr; i++) {
+    EXPECT_EQ(packed_f32[i], 0.0f) << "at zero-bias index " << i;
+  }
+}
 
 }  // namespace
