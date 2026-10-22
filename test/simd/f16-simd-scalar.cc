@@ -99,7 +99,6 @@ TEST_F(F16SimdSCALARTest, Mul) {
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16]));
   }
 }
-
 TEST_F(F16SimdSCALARTest, Accumulate) {
   std::fill(inputs_.begin(), inputs_.begin() + xnn_simd_size_f16,
             xnn_float16_from_bits(UINT16_C(0x7BFF)));
@@ -108,7 +107,7 @@ TEST_F(F16SimdSCALARTest, Accumulate) {
   accumulator = xnn_accumulate_f16(accumulator, value);
   accumulator = xnn_accumulate_f16(accumulator, value);
   ASSERT_EQ(xnn_reduce_f16_accumulator(accumulator),
-        2.0f * 65504.0f * xnn_simd_size_f16);
+            2.0f * 65504.0f * xnn_simd_size_f16);
 }
 
 TEST_F(F16SimdSCALARTest, FmaddRounding) {
@@ -595,7 +594,6 @@ TEST_F(F16SimdSCALARTest, CmpEq) {
                   : 0);
   }
 }
-
 TEST_F(F16SimdSCALARTest, CmpLt) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b =
