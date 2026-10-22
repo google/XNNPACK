@@ -658,6 +658,9 @@ static void init_pqs8_qc4w_gemm_config(void) {
       return;
     }
     pqs8_qc4w_gemm_config.arch = xnn_arch_arm_sme2;
+    pqs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] =
+        XNN_INIT_HMP_GEMM_UKERNEL(
+            xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2);
     pqs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_GEMM_UKERNEL(
             xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2);
