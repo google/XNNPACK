@@ -22,6 +22,7 @@ py_library(
 [py_binary(
     name = name,
     srcs = [name + ".py"],
+    legacy_create_init = False,
     tags = [
         "manual",
         "notap",
@@ -51,6 +52,7 @@ py_library(
 [py_binary(
     name = name,
     srcs = [name + ".py"],
+    legacy_create_init = False,
     tags = [
         "manual",
         "notap",
@@ -74,6 +76,7 @@ py_library(
 [py_binary(
     name = name,
     srcs = [name + ".py"],
+    legacy_create_init = False,
     tags = [
         "manual",
         "notap",
@@ -109,6 +112,7 @@ py_library(
 [py_binary(
     name = name,
     srcs = [name + ".py"],
+    legacy_create_init = False,
     tags = [
         "manual",
         "notap",
