@@ -10,6 +10,7 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/subgraph.h"
@@ -61,6 +62,50 @@ TEST(PackLH, ReshapeOverflowInputElements) {
 
   const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
   EXPECT_EQ(xnn_status_invalid_parameter, reshape_status);
+}
+
+TEST(PackLH, ReshapeOverflowInputStride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_operator_t pack_lh_op = nullptr;
+  const enum xnn_status create_status =
+      xnn_create_pack_lh_x8(/*flags=*/0, &pack_lh_op);
+  if (create_status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, create_status);
+  ASSERT_NE(pack_lh_op, nullptr);
+
+  size_t output_size_bytes = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_pack_lh_x8(pack_lh_op, /*num_groups=*/1, /*batch_size=*/1,
+                             /*channels=*/SIZE_MAX,
+                             &output_size_bytes, /*threadpool=*/nullptr));
+  EXPECT_EQ(SIZE_MAX, output_size_bytes);
+
+  EXPECT_EQ(xnn_status_success, xnn_delete_operator(pack_lh_op));
+}
+
+TEST(PackLH, RuntimeTensorSizeOverflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_qp8_f32_qc8w_gemm_config();
+  if (gemm_config == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_runtime_value value = {};
+  value.type = xnn_value_type_dense_tensor;
+  value.datatype = xnn_datatype_qpint8;
+  value.gemm_config = gemm_config;
+  value.shape.num_dims = 3;
+  value.shape.dim[0] = 2;
+  value.shape.dim[1] = (SIZE_MAX / 2) + 1;
+  value.shape.dim[2] = 1;
+  value.flags = XNN_FLAG_SQUASH_GROUPS;
+
+  EXPECT_EQ(SIZE_MAX, xnn_runtime_tensor_get_size(&value));
 }
 
 TEST(PackLH, DefineRejectsUnsupportedDatatype) {
