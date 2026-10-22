@@ -28,6 +28,9 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
                        bool consistent_arithmetic, uint32_t input_b_id);
 
+uint32_t define_pack_a(ynn_subgraph& subgraph, slinky::index_t tile_m,
+                       slinky::index_t tile_k, int m_dim, uint32_t input_a_id);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_SUBGRAPH_DOT_H_
