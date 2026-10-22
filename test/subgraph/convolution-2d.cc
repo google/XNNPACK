@@ -554,6 +554,55 @@ TEST(Convolution2D, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+// group_output_channels * groups is computed with an overflow check before it
+// is compared against the filter's output channel count. Before the check
+// existed, the product wrapped and the comparison was made against the wrapped
+// value, so this input was reported as a shape mismatch
+// (xnn_status_invalid_parameter) rather than as the overflow it is.
+TEST(CONVOLUTION_2D, group_channel_product_overflow_is_reported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(3, 0, &subgraph), xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t input_dims[4] = {1, 2, 2, 1};
+  const size_t filter_dims[4] = {1, 1, 1, 1};
+  const size_t output_dims[4] = {1, 2, 2, 1};
+  const float filter_data[1] = {0.0f};
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 4, input_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 4, filter_dims, filter_data,
+                /*external_id=*/1, /*flags=*/0, &filter_id),
+            xnn_status_success);
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 4, output_dims, nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                &output_id),
+            xnn_status_success);
+
+  // (SIZE_MAX / 2 + 1) * 2 == SIZE_MAX + 2, which is 1 modulo 2^64, so it
+  // matches the filter's single output channel when it wraps.
+  const size_t overflowing_group_output_channels = (SIZE_MAX / 2) + 1;
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_define_convolution_2d(
+                subgraph, /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0, /*kernel_height=*/1,
+                /*kernel_width=*/1, /*subsampling_height=*/1,
+                /*subsampling_width=*/1, /*dilation_height=*/1,
+                /*dilation_width=*/1, /*groups=*/2, /*group_input_channels=*/1,
+                overflowing_group_output_channels, -INFINITY, INFINITY,
+                input_id, filter_id, XNN_INVALID_VALUE_ID, output_id, 0));
+}
+
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
