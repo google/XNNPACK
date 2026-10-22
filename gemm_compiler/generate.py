@@ -67,5 +67,10 @@ def generate_gemm_microkernel(
   ]
   asm_string = '\n'.join(stripped_lines)
 
-  with open(output_file, 'w') as f:
-    f.write(asm_string)
+  txt_changed = True
+  if os.path.exists(output_file):
+    with open(output_file, 'r', encoding='utf-8') as f:
+      txt_changed = f.read() != asm_string
+  if txt_changed:
+    with open(output_file, 'w', encoding='utf-8') as f:
+      f.write(asm_string)

@@ -6,6 +6,7 @@
 
 import argparse
 import codecs
+import concurrent.futures
 import io
 import os
 import re
@@ -112,6 +113,12 @@ _VERIFICATION_IGNORE_SUBDIRS = {
 }
 
 
+def _extract_microkernels_from_file(args):
+  root_dir, filepath = args
+  with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
+    return _MICROKERNEL_NAME_REGEX.findall(f.read())
+
+
 def overwrite_if_changed(filepath, content):
   if isinstance(content, io.IOBase):
     content.seek(0)
@@ -175,13 +182,13 @@ def main(args):
   cmake_gen_dir = os.path.join(dst_dir, 'cmake', 'gen')
   if not os.path.exists(cmake_gen_dir):
     os.makedirs(cmake_gen_dir, exist_ok=True)
-  ignore_roots = {
-      os.path.join(src_dir, 'configs') + os.sep,
-      os.path.join(src_dir, 'enums') + os.sep,
-      os.path.join(src_dir, 'operators') + os.sep,
-      os.path.join(src_dir, 'subgraph') + os.sep,
-      os.path.join(src_dir, 'tables') + os.sep,
-      os.path.join(src_dir, 'xnnpack') + os.sep,
+  ignore_dirs = {
+      'configs',
+      'enums',
+      'operators',
+      'subgraph',
+      'tables',
+      'xnnpack',
   }
   c_microkernels_per_isa = {isa: [] for isa in _ISA_LIST if isa not in _ISA_MAP}
   c_microkernels_per_isa['neon_aarch64'] = list()
@@ -192,12 +199,13 @@ def main(args):
   c_microkernels_per_isa['neonsme2'] = list()
   asm_microkernels_per_arch = {arch: [] for arch in _ARCH_LIST}
   microkernel_name_to_filename = dict()
-  for root, _, files in os.walk(src_dir, topdown=False):
+  file_entries = []
+  for root, dirs, files in os.walk(src_dir, topdown=True):
     if root == src_dir:
-      continue
-    if any((root + os.sep).startswith(ignored_root) for ignored_root in ignore_roots):
+      dirs[:] = [d for d in dirs if d not in ignore_dirs]
       continue
 
+    subdir = os.path.relpath(root, root_dir)
     for name in files:
       if name.endswith('.in'):
         continue
@@ -209,7 +217,6 @@ def main(args):
       if ext == '.sollya':
         continue
 
-      subdir = os.path.relpath(root, root_dir)
       filepath = os.path.join(subdir, name)
       if 'pipertmp' in filepath:
         continue
@@ -222,97 +229,100 @@ def main(args):
       ):
         continue
 
-      # Build microkernel name -> microkernel filepath mapping
-      with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
-        content = f.read()
-        microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
-        if not microkernels:
-          if subdir in _VERIFICATION_IGNORE_SUBDIRS:
-            microkernel_name_to_filename[
-                os.path.splitext(os.path.basename(filepath))[0]
-            ] = filepath
-          else:
-            print('No microkernel found in %s' % filepath)
-        else:
-          microkernels = sorted(set(microkernels))
-          if len(microkernels) > 1:
-            if ext == '.cc':
-              # In generators it is normal to have multiple implementations in
-              # the same file. We need to filter out non-generators though.
-              microkernels = sorted(
-                  filter(
-                      lambda fn: fn.startswith('xnn_generate_'), microkernels
-                  )
-              )
-              if (
-                  not microkernels
-                  and subdir not in _VERIFICATION_IGNORE_SUBDIRS
-              ):
-                print('No microkernel generator found in %s' % filepath)
+      file_entries.append((subdir, filepath, basename, ext))
 
-              for microkernel in microkernels:
-                if microkernel in microkernel_name_to_filename:
-                  print(
-                      'Duplicate microkernel generator definition: %s and %s'
-                      % (microkernel_name_to_filename[microkernel], filepath)
-                  )
-                else:
-                  microkernel_name_to_filename[microkernel] = filepath
-            else:
-              # Extract the individual function names and their offsets.
-              matches = list(re.finditer(_MICROKERNEL_NAME_REGEX, content))
+  with concurrent.futures.ProcessPoolExecutor(max_workers=32) as executor:
+    extracted_microkernels = list(
+        executor.map(
+            _extract_microkernels_from_file,
+            [(root_dir, entry[1]) for entry in file_entries],
+            chunksize=200,
+        )
+    )
 
-              # Write them to temporary files.
-              for k, match in enumerate(matches):
-                microkernel = match.group(0)
-                if microkernel in microkernel_name_to_filename:
-                  print(
-                      'Duplicate microkernel definition: %s and %s (%ith'
-                      ' function)'
-                      % (
-                          microkernel_name_to_filename[microkernel],
-                          filepath,
-                          k,
-                      )
-                  )
-                microkernel_name_to_filename[microkernel] = filepath
+  for (subdir, filepath, basename, ext), raw_microkernels in zip(
+      file_entries, extracted_microkernels
+  ):
+    # Build microkernel name -> microkernel filepath mapping
+    microkernels = list(raw_microkernels)
+    if not microkernels:
+      if subdir in _VERIFICATION_IGNORE_SUBDIRS:
+        microkernel_name_to_filename[
+            os.path.splitext(os.path.basename(filepath))[0]
+        ] = filepath
+      else:
+        print('No microkernel found in %s' % filepath)
+    else:
+      microkernels = sorted(set(microkernels))
+      if len(microkernels) > 1:
+        if ext == '.cc':
+          # In generators it is normal to have multiple implementations in
+          # the same file. We need to filter out non-generators though.
+          microkernels = sorted(
+              filter(lambda fn: fn.startswith('xnn_generate_'), microkernels)
+          )
+          if not microkernels and subdir not in _VERIFICATION_IGNORE_SUBDIRS:
+            print('No microkernel generator found in %s' % filepath)
 
-          else:
-            microkernel = microkernels[0]
+          for microkernel in microkernels:
             if microkernel in microkernel_name_to_filename:
               print(
-                  'Duplicate microkernel definition: %s and %s'
+                  'Duplicate microkernel generator definition: %s and %s'
                   % (microkernel_name_to_filename[microkernel], filepath)
               )
             else:
               microkernel_name_to_filename[microkernel] = filepath
+        else:
+          # Extract the individual function names.
+          for k, microkernel in enumerate(raw_microkernels):
+            if microkernel in microkernel_name_to_filename:
+              print(
+                  'Duplicate microkernel definition: %s and %s (%ith'
+                  ' function)'
+                  % (
+                      microkernel_name_to_filename[microkernel],
+                      filepath,
+                      k,
+                  )
+              )
+            microkernel_name_to_filename[microkernel] = filepath
 
-      if ext == '.c':
-        arch = None
-        for component in basename.split('-'):
-          if component in _ARCH_LIST:
-            arch = component
-          if component in _ISA_LIST:
-            isa = _ISA_MAP.get(component, component)
-            if (
-                isa == 'wasmrelaxedsimd'
-                and basename.startswith('f16-')
-                and not basename.startswith('f16-f32acc-')
-                and not basename.startswith('f16-f32-vcvt-')
-            ):
-              isa = 'wasmrelaxedsimdfp16'
-            key = isa if arch is None else f'{isa}_{arch}'
-            c_microkernels_per_isa[key].append(filepath)
-            break
+      else:
+        microkernel = microkernels[0]
+        if microkernel in microkernel_name_to_filename:
+          print(
+              'Duplicate microkernel definition: %s and %s'
+              % (microkernel_name_to_filename[microkernel], filepath)
+          )
         else:
-          print('Unknown ISA for C microkernel %s' % filepath)
-      elif ext == '.S':
-        for component in basename.split('-'):
-          if component in _ARCH_LIST:
-            asm_microkernels_per_arch[component].append(filepath)
-            break
-        else:
-          print('Unknown architecture for assembly microkernel %s' % filepath)
+          microkernel_name_to_filename[microkernel] = filepath
+
+    if ext == '.c':
+      arch = None
+      for component in basename.split('-'):
+        if component in _ARCH_LIST:
+          arch = component
+        if component in _ISA_LIST:
+          isa = _ISA_MAP.get(component, component)
+          if (
+              isa == 'wasmrelaxedsimd'
+              and basename.startswith('f16-')
+              and not basename.startswith('f16-f32acc-')
+              and not basename.startswith('f16-f32-vcvt-')
+          ):
+            isa = 'wasmrelaxedsimdfp16'
+          key = isa if arch is None else f'{isa}_{arch}'
+          c_microkernels_per_isa[key].append(filepath)
+          break
+      else:
+        print('Unknown ISA for C microkernel %s' % filepath)
+    elif ext == '.S':
+      for component in basename.split('-'):
+        if component in _ARCH_LIST:
+          asm_microkernels_per_arch[component].append(filepath)
+          break
+      else:
+        print('Unknown architecture for assembly microkernel %s' % filepath)
 
   # Collect filenames of production microkernels as a set
   prod_microkernels = set()

@@ -62,65 +62,77 @@ def escape(line):
   return " + ".join(output_parts)
 
 
+_BYTECODE_CACHE = {}
+_FILE_CACHE = {}
+
+
 def preprocess(input_text, input_globals, input_path="codegen"):
-  input_lines = input_text.splitlines()
-  python_lines = []
+  cache_key = (input_path, input_text)
+  python_bytecode = _BYTECODE_CACHE.get(cache_key)
+  if python_bytecode is None:
+    input_lines = input_text.splitlines()
+    python_lines = []
 
-  blank_lines = 0
+    blank_lines = 0
 
-  last_line = ""
-  last_indent = ""
+    last_line = ""
+    last_indent = ""
 
-  # List of tuples (total_index, python_indent)
-  indent_stack = [("", "")]
+    # List of tuples (total_index, python_indent)
+    indent_stack = [("", "")]
 
-  # Indicates whether this is the first line inside Python
-  # code block (i.e. for, while, if, elif, else)
-  python_block_start = True
-  for i, input_line in enumerate(input_lines):
-    if input_line == "":
-      blank_lines += 1
-      continue
+    # Indicates whether this is the first line inside Python
+    # code block (i.e. for, while, if, elif, else)
+    python_block_start = True
+    for i, input_line in enumerate(input_lines):
+      if input_line == "":
+        blank_lines += 1
+        continue
 
-    input_indent = extract_leading_whitespace(input_line)
-    if python_block_start:
-      assert input_indent.startswith(last_indent)
-      extra_python_indent = input_indent[len(last_indent) :]
-      python_indent = indent_stack[-1][1] + extra_python_indent
-      indent_stack.append((input_indent, python_indent))
-      assert input_indent.startswith(indent_stack[-1][0])
-    else:
-      while not input_indent.startswith(indent_stack[-1][0]):
-        del indent_stack[-1]
-    python_block_start = False
+      input_indent = extract_leading_whitespace(input_line)
+      if python_block_start:
+        assert input_indent.startswith(last_indent)
+        extra_python_indent = input_indent[len(last_indent) :]
+        python_indent = indent_stack[-1][1] + extra_python_indent
+        indent_stack.append((input_indent, python_indent))
+        assert input_indent.startswith(indent_stack[-1][0])
+      else:
+        while not input_indent.startswith(indent_stack[-1][0]):
+          del indent_stack[-1]
+      python_block_start = False
 
-    python_indent = indent_stack[-1][1]
-    stripped_input_line = input_line.strip()
-    if stripped_input_line.startswith(
-        "$"
-    ) and not stripped_input_line.startswith("${"):
-      if stripped_input_line.endswith(":"):
-        python_block_start = True
-      while blank_lines != 0:
-        python_lines.append(python_indent + "print(file=OUT_STREAM)")
-        blank_lines -= 1
-      python_lines.append(python_indent + stripped_input_line.replace("$", ""))
-    else:
-      assert input_line.startswith(python_indent)
-      while blank_lines != 0:
-        python_lines.append(python_indent + "print(file=OUT_STREAM)")
-        blank_lines -= 1
-      python_lines.append(
-          python_indent
-          + "print(%s, file=OUT_STREAM)"
-          % escape(input_line[len(python_indent) :])
-      )
-    last_line = input_line
-    last_indent = input_indent
+      python_indent = indent_stack[-1][1]
+      stripped_input_line = input_line.strip()
+      if stripped_input_line.startswith(
+          "$"
+      ) and not stripped_input_line.startswith("${"):
+        if stripped_input_line.endswith(":"):
+          python_block_start = True
+        while blank_lines != 0:
+          python_lines.append(python_indent + "print(file=OUT_STREAM)")
+          blank_lines -= 1
+        python_lines.append(
+            python_indent + stripped_input_line.replace("$", "")
+        )
+      else:
+        assert input_line.startswith(python_indent)
+        while blank_lines != 0:
+          python_lines.append(python_indent + "print(file=OUT_STREAM)")
+          blank_lines -= 1
+        python_lines.append(
+            python_indent
+            + "print(%s, file=OUT_STREAM)"
+            % escape(input_line[len(python_indent) :])
+        )
+      last_line = input_line
+      last_indent = input_indent
 
-  while blank_lines != 0:
-    python_lines.append(python_indent + "print(file=OUT_STREAM)")
-    blank_lines -= 1
+    while blank_lines != 0:
+      python_lines.append(python_indent + "print(file=OUT_STREAM)")
+      blank_lines -= 1
+
+    python_bytecode = compile("\n".join(python_lines), input_path, "exec")
+    _BYTECODE_CACHE[cache_key] = python_bytecode
 
   exec_globals = dict(input_globals)
   if sys.version_info > (3, 0):
@@ -128,7 +140,6 @@ def preprocess(input_text, input_globals, input_path="codegen"):
   else:
     output_stream = io.BytesIO()
   exec_globals["OUT_STREAM"] = output_stream
-  python_bytecode = compile("\n".join(python_lines), input_path, "exec")
   exec(python_bytecode, exec_globals)
 
   return output_stream.getvalue()
@@ -146,11 +157,16 @@ PREAMBLE = """\
 def main(args):
   options = parser.parse_args(args)
 
-  input_text = codecs.open(options.input[0], "r", encoding="utf-8").read()
+  input_path = options.input[0]
+  input_text = _FILE_CACHE.get(input_path)
+  if input_text is None:
+    with codecs.open(input_path, "r", encoding="utf-8") as input_file:
+      input_text = input_file.read()
+    _FILE_CACHE[input_path] = input_text
   python_globals = dict(chain(*options.defines))
   output_text = PREAMBLE.format(
-      template=options.input[0], generator=sys.argv[0]
-  ) + preprocess(input_text, python_globals, options.input[0])
+      template=input_path, generator=sys.argv[0]
+  ) + preprocess(input_text, python_globals, input_path)
 
   xnncommon.overwrite_if_changed(options.output, output_text)
 

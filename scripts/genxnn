@@ -1,35 +1,23 @@
 #!/bin/bash
 
-function my_generate1() {
-  files_changed=$(scripts/check_files_changed.py $1)
-  if [[ $files_changed ]]
-  then
-    if ${VERBOSE}; then
-      echo $1
-    fi
-    if ${DEBUG}; then
-      echo $files_changed
-    fi
-    touch $files_changed
-    bash -c $1 &
-  fi
-}
-
-function my_generatef() {
-  if ${VERBOSE}; then
-    echo $1
-  fi
-  bash -c $1 &
-}
-
-export -f my_generate1
-export -f my_generatef
-
-export FORCE='false'
+export PYTHONDONTWRITEBYTECODE=1
+export FORCE='true'
 export VERBOSE='false'
 export DEBUG='false'
+export UPDATE='true'
+export GEMM='false'
 
-while getopts ':vfd' 'OPTKEY'; do
+function usage() {
+  echo "Usage: $(basename "$0") [-f] [-n] [-u] [-v] [-d] [-h]"
+  echo "  -f  Full regeneration, including gemm_compiler assembly (.S) microkernels"
+  echo "  -n  Only regenerate changed files (disable force)"
+  echo "  -u  Skip running update-microkernels.py"
+  echo "  -v  Verbose output"
+  echo "  -d  Debug output"
+  echo "  -h  Display this help message"
+}
+
+while getopts ':vfdnuh' 'OPTKEY'; do
     case ${OPTKEY} in
         'v')
             export VERBOSE='true'
@@ -39,17 +27,31 @@ while getopts ':vfd' 'OPTKEY'; do
             ;;
         'f')
             export FORCE='true'
+            export GEMM='true'
+            ;;
+        'n')
+            export FORCE='false'
+            ;;
+        'u')
+            export UPDATE='false'
+            ;;
+        'h')
+            usage
+            exit 0
             ;;
         '?')
             echo "INVALID OPTION -- ${OPTARG}" >&2
+            usage >&2
             exit 1
             ;;
         ':')
             echo "MISSING ARGUMENT for option -- ${OPTARG}" >&2
+            usage >&2
             exit 1
             ;;
         *)
             echo "UNIMPLEMENTED OPTION -- ${OPTKEY}" >&2
+            usage >&2
             exit 1
             ;;
     esac
@@ -59,13 +61,131 @@ done
 shift $(( OPTIND - 1 ))
 [[ "${1}" == "--" ]] && shift
 
-if ${FORCE}; then
-  find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generatef {}' \;
-else
-  find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generate1 {}' \;
+if ${GEMM}; then
+  if ${VERBOSE}; then
+    echo python3 -B gemm_compiler/generate_gemm_microkernels_main.py
+  fi
+  PYTHONPATH=..:. python3 -B gemm_compiler/generate_gemm_microkernels_main.py &
 fi
+
+python3 -B - << 'EOF'
+import concurrent.futures
+import glob
+import multiprocessing
+import os
+import re
+import shlex
+import subprocess
+import sys
+
+scripts_dir = 'scripts/'
+tools_dir = 'tools/'
+sys.path.insert(0, scripts_dir)
+sys.path.insert(0, tools_dir)
+import check_files_changed
+import xngen
+
+force = os.environ.get('FORCE') == 'true'
+verbose = os.environ.get('VERBOSE') == 'true'
+debug = os.environ.get('DEBUG') == 'true'
+
+_script_code_cache = {}
+
+
+def run_batch(batch):
+  for kind, cmd in batch:
+    sys.argv = cmd
+    if kind == 'xngen':
+      xngen.main(cmd[1:])
+    elif kind == 'py':
+      code = _script_code_cache.get(cmd[0])
+      if code is None:
+        with open(cmd[0], 'r', encoding='utf-8') as f:
+          code = compile(f.read(), cmd[0], 'exec')
+        _script_code_cache[cmd[0]] = code
+      exec(code, {'__name__': '__main__', '__file__': cmd[0]})
+
+
+tasks = []
+sh_fallbacks = []
+file_edit_dates = {}
+for script in sorted(glob.glob(os.path.join(scripts_dir, 'generate-*.sh'))):
+  if not force:
+    changed = check_files_changed.find_changed_files(
+        script, file_edit_dates=file_edit_dates
+    )
+    if not changed:
+      continue
+    if verbose:
+      print(script)
+    if debug:
+      print('\n'.join(changed))
+    changed_set = set(changed)
+  else:
+    if verbose:
+      print(script)
+    changed_set = None
+
+  with open(script, 'r', encoding='utf-8') as f:
+    content = re.sub(r'\\[ \t]*\r?\n', ' ', f.read())
+  script_tasks = []
+  fallback = False
+  for raw_line in content.splitlines():
+    line = raw_line.strip()
+    if (
+        not line
+        or line.startswith('#')
+        or line == 'wait'
+        or re.match(r'^[a-zA-Z0-9_]+=\$!$', line)
+        or line == 'status=0'
+        or line.startswith('wait ')
+        or line.startswith('exit ')
+    ):
+      continue
+    if line.endswith('&'):
+      line = line[:-1].strip()
+    if changed_set is not None and not any(out in line for out in changed_set):
+      continue
+    tokens = shlex.split(line)
+    if tokens[0] == tools_dir + 'xngen':
+      script_tasks.append(('xngen', tokens))
+    elif tokens[0].startswith(tools_dir + 'generate-') and tokens[0].endswith(
+        '.py'
+    ):
+      script_tasks.append(('py', tokens))
+    else:
+      fallback = True
+      break
+  if fallback:
+    sh_fallbacks.append(script)
+  else:
+    tasks.extend(script_tasks)
+
+for s in sh_fallbacks:
+  subprocess.run(['bash', s], check=True)
+
+if tasks:
+  batch_size = max(1, min(50, (len(tasks) + 31) // 32))
+  batches = [tasks[i : i + batch_size] for i in range(0, len(tasks), batch_size)]
+  # This script is read from stdin, so worker processes must be forked: the
+  # 'spawn' (macOS default) and 'forkserver' (Linux default from Python 3.14)
+  # start methods cannot re-import run_batch from __main__.
+  if 'fork' in multiprocessing.get_all_start_methods():
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=min(32, len(batches)),
+        mp_context=multiprocessing.get_context('fork'),
+    ) as ex:
+      for _ in ex.map(run_batch, batches):
+        pass
+  else:
+    for batch in batches:
+      run_batch(batch)
+EOF
+
 wait
-if ${VERBOSE}; then
-  echo ./tools/update-microkernels.py
+if ${UPDATE}; then
+  if ${VERBOSE}; then
+    echo ./tools/update-microkernels.py
+  fi
+  python3 -B ./tools/update-microkernels.py
 fi
-./tools/update-microkernels.py

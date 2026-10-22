@@ -2,6 +2,52 @@
 
 import argparse
 import os
+import re
+
+
+def find_changed_files(
+    script_to_check, file_paths_contain='/', file_edit_dates=None
+):
+  if file_edit_dates is None:
+    file_edit_dates = {}
+  outputs = {}
+
+  def get_mtime(path):
+    if path not in file_edit_dates:
+      try:
+        file_edit_dates[path] = os.path.getmtime(path)
+      except OSError:
+        file_edit_dates[path] = 0
+    return file_edit_dates[path]
+
+  with open(script_to_check, 'r', encoding='utf-8') as f:
+    content = re.sub(r'\\[ \t]*\r?\n', ' ', f.read())
+    for line in content.splitlines():
+      if line.lstrip().startswith('#'):
+        continue
+      file_names = [x.strip() for x in line.split(' ') if file_paths_contain in x]
+      if len(file_names) >= 3:
+        in_file = file_names[1]
+        in_mtime = get_mtime(in_file)
+        if in_mtime == 0:
+          continue
+        for out_file in file_names[2:]:
+          get_mtime(out_file)
+          outputs[out_file] = in_file
+      elif len(file_names) == 2:
+        in_file = file_names[0]
+        in_mtime = get_mtime(in_file)
+        if in_mtime == 0:
+          continue
+        out_file = file_names[1]
+        get_mtime(out_file)
+        outputs[out_file] = in_file
+
+  return [
+      out_file
+      for out_file, in_file in outputs.items()
+      if file_edit_dates[in_file] > file_edit_dates[out_file]
+  ]
 
 
 def main():
@@ -12,41 +58,8 @@ def main():
   )
   args = parser.parse_args()
 
-  script_to_check = args.filename
-  file_paths_contain = args.files_contain
-
-  file_edit_dates = {}
-  outputs = {}
-  files_exist = {}
-  with open(script_to_check, 'r') as f:
-    for line in f.readlines():
-      if line.lstrip().startswith('#'):
-        continue
-      file_names = [x.strip() for x in line.split(' ')]
-      # Filter file names based on presence of 'files_contain'
-      file_names = [x for x in file_names if file_paths_contain in x]
-      if len(file_names) >= 3:
-        # outputs[file_names[1]] = file_names[0]
-        # i==0 is script. i==1 is input file. i>=1 is for output files
-        for i, file_name in enumerate(file_names):
-          if file_name not in files_exist:
-            files_exist[file_name] = os.path.exists(file_name)
-
-          # if file doesn't exist
-          if not files_exist[file_name]:
-            # if output file does not exist
-            if i > 1:
-              file_edit_dates[file_name] = 0
-            else:
-              continue
-          if file_name not in file_edit_dates:
-            file_edit_dates[file_name] = os.path.getmtime(file_name)
-          if i > 1:
-            outputs[file_name] = file_names[1]
-
-  for out_file, in_file in outputs.items():
-    if file_edit_dates[in_file] > file_edit_dates[out_file]:
-      print(out_file)
+  for out_file in find_changed_files(args.filename, args.files_contain):
+    print(out_file)
 
 
 if __name__ == '__main__':
