@@ -15,6 +15,13 @@ void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
                              std::vector<size_t> new_dims, uint32_t input_id,
                              uint32_t* output_id);
 
+void define_fuse_dim(ynn_subgraph& subgraph, ynn_node& node, int axis,
+                     size_t axes_count, uint32_t input_id, uint32_t* output_id);
+
+void define_split_dim(ynn_subgraph& subgraph, ynn_node& node, int axis,
+                      std::vector<size_t> new_dims, uint32_t input_id,
+                      uint32_t* output_id);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_SUBGRAPH_COPY_H_
