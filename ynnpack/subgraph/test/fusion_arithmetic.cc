@@ -476,8 +476,122 @@ TEST(fusion, dequantize_dot) {
   subgraph.invalidate_dead_values();
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(10)));
-  EXPECT_THAT(ProducerOf(x_id, subgraph),
-              AllOf(IsDequantizeDot(), HasInputCount(6)));
+  const ynn_node& final_node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(final_node, AllOf(IsDequantizeDot(), HasInputCount(7)));
+  EXPECT_EQ(final_node.inputs[6], YNN_INVALID_VALUE_ID);
+}
+
+// rewrite multiply(scaled_dot(A, B, subtract_multiply(0, a, b), c), d) ->
+// dequantize_dot(dot(A, B, YNN_INVALID_VALUE_ID, c), a, b, c, d, 0, c)
+void TestDequantizeScaledDot(bool per_column_b) {
+  constexpr size_t M = 7;
+  constexpr size_t K = 8;
+  constexpr size_t N = 5;
+  const size_t bn = per_column_b ? N : 1;
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t a_offset_id = 2;
+  const uint32_t b_offset_id = 3;
+  const uint32_t c_id = 4;
+  const uint32_t d_id = 5;
+  const uint32_t x_id = 6;
+  SubgraphBuilder builder(7);
+
+  uint32_t sm_id = YNN_INVALID_VALUE_ID;
+  uint32_t scaled_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_id = builder.DefineScalar<int32_t>(0);
+
+  builder.AddInput(ynn_type_uint8, {M, K}, a_id)
+      .AddInput(ynn_type_int8, {K, N}, b_id)
+      .AddInput(ynn_type_int32, {M, 1}, a_offset_id)
+      .AddInput(ynn_type_int32, {1, bn}, b_offset_id)
+      .AddInput(ynn_type_fp32, {M, 1}, c_id)
+      .AddInput(ynn_type_fp32, {1, bn}, d_id)
+      .AddOutput(ynn_type_fp32, {M, N}, x_id)
+      .AddTensor(ynn_type_int32, 2, sm_id)
+      .AddTensor(ynn_type_fp32, 2, scaled_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node sm_node;
+  ynn::define_ternary(
+      subgraph, sm_node, zero_id, a_offset_id, b_offset_id, sm_id,
+      ternary_op::subtract_multiply,
+      get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_int32,
+                         ynn_type_int32, ynn_type_int32, ynn_type_int32));
+  subgraph.add_node(std::move(sm_node));
+
+  builder.AddScaledDot(1, a_id, b_id, sm_id, c_id, scaled_id)
+      .AddBinary(ynn_binary_multiply, scaled_id, d_id, x_id);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+  const ynn_node& final_node = ProducerOf(x_id, subgraph);
+  ASSERT_THAT(final_node, AllOf(IsDequantizeDot(), HasInputCount(7)));
+  EXPECT_EQ(final_node.inputs[6], c_id);
+  const ynn_node& dot_node = ProducerOf(final_node.inputs[0], subgraph);
+  ASSERT_EQ(dot_node.inputs.size(), 4);
+  EXPECT_EQ(dot_node.inputs[2], YNN_INVALID_VALUE_ID);
+  EXPECT_EQ(dot_node.inputs[3], c_id);
+
+  auto is_active = [](size_t i) { return i % 3 != 1; };
+  std::vector<uint8_t> a(M * K);
+  std::vector<int8_t> b(K * N);
+  std::vector<int32_t> a_offset(M), b_offset(bn);
+  std::vector<float> c(M), d(bn), x(M * N, 7.0f);
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t k = 0; k < K; ++k) {
+      a[i * K + k] = is_active(i) ? (i + 2 * k) % 5 : 255;
+    }
+    a_offset[i] = static_cast<int32_t>(i % 4) + 1;
+    c[i] = is_active(i) ? 0.5f + i : 0.0f;
+  }
+  for (size_t k = 0; k < K; ++k) {
+    for (size_t j = 0; j < N; ++j) {
+      b[k * N + j] = static_cast<int8_t>((3 * k + j) % 7) - 3;
+    }
+  }
+  for (size_t j = 0; j < bn; ++j) {
+    b_offset[j] = static_cast<int32_t>(j) + 1;
+    d[j] = 0.25f * (j + 1);
+  }
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  runtime.SetupExternalTensor(a.data(), a_id)
+      .SetupExternalTensor(b.data(), b_id)
+      .SetupExternalTensor(a_offset.data(), a_offset_id)
+      .SetupExternalTensor(b_offset.data(), b_offset_id)
+      .SetupExternalTensor(c.data(), c_id)
+      .SetupExternalTensor(d.data(), d_id)
+      .SetupExternalTensor(x.data(), x_id)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      const size_t bj = per_column_b ? j : 0;
+      float expected = 0.0f;
+      if (is_active(i)) {
+        int32_t dot = -a_offset[i] * b_offset[bj];
+        for (size_t k = 0; k < K; ++k) {
+          dot += static_cast<int32_t>(a[i * K + k]) * b[k * N + j];
+        }
+        expected = static_cast<float>(dot) * c[i] * d[bj];
+      }
+      // The values are small integers times powers of two, so the result is
+      // exact.
+      ASSERT_EQ(x[i * N + j], expected) << "i=" << i << " j=" << j;
+    }
+  }
+}
+
+TEST(fusion, dequantize_scaled_dot_per_column_b) {
+  TestDequantizeScaledDot(/*per_column_b=*/true);
+}
+
+TEST(fusion, dequantize_scaled_dot_broadcast_b) {
+  TestDequantizeScaledDot(/*per_column_b=*/false);
 }
 
 TEST(fusion, dequantize_dot_add) {
@@ -520,6 +634,54 @@ TEST(fusion, dequantize_dot_add) {
   const ynn_node& final_node = ProducerOf(out_id, subgraph);
   EXPECT_THAT(final_node, IsDequantizeDot());
   EXPECT_EQ(final_node.inputs[5], x_offset_id);
+}
+
+TEST(fusion, masked_dequantize_dot_add_not_fused) {
+  // add(dequantize_dot(..., 0, mask), x) is x where the mask is zero, which
+  // dequantize_dot(..., x, mask) is not, so it must not be rewritten.
+  const uint32_t dot_id = 0;
+  const uint32_t a_offset_id = 1;
+  const uint32_t b_offset_id = 2;
+  const uint32_t a_scale_id = 3;
+  const uint32_t b_scale_id = 4;
+  const uint32_t x_offset_id = 5;
+  const uint32_t mask_id = 6;
+  const uint32_t out_id = 7;
+  SubgraphBuilder builder(8);
+
+  uint32_t dequantize_dot_out_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_id = builder.DefineScalar(0.0f);
+
+  builder.AddInput(ynn_type_fp32, 2, dot_id)
+      .AddInput(ynn_type_fp32, 1, a_offset_id)
+      .AddInput(ynn_type_fp32, 1, b_offset_id)
+      .AddInput(ynn_type_fp32, 1, a_scale_id)
+      .AddInput(ynn_type_fp32, 1, b_scale_id)
+      .AddInput(ynn_type_fp32, 1, x_offset_id)
+      .AddInput(ynn_type_fp32, 2, mask_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, dequantize_dot_out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node rescale_node;
+  ynn::define_dequantize_dot(subgraph, rescale_node, ynn_type_fp32, dot_id,
+                             a_offset_id, b_offset_id, a_scale_id, b_scale_id,
+                             zero_id, dequantize_dot_out_id,
+                             ynn::dequantize_dot_params{}, mask_id);
+  subgraph.add_node(std::move(rescale_node));
+
+  builder.AddBinary(ynn_binary_add, dequantize_dot_out_id, x_offset_id, out_id);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(2));
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsBinary(ynn_binary_add));
+  const ynn_node& dequantize_dot_node =
+      ProducerOf(dequantize_dot_out_id, subgraph);
+  EXPECT_THAT(dequantize_dot_node, IsDequantizeDot());
+  EXPECT_EQ(dequantize_dot_node.inputs[5], zero_id);
+  EXPECT_EQ(dequantize_dot_node.inputs[6], mask_id);
 }
 
 TEST(fusion, dequantize_dot_convert) {
