@@ -437,6 +437,20 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
+    "sme": _create_params(
+        cond = "//:arm_sme_enabled",
+        copts = ["-march=armv9.2-a+sme+nosve"],
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
+    ),
+    "sme2": _create_params(
+        cond = "//:arm_sme2_enabled",
+        copts = ["-march=armv9.2-a+sme2+nosve"],
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
+    ),
     "aarch32": _create_params(
         cond = "//build_config:aarch32",
         copts = [
