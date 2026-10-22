@@ -8,6 +8,10 @@ $  "wasmrelaxedsimd": 4,
 $  "f16c": 8,
 $  "avx512f": 16,
 $}[ARCH]
+$assert BATCH_TILE >= SIMD_SIZE
+$assert BATCH_TILE % SIMD_SIZE == 0
+$SIMD_TILE = BATCH_TILE // SIMD_SIZE
+$assert 1 <= ACCUMULATORS <= SIMD_TILE
 #include <assert.h>
 #include <stddef.h>
 
@@ -79,7 +83,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${SIMD_SIZE}(
+void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
@@ -95,17 +99,33 @@ void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${SIMD_SIZE}(
   assert(sum != NULL);
 
   const xnn_simd_f32_t vmax = xnn_set1_f32(xnn_float16_to_float(*max));
-  xnn_simd_f32_t vacc = xnn_zero_f32();
+  $for ACC in range(ACCUMULATORS):
+    xnn_simd_f32_t vacc${ACC} = xnn_zero_f32();
+  $if SIMD_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(xnn_float16);
+         batch -= ${BATCH_TILE} * sizeof(xnn_float16)) {
+      $for VECTOR in range(SIMD_TILE):
+        const xnn_simd_f32_t vf${VECTOR} =
+            expminusmax_f32(load_f16_f32(input + ${VECTOR * SIMD_SIZE}), vmax);
+        store_f32_f16(output + ${VECTOR * SIMD_SIZE}, vf${VECTOR});
+        vacc${VECTOR % ACCUMULATORS} =
+            xnn_add_f32(vacc${VECTOR % ACCUMULATORS}, vf${VECTOR});
+      input += ${BATCH_TILE};
+      output += ${BATCH_TILE};
+    }
+
   for (; batch >= ${SIMD_SIZE} * sizeof(xnn_float16);
        batch -= ${SIMD_SIZE} * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf = expminusmax_f32(load_f16_f32(input), vmax);
     input += ${SIMD_SIZE};
     store_f32_f16(output, vf);
     output += ${SIMD_SIZE};
-    vacc = xnn_add_f32(vacc, vf);
+    vacc0 = xnn_add_f32(vacc0, vf);
   }
 
-  float vsum = xnn_reduce_add_f32(vacc);
+  float vsum = xnn_reduce_add_f32(vacc0);
+  $for ACC in range(1, ACCUMULATORS):
+    vsum += xnn_reduce_add_f32(vacc${ACC});
   $if SIMD_SIZE > 1:
     if XNN_UNLIKELY(batch != 0) {
       const size_t num_elements = batch / sizeof(xnn_float16);
