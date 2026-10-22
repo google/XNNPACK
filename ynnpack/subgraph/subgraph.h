@@ -581,8 +581,15 @@ struct ynn_node {
     }
   };
   struct pack_b {
-    friend bool operator==(const pack_b&, const pack_b&) { return true; }
-    friend bool operator<(const pack_b&, const pack_b&) { return false; }
+    // For `transpose = false`, the first two dimensions of the input are n, k1.
+    // For `transpose = true`, the first two dimensions of the input are k1, n.
+    bool transpose = false;
+    friend bool operator==(const pack_b& a, const pack_b& b) {
+      return a.transpose == b.transpose;
+    }
+    friend bool operator<(const pack_b& a, const pack_b& b) {
+      return a.transpose < b.transpose;
+    }
   };
   struct transpose_a {
     size_t tile_m;

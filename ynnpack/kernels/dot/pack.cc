@@ -83,7 +83,7 @@ packer::packer(size_t stride_m, size_t stride_n, size_t elem_size_bits,
     interleave_fn = get_broadcast_interleave_kernel(elem_size_bits);
     return;
   }
-  const size_t elem_size_bytes = elem_size_bits / 8;
+  const size_t elem_size_bytes = std::max<size_t>(elem_size_bits / 8, 1);
   if (stride_m == elem_size_bytes && tile_n == 1 &&
       output_stride == elem_size_bytes * tile_m) {
     // This is a transpose of a row or column that remains contiguous.
@@ -145,8 +145,7 @@ void packer::pack(size_t m, size_t n, const void* input,
       const size_t n_i = std::min(n, tile_n);
       transpose_fn(ceil_div(m, tile_m), n_i, m * elem_size_bits / 8, stride_n,
                    input, output_stride, output);
-      size_t elem_count = std::max<size_t>(8 / elem_size_bits, 1);
-      input = offset_bytes(input, stride_n * (tile_n / elem_count));
+      input = offset_bytes(input, stride_n * tile_n);
       output = offset_bytes(output, output_block_stride);
       n = sub_sat(n, tile_n);
     }

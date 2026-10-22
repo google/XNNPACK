@@ -2340,7 +2340,7 @@ bool rewrite_pack_b_gather(ynn_subgraph& subgraph, ynn_node& node,
   ynn_node pack_w_node;
   pack_w_node.inputs = {w_id};
   pack_w_node.outputs = {packed_w_id};
-  pack_w_node.op = ynn_node::pack_b{};
+  pack_w_node.op = node.op;
   pack_w_node.create = node.create;
   subgraph.add_node(std::move(pack_w_node));
 
@@ -2359,6 +2359,87 @@ bool rewrite_pack_b_gather(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t output_id = packed_b_id;
   define_gather(subgraph, node, std::move(new_axes), packed_b.rank(),
                 packed_w_id, new_index_id, output_id);
+
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
+// Rewrite pack_b(transpose(x)) to pack_b(x), updating the transpose flag.
+// If the transpose also permutes other dimensions, leave an aliased transpose
+// behind that performs the minimal transpose to keep dimension 0 = 0.
+bool rewrite_pack_b_transpose(ynn_subgraph& subgraph, ynn_node& node,
+                              subgraph_analysis& analysis) {
+  auto* pack_b_op = std::get_if<ynn_node::pack_b>(&node.op);
+  if (!pack_b_op) return false;
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+
+  auto* transpose_op = std::get_if<ynn_node::static_transpose>(&producer->op);
+  if (!transpose_op) return false;
+
+  const auto& perm = transpose_op->permutation;
+  if (perm.size() < 2) return false;
+
+  // In the transposed tensor t (input to pack_b):
+  // When pack_b has transpose=false, t[0] is N and t[1] is K.
+  // When pack_b has transpose=true,  t[0] is K and t[1] is N.
+  const int n_dim_in_t = pack_b_op->transpose ? 1 : 0;
+  const int k_dim_in_t = pack_b_op->transpose ? 0 : 1;
+
+  // In x (input to the transpose), find which dimensions hold N and K:
+  const int n_dim_in_x = perm[n_dim_in_t];
+  const int k_dim_in_x = perm[k_dim_in_t];
+
+  // For pack_b to consume x (or an aliased transpose of x that keeps dim 0 =
+  // 0), dimension 0 of x must be either N or K:
+  // - If dim 0 is N, the new pack_b has transpose = false.
+  // - If dim 0 is K, the new pack_b has transpose = true.
+  bool new_transpose;
+  int other_packed_dim_in_x;
+  if (n_dim_in_x == 0) {
+    new_transpose = false;
+    other_packed_dim_in_x = k_dim_in_x;
+  } else if (k_dim_in_x == 0) {
+    new_transpose = true;
+    other_packed_dim_in_x = n_dim_in_x;
+  } else {
+    // Neither N nor K is at dimension 0 of x.
+    return false;
+  }
+
+  // The minimal transpose keeps dimension 0 = 0, moves the other packed
+  // dimension to dimension 1, and preserves the order of batch dimensions.
+  std::vector<int32_t> new_perm(perm.size());
+  new_perm[0] = 0;
+  new_perm[1] = other_packed_dim_in_x;
+  std::copy_n(perm.begin() + 2, perm.size() - 2, new_perm.begin() + 2);
+
+  const bool is_identity =
+      !any_n(new_perm.size(), [&](int d) { return new_perm[d] != d; });
+
+  // If the transpose is already minimal and the transpose flag does not change,
+  // there is nothing to rewrite.
+  if (new_transpose == pack_b_op->transpose && new_perm == perm &&
+      !is_identity) {
+    return false;
+  }
+
+  uint32_t x_id = producer->inputs[0];
+  uint32_t new_input_id = x_id;
+  if (!is_identity) {
+    new_input_id = YNN_INVALID_VALUE_ID;
+    ynn_node new_node;
+    define_static_transpose(subgraph, new_node, std::move(new_perm), x_id,
+                            &new_input_id, /*alias=*/true);
+    subgraph.add_node(std::move(new_node));
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting pack_b(transpose) with transpose="
+                  << new_transpose;
+  node.inputs[0] = new_input_id;
+  pack_b_op->transpose = new_transpose;
 
   subgraph.topological_sort();
   analysis.invalidate();
@@ -2712,6 +2793,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_static_transpose(*this, node, analysis) ||
                 ynn::rewrite_reduce_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_gather(*this, node, analysis) ||
+                ynn::rewrite_pack_b_transpose(*this, node, analysis) ||
                 ynn::rewrite_fast_math(*this, node, analysis) ||
                 ynn::rewrite_requantize_quantize(*this, node, analysis) ||
                 changed;
