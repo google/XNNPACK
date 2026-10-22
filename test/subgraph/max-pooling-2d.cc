@@ -255,6 +255,44 @@ TEST(MaxPooling2D, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(MaxPooling2DTest, DefineRejectsZeroPoolingDimension) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  const size_t dims[4] = {1, 4, 4, 1};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 4, dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 4, dims, nullptr,
+          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  // Reject pooling_height == 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_max_pooling_2d(
+          subgraph, 0, 0, 0, 0, /*pooling_height=*/0, /*pooling_width=*/1,
+          1, 1, 1, 1, -INFINITY, INFINITY, input_id, output_id, 0));
+
+  // Reject pooling_width == 0.
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_define_max_pooling_2d(
+          subgraph, 0, 0, 0, 0, /*pooling_height=*/1, /*pooling_width=*/0,
+          1, 1, 1, 1, -INFINITY, INFINITY, input_id, output_id, 0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
