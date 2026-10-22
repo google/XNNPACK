@@ -1026,6 +1026,21 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
       break;
     }
   }
+  if (m == 1) {
+    // When m == 1, there is no reuse of B across m. Each parallel task loads
+    // the entire k-element vector A from cache and writes a slice of C, so
+    // creating too many tasks across n hurts performance due to thread dispatch
+    // and synchronization overhead. Ensure each task processes at least 1M
+    // elements of B, cap parallelism at 4 tasks for fan-out projections (k <=
+    // n, which often execute concurrently) and 8 tasks for fan-in projections
+    // (k > n), and divide n evenly across the chosen number of tasks.
+    const index_t max_tasks = k > n ? 8 : 4;
+    const index_t target_tasks =
+        std::clamp<index_t>((n * k) / (1024 * 1024), 1, max_tasks);
+    const index_t min_n_for_target_tasks =
+        ceil_div<index_t>(n, target_tasks * block_n) * block_n;
+    split_n = std::max<index_t>(split_n, min_n_for_target_tasks);
+  }
 
   // Trade-offs for splitting k:
   // - Benefit: For very large values of k, splitting the reduction dimension
@@ -1051,7 +1066,7 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   assert(a_elem_size > 0);
   const index_t k_threshold = cache_size_l1 / a_elem_size;
   const index_t k_split_size = k_threshold / 2;
-  index_t split_k = k >= k_threshold ? k_split_size : k;
+  index_t split_k = (m > 1 && k >= k_threshold) ? k_split_size : k;
   split_k = align_up<index_t>(split_k, step_k);
 
   // Ensure the split factors do not exceed the maximum representable numbers
@@ -1234,7 +1249,8 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   slinky::expr blocks_m =
       slinky::ceil_div<slinky::expr>(a.extent(num_k_dims), block_m);
 
-  if (slinky::prove_true(blocks_m * a_batch <= b_batch * 10)) {
+  const int max_unpacked_blocks = kernel.tile_k == 1 ? 10 : 1;
+  if (slinky::prove_true(blocks_m * a_batch <= b_batch * max_unpacked_blocks)) {
     // A is small relative to B, we should not bother packing B because we're
     // not going to read it very much, and packing itself costs a read of B.
     return false;
@@ -1338,7 +1354,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // be implemented, and let a global cost optimization decide what to do...
   } else {
     unpacked_kernel = kernel;
-    if (kernel.tile_k != 1) {
+    if (kernel.tile_k != 1 || (kernel.flags & dot_flag::unaligned_b) == 0) {
       unpacked_kernel = get_dot_kernel(type, cost_models, shape, no_tile_k,
                                        kernel_flags | dot_flag::unaligned_b);
     }
@@ -1349,6 +1365,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       should_pack_b(subgraph, num_k_dims, a, b, kernel, unpacked_kernel);
   uint32_t packed_b_id = YNN_INVALID_VALUE_ID;
   if (!pack_b) {
+    kernel = unpacked_kernel;
     // We don't want or need to pack B, but we still need to reshape it as if it
     // were packed.
     ynn_node node;
