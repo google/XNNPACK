@@ -71,6 +71,10 @@ Pull requests violating these principles will be closed:
   descriptions, and review replies concise (1-3 sentences stating what changed
   and why, plus test or benchmark output). Do not paste multi-section essays
   (`Problem`, `Root Cause Analysis`, `Solution Architecture`).
+- **No temporary files or compilation artifacts**: Do not include temporary
+  scripts, compilation artifacts (such as `.pyc` or `__pycache__`), or
+  unrelated files in a pull request. Ensure the working tree is clean before
+  submitting.
 
 ## Code Generation Workflows
 
@@ -79,7 +83,9 @@ templates and specification files.
 
 ### 1. Microkernel Templates (`src/**/*.c.in`)
 - Templates use `tools/xngen.py` syntax (`$for`, `$if`, `${var}`).
-- Edit the corresponding `.c.in` template under `src/<datatype>-<op>/`.
+- Edit the corresponding `.c.in` template under `src/<datatype>-<op>/`. When
+  adding a new `.c.in` template, set the copyright date in its header to the
+  current year before generating C sources from it.
 - Regenerate C sources by running the operator script:
   ```bash
   ./scripts/generate-<datatype>-<op>.sh
@@ -139,6 +145,13 @@ bazel test -c fastbuild //test/...
 
 ## Code Style & Microkernel Conventions
 
+- **Copyright Notice on New Source Files**: When adding a new source file in a
+  pull request (including `.c`, `.cc`, `.h`, `.c.in` templates, `.py`, and
+  `.sh`) that will have a copyright notice, set the copyright date in the
+  header to the current year (and regenerate any generated files derived from a
+  new `.c.in` template). Only set the copyright date to the current year on
+  newly added source files; do not modify copyright headers on existing files
+  or existing templates.
 - **Language Standards**: C99/C11 (`-std=c99` or `-std=c11`, no GNU
   extensions) for core library and microkernels. C++17 for `test/` and
   `bench/`. Python 3 for `tools/` and `scripts/`.

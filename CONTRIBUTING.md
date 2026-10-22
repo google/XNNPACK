@@ -32,6 +32,10 @@ In particular:
   microkernel family.
 - **Code Generation**: Never edit auto-generated files directly; update
   templates (`.c.in`) or specifications (`.yaml`) and run the generators.
+- **Copyright Headers**: When adding a new source file (including new `.c.in`
+  templates) with a copyright notice, set the copyright date to the current
+  year (and regenerate any derived files). Do not modify copyright dates on
+  existing files or existing templates.
 - **Benchmarking**: Performance and microkernel changes require reproducible
   benchmark results from `bench/` on target hardware.
 - **No Speculative Sweeps**: Avoid mass defensive hardening or redundant
