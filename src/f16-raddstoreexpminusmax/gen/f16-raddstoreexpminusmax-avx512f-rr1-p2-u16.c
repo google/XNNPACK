@@ -84,17 +84,18 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16(
   assert(sum != NULL);
 
   const xnn_simd_f32_t vmax = xnn_set1_f32(xnn_float16_to_float(*max));
-  xnn_simd_f32_t vacc = xnn_zero_f32();
+  xnn_simd_f32_t vacc0 = xnn_zero_f32();
+
   for (; batch >= 16 * sizeof(xnn_float16);
        batch -= 16 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf = expminusmax_f32(load_f16_f32(input), vmax);
     input += 16;
     store_f32_f16(output, vf);
     output += 16;
-    vacc = xnn_add_f32(vacc, vf);
+    vacc0 = xnn_add_f32(vacc0, vf);
   }
 
-  float vsum = xnn_reduce_add_f32(vacc);
+  float vsum = xnn_reduce_add_f32(vacc0);
   if XNN_UNLIKELY(batch != 0) {
     const size_t num_elements = batch / sizeof(xnn_float16);
     const xnn_simd_f32_t vf =

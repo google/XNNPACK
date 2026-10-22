@@ -5,10 +5,10 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u1.c &
+tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u1.c &
 
 # Portable FP16 arithmetic
-tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=avx512fp16 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512fp16-rr2-p2-u32.c &
+tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=avx512fp16 -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512fp16-rr2-p2-u32.c &
 
 # ARM NEON+FP16ARITH
 tools/xngen src/f16-raddstoreexpminusmax/neonfp16arith-rr2-p2.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u16.c &
@@ -39,13 +39,13 @@ tools/xngen src/f16-raddstoreexpminusmax/rvvfp16arith-rr2-p2.c.in -D LMUL=2 -o s
 tools/xngen src/f16-raddstoreexpminusmax/rvvfp16arith-rr2-p2.c.in -D LMUL=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-rvvfp16arith-rr2-p2-u4v.c &
 
 # WebAssembly Relaxed SIMD FP16
-tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=wasmrelaxedsimdfp16 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimdfp16-rr2-p2-u8.c &
+tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=wasmrelaxedsimdfp16 -D BATCH_TILE=8 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimdfp16-rr2-p2-u8.c &
 
 # WebAssembly Relaxed SIMD with FP32 accumulation
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u4.c &
+tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=4 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u4.c &
 
 # Portable FP32 accumulation
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-f16c-rr1-p2-u8.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512f-rr1-p2-u16.c &
+tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=8 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-f16c-rr1-p2-u8.c &
+tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512f-rr1-p2-u16.c &
 
 wait
