@@ -131,7 +131,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x128c4__hvx(
     } else {
       for (; k >= 8 * sizeof(int8_t); k -= 8 * sizeof(int8_t)) {
         const HVX_Vector va0x0123 = Q6_V_vsplat_R(*((const int32_t*)a0));
-        const HVX_Vector va0x4567 = Q6_V_vsplat_R(*((const int32_t*)a0+4)); a0 += 8;
+        const HVX_Vector va0x4567 = Q6_V_vsplat_R(*((const int32_t*)(a0+4))); a0 += 8;
 
         const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;

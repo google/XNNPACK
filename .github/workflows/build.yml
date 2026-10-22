@@ -280,6 +280,31 @@ jobs:
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
+      # Temporary workaround until https://github.com/actions/runner-images/issues/14198 is fixed.
+      - name: Install Windows 11 SDK 10.0.28000.0
+        shell: pwsh
+        run: |
+          $sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include\10.0.28000.0"
+          Write-Host "Checking for SDK at: $sdkPath"
+          if (Test-Path $sdkPath) {
+            Write-Host "SDK 10.0.28000.0 already exists."
+            exit 0
+          }
+
+          Write-Host "Downloading Windows SDK for Windows 11 (10.0.28000.2705) installer..."
+          $installerUrl = "https://download.microsoft.com/download/38ab8f6d-3676-4860-ae84-3361308b9d7f/KIT_BUNDLE_WINDOWSSDK_MEDIACREATION/winsdksetup.exe"
+          $installerPath = "$env:TEMP\winsdksetup.exe"
+          Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath -ErrorAction Stop
+
+          Write-Host "Installing Windows SDK for Windows 11 (10.0.28000.2705)..."
+          $features = "/features OptionId.DesktopCPPx64 OptionId.DesktopCPPx86 OptionId.DesktopCPPArm64 OptionId.WindowsDesktopDebuggers OptionId.UWPCPP OptionId.SigningTools /q /norestart /ceip off"
+          $proc = Start-Process -FilePath $installerPath -ArgumentList $features -PassThru -Wait
+
+          if ($proc.ExitCode -ne 0) {
+            Write-Error "winsdksetup.exe failed with code $($proc.ExitCode)"
+            exit 1
+          }
+          Write-Host "SDK installed successfully."
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:

@@ -281,6 +281,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
             packed_weights_size, xnn_operator_type_to_string_v2(resize_op));
         return xnn_status_out_of_memory;
       }
+      resize_op->packed_weights.size = packed_weights_size;
     }
 
     if (input_height != resize_op->convolution_op->last_input_height ||

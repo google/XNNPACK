@@ -49,9 +49,15 @@ YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x4_sve, 2, 4)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x8_sve, 2, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x16_sve, 2, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x32_sve, 2, 32)
+YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x2_sve, 4, 2)
+YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x4_sve, 4, 4)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x8_sve, 4, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x16_sve, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x32_sve, 4, 32)
+YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave8_x2_sve, 8, 2)
+YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave8_x4_sve, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave8_x8_sve, 8, 8)
+YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave16_x2_sve, 16, 2)
 #endif  // YNN_ARCH_ARM64_SVE
 
 #ifdef YNN_ARCH_ARM_NEON

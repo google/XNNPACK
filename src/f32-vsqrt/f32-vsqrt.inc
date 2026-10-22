@@ -51,6 +51,12 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u8, 8, false, fl
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vsqrt_ukernel__hvx_rsqrt_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vsqrt_ukernel__hvx_rsqrt_u64, 64, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vsqrt_ukernel__hvx_rsqrt_u128, 128, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsqrt_ukernel__scalar_sqrt_u1, 1, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsqrt_ukernel__scalar_sqrt_u2, 2, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsqrt_ukernel__scalar_sqrt_u4, 4, false, float, struct xnn_f32_default_params, NULL)

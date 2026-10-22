@@ -25,7 +25,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
+
+
 #include "src/xnnpack/simd/s32-sse41.h"
+
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -45,6 +49,7 @@ class S32SimdSSE41Test : public ::testing::Test {
   std::vector<int32_t> inputs_;
   std::vector<int32_t> output_;
 };
+
 
 TEST_F(S32SimdSSE41Test, Mul) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());

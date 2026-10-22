@@ -88,6 +88,13 @@ enum xnn_status create_average_pooling2d_nhwc(
     return xnn_status_invalid_parameter;
   }
 
+  if (output_min > output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
+      xnn_operator_type_to_string(operator_type), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {

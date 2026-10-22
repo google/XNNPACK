@@ -66,6 +66,12 @@ XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f32_f16_vcvt_ukernel__rvvfp16a
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f32_f16_vcvt_ukernel__rvvfp16arith_u8v, 8, true, float, xnn_float16, void, NULL)
 #endif
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_f16_vcvt_ukernel__hvx_u32, 32, false, float, xnn_float16, void, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_f16_vcvt_ukernel__hvx_u64, 64, false, float, xnn_float16, void, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_f16_vcvt_ukernel__hvx_u128, 128, false, float, xnn_float16, void, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u1, 1, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u2, 2, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u3, 3, false, float, xnn_float16, void, NULL)

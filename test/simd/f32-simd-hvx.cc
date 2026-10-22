@@ -25,7 +25,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
+
+
 #include "src/xnnpack/simd/f32-hvx.h"
+
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -45,6 +49,7 @@ class F32SimdHVXTest : public ::testing::Test {
   std::vector<float> inputs_;
   std::vector<float> output_;
 };
+
 
 TEST_F(F32SimdHVXTest, SetZero) {
   xnn_storeu_f32(output_.data(), xnn_zero_f32());
@@ -1030,6 +1035,7 @@ TEST_F(F32SimdHVXTest, StoreTail) {
     }
   }
 }
+
 
 }  // namespace xnnpack
 

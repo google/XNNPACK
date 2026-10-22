@@ -386,10 +386,13 @@ YNN_ALWAYS_INLINE vec<T, N> log_taylor2(vec<T, N> x, const P& poly_p,
   auto r = y_norm - one;
   if (p == 1) {
     // When exp == -1, y_norm = 2*(x + 1) = 2x + 2, so r = y_norm - 1 = 2x + 1.
-    // Evaluating 2x + 1 via FMA avoids catastrophic cancellation in x + 1.
+    // When exp == 1, y_norm = 0.5*(x + 1), so r = y_norm - 1 = 0.5x - 0.5.
+    // Evaluating via FMA avoids precision loss in x + 1 and y_norm - 1.
     vec<T, N> neg_one(-1);
+    vec<T, N> neg_half(-0.5);
     vec<T, N> two(2);
     r = select(exp == neg_one, multiply_add(x, two, one), r);
+    r = select(exp == one, multiply_add(x, half, neg_half), r);
     r = select(exp == zero, x, r);
   }
 
@@ -445,21 +448,21 @@ static vec<float, N> log_impl(vec<float, N> x) {
 template <int p, size_t N>
 static vec<double, N> log_impl(vec<double, N> x) {
   std::array<double, 6> P = {
-      -2.956046447212538203e-03,
-      -6.691314126082094360e-02,
-      -4.289980732181625789e-01,
-      -1.110965361416291097e+00,
-      -1.242991301338429500e+00,
-      -4.999999999999990008e-01,
+      -2.127305326590717485e-03,
+      -4.368664266506767924e-02,
+      -2.614479611443955576e-01,
+      -6.434513667907894030e-01,
+      -6.923120527836292837e-01,
+      -2.699999999999999067e-01,
   };
   std::array<double, 7> Q = {
-      3.009181610003072455e-03,
-      7.942469932969810353e-02,
-      6.369060590899747742e-01,
-      2.230802780023532605e+00,
-      3.823696902394678077e+00,
-      3.152649269343555716e+00,
-      1.000000000000000000e+00,
+      2.170996471217958440e-03,
+      5.248507746719702910e-02,
+      3.951685366405143229e-01,
+      1.319907516589327257e+00,
+      2.179985470626362165e+00,
+      1.744624105567259109e+00,
+      5.400000000000000355e-01,
   };
   return log_taylor2<p, int64_t>(x, P, Q);
 }

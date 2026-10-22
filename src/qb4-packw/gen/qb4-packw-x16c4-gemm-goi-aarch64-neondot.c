@@ -291,7 +291,8 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__aarch64_neondot(
           out += 256;
         }
 
-        uint16x8_t bf_scales0 = vdupq_n_u16(0);
+        const uint16x8_t vzero = vdupq_n_u16(0);
+        uint16x8_t bf_scales0 = vzero;
         bf_scales0 = vsetq_lane_u16(s0[0], bf_scales0, 0);
         bf_scales0 = vsetq_lane_u16(s1[0], bf_scales0, 1);
         bf_scales0 = vsetq_lane_u16(s2[0], bf_scales0, 2);
@@ -300,7 +301,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__aarch64_neondot(
         bf_scales0 = vsetq_lane_u16(s5[0], bf_scales0, 5);
         bf_scales0 = vsetq_lane_u16(s6[0], bf_scales0, 6);
         bf_scales0 = vsetq_lane_u16(s7[0], bf_scales0, 7);
-        uint16x8_t bf_scales1 = vdupq_n_u16(0);
+        uint16x8_t bf_scales1 = vzero;
         bf_scales1 = vsetq_lane_u16(s8[0], bf_scales1, 0);
         bf_scales1 = vsetq_lane_u16(s9[0], bf_scales1, 1);
         bf_scales1 = vsetq_lane_u16(s10[0], bf_scales1, 2);
@@ -310,10 +311,10 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__aarch64_neondot(
         bf_scales1 = vsetq_lane_u16(s14[0], bf_scales1, 6);
         bf_scales1 = vsetq_lane_u16(s15[0], bf_scales1, 7);
 
-        float32x4_t f_scales0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales0), 16));
-        float32x4_t f_scales1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(bf_scales0), 16));
-        float32x4_t f_scales2 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales1), 16));
-        float32x4_t f_scales3 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(bf_scales1), 16));
+        float32x4_t f_scales0 = vreinterpretq_f32_u16(vzip1q_u16(vzero, bf_scales0));
+        float32x4_t f_scales1 = vreinterpretq_f32_u16(vzip2q_u16(vzero, bf_scales0));
+        float32x4_t f_scales2 = vreinterpretq_f32_u16(vzip1q_u16(vzero, bf_scales1));
+        float32x4_t f_scales3 = vreinterpretq_f32_u16(vzip2q_u16(vzero, bf_scales1));
 
         s0 += 1;
         s1 += 1;

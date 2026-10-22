@@ -27,6 +27,8 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_rdmax_ukernel_2p2x__wasmsimd_u32, 2, 32, fals
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rdmax_ukernel_2p2x__hvx_u32, 2, 32, false, float, float, void*, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rdmax_ukernel_2p2x__hvx_u64, 2, 64, false, float, float, void*, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rdmax_ukernel_2p2x__hvx_u128, 2, 128, false, float, float, void*, NULL)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR

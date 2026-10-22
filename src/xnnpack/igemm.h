@@ -2018,6 +2018,11 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x4v__rvv)
 
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x128c4__hvx)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x128c4__hvx)
+
 #define DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                                        \
       size_t mr, size_t nc, size_t kc, size_t ks, const int8_t** a, \

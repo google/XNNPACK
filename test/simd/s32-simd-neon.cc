@@ -25,7 +25,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
+
+
 #include "src/xnnpack/simd/s32-neon.h"
+
+
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
@@ -45,6 +49,7 @@ class S32SimdNEONTest : public ::testing::Test {
   std::vector<int32_t> inputs_;
   std::vector<int32_t> output_;
 };
+
 
 TEST_F(S32SimdNEONTest, Mul) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());

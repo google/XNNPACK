@@ -43,6 +43,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-vsin/gen/f16-f32acc-vsin-scalar-poly-3.c
   src/f16-vsqrt/gen/f16-vsqrt-scalar-sqrt.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-scalar-rational-5-4-div.c
+  src/f16-vunary/gen/f16-vabs-scalar-u4.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-scalar-c1.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-scalar-u1.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u2.c
@@ -174,6 +175,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-packw/gen/qs8-packw-x16c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x2-minmax-fp32-scalar-fmagic.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-3x4-minmax-fp32-scalar-fmagic.c
@@ -339,6 +341,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-vsin/gen/f16-vsin-scalar-poly-3.c
   src/f16-vsin/gen/f16-vsin-scalar-rational-3-2-div.c
   src/f16-vtanh/gen/f16-vtanh-scalar-rational-5-4-div.c
+  src/f16-vunary/gen/f16-vabs-scalar-u1.c
+  src/f16-vunary/gen/f16-vabs-scalar-u2.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u1.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u3.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u4.c
@@ -649,7 +653,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-packw/gen/qs8-packw-x32c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c
   src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-scalar.c
-  src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x2-minmax-fp32-scalar-lrintf.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-2x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x2-minmax-fp32-scalar-fmagic.c

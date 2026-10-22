@@ -36,6 +36,11 @@ static std::array<u8x16, M> load(std::array<u8x16, M>, const void* a,
 
 namespace ynn {
 
+void transpose_x2_sse2(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
+                       const void* a, size_t stride_x, void* x) {
+  interleave_and_transpose<2>(m, n, n_bytes_a, stride_a, a, stride_x, x,
+                              interleave4_x2_sse2, transpose_x8_sse2);
+}
 void transpose_x4_sse2(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                        const void* a, size_t stride_x, void* x) {
   transpose<std::array<u8x16, 32>>(m, n, n_bytes_a, stride_a, a, stride_x, x,

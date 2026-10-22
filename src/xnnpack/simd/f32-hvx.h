@@ -323,14 +323,45 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
-  return Q6_V_vand_QR(Q6_Q_vcmp_eq_VwVw(a, b), 0xFFFFFFFF);
+  const HVX_VectorPred q_eq = Q6_Q_or_QQ(
+      Q6_Q_vcmp_eq_VwVw(a, b),
+      Q6_Q_vcmp_eq_VwVw(Q6_V_vor_VV(a, b), Q6_V_vsplat_R(0x80000000)));
+  return Q6_V_vand_QR(q_eq, 0xFFFFFFFF);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  const HVX_VectorPred q_eq = Q6_Q_or_QQ(
+      Q6_Q_vcmp_eq_VwVw(a, b),
+      Q6_Q_vcmp_eq_VwVw(Q6_V_vor_VV(a, b), Q6_V_vsplat_R(0x80000000)));
+  return Q6_V_vand_QR(Q6_Q_not_Q(q_eq), 0xFFFFFFFF);
 }
 
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_NUM_RCP_ITER_F32 1
-#define XNN_SIMD_HAVE_RSQRT_F32 0
-#define XNN_SIMD_NUM_RCP_ITER_F32 2
+#define XNN_SIMD_HAVE_RSQRT_F32 1
+#define XNN_SIMD_NUM_RSQRT_ITER_F32 2
+
+static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vmagic = Q6_V_vsplat_R(0x5f375a86);
+  HVX_Vector vy = Q6_Vw_vsub_VwVw(vmagic, Q6_Vuw_vlsr_VuwR(a, 1));
+  const HVX_Vector vone = Q6_V_vsplat_R(float_as_uint32(1.0f));
+  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
+  const HVX_Vector vt1 = xnn_mul_f32(a, vy);
+  const HVX_Vector vt2 = xnn_sub_f32(xnn_mul_f32(vt1, vy), vone);
+  vy = xnn_sub_f32(vy, xnn_mul_f32(xnn_mul_f32(vhalf, vy), vt2));
+  const HVX_Vector vabs_a = xnn_abs_f32(a);
+  const HVX_VectorPred q_zero_or_inf =
+      Q6_Q_or_QQ(Q6_Q_vcmp_eq_VwVw(vabs_a, Q6_V_vzero()),
+                 Q6_Q_vcmp_eq_VwVw(a, Q6_V_vsplat_R(0x7F800000)));
+  const HVX_VectorPred q_neg = Q6_Q_vcmp_gt_VsfVsf(Q6_V_vzero(), a);
+  const HVX_VectorPred q_nan =
+      Q6_Q_vcmp_gt_VuwVuw(vabs_a, Q6_V_vsplat_R(0x7F800000));
+  vy = Q6_V_vmux_QVV(Q6_Q_or_QQ(q_neg, q_nan), Q6_V_vsplat_R(0x7FC00000), vy);
+  vy = Q6_V_vmux_QVV(q_zero_or_inf, Q6_V_vzero(), vy);
+  return vy;
+}
 
 #define XNN_SIMD_HAVE_REDUCE_MAX_F32 1
 static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t v) {
@@ -438,11 +469,11 @@ static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
-  return Q6_V_lo_W(Q6_Wsf_vcvt_Vhf(a));
+  return Q6_V_lo_W(Q6_Wsf_vcvt_Vhf(Q6_Vh_vshuff_Vh(a)));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
-  return Q6_Vhf_vcvt_VsfVsf(a, Q6_V_vzero());
+  return Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(a, Q6_V_vzero()));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,

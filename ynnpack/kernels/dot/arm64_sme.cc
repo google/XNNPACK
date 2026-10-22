@@ -23,7 +23,7 @@ namespace ynn {
 
 size_t sme_vl(float) {
   if (is_arch_supported(arch_flag::sme) || is_arch_supported(arch_flag::sme2)) {
-    return svcnts(float{});
+    return svcntsw();
   } else {
     return 0;
   }
@@ -31,7 +31,7 @@ size_t sme_vl(float) {
 
 size_t sme_vl(int32_t) {
   if (is_arch_supported(arch_flag::sme) || is_arch_supported(arch_flag::sme2)) {
-    return svcnts(int32_t{});
+    return svcntsw();
   } else {
     return 0;
   }

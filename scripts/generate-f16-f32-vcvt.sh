@@ -89,4 +89,9 @@ tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=2 -o src/f16-f32-vcvt/gen
 tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=3 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u3.c &
 tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=4 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/f16-f32-vcvt/hvx.c.in -D BATCH_TILE=32  -o src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u32.c &
+tools/xngen src/f16-f32-vcvt/hvx.c.in -D BATCH_TILE=64  -o src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u64.c &
+tools/xngen src/f16-f32-vcvt/hvx.c.in -D BATCH_TILE=128 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u128.c &
+
 wait
