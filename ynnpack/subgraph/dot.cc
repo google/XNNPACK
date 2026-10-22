@@ -350,7 +350,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
 
     assert(b_k1i.min() == 0);
     assert(b_k1i.extent() == 1 || b_k1i.stride() == b.elem_size);
-    assert(b_ni.min() == 0);
+    assert(!pack_b || b_ni.min() == 0);
     assert(b_ni.extent() == 1 || b_ni.stride() == b.elem_size * b_k1i.extent());
     assert(b_k1o.stride() % tile_k == 0);
     assert(!b_k1o.is_folded());
@@ -1532,16 +1532,19 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // two dimensions.
     const int num_b_k_dims = num_k_dims + 2;
     slinky::box_expr b_bounds(num_b_k_dims + 1);
-    b_bounds[0] = all_bounds(packed_b.physical_extent(0));  // ki
-    b_bounds[1] = all_bounds(packed_b.physical_extent(1));  // ni
     if (pack_b) {
+      b_bounds[0] = all_bounds(packed_b.physical_extent(0));  // ki
+      b_bounds[1] = all_bounds(packed_b.physical_extent(1));  // ni
       b_bounds[2] = slinky::point(slinky::simplify(reduction_dims[0] / tile_k));
+      // When we split a packed dimension, the inner part of the split remains
+      // packed, but the outer part is not.
+      b_bounds[3] = slinky::point(j) / packed_b.physical_extent(1);
     } else {
+      b_bounds[0] = slinky::point(0);
+      b_bounds[1] = slinky::point(j);
       b_bounds[2] = slinky::point(reduction_dims[0]);
+      b_bounds[3] = slinky::point(0);
     }
-    // When we split a packed dimension, the inner part of the split remains
-    // packed, but the outer part is not.
-    b_bounds[3] = slinky::point(j) / packed_b.physical_extent(1);
     for (size_t i = 4; i < num_b_k_dims + 1; ++i) {
       b_bounds[i] = slinky::point(reduction_dims[i - 3]);
     }
@@ -1619,7 +1622,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
     std::vector<int> loop_order;
-    const bool pack_b_outer = rank >= 2 && pack_b && !packed_b.is_static();
+    const bool pack_b_outer = rank >= 2 && !packed_b.is_static();
     if (is_split_k) {
       if (pack_b_outer) {
         loop_order.push_back(num_k_dims + 1);  // m (innermost)
