@@ -430,6 +430,8 @@ xnn_init_qdu8_f32_qc8w_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
+// NULL unless the default qs8-qc8w config uses kr = 8.
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_dot_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qu8_gemm_config();
 
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f16_maxpool_config();
