@@ -26,6 +26,7 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
 using ynn::to_string;  // NOLINT(misc-unused-using-decls)
@@ -131,6 +132,7 @@ void test_random(T, bool with_copy) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<int> input_rank_dist(min_rank, max_test_rank);
   std::bernoulli_distribution bool_dist(0.5);
+  TestScheduler scheduler(3);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     const size_t input_rank = input_rank_dist(rng);
@@ -173,7 +175,7 @@ void test_random(T, bool with_copy) {
       subgraph.AddTranspose(axes, 0, 1, flags);
     }
 
-    Runtime runtime(subgraph.GetSubgraph());
+    Runtime runtime(subgraph.GetSubgraph(), &scheduler);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
@@ -255,6 +257,46 @@ TEST_P(Transpose, random) {
 TEST_P(Transpose, random_with_copy) {
   SwitchType(GetParam(),
              [&](auto type) { test_random(type, /*with_copy=*/true); });
+}
+
+template <typename T>
+void test_batched_drop_unit_dim(T, const std::vector<size_t>& input_shape,
+                                const std::vector<int32_t>& perm) {
+  ReplicableRandomDevice rng;
+  TestScheduler scheduler(3);
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<T>(), input_shape, 0)
+      .AddOutput(type_of<T>(), perm.size(), 1)
+      .AddTranspose(perm, 0, 1);
+
+  Runtime runtime(subgraph.GetSubgraph(), &scheduler);
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  Tensor<T> input(input_shape);
+  fill_random(input.data(), input.size(), rng);
+  std::vector<size_t> output_shape(perm.size());
+  for (size_t i = 0; i < perm.size(); ++i) {
+    output_shape[i] = input_shape[perm[i]];
+  }
+  Tensor<T> expected =
+      input.transpose(perm).deep_copy().reshape(output_shape);
+
+  runtime.ReshapeExternalTensor(input_shape, input.data(), 0).ReshapeRuntime();
+  ASSERT_EQ(runtime.GetExternalTensorShape(1), expected.extents());
+
+  Tensor<T> output(expected.extents());
+  runtime.SetupExternalTensor(output.data(), 1).InvokeRuntime();
+  EXPECT_THAT(output, testing::ElementsAreArray(expected));
+}
+
+TEST_P(Transpose, batched_drop_unit_dim) {
+  SwitchType(GetParam(), [&](auto type) {
+    test_batched_drop_unit_dim(type, {16, 8, 1, 32}, {1, 3, 0});
+    if (type_info<decltype(type)>::element_count() == 1) {
+      test_batched_drop_unit_dim(type, {8, 16, 32, 1}, {0, 2, 1});
+    }
+  });
 }
 
 INSTANTIATE_TEST_SUITE_P(

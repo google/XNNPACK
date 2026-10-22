@@ -214,10 +214,11 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     }
 
     slinky::func f;
-    auto sched = std::make_unique<scheduling_info>();
+    std::unique_ptr<scheduling_info> sched;
     if (op.alias) {
       f = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                   {output.buffer, output_dims});
+      sched = std::make_unique<scheduling_info>();
     } else {
       slinky::call_stmt::attributes attrs;
       attrs.name = "transpose";
@@ -225,6 +226,32 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
       f = slinky::func::make(make_transpose_impl(elem_count, op.permutation),
                              {{input.buffer, std::move(bounds)}},
                              {{output.buffer, output_dims}}, attrs);
+
+      // Find the longest identity prefix of `op.permutation` (dimensions
+      // 0..k-1 that are not transposed) and omit loop splits from 0 through the
+      // output dimension `m_dim` that holds the innermost remaining input
+      // dimension (plus any contiguous inner dimensions when
+      // `elem_count == 1`). This keeps the inner transposed tile intact while
+      // parallelizing outer batch dimensions.
+      int k = 0;
+      while (k < rank && op.permutation[k] == k) {
+        ++k;
+      }
+      int m_dim = rank;
+      for (int d = k; d < rank; ++d) {
+        if (op.permutation[d] < static_cast<int32_t>(input.rank()) &&
+            (m_dim == rank || op.permutation[d] < op.permutation[m_dim])) {
+          m_dim = d;
+        }
+      }
+      int pin_end = (k < rank && m_dim < rank) ? (m_dim + 1) : rank;
+      while (elem_count == 1 && pin_end < rank &&
+             op.permutation[pin_end] == op.permutation[pin_end - 1] + 1) {
+        ++pin_end;
+      }
+      std::vector<slinky::expr> given_splits(pin_end);
+      sched = runtime.make_schedule(output_dims, output.physical_extents(),
+                                    output.buffer->elem_size(), given_splits);
     }
 
     f.user_data() = sched.get();
