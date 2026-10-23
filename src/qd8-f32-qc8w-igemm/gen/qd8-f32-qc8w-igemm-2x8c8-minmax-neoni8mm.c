@@ -83,16 +83,12 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8c8__neoni8mm(
       }
       a += 2;
 
-      uint64x2x2_t va01x0123456789ABCDEF;
-      va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-
       // Inner accumulation loop along the 8 columns.
       size_t k = kc;
       // 2x partial unrolled loop to load 8 bytes at a time.
       while (k >= 16 * sizeof(int8_t)) {
         // Load a 2x16 block of activations.
-        va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
+        uint64x2x2_t va01x0123456789ABCDEF = vld2q_dup_u64((const void*) a0); a0 += 16;
         va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
 
         // Load a 16x8 block of weights.
