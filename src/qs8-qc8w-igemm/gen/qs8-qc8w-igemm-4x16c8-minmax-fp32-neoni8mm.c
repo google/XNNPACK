@@ -113,11 +113,16 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c8__neoni8mm(
       size_t k = kc;
       // 2x partial unrolled loop to load 8 bytes at a time.
       while (k >= 16 * sizeof(int8_t)) {
-        // Load a 4x16 block of activations.
-        va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
-        va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a2, va23x0123456789ABCDEF, 0); a2 += 16;
-        va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
-        va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a3, va23x0123456789ABCDEF, 1); a3 += 16;
+        // Load a 4x16 block of activations with full 16-byte loads and
+        // interleave each row pair into the 2x8 operands of SMMLA.
+        const uint64x2_t vr0 = vreinterpretq_u64_s8(vld1q_s8(a0)); a0 += 16;
+        const uint64x2_t vr1 = vreinterpretq_u64_s8(vld1q_s8(a1)); a1 += 16;
+        va01x0123456789ABCDEF.val[0] = vzip1q_u64(vr0, vr1);
+        va01x0123456789ABCDEF.val[1] = vzip2q_u64(vr0, vr1);
+        const uint64x2_t vr2 = vreinterpretq_u64_s8(vld1q_s8(a2)); a2 += 16;
+        const uint64x2_t vr3 = vreinterpretq_u64_s8(vld1q_s8(a3)); a3 += 16;
+        va23x0123456789ABCDEF.val[0] = vzip1q_u64(vr2, vr3);
+        va23x0123456789ABCDEF.val[1] = vzip2q_u64(vr2, vr3);
 
         // Load a 16x16 block of weights.
         const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
