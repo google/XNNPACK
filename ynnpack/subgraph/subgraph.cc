@@ -629,30 +629,45 @@ bool build_cache_key(const ynn_subgraph& subgraph, uint32_t v_id,
   return true;
 }
 
-std::mutex constant_cache_mutex;  // NOLINT
-std::map<cache_key, std::weak_ptr<slinky::raw_buffer>> constant_cache;
+using constant_cache_map =
+    std::map<cache_key, std::weak_ptr<slinky::raw_buffer>>;
 
-// constant_cache_mutex must be held when calling this function.
+// The cache and its mutex are function-local statics (that are intentionally
+// never destroyed) rather than globals, because globals with non-trivial
+// constructors or destructors require static initializers, which some clients
+// (e.g. Chromium) do not allow.
+std::mutex& constant_cache_mutex() {  // NOLINT
+  static std::mutex* mutex = new std::mutex();  // NOLINT
+  return *mutex;
+}
+
+constant_cache_map& constant_cache() {
+  static constant_cache_map* cache = new constant_cache_map();
+  return *cache;
+}
+
+// constant_cache_mutex() must be held when calling this function.
 slinky::raw_buffer_ptr lookup_constant(const cache_key& key) {
-  auto it = constant_cache.find(key);
-  if (it != constant_cache.end()) {
+  constant_cache_map& cache = constant_cache();
+  auto it = cache.find(key);
+  if (it != cache.end()) {
     if (slinky::raw_buffer_ptr ptr = it->second.lock()) {
       return ptr;
     } else {
       // The value was released by all subgraphs, we don't have it in the cache
       // any more.
-      constant_cache.erase(it);
+      cache.erase(it);
     }
   }
   return nullptr;
 }
 
-// constant_cache_mutex must be held when calling this function.
+// constant_cache_mutex() must be held when calling this function.
 void insert_constant(const cache_key& key, slinky::raw_buffer_ptr& ptr) {
   // This must tolerate writing multiple buffers to the same cache key, because
   // graphs sometimes define multiple copies of the same computation, so within
   // one subgraph, multiple constants map to the same cache key.
-  constant_cache[key] = ptr;
+  constant_cache()[key] = ptr;
 }
 
 // `get_tensor_shape` needs a special case for constant folding, because we can
@@ -829,7 +844,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
 
   // From here, we need to serialize constant folding, to avoid racily folding
   // the same constant twice.
-  std::lock_guard<std::mutex> lock(constant_cache_mutex);  // NOLINT
+  std::lock_guard<std::mutex> lock(constant_cache_mutex());  // NOLINT
   for (uint32_t i : needed_constants) {
     cache_key key;
     // Build key using constants subgraph because it has folded nodes intact.
