@@ -1367,7 +1367,13 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   slinky::expr blocks_m =
       slinky::ceil_div<slinky::expr>(a.extent(num_k_dims), block_m);
 
-  if (slinky::prove_true(blocks_m * a_batch <= b_batch * 10)) {
+  int max_unpacked_blocks = 1;
+  if ((unpacked_kernel.flags & dot_flag::fast_unaligned_b) != 0) {
+    // Packing B for a kernel with tile_k > 1 is more expensive, but it can
+    // enable a much faster kernel, so we need fewer blocks of M to amortize it.
+    max_unpacked_blocks = kernel.tile_k == 1 ? 10 : 2;
+  }
+  if (slinky::prove_true(blocks_m * a_batch <= b_batch * max_unpacked_blocks)) {
     // A is small relative to B, we should not bother packing B because we're
     // not going to read it very much, and packing itself costs a read of B.
     return false;
@@ -1471,7 +1477,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // be implemented, and let a global cost optimization decide what to do...
   } else {
     unpacked_kernel = kernel;
-    if (kernel.tile_k != 1) {
+    if (kernel.tile_k != 1 || (kernel.flags & dot_flag::unaligned_b) == 0) {
       unpacked_kernel = get_dot_kernel(type, cost_models, shape, no_tile_k,
                                        kernel_flags | dot_flag::unaligned_b);
     }

@@ -386,8 +386,12 @@ void {func_name}(
     )
 
     if handle_tail:
+      if self.block_shape[1] == self.tile_shape[1] and (
+          "dot_flag::unaligned_b" in self.flags
+      ):
+        return self.add_c_block_tail()
       result = f"if (N >= {block_n}) {{\n"
-      result += indent(block  , "  ")
+      result += indent(block, "  ")
       result += "\n} else {\n"
       block = self.add_c_block_tail()
       result += indent(block, "  ")
@@ -507,16 +511,8 @@ do {
 
   def loop_j(self, n, k, handle_tail):
     """Generate the loop over N."""
-    tiles_m = self.block_shape[0] // self.tile_shape[0]
-    tiles_n = n // self.tile_shape[1]
-    tiles = tiles_m * tiles_n
-
-    # Ensure we have the minimum number of tiles.
-    n = min(self.block_shape[1], n * max(1, self.min_tiles // tiles))
-
-    # If we're unrolling the tail, we need to avoid reading B out of bounds.
-    self.n = "N" if handle_tail else self.block_shape[1]
-    self.b_chunk_n = self.tile_shape[1] if handle_tail else self.block_shape[1]
+    self.n = "N" if handle_tail else n
+    self.b_chunk_n = self.tile_shape[1] if handle_tail else n
 
     self.block_shape = (self.block_shape[0], n, k)
     body = self.init_c_block()
@@ -526,7 +522,12 @@ do {
     body += self.release_c_block()
 
     if handle_tail:
-      loop = "while (N > 0) {\n"
+      if self.block_shape[1] == self.tile_shape[1] and (
+          "dot_flag::unaligned_b" in self.flags
+      ):
+        loop = "if (N > 0) {\n"
+      else:
+        loop = "while (N > 0) {\n"
     else:
       loop = f"while (N >= {self.block_shape[1]}) {{\n"
     loop += indent(body, "  ")
@@ -559,14 +560,23 @@ do {
     )
 
     src = self.begin_func(func_name)
+    tiles_m = m // self.tile_shape[0]
+    tail_n = min(n, self.tile_shape[1] * max(1, self.min_tiles // tiles_m))
     # If we claim b is unaligned, we might use slow masked loads in the tail
     # case.
-    if (n != self.tile_shape[1] or "dot_flag::unaligned_b" in self.flags):
+    if n != self.tile_shape[1] or "dot_flag::unaligned_b" in self.flags:
       # The main loop (n = block_shape.n)
       body = self.loop_j(n, k, False)
       src += indent(body, "  ") + "\n"
-    # The tail case (n = tile_shape.n))
-    body = self.loop_j(self.tile_shape[1], k, True)
+    if (
+        "dot_flag::unaligned_b" in self.flags
+        and n > tail_n
+        and tail_n == self.tile_shape[1]
+    ):
+      body = self.loop_j(tail_n, k, False)
+      src += indent(body, "  ") + "\n"
+    # The tail case
+    body = self.loop_j(tail_n, k, True)
     src += indent(body, "  ") + "\n"
     src += self.end_func()
 
@@ -579,6 +589,7 @@ def generate_dot_kernels_impl(
     output_inc: str,
     block_shapes: Sequence[Tuple[int, int, int]],
     build_predicate: str | None = None,
+    variants: Sequence[dot_base] = (),
 ):
   if (
       gen.kind == "fp64" or "double" in (gen.a_type, gen.b_type, gen.c_type)
@@ -592,11 +603,12 @@ def generate_dot_kernels_impl(
     src += "#if " + build_predicate + "\n"
     inc += "#if " + build_predicate + "\n"
 
-  for m, n, k in block_shapes:
-    src_i, inc_i = gen.generate_dot(m, n, k)
+  for g in (gen, *variants):
+    for m, n, k in block_shapes:
+      src_i, inc_i = g.generate_dot(m, n, k)
 
-    src += src_i
-    inc += inc_i
+      src += src_i
+      inc += inc_i
 
   if build_predicate:
     src += "#endif\n"
@@ -622,9 +634,19 @@ def generate_dot_kernels(
     gen: dot_base,
     block_shapes: Sequence[Tuple[int, int, int]],
     build_predicate: str | None = None,
+    variants: Sequence[dot_base] = (),
 ):
+  """Generates kernels for `gen`, followed by kernels for each of `variants`.
+
+  Args:
+    gen: The generator that determines the header and output files.
+    block_shapes: The block shapes of the kernels to generate.
+    build_predicate: If not None, a preprocessor condition for the kernels.
+    variants: Generators of additional kernels to write to the same files, which
+      must be compatible with the header of `gen`.
+  """
   output_src = get_output_path(type(gen).__name__ + ".cc")
   output_inc = get_output_path(type(gen).__name__ + ".inc")
   generate_dot_kernels_impl(
-      gen, output_src, output_inc, block_shapes, build_predicate
+      gen, output_src, output_inc, block_shapes, build_predicate, variants
   )

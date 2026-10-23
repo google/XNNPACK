@@ -41,6 +41,12 @@ enum {
   // This kernel assumes that the values in B do not include the most negative
   // value, i.e. -b does not overflow.
   symmetric_b = 1 << 3,
+
+  // This kernel reads an unaligned B efficiently enough that skipping packing
+  // B is still profitable when B is read for several blocks of M.
+  // TODO(b/576141475): Use cost models to decide when to skip packing B instead
+  // of this flag.
+  fast_unaligned_b = 1 << 4,
 };
 
 }  // namespace dot_flag
