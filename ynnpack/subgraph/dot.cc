@@ -246,7 +246,7 @@ const dot_cost_models& get_dot_cost_models(const slinky::eval_context& ctx) {
 
 // Per-core cache budgets {L1, L2, L3}, in bytes, that `schedule_dot` tiles the
 // loops of each task to fit: 1/2 of L1 for the micro-kernel's reused panel,
-// leaving room for the streamed operand and the accumulators, and 1/4 of L2 and
+// leaving room for the streamed operand and the accumulators, and 1/2 of L2 and
 // L3, leaving room for the other operand, C, hardware prefetcher streams and
 // set-associativity conflicts. A per-core L3 share that is no larger than L2
 // (e.g. on many-core x86 and ARM servers) can't hold more reused data than L2,
@@ -255,7 +255,7 @@ const std::array<size_t, 3>& get_dot_cache_budgets() {
   static const std::array<size_t, 3> budgets = []() {
     const std::array<size_t, 3> sizes = get_cache_sizes();
     const size_t l3_size = sizes[2] > sizes[1] ? sizes[2] : 0;
-    return std::array<size_t, 3>{sizes[0] / 2, sizes[1] / 4, l3_size / 4};
+    return std::array<size_t, 3>{sizes[0] / 2, sizes[1] / 2, l3_size / 2};
   }();
   return budgets;
 }
@@ -1083,13 +1083,19 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   // use data we load from either side.
   // - Tasks shouldn't be too small, to avoid parallelism overhead.
   // - Tasks shouldn't be too large, so we get enough parallelism.
+  const index_t min_tile = 64;
   const index_t min_area_2d =
-      std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
+      std::min<index_t>(m, min_tile) * std::min<index_t>(n, min_tile);
   const index_t min_area_1d = 256;
   const index_t min_area = std::max<index_t>(min_area_2d, min_area_1d);
+  if (m * n <= min_area) {
+    return {max_multiplier_n * block_n, max_multiplier_m * step_m,
+            choose_split_k(k, a_elem_size)};
+  }
   const index_t max_area = 256 * 256;
   // The maximum cost of a tile, according to the cost function (m + n) * k.
   const index_t max_cost = 1024 * 64;
+  const index_t min_tasks = 32;
 
   // A parameter indicating the target split_m/split_n ratio.
   // TODO(b/438841352): Figure out why we want tall skinny tiles, at least on
@@ -1113,7 +1119,16 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   index_t split_n = std::min<index_t>(n, block_n);
   index_t split_m = std::min<index_t>(m, step_m);
   while (true) {
-    if (split_n * split_m >= min_area) {
+    // Once `m` and `n` have enough tiles to saturate parallel workers, require
+    // `split_n >= std::max(min_tile, 2 * block_n)` and
+    // `split_m >= aspect_ratio * split_n` so each task reuses A across multiple
+    // blocks of B and B across rows of A.
+    if (split_n * split_m >= min_area &&
+        (split_n >= std::max(min_tile, 2 * block_n) ||
+         split_n * min_tasks >= std::min(m, n)) &&
+        (split_m >= aspect_ratio * split_n ||
+         (split_m * min_tasks > m && split_n * min_tasks > std::min(m, n)) ||
+         split_n >= n)) {
       // We've reached the minimum tile size, should we stop?
       if ((split_m + split_n) * effective_k >= max_cost ||
           split_m * split_n >= max_area) {
