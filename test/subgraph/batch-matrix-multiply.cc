@@ -1,5 +1,7 @@
 // Copyright 2023 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -19,10 +21,13 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/reference-utils.h"
 #include "src/xnnpack/quantization.h"
 #include "src/xnnpack/subgraph.h"
@@ -34,6 +39,25 @@
 namespace xnnpack {
 
 using qcint8 = quantized<int8_t, channelwise>;
+
+static constexpr size_t kQP8F32QC8WBMMOnSME2MThreshold = 32;
+
+static bool UseQP8F32QC8WBMMOnSME2(uint64_t runtime_flags, size_t m) {
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  return m > kQP8F32QC8WBMMOnSME2MThreshold &&
+         (runtime_flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) == 0 &&
+         (runtime_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
+         hardware_config != nullptr &&
+         (hardware_config->arch_flags & xnn_arch_arm_sme2) != 0 &&
+         xnn_init_qp8_f32_qc8w_gemm_config() != nullptr;
+#else
+  (void)runtime_flags;
+  (void)m;
+  return false;
+#endif
+}
 
 // Make input matrices of the given ranks, with random broadcasting, such that
 // the result of batch matrix multiply of the two operands is `output_shape`.
@@ -277,7 +301,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
             .AddBatchMatrixMultiply(bmm_input_a_id, input_b_id, output_id,
                                     flags);
 
-    xnn_status status = subgraph.CreateRuntime();
+    xnn_status status =
+        subgraph.CreateRuntime(/*threadpool=*/nullptr, runtime_flags);
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
       return;
@@ -413,6 +438,161 @@ TEST(BatchMatrixMultiplyF32QC8W, dont_inline_lhs_dynamic_b) {
   TestDynamicB<float, qcint8>(/*convert_to=*/xnn_datatype_invalid,
                               /*runtime_flags=*/xnn_test_runtime_flags() |
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+
+static void TestQP8F32QC8WBMMSelection(size_t m, uint32_t optimization_flags,
+                                       bool expect_qp8,
+                                       bool transpose_a = false) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (expect_qp8 &&
+      !UseQP8F32QC8WBMMOnSME2(optimization_flags, m)) {
+    GTEST_SKIP() << "QP8 F32 QC8W SME2 BMM is not available";
+  }
+
+  constexpr uint32_t input_a_id = 0;
+  constexpr uint32_t input_b_id = 1;
+  constexpr uint32_t output_id = 2;
+  constexpr size_t k = 64;
+  constexpr size_t n = 32;
+  std::vector<float> input_b_scale(n, 1.0f);
+  const std::vector<size_t> input_a_shape =
+      transpose_a ? std::vector<size_t>{1, k, m}
+                  : std::vector<size_t>{1, m, k};
+  const uint32_t flags = transpose_a ? XNN_FLAG_TRANSPOSE_A : 0;
+
+  SubgraphTester subgraph(/*external_value_ids=*/3);
+  subgraph
+      .AddInputTensorF32(input_a_shape, input_a_id)
+      .AddStaticTensorQS8({1, k, n}, /*channel_dim=*/2,
+                          TensorType::kDense, input_b_scale.data(), input_b_id)
+      .AddOutputTensor({1, m, n}, xnn_datatype_fp32, output_id)
+      .AddBatchMatrixMultiply(input_a_id, input_b_id, output_id, flags)
+      .Optimize(optimization_flags);
+
+  ASSERT_EQ(subgraph.NumNodes(), 1);
+  const struct xnn_node* bmm_node = subgraph.Node(0);
+  ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
+  if (expect_qp8) {
+    EXPECT_EQ(bmm_node->packed_input_datatype, xnn_datatype_qpint8);
+    EXPECT_NE(bmm_node->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  } else {
+    EXPECT_EQ(bmm_node->packed_input_datatype, xnn_datatype_invalid);
+    EXPECT_EQ(bmm_node->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  }
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W,
+     default_uses_f32_fallback_at_m_threshold) {
+  TestQP8F32QC8WBMMSelection(
+      /*m=*/kQP8F32QC8WBMMOnSME2MThreshold,
+      /*optimization_flags=*/0,
+      /*expect_qp8=*/false);
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W,
+     default_selects_sme2_above_m_threshold_when_available) {
+  constexpr size_t m = kQP8F32QC8WBMMOnSME2MThreshold + 1;
+  TestQP8F32QC8WBMMSelection(
+      m, /*optimization_flags=*/0,
+      /*expect_qp8=*/UseQP8F32QC8WBMMOnSME2(/*runtime_flags=*/0, m));
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W,
+     transposed_a_uses_f32_fallback_at_m_threshold) {
+  TestQP8F32QC8WBMMSelection(
+      /*m=*/kQP8F32QC8WBMMOnSME2MThreshold,
+      /*optimization_flags=*/0, /*expect_qp8=*/false,
+      /*transpose_a=*/true);
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W,
+     transposed_a_selects_sme2_above_m_threshold_when_available) {
+  constexpr size_t m = kQP8F32QC8WBMMOnSME2MThreshold + 1;
+  TestQP8F32QC8WBMMSelection(
+      m, /*optimization_flags=*/0,
+      /*expect_qp8=*/UseQP8F32QC8WBMMOnSME2(/*runtime_flags=*/0, m),
+      /*transpose_a=*/true);
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W, no_inline_lhs_packing_uses_f32_fallback) {
+  TestQP8F32QC8WBMMSelection(
+      /*m=*/kQP8F32QC8WBMMOnSME2MThreshold + 1,
+      /*optimization_flags=*/XNN_FLAG_NO_INLINED_LHS_PACKING,
+      /*expect_qp8=*/false);
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W,
+     slow_consistent_arithmetic_uses_f32_fallback) {
+  TestQP8F32QC8WBMMSelection(
+      /*m=*/kQP8F32QC8WBMMOnSME2MThreshold + 1,
+      /*optimization_flags=*/XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC,
+      /*expect_qp8=*/false);
+}
+
+TEST(BatchMatrixMultiplyQP8F32QC8W, non_prequantized_fp32_lhs_accuracy) {
+  constexpr uint32_t input_a_id = 0;
+  constexpr uint32_t input_b_id = 1;
+  constexpr uint32_t output_id = 2;
+  constexpr size_t batch = 1;
+  constexpr size_t m = 64;
+  constexpr size_t k = 256;
+  constexpr size_t n = 64;
+  constexpr uint32_t runtime_flags = 0;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (!UseQP8F32QC8WBMMOnSME2(runtime_flags, m)) {
+    GTEST_SKIP() << "QP8 F32 QC8W SME2 BMM is not available";
+  }
+
+  ReplicableRandomDevice rng;
+  std::normal_distribution<float> input_dist(0.0f, 1.0f);
+  std::uniform_real_distribution<float> scale_dist(0.001f, 0.05f);
+  Tensor<float> input_a({batch, m, k}, XnnExtraBytes);
+  input_a.generate([&]() { return input_dist(rng); });
+  Tensor<qcint8> input_b({batch, k, n}, XnnExtraBytes);
+  auto input_b_gen =
+      MakeDatatypeGenerator(qcint8(), /*symmetric_range=*/true);
+  input_b.generate([&]() { return input_b_gen(rng); });
+  Tensor<float> input_b_scales({batch, 1, n});
+  input_b_scales.generate([&]() { return scale_dist(rng); });
+
+  const std::vector<size_t> output_shape = {batch, m, n};
+  Tensor<float> fallback_output(output_shape);
+  Tensor<float> sme2_output(output_shape);
+  const auto run_bmm = [&](uint32_t flags, Tensor<float>& output) {
+    SubgraphTester subgraph(/*external_value_ids=*/3);
+    subgraph
+        .AddInputTensor(input_a.shape(), input_a.base(), input_a_id)
+        .AddStaticTensorQS8(
+            input_b.shape(), /*channel_dim=*/2, TensorType::kDense,
+            input_b_scales.base(), input_b_id, /*flags=*/0,
+            reinterpret_cast<int8_t*>(input_b.data()))
+        .AddOutputTensor(output.shape(), output.base(), output_id)
+        .AddBatchMatrixMultiply(input_a_id, input_b_id, output_id);
+
+    const xnn_status status =
+        subgraph.CreateRuntime(/*threadpool=*/nullptr, flags);
+    if (status != xnn_status_success) {
+      return status;
+    }
+    return subgraph.ReshapeRuntime().SetupRuntime().InvokeRuntime();
+  };
+
+  ASSERT_EQ(xnn_status_success,
+            run_bmm(/*flags=*/XNN_FLAG_NO_INLINED_LHS_PACKING,
+                    fallback_output));
+  ASSERT_EQ(xnn_status_success, run_bmm(runtime_flags, sme2_output));
+
+  double squared_error = 0.0;
+  double squared_reference = 0.0;
+  for (const auto& i : EnumerateIndices(output_shape)) {
+    const double reference_value = fallback_output(i);
+    const double error = static_cast<double>(sme2_output(i)) - reference_value;
+    squared_error += error * error;
+    squared_reference += reference_value * reference_value;
+  }
+  ASSERT_GT(squared_reference, 0.0);
+  EXPECT_LT(std::sqrt(squared_error / squared_reference), 0.02);
 }
 #endif  // XNNPACK_USE_YNNPACK
 
@@ -715,7 +895,8 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
   }
 }
 
-TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_large_m_not_rewritten) {
+TEST(BatchMatrixMultiplyDequantBmmRewrite,
+     dynamic_b_large_m_not_rewritten_without_packed_lhs) {
   const uint32_t external_input_a = 0;
   const uint32_t external_input_b = 1;
   const uint32_t external_output = 2;
@@ -744,6 +925,110 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_large_m_not_rewritten) {
   const xnn_value* b_val = tester.Value(bmm_node->inputs[1]);
   EXPECT_EQ(b_val->datatype, xnn_datatype_fp32)
       << "bmm input B should remain fp32 when M > mr";
+}
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite,
+     dynamic_b_at_m_threshold_not_rewritten) {
+  const uint32_t external_input_a = 0;
+  const uint32_t external_input_b = 1;
+  const uint32_t external_output = 2;
+  uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+  constexpr uint32_t flags = 0;
+  SubgraphTester tester(/*external_value_ids=*/3, flags);
+  tester
+      .AddInputTensorF32(
+          {2, kQP8F32QC8WBMMOnSME2MThreshold, 4}, external_input_a)
+      .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {2, 4, 5},
+                         external_input_b)
+      .AddInternalDynamicTensorF32({2, 4, 5}, &internal_b_f32)
+      .AddOutputTensor({2, kQP8F32QC8WBMMOnSME2MThreshold, 5},
+                       xnn_datatype_fp32, external_output)
+      .AddConvert(external_input_b, internal_b_f32)
+      .AddBatchMatrixMultiply(external_input_a, internal_b_f32, external_output)
+      .Optimize(flags);
+
+  const xnn_node* bmm_node = nullptr;
+  for (size_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* n = tester.Node(i);
+    if (n->type == xnn_node_type_batch_matrix_multiply) {
+      bmm_node = n;
+      break;
+    }
+  }
+  ASSERT_NE(bmm_node, nullptr) << "bmm node missing";
+  EXPECT_EQ(tester.Value(bmm_node->inputs[1])->datatype, xnn_datatype_fp32);
+  EXPECT_NE(bmm_node->packed_input_datatype, xnn_datatype_qpint8);
+}
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite,
+     transposed_a_small_m_not_rewritten) {
+  const uint32_t external_input_a = 0;
+  const uint32_t external_input_b = 1;
+  const uint32_t external_output = 2;
+  uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+  constexpr size_t m = 8;
+  constexpr size_t k = 64;
+  constexpr size_t n = 5;
+  constexpr uint32_t flags = XNN_FLAG_TRANSPOSE_A;
+  SubgraphTester tester(/*external_value_ids=*/3);
+  tester.AddInputTensorF32({2, k, m}, external_input_a)
+      .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {2, k, n},
+                         external_input_b)
+      .AddInternalDynamicTensorF32({2, k, n}, &internal_b_f32)
+      .AddOutputTensor({2, m, n}, xnn_datatype_fp32, external_output)
+      .AddConvert(external_input_b, internal_b_f32)
+      .AddBatchMatrixMultiply(external_input_a, internal_b_f32, external_output,
+                              flags)
+      .Optimize(/*optimization_flags=*/0);
+
+  const xnn_node* bmm_node = nullptr;
+  for (size_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* candidate = tester.Node(i);
+    if (candidate->type == xnn_node_type_batch_matrix_multiply) {
+      bmm_node = candidate;
+      break;
+    }
+  }
+  ASSERT_NE(bmm_node, nullptr) << "bmm node missing";
+  EXPECT_EQ(tester.Value(bmm_node->inputs[1])->datatype, xnn_datatype_fp32);
+  EXPECT_NE(bmm_node->packed_input_datatype, xnn_datatype_qpint8);
+}
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite,
+     dynamic_b_large_m_rewritten_for_sme2_packed_lhs) {
+  const uint32_t external_input_a = 0;
+  const uint32_t external_input_b = 1;
+  const uint32_t external_output = 2;
+  uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+  constexpr uint32_t flags = 0;
+  SubgraphTester tester(/*external_value_ids=*/3, flags);
+  tester.AddInputTensorF32({2, 64, 4}, external_input_a)
+      .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {2, 4, 5},
+                         external_input_b)
+      .AddInternalDynamicTensorF32({2, 4, 5}, &internal_b_f32)
+      .AddOutputTensor({2, 64, 5}, xnn_datatype_fp32, external_output)
+      .AddConvert(external_input_b, internal_b_f32)
+      .AddBatchMatrixMultiply(external_input_a, internal_b_f32, external_output)
+      .Optimize(flags);
+
+  const xnn_node* bmm_node = nullptr;
+  for (size_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* n = tester.Node(i);
+    if (n->type == xnn_node_type_batch_matrix_multiply) {
+      bmm_node = n;
+      break;
+    }
+  }
+  ASSERT_NE(bmm_node, nullptr) << "bmm node missing";
+  const xnn_value* b_val = tester.Value(bmm_node->inputs[1]);
+  if (UseQP8F32QC8WBMMOnSME2(flags, /*m=*/64)) {
+    EXPECT_EQ(b_val->datatype, xnn_datatype_qcint8);
+    EXPECT_EQ(bmm_node->packed_input_datatype, xnn_datatype_qpint8);
+    EXPECT_NE(bmm_node->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  } else {
+    EXPECT_EQ(b_val->datatype, xnn_datatype_fp32);
+    EXPECT_EQ(bmm_node->packed_input_datatype, xnn_datatype_invalid);
+  }
 }
 #endif  // XNNPACK_USE_YNNPACK
 
