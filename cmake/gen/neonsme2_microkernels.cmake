@@ -37,6 +37,11 @@ SET(PROD_NEONSME2_MICROKERNEL_SRCS
   src/x32-pack-lh/x32-packlh-neonsme2.c)
 
 SET(NON_PROD_NEONSME2_MICROKERNEL_SRCS
-  src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-1x64c4-minmax-neonsme2.c)
+  src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-1x64c4-minmax-neonsme2.c
+  src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-1x32c4-minmax-sme2.c
+  src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-32x32c4-minmax-sme2.c
+  src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-1x32c4-minmax-sme2.c
+  src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-32x32c4-minmax-sme2.c
+  src/x8-packq/x8-packq-f32qp8-sme2.c)
 
 SET(ALL_NEONSME2_MICROKERNEL_SRCS ${PROD_NEONSME2_MICROKERNEL_SRCS} ${NON_PROD_NEONSME2_MICROKERNEL_SRCS})

@@ -176,6 +176,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_ARM_SME2=1"],
         ["XNN_ENABLE_ARM_SME2=0"],
     ) + xnnpack_select_if(
+        "//:arm_sme_acle_enabled",
+        ["XNN_ENABLE_ARM_SME_ACLE=1"],
+        ["XNN_ENABLE_ARM_SME_ACLE=0"],
+    ) + xnnpack_select_if(
         "//:wasm_revectorize_enabled",
         ["XNN_ENABLE_WASM_REVECTORIZE=1"],
         ["XNN_ENABLE_WASM_REVECTORIZE=0"],

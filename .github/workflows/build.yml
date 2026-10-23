@@ -824,6 +824,7 @@ jobs:
       CC: clang-18
       CXX: clang++-18
       BAZEL_DEFINES: |
+        --define=xnn_enable_arm_sme_acle=false
         --define=ynn_enable_arm64_neonfp8=false
     steps:
       - uses: actions/checkout@v6
@@ -893,6 +894,7 @@ jobs:
       CC: gcc-13
       CXX: g++-13
       BAZEL_DEFINES: |
+        --define=xnn_enable_arm_sme_acle=false
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
         --define=ynn_enable_arm64_sve=false
@@ -965,6 +967,7 @@ jobs:
       CXX: clang++-20
       QEMU_ARGS: -cpu max
       BAZEL_DEFINES: |
+        --define=xnn_enable_arm_sme_acle=true
         --define=ynn_enable_arm64_neonfp8=true
     steps:
       - uses: actions/checkout@v6
@@ -993,9 +996,11 @@ jobs:
             ${BAZEL_DEFINES} \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:qp8_f32_qc8w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
             //test:pf16_gemm_minmax_test \
             //test:pqs8_qc8w_gemm_minmax_test \
+            //test:x8_packq_test \
             //test/subgraph/... \
             //ynnpack/...
         working-directory: ${{ github.workspace }}
@@ -1016,11 +1021,13 @@ jobs:
             ${BAZEL_DEFINES} \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:qp8_f32_qc8w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
             //test:pf16_gemm_minmax_test \
             //test:pqs8_qc8w_gemm_minmax_test \
+            //test:x8_packq_test \
             --cache_test_results=no \
-            --test_filter="*NEONSME2*" \
+            --test_filter="*SME2*:*sme2*" \
             --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
