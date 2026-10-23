@@ -112,13 +112,6 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c8__neoni8mm(
     size_t k = kc;
     // 2x partial unrolled loop to load 8 bytes at a time.
 
-    uint64x2x2_t va01x0123456789ABCDEF;
-    va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-    va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-    uint64x2x2_t va23x0123456789ABCDEF;
-    va23x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-    va23x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-
     while (k >= 16 * sizeof(int8_t)) {
       // Load a 4x16 block of activations with full 16-byte loads and
       // interleave each row pair into the 2x8 operands of SMMLA.

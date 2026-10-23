@@ -187,7 +187,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       // Inner accumulation loop along the ${NR} columns.
       size_t k = kc;
     ${_}// 2x partial unrolled loop to load 8 bytes at a time.
-    $if PAIRED_MR > 0:
+    $if PAIRED_MR > 0 and not VLD1_ACTIVATIONS:
 
       $for M in range(0, PAIRED_MR, 2):
         ${_}uint64x2x2_t va${M}${M+1}x${ABC[0:16]};
