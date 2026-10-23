@@ -961,21 +961,9 @@ TEST(BatchMatrixMultiply, RankOneTransposedB) {
   ASSERT_EQ(xnn_status_success,
             xnn_define_static_transpose(subgraph, 1, perm, input_b_id,
                                         transposed_b_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success,
+  EXPECT_EQ(xnn_status_invalid_parameter,
             xnn_define_batch_matrix_multiply(
                 subgraph, input_a_id, transposed_b_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  const xnn_status status =
-      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-
-  EXPECT_EQ(xnn_status_invalid_parameter, xnn_reshape_runtime(runtime));
 }
 #endif  // XNNPACK_USE_YNNPACK
 
