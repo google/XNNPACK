@@ -1256,12 +1256,24 @@ size_t xnn_init_qs8_cvt_scalar_params(
   assert(input_output_scale >= 0x1.0p-8);
   assert(input_output_scale <= 0x1.0p+7);
 
-  const long multiplier = lrintf(256.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 32768L);
+  const uint32_t scale_bits = float_as_uint32(input_output_scale);
+  const int32_t scale_exponent = (int32_t) (scale_bits >> 23) - 127;
+  int32_t shift = math_min_s32(math_max_s32(scale_exponent + 1, 0), 7);
+  int32_t multiplier = (int32_t) lrintf(uint32_as_float(scale_bits + ((uint32_t) (15 - shift) << 23)));
+  if (multiplier == 32768) {
+    if (shift < 7) {
+      multiplier = 16384;
+      shift += 1;
+    } else {
+      multiplier = 32767;
+    }
+  }
+  assert(multiplier >= 128);
+  assert(multiplier <= 32767);
   params->qs8_cvt.scalar.input_zero_point = (int16_t) input_quantization->zero_point;
-  params->qs8_cvt.scalar.multiplier = (int32_t) multiplier;
+  params->qs8_cvt.scalar.multiplier = (int16_t) multiplier;
   params->qs8_cvt.scalar.output_zero_point = (int16_t) output_quantization->zero_point;
+  params->qs8_cvt.scalar.shift = (int16_t) shift;
   return sizeof(params->qs8_cvt);
 }
 
@@ -1297,12 +1309,24 @@ size_t xnn_init_qu8_cvt_scalar_params(
   assert(input_output_scale >= 0x1.0p-8);
   assert(input_output_scale <= 0x1.0p+7);
 
-  const long multiplier = lrintf(256.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 32768L);
+  const uint32_t scale_bits = float_as_uint32(input_output_scale);
+  const int32_t scale_exponent = (int32_t) (scale_bits >> 23) - 127;
+  int32_t shift = math_min_s32(math_max_s32(scale_exponent + 1, 0), 7);
+  int32_t multiplier = (int32_t) lrintf(uint32_as_float(scale_bits + ((uint32_t) (15 - shift) << 23)));
+  if (multiplier == 32768) {
+    if (shift < 7) {
+      multiplier = 16384;
+      shift += 1;
+    } else {
+      multiplier = 32767;
+    }
+  }
+  assert(multiplier >= 128);
+  assert(multiplier <= 32767);
   params->qu8_cvt.scalar.input_zero_point = (uint16_t) input_quantization->zero_point;
-  params->qu8_cvt.scalar.multiplier = (int32_t) multiplier;
+  params->qu8_cvt.scalar.multiplier = (int16_t) multiplier;
   params->qu8_cvt.scalar.output_zero_point = (int16_t) output_quantization->zero_point;
+  params->qu8_cvt.scalar.shift = (int16_t) shift;
   return sizeof(params->qu8_cvt);
 }
 

@@ -27,14 +27,15 @@ void xnn_qs8_vcvt_ukernel__rvv_u2v(
   const int8_t input_zero_point = params->scalar.input_zero_point;
   const int16_t multiplier = params->scalar.multiplier;
   const int16_t output_zero_point = params->scalar.output_zero_point;
+  const size_t shift = (size_t) params->scalar.shift;
 
   do {
     size_t vl = __riscv_vsetvl_e8m2(batch); batch -= vl;
     vint8m2_t in_i8v = __riscv_vle8_v_i8m2(input, vl); input += vl;
     vint16m4_t acc_i16v = __riscv_vwsub_vx(in_i8v, input_zero_point, vl);
-    acc_i16v = __riscv_vsll(acc_i16v, 7, vl);
+    acc_i16v = __riscv_vsll(acc_i16v, shift, vl);
     acc_i16v = __riscv_vsmul(acc_i16v, multiplier, __RISCV_VXRM_RNU, vl);
-    acc_i16v = __riscv_vsadd(acc_i16v, output_zero_point, vl);
+    acc_i16v = __riscv_vadd(acc_i16v, output_zero_point, vl);
     vint8m2_t out_i8v = __riscv_vnclip(acc_i16v, 0, __RISCV_VXRM_RNU, vl);
     __riscv_vse8(output, out_i8v, vl); output += vl;
   } while (batch != 0);
