@@ -155,10 +155,11 @@ static enum xnn_status reshape_even_split_operator(
     axis += input_value->shape.num_dims;
   }
   // Check that the split dimension can be evenly split into outputs.
-  if (axis >= input_value->shape.num_dims) {
+  if (axis < 0 || axis >= input_value->shape.num_dims) {
     xnn_log_error(
         "failed to reshape Even Split operator with the input ID #%" PRIu32
-        ": split dimension (%d) exceeds the number of dimensions (%zu)",
+        ": split dimension (%d) is out of range for a tensor with %zu "
+        "dimensions",
         input_id, axis, input_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
