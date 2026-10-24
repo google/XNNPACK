@@ -117,4 +117,76 @@ TEST(SUBGRAPH, reserve_nodes_overflow) {
   ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
 }
 
+TEST(SUBGRAPH, widen_fp16_accumulators_converts_static_value_correctly) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+
+  // Input tensor: 1D FP16 external input (id 0).
+  const size_t input_dims[1] = {4};
+  uint32_t input_id = 0;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 1, input_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  // Intermediate reduced tensor: 1D FP16 internal (id 2).
+  const size_t reduced_dims[1] = {1};
+  uint32_t reduced_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 1, reduced_dims, nullptr,
+                /*external_id=*/XNN_INVALID_VALUE_ID, 0, &reduced_id),
+            xnn_status_success);
+
+  // Output tensor: 1D FP16 external output (id 1).
+  uint32_t output_id = 1;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 1, reduced_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  // Static scalar FP16 multiplier (value = 0.5f).
+  const uint16_t static_fp16_val = 0x3800;  // 0.5 in FP16
+  const size_t scalar_dims[1] = {1};
+  uint32_t static_scalar_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 1, scalar_dims, &static_fp16_val,
+                /*external_id=*/XNN_INVALID_VALUE_ID, 0, &static_scalar_id),
+            xnn_status_success);
+
+  // Static sum reduction node.
+  const size_t reduction_axes[1] = {0};
+  ASSERT_EQ(xnn_define_static_reduce(
+                subgraph, xnn_reduce_sum, 1, reduction_axes, input_id,
+                reduced_id, /*flags=*/XNN_FLAG_KEEP_DIMS),
+            xnn_status_success);
+
+  // Binary multiply node: reduced_id * static_scalar_id -> output_id.
+  ASSERT_EQ(xnn_define_binary(
+                subgraph, xnn_binary_multiply, nullptr, reduced_id,
+                static_scalar_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  // Run subgraph optimization.
+  ASSERT_EQ(xnn_subgraph_optimize(subgraph, /*flags=*/0), xnn_status_success);
+
+  // Verify that the graph contains 3 nodes: reduce, binary op, and convert.
+  ASSERT_EQ(subgraph->num_nodes, 3);
+  EXPECT_EQ(subgraph->nodes[0].type, xnn_node_type_static_sum);
+  EXPECT_EQ(subgraph->nodes[1].type, xnn_node_type_binary_elementwise);
+  EXPECT_EQ(subgraph->nodes[1].binary_operator, xnn_binary_multiply);
+  EXPECT_EQ(subgraph->nodes[2].type, xnn_node_type_unary_elementwise);
+  EXPECT_EQ(subgraph->nodes[2].unary_operator, xnn_unary_convert);
+
+  // Verify that static_scalar_id was rewritten to FP32 and equals 0.5f.
+  const struct xnn_value* scalar_val = &subgraph->values[static_scalar_id];
+  EXPECT_EQ(scalar_val->datatype, xnn_datatype_fp32);
+  ASSERT_NE(scalar_val->data, nullptr);
+  EXPECT_EQ(*reinterpret_cast<const float*>(scalar_val->data), 0.5f);
+
+  ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
 }  // namespace xnnpack
