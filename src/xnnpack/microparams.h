@@ -501,7 +501,8 @@ struct xnn_f32_qu8_cvt_params {
 struct xnn_qs8_cvt_params {
   struct {
     int16_t input_zero_point;
-    int32_t multiplier;
+    int16_t multiplier;
+    int16_t shift;
     int16_t output_zero_point;
   } scalar;
 };
@@ -524,6 +525,7 @@ struct xnn_qu8_cvt_params {
   struct {
     uint16_t input_zero_point;
     int16_t multiplier;
+    int16_t shift;
     int16_t output_zero_point;
   } scalar;
 };
