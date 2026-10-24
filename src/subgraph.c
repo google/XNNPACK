@@ -3900,8 +3900,10 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // rewritten to be fp16 less likely to overflow. Especially if x is a
         // squaring operation, and the data is fp16, it is very likely that the
         // sum will overflow.
-        XNN_RETURN_IF_ERROR(
-            widen_fp16_accumulators(subgraph, node_id, changes));
+        // Disabled: the fp16 reduce operators cannot produce an fp32 output,
+        // and the rewrite drops the `mul`/`div` node.
+        // XNN_RETURN_IF_ERROR(
+        //     widen_fp16_accumulators(subgraph, node_id, changes));
 
         // Convert min/max operations with a single static value to a unary
         // `clamp` node.
