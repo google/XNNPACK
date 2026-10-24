@@ -136,10 +136,10 @@ TEST_F(LoopFusionTest, ProducerOfPackedInputFusesWithDot) {
 }
 
 // The pipeline is dot(A, transpose(exp(Bt))). The transpose is folded into the
-// packing (always_alias_transpose), so the func chain is exp -> transpose
-// (aliased copy) -> pack_b -> dot. In this layout exp's loop order matches the
-// dot's loop nest positionally, so fusion of exp is blocked *only* by the
-// source region inference breaking at pack's non-identity input bounds.
+// packing (pack_b transpose flag), so the func chain is exp -> pack_b -> dot.
+// In this layout exp's loop order matches the dot's loop nest positionally, so
+// fusion of exp is blocked *only* by the source region inference breaking at
+// pack's non-identity input bounds.
 TEST_F(LoopFusionTest, ProducerOfTransposedPackedInputFusesWithDot) {
   const uint32_t a_id = 0;
   const uint32_t b_id = 1;
