@@ -26,6 +26,31 @@ namespace {
 
 
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f16_gemm_minmax_ukernel_1x64c2__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_f16_gemm_minmax_ukernel_1x64c2__hvx,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_x16_packw_gemm_goi_ukernel_x64c2__hvx,
+      /*mr=*/1, /*nr=*/64, /*kr=*/2, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_1x64c2__hvx)
+
+  static void f16_gemm_minmax_ukernel_4x64c2__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_f16_gemm_minmax_ukernel_4x64c2__hvx,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_x16_packw_gemm_goi_ukernel_x64c2__hvx,
+      /*mr=*/4, /*nr=*/64, /*kr=*/2, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_4x64c2__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
 #if XNN_ARCH_WASMRELAXEDSIMDFP16
   static void f16_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(benchmark::State& state) {
     GEMMBenchmark(state,
@@ -727,6 +752,31 @@ namespace {
 
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_7x4v__rvvfp16arith)
 #endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+  static void f16_gemm_minmax_ukernel_32x64c2__hmx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_f16_gemm_minmax_ukernel_32x64c2__hmx,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_x16_packw_gemm_goi_ukernel_x64c2__hvx,
+      /*mr=*/32, /*nr=*/64, /*kr=*/2, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_32x64c2__hmx)
+
+  static void f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_x16_packw_gemm_goi_ukernel_x64c2__hvx,
+      /*mr=*/32, /*nr=*/64, /*kr=*/2, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong)
+#endif  // XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
 
 
 }  // namespace

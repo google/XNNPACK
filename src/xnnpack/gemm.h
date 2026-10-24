@@ -364,6 +364,15 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_gemm_minmax_ukernel_7x4v__rvvfp16arith)
 
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_1x64c2__hvx)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_4x64c2__hvx)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_32x64c2__hmx)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong)
+
 #define DECLARE_F32_GEMM_UKERNEL_FUNCTION(fn_name)                           \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
                             size_t a_stride, const float* w, float* c,       \

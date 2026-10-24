@@ -391,6 +391,37 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.mr = 7;
       f16_gemm_config.nr = 4 * hardware_config->vlenb / sizeof(xnn_float16);
     }
+  #elif XNN_ARCH_HEXAGON
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_HMX && XNN_ENABLE_HVX
+      if ((hardware_config->arch_flags & xnn_arch_hmx) &&
+          (hardware_config->arch_flags & xnn_arch_hvx)) {
+        f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x64c2__hvx);
+        f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_4x64c2__hvx);
+        f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(32)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong);
+        f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+        f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x64c2__hvx;
+        f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x64c2__hvx;
+        f16_gemm_config.mr = 32;
+        f16_gemm_config.nr = 64;
+        f16_gemm_config.log2_kr = 1;
+      } else
+    #endif
+    #if XNN_ENABLE_HVX
+      if (hardware_config->arch_flags & xnn_arch_hvx) {
+        f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x64c2__hvx);
+        f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_4x64c2__hvx);
+        f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+        f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x64c2__hvx;
+        f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x64c2__hvx;
+        f16_gemm_config.mr = 4;
+        f16_gemm_config.nr = 64;
+        f16_gemm_config.log2_kr = 1;
+      } else
+    #endif
+      {}
   #endif
   assert(f16_gemm_config.mr <= XNN_MAX_MR);
 }

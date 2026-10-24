@@ -804,6 +804,14 @@ XNNPACK_PARAMS_FOR_ARCH = {
         ],
         extra_deps = [],  # Extra deps for hexagon.
     ),
+    "hmx": _create_params(
+        cond = "//:hmx_enabled",
+        copts = [
+            "-mhvx-ieee-fp",
+            "-mhmx",
+        ],
+        extra_deps = [],  # Extra deps for hexagon.
+    ),
     "amd64": _create_params(
         cond = "//build_config:x86_64",
         gcc_x86_copts = [
