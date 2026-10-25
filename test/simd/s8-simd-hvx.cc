@@ -76,6 +76,37 @@ TEST_F(S8SimdHVXTest, Max) {
   }
 }
 
+TEST_F(S8SimdHVXTest, ReduceMin) {
+  const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
+  int8_t res = xnn_reduce_min_s8(a);
+  int8_t expected = std::numeric_limits<int8_t>::max();
+  for (size_t i = 0; i < xnn_simd_size_s8; ++i) {
+    expected = std::min<int8_t>(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
+TEST_F(S8SimdHVXTest, ReduceMax) {
+  const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
+  int8_t res = xnn_reduce_max_s8(a);
+  int8_t expected = std::numeric_limits<int8_t>::min();
+  for (size_t i = 0; i < xnn_simd_size_s8; ++i) {
+    expected = std::max<int8_t>(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+
+  std::uniform_int_distribution<int> neg_s8(-128, -1);
+  std::generate(inputs_.begin(), inputs_.begin() + xnn_simd_size_s8,
+                [&]() { return neg_s8(rng_); });
+  const xnn_simd_s8_t neg_a = xnn_loadu_s8(inputs_.data());
+  res = xnn_reduce_max_s8(neg_a);
+  expected = std::numeric_limits<int8_t>::min();
+  for (size_t i = 0; i < xnn_simd_size_s8; ++i) {
+    expected = std::max<int8_t>(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
 TEST_F(S8SimdHVXTest, StoreTail) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s8;

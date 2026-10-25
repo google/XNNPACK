@@ -36,7 +36,7 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return Q6_Vb_vmin_VbVb(a, b);
 }
 
-static XNN_INLINE float xnn_reduce_max_s8(xnn_simd_s8_t v) {
+static XNN_INLINE int8_t xnn_reduce_max_s8(xnn_simd_s8_t v) {
   v = Q6_Vb_vmax_VbVb(v, Q6_V_vror_VR(v, 64));
   v = Q6_Vb_vmax_VbVb(v, Q6_V_vror_VR(v, 32));
   v = Q6_Vb_vmax_VbVb(v, Q6_V_vror_VR(v, 16));
@@ -44,10 +44,10 @@ static XNN_INLINE float xnn_reduce_max_s8(xnn_simd_s8_t v) {
   v = Q6_Vb_vmax_VbVb(v, Q6_V_vror_VR(v, 4));
   v = Q6_Vb_vmax_VbVb(v, Q6_V_vror_VR(v, 2));
   v = Q6_Vb_vmax_VbVb(v, Q6_V_vror_VR(v, 1));
-  return *((uint8_t*)&v);
+  return *((int8_t*)&v);
 }
 
-static XNN_INLINE float xnn_reduce_min_s8(xnn_simd_s8_t v) {
+static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t v) {
   v = Q6_Vb_vmin_VbVb(v, Q6_V_vror_VR(v, 64));
   v = Q6_Vb_vmin_VbVb(v, Q6_V_vror_VR(v, 32));
   v = Q6_Vb_vmin_VbVb(v, Q6_V_vror_VR(v, 16));

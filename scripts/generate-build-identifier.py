@@ -62,11 +62,11 @@ static const uint8_t xnn_build_identifier[] = {{
 {id_data}
 }};
 
-size_t xnn_experimental_get_build_identifier_size() {{
+size_t xnn_experimental_get_build_identifier_size(void) {{
   return sizeof(xnn_build_identifier);
 }}
 
-const void* xnn_experimental_get_build_identifier_data() {{
+const void* xnn_experimental_get_build_identifier_data(void) {{
   return xnn_build_identifier;
 }}
 

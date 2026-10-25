@@ -242,12 +242,12 @@ bool xnn_is_f16_native_supported(void);
 /// That identifier will be unique for the current set of microkernels implementations.
 ///
 /// @returns A pointer to the current identifier's data.
-const void* xnn_experimental_get_build_identifier_data();
+const void* xnn_experimental_get_build_identifier_data(void);
 
 /// Get the microkernel implementation build identifier's data size.
 ///
 /// @returns The size in bytes of the identifier's data.
-size_t xnn_experimental_get_build_identifier_size();
+size_t xnn_experimental_get_build_identifier_size(void);
 
 /// Check whether the given data matches this version's identifier.
 ///
