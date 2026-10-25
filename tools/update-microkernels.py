@@ -11,6 +11,11 @@ import io
 import os
 import re
 import sys
+try:
+  from immutabledict import immutabledict
+except ImportError:
+  immutabledict = dict
+
 
 parser = argparse.ArgumentParser(
     description='Utility for re-generating microkernel lists'
@@ -85,12 +90,12 @@ _ISA_LIST = frozenset({
     'wasmsimd',
 })
 
-_ISA_MAP = {
+_ISA_MAP = immutabledict({
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',
     'wasmusdot': 'wasmrelaxedsimd',
-}
+})
 
 _ARCH_LIST = frozenset({
     'aarch32',
@@ -105,12 +110,12 @@ _MICROKERNEL_NAME_REGEX = re.compile(
     r'\bxnn_(?:[a-z0-9]+(?:_[a-z0-9]+)*)_ukernel(?:_[a-z0-9]+)*__(?:[a-z0-9]+(?:_[a-z0-9]+)*)\b'
 )
 
-_VERIFICATION_IGNORE_SUBDIRS = {
+_VERIFICATION_IGNORE_SUBDIRS = frozenset({
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
     os.path.join('src', 'reference'),
     os.path.join('src', 'xnnpack', 'simd'),
-}
+})
 
 
 def _extract_microkernels_from_file(args):
