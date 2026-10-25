@@ -1,0 +1,180 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/x16-packw/gio-c2-hvx.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+#include <hvx_hexagon_protos.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packw.h"
+
+static XNN_INLINE void l2fetch_2d(
+    const void* p,
+    uint32_t stride,
+    uint32_t width,
+    uint32_t height) {
+  const uint64_t control = ((uint64_t) stride << 32) |
+                           ((uint64_t) width << 16) |
+                           (uint64_t) height;
+  __asm__ __volatile__("l2fetch(%0,%1)" : : "r"(p), "r"(control));
+}
+
+void xnn_x16_packw_gemm_gio_ukernel_x64c2__hvx(
+    size_t g,
+    size_t nc,
+    size_t kc,
+    size_t nr,
+    size_t kr,
+    size_t sr,
+    size_t k_stride,
+    const uint16_t* weights,
+    const uint16_t* bias,
+    const void* scale,
+    uint16_t* packed_weights,
+    size_t extra_bytes,
+    const void* params) {
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == 64);
+  assert(kr == 2);
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+  (void) nr;
+  (void) kr;
+  (void) sr;
+  (void) scale;
+  (void) params;
+
+  const HVX_Vector vzero = Q6_V_vzero();
+  const uint16_t* b = bias;
+  uint16_t* packed_w = packed_weights;
+  const uint32_t stride_bytes = (uint32_t) (k_stride * sizeof(uint16_t));
+
+  do {
+    const uint16_t* w = weights;
+    const uint16_t* const w_end = weights + (kc - 1) * k_stride + nc;
+    size_t n = nc;
+
+    for (; n >= 64; n -= 64) {
+      if XNN_LIKELY(b != NULL) {
+        *((HVX_Vector*) packed_w) = *((const HVX_UVector*) b);
+        b += 64;
+      } else {
+        *((HVX_Vector*) packed_w) = vzero;
+      }
+      packed_w += 64;
+
+      if (stride_bytes < 65536 && kc < 65536) {
+        l2fetch_2d(w, stride_bytes, 128, (uint32_t) kc);
+      }
+
+      const uint16_t* w_col = w;
+      size_t k = kc;
+      for (; k >= 4; k -= 4) {
+        const HVX_Vector v0 = *((const HVX_UVector*) w_col);
+        const HVX_Vector v1 = *((const HVX_UVector*) (w_col + k_stride));
+        const HVX_Vector v2 = *((const HVX_UVector*) (w_col + 2 * k_stride));
+        const HVX_Vector v3 = *((const HVX_UVector*) (w_col + 3 * k_stride));
+        w_col += 4 * k_stride;
+        const HVX_VectorPair p01 = Q6_W_vshuff_VVR(v1, v0, -2);
+        const HVX_VectorPair p23 = Q6_W_vshuff_VVR(v3, v2, -2);
+        ((HVX_Vector*) packed_w)[0] = Q6_V_lo_W(p01);
+        ((HVX_Vector*) packed_w)[1] = Q6_V_hi_W(p01);
+        ((HVX_Vector*) packed_w)[2] = Q6_V_lo_W(p23);
+        ((HVX_Vector*) packed_w)[3] = Q6_V_hi_W(p23);
+        packed_w += 256;
+      }
+      if (k >= 2) {
+        const HVX_Vector v0 = *((const HVX_UVector*) w_col);
+        const HVX_Vector v1 = *((const HVX_UVector*) (w_col + k_stride));
+        w_col += 2 * k_stride;
+        const HVX_VectorPair p01 = Q6_W_vshuff_VVR(v1, v0, -2);
+        ((HVX_Vector*) packed_w)[0] = Q6_V_lo_W(p01);
+        ((HVX_Vector*) packed_w)[1] = Q6_V_hi_W(p01);
+        packed_w += 128;
+        k -= 2;
+      }
+      if (k != 0) {
+        const HVX_Vector v0 = *((const HVX_UVector*) w_col);
+        const HVX_VectorPair p0 = Q6_W_vshuff_VVR(vzero, v0, -2);
+        ((HVX_Vector*) packed_w)[0] = Q6_V_lo_W(p0);
+        ((HVX_Vector*) packed_w)[1] = Q6_V_hi_W(p0);
+        packed_w += 128;
+      }
+
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+      w += 64;
+    }
+
+    if XNN_UNLIKELY(n != 0) {
+      XNN_ALIGN(128) uint16_t pad0[64];
+      XNN_ALIGN(128) uint16_t pad1[64];
+      memset(pad0, 0, sizeof(pad0));
+      memset(pad1, 0, sizeof(pad1));
+      if XNN_LIKELY(b != NULL) {
+        memcpy(pad0, b, n * sizeof(uint16_t));
+        *((HVX_Vector*) packed_w) = *((const HVX_Vector*) pad0);
+        b += n;
+      } else {
+        *((HVX_Vector*) packed_w) = vzero;
+      }
+      packed_w += 64;
+
+      const HVX_VectorPred q_n = Q6_Q_vsetq_R(n * sizeof(uint16_t));
+      const uint16_t* w_col = w;
+      size_t k = kc;
+      for (; k >= 2; k -= 2) {
+        HVX_Vector v0;
+        if XNN_LIKELY(w_col + 64 <= w_end) {
+          v0 = Q6_V_vand_QV(q_n, *((const HVX_UVector*) w_col));
+        } else {
+          memcpy(pad0, w_col, n * sizeof(uint16_t));
+          v0 = *((const HVX_Vector*) pad0);
+        }
+        const uint16_t* w_col1 = w_col + k_stride;
+        HVX_Vector v1;
+        if XNN_LIKELY(w_col1 + 64 <= w_end) {
+          v1 = Q6_V_vand_QV(q_n, *((const HVX_UVector*) w_col1));
+        } else {
+          memcpy(pad1, w_col1, n * sizeof(uint16_t));
+          v1 = *((const HVX_Vector*) pad1);
+        }
+        w_col += 2 * k_stride;
+        const HVX_VectorPair p01 = Q6_W_vshuff_VVR(v1, v0, -2);
+        ((HVX_Vector*) packed_w)[0] = Q6_V_lo_W(p01);
+        ((HVX_Vector*) packed_w)[1] = Q6_V_hi_W(p01);
+        packed_w += 128;
+      }
+      if (k != 0) {
+        HVX_Vector v0;
+        if (w_col + 64 <= w_end) {
+          v0 = Q6_V_vand_QV(q_n, *((const HVX_UVector*) w_col));
+        } else {
+          memcpy(pad0, w_col, n * sizeof(uint16_t));
+          v0 = *((const HVX_Vector*) pad0);
+        }
+        const HVX_VectorPair p0 = Q6_W_vshuff_VVR(vzero, v0, -2);
+        ((HVX_Vector*) packed_w)[0] = Q6_V_lo_W(p0);
+        ((HVX_Vector*) packed_w)[1] = Q6_V_hi_W(p0);
+        packed_w += 128;
+      }
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+    }
+
+    weights += nc * kc;
+  } while (--g != 0);
+}
