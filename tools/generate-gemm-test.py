@@ -684,6 +684,30 @@ std::vector<GemmTestParams> CreateTests(
             $if WEIGHTS_DATATYPE in ['qb4w']:
               .bl(32)
         , test_func, arch_flags));
+  $if ISA == 'hmx':
+    // Partial and multiple 32-deep HMX K tiles, including odd K and the
+    // 64-element LHS transfer tail.
+    gemm_tests.push_back(GemmTestParams(
+        "k_tiles",
+        tester.clone()
+            .m(mr).n(nr)
+        , test_func, arch_flags)
+        .loop_k(1, 72, 1, LoopStepType::Linear));
+    gemm_tests.push_back(GemmTestParams(
+        "k_tiles_subtile_m",
+        tester.clone()
+            .n(nr)
+        , test_func, arch_flags)
+        .loop_k(31, 65, 2, LoopStepType::Linear)
+        .loop_m(1, mr, 5));
+    // K around and beyond one VTCM-resident chunk (1024) exercises the full
+    // 64 KB HMX operand size and the chunked K path.
+    gemm_tests.push_back(GemmTestParams(
+        "k_large",
+        tester.clone()
+            .m(mr).n(nr)
+        , test_func, arch_flags)
+        .loop_k(1023, 2049, 513, LoopStepType::Linear));
   return gemm_tests;
 }
 """
@@ -919,6 +943,7 @@ def generate_test_cases(
       "next_prime": next_prime,
       "CPP_CHECK": cpp_check,
       "OUTPUT_DATATYPE": output_datatype,
+      "ISA": isa,
       "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
   }
 

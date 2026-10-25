@@ -270,3 +270,13 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_f16_gemm_goi_w
   k-block: 1
+
+# Hexagon HMX
+- name: xnn_f16_gemm_minmax_ukernel_32x64c2__hmx
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2

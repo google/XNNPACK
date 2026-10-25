@@ -729,6 +729,31 @@ namespace {
 #endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
 
 
+#if XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+  static void f16_gemm_minmax_ukernel_32x64c2__hmx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_f16_gemm_minmax_ukernel_32x64c2__hmx,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_gemm_goi_w,
+      /*mr=*/32, /*nr=*/64, /*kr=*/2, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_32x64c2__hmx)
+
+  static void f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_gemm_goi_w,
+      /*mr=*/32, /*nr=*/64, /*kr=*/2, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_32x64c2__hmx_pingpong)
+#endif  // XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+
+
 }  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

@@ -355,9 +355,11 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "f16_gemm_minmax_test",
+    timeout = "long",
     srcs = [
         "f16-gemm-minmax.cc",
     ],
+    shard_count = 15,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
