@@ -419,8 +419,12 @@ YNN_ALWAYS_INLINE f32x32 operator*(f32x32 a, f32x32 b) {
 }
 
 YNN_ALWAYS_INLINE HVX_VectorPred isfinite(f32x32 a) {
-  HVX_Vector abs_a = Q6_V_vand_VV(a.v, Q6_V_vsplat_R(0x7FFFFFFF));
-  return Q6_Q_vcmp_gt_VwVw(Q6_V_vsplat_R(0x7F800000), abs_a);
+#if __HVX_ARCH__ >= 81
+  return Q6_Q_vcmp_gt_VwVw(Q6_V_vsplat_R(0x7F800000), Q6_Vsf_vabs_Vsf(a.v));
+#else
+  return Q6_Q_vcmp_gt_VwVw(Q6_V_vsplat_R(0x7F800000),
+                           Q6_V_vand_VV(a.v, Q6_V_vsplat_R(0x7FFFFFFF)));
+#endif
 }
 
 YNN_ALWAYS_INLINE f32x32 select(HVX_VectorPred cond, f32x32 a, f32x32 b) {

@@ -67,13 +67,8 @@ static f32x32 reduce_add(
 }
 
 YNN_ALWAYS_INLINE s8x128 sign_complement(s8x128 x) {
-  HVX_Vector zero = Q6_V_vzero();
-  HVX_VectorPred sign_mask = Q6_Q_vcmp_gt_VbVb(zero, x.v);
-  HVX_Vector sign = Q6_V_vmux_QVV(sign_mask, Q6_V_vsplat_R(-1), zero);
-  HVX_Vector mask = Q6_V_vsplat_R(0x7F7F7F7F);
-  HVX_Vector abs_val = Q6_V_vand_VV(x.v, mask);
-  HVX_Vector result = Q6_V_vxor_VV(abs_val, sign);
-  return s8x128(result);
+  HVX_VectorPred sign_mask = Q6_Q_vcmp_gt_VbVb(Q6_V_vzero(), x.v);
+  return s8x128(Q6_V_vxor_VV(x.v, Q6_V_vand_QR(sign_mask, 0x7F7F7F7F)));
 }
 
 }  // namespace simd

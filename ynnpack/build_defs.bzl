@@ -336,7 +336,10 @@ def ynn_if_arch(arch, if_true, if_false = []):
     })
 
 def ynn_arch_copts(arch):
-    return _YNN_PARAMS_FOR_ARCH[arch].get("arch_copts", [])
+    copts = _YNN_PARAMS_FOR_ARCH[arch].get("arch_copts", [])
+    if copts and type(copts) == "list":
+        return ynn_if_arch(arch, copts)
+    return copts
 
 def ynn_arch_flag(arch):
     return _YNN_PARAMS_FOR_ARCH[arch].get("arch_flag", "")

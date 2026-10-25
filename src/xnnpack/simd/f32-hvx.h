@@ -123,11 +123,19 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vabs_Vsf(a);
+#else
   return Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vfneg_Vsf(a);
+#else
   return Q6_V_vxor_VV(a, Q6_V_vsplat_R(0x80000000));
+#endif
 }
 
 #if __HVX_ARCH__ >= 81
@@ -160,12 +168,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   const HVX_Vector v_shift = Q6_Vw_vsub_VwVw(Q6_V_vsplat_R(149), v_E);
   const HVX_Vector half_bits = Q6_Vw_vasl_VwVw(Q6_V_vsplat_R(1), v_shift);
 
-  const HVX_VectorPred pred_gt = Q6_Q_vcmp_gt_VwVw(fraction_bits, half_bits);
-  const HVX_VectorPred pred_eq = Q6_Q_vcmp_eq_VwVw(fraction_bits, half_bits);
-  const HVX_Vector is_odd = Q6_V_vand_VV(vabs_truncint, Q6_V_vsplat_R(1));
-  const HVX_VectorPred pred_is_odd = Q6_Q_vcmp_eq_VwVw(is_odd, Q6_V_vsplat_R(1));
-  const HVX_VectorPred pred_round_up_eq = Q6_Q_and_QQ(pred_eq, pred_is_odd);
-  const HVX_VectorPred pred_round_up = Q6_Q_or_QQ(pred_gt, pred_round_up_eq);
+  const HVX_VectorPred pred_is_odd = Q6_Q_vand_VR(vabs_truncint, 1);
+  const HVX_VectorPred pred_round_up_eq =
+      Q6_Q_vcmp_eqand_QVwVw(pred_is_odd, fraction_bits, half_bits);
+  const HVX_VectorPred pred_round_up =
+      Q6_Q_vcmp_gtor_QVwVw(pred_round_up_eq, fraction_bits, half_bits);
 
   const HVX_Vector vabs_rounded_int_ge1 = Q6_Vw_vadd_VwVw(vabs_truncint, Q6_V_vand_QR(pred_round_up, 1));
 
@@ -198,8 +205,8 @@ static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
       Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1
 
-  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
-      Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
+  const HVX_VectorPred vfilter =
+      Q6_Q_vcmp_gt_VsfVsf(xnn_abs_f32(a), vmax_non_int_val);
 
   const HVX_Vector vresult = Q6_Vsf_equals_Vw(Q6_Vw_equals_Vsf(a));
 
@@ -221,11 +228,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
 static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
       Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1.
-  const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
+  const HVX_Vector vabs_a = xnn_abs_f32(a);
   const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
 
   // Create a vector of `1` where the entries of `a` are positive
-  const HVX_Vector vzero = Q6_V_vsplat_R(0);
+  const HVX_Vector vzero = Q6_V_vzero();
   const HVX_VectorPred vfilterpos = Q6_Q_vcmp_gt_VsfVsf(a, vzero);
 
   const HVX_Vector vtruncint = Q6_Vw_equals_Vsf(a);
@@ -256,11 +263,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
 static XNN_INLINE xnn_simd_f32_t xnn_floor_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
       Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1.
-  const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
+  const HVX_Vector vabs_a = xnn_abs_f32(a);
   const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
 
   // Create a vector of `1` where the entries of `a` are negative
-  const HVX_Vector vzero = Q6_V_vsplat_R(0);
+  const HVX_Vector vzero = Q6_V_vzero();
   const HVX_VectorPred vfilterneg = Q6_Q_not_Q(Q6_Q_vcmp_gt_VsfVsf(a, vzero));
 
   const HVX_Vector vtruncint = Q6_Vw_equals_Vsf(a);
