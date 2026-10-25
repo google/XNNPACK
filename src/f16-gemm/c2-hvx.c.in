@@ -1,0 +1,172 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR >= 1
+$assert NR == 64
+#include <assert.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+#include <hvx_hexagon_protos.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/unaligned.h"
+
+// TODO(b/574286664): Support qc4w and qc8w weights (f16-qc4w-gemm and
+// f16-qc8w-gemm) by unpacking/dequantizing 4-bit and 8-bit weights to FP16
+// in HVX using the same KR=2 interleaved layout.
+
+static XNN_INLINE void l2fetch_2d(
+    const void* p,
+    uint32_t stride,
+    uint32_t width,
+    uint32_t height) {
+  const uint64_t control = ((uint64_t) stride << 32) |
+                           ((uint64_t) width << 16) |
+                           (uint64_t) height;
+  __asm__ __volatile__("l2fetch(%0,%1)" : : "r"(p), "r"(control));
+}
+
+void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}c2__hvx(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const xnn_float16* restrict a,
+    size_t a_stride,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const struct xnn_f16_minmax_params* restrict params) {
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(xnn_float16) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  const uint16_t min_bits = *((const uint16_t*) &params->scalar.min);
+  const uint16_t max_bits = *((const uint16_t*) &params->scalar.max);
+  const HVX_Vector v_min = Q6_Vh_vsplat_R(min_bits);
+  const HVX_Vector v_max = Q6_Vh_vsplat_R(max_bits);
+  const HVX_Vector v_one = Q6_Vh_vsplat_R(0x3c00);
+
+  const uint8_t* a0 = (const uint8_t*) a;
+  xnn_float16* c0 = c;
+  $if MR == 1:
+    (void) mr;
+    (void) a_stride;
+    (void) cm_stride;
+  $for M in range(1, MR):
+    const uint8_t* a${M} = a${M-1} + a_stride;
+    xnn_float16* c${M} = (xnn_float16*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  const HVX_Vector* restrict w_vec = (const HVX_Vector*) w;
+  const uint32_t k_pairs = (uint32_t) ((kc + 2) >> 2);
+  const int a_unaligned =
+      ((((uintptr_t) a) | a_stride) & (sizeof(uint32_t) - 1)) != 0;
+
+  do {
+    l2fetch_2d(w_vec, 256, 256, k_pairs + 1);
+    const HVX_Vector v_bias_raw = *w_vec++;
+    $for M in range(MR):
+      HVX_Vector vacc${M}_0 = Q6_V_vzero();
+      HVX_Vector vacc${M}_1 = Q6_V_vzero();
+
+    size_t k = kc;
+    if XNN_UNLIKELY(a_unaligned) {
+      for (; k >= 2 * sizeof(xnn_float16); k -= 2 * sizeof(xnn_float16)) {
+        $for M in range(MR):
+          const HVX_Vector va${M} = Q6_V_vsplat_R(unaligned_load_u32(a${M}));
+          a${M} += sizeof(uint32_t);
+        const HVX_Vector vb0 = *w_vec++;
+        const HVX_Vector vb1 = *w_vec++;
+
+        $for M in range(MR):
+          const HVX_VectorPair p${M}0 = Q6_Wqf32_vmpy_VhfVhf(va${M}, vb0);
+          const HVX_VectorPair p${M}1 = Q6_Wqf32_vmpy_VhfVhf(va${M}, vb1);
+          vacc${M}_0 = Q6_Vqf32_vadd_Vqf32Vqf32(
+              vacc${M}_0, Q6_Vqf32_vadd_Vqf32Vqf32(Q6_V_lo_W(p${M}0), Q6_V_hi_W(p${M}0)));
+          vacc${M}_1 = Q6_Vqf32_vadd_Vqf32Vqf32(
+              vacc${M}_1, Q6_Vqf32_vadd_Vqf32Vqf32(Q6_V_lo_W(p${M}1), Q6_V_hi_W(p${M}1)));
+      }
+    } else {
+      for (; k >= 2 * sizeof(xnn_float16); k -= 2 * sizeof(xnn_float16)) {
+        $for M in range(MR):
+          const HVX_Vector va${M} = Q6_V_vsplat_R(*((const uint32_t*) a${M}));
+          a${M} += sizeof(uint32_t);
+        const HVX_Vector vb0 = *w_vec++;
+        const HVX_Vector vb1 = *w_vec++;
+
+        $for M in range(MR):
+          const HVX_VectorPair p${M}0 = Q6_Wqf32_vmpy_VhfVhf(va${M}, vb0);
+          const HVX_VectorPair p${M}1 = Q6_Wqf32_vmpy_VhfVhf(va${M}, vb1);
+          vacc${M}_0 = Q6_Vqf32_vadd_Vqf32Vqf32(
+              vacc${M}_0, Q6_Vqf32_vadd_Vqf32Vqf32(Q6_V_lo_W(p${M}0), Q6_V_hi_W(p${M}0)));
+          vacc${M}_1 = Q6_Vqf32_vadd_Vqf32Vqf32(
+              vacc${M}_1, Q6_Vqf32_vadd_Vqf32Vqf32(Q6_V_lo_W(p${M}1), Q6_V_hi_W(p${M}1)));
+      }
+    }
+    if XNN_UNLIKELY(k != 0) {
+      $for M in range(MR):
+        const uint16_t a${M}_tail = *((const uint16_t*) a${M});
+        a${M} += sizeof(uint16_t);
+        const HVX_Vector va${M} = Q6_V_vsplat_R((uint32_t) a${M}_tail);
+      const HVX_Vector vb0 = *w_vec++;
+      const HVX_Vector vb1 = *w_vec++;
+
+      $for M in range(MR):
+        const HVX_VectorPair p${M}0 = Q6_Wqf32_vmpy_VhfVhf(va${M}, vb0);
+        const HVX_VectorPair p${M}1 = Q6_Wqf32_vmpy_VhfVhf(va${M}, vb1);
+        vacc${M}_0 = Q6_Vqf32_vadd_Vqf32Vqf32(
+            vacc${M}_0, Q6_Vqf32_vadd_Vqf32Vqf32(Q6_V_lo_W(p${M}0), Q6_V_hi_W(p${M}0)));
+        vacc${M}_1 = Q6_Vqf32_vadd_Vqf32Vqf32(
+            vacc${M}_1, Q6_Vqf32_vadd_Vqf32Vqf32(Q6_V_lo_W(p${M}1), Q6_V_hi_W(p${M}1)));
+    }
+
+    const HVX_Vector v_bias_shuff = Q6_Vh_vshuff_Vh(v_bias_raw);
+    const HVX_VectorPair b_pair = Q6_Wqf32_vmpy_VhfVhf(v_bias_shuff, v_one);
+    $for M in range(MR):
+      vacc${M}_0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc${M}_0, Q6_V_lo_W(b_pair));
+      vacc${M}_1 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc${M}_1, Q6_V_hi_W(b_pair));
+      HVX_Vector vout${M} = Q6_Vh_vdeal_Vh(
+          Q6_Vhf_equals_Wqf32(Q6_W_vcombine_VV(vacc${M}_1, vacc${M}_0)));
+      vout${M} = Q6_Vhf_vmin_VhfVhf(Q6_Vhf_vmax_VhfVhf(vout${M}, v_min), v_max);
+
+    if XNN_LIKELY(nc >= 64) {
+      $for M in range(MR):
+        *((HVX_UVector*) c${M}) = vout${M};
+        c${M} = (xnn_float16*) ((uintptr_t) c${M} + cn_stride);
+        a${M} -= kc;
+      nc -= 64;
+    } else {
+      $for M in range(MR):
+        Q6_V_vstu_variable(c${M}, nc * sizeof(xnn_float16), vout${M});
+      nc = 0;
+    }
+  } while (nc != 0);
+}

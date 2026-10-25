@@ -77,6 +77,7 @@ enum xnn_arch_flags {
 #endif // XNN_ARCH_WASMRELAXEDSIMD
 #elif XNN_ARCH_HEXAGON
   xnn_arch_hvx = 1 << 0,
+  xnn_arch_hmx = 1 << 1,
 #endif
 };
 
@@ -230,6 +231,8 @@ static inline bool xnn_is_f16_compatible_config(
   return (hardware_config->arch_flags & xnn_arch_x86_f16c) && (hardware_config->arch_flags & xnn_arch_x86_avx);
 #elif (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR)
   return hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith;
+#elif (XNN_ARCH_HEXAGON && XNN_ENABLE_HVX)
+  return hardware_config->arch_flags & xnn_arch_hvx;
 #else
   return false;
 #endif

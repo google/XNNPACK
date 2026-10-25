@@ -54,4 +54,8 @@ tools/xngen src/x16-packw/avx512skx.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=16 -o 
 tools/xngen src/x16-packw/avx512skx.c.in -D NR=64 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16.c &
 tools/xngen src/x16-packw/avx512skx.c.in -D NR=64 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16-prfm.c &
 
+################################## Hexagon HVX #################################
+tools/xngen src/x16-packw/c2-hvx.c.in -D NR=64 -D KR=2 -o src/x16-packw/gen/x16-packw-x64c2-gemm-goi-hvx.c &
+tools/xngen src/x16-packw/gio-c2-hvx.c.in -D NR=64 -D KR=2 -o src/x16-packw/gen/x16-packw-x64c2-gemm-gio-hvx.c &
+
 wait
