@@ -22,6 +22,11 @@ tools/xngen src/f32-bf16-vcvt/neon.c.in -D BATCH_TILE=32 -o src/f32-bf16-vcvt/ge
 tools/xngen src/f32-bf16-vcvt/neonbf16.c.in -D BATCH_TILE=8  -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u8.c &
 tools/xngen src/f32-bf16-vcvt/neonbf16.c.in -D BATCH_TILE=16 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u16.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/f32-bf16-vcvt/hvx.c.in -D BATCH_TILE=32  -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-hvx-u32.c &
+tools/xngen src/f32-bf16-vcvt/hvx.c.in -D BATCH_TILE=64  -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-hvx-u64.c &
+tools/xngen src/f32-bf16-vcvt/hvx.c.in -D BATCH_TILE=128 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-hvx-u128.c &
+
 #################################### Scalar ###################################
 tools/xngen src/f32-bf16-vcvt/scalar.c.in -D BATCH_TILE=1 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u1.c &
 tools/xngen src/f32-bf16-vcvt/scalar.c.in -D BATCH_TILE=2 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u2.c &

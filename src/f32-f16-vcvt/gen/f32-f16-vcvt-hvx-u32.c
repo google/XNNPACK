@@ -43,7 +43,7 @@ void xnn_f32_f16_vcvt_ukernel__hvx_u32(
     assert(batch <= 31 * sizeof(float));
 
     const size_t num_elements = batch >> XNN_LOG2_SIZEOF_FLOAT;
-    const xnn_simd_f32_t vx = xnn_load_tail_f32(input, num_elements);
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
     const xnn_simd_f16_t vy = xnn_cvt_f16_f32(vx);
     xnn_store_tail_f16(output, vy, num_elements);
   }
