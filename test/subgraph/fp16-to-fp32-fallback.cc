@@ -1034,8 +1034,7 @@ TEST_P(Fp16ToFp32FallbackUnaryOpTest, Rewrite) {
         XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
         // These ops have software emulation fallbacks and will therefore not be
         // converted.
-        if (param.name == "Abs" || param.name == "Cos" ||
-            param.name == "HardSwish" || param.name == "Sin") {
+        if (param.name == "Abs" || param.name == "Cos" || param.name == "Sin") {
           XnnTensor output = param.op_builder(input);
           return BuildXnnpackGraph({output});
         } else {
@@ -1103,18 +1102,11 @@ TEST_P(Fp16ToFp32FallbackBinaryOpTest, Rewrite) {
   std::unique_ptr<XnnpackGraph> expected_graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor a_fp32 = Cast(a, Type::kFP32);
     XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
-    XnnTensor output;
-    // Add and Mul have scalar FP16 fallbacks and will therefore not be
-    // converted.
-    if (param.name == "Add" || param.name == "Mul") {
-      output = param.op_builder(a, b);
-    } else {
-      XnnTensor a_fp32 = Cast(a, Type::kFP32);
-      XnnTensor b_fp32 = Cast(b, Type::kFP32);
-      XnnTensor output_fp32 = param.op_builder(a_fp32, b_fp32);
-      output = Cast(output_fp32, Type::kFP16);
-    }
+    XnnTensor b_fp32 = Cast(b, Type::kFP32);
+    XnnTensor output_fp32 = param.op_builder(a_fp32, b_fp32);
+    XnnTensor output = Cast(output_fp32, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }

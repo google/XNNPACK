@@ -705,6 +705,7 @@ static void init_f16_gelu_config(void) {
 }
 
 static void init_f16_hswish_config(void) {
+  f16_hswish_config.ukernel = NULL;
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
