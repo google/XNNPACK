@@ -27,10 +27,6 @@ typedef struct {
 
 #define XNN_SIMD_CONST_F16(var, val) \
   const xnn_simd_f16_t var = _mm512_set1_ph(val);
-#define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
-  const xnn_simd_f16_t var = _mm512_castsi512_ph(_mm512_set1_epi16(val));
-
-#if XNN_HAVE_FLOAT16
 
 #if defined(__clang__) && (__clang_major__ < 19)
 static XNN_INLINE __m512h xnn_broadcast_16_512_workaround(uint16_t x) {
@@ -38,6 +34,16 @@ static XNN_INLINE __m512h xnn_broadcast_16_512_workaround(uint16_t x) {
   __asm__ volatile("" : "=m"(bits) : "m"(bits));
   return (__m512h)_mm512_castsi512_pd(_mm512_set1_epi32(bits));
 }
+#define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
+  const xnn_simd_f16_t var = xnn_broadcast_16_512_workaround(val);
+#else
+#define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
+  const xnn_simd_f16_t var = _mm512_castsi512_ph(_mm512_set1_epi16(val));
+#endif
+
+#if XNN_HAVE_FLOAT16
+
+#if defined(__clang__) && (__clang_major__ < 19)
 #define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val)               \
   const xnn_simd_f16_t var = xnn_broadcast_16_512_workaround( \
       xnn_float16_to_bits(xnn_float16_from_float(val)))
