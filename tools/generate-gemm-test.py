@@ -75,7 +75,7 @@ def split_ukernel_name(name):
     mr_packed = mr // int(mr_packed.group(1))
   else:
     mr_packed = mr
-  if "sme" in target_name:
+  if isa in ["neonsme", "sme"]:
     # SME kernels have a non-constant mr, nr that we need to use functions to
     # learn the value of. However, we cannot call these functions unless SME
     # is supported by the hardware.
@@ -101,7 +101,7 @@ def split_ukernel_name(name):
 """.format(name=name)
     mr_packed = mr
 
-  if "sme2" in target_name:
+  if isa in ["neonsme2", "sme2"]:
     # SME2 kernels have a non-constant mr, nr that we need to use functions to
     # learn the value of. However, we cannot call these functions unless SME2
     # is supported by the hardware.
