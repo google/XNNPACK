@@ -68,13 +68,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
 
   tile_data.palette_id = 1;
-  tile_data.rows[0] = mr;              // tmm0 = res[0]
-  tile_data.rows[1] = mr;              // tmm1 = res[1]
-  tile_data.rows[2] = mr;              // tmm2 = res[2]
-  tile_data.rows[3] = mr;              // tmm3 = res[3]
-  tile_data.rows[4] = mr;              // tmm4 = input
+  tile_data.rows[0] = 1;              // tmm0 = res[0]
+  tile_data.rows[1] = 1;              // tmm1 = res[1]
+  tile_data.rows[2] = 1;              // tmm2 = res[2]
+  tile_data.rows[3] = 1;              // tmm3 = res[3]
+  tile_data.rows[4] = 1;              // tmm4 = input
   tile_data.rows[5] = 16;              // tmm5 = weights
-  tile_data.rows[6] = mr;              // tmm6 = input remainder
+  tile_data.rows[6] = 1;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
   tile_data.colsb[0] = 64;          // tmm0 = res[0]
   tile_data.colsb[1] = 64;          // tmm1 = res[1]
@@ -85,8 +85,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
   _tile_loadconfig(&tile_data);
-
-  int8_t* c0 = c;
 
   const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
   const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_scalar.output_zero_point);
@@ -104,7 +102,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
-      _tile_loadd(4, a, a_stride);
+      _tile_loadd(4, a, 64);
       a += 64;
       _tile_loadd(5, (const int8_t*) w + 0, 64);
       _tile_dpbssd(0, 4, 5);
@@ -114,7 +112,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
     }
 
     if XNN_UNLIKELY(k != 0) {
-      _tile_loadd(6, a, a_stride);
+      _tile_loadd(6, a, 64);
       a += kremainder;
       _tile_loadd(7, (const int8_t*) w + 0, 64);
       _tile_dpbssd(0, 6, 7);
@@ -134,38 +132,37 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
       #endif
     #endif
 
-    // TODO: Instead of processing up to 4 tiles (16x64) consider
-    // quantizing 1 row at a time.
-    // Add tile to bias
-    __m512i vacc0x0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0] + 0));
-
-    __m512 vscaled0x0 = _mm512_cvtepi32_ps(vacc0x0);
-
+    // Quantize 1 row at a time across all tiles.
     const __m512 vscale0 = _mm512_load_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
 
-    vscaled0x0 = _mm512_mul_ps(vscaled0x0, vscale0);
+    int8_t* c0 = c;
+    {
+      // Add tile to bias
+      __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
 
-    vscaled0x0 = _mm512_min_ps(vscaled0x0, voutput_max_less_zero_point);
+      __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
 
-    vacc0x0 = _mm512_cvtps_epi32(vscaled0x0);
+      vscaled0 = _mm512_mul_ps(vscaled0, vscale0);
+      vscaled0 = _mm512_min_ps(vscaled0, voutput_max_less_zero_point);
+      vacc0 = _mm512_cvtps_epi32(vscaled0);
+      vacc0 = _mm512_add_epi32(vacc0, voutput_zero_point);
+      __m128i vout0 = _mm512_cvtsepi32_epi8(vacc0);
+      vout0 = _mm_max_epi8(vout0, voutput_min);
 
-    vacc0x0 = _mm512_add_epi32(vacc0x0, voutput_zero_point);
-
-    __m128i vout0x0 = _mm512_cvtsepi32_epi8(vacc0x0);
-
-    vout0x0 = _mm_max_epi8(vout0x0, voutput_min);
-
+      if XNN_LIKELY(nc >= 16) {
+        _mm_storeu_si128((__m128i*) (c0 + 0), vout0);
+      } else {
+        // Prepare mask for valid 8-bit elements (depends on nc).
+        const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
+        _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0);
+      }
+    }
     if XNN_LIKELY(nc >= 16) {
-      _mm_storeu_si128((__m128i*) (c0 + 0), vout0x0);
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+      c = (int8_t*) ((uintptr_t) c + cn_stride);
       a -= kc;
       nc -= 16;
     } else {
-      // Prepare mask for valid 8-bit elements (depends on nc).
-      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
-
-      _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0x0);
       nc = 0;
     }
   } while (nc != 0);

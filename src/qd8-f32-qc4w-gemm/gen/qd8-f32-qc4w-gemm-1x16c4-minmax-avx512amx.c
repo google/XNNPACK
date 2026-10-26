@@ -64,19 +64,19 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx(
 
   XNN_ALIGN(64) struct __tile_config tile_data = {0};
   XNN_ALIGN(64) int32_t res[1][1 * 16];
-  XNN_ALIGN(64) int8_t weight_buffer[16 * 64];
+  XNN_ALIGN(64) int8_t weight_buffer[1][16 * 64];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
 
   tile_data.palette_id = 1;
-  tile_data.rows[0] = mr;              // tmm0 = res[0]
-  tile_data.rows[1] = mr;              // tmm1 = res[1]
-  tile_data.rows[2] = mr;              // tmm2 = res[2]
-  tile_data.rows[3] = mr;              // tmm3 = res[3]
-  tile_data.rows[4] = mr;              // tmm4 = input
+  tile_data.rows[0] = 1;              // tmm0 = res[0]
+  tile_data.rows[1] = 1;              // tmm1 = res[1]
+  tile_data.rows[2] = 1;              // tmm2 = res[2]
+  tile_data.rows[3] = 1;              // tmm3 = res[3]
+  tile_data.rows[4] = 1;              // tmm4 = input
   tile_data.rows[5] = 16;              // tmm5 = weights
-  tile_data.rows[6] = mr;              // tmm6 = input remainder
+  tile_data.rows[6] = 1;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
   tile_data.colsb[0] = 64;          // tmm0 = res[0]
   tile_data.colsb[1] = 64;          // tmm1 = res[1]
@@ -87,8 +87,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx(
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
   _tile_loadconfig(&tile_data);
-
-  float* c0 = c;
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
@@ -108,8 +106,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx(
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
-      _tile_loadd(4, a, a_stride);
-      a += 64;
       const __m512i vb0x0 = _mm512_load_epi32((const int8_t*) w + 0);
       const __m512i vb1x0 = _mm512_load_epi32((const int8_t*) w + 64);
       const __m512i vb2x0 = _mm512_load_epi32((const int8_t*) w + 128);
@@ -134,23 +130,25 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx(
       const __m512i vh6x0 = _mm512_and_si512(vb6x0, vmask);
       const __m512i vl7x0 = _mm512_gf2p8affine_epi64_epi8(vb7x0, vshl4, 0);
       const __m512i vh7x0 = _mm512_and_si512(vb7x0, vmask);
-      _mm512_store_epi32(weight_buffer + 0, vl0x0);
-      _mm512_store_epi32(weight_buffer + 64, vh0x0);
-      _mm512_store_epi32(weight_buffer + 128, vl1x0);
-      _mm512_store_epi32(weight_buffer + 192, vh1x0);
-      _mm512_store_epi32(weight_buffer + 256, vl2x0);
-      _mm512_store_epi32(weight_buffer + 320, vh2x0);
-      _mm512_store_epi32(weight_buffer + 384, vl3x0);
-      _mm512_store_epi32(weight_buffer + 448, vh3x0);
-      _mm512_store_epi32(weight_buffer + 512, vl4x0);
-      _mm512_store_epi32(weight_buffer + 576, vh4x0);
-      _mm512_store_epi32(weight_buffer + 640, vl5x0);
-      _mm512_store_epi32(weight_buffer + 704, vh5x0);
-      _mm512_store_epi32(weight_buffer + 768, vl6x0);
-      _mm512_store_epi32(weight_buffer + 832, vh6x0);
-      _mm512_store_epi32(weight_buffer + 896, vl7x0);
-      _mm512_store_epi32(weight_buffer + 960, vh7x0);
-      _tile_loadd(5, weight_buffer, 64);
+      _mm512_store_epi32(weight_buffer[0] + 0, vl0x0);
+      _mm512_store_epi32(weight_buffer[0] + 64, vh0x0);
+      _mm512_store_epi32(weight_buffer[0] + 128, vl1x0);
+      _mm512_store_epi32(weight_buffer[0] + 192, vh1x0);
+      _mm512_store_epi32(weight_buffer[0] + 256, vl2x0);
+      _mm512_store_epi32(weight_buffer[0] + 320, vh2x0);
+      _mm512_store_epi32(weight_buffer[0] + 384, vl3x0);
+      _mm512_store_epi32(weight_buffer[0] + 448, vh3x0);
+      _mm512_store_epi32(weight_buffer[0] + 512, vl4x0);
+      _mm512_store_epi32(weight_buffer[0] + 576, vh4x0);
+      _mm512_store_epi32(weight_buffer[0] + 640, vl5x0);
+      _mm512_store_epi32(weight_buffer[0] + 704, vh5x0);
+      _mm512_store_epi32(weight_buffer[0] + 768, vl6x0);
+      _mm512_store_epi32(weight_buffer[0] + 832, vh6x0);
+      _mm512_store_epi32(weight_buffer[0] + 896, vl7x0);
+      _mm512_store_epi32(weight_buffer[0] + 960, vh7x0);
+      _tile_loadd(4, a, 64);
+      a += 64;
+      _tile_loadd(5, weight_buffer[0], 64);
       _tile_dpbssd(0, 4, 5);
 
       w = (const int8_t*) w + 512;
@@ -158,16 +156,16 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx(
     }
 
     if XNN_UNLIKELY(k != 0) {
-      _tile_loadd(6, a, a_stride);
+      _tile_loadd(6, a, 64);
       a += kremainder;
       for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
         const __m512i vb0 = _mm512_load_epi32((const int8_t*) w + 0 + 64 * k);
         const __m512i vl0 = _mm512_gf2p8affine_epi64_epi8(vb0, vshl4, 0);
         const __m512i vh0 = _mm512_and_si512(vb0, vmask);
-        _mm512_store_epi32(weight_buffer + 128 * k + 0, vl0);
-        _mm512_store_epi32(weight_buffer + 128 * k + 64, vh0);
+        _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl0);
+        _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh0);
       }
-      _tile_loadd(7, weight_buffer, 64);
+      _tile_loadd(7, weight_buffer[0], 64);
       _tile_dpbssd(0, 6, 7);
 
       w = (const int8_t*) w + ((kremainder + 7) >> 3) * 64;
@@ -185,38 +183,41 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx(
       #endif
     #endif
 
-    // TODO: Instead of processing up to 4 tiles (16x64) consider
-    // quantizing 1 row at a time.
-    __m512i vacc0x0 = _mm512_mullo_epi32(vksum0, _mm512_set1_epi32((int) quantization_params[0].zero_point));
-    // Add tile to bias
-    vacc0x0 = _mm512_add_epi32(vacc0x0, _mm512_load_epi32(&res[0][0] + 0));
-
-    vacc0x0 = _mm512_srai_epi32(vacc0x0, 4);
-    __m512 vscaled0x0 = _mm512_cvtepi32_ps(vacc0x0);
-
-    vscaled0x0 = _mm512_mul_ps(vscaled0x0, _mm512_set1_ps(quantization_params[0].inv_scale));
-
+    // Quantize 1 row at a time across all tiles.
     const __m512 vfilter_output_scale0 = _mm512_load_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
     const __m512 vbias0 = _mm512_load_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
 
-    vscaled0x0 = _mm512_fmadd_ps(vscaled0x0, vfilter_output_scale0, vbias0);
+    float* c0 = c;
+    {
+      const __m512i vzero_point = _mm512_set1_epi32((int) quantization_params[0].zero_point);
+      const __m512 vinv_scale = _mm512_set1_ps(quantization_params[0].inv_scale);
+      __m512i vacc0 = _mm512_mullo_epi32(vksum0, vzero_point);
+      // Add tile to bias
+      vacc0 = _mm512_add_epi32(vacc0, _mm512_load_epi32(&res[0][0]));
 
-    vscaled0x0 = _mm512_max_ps(vscaled0x0, voutput_min);
+      vacc0 = _mm512_srai_epi32(vacc0, 4);
+      __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
 
-    vscaled0x0 = _mm512_min_ps(vscaled0x0, voutput_max);
+      vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
+      vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
+      vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
+      vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
 
+      if XNN_LIKELY(nc >= 16) {
+        _mm512_storeu_ps(c0 + 0, vscaled0);
+      } else {
+        // Prepare mask for valid 32-bit elements (depends on nc).
+        const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
+        _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0);
+      }
+    }
     if XNN_LIKELY(nc >= 16) {
-      _mm512_storeu_ps(c0 + 0, vscaled0x0);
-      c0 = (float*) ((uintptr_t) c0 + cn_stride);
-
+      c = (float*) ((uintptr_t) c + cn_stride);
       a -= kc;
       nc -= 16;
     } else {
-      // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
-      _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0x0);
       nc = 0;
     }
   } while (nc != 0);
