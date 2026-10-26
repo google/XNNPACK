@@ -88,9 +88,11 @@ void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr2_p2_u${BATCH_TILE}${"" if 
     vacc0 = xnn_accumulate_f16(vacc0, vf);
   }
 
+  $for STEP in range((ACCUMULATORS - 1).bit_length()):
+    $for ACC in range(0, ACCUMULATORS, 2 << STEP):
+      $if ACC + (1 << STEP) < ACCUMULATORS:
+        vacc${ACC} = xnn_add_f16_accumulator(vacc${ACC}, vacc${ACC + (1 << STEP)});
   float vsum = xnn_reduce_f16_accumulator(vacc0);
-  $for ACC in range(1, ACCUMULATORS):
-    vsum += xnn_reduce_f16_accumulator(vacc${ACC});
   $if SIMD_SIZE > 1:
     if XNN_UNLIKELY(batch != 0) {
       const size_t num_elements = batch / sizeof(xnn_float16);

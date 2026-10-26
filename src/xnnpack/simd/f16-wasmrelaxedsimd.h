@@ -326,6 +326,13 @@ static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
   return accumulator;
 }
 
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_add_f16_accumulator(
+    xnn_simd_f16_accumulator_t lhs, xnn_simd_f16_accumulator_t rhs) {
+  lhs.lo = wasm_f32x4_add(lhs.lo, rhs.lo);
+  lhs.hi = wasm_f32x4_add(lhs.hi, rhs.hi);
+  return lhs;
+}
+
 static XNN_INLINE float xnn_reduce_f16_accumulator(
     xnn_simd_f16_accumulator_t accumulator) {
   v128_t sum = wasm_f32x4_add(accumulator.lo, accumulator.hi);

@@ -258,6 +258,11 @@ static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
   return accumulator + xnn_float16_to_float(value);
 }
 
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_add_f16_accumulator(
+    xnn_simd_f16_accumulator_t lhs, xnn_simd_f16_accumulator_t rhs) {
+  return lhs + rhs;
+}
+
 static XNN_INLINE float xnn_reduce_f16_accumulator(
     xnn_simd_f16_accumulator_t accumulator) {
   return accumulator;

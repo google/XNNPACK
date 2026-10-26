@@ -116,6 +116,22 @@ TEST_F(F16SimdNEONFP16ARITHTest, Accumulate) {
             2.0f * 65504.0f * xnn_simd_size_f16);
 }
 
+TEST_F(F16SimdNEONFP16ARITHTest, AddAccumulator) {
+  float sum = 0.0f;
+  for (size_t index = 0; index < xnn_simd_size_f16; index++) {
+    inputs_[index] = xnn_float16_from_float(float(index + 1));
+    inputs_[index + xnn_simd_size_f16] =
+        xnn_float16_from_float(float(2 * index + 1));
+    sum += float(3 * index + 2);
+  }
+  const xnn_simd_f16_accumulator_t lhs = xnn_accumulate_f16(
+      xnn_zero_f16_accumulator(), xnn_loadu_f16(inputs_.data()));
+  const xnn_simd_f16_accumulator_t rhs = xnn_accumulate_f16(
+      xnn_zero_f16_accumulator(),
+      xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16));
+  ASSERT_EQ(xnn_reduce_f16_accumulator(xnn_add_f16_accumulator(lhs, rhs)), sum);
+}
+
 TEST_F(F16SimdNEONFP16ARITHTest, Fmadd) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
