@@ -1275,6 +1275,9 @@ ynn_status ynn_runtime::setup() {
 ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
                               ynn_threadpool_t threadpool, uint32_t flags,
                               ynn_runtime_t* runtime_out) {
+#ifdef YNN_ENABLE_PERFETTO
+  ynn::scoped_perfetto_trace trace("ynn_create_runtime");
+#endif
   YNN_RETURN_IF_ERROR(ynn::validate_subgraph("create_runtime", subgraph));
   if (runtime_out == nullptr) {
     YNN_LOG_ERROR() << "runtime_out must be non-null";
@@ -1337,6 +1340,9 @@ ynn_status ynn_get_external_value_shape(ynn_runtime_t runtime,
 }
 
 ynn_status ynn_reshape_runtime(ynn_runtime_t runtime) {
+#ifdef YNN_ENABLE_PERFETTO
+  ynn::scoped_perfetto_trace trace("ynn_reshape_runtime");
+#endif
   YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   return runtime->reshape();
 }
@@ -1355,6 +1361,9 @@ ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
 }
 
 ynn_status ynn_invoke_runtime(ynn_runtime_t runtime) {
+#ifdef YNN_ENABLE_PERFETTO
+  ynn::scoped_perfetto_trace trace("ynn_invoke_runtime");
+#endif
   YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   return runtime->invoke();
 }

@@ -30,6 +30,9 @@
 #include <variant>
 #include <vector>
 
+#ifdef YNN_ENABLE_PERFETTO
+#include "ynnpack/subgraph/perfetto.h"
+#endif
 #include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
@@ -667,7 +670,12 @@ void insert_constant(const cache_key& key, slinky::raw_buffer_ptr& ptr) {
   // This must tolerate writing multiple buffers to the same cache key, because
   // graphs sometimes define multiple copies of the same computation, so within
   // one subgraph, multiple constants map to the same cache key.
-  constant_cache()[key] = ptr;
+  std::weak_ptr<slinky::raw_buffer>& cached = constant_cache()[key];
+  if (slinky::raw_buffer_ptr existing = cached.lock()) {
+    ptr = existing;
+  } else {
+    cached = ptr;
+  }
 }
 
 // `get_tensor_shape` needs a special case for constant folding, because we can
@@ -841,19 +849,18 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   // Cache lookup.
   std::map<uint32_t, cache_key> keys;
   std::map<uint32_t, slinky::raw_buffer_ptr> cached_values;
-
-  // From here, we need to serialize constant folding, to avoid racily folding
-  // the same constant twice.
-  std::lock_guard<std::mutex> lock(constant_cache_mutex());  // NOLINT
-  for (uint32_t i : needed_constants) {
-    cache_key key;
-    // Build key using constants subgraph because it has folded nodes intact.
-    if (build_cache_key(*constants, i, key)) {
-      keys[i] = key;
-      slinky::raw_buffer_ptr cached_ptr = lookup_constant(key);
-      if (cached_ptr) {
-        YNN_LOG_DEBUG() << "Constant cache hit for value " << i;
-        cached_values[i] = cached_ptr;
+  {
+    std::lock_guard<std::mutex> lock(constant_cache_mutex());  // NOLINT
+    for (uint32_t i : needed_constants) {
+      cache_key key;
+      // Build key using constants subgraph because it has folded nodes intact.
+      if (build_cache_key(*constants, i, key)) {
+        keys[i] = key;
+        slinky::raw_buffer_ptr cached_ptr = lookup_constant(key);
+        if (cached_ptr) {
+          YNN_LOG_DEBUG() << "Constant cache hit for value " << i;
+          cached_values[i] = cached_ptr;
+        }
       }
     }
   }
@@ -929,11 +936,17 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   }
 
   // Insert newly folded constants into cache.
-  for (uint32_t i : needed_constants) {
-    if (cached_values.count(i)) continue;
-    auto it = keys.find(i);
-    if (it != keys.end()) {
-      insert_constant(it->second, values[i].data);
+  // Since we unlocked and relocked the mutex, it is possible that multiple
+  // subgraphs constant folded the same value. In this case, `insert_constant`
+  // will use only the existing cached value.
+  {
+    std::lock_guard<std::mutex> lock(constant_cache_mutex());  // NOLINT
+    for (uint32_t i : needed_constants) {
+      if (cached_values.count(i)) continue;
+      auto it = keys.find(i);
+      if (it != keys.end()) {
+        insert_constant(it->second, values[i].data);
+      }
     }
   }
 
@@ -1514,6 +1527,9 @@ ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
 
 ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
                                  ynn_threadpool_t threadpool, uint32_t flags) {
+#ifdef YNN_ENABLE_PERFETTO
+  ynn::scoped_perfetto_trace trace("ynn_optimize_subgraph");
+#endif
   if (subgraph == nullptr) {
     YNN_LOG_ERROR() << "subgraph must be non-null";
     return ynn_status_invalid_parameter;
