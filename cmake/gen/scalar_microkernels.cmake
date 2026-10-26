@@ -321,6 +321,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u1.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u2.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u3.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u2-acc2.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u4-acc4.c
   src/f16-rminmax/gen/f16-rmax-scalar-u1.c
   src/f16-rminmax/gen/f16-rmax-scalar-u3-acc3.c
   src/f16-rminmax/gen/f16-rmax-scalar-u4-acc2.c
