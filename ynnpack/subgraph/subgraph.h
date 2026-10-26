@@ -566,11 +566,14 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
+    bool init_c_per_group = false;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims;
+      return a.num_k_dims == b.num_k_dims &&
+             a.init_c_per_group == b.init_c_per_group;
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return a.num_k_dims < b.num_k_dims;
+      return std::tie(a.num_k_dims, a.init_c_per_group) <
+             std::tie(b.num_k_dims, b.init_c_per_group);
     }
   };
   struct iota {

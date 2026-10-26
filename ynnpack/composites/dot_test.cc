@@ -459,5 +459,179 @@ TEST(DotTest, BlockwiseDotWithZeroPoints) {
   }
 }
 
+TEST(DotTest, BlockwiseDotInvalidParameters) {
+  subgraph_ptr subgraph = create_subgraph(5, 0);
+  ASSERT_NE(subgraph, nullptr);
+
+  uint32_t a_id = 0;
+  ASSERT_EQ(
+      ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, nullptr, nullptr,
+                        YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_id),
+      ynn_status_success);
+
+  uint32_t b_id = 1;
+  const size_t b_dims[2] = {4, 2};
+  const int8_t b_data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, b_dims, b_data,
+                              YNN_VALUE_FLAG_COPY_DATA, &b_id),
+            ynn_status_success);
+
+  uint32_t b_scale_id = 2;
+  const size_t b_scale_dims[2] = {2, 2};
+  const float b_scale_data[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, b_scale_dims,
+                              b_scale_data, YNN_VALUE_FLAG_COPY_DATA,
+                              &b_scale_id),
+            ynn_status_success);
+
+  uint32_t out_id = YNN_INVALID_VALUE_ID;
+
+  // block_size == 0
+  EXPECT_EQ(define_blockwise_dot(subgraph.get(), a_id, YNN_INVALID_VALUE_ID,
+                                 YNN_INVALID_VALUE_ID, b_id,
+                                 YNN_INVALID_VALUE_ID, b_scale_id,
+                                 /*block_size=*/0, YNN_INVALID_VALUE_ID,
+                                 ynn_type_fp32, out_id, 0),
+            ynn_status_invalid_parameter);
+}
+
+TEST(DotTest, BlockwiseRaggedDot) {
+  subgraph_ptr subgraph = create_subgraph(5, 0);
+  ASSERT_NE(subgraph, nullptr);
+
+  const size_t G = 3;
+  const size_t M = 4;
+  const size_t K = 32;
+  const size_t N = 16;
+  const size_t block_size = 16;
+  const size_t num_blocks = K / block_size;
+
+  uint32_t a_id = 0;
+  ASSERT_EQ(
+      ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, nullptr, nullptr,
+                        YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_id),
+      ynn_status_success);
+  const size_t col_dims[2] = {0, 1};
+  uint32_t a_zp_id = 1;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int32, 2, col_dims,
+                              nullptr, YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_zp_id),
+            ynn_status_success);
+  uint32_t a_scale_id = 2;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, col_dims,
+                              nullptr, YNN_VALUE_FLAG_EXTERNAL_INPUT,
+                              &a_scale_id),
+            ynn_status_success);
+  uint32_t rg_id = 3;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int32, 2, col_dims,
+                              nullptr, YNN_VALUE_FLAG_EXTERNAL_INPUT, &rg_id),
+            ynn_status_success);
+  uint32_t out_id = 4;
+  ASSERT_EQ(
+      ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, nullptr, nullptr,
+                        YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id),
+      ynn_status_success);
+
+  std::vector<int8_t> b_data(G * K * N);
+  for (size_t i = 0; i < b_data.size(); ++i) {
+    b_data[i] = static_cast<int8_t>((static_cast<int>(i % 15) - 7));
+  }
+  const size_t b_dims[3] = {G, K, N};
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int8, 3, b_dims,
+                              b_data.data(), YNN_VALUE_FLAG_COPY_DATA, &b_id),
+            ynn_status_success);
+
+  std::vector<int32_t> b_zp_data(G * N * num_blocks);
+  std::vector<float> b_scale_data(G * N * num_blocks);
+  for (size_t i = 0; i < b_scale_data.size(); ++i) {
+    b_zp_data[i] = static_cast<int32_t>((i % 5) - 2);
+    b_scale_data[i] = 0.1f * static_cast<float>((i % 4) + 1);
+  }
+  const size_t b_param_dims[3] = {G, N, num_blocks};
+  uint32_t b_zp_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int32, 3, b_param_dims,
+                              b_zp_data.data(), YNN_VALUE_FLAG_COPY_DATA,
+                              &b_zp_id),
+            ynn_status_success);
+  uint32_t b_scale_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 3, b_param_dims,
+                              b_scale_data.data(), YNN_VALUE_FLAG_COPY_DATA,
+                              &b_scale_id),
+            ynn_status_success);
+
+  ASSERT_EQ(define_blockwise_dot(subgraph.get(), a_id, a_zp_id, a_scale_id,
+                                 b_id, b_zp_id, b_scale_id, block_size,
+                                 /*bias_id=*/YNN_INVALID_VALUE_ID,
+                                 ynn_type_fp32, out_id, /*flags=*/0, rg_id),
+            ynn_status_success);
+  ASSERT_EQ(ynn_optimize_subgraph(subgraph.get(), nullptr, 0),
+            ynn_status_success);
+
+  runtime_ptr runtime = create_runtime(subgraph, nullptr, 0);
+  ASSERT_NE(runtime, nullptr);
+
+  const size_t a_shape[2] = {M, K};
+  const size_t col_shape[2] = {M, 1};
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, a_shape),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_zp_id, 2, col_shape),
+            ynn_status_success);
+  ASSERT_EQ(
+      ynn_set_external_value_shape(runtime.get(), a_scale_id, 2, col_shape),
+      ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), rg_id, 2, col_shape),
+            ynn_status_success);
+
+  std::vector<int8_t> a_data(M * K);
+  for (size_t i = 0; i < a_data.size(); ++i) {
+    a_data[i] = static_cast<int8_t>((static_cast<int>(i % 11) - 5));
+  }
+  std::vector<int32_t> a_zp_data = {1, -2, 3, -1};
+  std::vector<float> a_scale_data = {0.5f, 0.25f, 0.75f, 1.0f};
+  std::vector<int32_t> rg_data = {0, 2, 2, 0};
+  std::vector<float> out_data(M * N, -999.0f);
+
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), a_id, a_data.data()),
+            ynn_status_success);
+  ASSERT_EQ(
+      ynn_set_external_value_data(runtime.get(), a_zp_id, a_zp_data.data()),
+      ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), a_scale_id,
+                                        a_scale_data.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), rg_id, rg_data.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), out_id, out_data.data()),
+            ynn_status_success);
+
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+
+  for (size_t m = 0; m < M; ++m) {
+    for (size_t n = 0; n < N; ++n) {
+      const size_t g = static_cast<size_t>(rg_data[m]);
+      float sum = 0.0f;
+      for (size_t b = 0; b < num_blocks; ++b) {
+        float block_sum = 0.0f;
+        const float b_zp =
+            static_cast<float>(b_zp_data[(g * N + n) * num_blocks + b]);
+        for (size_t kb = 0; kb < block_size; ++kb) {
+          const size_t k = b * block_size + kb;
+          const float a_val =
+              static_cast<float>(a_data[m * K + k]) -
+              static_cast<float>(a_zp_data[m]);
+          const float b_val =
+              static_cast<float>(b_data[(g * K + k) * N + n]) - b_zp;
+          block_sum += a_val * b_val;
+        }
+        sum += block_sum * b_scale_data[(g * N + n) * num_blocks + b];
+      }
+      sum *= a_scale_data[m];
+      EXPECT_NEAR(out_data[m * N + n], sum, 1e-4f)
+          << "m=" << m << " n=" << n;
+    }
+  }
+}
+
 }  // namespace
 }  // namespace ynn
