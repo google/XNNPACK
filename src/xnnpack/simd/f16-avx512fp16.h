@@ -232,6 +232,13 @@ static XNN_INLINE xnn_simd_f16_accumulator_t xnn_accumulate_f16(
   return accumulator;
 }
 
+static XNN_INLINE xnn_simd_f16_accumulator_t xnn_add_f16_accumulator(
+    xnn_simd_f16_accumulator_t lhs, xnn_simd_f16_accumulator_t rhs) {
+  lhs.lo = _mm512_add_ps(lhs.lo, rhs.lo);
+  lhs.hi = _mm512_add_ps(lhs.hi, rhs.hi);
+  return lhs;
+}
+
 static XNN_INLINE float xnn_reduce_f16_accumulator(
     xnn_simd_f16_accumulator_t accumulator) {
   const __m512 sum = _mm512_add_ps(accumulator.lo, accumulator.hi);

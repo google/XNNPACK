@@ -123,9 +123,11 @@ void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${BATCH_TILE}${"" if 
     vacc0 = xnn_add_f32(vacc0, vf);
   }
 
+  $for STEP in range((ACCUMULATORS - 1).bit_length()):
+    $for ACC in range(0, ACCUMULATORS, 2 << STEP):
+      $if ACC + (1 << STEP) < ACCUMULATORS:
+        vacc${ACC} = xnn_add_f32(vacc${ACC}, vacc${ACC + (1 << STEP)});
   float vsum = xnn_reduce_add_f32(vacc0);
-  $for ACC in range(1, ACCUMULATORS):
-    vsum += xnn_reduce_add_f32(vacc${ACC});
   $if SIMD_SIZE > 1:
     if XNN_UNLIKELY(batch != 0) {
       const size_t num_elements = batch / sizeof(xnn_float16);
@@ -133,7 +135,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${BATCH_TILE}${"" if 
           expminusmax_f32(load_tail_f16_f32(input, num_elements), vmax);
       store_tail_f32_f16(output, vf, num_elements);
 
-      XNN_ALIGN(128) float values[xnn_simd_size_f32];
+      XNN_ALIGN(64) float values[xnn_simd_size_f32];
       xnn_storeu_f32(values, vf);
       for (size_t i = 0; i < num_elements; i++) {
         vsum += values[i];

@@ -102,7 +102,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16(
         expminusmax_f32(load_tail_f16_f32(input, num_elements), vmax);
     store_tail_f32_f16(output, vf, num_elements);
 
-    XNN_ALIGN(128) float values[xnn_simd_size_f32];
+    XNN_ALIGN(64) float values[xnn_simd_size_f32];
     xnn_storeu_f32(values, vf);
     for (size_t i = 0; i < num_elements; i++) {
       vsum += values[i];
