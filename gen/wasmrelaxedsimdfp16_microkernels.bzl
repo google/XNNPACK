@@ -42,6 +42,8 @@ NON_PROD_WASMRELAXEDSIMDFP16_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimd-splat.c",
     "src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimd-splat.c",
     "src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c",
+    "src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimdfp16-rr2-p2-u16-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimdfp16-rr2-p2-u32-acc4.c",
     "src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u8.c",
     "src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u16-acc2.c",
     "src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u24-acc3.c",
