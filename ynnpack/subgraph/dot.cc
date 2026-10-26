@@ -83,6 +83,7 @@ namespace {
 
 bool is_layout_transform(const ynn_node& node) {
   return std::holds_alternative<ynn_node::copy>(node.op) ||
+         std::holds_alternative<ynn_node::gather>(node.op) ||
          std::holds_alternative<ynn_node::split_dim>(node.op) ||
          std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
          std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
@@ -141,7 +142,10 @@ bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
 
 bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
                             uint32_t input_b_id, uint32_t& input_c_id,
-                            size_t num_k_dims) {
+                            size_t num_k_dims, bool is_ragged) {
+  if (is_ragged && input_c_id != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
   uint32_t uint8_a_id = YNN_INVALID_VALUE_ID;
   ynn_status status = ynn_define_unary(&subgraph, ynn_unary_requantize_to_uint8,
                                        input_a_id, &uint8_a_id, 0);
@@ -217,7 +221,8 @@ bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
 // int8.
 bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
                                     uint32_t& input_a_id, uint32_t input_b_id,
-                                    uint32_t& input_c_id, size_t num_k_dims) {
+                                    uint32_t& input_c_id, size_t num_k_dims,
+                                    bool is_ragged = false) {
   const ynn_value& a = subgraph.value(input_a_id);
   if (a.type != ynn_type_int8) return false;
 
@@ -237,7 +242,7 @@ bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
   }
 
   return try_requantize_rewrite(subgraph, input_a_id, input_b_id, input_c_id,
-                                num_k_dims);
+                                num_k_dims, is_ragged);
 }
 
 const dot_cost_models& get_dot_cost_models(const slinky::eval_context& ctx) {
@@ -261,11 +266,113 @@ const std::array<size_t, 3>& get_dot_cache_budgets() {
   return budgets;
 }
 
+enum class dot_mode { normal, ragged };
+
+template <dot_mode Mode>
+struct dot_mask {
+  void init(const slinky::call_stmt*, const slinky::eval_context&, index_t,
+            bool, slinky::raw_buffer&, slinky::raw_buffer&) {}
+  void reset_init_c_to_c() {}
+
+  template <typename RunRows>
+  void for_each(const slinky::raw_buffer& c, const slinky::raw_buffer& a,
+                const slinky::raw_buffer& b, const slinky::raw_buffer& init_c,
+                index_t m, index_t, index_t, index_t, bool,
+                const RunRows& run_rows) const {
+    slinky::for_each_element(
+        [&](void* c, const void* a, const void* b, const void* init_c) {
+          run_rows(0, m, c, a, b, init_c);
+        },
+        c, a, b, init_c);
+  }
+};
+
+template <>
+struct dot_mask<dot_mode::ragged> {
+  slinky::raw_buffer row_group;
+  index_t rg_stride_m = 0;
+  index_t num_groups = 0;
+  index_t b_stride_g = 0;
+  index_t init_c_stride_g = 0;
+
+  void init(const slinky::call_stmt* call, const slinky::eval_context& ctx,
+            index_t min_m, bool init_c_per_group, slinky::raw_buffer& b,
+            slinky::raw_buffer& init_c) {
+    row_group = *ctx.lookup_buffer(call->inputs[3]);
+    assert(row_group.elem_size == sizeof(int32_t));
+    assert(row_group.rank >= 2);
+    row_group.slice(0);
+    const slinky::dim& rg_m = row_group.dim(0);
+    rg_stride_m = rg_m.extent() == 1 ? 0 : rg_m.stride();
+    const index_t slice_m = rg_m.extent() == 1 ? rg_m.min() : min_m;
+    row_group.slice(0, slinky::in_bounds{slice_m});
+
+    const slinky::dim& b_g = slice_dim0(b);
+    b_stride_g = b_g.stride();
+    num_groups = b_g.extent();
+
+    if (init_c_per_group && init_c.rank > 0) {
+      const slinky::dim& ic_g = slice_dim0(init_c);
+      init_c_stride_g = ic_g.stride();
+    }
+  }
+  void reset_init_c_to_c() { init_c_stride_g = 0; }
+
+  template <typename RunRows>
+  void for_each(const slinky::raw_buffer& c, const slinky::raw_buffer& a,
+                const slinky::raw_buffer& b, const slinky::raw_buffer& init_c,
+                index_t m, index_t n, index_t c_stride_m, index_t c_stride_n,
+                bool is_final_pass, const RunRows& run_rows) const {
+    const index_t c_elem_size = c.elem_size;
+    auto zero_rows = [&](void* c_ptr, index_t begin, index_t end) {
+      for (index_t i = begin; i < end; ++i) {
+        void* row = offset_bytes(c_ptr, i * c_stride_m);
+        if (c_stride_n == c_elem_size) {
+          memset(row, 0, n * c_elem_size);
+        } else {
+          for (index_t j = 0; j < n; ++j) {
+            memset(offset_bytes(row, j * c_stride_n), 0, c_elem_size);
+          }
+        }
+      }
+    };
+    slinky::for_each_element(
+        [&](void* c_ptr, const void* a_ptr, const void* b_ptr,
+            const void* init_c_ptr, const void* rg_ptr) {
+          index_t begin = 0;
+          while (begin < m) {
+            const int32_t g = *reinterpret_cast<const int32_t*>(
+                offset_bytes(rg_ptr, begin * rg_stride_m));
+            index_t end = begin + 1;
+            while (end < m &&
+                   *reinterpret_cast<const int32_t*>(
+                       offset_bytes(rg_ptr, end * rg_stride_m)) == g) {
+              ++end;
+            }
+            if (0 <= g && g < num_groups) {
+              run_rows(begin, end, c_ptr, a_ptr,
+                       offset_bytes(b_ptr, g * b_stride_g),
+                       init_c_ptr
+                           ? offset_bytes(init_c_ptr, g * init_c_stride_g)
+                           : nullptr);
+            } else if (is_final_pass) {
+              zero_rows(c_ptr, begin, end);
+            }
+            begin = end;
+          }
+        },
+        c, a, b, init_c, row_group);
+  }
+};
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
-auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
-                   bool transposed_a, bool pack_b, size_t num_k_dims,
-                   int thread_count) {
+template <dot_mode Mode = dot_mode::normal>
+slinky::call_stmt::callable make_dot_impl(dot_type type,
+                                          bool consistent_arithmetic,
+                                          bool symmetric_b, bool transposed_a,
+                                          bool pack_b, size_t num_k_dims,
+                                          int thread_count,
+                                          bool init_c_per_group = false) {
   uint32_t kernel_flags = 0;
   if (consistent_arithmetic) {
     kernel_flags |= dot_flag::consistent_arithmetic;
@@ -279,8 +386,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
   uint64_t arch_flags = get_supported_arch_flags();
 
   return [type, kernel_flags, transposed_a, pack_b, num_k_dims, arch_flags,
-          thread_count](const slinky::call_stmt* call,
-                        const slinky::eval_context& ctx) -> index_t {
+          thread_count, init_c_per_group](
+             const slinky::call_stmt* call,
+             const slinky::eval_context& ctx) -> index_t {
     slinky::raw_buffer a = *ctx.lookup_buffer(call->inputs[0]);
     slinky::raw_buffer b = *ctx.lookup_buffer(call->inputs[1]);
     slinky::raw_buffer init_c = *ctx.lookup_buffer(call->inputs[2]);
@@ -501,18 +609,25 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     // inner microkernel loops.
     dot_loop loops_storage[std::size(cache_budgets) + 3];
 
+    dot_mask<Mode> mask;
+    mask.init(call, ctx, c_min_m, init_c_per_group, b, init_c);
+
     if (k1) {
       auto loops = schedule_dot(cache_budgets, m, n, k, block_m, block_n,
                                 a.elem_size, b.elem_size, loops_storage);
-
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            run_dot(loops, m, n, k, a_stride_m, a_k_strides, a, b_k_strides,
-                    b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-                    c_stride_n, c, call_kernel, &kernel_state);
-          },
-          c, a, b, init_c);
+      mask.for_each(
+          c, a, b, init_c, m, n, c_stride_m, c_stride_n,
+          /*is_final_pass=*/k1_tail == 0,
+          [&](index_t begin, index_t end, void* c, const void* a, const void* b,
+              const void* init_c) {
+            run_dot(loops, end - begin, n, k, a_stride_m, a_k_strides,
+                    offset_bytes(a, begin * a_stride_m), b_k_strides,
+                    b_stride_n, b, init_c_stride_m,
+                    init_c ? offset_bytes(init_c, begin * init_c_stride_m)
+                           : nullptr,
+                    c_stride_m, c_stride_n, offset_bytes(c, begin * c_stride_m),
+                    call_kernel, &kernel_state);
+          });
     }
     if (k1_tail) {
       std::array<size_t, 3> k_tail = {
@@ -563,21 +678,26 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
               }
             }
           };
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            index_t tail_init_c_stride_m = init_c_stride_m;
-            if (k1 != 0) {
-              init_c = c;
-              tail_init_c_stride_m = c_stride_m;
-            }
-            a = offset_bytes(a, a_k_strides[0] * k1);
-            b = offset_bytes(b, b_k_strides[0] * k1);
-            run_dot(loops, m, n, k_tail, a_stride_m, a_k_strides, a,
-                    b_k_strides, b_stride_n, b, tail_init_c_stride_m, init_c,
-                    c_stride_m, c_stride_n, c, call_kernel_tail, &kernel_state);
-          },
-          c, a, b, init_c);
+      if (k1 != 0) {
+        init_c = c;
+        init_c_stride_m = c_stride_m;
+        mask.reset_init_c_to_c();
+        a.base = offset_bytes(a.base, a_k_strides[0] * k1);
+        b.base = offset_bytes(b.base, b_k_strides[0] * k1);
+      }
+      mask.for_each(
+          c, a, b, init_c, m, n, c_stride_m, c_stride_n,
+          /*is_final_pass=*/true,
+          [&](index_t begin, index_t end, void* c, const void* a, const void* b,
+              const void* init_c) {
+            run_dot(loops, end - begin, n, k_tail, a_stride_m, a_k_strides,
+                    offset_bytes(a, begin * a_stride_m), b_k_strides,
+                    b_stride_n, b, init_c_stride_m,
+                    init_c ? offset_bytes(init_c, begin * init_c_stride_m)
+                           : nullptr,
+                    c_stride_m, c_stride_n, offset_bytes(c, begin * c_stride_m),
+                    call_kernel_tail, &kernel_state);
+          });
     }
 
     return 0;
@@ -1070,14 +1190,28 @@ constexpr float task_bytes_per_second = 8e9f;
 constexpr float task_output_bytes_per_second = 16e9f;
 
 std::tuple<index_t, index_t, index_t> choose_split_factors(
-    index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
-    size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac) {
+    index_t m, index_t n, index_t k, index_t block_n, index_t num_groups,
+    size_t a_elem_size, size_t b_elem_bits, size_t c_elem_size,
+    float seconds_per_mac) {
   assert(block_n > 0);
+  num_groups = std::max<index_t>(1, num_groups);
 
   // If k gets big, we're going to tile k anyways. It could be faster to
   // parallelize more finely, but it will waste CPU cycles due to more memory
   // traffic out of the cache.
   const index_t effective_k = std::min<index_t>(k, step_k);
+
+  // In a ragged dot with `num_groups > 1`, rows from different groups do not
+  // share `B`. Growing `split_m` beyond the average group size does not
+  // increase `B` reuse; it only increases the working set of `A` and the number
+  // of distinct group weight matrices streamed per tile.
+  const index_t m_per_group = ceil_div(m, num_groups);
+  const index_t eff_step_m =
+      (num_groups > 1 && m_per_group < step_m) ? 1 : step_m;
+  const index_t max_split_m =
+      num_groups > 1
+          ? std::min<index_t>(m, align_up(m_per_group, eff_step_m))
+          : m;
 
   // Considerations for task size:
   // - We want tasks to be square-ish, to maximize the number of times we can
@@ -1102,10 +1236,11 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   // Make the tile bigger, doubling the dimension that keeps it closest to
   // `aspect_ratio`. Returns false if the tile already covers the whole dot.
   auto grow = [&](index_t& split_m, index_t& split_n) {
-    if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
+    if ((aspect_ratio * split_n <= split_m || split_m >= max_split_m) &&
+        split_n < n) {
       split_n *= 2;
     } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
-               split_m < m) {
+               split_m < max_split_m) {
       split_m *= 2;
     } else {
       return false;
@@ -1114,11 +1249,12 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   };
 
   index_t split_n = std::min<index_t>(n, block_n);
-  index_t split_m = std::min<index_t>(m, step_m);
+  index_t split_m = std::min<index_t>(max_split_m, step_m);
   while (true) {
     if (split_n * split_m >= min_area) {
       // We've reached the minimum tile size, should we stop?
-      if ((split_m + split_n) * effective_k >= max_cost ||
+      const index_t group_m = std::min<index_t>(split_m, m_per_group);
+      if ((group_m + split_n) * effective_k >= max_cost ||
           split_m * split_n >= max_area) {
         // We've reached the maximum task size, we should stop.
         break;
@@ -1133,8 +1269,10 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   // Make the tasks bigger if they are too small to be worth running in
   // parallel.
   const float task_k = std::min(k, split_k);
-  const float operand_seconds = (m * a_elem_size + n * b_elem_bits / 8.0f) *
-                                task_k / task_bytes_per_second;
+  const index_t active_groups = std::min<index_t>(m, num_groups);
+  const float operand_seconds =
+      (m * a_elem_size + active_groups * n * b_elem_bits / 8.0f) * task_k /
+      task_bytes_per_second;
   const float dot_seconds =
       static_cast<float>(m) * n * task_k * seconds_per_mac + operand_seconds;
   while (true) {
@@ -1178,36 +1316,40 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
     const index_t splits = ceil_div(extent, split);
     return std::min(split, ceil_div(ceil_div(extent, splits), step) * step);
   };
-  split_m = balance(m, split_m, step_m);
+  split_m = balance(m, split_m, eff_step_m);
   split_n = balance(n, split_n, block_n);
 
   // Ensure the split factors do not exceed the maximum representable numbers
   // in the 32-bit packing scheme (11 bits for n, 11 bits for m, 9 bits for k).
+  const index_t pack_step_m = num_groups > 1 ? 1 : step_m;
   split_n = std::min<index_t>(split_n, max_multiplier_n * block_n);
-  split_m = std::min<index_t>(split_m, max_multiplier_m * step_m);
+  split_m = std::min<index_t>(split_m, max_multiplier_m * pack_step_m);
   split_k = std::min<index_t>(split_k, max_multiplier_k * step_k);
   return {split_n, split_m, split_k};
 }
 
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n, size_t a_elem_size, size_t b_elem_bits,
-    size_t c_elem_size, float seconds_per_mac) {
+    slinky::expr block_n, slinky::expr num_groups, size_t a_elem_size,
+    size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
     index_t n = evaluate(op->args[1], ctx);
     index_t k = evaluate(op->args[2], ctx);
     index_t block_n = evaluate(op->args[3], ctx);
+    index_t num_groups = evaluate(op->args[4], ctx);
     auto [split_n, split_m, split_k] =
-        choose_split_factors(m, n, k, block_n, a_elem_size, b_elem_bits,
-                             c_elem_size, seconds_per_mac);
+        choose_split_factors(m, n, k, block_n, num_groups, a_elem_size,
+                             b_elem_bits, c_elem_size, seconds_per_mac);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
-    index_t mult_m = std::max<index_t>(1, split_m / step_m);
+    index_t mult_m =
+        std::max<index_t>(1, split_m / (num_groups > 1 ? 1 : step_m));
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
     return (mult_k * radix_m + mult_m) * radix_n + mult_n;
   };
-  slinky::expr splits = slinky::call::make(impl, {m, n, k, block_n});
+  slinky::expr splits =
+      slinky::call::make(impl, {m, n, k, block_n, num_groups});
 
   // Extract the splits from the single 32-bit index_t result.
   splits = runtime.globals.get(splits, "dot_splits");
@@ -1215,8 +1357,9 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   slinky::expr splits_m_k = splits / radix_n;
   slinky::expr mult_m = splits_m_k % radix_m;
   slinky::expr mult_k = splits_m_k / radix_m;
+  slinky::expr eff_step_m = slinky::select(num_groups > 1, 1, step_m);
   slinky::expr split_n = slinky::min(n, mult_n * block_n);
-  slinky::expr split_m = slinky::min(m, mult_m * step_m);
+  slinky::expr split_m = slinky::min(m, mult_m * eff_step_m);
   slinky::expr split_k = slinky::min(k, mult_k * step_k);
   split_n = runtime.globals.get(split_n, "split_n");
   split_m = runtime.globals.get(split_m, "split_m");
@@ -1228,8 +1371,8 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   // the globals so scheduler proofs and simplifications can reason about the
   // steps without evaluating the call.
   runtime.globals.learn_bounds(
-      split_m,
-      {slinky::min(m, step_m), slinky::min(m, max_multiplier_m * step_m)});
+      split_m, {slinky::min(m, eff_step_m),
+                slinky::min(m, max_multiplier_m * eff_step_m)});
   runtime.globals.learn_bounds(
       split_n,
       {slinky::min(n, block_n), slinky::min(n, max_multiplier_n * block_n)});
@@ -1436,8 +1579,9 @@ ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
 
 ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                       uint32_t input_a_id, uint32_t input_b_id,
-                      uint32_t input_c_id, uint32_t* output_id,
-                      uint32_t flags) {
+                      uint32_t input_c_id, uint32_t row_group_id,
+                      uint32_t* output_id, uint32_t flags,
+                      bool is_ragged = false) {
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
@@ -1500,8 +1644,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   shape.n = std::min<size_t>(shape.n, 384);
   shape.k1 = std::min<size_t>(shape.k1, 256);
 
+  const std::optional<bool> require_transpose_a =
+      is_ragged ? std::make_optional(false) : std::nullopt;
   dot_kernel kernel =
-      get_dot_kernel(type, cost_models, shape, packed_shape, kernel_flags);
+      get_dot_kernel(type, cost_models, shape, packed_shape, kernel_flags,
+                     require_transpose_a);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -1515,7 +1662,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
       unpacked_kernel = get_dot_kernel(type, cost_models, shape, no_tile_k,
-                                       kernel_flags | dot_flag::unaligned_b);
+                                       kernel_flags | dot_flag::unaligned_b,
+                                       require_transpose_a);
     }
   }
 
@@ -1530,13 +1678,19 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   }
 
   ynn_node node;
-  node.inputs = {input_a_id, input_b_id, input_c_id};
+  if (is_ragged) {
+    node.inputs = {input_a_id, input_b_id, input_c_id, row_group_id};
+  } else {
+    node.inputs = {input_a_id, input_b_id, input_c_id};
+  }
   node.outputs = {*output_id};
-  node.op = ynn_node::dot{num_k_dims};
+  node.op = ynn_node::dot{num_k_dims, is_ragged};
 
   // Propagate shape.
   int c_rank;
-  if (a.rank() == 1) {
+  if (is_ragged) {
+    c_rank = std::max(a.rank(), b.rank() - 1) + 1 - num_k_dims;
+  } else if (a.rank() == 1) {
     // TODO These special cases for a rank 1 are pretty anoying, there must be a
     // more elegant generalization of a rank 1 cases.
     c_rank = b.rank() - num_k_dims;
@@ -1558,16 +1712,36 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   subgraph.infer_elementwise_shape(node, 1, 0, 0, 0);
   subgraph.infer_elementwise_shape(node, 2, 0, 0, 0);
 
-  if (c_rank >= 2) {
+  if (is_ragged) {
+    assert(c_rank >= 2);
     subgraph.infer_elementwise_shape(node, 0, 0, num_k_dims, 1);
-    subgraph.infer_elementwise_shape(node, 2, 0, 1, 1);
-  }
+    const bool c_is_per_group =
+        input_c_id != YNN_INVALID_VALUE_ID &&
+        subgraph.value(input_c_id).rank() > static_cast<size_t>(c_rank);
+    if (!c_is_per_group) {
+      subgraph.infer_elementwise_shape(node, 2, 0, 1, 1);
+    }
+    subgraph.infer_elementwise_shape(node, 3, 0, 0, 0);
+    subgraph.infer_elementwise_shape(node, 3, 0, 1, 1);
+    for (size_t d = 2; d < c_rank; ++d) {
+      subgraph.infer_elementwise_shape(node, 0, 0, d + num_k_dims - 1, d);
+      subgraph.infer_elementwise_shape(node, 1, 0, d + num_k_dims, d);
+      subgraph.infer_elementwise_shape(node, 2, 0, c_is_per_group ? d + 1 : d,
+                                       d);
+      subgraph.infer_elementwise_shape(node, 3, 0, d, d);
+    }
+  } else {
+    if (c_rank >= 2) {
+      subgraph.infer_elementwise_shape(node, 0, 0, num_k_dims, 1);
+      subgraph.infer_elementwise_shape(node, 2, 0, 1, 1);
+    }
 
-  // The rest of the dimensions are elementwise.
-  for (size_t d = 2; d < c_rank; ++d) {
-    subgraph.infer_elementwise_shape(node, 0, 0, d + num_k_dims - 1, d);
-    subgraph.infer_elementwise_shape(node, 1, 0, d + num_k_dims - 1, d);
-    subgraph.infer_elementwise_shape(node, 2, 0, d, d);
+    // The rest of the dimensions are elementwise.
+    for (size_t d = 2; d < c_rank; ++d) {
+      subgraph.infer_elementwise_shape(node, 0, 0, d + num_k_dims - 1, d);
+      subgraph.infer_elementwise_shape(node, 1, 0, d + num_k_dims - 1, d);
+      subgraph.infer_elementwise_shape(node, 2, 0, d, d);
+    }
   }
 
   // The k-dims must match.
@@ -1723,28 +1897,69 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     // Batch dims are elementwise too.
-    for (size_t i = 1; i < output_dims.size(); ++i) {
-      if (transpose_a) {
-        if (i >= 2 && i + num_a_k_dims - 1 < input_a.rank()) {
-          a_bounds.push_back(elementwise_bounds(
-              output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
+    if (op.is_ragged) {
+      const size_t b_g_dim = b_k2_dim + num_k_dims;
+      if (b_g_dim < input_b.rank()) {
+        b_bounds.push_back(all_bounds(input_b.physical_extent(b_g_dim)));
+      }
+      const bool c_is_per_group = input_c.rank() > output.rank();
+      if (c_is_per_group) {
+        c_bounds.push_back(slinky::point(0));
+        c_bounds.push_back(all_bounds(input_c.physical_extent(2)));
+      }
+      for (size_t i = 1; i < output_dims.size(); ++i) {
+        if (transpose_a) {
+          if (i >= 2 && i + num_a_k_dims - 1 < input_a.rank()) {
+            a_bounds.push_back(elementwise_bounds(
+                output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
+          }
+        } else {
+          if (i + num_a_k_dims - 1 < input_a.rank()) {
+            a_bounds.push_back(elementwise_bounds(
+                output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
+          }
         }
-      } else {
-        if (i + num_a_k_dims - 1 < input_a.rank()) {
-          a_bounds.push_back(elementwise_bounds(
-              output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
+        if (i >= 2) {
+          const size_t b_batch_dim = b_k2_dim + num_k_dims + 1 + (i - 2);
+          if (b_batch_dim < input_b.rank()) {
+            b_bounds.push_back(elementwise_bounds(
+                output_dims[i], input_b.extents[b_batch_dim]));
+          }
+        }
+        if (c_is_per_group) {
+          if (i >= 2 && i + 1 < input_c.rank()) {
+            c_bounds.push_back(
+                elementwise_bounds(output_dims[i], input_c.extents[i + 1]));
+          }
+        } else if (i < input_c.rank()) {
+          c_bounds.push_back(
+              elementwise_bounds(output_dims[i], input_c.extents[i]));
         }
       }
-      if (i >= 2) {
-        const size_t b_batch_dim = b_k2_dim + num_k_dims + (i - 2);
-        if (b_batch_dim < input_b.rank()) {
-          b_bounds.push_back(
-              elementwise_bounds(output_dims[i], input_b.extents[b_batch_dim]));
+    } else {
+      for (size_t i = 1; i < output_dims.size(); ++i) {
+        if (transpose_a) {
+          if (i >= 2 && i + num_a_k_dims - 1 < input_a.rank()) {
+            a_bounds.push_back(elementwise_bounds(
+                output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
+          }
+        } else {
+          if (i + num_a_k_dims - 1 < input_a.rank()) {
+            a_bounds.push_back(elementwise_bounds(
+                output_dims[i], input_a.extents[i + num_a_k_dims - 1]));
+          }
         }
-      }
-      if (i < input_c.rank()) {
-        c_bounds.push_back(
-            elementwise_bounds(output_dims[i], input_c.extents[i]));
+        if (i >= 2) {
+          const size_t b_batch_dim = b_k2_dim + num_k_dims + (i - 2);
+          if (b_batch_dim < input_b.rank()) {
+            b_bounds.push_back(elementwise_bounds(
+                output_dims[i], input_b.extents[b_batch_dim]));
+          }
+        }
+        if (i < input_c.rank()) {
+          c_bounds.push_back(
+              elementwise_bounds(output_dims[i], input_c.extents[i]));
+        }
       }
     }
 
@@ -1769,15 +1984,37 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     dot_type dot_type = {input_a.type, input_b.type, output.type};
     const int thread_count =
         runtime.threadpool() ? runtime.threadpool()->thread_count() + 1 : 1;
-    auto func = slinky::func(
-        make_dot_impl(dot_type, consistent_arithmetic, symmetric_b, transpose_a,
-                      pack_b, num_k_dims, thread_count),
-        {{input_a.buffer, std::move(a_bounds)},
-         {input_b.buffer, std::move(b_bounds)},
-         {input_c.buffer, std::move(c_bounds)}},
-        {{output.buffer, output_dims},
-         {reduction_buffer, std::move(reduction_dims)}},
-        {}, std::move(attrs));
+    std::vector<slinky::func::input> inputs = {
+        {input_a.buffer, std::move(a_bounds)},
+        {input_b.buffer, std::move(b_bounds)},
+        {input_c.buffer, std::move(c_bounds)},
+    };
+    slinky::call_stmt::callable impl;
+    if (op.is_ragged) {
+      const ynn_runtime_value& rg = runtime.value(node.inputs[3]);
+      slinky::box_expr rg_bounds;
+      if (rg.rank() >= 1) {
+        rg_bounds.push_back(slinky::point(0));
+      }
+      for (size_t i = 1; i < output_dims.size() && i < rg.rank(); ++i) {
+        rg_bounds.push_back(
+            elementwise_bounds(output_dims[i], rg.extents[i]));
+      }
+      rg_bounds.resize(rg.rank(), slinky::point(0));
+      assert(rg_bounds.size() == rg.rank());
+      inputs.push_back({rg.buffer, std::move(rg_bounds)});
+      const bool c_is_per_group = input_c.rank() > output.rank();
+      impl = make_dot_impl<dot_mode::ragged>(
+          dot_type, consistent_arithmetic, symmetric_b, transpose_a, pack_b,
+          num_k_dims, thread_count, c_is_per_group);
+    } else {
+      impl = make_dot_impl(dot_type, consistent_arithmetic, symmetric_b,
+                           transpose_a, pack_b, num_k_dims, thread_count);
+    }
+    auto func = slinky::func(std::move(impl), std::move(inputs),
+                             {{output.buffer, output_dims},
+                              {reduction_buffer, std::move(reduction_dims)}},
+                             {}, std::move(attrs));
 
     slinky::expr block_n = pack_b ? input_b.extent(1) : block_n_unpacked;
     slinky::expr n = output.extent(0);
@@ -1792,8 +2029,13 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       k *= input_b.extent(b_k2_dim + d);
     }
 
+    const size_t b_g_dim = b_k2_dim + num_k_dims;
+    slinky::expr num_groups =
+        op.is_ragged && b_g_dim < input_b.rank()
+            ? input_b.physical_extent(b_g_dim)
+            : slinky::expr(1);
     auto [split_n, split_m, split_k] = choose_split_factors(
-        runtime, m, n, k, block_n, type_size_bytes(input_a.type),
+        runtime, m, n, k, block_n, num_groups, type_size_bytes(input_a.type),
         type_size_bits(input_b.type), type_size_bytes(output.type),
         seconds_per_mac);
 
@@ -1891,35 +2133,59 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   return ynn_status_success;
 }
 
-}  // namespace
-
-extern "C" {
-
-ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
-                          uint32_t input_a_id, uint32_t input_b_id,
-                          uint32_t input_c_id, uint32_t* output_id,
-                          uint32_t flags) {
+ynn_status define_dot_api(const char* name, ynn_subgraph_t subgraph,
+                          size_t num_k_dims, uint32_t input_a_id,
+                          uint32_t input_b_id, uint32_t input_c_id,
+                          uint32_t row_group_id, uint32_t* output_id,
+                          uint32_t flags, bool is_ragged = false) {
   // Validate arguments.
-  YNN_RETURN_IF_ERROR(validate_subgraph("dot", subgraph));
+  YNN_RETURN_IF_ERROR(validate_subgraph(name, subgraph));
   YNN_RETURN_IF_ERROR(
-      validate_input_tensor("dot", subgraph, "input_a_id", input_a_id));
+      validate_input_tensor(name, subgraph, "input_a_id", input_a_id));
   YNN_RETURN_IF_ERROR(
-      validate_input_tensor("dot", subgraph, "input_b_id", input_b_id));
-  YNN_RETURN_IF_ERROR(validate_input_tensor("dot", subgraph, "input_c_id",
+      validate_input_tensor(name, subgraph, "input_b_id", input_b_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor(name, subgraph, "input_c_id",
                                             input_c_id, /*optional=*/true));
+  if (is_ragged) {
+    YNN_RETURN_IF_ERROR(validate_input_tensor(name, subgraph, "row_group_id",
+                                              row_group_id));
+  }
   YNN_RETURN_IF_ERROR(
-      validate_output_tensor("dot", subgraph, "output_id", output_id));
+      validate_output_tensor(name, subgraph, "output_id", output_id));
 
   if (num_k_dims == 0 || num_k_dims > 3) {
-    YNN_LOG_ERROR() << "For node `dot`, `num_k_dims` must be in [1, 3], got "
-                    << num_k_dims;
+    YNN_LOG_ERROR() << "For node `" << name
+                    << "`, `num_k_dims` must be in [1, 3], got " << num_k_dims;
     return ynn_status_invalid_parameter;
+  }
+
+  if (is_ragged) {
+    const ynn_value& a = subgraph->value(input_a_id);
+    if (a.rank() <= num_k_dims) {
+      YNN_LOG_ERROR() << "For node `" << name << "`, `input_a_id` rank ("
+                      << a.rank() << ") must be > `num_k_dims` (" << num_k_dims
+                      << ")";
+      return ynn_status_invalid_parameter;
+    }
+    const ynn_value& b = subgraph->value(input_b_id);
+    if (b.rank() <= num_k_dims + 1) {
+      YNN_LOG_ERROR() << "For node `" << name << "`, `input_b_id` rank ("
+                      << b.rank() << ") must be > `num_k_dims + 1` ("
+                      << (num_k_dims + 1) << ")";
+      return ynn_status_invalid_parameter;
+    }
+    const ynn_value& rg = subgraph->value(row_group_id);
+    if (rg.type != ynn_type_int32 || rg.rank() < 2) {
+      YNN_LOG_ERROR() << "For node `" << name
+                      << "`, `row_group_id` must be rank >= 2 int32";
+      return ynn_status_invalid_parameter;
+    }
   }
 
   // TODO: b/531861696 - This and other dot graph rewrites should be done in a
   // separate graph optimization pass.
   maybe_rewrite_input_a_to_uint8(*subgraph, input_a_id, input_b_id, input_c_id,
-                                 num_k_dims);
+                                 num_k_dims, is_ragged);
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
   const ynn_type c_type = deduce_output_type(a.type, b.type);
@@ -1949,7 +2215,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   }
 
   YNN_RETURN_IF_ERROR(define_dot(*subgraph, num_k_dims, input_a_id, input_b_id,
-                                 input_c_id, output_id, flags));
+                                 input_c_id, row_group_id, output_id, flags,
+                                 is_ragged));
 
   if (convert_to_id != YNN_INVALID_VALUE_ID) {
     // We decided above to compute the output into an intermediate tensor, and
@@ -1960,6 +2227,28 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   }
 
   return ynn_status_success;
+}
+
+}  // namespace
+
+extern "C" {
+
+ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+                          uint32_t input_a_id, uint32_t input_b_id,
+                          uint32_t input_c_id, uint32_t* output_id,
+                          uint32_t flags) {
+  return define_dot_api("dot", subgraph, num_k_dims, input_a_id, input_b_id,
+                        input_c_id, /*row_group_id=*/YNN_INVALID_VALUE_ID,
+                        output_id, flags);
+}
+
+ynn_status ynn_define_ragged_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                 uint32_t input_a_id, uint32_t input_b_id,
+                                 uint32_t input_c_id, uint32_t row_group_id,
+                                 uint32_t* output_id, uint32_t flags) {
+  return define_dot_api("ragged_dot", subgraph, num_k_dims, input_a_id,
+                        input_b_id, input_c_id, row_group_id, output_id,
+                        flags, /*is_ragged=*/true);
 }
 
 }  // extern "C"

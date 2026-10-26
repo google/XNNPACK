@@ -1384,6 +1384,9 @@ void print(std::ostream& os, const ynn_node::stencil_copy& op) {
 
 void print(std::ostream& os, const ynn_node::dot& op) {
   os << "num_k_dims=" << op.num_k_dims;
+  if (op.is_ragged) {
+    os << " is_ragged=true";
+  }
 }
 
 void print(std::ostream& os, const ynn_node::iota& op) {}
