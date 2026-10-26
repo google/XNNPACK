@@ -72,9 +72,13 @@ static XNN_INLINE xnn_simd_f16_t xnn_mul_f16(xnn_simd_f16_t a,
 static XNN_INLINE xnn_simd_f16_t xnn_fmadd_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
+#if XNN_HAVE_FLOAT16
+  return a * b + c;
+#else
   return xnn_float16_from_float(
       (xnn_float16_to_float(a) * xnn_float16_to_float(b)) +
       xnn_float16_to_float(c));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_fnmadd_f16(xnn_simd_f16_t a,
@@ -214,8 +218,12 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
 static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {
   XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
+#if XNN_HAVE_FLOAT16
+  return a < b ? ones : xnn_zero_f16();
+#else
   return xnn_float16_to_float(a) < xnn_float16_to_float(b) ? ones
                                                         : xnn_zero_f16();
+#endif
 }
 
 // Special functions.
