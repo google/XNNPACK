@@ -127,6 +127,12 @@ declare_args() {
 
   # Enables Armv8.6-A 8-bit integer matrix multiply accumulate (I8MM) extension
   xnnpack_enable_arm_i8mm = target_cpu == "arm64"
+
+  # Builds the non-production microkernels as well as the production ones.
+  # Production microkernels are the ones that src/configs/*-config.c can
+  # dispatch to. The microkernel tests and benchmarks need all of them.
+  # Matches XNNPACK_BUILD_ALL_MICROKERNELS in CMakeLists.txt.
+  xnnpack_build_all_microkernels = !build_with_chromium
 }
 
 assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86" ||
@@ -148,6 +154,97 @@ assert(!xnnpack_enable_arm_i8mm || target_cpu == "arm64",
        "xnnpack_enable_arm_i8mm requires target_cpu='arm64'")
 assert(!xnnpack_enable_arm_i8mm || xnnpack_enable_arm_dotprod,
        "xnnpack_enable_arm_i8mm requires xnnpack_enable_arm_dotprod")
+
+# Kernel source lists, picked by xnnpack_build_all_microkernels.
+if (xnnpack_build_all_microkernels) {
+  BUILT_ARMSIMD32_MICROKERNEL_SRCS = ALL_ARMSIMD32_MICROKERNEL_SRCS
+  BUILT_AVX_MICROKERNEL_SRCS = ALL_AVX_MICROKERNEL_SRCS
+  BUILT_AVX2_MICROKERNEL_SRCS = ALL_AVX2_MICROKERNEL_SRCS
+  BUILT_AVX256SKX_MICROKERNEL_SRCS = ALL_AVX256SKX_MICROKERNEL_SRCS
+  BUILT_AVX256VNNI_MICROKERNEL_SRCS = ALL_AVX256VNNI_MICROKERNEL_SRCS
+  BUILT_AVX256VNNIGFNI_MICROKERNEL_SRCS = ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
+  BUILT_AVX512AMX_MICROKERNEL_SRCS = ALL_AVX512AMX_MICROKERNEL_SRCS
+  BUILT_AVX512BF16_MICROKERNEL_SRCS = ALL_AVX512BF16_MICROKERNEL_SRCS
+  BUILT_AVX512F_MICROKERNEL_SRCS = ALL_AVX512F_MICROKERNEL_SRCS
+  BUILT_AVX512FP16_MICROKERNEL_SRCS = ALL_AVX512FP16_MICROKERNEL_SRCS
+  BUILT_AVX512SKX_MICROKERNEL_SRCS = ALL_AVX512SKX_MICROKERNEL_SRCS
+  BUILT_AVX512VBMI_MICROKERNEL_SRCS = ALL_AVX512VBMI_MICROKERNEL_SRCS
+  BUILT_AVX512VNNI_MICROKERNEL_SRCS = ALL_AVX512VNNI_MICROKERNEL_SRCS
+  BUILT_AVX512VNNIGFNI_MICROKERNEL_SRCS = ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS
+  BUILT_AVXVNNI_MICROKERNEL_SRCS = ALL_AVXVNNI_MICROKERNEL_SRCS
+  BUILT_AVXVNNIINT8_MICROKERNEL_SRCS = ALL_AVXVNNIINT8_MICROKERNEL_SRCS
+  BUILT_F16C_MICROKERNEL_SRCS = ALL_F16C_MICROKERNEL_SRCS
+  BUILT_FMA3_MICROKERNEL_SRCS = ALL_FMA3_MICROKERNEL_SRCS
+  BUILT_FP16ARITH_MICROKERNEL_SRCS = ALL_FP16ARITH_MICROKERNEL_SRCS
+  BUILT_NEON_MICROKERNEL_SRCS = ALL_NEON_MICROKERNEL_SRCS
+  BUILT_NEON_AARCH64_MICROKERNEL_SRCS = ALL_NEON_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONBF16_MICROKERNEL_SRCS = ALL_NEONBF16_MICROKERNEL_SRCS
+  BUILT_NEONDOT_MICROKERNEL_SRCS = ALL_NEONDOT_MICROKERNEL_SRCS
+  BUILT_NEONDOT_AARCH64_MICROKERNEL_SRCS = ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONDOTFP16ARITH_MICROKERNEL_SRCS =
+      ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS
+  BUILT_NEONFMA_MICROKERNEL_SRCS = ALL_NEONFMA_MICROKERNEL_SRCS
+  BUILT_NEONFMA_AARCH64_MICROKERNEL_SRCS = ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONFP16_MICROKERNEL_SRCS = ALL_NEONFP16_MICROKERNEL_SRCS
+  BUILT_NEONFP16ARITH_MICROKERNEL_SRCS = ALL_NEONFP16ARITH_MICROKERNEL_SRCS
+  BUILT_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS =
+      ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONI8MM_MICROKERNEL_SRCS = ALL_NEONI8MM_MICROKERNEL_SRCS
+  BUILT_NEONI8MMBF16_MICROKERNEL_SRCS = ALL_NEONI8MMBF16_MICROKERNEL_SRCS
+  BUILT_NEONSME_MICROKERNEL_SRCS = ALL_NEONSME_MICROKERNEL_SRCS
+  BUILT_NEONSME2_MICROKERNEL_SRCS = ALL_NEONSME2_MICROKERNEL_SRCS
+  BUILT_NEONV8_MICROKERNEL_SRCS = ALL_NEONV8_MICROKERNEL_SRCS
+  BUILT_SCALAR_MICROKERNEL_SRCS = ALL_SCALAR_MICROKERNEL_SRCS
+  BUILT_SSE_MICROKERNEL_SRCS = ALL_SSE_MICROKERNEL_SRCS
+  BUILT_SSE2_MICROKERNEL_SRCS = ALL_SSE2_MICROKERNEL_SRCS
+  BUILT_SSE2FMA_MICROKERNEL_SRCS = ALL_SSE2FMA_MICROKERNEL_SRCS
+  BUILT_SSE41_MICROKERNEL_SRCS = ALL_SSE41_MICROKERNEL_SRCS
+  BUILT_SSSE3_MICROKERNEL_SRCS = ALL_SSSE3_MICROKERNEL_SRCS
+} else {
+  BUILT_ARMSIMD32_MICROKERNEL_SRCS = PROD_ARMSIMD32_MICROKERNEL_SRCS
+  BUILT_AVX_MICROKERNEL_SRCS = PROD_AVX_MICROKERNEL_SRCS
+  BUILT_AVX2_MICROKERNEL_SRCS = PROD_AVX2_MICROKERNEL_SRCS
+  BUILT_AVX256SKX_MICROKERNEL_SRCS = PROD_AVX256SKX_MICROKERNEL_SRCS
+  BUILT_AVX256VNNI_MICROKERNEL_SRCS = PROD_AVX256VNNI_MICROKERNEL_SRCS
+  BUILT_AVX256VNNIGFNI_MICROKERNEL_SRCS = PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS
+  BUILT_AVX512AMX_MICROKERNEL_SRCS = PROD_AVX512AMX_MICROKERNEL_SRCS
+  BUILT_AVX512BF16_MICROKERNEL_SRCS = PROD_AVX512BF16_MICROKERNEL_SRCS
+  BUILT_AVX512F_MICROKERNEL_SRCS = PROD_AVX512F_MICROKERNEL_SRCS
+  BUILT_AVX512FP16_MICROKERNEL_SRCS = PROD_AVX512FP16_MICROKERNEL_SRCS
+  BUILT_AVX512SKX_MICROKERNEL_SRCS = PROD_AVX512SKX_MICROKERNEL_SRCS
+  BUILT_AVX512VBMI_MICROKERNEL_SRCS = PROD_AVX512VBMI_MICROKERNEL_SRCS
+  BUILT_AVX512VNNI_MICROKERNEL_SRCS = PROD_AVX512VNNI_MICROKERNEL_SRCS
+  BUILT_AVX512VNNIGFNI_MICROKERNEL_SRCS = PROD_AVX512VNNIGFNI_MICROKERNEL_SRCS
+  BUILT_AVXVNNI_MICROKERNEL_SRCS = PROD_AVXVNNI_MICROKERNEL_SRCS
+  BUILT_AVXVNNIINT8_MICROKERNEL_SRCS = PROD_AVXVNNIINT8_MICROKERNEL_SRCS
+  BUILT_F16C_MICROKERNEL_SRCS = PROD_F16C_MICROKERNEL_SRCS
+  BUILT_FMA3_MICROKERNEL_SRCS = PROD_FMA3_MICROKERNEL_SRCS
+  BUILT_FP16ARITH_MICROKERNEL_SRCS = PROD_FP16ARITH_MICROKERNEL_SRCS
+  BUILT_NEON_MICROKERNEL_SRCS = PROD_NEON_MICROKERNEL_SRCS
+  BUILT_NEON_AARCH64_MICROKERNEL_SRCS = PROD_NEON_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONBF16_MICROKERNEL_SRCS = PROD_NEONBF16_MICROKERNEL_SRCS
+  BUILT_NEONDOT_MICROKERNEL_SRCS = PROD_NEONDOT_MICROKERNEL_SRCS
+  BUILT_NEONDOT_AARCH64_MICROKERNEL_SRCS = PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONDOTFP16ARITH_MICROKERNEL_SRCS =
+      PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS
+  BUILT_NEONFMA_MICROKERNEL_SRCS = PROD_NEONFMA_MICROKERNEL_SRCS
+  BUILT_NEONFMA_AARCH64_MICROKERNEL_SRCS = PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONFP16_MICROKERNEL_SRCS = PROD_NEONFP16_MICROKERNEL_SRCS
+  BUILT_NEONFP16ARITH_MICROKERNEL_SRCS = PROD_NEONFP16ARITH_MICROKERNEL_SRCS
+  BUILT_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS =
+      PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
+  BUILT_NEONI8MM_MICROKERNEL_SRCS = PROD_NEONI8MM_MICROKERNEL_SRCS
+  BUILT_NEONI8MMBF16_MICROKERNEL_SRCS = PROD_NEONI8MMBF16_MICROKERNEL_SRCS
+  BUILT_NEONSME_MICROKERNEL_SRCS = PROD_NEONSME_MICROKERNEL_SRCS
+  BUILT_NEONSME2_MICROKERNEL_SRCS = PROD_NEONSME2_MICROKERNEL_SRCS
+  BUILT_NEONV8_MICROKERNEL_SRCS = PROD_NEONV8_MICROKERNEL_SRCS
+  BUILT_SCALAR_MICROKERNEL_SRCS = PROD_SCALAR_MICROKERNEL_SRCS
+  BUILT_SSE_MICROKERNEL_SRCS = PROD_SSE_MICROKERNEL_SRCS
+  BUILT_SSE2_MICROKERNEL_SRCS = PROD_SSE2_MICROKERNEL_SRCS
+  BUILT_SSE2FMA_MICROKERNEL_SRCS = PROD_SSE2FMA_MICROKERNEL_SRCS
+  BUILT_SSE41_MICROKERNEL_SRCS = PROD_SSE41_MICROKERNEL_SRCS
+  BUILT_SSSE3_MICROKERNEL_SRCS = PROD_SSSE3_MICROKERNEL_SRCS
+}
 
 # Various #defines and cflags that should stay internal to XNNPACK.
 config("xnnpack_private_config") {
@@ -489,8 +586,8 @@ if (current_cpu == "arm64") {
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONDOT_MICROKERNEL_SRCS
-    sources += ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS
+    sources = BUILT_NEONDOT_MICROKERNEL_SRCS
+    sources += BUILT_NEONDOT_AARCH64_MICROKERNEL_SRCS
     cflags = [
       "-Xclang",
       "-target-feature",
@@ -504,7 +601,7 @@ if (current_cpu == "arm64") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONBF16_MICROKERNEL_SRCS
+    sources = BUILT_NEONBF16_MICROKERNEL_SRCS
     cflags = [
       "-Xclang",
       "-target-feature",
@@ -523,7 +620,7 @@ if (current_cpu == "arm64") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS
+    sources = BUILT_NEONDOTFP16ARITH_MICROKERNEL_SRCS
     cflags = [
       "-Xclang",
       "-target-feature",
@@ -542,10 +639,10 @@ if (current_cpu == "arm64") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONFP16_MICROKERNEL_SRCS
-    sources += ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
-    sources += ALL_NEONFP16ARITH_MICROKERNEL_SRCS
-    sources += ALL_FP16ARITH_MICROKERNEL_SRCS
+    sources = BUILT_NEONFP16_MICROKERNEL_SRCS
+    sources += BUILT_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
+    sources += BUILT_NEONFP16ARITH_MICROKERNEL_SRCS
+    sources += BUILT_FP16ARITH_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -563,7 +660,7 @@ if (current_cpu == "arm64") {
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONI8MM_MICROKERNEL_SRCS
+    sources = BUILT_NEONI8MM_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -585,7 +682,7 @@ if (current_cpu == "arm64") {
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONI8MMBF16_MICROKERNEL_SRCS
+    sources = BUILT_NEONI8MMBF16_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -611,7 +708,7 @@ if (current_cpu == "arm64") {
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEON_AARCH64_MICROKERNEL_SRCS
+    sources = BUILT_NEON_AARCH64_MICROKERNEL_SRCS
   }
 
   xnnpack_source_set("sme_microkernels") {
@@ -622,7 +719,7 @@ if (current_cpu == "arm64") {
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONSME_MICROKERNEL_SRCS
+    sources = BUILT_NEONSME_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -646,7 +743,7 @@ if (current_cpu == "arm64") {
     if (xnnpack_enable_arm_kleidiai) {
       deps += [ "//third_party/kleidiai" ]
     }
-    sources = ALL_NEONSME2_MICROKERNEL_SRCS
+    sources = BUILT_NEONSME2_MICROKERNEL_SRCS
 
     cflags = [
       "-Xclang",
@@ -779,7 +876,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_ARMSIMD32_MICROKERNEL_SRCS
+    sources = BUILT_ARMSIMD32_MICROKERNEL_SRCS
     configs = [ ":armsimd32_config" ]
   }
 
@@ -797,7 +894,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEON_MICROKERNEL_SRCS
+    sources = BUILT_NEON_MICROKERNEL_SRCS
     configs = [ ":neon_config" ]
   }
 
@@ -806,7 +903,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONFP16_MICROKERNEL_SRCS
+    sources = BUILT_NEONFP16_MICROKERNEL_SRCS
     configs = [ ":neonfp16_config" ]
   }
 
@@ -815,7 +912,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONFMA_MICROKERNEL_SRCS
+    sources = BUILT_NEONFMA_MICROKERNEL_SRCS
     configs = [ ":neonfma_config" ]
   }
 
@@ -824,7 +921,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONV8_MICROKERNEL_SRCS
+    sources = BUILT_NEONV8_MICROKERNEL_SRCS
     configs = [ ":neonv8_config" ]
   }
 
@@ -833,7 +930,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_FP16ARITH_MICROKERNEL_SRCS
+    sources = BUILT_FP16ARITH_MICROKERNEL_SRCS
     configs = [ ":fp16arith_config" ]
   }
 
@@ -842,7 +939,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONFP16ARITH_MICROKERNEL_SRCS
+    sources = BUILT_NEONFP16ARITH_MICROKERNEL_SRCS
     configs = [ ":neonfp16arith_config" ]
   }
 
@@ -851,7 +948,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONDOT_MICROKERNEL_SRCS
+    sources = BUILT_NEONDOT_MICROKERNEL_SRCS
     configs = [ ":neon_dotprod_config" ]
   }
 
@@ -860,7 +957,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS
+    sources = BUILT_NEONDOTFP16ARITH_MICROKERNEL_SRCS
     configs = [ ":neon_dotprodfp16arith_config" ]
   }
 
@@ -869,7 +966,7 @@ if (current_cpu == "arm") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_NEONBF16_MICROKERNEL_SRCS
+    sources = BUILT_NEONBF16_MICROKERNEL_SRCS
     configs = [ ":neon_bf16_config" ]
   }
 }
@@ -880,7 +977,7 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_AVXVNNI_MICROKERNEL_SRCS
+    sources = BUILT_AVXVNNI_MICROKERNEL_SRCS
     cflags = [
       "-mavxvnni",
       "-mf16c",
@@ -895,7 +992,7 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_AVXVNNIINT8_MICROKERNEL_SRCS
+    sources = BUILT_AVXVNNIINT8_MICROKERNEL_SRCS
     cflags = [
       "-mavxvnniint8",
       "-mf16c",
@@ -913,17 +1010,17 @@ if (current_cpu == "x64" || current_cpu == "x86") {
 
     # TODO: we do not currently distinguish between AVX256 and AVX512
     # Perhaps we should?
-    sources = ALL_AVX256SKX_MICROKERNEL_SRCS
-    sources += ALL_AVX512F_MICROKERNEL_SRCS
-    sources += ALL_AVX512FP16_MICROKERNEL_SRCS
-    sources += ALL_AVX512AMX_MICROKERNEL_SRCS
-    sources += ALL_AVX512SKX_MICROKERNEL_SRCS
-    sources += ALL_AVX512VBMI_MICROKERNEL_SRCS
-    sources += ALL_AVX512BF16_MICROKERNEL_SRCS
-    sources += ALL_AVX256VNNI_MICROKERNEL_SRCS
-    sources += ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
-    sources += ALL_AVX512VNNI_MICROKERNEL_SRCS
-    sources += ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS
+    sources = BUILT_AVX256SKX_MICROKERNEL_SRCS
+    sources += BUILT_AVX512F_MICROKERNEL_SRCS
+    sources += BUILT_AVX512FP16_MICROKERNEL_SRCS
+    sources += BUILT_AVX512AMX_MICROKERNEL_SRCS
+    sources += BUILT_AVX512SKX_MICROKERNEL_SRCS
+    sources += BUILT_AVX512VBMI_MICROKERNEL_SRCS
+    sources += BUILT_AVX512BF16_MICROKERNEL_SRCS
+    sources += BUILT_AVX256VNNI_MICROKERNEL_SRCS
+    sources += BUILT_AVX256VNNIGFNI_MICROKERNEL_SRCS
+    sources += BUILT_AVX512VNNI_MICROKERNEL_SRCS
+    sources += BUILT_AVX512VNNIGFNI_MICROKERNEL_SRCS
 
     cflags = [
       "-mavx512f",
@@ -940,12 +1037,13 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       "-mavx512vnni",
     ]
   }
+
   xnnpack_source_set("avx_microkernels") {
     deps = [
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_AVX_MICROKERNEL_SRCS
+    sources = BUILT_AVX_MICROKERNEL_SRCS
     cflags = [ "-mavx" ]
   }
 
@@ -954,7 +1052,7 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_AVX2_MICROKERNEL_SRCS
+    sources = BUILT_AVX2_MICROKERNEL_SRCS
     cflags = [
       "-mavx2",
       "-mfma",
@@ -967,7 +1065,7 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_SSE41_MICROKERNEL_SRCS
+    sources = BUILT_SSE41_MICROKERNEL_SRCS
     cflags = [ "-msse4.1" ]
   }
 
@@ -976,7 +1074,7 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_F16C_MICROKERNEL_SRCS
+    sources = BUILT_F16C_MICROKERNEL_SRCS
     cflags = [ "-mf16c" ]
   }
 
@@ -985,7 +1083,7 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
-    sources = ALL_FMA3_MICROKERNEL_SRCS
+    sources = BUILT_FMA3_MICROKERNEL_SRCS
     cflags = [
       "-mfma",
       "-mf16c",
@@ -999,7 +1097,7 @@ xnnpack_source_set("scalar_microkernels") {
     ":microkernel_headers",
     "//third_party/fxdiv",
   ]
-  sources = ALL_SCALAR_MICROKERNEL_SRCS
+  sources = BUILT_SCALAR_MICROKERNEL_SRCS
 }
 
 xnnpack_source_set("init_once") {
@@ -1059,10 +1157,10 @@ template("xnnpack_library") {
     use_libcxx_modules = false
     cflags = []
     if (current_cpu == "arm64") {
-      sources += ALL_NEON_MICROKERNEL_SRCS
-      sources += ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
-      sources += ALL_NEONFMA_MICROKERNEL_SRCS
-      sources += ALL_NEONV8_MICROKERNEL_SRCS
+      sources += BUILT_NEON_MICROKERNEL_SRCS
+      sources += BUILT_NEONFMA_AARCH64_MICROKERNEL_SRCS
+      sources += BUILT_NEONFMA_MICROKERNEL_SRCS
+      sources += BUILT_NEONV8_MICROKERNEL_SRCS
       deps += [
         ":neon_aarch64_microkernels",
         ":neon_bf16_microkernels",
@@ -1124,10 +1222,10 @@ template("xnnpack_library") {
       if (xnnpack_enable_assembly && current_cpu == "x64") {
         sources += AMD64_ASM_MICROKERNEL_SRCS
       }
-      sources += ALL_SSE_MICROKERNEL_SRCS
-      sources += ALL_SSE2_MICROKERNEL_SRCS
-      sources += ALL_SSE2FMA_MICROKERNEL_SRCS
-      sources += ALL_SSSE3_MICROKERNEL_SRCS
+      sources += BUILT_SSE_MICROKERNEL_SRCS
+      sources += BUILT_SSE2_MICROKERNEL_SRCS
+      sources += BUILT_SSE2FMA_MICROKERNEL_SRCS
+      sources += BUILT_SSSE3_MICROKERNEL_SRCS
       if (xnnpack_enable_sse41) {
         deps += [ ":sse41_microkernels" ]
       }
@@ -1365,33 +1463,6 @@ GEMM_MICROKERNEL_TESTS = [
   "test/qu8-igemm-minmax-rndnu-2.cc",
 ]
 
-foreach(name, R_TESTS) {
-  xnnpack_test(name) {
-    sources = [ string_join("",
-                            [
-                              "test",
-                              "/",
-                              name,
-                              ".cc",
-                            ]) ]
-  }
-}
-
-foreach(name, IBILINEAR_TESTS) {
-  xnnpack_test(name) {
-    sources = [
-      "test/ibilinear-microkernel-tester.h",
-      string_join("",
-                  [
-                    "test",
-                    "/",
-                    string_replace(name, "_", "-"),
-                    ".cc",
-                  ]),
-    ]
-  }
-}
-
 foreach(subgraph_test, SUBGRAPH_SEPARATE_TESTS) {
   xnnpack_test("subgraph_" + subgraph_test) {
     sources = [
@@ -1418,42 +1489,80 @@ foreach(subgraph_test, SUBGRAPH_SEPARATE_TESTS) {
   }
 }
 
-foreach(name, DWCONV_TESTS) {
-  xnnpack_test(name) {
-    sources = [
-      "test/dwconv-microkernel-tester.h",
-      "test/dwconv-microkernel-tester.cc",
-      string_join("",
-                  [
-                    "test",
-                    "/",
-                    string_replace(name, "_", "-"),
-                    ".cc",
-                  ]),
-    ]
+# The microkernel tests call non-production kernels.
+if (xnnpack_build_all_microkernels) {
+  foreach(name, R_TESTS) {
+    xnnpack_test(name) {
+      sources = [ string_join("",
+                              [
+                                "test",
+                                "/",
+                                name,
+                                ".cc",
+                              ]) ]
+    }
   }
-}
 
-foreach(kernel, PACKW_TESTS) {
-  xnnpack_test(kernel) {
-    sources = [
-      "test/packw-microkernel-tester.h",
-      string_join("",
-                  [
-                    "test",
-                    "/",
-                    string_replace(kernel, "_", "-"),
-                    ".cc",
-                  ]),
-    ]
+  foreach(name, IBILINEAR_TESTS) {
+    xnnpack_test(name) {
+      sources = [
+        "test/ibilinear-microkernel-tester.h",
+        string_join("",
+                    [
+                      "test",
+                      "/",
+                      string_replace(name, "_", "-"),
+                      ".cc",
+                    ]),
+      ]
+    }
   }
-}
 
-xnnpack_test("gemm") {
-  sources = GEMM_MICROKERNEL_TESTS + [
-              "test/gemm-microkernel-tester.cc",
-              "test/gemm-microkernel-tester.h",
-            ]
+  foreach(name, DWCONV_TESTS) {
+    xnnpack_test(name) {
+      sources = [
+        "test/dwconv-microkernel-tester.h",
+        "test/dwconv-microkernel-tester.cc",
+        string_join("",
+                    [
+                      "test",
+                      "/",
+                      string_replace(name, "_", "-"),
+                      ".cc",
+                    ]),
+      ]
+    }
+  }
+
+  foreach(kernel, PACKW_TESTS) {
+    xnnpack_test(kernel) {
+      sources = [
+        "test/packw-microkernel-tester.h",
+        string_join("",
+                    [
+                      "test",
+                      "/",
+                      string_replace(kernel, "_", "-"),
+                      ".cc",
+                    ]),
+      ]
+    }
+  }
+
+  xnnpack_test("gemm") {
+    sources = GEMM_MICROKERNEL_TESTS + [
+                "test/gemm-microkernel-tester.cc",
+                "test/gemm-microkernel-tester.h",
+              ]
+  }
+} else {
+  not_needed([
+               "DWCONV_TESTS",
+               "GEMM_MICROKERNEL_TESTS",
+               "IBILINEAR_TESTS",
+               "PACKW_TESTS",
+               "R_TESTS",
+             ])
 }
 
 xnnpack_test("xx_fill") {
@@ -1485,10 +1594,15 @@ xnnpack_test("standalone") {
     # "test/build-identifier.cc",
     "test/packing.cc",
     "test/weights-cache.cc",
-    "test/x32-packx.cc",
     "test/x32-unpool.cc",
-    "test/xN-transpose.cc",
   ]
+  if (xnnpack_build_all_microkernels) {
+    # These call non-production kernels.
+    sources += [
+      "test/x32-packx.cc",
+      "test/xN-transpose.cc",
+    ]
+  }
 }
 
 xnnpack_source_set("xnnpack_operators_test_support") {
@@ -1579,9 +1693,9 @@ xnnpack_test("operators") {
 #
 # Benchmarks
 #
-if (!build_with_chromium) {
-  # XNNPACK's benchmarks don't seem to build agains the Google benchmark in
-  # Chromium. TODO: figure out why.
+if (!build_with_chromium && xnnpack_build_all_microkernels) {
+  # XNNPACK's benchmarks don't seem to build against the Google benchmark in
+  # Chromium. TODO: figure out why. They also call non-production kernels.
   xnnpack_source_set("benchmark_test_support") {
     testonly = true
     deps = [

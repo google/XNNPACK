@@ -651,9 +651,28 @@ jobs:
         run: |
           gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
+      # Check that this stuff builds/links for Chrome.
+      - name: Generate build files (production microkernels only)
+        run: |
+          gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false xnnpack_build_all_microkernels=false target_cpu=\"x64\" use_siso=true" out/x64.prod
+        working-directory: ${{ github.workspace }}/xnnpack
       - name: Build all targets (Release + debug checks, without AVX512)
         run: |
           autoninja -C out/x64.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      # We deliberately don't run AVX-512 tests because we're not sure whether the Github
+      # Actions runner will give us that support. It's covered on other bots.
+      - name: Run tests (no AVX512)
+        run: |
+          python3 scripts/run-gn-tests.py out/x64.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Build all targets (production microkernels only)
+        run: |
+          autoninja -C out/x64.prod
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Run tests (production micro-kernels)
+        run: |
+          python3 scripts/run-gn-tests.py out/x64.prod
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Save ccache
         if: ${{ inputs.update-caches }}
@@ -667,6 +686,10 @@ jobs:
       - name: Run tests
         run: |
           python3 scripts/run-gn-tests.py out/x64.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Run tests (production microkernels only)
+        run: |
+          python3 scripts/run-gn-tests.py out/x64.prod
         working-directory: ${{ github.workspace }}/xnnpack
 
   bazel-linux-x86_64-clang-18:
