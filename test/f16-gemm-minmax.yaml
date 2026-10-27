@@ -132,6 +132,46 @@
   pack: xnn_x16_packw_gemm_goi_ukernel_x64__avx512skx_u16
   k-block: 1
 
+# x86 AVX512AMXFP16
+- name: xnn_f16_gemm_minmax_ukernel_1x16c2__avx512amxfp16
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_16x16c2__avx512amxfp16
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_16x16c2__avx512amxfp16_prfm
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+
+- name: xnn_f16_gemm_minmax_ukernel_1x32c2__avx512amxfp16
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_16x32c2__avx512amxfp16
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_16x32c2__avx512amxfp16_prfm
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+
+- name: xnn_f16_gemm_minmax_ukernel_1x64c2__avx512amxfp16
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_16x64c2__avx512amxfp16
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+- name: xnn_f16_gemm_minmax_ukernel_16x64c2__avx512amxfp16_prfm
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 2
+
 # x86 AVX2
 - name: xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast
   init: xnn_init_f16_minmax_scalar_params

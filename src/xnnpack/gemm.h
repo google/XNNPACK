@@ -289,6 +289,25 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_gemm_minmax_ukernel_8x64__avx512fp16_broadcast)
 
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_1x16c2__avx512amxfp16)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_16x16c2__avx512amxfp16)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_16x16c2__avx512amxfp16_prfm)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_1x32c2__avx512amxfp16)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_16x32c2__avx512amxfp16)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_16x32c2__avx512amxfp16_prfm)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_1x64c2__avx512amxfp16)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_16x64c2__avx512amxfp16)
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemm_minmax_ukernel_16x64c2__avx512amxfp16_prfm)
+
+DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_gemm_minmax_ukernel_1x16__avx512skx_broadcast)
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_gemm_minmax_ukernel_4x16__avx512skx_broadcast)

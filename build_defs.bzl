@@ -152,6 +152,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVX512AMX=1"],
         ["XNN_ENABLE_AVX512AMX=0"],
     ) + xnnpack_select_if(
+        "//:avx512amxfp16_enabled",
+        ["XNN_ENABLE_AVX512AMXFP16=1"],
+        ["XNN_ENABLE_AVX512AMXFP16=0"],
+    ) + xnnpack_select_if(
         "//:avx512fp16_enabled",
         ["XNN_ENABLE_AVX512FP16=1"],
         ["XNN_ENABLE_AVX512FP16=0"],

@@ -44,6 +44,7 @@ _ISA_LIST = frozenset({
     'avx512vnni',
     'avx512vnnigfni',
     'avx512amx',
+    'avx512amxfp16',
     'avx512fp16',
     'avxvnni',
     'avxvnniint8',
