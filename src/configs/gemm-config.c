@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
@@ -75,6 +76,7 @@ static struct xnn_gemm_config qdu8_f16_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc2w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
+static struct xnn_gemm_config qs8_qc8w_small_k_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
 
 XNN_INIT_ONCE_GUARD(bf16_f32_gemm);
@@ -5656,6 +5658,8 @@ static void init_qs8_qc4w_gemm_config(void) {
   assert(qs8_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
+static void init_qs8_qc8w_small_k_gemm_config(void);
+
 static void init_qs8_qc8w_gemm_config(void) {
   // Common parameters.
   qs8_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
@@ -6672,6 +6676,41 @@ static void init_qs8_qc8w_gemm_config(void) {
     qs8_qc8w_gemm_config.nr = 4;
   #endif
   assert(qs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
+  init_qs8_qc8w_small_k_gemm_config();
+}
+
+// kr = 4 alternative to the kr = 8 I8MM config: with <= 4 channels per kernel
+// tap, kr = 8 pads each tap to twice the work.
+static void init_qs8_qc8w_small_k_gemm_config(void) {
+  #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!(hardware_config->arch_flags & xnn_arch_arm_neon_dot) ||
+        qs8_qc8w_gemm_config.log2_kr != 3) {
+      return;
+    }
+    qs8_qc8w_small_k_gemm_config = qs8_qc8w_gemm_config;
+    memset(&qs8_qc8w_small_k_gemm_config.minmax, 0, sizeof(qs8_qc8w_small_k_gemm_config.minmax));
+    memset(&qs8_qc8w_small_k_gemm_config.relu, 0, sizeof(qs8_qc8w_small_k_gemm_config.relu));
+    memset(&qs8_qc8w_small_k_gemm_config.linear, 0, sizeof(qs8_qc8w_small_k_gemm_config.linear));
+    #if XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC && !XNN_PLATFORM_WINDOWS
+      qs8_qc8w_small_k_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128);
+      qs8_qc8w_small_k_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128);
+    #else
+      qs8_qc8w_small_k_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__neondot);
+      qs8_qc8w_small_k_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__neondot);
+    #endif
+    qs8_qc8w_small_k_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__neondot);
+    qs8_qc8w_small_k_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__neondot);
+    qs8_qc8w_small_k_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params;
+    qs8_qc8w_small_k_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot;
+    qs8_qc8w_small_k_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_qs8_packw_gemm_gio_ukernel_x16c4__scalar;
+    qs8_qc8w_small_k_gemm_config.mr = 4;
+    qs8_qc8w_small_k_gemm_config.nr = 16;
+    qs8_qc8w_small_k_gemm_config.log2_kr = 2;
+    qs8_qc8w_small_k_gemm_config.log2_sr = 0;
+    qs8_qc8w_gemm_config.small_k_config = &qs8_qc8w_small_k_gemm_config;
+  #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
 }
 
 static void init_qu8_gemm_config(void) {
