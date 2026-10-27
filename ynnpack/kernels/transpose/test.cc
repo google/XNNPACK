@@ -239,7 +239,6 @@ TEST_P(Interleave, test) {
 }
 
 auto AllFactors(int factor, int elem_size_bits) {
-  std::vector<int> result;
   const int element_count = std::max(elem_size_bits, 8) / elem_size_bits;
   // If the kernel doesn't require a specific factor, test factors up to this.
   constexpr int max_factor = 8;

@@ -179,11 +179,14 @@ std::vector<GemmTestParams> CreateTests(
     std::function<void(GemmMicrokernelTester& tester)> test_func,
     uint64_t arch_flags = 0) {
   std::string kbs = std::to_string(k_block);
-  std::string kb2s = std::to_string(k_block * 2);
-  std::string akbs = std::to_string(adj_k_block);
+  $if IS_PIPELINED:
+    std::string kb2s = std::to_string(k_block * 2);
+  $if WEIGHTS_DATATYPE not in ['qb4w']:
+    std::string akbs = std::to_string(adj_k_block);
   $if NR_SCALE != "":
     nr = nr${NR_SCALE};
-  std::string nrs = std::to_string(nr);
+  $if WEIGHTS_DATATYPE not in ['qb4w']:
+    std::string nrs = std::to_string(nr);
 
   $if PACKED_LHS:
     const GemmMicrokernelTester tester = GemmMicrokernelTester()
