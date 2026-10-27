@@ -60,14 +60,14 @@ static void init_f16_raddstoreexpminusmax_config(void) {
         f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16);
       }
     #endif
-    #if XNN_ENABLE_AVX2
-      if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
-      }
-    #endif
     #if XNN_ENABLE_F16C
       if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_f16c)) {
         f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8);
+      }
+    #endif
+    #if XNN_ENABLE_AVX2
+      if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
       }
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
