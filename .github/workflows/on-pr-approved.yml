@@ -5,5 +5,7 @@ on:
     types: [submitted]
 jobs:
   build-and-test:
-    if: github.event.review.state == 'APPROVED'
+    if: >-
+      github.event.review.state == 'APPROVED' &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.review.author_association)
     uses: ./.github/workflows/build.yml
