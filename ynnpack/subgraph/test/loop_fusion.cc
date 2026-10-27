@@ -14,6 +14,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -23,9 +25,48 @@
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
+#include "slinky/base/function_ref.h"
+#include "slinky/base/ref_count.h"
+#include "slinky/base/thread_pool.h"
 
 namespace ynn {
 namespace {
+
+// Forwards to another thread pool, recording the number of iterations of the
+// largest parallel loop.
+class LoopRecordingThreadPool : public slinky::thread_pool {
+ public:
+  explicit LoopRecordingThreadPool(slinky::thread_pool* impl) : impl_(impl) {}
+
+  int thread_count() const override { return impl_->thread_count(); }
+  slinky::ref_count<task> enqueue(std::size_t n, task_body t,
+                                  int max_workers) override {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);  // NOLINT
+      max_iterations_ = std::max(max_iterations_, n);
+    }
+    return impl_->enqueue(n, std::move(t), max_workers);
+  }
+  void wait_for(task* t) override { impl_->wait_for(t); }
+  void wait_for(predicate_ref condition) override {
+    impl_->wait_for(condition);
+  }
+  void atomic_call(slinky::function_ref<void()> t) override {
+    impl_->atomic_call(t);
+  }
+
+  slinky::thread_pool* impl() const { return impl_; }
+
+  std::size_t max_iterations() {
+    std::lock_guard<std::mutex> lock(mutex_);  // NOLINT
+    return max_iterations_;
+  }
+
+ private:
+  slinky::thread_pool* impl_;
+  std::mutex mutex_;  // NOLINT
+  std::size_t max_iterations_ = 0;
+};
 
 class LoopFusionTest : public testing::Test {
  protected:
@@ -238,6 +279,54 @@ TEST_F(LoopFusionTest, ConstantFoldedPackIsParallel) {
 // threads so all of the loops become serial.
 #if !defined(YNN_ARCH_WASM_SIMD128)
   EXPECT_GT(scheduler_.task_count(), 0);
+#endif  // !YNN_ARCH_WASM_SIMD128
+}
+
+// The pipeline is transpose(dot(A, B)) with batch dimensions, like attention
+// when decoding an LLM: the dot has a small output, but a large reduction. The
+// transpose owns the batch loop, which it doesn't split, and the dot fuses into
+// it. The dot's own m loop has a dynamic extent, so it can't be proven to
+// provide parallelism, and the batch loop should take the dot's split to
+// parallelize the batch. B is static so its packing is constant folded, and
+// the dot is the only function proposing a split of the batch loop.
+TEST_F(LoopFusionTest, DotFusedIntoTransposeIsParallel) {
+  const size_t B = 8, M = 520, K = 256, N = 2;
+  Tensor<float> b({B, K, N});
+  b.fill(1.0f);
+
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t dot_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(3), a_id)
+      .AddTensor(b, b_id)
+      .AddOutput(type_of<float>(), TensorShape(3), out_id)
+      .AddTensor(type_of<float>(), TensorShape(3), dot_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, dot_id)
+      .AddTranspose({0, 2, 1}, dot_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> a({B, M, K});
+  Tensor<float> out({B, N, M});
+  a.fill(1.0f);
+  ReshapeExternalTensor(a_id, {B, M, K}, a.data());
+  SetupExternalTensor(out_id, out.data());
+  LoopRecordingThreadPool thread_pool(runtime_->eval_config.thread_pool);
+  runtime_->eval_config.thread_pool = &thread_pool;
+  RunPipeline();
+  runtime_->eval_config.thread_pool = thread_pool.impl();
+  for (size_t i = 0; i < B; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      for (size_t k = 0; k < M; ++k) {
+        ASSERT_EQ(out({i, j, k}), K) << i << " " << j << " " << k;
+      }
+    }
+  }
+#if !defined(YNN_ARCH_WASM_SIMD128)
+  // The batch should be parallelized, not just the tiles of m.
+  EXPECT_GE(thread_pool.max_iterations(), B);
 #endif  // !YNN_ARCH_WASM_SIMD128
 }
 
