@@ -125,6 +125,10 @@ tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=6 -D NR=32 -D ACCTYPE=F3
 tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=7 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x32-minmax-avx512skx-broadcast.c &
 tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=8 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-8x32-minmax-avx512skx-broadcast.c &
 
+tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=1 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x64-minmax-avx512skx-broadcast.c &
+tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=4 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x64-minmax-avx512skx-broadcast.c &
+tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=5 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x64-minmax-avx512skx-broadcast.c &
+
 ################################# WASM FP16 #################################
 ### WASM FP16X8 micro-kernels
 tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-1x8-minmax-wasmrelaxedsimd-splat.c &

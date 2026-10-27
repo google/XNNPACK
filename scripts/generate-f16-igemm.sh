@@ -105,6 +105,10 @@ tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=6 -D NR=32 -D ACCTYPE=F
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=7 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-7x32-minmax-avx512skx-broadcast.c &
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=8 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-8x32-minmax-avx512skx-broadcast.c &
 
+tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=1 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x64-minmax-avx512skx-broadcast.c &
+tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=4 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x64-minmax-avx512skx-broadcast.c &
+tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=5 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x64-minmax-avx512skx-broadcast.c &
+
 ################################ RISC-V Vector #####################################
 tools/xngen src/f16-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -o src/f16-igemm/gen/f16-igemm-1x4v-minmax-rvvfp16arith.c &
 tools/xngen src/f16-igemm/MRxNRv-rvv.c.in -D MR=4 -D NR=m4 -o src/f16-igemm/gen/f16-igemm-4x4v-minmax-rvvfp16arith.c &
