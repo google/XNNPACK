@@ -413,20 +413,32 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
   };
 
   // For each loop, whether any of its descendants can be parallelized: a pure
-  // or partial-reduction ("r") loop that is not provably a single iteration.
+  // or partial-reduction ("r") loop that provably runs more than one iteration.
   // Serial reduction ("k") loops never count, they run inside one task by
   // construction. Loops are appended after their parent, so a single backward
   // pass propagates each loop's answer up to its parent.
   std::vector<bool> parallel_in_subtree(global_loop_nest.size(), false);
   for (int i = global_loop_nest.size() - 1; i >= 0; --i) {
     const loop_level& l = global_loop_nest[i];
-    const slinky::expr once = is_single_iteration(globals, l);
-    const bool is_parallel =
-        !globals.is_reduction_dim(l.loop_id.var) && once.defined() &&
-        !slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment);
-    if (l.parent >= 0 && (is_parallel || parallel_in_subtree[i])) {
-      parallel_in_subtree[l.parent] = true;
+    if (l.parent < 0) {
+      // This is a root loop.
+      continue;
     }
+    if (parallel_in_subtree[i]) {
+      parallel_in_subtree[l.parent] = true;
+      continue;
+    }
+    if (globals.is_reduction_dim(l.loop_id.var)) {
+      // Serial reduction loops run inside one task.
+      continue;
+    }
+    const slinky::expr once = is_single_iteration(globals, l);
+    if (!once.defined() || !slinky::prove_false(once, globals.fact_bounds,
+                                                globals.fact_alignment)) {
+      // This loop might only run one iteration.
+      continue;
+    }
+    parallel_in_subtree[l.parent] = true;
   }
 
   // The number of tasks the loops from the root down to (and including) each
@@ -548,6 +560,19 @@ bool produces_external_output(
 // may this function's split cover the loop at all (find_matching_split), and
 // what step does the shared loop end up with (reconcile_step).
 
+// The product of the extents of the reduction dimensions of `f`.
+slinky::expr reduction_extent(ynn::slinky_globals& globals,
+                              const slinky::func& f) {
+  slinky::expr result = 1;
+  for (const slinky::func::output& out : f.outputs()) {
+    for (int d = 0; d < static_cast<int>(out.dims.size()); ++d) {
+      if (globals.is_pure_dim(out.dims[d])) continue;
+      result = result * out.buffer->dim(d).bounds.extent();
+    }
+  }
+  return result;
+}
+
 // Find the split of `f` that covers `consumer_source_region`, or -1 if none
 // does. `split_matched` marks the splits already used by outer loops.
 //
@@ -583,17 +608,9 @@ int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
   // tuning, or replacing by something derived from the shapes.
   constexpr slinky::index_t small_reduction_threshold = 256;
   auto has_small_reduction = [&]() {
-    slinky::index_t k_product = 1;
-    for (const auto& out : f.outputs()) {
-      for (int d = 0; d < static_cast<int>(out.dims.size()); ++d) {
-        if (globals.is_pure_dim(out.dims[d])) continue;
-        auto c = slinky::as_constant(
-            slinky::simplify(out.buffer->dim(d).bounds.extent()));
-        if (!c) return false;
-        k_product *= *c;
-      }
-    }
-    return k_product <= small_reduction_threshold;
+    std::optional<slinky::index_t> k_product =
+        slinky::as_constant(slinky::simplify(reduction_extent(globals, f)));
+    return k_product && *k_product <= small_reduction_threshold;
   };
 
   for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
@@ -654,10 +671,10 @@ std::vector<bool> initial_split_matches(
 //                         taking the min) degenerates to tiny steps.
 //
 // "No claim" means the loop runs a single full-extent iteration, see
-// is_single_iteration(). `loop_splits` are all of the matching function's
-// splits, used to size its iteration space.
+// is_single_iteration(). `f` is the matching function, and `loop_splits` are
+// all of its splits, used to size its iteration space.
 void reconcile_step(ynn::slinky_globals& globals, loop_level& loop,
-                    const ynn::scheduling_split& split,
+                    const slinky::func& f, const ynn::scheduling_split& split,
                     const std::vector<ynn::scheduling_split>& loop_splits) {
   if (split.step_is_required) {
     if (loop.step_is_required &&
@@ -705,14 +722,14 @@ void reconcile_step(ynn::slinky_globals& globals, loop_level& loop,
                  globals.fact_alignment)) {
     return;
   }
-  // The function's splits span its whole iteration space, so their extent
-  // product is the work that would be divided up. Below this threshold the
-  // extra task dispatches cost more than the split saves; the value was found
-  // experimentally.
+  // The function's pure splits and its reduction dimensions span its whole
+  // iteration space, so their extent product is the work that would be divided
+  // up. Below this threshold the extra task dispatches cost more than the split
+  // saves; the value was found experimentally.
   constexpr slinky::index_t min_work_per_split = 128 * 1024;
-  slinky::expr work = 1;
+  slinky::expr work = reduction_extent(globals, f);
   for (const ynn::scheduling_split& ls : loop_splits) {
-    work = work * ls.extent;
+    if (globals.is_pure_dim(ls.var)) work = work * ls.extent;
   }
   // Both conditions can depend on the runtime shape, so they go into the
   // proposal as a select, which folds away for static shapes.
@@ -843,7 +860,7 @@ void ynn_runtime::schedule() {
           break;
         }
         split_matched[matched_split] = true;
-        reconcile_step(globals, global_loop, loop_splits[matched_split],
+        reconcile_step(globals, global_loop, f, loop_splits[matched_split],
                        loop_splits);
         compute_at++;
       }
