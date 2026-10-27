@@ -83,16 +83,14 @@ TEST_HORIZONTAL_SUM(hvx, s32, 32);
 TEST_HORIZONTAL_SUM(hvx, f32, 32);
 
 TEST_HORIZONTAL_MIN(hvx, u8, 128);
-// TODO(dsharlet): HVX vectors are so big that our test for this overflows...
-// TEST_HORIZONTAL_MIN(hvx, s8, 128);
+TEST_HORIZONTAL_MIN(hvx, s8, 128);
 TEST_HORIZONTAL_MIN(hvx, s16, 64);
 TEST_HORIZONTAL_MIN(hvx, s32, 32);
 TEST_HORIZONTAL_MIN(hvx, f16, 64);
 TEST_HORIZONTAL_MIN(hvx, f32, 32);
 
 TEST_HORIZONTAL_MAX(hvx, u8, 128);
-// TODO(dsharlet): HVX vectors are so big that our test for this overflows...
-// TEST_HORIZONTAL_MAX(hvx, s8, 128);
+TEST_HORIZONTAL_MAX(hvx, s8, 128);
 TEST_HORIZONTAL_MAX(hvx, s16, 64);
 TEST_HORIZONTAL_MAX(hvx, s32, 32);
 TEST_HORIZONTAL_MAX(hvx, f16, 64);

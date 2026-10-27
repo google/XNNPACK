@@ -233,23 +233,23 @@ void test_op() {
     scalar b[vector::N];
     fill_uniform_random_bits(a, vector::N, rng);
     fill_uniform_random_bits(b, vector::N, rng);
-#ifdef YNN_ARCH_ARM32
+#if defined(YNN_ARCH_ARM32) || defined(YNN_ARCH_HEXAGON)
     replace_denormals(a, vector::N);
     replace_denormals(b, vector::N);
-#endif  // YNN_ARCH_ARM32
+#endif  // defined(YNN_ARCH_ARM32) || defined(YNN_ARCH_HEXAGON)
 
     scalar result[vector::N];
 
     store(result, op(load(a, vector::N), load(b, vector::N)));
     for (size_t i = 0; i < vector::N; ++i) {
       scalar expected = op(a[i], b[i]);
-#ifdef YNN_ARCH_ARM32
+#if defined(YNN_ARCH_ARM32) || defined(YNN_ARCH_HEXAGON)
       if (std::abs(static_cast<double>(expected)) <
           type_info<scalar>::smallest_normal()) {
         // ARM32 flushes denormals to 0(?).
         continue;
       }
-#endif  // YNN_ARCH_ARM32
+#endif  // defined(YNN_ARCH_ARM32) || defined(YNN_ARCH_HEXAGON)
       if (ynn::isnan(expected)) {
         ASSERT_TRUE(ynn::isnan(result[i])) << a[i] << " " << b[i];
       } else {
@@ -916,12 +916,13 @@ template <typename scalar, size_t N>
 void test_horizontal_min() {
   using vector = vec<scalar, N>;
 
+  const int max = std::min<double>(type_info<scalar>::max(), N);
   scalar a[N * 2 - 1];
   for (int i = 0; i < N * 2 - 1; ++i) {
-    a[i] = N - tent(i, N);
+    a[i] = max - tent(i, N);
   }
   for (int i = 0; i < N - 1; ++i) {
-    ASSERT_EQ(N - tent(N, N), horizontal_min(load(&a[i], vector::N)));
+    ASSERT_EQ(max - tent(N, N), horizontal_min(load(&a[i], vector::N)));
   }
 }
 

@@ -123,9 +123,9 @@ const dot_cost_models& cost_models = get_dot_cost_models();
                        cost_model)                                             \
   BENCHMARK_CAPTURE(                                                           \
       dot, kernel, arch_flags,                                                 \
-      dot_kernel{kernel, static_cast<int>(block_m), static_cast<int>(block_n), \
-                 static_cast<int>(block_k), static_cast<int>(tile_m),          \
-                 static_cast<int>(tile_n), static_cast<int>(tile_k), flags,    \
+      dot_kernel{kernel, static_cast<int>(block_n), static_cast<int>(block_m), \
+                 static_cast<int>(block_k), static_cast<int>(tile_n),          \
+                 static_cast<int>(tile_m), static_cast<int>(tile_k), flags,    \
                  &cost_model},                                                 \
       a_type(), b_type(), c_type())                                            \
       ->UseRealTime();

@@ -411,11 +411,11 @@ struct optimizer {
 
     result = {
         kernel,
-        static_cast<int>(block_m),
         static_cast<int>(block_n),
+        static_cast<int>(block_m),
         static_cast<int>(block_k),
-        static_cast<int>(tile_m),
         static_cast<int>(tile_n),
+        static_cast<int>(tile_m),
         static_cast<int>(tile_k),
         flags,
         &cost_model,

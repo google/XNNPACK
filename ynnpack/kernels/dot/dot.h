@@ -139,11 +139,11 @@ struct dot_kernel {
   // values from `K` rows of B are adjacent in memory.
   // - Kernels often assume that the memory of B is aligned such that the each
   // tile beings on a memory address aligned to the size of the tile.
+  int block_n : 16;
   int block_m : 8;
-  int block_n : 8;
   int block_k : 8;
+  int tile_n : 16;
   int tile_m : 8;
-  int tile_n : 8;
   int tile_k : 8;
   uint32_t flags;
   const dot_cost_model* cost_model = nullptr;

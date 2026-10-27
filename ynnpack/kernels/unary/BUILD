@@ -127,6 +127,8 @@ cc_test(
 cc_test(
     name = "consistent_arithmetic_test",
     srcs = ["consistent_arithmetic_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":unary",
         "//ynnpack:ynnpack_h",
