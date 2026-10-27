@@ -20,6 +20,10 @@ xnn_subgraph_t FP32MobileNetV3Large();
 xnn_subgraph_t FP32MobileNetV3Small();
 xnn_subgraph_t QS8MobileNetV2();
 
+xnn_subgraph_t FP32ResNet50(size_t batch_size = 1);
+xnn_subgraph_t FP16ResNet50(size_t batch_size = 1);
+xnn_subgraph_t QD8ResNet50(size_t batch_size = 1);
+xnn_subgraph_t QS8ResNet50(size_t batch_size = 1);
 
 xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
 

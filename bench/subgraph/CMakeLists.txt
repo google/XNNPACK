@@ -13,9 +13,11 @@ IF(XNNPACK_BUILD_LIBRARY)
     fp32-mobilenet-v2.cc
     fp32-mobilenet-v3-large.cc
     fp32-mobilenet-v3-small.cc
+    fp32-resnet50.cc
     fp32-transformer.cc
     qd8-transformer.cc
-    qs8-mobilenet-v2.cc)
+    qs8-mobilenet-v2.cc
+    qs8-resnet50.cc)
   SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
   TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK xnnpack-test)
 
@@ -35,6 +37,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       fully-connected
       layer-norm
       mobilenet
+      resnet50
       softmax
       transformer)
   FOREACH(BENCH ${SUBGRAPH_BENCHMARKS})
