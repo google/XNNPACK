@@ -83,7 +83,7 @@ Tensor<T> transpose_a(Tensor<T> a, size_t tile_m, size_t tile_k) {
   // Make the result.
   Tensor<T> result(extents);
   packer p(a.stride_bytes(a.rank() - 1), a.stride_bytes(a.rank() - 2),
-           elem_size_bits, tile_k, align_up(m, tile_m) * tile_k,
+           elem_size_bits, tile_k, align_up(m, tile_m),
            result.stride_bytes(result.rank() - 2));
   for (const auto& i : EnumerateIndices(batch_extents)) {
     p.pack(k, m, a.slice_leading(i).data(), 0,

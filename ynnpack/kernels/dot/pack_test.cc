@@ -141,11 +141,11 @@ TEST_P(pack, tile_1x2) {
       3, 8,
       4, 9,
 
-      10, _,
-      11, _,
-      12, _,
-      13, _,
-      14, _,
+      10, 0,
+      11, 0,
+      12, 0,
+      13, 0,
+      14, 0,
       // clang-format on
   };
 
@@ -176,11 +176,11 @@ TEST_P(pack, tile_1x4) {
 
   std::vector<Matcher<int>> expected = {
       // clang-format off
-      0, 5, 10, _,
-      1, 6, 11, _,
-      2, 7, 12, _,
-      3, 8, 13, _,
-      4, 9, 14, _,
+      0, 5, 10, 0,
+      1, 6, 11, 0,
+      2, 7, 12, 0,
+      3, 8, 13, 0,
+      4, 9, 14, 0,
       // clang-format on
   };
 
@@ -255,9 +255,9 @@ TEST_P(pack, tile_2x2) {
       2, 3, 7, 8,
       4, 0, 9, 0,
 
-      10, 11, _, _,
-      12, 13, _, _,
-      14, 0, _, _,
+      10, 11, 0, 0,
+      12, 13, 0, 0,
+      14, 0, 0, 0,
       // clang-format on
   };
   EXPECT_THAT(output, ElementsAreArray(expected));
@@ -287,9 +287,9 @@ TEST_P(pack, tile_2x4) {
 
   std::vector<Matcher<int>> expected = {
       // clang-format off
-      0, 1, 5, 6, 10, 11, _, _,
-      2, 3, 7, 8, 12, 13, _, _,
-      4, 0, 9, 0, 14, 0, _, _,
+      0, 1, 5, 6, 10, 11, 0, 0,
+      2, 3, 7, 8, 12, 13, 0, 0,
+      4, 0, 9, 0, 14, 0, 0, 0,
       // clang-format on
   };
   EXPECT_THAT(output, ElementsAreArray(expected));
@@ -322,8 +322,8 @@ TEST_P(pack, tile_4x2) {
       0, 1, 2, 3, 5, 6, 7, 8,
       4, 0, 0, 0, 9, 0, 0, 0,
 
-      10, 11, 12, 13, _, _, _, _,
-      14, 0, 0, 0, _, _, _, _,
+      10, 11, 12, 13, 0, 0, 0, 0,
+      14, 0, 0, 0, 0, 0, 0, 0,
       // clang-format on
   };
   EXPECT_THAT(output, ElementsAreArray(expected));
