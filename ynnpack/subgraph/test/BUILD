@@ -136,7 +136,7 @@ cc_test(
     srcs = ["dot.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
-    shard_count = 24,
+    shard_count = 36,
     tags = ["nowasm"],  # b/525770952
     deps = TEST_DEPS,
 )
