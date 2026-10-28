@@ -124,18 +124,10 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
       }
 
       size_t k = kc;
-      const int8_t* restrict a1 = a[1];
-      if XNN_UNPREDICTABLE(a1 != zero) {
-        a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
-      } else {
-        a1 = zero_data;
-      }
-
-      if (mr <= 2) {
+      if (mr == 1) {
         a += 7;
-        const intptr_t a_stride = (intptr_t) a1 - (intptr_t) a0;
         while (k >= 64 * sizeof(int8_t)) {
-          _tile_loadd(4, a0, a_stride);
+          _tile_loadd(4, a0, 64);
           a0 += 64;
           _tile_loadd(5, (const int8_t*) w + 0, 256);
           _tile_dpbssd(0, 4, 5);
@@ -150,7 +142,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
           k -= 64 * sizeof(int8_t);
         }
         if XNN_UNLIKELY(k != 0) {
-          _tile_loadd(6, a0, a_stride);
+          _tile_loadd(6, a0, 64);
           _tile_loadd(7, (const int8_t*) w + 0, 256);
           _tile_dpbssd(0, 6, 7);
           _tile_loadd(7, (const int8_t*) w + 64, 256);
@@ -164,6 +156,12 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
           k -= kremainder * sizeof(int8_t);
         }
       } else {
+        const int8_t* restrict a1 = a[1];
+        if XNN_UNPREDICTABLE(a1 != zero) {
+          a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
+        } else {
+          a1 = zero_data;
+        }
         const int8_t* restrict a2 = a[2];
         if XNN_UNPREDICTABLE(a2 != zero) {
           a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
