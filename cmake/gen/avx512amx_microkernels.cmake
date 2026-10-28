@@ -27,6 +27,7 @@ SET(PROD_AVX512AMX_MICROKERNEL_SRCS
 
 SET(NON_PROD_AVX512AMX_MICROKERNEL_SRCS
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-16x64c4-minmax-avx512amx-prfm.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-7x64c4-minmax-avx512amx.c
   src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-16x64c4-minmax-avx512amx-prfm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c4-minmax-avx512amx.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x32c4-minmax-avx512amx.c
@@ -47,6 +48,8 @@ SET(NON_PROD_AVX512AMX_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x16c4-minmax-avx512amx.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x32c4-minmax-avx512amx.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-7x16c4-minmax-avx512amx.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-7x32c4-minmax-avx512amx.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-7x64c4-minmax-avx512amx.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-16x16c4-minmax-avx512amx-prfm.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-16x16c4-minmax-avx512amx.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-16x32c4-minmax-avx512amx-prfm.c
@@ -63,6 +66,8 @@ SET(NON_PROD_AVX512AMX_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c4-minmax-fp32-avx512amx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-avx512amx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x16c4-minmax-fp32-avx512amx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x32c4-minmax-fp32-avx512amx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x64c4-minmax-fp32-avx512amx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x16c4-minmax-fp32-avx512amx-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x16c4-minmax-fp32-avx512amx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x32c4-minmax-fp32-avx512amx-prfm.c
