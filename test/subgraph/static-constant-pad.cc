@@ -200,6 +200,43 @@ TEST(ConstantPad, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(ConstantPad, DefineRejectsTooManyPaddingDimsAsUnsupported) {
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_fp32)
+      .AddDynamicTensor({4, 5}, 1, xnn_datatype_fp32);
+  const std::vector<size_t> paddings(XNN_MAX_TENSOR_DIMS + 1, 1);
+  EXPECT_EQ(xnn_define_static_constant_pad_v2(
+                subgraph.Subgraph(), paddings.size(), paddings.data(),
+                paddings.data(), /*padding_value=*/0.0f, 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(ConstantPad, DefineRejectsSubByteDatatypeAsUnsupported) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({4, 5}, 1, xnn_datatype_qint4, quantization);
+  const std::vector<size_t> paddings = {1, 1};
+  EXPECT_EQ(xnn_define_static_constant_pad_v2(
+                subgraph.Subgraph(), paddings.size(), paddings.data(),
+                paddings.data(), /*padding_value=*/0.0f, 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(ConstantPad, DefineRejectsMismatchingDatatypesAsInvalid) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({4, 5}, 1, xnn_datatype_fp32);
+  const std::vector<size_t> paddings = {1, 1};
+  EXPECT_EQ(xnn_define_static_constant_pad_v2(
+                subgraph.Subgraph(), paddings.size(), paddings.data(),
+                paddings.data(), /*padding_value=*/0.0f, 0, 1, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
