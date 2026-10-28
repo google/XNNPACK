@@ -33,15 +33,19 @@ YNN_INTRINSIC float32x4_t bf16_to_f32(uint16x4_t x) {
 }  // namespace
 """
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    a_ptr = self.a_ptr(i, k)
-    if nk == 1:
-      return f"float32x4_t a_{i}_{k} = bf16_to_f32(vdup_n_u16(*{a_ptr}));\n"
-    elif k % 4 == 0:
-      assert nk % 4 == 0
-      return f"float32x4_t a_{i}_{k} = bf16_to_f32(vld1_u16({a_ptr}));\n"
-    else:
-      return ""
+  def load_a_tile(self, i, k):
+    if k % 4 == 0:
+      return (
+          f"float32x4_t a_{i}_{k} ="
+          f" bf16_to_f32(vld1_u16({self.a_ptr(i, k)}));\n"
+      )
+    return ""
+
+  def load_a_tile_tail(self, i, k):
+    return (
+        f"float32x4_t a_{i}_{k} ="
+        f" bf16_to_f32(vdup_n_u16(*{self.a_ptr(i, k)}));\n"
+    )
 
   def load_b_tile(self, k, j):
     b_ptr = self.b_ptr(k, j)

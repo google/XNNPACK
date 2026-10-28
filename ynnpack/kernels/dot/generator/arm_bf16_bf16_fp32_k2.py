@@ -39,17 +39,21 @@ YNN_INTRINSIC bfloat16x4_t unaligned_load_broadcast_bf16x2(const __bf16* ptr) {
 }  // namespace
 """
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    if k % nk != 0:
+  def load_a_tile(self, i, k):
+    if k % self.block_shape[2] != 0:
       return ""
     a_ptr = self.a_ptr(i, k)
     a = f"a_{i}_{k}"
-    if nk == 8:
+    if self.block_shape[2] == 8:
       return f"bfloat16x8_t {a} = vld1q_bf16({a_ptr});\n"
-    elif nk == 4:
-      return f"bfloat16x4_t {a} = vld1_bf16({a_ptr});\n"
     else:
-      return f"bfloat16x4_t {a} = unaligned_load_broadcast_bf16x2({a_ptr});\n"
+      return f"bfloat16x4_t {a} = vld1_bf16({a_ptr});\n"
+
+  def load_a_tile_tail(self, i, k):
+    return (
+        f"bfloat16x4_t a_{i}_{k} ="
+        f" unaligned_load_broadcast_bf16x2({self.a_ptr(i, k)});\n"
+    )
 
   def load_b_tile(self, k, j):
     return f"bfloat16x8_t b_{k}_{j} = vld1q_bf16({self.b_ptr(k, j)});\n"

@@ -43,17 +43,16 @@ YNN_INTRINSIC int16x8_t unaligned_load_and_widen_int8x8(const int8_t* ptr) {
 }  // namespace
 """
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    if k % nk != 0:
+  def load_a_tile(self, i, k):
+    if k % 8 != 0:
       return ""
-    if nk == 8:
-      return (
-          f"int16x8_t a_{i}_{k} ="
-          f" unaligned_load_and_widen_int8x8({self.a_ptr(i, k)});\n"
-      )
-    else:
-      assert(nk == 1)
-      return f"int16x8_t a_{i}_{k} = vdupq_n_s16(*{self.a_ptr(i, k)});\n"
+    return (
+        f"int16x8_t a_{i}_{k} ="
+        f" unaligned_load_and_widen_int8x8({self.a_ptr(i, k)});\n"
+    )
+
+  def load_a_tile_tail(self, i, k):
+    return f"int16x8_t a_{i}_{k} = vdupq_n_s16(*{self.a_ptr(i, k)});\n"
 
   def load_b_tile(self, k, j):
     if self.b_chunk_n < 8 or (j // 8) * 8 + 8 > self.block_shape[1]:
@@ -98,14 +97,14 @@ YNN_INTRINSIC int32_t unaligned_load_int8x4(const int8_t* ptr) {
 }  // namespace
 """
 
-  def load_a_tile_k_tail(self, i, k, nk):
+  def load_a_tile(self, i, k):
     if k % 8 != 0:
       return ""
-    if nk == 8:
-      return f"int8x8_t a_{i}_{k} = vld1_s8({self.a_ptr(i, k)});\n"
-    else:
-      a_x4 = f"unaligned_load_int8x4({self.a_ptr(i, k)})"
-      return f"int8x8_t a_{i}_{k} = vreinterpret_s8_s32(vdup_n_s32({a_x4}));\n"
+    return f"int8x8_t a_{i}_{k} = vld1_s8({self.a_ptr(i, k)});\n"
+
+  def load_a_tile_tail(self, i, k):
+    a_x4 = f"unaligned_load_int8x4({self.a_ptr(i, k)})"
+    return f"int8x8_t a_{i}_{k} = vreinterpret_s8_s32(vdup_n_s32({a_x4}));\n"
 
   def load_b_tile(self, k, j):
     return f"int8x16_t b_{k}_{j} = vld1q_s8({self.b_ptr(k, j)});\n"

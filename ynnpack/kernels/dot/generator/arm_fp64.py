@@ -19,14 +19,13 @@ class arm_neon_fp64(arm_neon):
     self.b_type = "double"
     self.flags += ["dot_flag::consistent_arithmetic"]
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    a_ptr = self.a_ptr(i, k)
-    if nk == 1:
-      return f"float64x2_t a_{i}_{k} = vdupq_n_f64(*{a_ptr});\n"
-    elif k % 2 == 0:
-      return f"float64x2_t a_{i}_{k} = vld1q_f64({a_ptr});\n"
-    else:
-      return ""
+  def load_a_tile(self, i, k):
+    if k % 2 == 0:
+      return f"float64x2_t a_{i}_{k} = vld1q_f64({self.a_ptr(i, k)});\n"
+    return ""
+
+  def load_a_tile_tail(self, i, k):
+    return f"float64x2_t a_{i}_{k} = vdupq_n_f64(*{self.a_ptr(i, k)});\n"
 
   def load_b_tile(self, k, j):
     return f"float64x2_t b_{k}_{j} = vld1q_f64({self.b_ptr(k, j)});\n"

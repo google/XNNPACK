@@ -20,17 +20,13 @@ class arm_neon_fp32(arm_neon):
     self.b_type = "float"
     self.flags += ["dot_flag::consistent_arithmetic"]
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    a_ptr = self.a_ptr(i, k)
-    if nk == 1:
-      return f"float32x4_t a_{i}_{k} = vdupq_n_f32(*{a_ptr});\n"
-    elif nk == 2:
-      return f"float32x2_t a_{i}_{k} = vld1_f32({a_ptr});\n"
-    elif k % 4 == 0:
-      assert nk % 4 == 0
-      return f"float32x4_t a_{i}_{k} = vld1q_f32({a_ptr});\n"
-    else:
-      return ""
+  def load_a_tile(self, i, k):
+    if k % 4 == 0:
+      return f"float32x4_t a_{i}_{k} = vld1q_f32({self.a_ptr(i, k)});\n"
+    return ""
+
+  def load_a_tile_tail(self, i, k):
+    return f"float32x4_t a_{i}_{k} = vdupq_n_f32(*{self.a_ptr(i, k)});\n"
 
   def load_b_tile(self, k, j):
     return f"float32x4_t b_{k}_{j} = vld1q_f32({self.b_ptr(k, j)});\n"
