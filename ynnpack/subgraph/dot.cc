@@ -1083,8 +1083,10 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   // use data we load from either side.
   // - Tasks shouldn't be too small, to avoid parallelism overhead.
   // - Tasks shouldn't be too large, so we get enough parallelism.
+  const index_t max_tiles_1d = 32;
+  const index_t min_tile = std::max<index_t>(std::min(m, n) / max_tiles_1d, 64);
   const index_t min_area_2d =
-      std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
+      std::min<index_t>(m, min_tile) * std::min<index_t>(n, min_tile);
   const index_t min_area_1d = 256;
   const index_t min_area = std::max<index_t>(min_area_2d, min_area_1d);
   const index_t max_area = 256 * 256;
