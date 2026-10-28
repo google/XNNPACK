@@ -16,6 +16,7 @@
 
 #include "bench/utils.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
@@ -32,6 +33,7 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/packw.h"
+#include "src/xnnpack/params.h"
 #include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
@@ -1376,6 +1378,12 @@ void GEMMBenchmark(benchmark::State& state,
                    uint64_t arch_flags) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
+  }
+
+  // The KleidiAI weight packing functions allocate scratch memory through the
+  // XNNPACK allocator, which is normally installed by xnn_initialize().
+  if (xnn_params.allocator.allocate == nullptr) {
+    xnn_params.allocator = xnn_default_allocator;
   }
 
   // Select by benchmark variant: SME benchmarks can run on SME2 hardware but
