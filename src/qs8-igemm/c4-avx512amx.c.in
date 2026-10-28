@@ -182,19 +182,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
           k -= kremainder * sizeof(int8_t);
         }
       $else:
-        const ${XINT8_T}* restrict a1 = a[1];
-        if XNN_UNPREDICTABLE(a1 != zero) {
-          a1 = (const ${XINT8_T}*) ((uintptr_t) a1 + a_offset);
-        $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-          } else {
-            a1 = zero_data;
-        }
-
-        if (mr <= 2) {
+        if (mr == 1) {
           a += ${MR};
-          const intptr_t a_stride = (intptr_t) a1 - (intptr_t) a0;
           while (k >= 64 * sizeof(int8_t)) {
-            _tile_loadd(4, a0, a_stride);
+            _tile_loadd(4, a0, 64);
             a0 += 64;
             $for N in range(0, NR, 16):
               _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
@@ -207,7 +198,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
             k -= 64 * sizeof(int8_t);
           }
           if XNN_UNLIKELY(k != 0) {
-            _tile_loadd(6, a0, a_stride);
+            _tile_loadd(6, a0, 64);
             $for N in range(0, NR, 16):
               _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
               _tile_dpbssd(${N // 16}, 6, 7);
@@ -216,7 +207,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
             k -= kremainder * sizeof(int8_t);
           }
         } else {
-          $for M in range(2, MR):
+          $for M in range(1, MR):
             const ${XINT8_T}* restrict a${M} = a[${M}];
             if XNN_UNPREDICTABLE(a${M} != zero) {
               a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} + a_offset);
