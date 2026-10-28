@@ -904,6 +904,7 @@ xnnpack_cc_library(
         ":operator_utils",
         ":operators",
         ":params",
+        ":reference_ukernels",
         ":requantization",
         ":subgraph_h",
         ":xnnpack_h",

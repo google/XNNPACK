@@ -17,6 +17,7 @@
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
+#include "src/xnnpack/reference-config.h"
 #include "src/xnnpack/reshape-helpers.h"
 #include "src/xnnpack/subgraph-validation.h"
 #include "src/xnnpack/subgraph.h"
@@ -186,6 +187,13 @@ enum xnn_status xnn_define_binary(
     return status;
   }
 
+  if (type <= xnn_binary_invalid || type > xnn_binary_shift_right_arithmetic) {
+    xnn_log_error("failed to define %s node: invalid operator type %d",
+                  xnn_node_type_to_string(xnn_node_type_binary_elementwise),
+                  (int) type);
+    return xnn_status_invalid_parameter;
+  }
+
   if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_binary_elementwise, input1_id, subgraph->num_values, 1)) !=
       xnn_status_success) {
     return status;
@@ -223,6 +231,16 @@ enum xnn_status xnn_define_binary(
       xnn_node_type_binary_elementwise, input1_id, input1_value, input2_id, input2_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  // The reference configs cover every implemented operator and datatype.
+  if (xnn_init_binary_reference_config(type, output_value->datatype) == NULL) {
+    xnn_log_error("failed to define %s operator with input IDs #%" PRIu32
+                  " and #%" PRIu32 " and output ID #%" PRIu32
+                  ": unsupported datatype %s",
+                  xnn_binary_operator_to_string(type), input1_id, input2_id,
+                  output_id, xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
