@@ -118,17 +118,10 @@ void xnn_f16_igemm_minmax_ukernel_16x32c2__avx512amxfp16_prfm(
       }
 
       size_t k = kc;
-      const xnn_float16* restrict a1 = a[1];
-      assert(a1 != NULL);
-      if XNN_UNPREDICTABLE(a1 != zero) {
-        a1 = (const xnn_float16*) ((uintptr_t) a1 + a_offset);
-      }
-
-      if (mr <= 2) {
+      if (mr == 1) {
         a += 16;
-        const intptr_t a_stride = (intptr_t) a1 - (intptr_t) a0;
         while (k >= 32 * sizeof(xnn_float16)) {
-          _tile_loadd(4, a0, a_stride);
+          _tile_loadd(4, a0, 64);
           a0 += 32;
           _tile_loadd(5, (const int8_t*) w + 0, 128);
           _tile_dpfp16ps(0, 4, 5);
@@ -190,9 +183,7 @@ void xnn_f16_igemm_minmax_ukernel_16x32c2__avx512amxfp16_prfm(
         }
         if XNN_UNLIKELY(k != 0) {
           const __m512i vin0 = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
-          const __m512i vin1 = _mm512_maskz_loadu_epi16(kremainder_mask, (const void*) ((intptr_t) a0 + a_stride));
           _mm512_store_epi32(&vintile[0][0], vin0);
-          _mm512_store_epi32(&vintile[0][16], vin1);
           _tile_loadd(6, &vintile[0][0], 64);
           _tile_loadd(7, (const int8_t*) w + 0, 128);
           _tile_dpfp16ps(0, 6, 7);
@@ -205,6 +196,11 @@ void xnn_f16_igemm_minmax_ukernel_16x32c2__avx512amxfp16_prfm(
           k -= kremainder;
         }
       } else {
+        const xnn_float16* restrict a1 = a[1];
+        assert(a1 != NULL);
+        if XNN_UNPREDICTABLE(a1 != zero) {
+          a1 = (const xnn_float16*) ((uintptr_t) a1 + a_offset);
+        }
         const xnn_float16* restrict a2 = a[2];
         assert(a2 != NULL);
         if XNN_UNPREDICTABLE(a2 != zero) {
