@@ -1305,6 +1305,8 @@ xnnpack_source_set("litert_tensor_api") {
     "litert/tensor/backends/xnnpack/arithmetic.h",
     "litert/tensor/backends/xnnpack/conversion.cc",
     "litert/tensor/backends/xnnpack/conversion.h",
+    "litert/tensor/backends/xnnpack/dequantize.cc",
+    "litert/tensor/backends/xnnpack/dequantize.h",
     "litert/tensor/backends/xnnpack/graph.h",
     "litert/tensor/backends/xnnpack/utils.h",
     "litert/tensor/runners/xnnpack/runner.cc",

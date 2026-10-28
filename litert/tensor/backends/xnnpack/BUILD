@@ -78,10 +78,42 @@ cc_library(
 )
 
 cc_library(
+    name = "dequantize",
+    srcs = ["dequantize.cc"],
+    hdrs = ["dequantize.h"],
+    deps = [
+        "//litert/tensor:datatypes",
+        "//litert/tensor/internal:graph",
+        "//litert/tensor/utils:macros",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_test(
+    name = "dequantize_test",
+    srcs = ["dequantize_test.cc"],
+    deps = [
+        ":dequantize",
+        "//litert/tensor:datatypes",
+        "//litert/tensor/internal:graph",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
+
+cc_library(
     name = "conversion",
     srcs = ["conversion.cc"],
     hdrs = ["conversion.h"],
     deps = [
+        ":dequantize",
         ":graph",
         ":utils",
         "//:XNNPACK",
