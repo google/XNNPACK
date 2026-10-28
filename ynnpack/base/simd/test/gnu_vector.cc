@@ -206,8 +206,8 @@ TEST_HORIZONTAL_SUM(gnu_vector, s32, 4);
 TEST_HORIZONTAL_SUM(gnu_vector, f32, 4);
 TEST_HORIZONTAL_SUM(gnu_vector, f64, 2);
 
-TEST_UNARY(gnu_vector, exp, f32, 4, std::exp, 2);
-TEST_UNARY(gnu_vector, exp, f64, 2, std::exp, 2);
+TEST_UNARY(gnu_vector, exp, f32, 4, std::exp, 1);
+TEST_UNARY(gnu_vector, exp, f64, 2, std::exp, 1);
 TEST_UNARY(gnu_vector, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(gnu_vector, expm1, f64, 2, std::expm1, 2);
 TEST_UNARY(gnu_vector, log, f32, 4, std::log, 2);

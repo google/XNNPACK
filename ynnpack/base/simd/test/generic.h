@@ -1129,8 +1129,7 @@ void test_unary(F f, Ref ref, float epsilons,
         }
 
         const scalar abs_error =
-            static_cast<scalar>(static_cast<double>(scalar_info::epsilon()) *
-                                static_cast<double>(std::abs(k) * epsilons));
+            (scalar_info::epsilon() * epsilons) * std::abs(k);
         ASSERT_NEAR(result[i], k, abs_error) << a[i];
       }
     }

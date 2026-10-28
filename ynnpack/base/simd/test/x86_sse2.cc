@@ -162,8 +162,8 @@ TEST_CAST(x86_sse2, u8, f32x16);
 TEST_CAST(x86_sse2, s8, f32x16);
 TEST_CAST(x86_sse2, s16, f32x8);
 
-TEST_UNARY(x86_sse2, exp, f32, 4, std::exp, 2);
-TEST_UNARY(x86_sse2, exp, f64, 2, std::exp, 2);
+TEST_UNARY(x86_sse2, exp, f32, 4, std::exp, 1);
+TEST_UNARY(x86_sse2, exp, f64, 2, std::exp, 1);
 TEST_UNARY(x86_sse2, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(x86_sse2, expm1, f64, 2, std::expm1, 2);
 TEST_UNARY(x86_sse2, log, f32, 4, std::log, 2);
