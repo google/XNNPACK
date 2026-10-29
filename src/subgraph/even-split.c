@@ -377,7 +377,6 @@ enum xnn_status xnn_define_even_split(
   uint32_t flags)
 {
   assert(num_outputs >= 1);
-  assert(num_outputs <= XNN_MAX_OUTPUTS);
 
   enum xnn_node_type node_type = xnn_node_type_even_split;
   enum xnn_status status;
@@ -406,7 +405,7 @@ enum xnn_status xnn_define_even_split(
     xnn_log_error(
       "failed to define %s operator with %zu outputs: number of outputs exceeds the supported maximum (%zu)",
       xnn_node_type_to_string(node_type), num_outputs, (size_t) XNN_MAX_OUTPUTS);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   for (size_t i = 0; i < num_outputs; ++i) {
