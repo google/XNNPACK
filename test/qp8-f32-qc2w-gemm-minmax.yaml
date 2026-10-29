@@ -10,11 +10,11 @@
   packed-stride: xnn_packed_stride_kai_qs2_weights_and_biases_sme2
   k-block: 32
   planes: 4
-  cpp-check: XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 - name: xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_kai_qs2_weights_and_biases_sme2
   packed-stride: xnn_packed_stride_kai_qs2_weights_and_biases_sme2
   k-block: 32
   planes: 4
-  cpp-check: XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)

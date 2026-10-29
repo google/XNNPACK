@@ -566,7 +566,10 @@ xnnpack_cxx_library(
         "//src/configs:config_hdrs",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
-    ]),
+    ]) + xnnpack_select_if(
+        ":arm_sme_acle_enabled",
+        [":arm_sme_abi_stubs"],
+    ),
 )
 
 py_binary(
@@ -1755,6 +1758,22 @@ alias(
         "//build_config:gcc": ":xnn_enable_arm_sme_acle_explicit_true",
         "//build_config:windows_arm64": ":xnn_enable_arm_sme_acle_explicit_true",
         "//conditions:default": ":arm_sme_acle_enabled_by_default",
+    }),
+)
+
+alias(
+    name = "arm_sme_acle_non_lexan_enabled",
+    actual = select({
+        "//build_config:windows_lexan": "//build_config:always_false",
+        "//conditions:default": ":arm_sme_acle_enabled",
+    }),
+)
+
+alias(
+    name = "arm_sme_acle_lexan_enabled",
+    actual = select({
+        "//build_config:windows_lexan": ":arm_sme_acle_enabled",
+        "//conditions:default": "//build_config:always_false",
     }),
 )
 

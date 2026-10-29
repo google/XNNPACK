@@ -1249,7 +1249,7 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
   ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
 }
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 // This test targets the failure where pf16 packed-LHS iGEMM kernels were
 // accidentally invoked through the non-packed iGEMM call path. The packed-LHS
 // kernels have a different function signature, so the runtime ended up passing
@@ -1259,8 +1259,8 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
 TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
 
     const auto* hw = xnn_init_hardware_config();
-    if (!hw || (hw->arch_flags & xnn_arch_arm_sme2) == 0
-            || (hw->arch_flags & xnn_arch_arm_sme ) == 0) {
+    if (!hw || ((hw->arch_flags & xnn_arch_arm_sme2) == 0 &&
+                (hw->arch_flags & xnn_arch_arm_sme) == 0)) {
       GTEST_SKIP() << "PF16/SME(2) path not available on this target";
     }
 
@@ -1377,7 +1377,7 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
     ASSERT_NEAR(out_fp16[i], out_fp32[i], tol);
   }
 }
-#endif
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 
 TEST(SUBGRAPH_FP16, static_value_pack_to_fp16) {
   SubgraphTester tester(3);

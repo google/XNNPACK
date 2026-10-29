@@ -8,9 +8,9 @@
 // Arguments are:
 // XNN_UKERNEL(arch, ukernel, size_fn, packed_offset_fn)
 
-#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 XNN_UKERNEL(xnn_arch_arm_sme, xnn_x8_pack_lh_ukernel__neonsme,
             xnn_x8_pack_lh_size__neonsme, xnn_x8_pack_lh_offset__neonsme)
 XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_pack_lh_ukernel__neonsme2,
-            xnn_x8_pack_lh_size__neonsme2, xnn_x8_pack_lh_offset__neonsme2)            
-#endif  // XNN_ENABLE_KLEIDIAI
+            xnn_x8_pack_lh_size__neonsme2, xnn_x8_pack_lh_offset__neonsme2)
+#endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE

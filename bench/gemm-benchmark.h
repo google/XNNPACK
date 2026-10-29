@@ -200,7 +200,7 @@ void IGEMMBenchmark(benchmark::State& state,
                     xnn_pack_f16_igemm_fn pack, size_t mr,
                     size_t nr, size_t kr, size_t sr, uint64_t arch_flags = 0);
 
-#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 typedef void (*xnn_pqs8_qc8w_gemm_minmax_ukernel_fn)(
     size_t, size_t, size_t, const void*, const void*, void*, size_t, size_t,
     const union xnn_qs8_qc8w_conv_minmax_params*);
@@ -260,6 +260,6 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_pack_lh_offset_fn pack_lh_offset,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
-#endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 
 #endif  // XNNPACK_BENCH_GEMM_BENCHMARK_H_
