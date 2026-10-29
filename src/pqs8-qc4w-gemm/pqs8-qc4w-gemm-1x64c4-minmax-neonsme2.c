@@ -14,6 +14,7 @@
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/kai_matmul.h"
+#include "kai/ukernels/matmul/kai_matmul_pack_rhs.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_mr(void) {
@@ -29,14 +30,30 @@ size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_mr(void) {
   return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
+
 size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_nr(void) {
+#if XNN_ENABLE_KLEIDIAI
+  // The packed RHS panel width is smaller than the GEMV N processing step.
+  const struct kai_matmul_pack_rhs_uker_api api =
+      kai_matmul_pack_rhs_nxk_qsi4cxp8vsx4sf32bi32_qsi4cx_f32_i32_sme();
+  return api.get_step(NULL).n;
+#else
+  assert(
+      "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
+  return 0;
+#endif  // XNN_ENABLE_KLEIDIAI
+}
+
+size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_n_step(void) {
 #if XNN_ENABLE_KLEIDIAI
   const struct kai_matmul_uker_api api =
       kai_matmul_clamp_qai8_qai8_qsi4cxp8vsx4sf32bi32_1x64vs_sme2_dot();
   return api.get_step(NULL).n;
 #else
   assert(
-      "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
+      "Calling KleidiAI kai_get_n_step wrapper, but XNNPACK was compiled without "
       "`XNN_ENABLE_KLEIDIAI`." &&
       0);
   return 0;

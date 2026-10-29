@@ -3467,12 +3467,17 @@ reshape_fully_connected_nc_with_pack_lh_config(
         xnn_operator_type_to_string_v2(fully_connected_op));
     return xnn_status_out_of_memory;
   }
+  const size_t n_step =
+      mr == 1 && fully_connected_op->gemm_config->gemv_n_step != 0
+          ? fully_connected_op->gemm_config->gemv_n_step
+          : nr;
+  assert(n_step >= nr && n_step % nr == 0);
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
       /*m_stride=*/m_stride,
       /*n_stride=*/
       fully_connected_op->weights_stride,
-      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
+      /*cn_stride=*/1 << log2_output_element_size, mr, n_step,
       /*num_threads=*/num_threads);
 
   // If we are packing the LHS, provide a per-thread workspace to do so inline.
@@ -3523,7 +3528,7 @@ reshape_fully_connected_nc_with_pack_lh_config(
         // Set up the LHS packing as a separate compute.
         size_t lhs_stride;
         if (!xnn_safe_mul(
-                input_channels,
+                fully_connected_op->input_pixel_stride,
                 (size_t)1 << packed_lh_config->log2_input_element_size,
                 &lhs_stride)) {
           xnn_log_error(

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include <pthreadpool.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
@@ -30,6 +31,68 @@ TEST(FULLY_CONNECTED_NC_QS8, unit_batch) {
       .input_channels(22)
       .output_channels(19)
       .TestQS8();
+}
+
+TEST(FULLY_CONNECTED_NC_QS8, gemv_n_step_preserves_packing_and_reshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const xnn_gemm_config* native_config = xnn_init_qs8_qc8w_gemm_config();
+  ASSERT_NE(nullptr, native_config);
+  xnn_gemm_config config = *native_config;
+  const size_t n_step = round_up(size_t{256}, size_t{config.nr});
+  const size_t output_channels = 17 * n_step + 1;
+  constexpr size_t input_channels = 7;
+  std::vector<int8_t> kernel(output_channels * input_channels, 1);
+  std::vector<int32_t> bias(output_channels, 0);
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_fully_connected_nc_qs8(
+                input_channels, output_channels, input_channels,
+                output_channels, /*input_zero_point=*/0, /*input_scale=*/1.0f,
+                /*kernel_scale=*/0.25f, kernel.data(), bias.data(),
+                /*output_zero_point=*/0, /*output_scale=*/1.0f,
+                /*output_min=*/-128, /*output_max=*/127, /*flags=*/0,
+                /*weights_cache=*/nullptr, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  ASSERT_EQ(native_config, op->gemm_config);
+  ASSERT_NE(nullptr, op->ukernel.gemm_ukernels->gemm.gemm_cases[0]
+                         .function[XNN_UARCH_DEFAULT]);
+  ASSERT_GT(op->ukernel.gemm_ukernels->gemm.mr, 1);
+  op->gemm_config = &config;
+  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
+      pthreadpool_create(4), pthreadpool_destroy);
+  ASSERT_NE(nullptr, threadpool);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_fully_connected_nc_qs8(op, /*batch_size=*/17,
+                                              threadpool.get()));
+  const size_t gemm_tile = op->compute[0].tile[0];
+  const size_t weights_stride = op->weights_stride;
+  const void* packed_weights = op->packed_weights.pointer;
+  config.gemv_n_step = n_step;
+  std::vector<int8_t> input(17 * input_channels + XNN_EXTRA_BYTES, 4);
+  std::vector<int8_t> output(17 * output_channels);
+  for (const size_t batch_size : {size_t{1}, size_t{17}, size_t{1}}) {
+    SCOPED_TRACE(batch_size);
+    ASSERT_EQ(xnn_status_success,
+              xnn_reshape_fully_connected_nc_qs8(op, batch_size,
+                                                threadpool.get()));
+    const size_t nc = op->compute[0].tile[0];
+    if (batch_size == 1) {
+      EXPECT_LT(nc, output_channels);
+      EXPECT_EQ(0, nc % n_step);
+    } else {
+      EXPECT_EQ(gemm_tile, nc);
+    }
+    EXPECT_EQ(config.nr, op->ukernel.gemm_ukernels->gemm.nr);
+    EXPECT_EQ(weights_stride, op->weights_stride);
+    EXPECT_EQ(packed_weights, op->packed_weights.pointer);
+    ASSERT_EQ(xnn_status_success,
+              xnn_setup_fully_connected_nc_qs8(op, input.data(), output.data()));
+    ASSERT_EQ(xnn_status_success, xnn_run_operator(op, threadpool.get()));
+    for (size_t i = 0; i < batch_size * output_channels; i++) {
+      ASSERT_EQ(7, output[i]) << "output index " << i;
+    }
+  }
 }
 
 TEST(FULLY_CONNECTED_NC_QS8, unit_batch_with_qmin) {
@@ -523,6 +586,180 @@ TEST(FULLY_CONNECTED_NC_PQS8_QC4W, signed_weights_without_bias) {
       .output_channels(29)
       .kernel_zero_point(0)
       .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, gemv_unsigned_weights_without_bias_and_cache) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(33)
+      .output_channels(511)
+      .kernel_zero_point(8)
+      .has_bias(false)
+      .use_weights_cache(true)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W,
+     gemv_n_step_exact_tails_strides_reshape_and_cache) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  const xnn_gemm_config* config = xnn_init_pqs8_qc4w_gemm_config();
+  if (config == nullptr) {
+    GTEST_SKIP() << "requires SME2 PQS8/QC4W kernels";
+  }
+  const size_t nr = config->nr;
+  const size_t n_step = config->gemv_n_step;
+  ASSERT_GT(nr, 0);
+  ASSERT_GT(n_step, nr);
+  ASSERT_EQ(0, n_step % nr);
+  const xnn_pack_lh_config* pack_lh_config = xnn_init_x8_pack_lh_config();
+  ASSERT_NE(nullptr, pack_lh_config);
+  ASSERT_NE(nullptr, pack_lh_config->pack_lh_fn);
+  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
+      pthreadpool_create(4), pthreadpool_destroy);
+  ASSERT_NE(nullptr, threadpool);
+  constexpr int8_t input_zero_point = -3;
+  constexpr int8_t output_zero_point = 5;
+  constexpr size_t max_batch_size = 17;
+  for (const size_t input_channels : {size_t{31}, size_t{32}, size_t{33}}) {
+    for (const size_t output_channels :
+         {nr - 1, nr, nr + 1, n_step - 1, n_step, n_step + 1,
+          17 * n_step + 1}) {
+      for (const uint8_t kernel_zero_point : {uint8_t{0}, uint8_t{8}}) {
+        SCOPED_TRACE(::testing::Message()
+                     << "K=" << input_channels << " N=" << output_channels
+                     << " kernel_zero_point=" << int(kernel_zero_point));
+        const size_t input_stride = input_channels + 5;
+        const size_t output_stride = output_channels + 7;
+        const size_t kernel_stride = divide_round_up(input_channels, size_t{2});
+        xnnpack::Buffer<int8_t> input(max_batch_size * input_stride,
+                                     xnnpack::XnnExtraBytes);
+        xnnpack::Buffer<uint8_t> kernel(output_channels * kernel_stride);
+        std::vector<int32_t> bias(output_channels);
+        std::vector<float> scales(output_channels);
+        for (size_t row = 0; row < max_batch_size; row++) {
+          for (size_t k = 0; k < input_stride; k++) {
+            input[row * input_stride + k] =
+                input_zero_point + 4 * (int((row + k) % 3) - 1);
+          }
+        }
+        std::fill(kernel.begin(), kernel.end(), uint8_t{0});
+        for (size_t n = 0; n < output_channels; n++) {
+          bias[n] = 4 * (int(n % 5) - 2);
+          scales[n] = n % 2 == 0 ? 0.25f : 0.5f;
+          for (size_t k = 0; k < input_channels; k++) {
+            const int8_t weight = int((n * 3 + k) % 7) - 3;
+            const uint8_t nibble = (weight + kernel_zero_point) & 15;
+            kernel[n * kernel_stride + k / 2] |= nibble << (4 * (k % 2));
+          }
+        }
+        xnn_weights_cache_t weights_cache = nullptr;
+        ASSERT_EQ(xnn_status_success, xnn_create_weights_cache(&weights_cache));
+        std::unique_ptr<xnn_weights_cache_provider,
+                        decltype(&xnn_delete_weights_cache)>
+            auto_cache(weights_cache, xnn_delete_weights_cache);
+        auto* internal_cache = static_cast<xnn_internal_weights_cache*>(
+            weights_cache->context);
+        size_t cached_size = 0;
+        size_t cached_offset = 0;
+        for (const uint32_t flags : {0, XNN_FLAG_INLINE_LHS_PACKING}) {
+          xnn_operator_t op = nullptr;
+          ASSERT_EQ(xnn_status_success,
+                    xnn_create_fully_connected_nc_pqs8_qc4w(
+                        input_channels, output_channels, input_stride,
+                        output_stride, input_zero_point, /*input_scale=*/1.0f,
+                        kernel_zero_point, scales.data(), kernel.data(),
+                        bias.data(), output_zero_point, /*output_scale=*/1.0f,
+                        /*output_min=*/-127, /*output_max=*/126, flags,
+                        weights_cache, &op));
+          std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+              op, xnn_delete_operator);
+          if (flags == 0) {
+            ASSERT_EQ(xnn_status_success,
+                      xnn_finalize_weights_cache(
+                          weights_cache,
+                          xnn_weights_cache_finalization_kind_soft));
+            cached_size = internal_cache->cache.weights.size;
+            cached_offset = op->packed_weights.offset;
+          } else {
+            EXPECT_EQ(cached_size, internal_cache->cache.weights.size);
+            EXPECT_EQ(cached_offset, op->packed_weights.offset);
+            EXPECT_GT(internal_cache->cache.hits, 0);
+          }
+          const size_t weights_stride = op->weights_stride;
+          for (const size_t batch_size : {size_t{1}, size_t{17}, size_t{1}}) {
+            SCOPED_TRACE(::testing::Message()
+                         << "M=" << batch_size << " flags=" << flags);
+            size_t workspace_size = 0;
+            ASSERT_EQ(xnn_status_success,
+                      xnn_reshape_fully_connected_nc_pqs8_qc4w(
+                          op, batch_size, &workspace_size, threadpool.get()));
+            const auto& compute =
+                op->compute[op->num_compute_invocations - 1];
+            if (batch_size == 1) {
+              if (flags & XNN_FLAG_INLINE_LHS_PACKING) {
+                EXPECT_EQ(batch_size, compute.range[0]);
+                EXPECT_EQ(1, compute.tile[0]);
+              } else {
+                EXPECT_EQ(output_channels, compute.range[0]);
+                EXPECT_EQ(batch_size, compute.range[1]);
+                if (compute.tile[0] < output_channels) {
+                  EXPECT_EQ(0, compute.tile[0] % n_step);
+                }
+                if (output_channels > 16 * n_step) {
+                  EXPECT_LT(compute.tile[0], output_channels);
+                }
+              }
+            }
+            EXPECT_EQ(nr, op->ukernel.gemm_ukernels->gemm.nr);
+            EXPECT_EQ(weights_stride, op->weights_stride);
+            EXPECT_EQ(cached_offset, op->packed_weights.offset);
+            xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+                workspace_size);
+            const auto& context = op->dynamic_context.gemm->gemm;
+            xnnpack::Buffer<int8_t> packed_input(
+                flags == 0
+                    ? pack_lh_config->size_fn(batch_size, input_channels,
+                                              context.mr_packed, context.kr,
+                                              context.sr)
+                    : 0,
+                xnnpack::XnnExtraBytes);
+            const int8_t* runtime_input = input.data();
+            if (flags == 0) {
+              pack_lh_config->pack_lh_fn(
+                  batch_size, input_channels, context.mr_packed, context.kr,
+                  context.sr, /*m_idx_start=*/0, input.data(), input_stride,
+                  packed_input.data());
+              runtime_input = packed_input.data();
+            }
+            std::vector<int8_t> output(batch_size * output_stride, int8_t{-101});
+            ASSERT_EQ(xnn_status_success,
+                      xnn_setup_fully_connected_nc_pqs8_qc4w(
+                          op, runtime_input, output.data(), workspace.data()));
+            ASSERT_EQ(xnn_status_success,
+                      xnn_run_operator(op, threadpool.get()));
+            for (size_t row = 0; row < batch_size; row++) {
+              for (size_t n = 0; n < output_channels; n++) {
+                int32_t acc = bias[n];
+                for (size_t k = 0; k < input_channels; k++) {
+                  acc += (int32_t(input[row * input_stride + k]) -
+                          input_zero_point) *
+                         (int((n * 3 + k) % 7) - 3);
+                }
+                const int32_t expected = std::max(
+                    -127, std::min(126, int32_t(acc * scales[n]) +
+                                           output_zero_point));
+                ASSERT_EQ(expected, output[row * output_stride + n])
+                    << "row=" << row << " channel=" << n;
+              }
+              for (size_t n = output_channels; n < output_stride; n++) {
+                ASSERT_EQ(-101, output[row * output_stride + n]);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 TEST(FULLY_CONNECTED_NC_PQS8_QC4W, invalid_kernel_zero_point) {
