@@ -127,6 +127,15 @@ class SubgraphTester {
   SubgraphTester& AddInternalDynamicTensor(const TensorShape& shape,
                                            enum xnn_datatype datatype,
                                            uint32_t* id_out,
+                                           uint32_t flags = 0) {
+    return AddInternalDynamicTensor(shape, datatype, {}, id_out, flags);
+  }
+
+  // Defines an internal dynamic value. Quantized datatypes use `quantization`.
+  SubgraphTester& AddInternalDynamicTensor(const TensorShape& shape,
+                                           enum xnn_datatype datatype,
+                                           xnn_quantization_params quantization,
+                                           uint32_t* id_out,
                                            uint32_t flags = 0);
 
   SubgraphTester& AddInternalDynamicTensorF32(const TensorShape& shape,
@@ -138,7 +147,33 @@ class SubgraphTester {
   SubgraphTester& AddInternalStaticTensor(const TensorShape& shape,
                                           enum xnn_datatype datatype,
                                           uint32_t* id_out, const void* data,
+                                          uint32_t flags = 0) {
+    return AddInternalStaticTensor(shape, datatype, {}, id_out, data, flags);
+  }
+
+  // Defines an internal static value. Quantized datatypes use `quantization`.
+  SubgraphTester& AddInternalStaticTensor(const TensorShape& shape,
+                                          enum xnn_datatype datatype,
+                                          xnn_quantization_params quantization,
+                                          uint32_t* id_out, const void* data,
                                           uint32_t flags = 0);
+
+  // Defines an internal channelwise quantized value, static if `data` isn't
+  // null, with one zero point per channel if `channelwise_zero_points` isn't
+  // null.
+  SubgraphTester& AddInternalChannelwiseQuantizedTensor(
+      const TensorShape& shape, size_t channel_dim, xnn_datatype datatype,
+      int32_t zero_point, const float* scales,
+      const float* channelwise_zero_points, uint32_t* id_out,
+      const void* data = nullptr, uint32_t flags = 0);
+
+  // Defines an internal blockwise quantized value, whose `scales` have the
+  // datatype `scale_type`.
+  SubgraphTester& AddInternalBlockwiseQuantizedTensor(
+      const TensorShape& shape, size_t channel_dim, size_t block_size,
+      xnn_datatype datatype, int32_t zero_point, const void* scales,
+      xnn_datatype scale_type, uint32_t* id_out, const void* data,
+      uint32_t flags = 0);
 
   SubgraphTester& AddInternalDynamicallyQuantizedTensor(
       const TensorShape& shape, xnn_datatype datatype, size_t num_nonbatch_dims,
