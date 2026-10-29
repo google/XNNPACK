@@ -47,6 +47,9 @@ static enum xnn_status create_concatenate_operator(
   xnn_weights_cache_t weights_cache)
 {
   size_t num_inputs = opdata->num_inputs;
+  if (num_inputs == 0) {
+    return xnn_status_invalid_parameter;
+  }
   enum xnn_status status = xnn_status_success;
   const int32_t axis = node->params.concatenate.axis;
   opdata->axis = axis;
@@ -406,18 +409,37 @@ enum xnn_status xnn_define_concatenate(
     return status;
   }
 
-  for (size_t i = 0; i < num_inputs; i++) {
-    status = check_input_value(subgraph, axis, inputs[i], output_id, i + 1, xnn_node_type_concatenate);
-    if (status != xnn_status_success) {
-      return status;
-    }
+  if (num_inputs < 2) {
+    xnn_log_error(
+      "failed to define %s operator with %zu inputs: "
+      "number of inputs must be at least 2",
+      xnn_node_type_to_string(xnn_node_type_concatenate), num_inputs);
+    return xnn_status_invalid_parameter;
   }
 
   if (num_inputs > XNN_MAX_OPERATOR_OBJECTS) {
     xnn_log_error(
-      "failed to define %s operator with %zu inputs: number of inputs (%zu) exceeds the supported maximum (%zu)",
-      xnn_node_type_to_string(xnn_node_type_concatenate), num_inputs, num_inputs, (size_t) XNN_MAX_OPERATOR_OBJECTS);
+      "failed to define %s operator with %zu inputs: "
+      "number of inputs (%zu) exceeds the supported maximum (%zu)",
+      xnn_node_type_to_string(xnn_node_type_concatenate), num_inputs,
+      num_inputs, (size_t) XNN_MAX_OPERATOR_OBJECTS);
     return xnn_status_invalid_parameter;
+  }
+
+  if (inputs == NULL) {
+    xnn_log_error(
+      "failed to define %s operator: inputs array cannot be NULL",
+      xnn_node_type_to_string(xnn_node_type_concatenate));
+    return xnn_status_invalid_parameter;
+  }
+
+  for (size_t i = 0; i < num_inputs; i++) {
+    status = check_input_value(
+      subgraph, axis, inputs[i], output_id, i + 1,
+      xnn_node_type_concatenate);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
 
   for (size_t i = 0; i < num_inputs; i++) {
