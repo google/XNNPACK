@@ -81,7 +81,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v(
 
     __riscv_vse16(o, vf, vl); o += vl;
 
-    vacc = __riscv_vfwadd_wv(vacc, vf, vl);
+    vacc = __riscv_vfwadd_wv_f32m8_tu(vacc, vacc, vf, vl);
   } while (batch > 0);
 
   vfloat32m1_t v0 = __riscv_vfmv_s_f_f32m1(0.0f, 1);

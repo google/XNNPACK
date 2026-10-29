@@ -36,7 +36,7 @@ void xnn_s8_rmax_ukernel__rvv_u8v(
   while (batch > 0) {
     size_t vl = __riscv_vsetvl_e8m8(batch); batch -= vl;
     vint8m8_t vinput = __riscv_vle8_v_i8m8(input, vl); input += vl;
-    vmax = __riscv_vmax(vmax, vinput, vl);
+    vmax = __riscv_vmax_vv_i8m8_tu(vmax, vmax, vinput, vl);
   }
 
   vint8m1_t max = __riscv_vle8_v_i8m1(output + 0, 1);

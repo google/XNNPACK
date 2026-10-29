@@ -32,7 +32,7 @@ void xnn_f16_vlrelu_ukernel__rvvfp16arith_u4v(
     size_t vl = __riscv_vsetvl_e16m4(batch);
     vfloat16m4_t in_f16v = __riscv_vle16_v_f16m4(input, vl); input += vl;
     vbool4_t mask_f16v = __riscv_vmflt(in_f16v, 0.0f, vl);
-    vfloat16m4_t out_f16v = __riscv_vfmul(mask_f16v, in_f16v, slope, vl);
+    vfloat16m4_t out_f16v = __riscv_vfmul_vf_f16m4_mu(mask_f16v, in_f16v, in_f16v, slope, vl);
     __riscv_vse16(output, out_f16v, vl); output += vl;
 
     batch -= vl;
