@@ -1525,6 +1525,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   uint32_t packed_b_id = input_b_id;
   if (pack_b) {
     packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims, input_b_id);
+  } else {
+    kernel = unpacked_kernel;
   }
 
   ynn_node node;
@@ -1601,9 +1603,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size, unpacked_kernel.block_n);
   // Estimate the throughput of the kernel we expect to run from its cost model
   // (for the shape it was selected for), to decide how small tasks can be.
-  const dot_kernel& expected_kernel = pack_b ? kernel : unpacked_kernel;
   const float seconds_per_mac =
-      expected_kernel.cost /
+      kernel.cost /
       (static_cast<float>(std::max<size_t>(1, shape.m)) *
        std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
   node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
