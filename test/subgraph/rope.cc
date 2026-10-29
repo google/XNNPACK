@@ -151,6 +151,50 @@ TEST(RoPEF32, reshape_rejects_tokens_exceeding_weights) {
 }
 
 #ifndef XNNPACK_USE_YNNPACK
+TEST(RoPE, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_bf16, 0)
+      .AddInputTensor(2, xnn_datatype_bf16, 1)
+      .AddOutputTensor(4, xnn_datatype_bf16, 2);
+  EXPECT_EQ(xnn_define_rope(subgraph.Subgraph(), /*max_tokens=*/0,
+                            /*input_id=*/0, /*weights_id=*/1,
+                            /*output_id=*/2, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(RoPE, DefineRejectsUnsupportedWeightsDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(2, xnn_datatype_bf16, 1)
+      .AddOutputTensor(4, xnn_datatype_fp32, 2);
+  EXPECT_EQ(xnn_define_rope(subgraph.Subgraph(), /*max_tokens=*/0,
+                            /*input_id=*/0, /*weights_id=*/1,
+                            /*output_id=*/2, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(RoPE, DefineRejectsUnsupportedOutputDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(2, xnn_datatype_fp32, 1)
+      .AddOutputTensor(4, xnn_datatype_bf16, 2);
+  EXPECT_EQ(xnn_define_rope(subgraph.Subgraph(), /*max_tokens=*/0,
+                            /*input_id=*/0, /*weights_id=*/1,
+                            /*output_id=*/2, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(RoPE, DefineRejectsInputOutputDatatypeMismatch) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(2, xnn_datatype_fp32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp16, 2);
+  EXPECT_EQ(xnn_define_rope(subgraph.Subgraph(), /*max_tokens=*/0,
+                            /*input_id=*/0, /*weights_id=*/1,
+                            /*output_id=*/2, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
 TEST(RoPE, ReshapeRejectZeroChannels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
