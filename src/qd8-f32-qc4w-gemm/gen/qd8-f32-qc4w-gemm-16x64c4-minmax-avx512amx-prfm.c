@@ -157,132 +157,138 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
       a += 64;
       _tile_loadd(5, weight_buffer[0], 64);
       _tile_dpbssd(0, 4, 5);
-      const __m512i vb0x1 = _mm512_load_epi32((const int8_t*) w + 64);
-      const __m512i vb1x1 = _mm512_load_epi32((const int8_t*) w + 320);
-      const __m512i vb2x1 = _mm512_load_epi32((const int8_t*) w + 576);
-      const __m512i vb3x1 = _mm512_load_epi32((const int8_t*) w + 832);
-      const __m512i vb4x1 = _mm512_load_epi32((const int8_t*) w + 1088);
-      const __m512i vb5x1 = _mm512_load_epi32((const int8_t*) w + 1344);
-      const __m512i vb6x1 = _mm512_load_epi32((const int8_t*) w + 1600);
-      const __m512i vb7x1 = _mm512_load_epi32((const int8_t*) w + 1856);
-      const __m512i vl0x1 = _mm512_gf2p8affine_epi64_epi8(vb0x1, vshl4, 0);
-      const __m512i vh0x1 = _mm512_and_si512(vb0x1, vmask);
-      const __m512i vl1x1 = _mm512_gf2p8affine_epi64_epi8(vb1x1, vshl4, 0);
-      const __m512i vh1x1 = _mm512_and_si512(vb1x1, vmask);
-      const __m512i vl2x1 = _mm512_gf2p8affine_epi64_epi8(vb2x1, vshl4, 0);
-      const __m512i vh2x1 = _mm512_and_si512(vb2x1, vmask);
-      const __m512i vl3x1 = _mm512_gf2p8affine_epi64_epi8(vb3x1, vshl4, 0);
-      const __m512i vh3x1 = _mm512_and_si512(vb3x1, vmask);
-      const __m512i vl4x1 = _mm512_gf2p8affine_epi64_epi8(vb4x1, vshl4, 0);
-      const __m512i vh4x1 = _mm512_and_si512(vb4x1, vmask);
-      const __m512i vl5x1 = _mm512_gf2p8affine_epi64_epi8(vb5x1, vshl4, 0);
-      const __m512i vh5x1 = _mm512_and_si512(vb5x1, vmask);
-      const __m512i vl6x1 = _mm512_gf2p8affine_epi64_epi8(vb6x1, vshl4, 0);
-      const __m512i vh6x1 = _mm512_and_si512(vb6x1, vmask);
-      const __m512i vl7x1 = _mm512_gf2p8affine_epi64_epi8(vb7x1, vshl4, 0);
-      const __m512i vh7x1 = _mm512_and_si512(vb7x1, vmask);
-      _mm512_store_epi32(weight_buffer[1] + 0, vl0x1);
-      _mm512_store_epi32(weight_buffer[1] + 64, vh0x1);
-      _mm512_store_epi32(weight_buffer[1] + 128, vl1x1);
-      _mm512_store_epi32(weight_buffer[1] + 192, vh1x1);
-      _mm512_store_epi32(weight_buffer[1] + 256, vl2x1);
-      _mm512_store_epi32(weight_buffer[1] + 320, vh2x1);
-      _mm512_store_epi32(weight_buffer[1] + 384, vl3x1);
-      _mm512_store_epi32(weight_buffer[1] + 448, vh3x1);
-      _mm512_store_epi32(weight_buffer[1] + 512, vl4x1);
-      _mm512_store_epi32(weight_buffer[1] + 576, vh4x1);
-      _mm512_store_epi32(weight_buffer[1] + 640, vl5x1);
-      _mm512_store_epi32(weight_buffer[1] + 704, vh5x1);
-      _mm512_store_epi32(weight_buffer[1] + 768, vl6x1);
-      _mm512_store_epi32(weight_buffer[1] + 832, vh6x1);
-      _mm512_store_epi32(weight_buffer[1] + 896, vl7x1);
-      _mm512_store_epi32(weight_buffer[1] + 960, vh7x1);
-      _tile_loadd(5, weight_buffer[1], 64);
-      _tile_dpbssd(1, 4, 5);
-      const __m512i vb0x2 = _mm512_load_epi32((const int8_t*) w + 128);
-      const __m512i vb1x2 = _mm512_load_epi32((const int8_t*) w + 384);
-      const __m512i vb2x2 = _mm512_load_epi32((const int8_t*) w + 640);
-      const __m512i vb3x2 = _mm512_load_epi32((const int8_t*) w + 896);
-      const __m512i vb4x2 = _mm512_load_epi32((const int8_t*) w + 1152);
-      const __m512i vb5x2 = _mm512_load_epi32((const int8_t*) w + 1408);
-      const __m512i vb6x2 = _mm512_load_epi32((const int8_t*) w + 1664);
-      const __m512i vb7x2 = _mm512_load_epi32((const int8_t*) w + 1920);
-      const __m512i vl0x2 = _mm512_gf2p8affine_epi64_epi8(vb0x2, vshl4, 0);
-      const __m512i vh0x2 = _mm512_and_si512(vb0x2, vmask);
-      const __m512i vl1x2 = _mm512_gf2p8affine_epi64_epi8(vb1x2, vshl4, 0);
-      const __m512i vh1x2 = _mm512_and_si512(vb1x2, vmask);
-      const __m512i vl2x2 = _mm512_gf2p8affine_epi64_epi8(vb2x2, vshl4, 0);
-      const __m512i vh2x2 = _mm512_and_si512(vb2x2, vmask);
-      const __m512i vl3x2 = _mm512_gf2p8affine_epi64_epi8(vb3x2, vshl4, 0);
-      const __m512i vh3x2 = _mm512_and_si512(vb3x2, vmask);
-      const __m512i vl4x2 = _mm512_gf2p8affine_epi64_epi8(vb4x2, vshl4, 0);
-      const __m512i vh4x2 = _mm512_and_si512(vb4x2, vmask);
-      const __m512i vl5x2 = _mm512_gf2p8affine_epi64_epi8(vb5x2, vshl4, 0);
-      const __m512i vh5x2 = _mm512_and_si512(vb5x2, vmask);
-      const __m512i vl6x2 = _mm512_gf2p8affine_epi64_epi8(vb6x2, vshl4, 0);
-      const __m512i vh6x2 = _mm512_and_si512(vb6x2, vmask);
-      const __m512i vl7x2 = _mm512_gf2p8affine_epi64_epi8(vb7x2, vshl4, 0);
-      const __m512i vh7x2 = _mm512_and_si512(vb7x2, vmask);
-      _mm512_store_epi32(weight_buffer[0] + 0, vl0x2);
-      _mm512_store_epi32(weight_buffer[0] + 64, vh0x2);
-      _mm512_store_epi32(weight_buffer[0] + 128, vl1x2);
-      _mm512_store_epi32(weight_buffer[0] + 192, vh1x2);
-      _mm512_store_epi32(weight_buffer[0] + 256, vl2x2);
-      _mm512_store_epi32(weight_buffer[0] + 320, vh2x2);
-      _mm512_store_epi32(weight_buffer[0] + 384, vl3x2);
-      _mm512_store_epi32(weight_buffer[0] + 448, vh3x2);
-      _mm512_store_epi32(weight_buffer[0] + 512, vl4x2);
-      _mm512_store_epi32(weight_buffer[0] + 576, vh4x2);
-      _mm512_store_epi32(weight_buffer[0] + 640, vl5x2);
-      _mm512_store_epi32(weight_buffer[0] + 704, vh5x2);
-      _mm512_store_epi32(weight_buffer[0] + 768, vl6x2);
-      _mm512_store_epi32(weight_buffer[0] + 832, vh6x2);
-      _mm512_store_epi32(weight_buffer[0] + 896, vl7x2);
-      _mm512_store_epi32(weight_buffer[0] + 960, vh7x2);
-      _tile_loadd(5, weight_buffer[0], 64);
-      _tile_dpbssd(2, 4, 5);
-      const __m512i vb0x3 = _mm512_load_epi32((const int8_t*) w + 192);
-      const __m512i vb1x3 = _mm512_load_epi32((const int8_t*) w + 448);
-      const __m512i vb2x3 = _mm512_load_epi32((const int8_t*) w + 704);
-      const __m512i vb3x3 = _mm512_load_epi32((const int8_t*) w + 960);
-      const __m512i vb4x3 = _mm512_load_epi32((const int8_t*) w + 1216);
-      const __m512i vb5x3 = _mm512_load_epi32((const int8_t*) w + 1472);
-      const __m512i vb6x3 = _mm512_load_epi32((const int8_t*) w + 1728);
-      const __m512i vb7x3 = _mm512_load_epi32((const int8_t*) w + 1984);
-      const __m512i vl0x3 = _mm512_gf2p8affine_epi64_epi8(vb0x3, vshl4, 0);
-      const __m512i vh0x3 = _mm512_and_si512(vb0x3, vmask);
-      const __m512i vl1x3 = _mm512_gf2p8affine_epi64_epi8(vb1x3, vshl4, 0);
-      const __m512i vh1x3 = _mm512_and_si512(vb1x3, vmask);
-      const __m512i vl2x3 = _mm512_gf2p8affine_epi64_epi8(vb2x3, vshl4, 0);
-      const __m512i vh2x3 = _mm512_and_si512(vb2x3, vmask);
-      const __m512i vl3x3 = _mm512_gf2p8affine_epi64_epi8(vb3x3, vshl4, 0);
-      const __m512i vh3x3 = _mm512_and_si512(vb3x3, vmask);
-      const __m512i vl4x3 = _mm512_gf2p8affine_epi64_epi8(vb4x3, vshl4, 0);
-      const __m512i vh4x3 = _mm512_and_si512(vb4x3, vmask);
-      const __m512i vl5x3 = _mm512_gf2p8affine_epi64_epi8(vb5x3, vshl4, 0);
-      const __m512i vh5x3 = _mm512_and_si512(vb5x3, vmask);
-      const __m512i vl6x3 = _mm512_gf2p8affine_epi64_epi8(vb6x3, vshl4, 0);
-      const __m512i vh6x3 = _mm512_and_si512(vb6x3, vmask);
-      const __m512i vl7x3 = _mm512_gf2p8affine_epi64_epi8(vb7x3, vshl4, 0);
-      const __m512i vh7x3 = _mm512_and_si512(vb7x3, vmask);
-      _mm512_store_epi32(weight_buffer[1] + 0, vl0x3);
-      _mm512_store_epi32(weight_buffer[1] + 64, vh0x3);
-      _mm512_store_epi32(weight_buffer[1] + 128, vl1x3);
-      _mm512_store_epi32(weight_buffer[1] + 192, vh1x3);
-      _mm512_store_epi32(weight_buffer[1] + 256, vl2x3);
-      _mm512_store_epi32(weight_buffer[1] + 320, vh2x3);
-      _mm512_store_epi32(weight_buffer[1] + 384, vl3x3);
-      _mm512_store_epi32(weight_buffer[1] + 448, vh3x3);
-      _mm512_store_epi32(weight_buffer[1] + 512, vl4x3);
-      _mm512_store_epi32(weight_buffer[1] + 576, vh4x3);
-      _mm512_store_epi32(weight_buffer[1] + 640, vl5x3);
-      _mm512_store_epi32(weight_buffer[1] + 704, vh5x3);
-      _mm512_store_epi32(weight_buffer[1] + 768, vl6x3);
-      _mm512_store_epi32(weight_buffer[1] + 832, vh6x3);
-      _mm512_store_epi32(weight_buffer[1] + 896, vl7x3);
-      _mm512_store_epi32(weight_buffer[1] + 960, vh7x3);
-      _tile_loadd(5, weight_buffer[1], 64);
-      _tile_dpbssd(3, 4, 5);
+      if XNN_LIKELY(nc > 16) {
+        const __m512i vb0x1 = _mm512_load_epi32((const int8_t*) w + 64);
+        const __m512i vb1x1 = _mm512_load_epi32((const int8_t*) w + 320);
+        const __m512i vb2x1 = _mm512_load_epi32((const int8_t*) w + 576);
+        const __m512i vb3x1 = _mm512_load_epi32((const int8_t*) w + 832);
+        const __m512i vb4x1 = _mm512_load_epi32((const int8_t*) w + 1088);
+        const __m512i vb5x1 = _mm512_load_epi32((const int8_t*) w + 1344);
+        const __m512i vb6x1 = _mm512_load_epi32((const int8_t*) w + 1600);
+        const __m512i vb7x1 = _mm512_load_epi32((const int8_t*) w + 1856);
+        const __m512i vl0x1 = _mm512_gf2p8affine_epi64_epi8(vb0x1, vshl4, 0);
+        const __m512i vh0x1 = _mm512_and_si512(vb0x1, vmask);
+        const __m512i vl1x1 = _mm512_gf2p8affine_epi64_epi8(vb1x1, vshl4, 0);
+        const __m512i vh1x1 = _mm512_and_si512(vb1x1, vmask);
+        const __m512i vl2x1 = _mm512_gf2p8affine_epi64_epi8(vb2x1, vshl4, 0);
+        const __m512i vh2x1 = _mm512_and_si512(vb2x1, vmask);
+        const __m512i vl3x1 = _mm512_gf2p8affine_epi64_epi8(vb3x1, vshl4, 0);
+        const __m512i vh3x1 = _mm512_and_si512(vb3x1, vmask);
+        const __m512i vl4x1 = _mm512_gf2p8affine_epi64_epi8(vb4x1, vshl4, 0);
+        const __m512i vh4x1 = _mm512_and_si512(vb4x1, vmask);
+        const __m512i vl5x1 = _mm512_gf2p8affine_epi64_epi8(vb5x1, vshl4, 0);
+        const __m512i vh5x1 = _mm512_and_si512(vb5x1, vmask);
+        const __m512i vl6x1 = _mm512_gf2p8affine_epi64_epi8(vb6x1, vshl4, 0);
+        const __m512i vh6x1 = _mm512_and_si512(vb6x1, vmask);
+        const __m512i vl7x1 = _mm512_gf2p8affine_epi64_epi8(vb7x1, vshl4, 0);
+        const __m512i vh7x1 = _mm512_and_si512(vb7x1, vmask);
+        _mm512_store_epi32(weight_buffer[1] + 0, vl0x1);
+        _mm512_store_epi32(weight_buffer[1] + 64, vh0x1);
+        _mm512_store_epi32(weight_buffer[1] + 128, vl1x1);
+        _mm512_store_epi32(weight_buffer[1] + 192, vh1x1);
+        _mm512_store_epi32(weight_buffer[1] + 256, vl2x1);
+        _mm512_store_epi32(weight_buffer[1] + 320, vh2x1);
+        _mm512_store_epi32(weight_buffer[1] + 384, vl3x1);
+        _mm512_store_epi32(weight_buffer[1] + 448, vh3x1);
+        _mm512_store_epi32(weight_buffer[1] + 512, vl4x1);
+        _mm512_store_epi32(weight_buffer[1] + 576, vh4x1);
+        _mm512_store_epi32(weight_buffer[1] + 640, vl5x1);
+        _mm512_store_epi32(weight_buffer[1] + 704, vh5x1);
+        _mm512_store_epi32(weight_buffer[1] + 768, vl6x1);
+        _mm512_store_epi32(weight_buffer[1] + 832, vh6x1);
+        _mm512_store_epi32(weight_buffer[1] + 896, vl7x1);
+        _mm512_store_epi32(weight_buffer[1] + 960, vh7x1);
+        _tile_loadd(5, weight_buffer[1], 64);
+        _tile_dpbssd(1, 4, 5);
+      }
+      if XNN_LIKELY(nc > 32) {
+        const __m512i vb0x2 = _mm512_load_epi32((const int8_t*) w + 128);
+        const __m512i vb1x2 = _mm512_load_epi32((const int8_t*) w + 384);
+        const __m512i vb2x2 = _mm512_load_epi32((const int8_t*) w + 640);
+        const __m512i vb3x2 = _mm512_load_epi32((const int8_t*) w + 896);
+        const __m512i vb4x2 = _mm512_load_epi32((const int8_t*) w + 1152);
+        const __m512i vb5x2 = _mm512_load_epi32((const int8_t*) w + 1408);
+        const __m512i vb6x2 = _mm512_load_epi32((const int8_t*) w + 1664);
+        const __m512i vb7x2 = _mm512_load_epi32((const int8_t*) w + 1920);
+        const __m512i vl0x2 = _mm512_gf2p8affine_epi64_epi8(vb0x2, vshl4, 0);
+        const __m512i vh0x2 = _mm512_and_si512(vb0x2, vmask);
+        const __m512i vl1x2 = _mm512_gf2p8affine_epi64_epi8(vb1x2, vshl4, 0);
+        const __m512i vh1x2 = _mm512_and_si512(vb1x2, vmask);
+        const __m512i vl2x2 = _mm512_gf2p8affine_epi64_epi8(vb2x2, vshl4, 0);
+        const __m512i vh2x2 = _mm512_and_si512(vb2x2, vmask);
+        const __m512i vl3x2 = _mm512_gf2p8affine_epi64_epi8(vb3x2, vshl4, 0);
+        const __m512i vh3x2 = _mm512_and_si512(vb3x2, vmask);
+        const __m512i vl4x2 = _mm512_gf2p8affine_epi64_epi8(vb4x2, vshl4, 0);
+        const __m512i vh4x2 = _mm512_and_si512(vb4x2, vmask);
+        const __m512i vl5x2 = _mm512_gf2p8affine_epi64_epi8(vb5x2, vshl4, 0);
+        const __m512i vh5x2 = _mm512_and_si512(vb5x2, vmask);
+        const __m512i vl6x2 = _mm512_gf2p8affine_epi64_epi8(vb6x2, vshl4, 0);
+        const __m512i vh6x2 = _mm512_and_si512(vb6x2, vmask);
+        const __m512i vl7x2 = _mm512_gf2p8affine_epi64_epi8(vb7x2, vshl4, 0);
+        const __m512i vh7x2 = _mm512_and_si512(vb7x2, vmask);
+        _mm512_store_epi32(weight_buffer[0] + 0, vl0x2);
+        _mm512_store_epi32(weight_buffer[0] + 64, vh0x2);
+        _mm512_store_epi32(weight_buffer[0] + 128, vl1x2);
+        _mm512_store_epi32(weight_buffer[0] + 192, vh1x2);
+        _mm512_store_epi32(weight_buffer[0] + 256, vl2x2);
+        _mm512_store_epi32(weight_buffer[0] + 320, vh2x2);
+        _mm512_store_epi32(weight_buffer[0] + 384, vl3x2);
+        _mm512_store_epi32(weight_buffer[0] + 448, vh3x2);
+        _mm512_store_epi32(weight_buffer[0] + 512, vl4x2);
+        _mm512_store_epi32(weight_buffer[0] + 576, vh4x2);
+        _mm512_store_epi32(weight_buffer[0] + 640, vl5x2);
+        _mm512_store_epi32(weight_buffer[0] + 704, vh5x2);
+        _mm512_store_epi32(weight_buffer[0] + 768, vl6x2);
+        _mm512_store_epi32(weight_buffer[0] + 832, vh6x2);
+        _mm512_store_epi32(weight_buffer[0] + 896, vl7x2);
+        _mm512_store_epi32(weight_buffer[0] + 960, vh7x2);
+        _tile_loadd(5, weight_buffer[0], 64);
+        _tile_dpbssd(2, 4, 5);
+      }
+      if XNN_LIKELY(nc > 48) {
+        const __m512i vb0x3 = _mm512_load_epi32((const int8_t*) w + 192);
+        const __m512i vb1x3 = _mm512_load_epi32((const int8_t*) w + 448);
+        const __m512i vb2x3 = _mm512_load_epi32((const int8_t*) w + 704);
+        const __m512i vb3x3 = _mm512_load_epi32((const int8_t*) w + 960);
+        const __m512i vb4x3 = _mm512_load_epi32((const int8_t*) w + 1216);
+        const __m512i vb5x3 = _mm512_load_epi32((const int8_t*) w + 1472);
+        const __m512i vb6x3 = _mm512_load_epi32((const int8_t*) w + 1728);
+        const __m512i vb7x3 = _mm512_load_epi32((const int8_t*) w + 1984);
+        const __m512i vl0x3 = _mm512_gf2p8affine_epi64_epi8(vb0x3, vshl4, 0);
+        const __m512i vh0x3 = _mm512_and_si512(vb0x3, vmask);
+        const __m512i vl1x3 = _mm512_gf2p8affine_epi64_epi8(vb1x3, vshl4, 0);
+        const __m512i vh1x3 = _mm512_and_si512(vb1x3, vmask);
+        const __m512i vl2x3 = _mm512_gf2p8affine_epi64_epi8(vb2x3, vshl4, 0);
+        const __m512i vh2x3 = _mm512_and_si512(vb2x3, vmask);
+        const __m512i vl3x3 = _mm512_gf2p8affine_epi64_epi8(vb3x3, vshl4, 0);
+        const __m512i vh3x3 = _mm512_and_si512(vb3x3, vmask);
+        const __m512i vl4x3 = _mm512_gf2p8affine_epi64_epi8(vb4x3, vshl4, 0);
+        const __m512i vh4x3 = _mm512_and_si512(vb4x3, vmask);
+        const __m512i vl5x3 = _mm512_gf2p8affine_epi64_epi8(vb5x3, vshl4, 0);
+        const __m512i vh5x3 = _mm512_and_si512(vb5x3, vmask);
+        const __m512i vl6x3 = _mm512_gf2p8affine_epi64_epi8(vb6x3, vshl4, 0);
+        const __m512i vh6x3 = _mm512_and_si512(vb6x3, vmask);
+        const __m512i vl7x3 = _mm512_gf2p8affine_epi64_epi8(vb7x3, vshl4, 0);
+        const __m512i vh7x3 = _mm512_and_si512(vb7x3, vmask);
+        _mm512_store_epi32(weight_buffer[1] + 0, vl0x3);
+        _mm512_store_epi32(weight_buffer[1] + 64, vh0x3);
+        _mm512_store_epi32(weight_buffer[1] + 128, vl1x3);
+        _mm512_store_epi32(weight_buffer[1] + 192, vh1x3);
+        _mm512_store_epi32(weight_buffer[1] + 256, vl2x3);
+        _mm512_store_epi32(weight_buffer[1] + 320, vh2x3);
+        _mm512_store_epi32(weight_buffer[1] + 384, vl3x3);
+        _mm512_store_epi32(weight_buffer[1] + 448, vh3x3);
+        _mm512_store_epi32(weight_buffer[1] + 512, vl4x3);
+        _mm512_store_epi32(weight_buffer[1] + 576, vh4x3);
+        _mm512_store_epi32(weight_buffer[1] + 640, vl5x3);
+        _mm512_store_epi32(weight_buffer[1] + 704, vh5x3);
+        _mm512_store_epi32(weight_buffer[1] + 768, vl6x3);
+        _mm512_store_epi32(weight_buffer[1] + 832, vh6x3);
+        _mm512_store_epi32(weight_buffer[1] + 896, vl7x3);
+        _mm512_store_epi32(weight_buffer[1] + 960, vh7x3);
+        _tile_loadd(5, weight_buffer[1], 64);
+        _tile_dpbssd(3, 4, 5);
+      }
       xnn_prefetch_to_l1((const int8_t*) w + 4096);
       xnn_prefetch_to_l1((const int8_t*) w + 4160);
       xnn_prefetch_to_l1((const int8_t*) w + 4224);
@@ -380,33 +386,39 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
       }
       _tile_loadd(7, weight_buffer[0], 64);
       _tile_dpbssd(0, 6, 7);
-      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
-        const __m512i vb1 = _mm512_load_epi32((const int8_t*) w + 64 + 256 * k);
-        const __m512i vl1 = _mm512_gf2p8affine_epi64_epi8(vb1, vshl4, 0);
-        const __m512i vh1 = _mm512_and_si512(vb1, vmask);
-        _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl1);
-        _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh1);
+      if XNN_LIKELY(nc > 16) {
+        for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+          const __m512i vb1 = _mm512_load_epi32((const int8_t*) w + 64 + 256 * k);
+          const __m512i vl1 = _mm512_gf2p8affine_epi64_epi8(vb1, vshl4, 0);
+          const __m512i vh1 = _mm512_and_si512(vb1, vmask);
+          _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl1);
+          _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh1);
+        }
+        _tile_loadd(7, weight_buffer[0], 64);
+        _tile_dpbssd(1, 6, 7);
       }
-      _tile_loadd(7, weight_buffer[0], 64);
-      _tile_dpbssd(1, 6, 7);
-      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
-        const __m512i vb2 = _mm512_load_epi32((const int8_t*) w + 128 + 256 * k);
-        const __m512i vl2 = _mm512_gf2p8affine_epi64_epi8(vb2, vshl4, 0);
-        const __m512i vh2 = _mm512_and_si512(vb2, vmask);
-        _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl2);
-        _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh2);
+      if XNN_LIKELY(nc > 32) {
+        for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+          const __m512i vb2 = _mm512_load_epi32((const int8_t*) w + 128 + 256 * k);
+          const __m512i vl2 = _mm512_gf2p8affine_epi64_epi8(vb2, vshl4, 0);
+          const __m512i vh2 = _mm512_and_si512(vb2, vmask);
+          _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl2);
+          _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh2);
+        }
+        _tile_loadd(7, weight_buffer[0], 64);
+        _tile_dpbssd(2, 6, 7);
       }
-      _tile_loadd(7, weight_buffer[0], 64);
-      _tile_dpbssd(2, 6, 7);
-      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
-        const __m512i vb3 = _mm512_load_epi32((const int8_t*) w + 192 + 256 * k);
-        const __m512i vl3 = _mm512_gf2p8affine_epi64_epi8(vb3, vshl4, 0);
-        const __m512i vh3 = _mm512_and_si512(vb3, vmask);
-        _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl3);
-        _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh3);
+      if XNN_LIKELY(nc > 48) {
+        for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+          const __m512i vb3 = _mm512_load_epi32((const int8_t*) w + 192 + 256 * k);
+          const __m512i vl3 = _mm512_gf2p8affine_epi64_epi8(vb3, vshl4, 0);
+          const __m512i vh3 = _mm512_and_si512(vb3, vmask);
+          _mm512_store_epi32(weight_buffer[0] + 128 * k + 0, vl3);
+          _mm512_store_epi32(weight_buffer[0] + 128 * k + 64, vh3);
+        }
+        _tile_loadd(7, weight_buffer[0], 64);
+        _tile_dpbssd(3, 6, 7);
       }
-      _tile_loadd(7, weight_buffer[0], 64);
-      _tile_dpbssd(3, 6, 7);
 
       w = (const int8_t*) w + ((kremainder + 7) >> 3) * 256;
       k -= kremainder * sizeof(int8_t);
@@ -415,9 +427,15 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
     // TODO: Instead of processing up to 4 tiles (16x64) consider
     // quantizing 1 tile at a time (16 registers)
     _tile_stored(0, &res[0][0], 64);
-    _tile_stored(1, &res[1][0], 64);
-    _tile_stored(2, &res[2][0], 64);
-    _tile_stored(3, &res[3][0], 64);
+    if XNN_LIKELY(nc > 16) {
+      _tile_stored(1, &res[1][0], 64);
+    }
+    if XNN_LIKELY(nc > 32) {
+      _tile_stored(2, &res[2][0], 64);
+    }
+    if XNN_LIKELY(nc > 48) {
+      _tile_stored(3, &res[3][0], 64);
+    }
 
     // TODO: Fix msan for AMX
     #if defined(__has_feature)
@@ -443,57 +461,94 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
     {
       const __m512i vzero_point = _mm512_set1_epi32((int) quantization_params[m].zero_point);
       const __m512 vinv_scale = _mm512_set1_ps(quantization_params[m].inv_scale);
-      __m512i vacc0 = _mm512_mullo_epi32(vksum0, vzero_point);
-      __m512i vacc1 = _mm512_mullo_epi32(vksum1, vzero_point);
-      __m512i vacc2 = _mm512_mullo_epi32(vksum2, vzero_point);
-      __m512i vacc3 = _mm512_mullo_epi32(vksum3, vzero_point);
-      // Add tile to bias
-      vacc0 = _mm512_add_epi32(vacc0, _mm512_load_epi32(&res[0][0] + m * 16));
-      vacc1 = _mm512_add_epi32(vacc1, _mm512_load_epi32(&res[1][0] + m * 16));
-      vacc2 = _mm512_add_epi32(vacc2, _mm512_load_epi32(&res[2][0] + m * 16));
-      vacc3 = _mm512_add_epi32(vacc3, _mm512_load_epi32(&res[3][0] + m * 16));
-
-      vacc0 = _mm512_srai_epi32(vacc0, 4);
-      vacc1 = _mm512_srai_epi32(vacc1, 4);
-      vacc2 = _mm512_srai_epi32(vacc2, 4);
-      vacc3 = _mm512_srai_epi32(vacc3, 4);
-      __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
-      __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
-      __m512 vscaled2 = _mm512_cvtepi32_ps(vacc2);
-      __m512 vscaled3 = _mm512_cvtepi32_ps(vacc3);
-
-      vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
-      vscaled1 = _mm512_mul_ps(vscaled1, vinv_scale);
-      vscaled2 = _mm512_mul_ps(vscaled2, vinv_scale);
-      vscaled3 = _mm512_mul_ps(vscaled3, vinv_scale);
-      vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
-      vscaled1 = _mm512_fmadd_ps(vscaled1, vfilter_output_scale1, vbias1);
-      vscaled2 = _mm512_fmadd_ps(vscaled2, vfilter_output_scale2, vbias2);
-      vscaled3 = _mm512_fmadd_ps(vscaled3, vfilter_output_scale3, vbias3);
-      vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
-      vscaled1 = _mm512_max_ps(vscaled1, voutput_min);
-      vscaled2 = _mm512_max_ps(vscaled2, voutput_min);
-      vscaled3 = _mm512_max_ps(vscaled3, voutput_min);
-      vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
-      vscaled1 = _mm512_min_ps(vscaled1, voutput_max);
-      vscaled2 = _mm512_min_ps(vscaled2, voutput_max);
-      vscaled3 = _mm512_min_ps(vscaled3, voutput_max);
-
       if XNN_LIKELY(nc >= 64) {
+        __m512i vacc0 = _mm512_mullo_epi32(vksum0, vzero_point);
+        __m512i vacc1 = _mm512_mullo_epi32(vksum1, vzero_point);
+        __m512i vacc2 = _mm512_mullo_epi32(vksum2, vzero_point);
+        __m512i vacc3 = _mm512_mullo_epi32(vksum3, vzero_point);
+        // Add tile to bias
+        vacc0 = _mm512_add_epi32(vacc0, _mm512_load_epi32(&res[0][0] + m * 16));
+        vacc1 = _mm512_add_epi32(vacc1, _mm512_load_epi32(&res[1][0] + m * 16));
+        vacc2 = _mm512_add_epi32(vacc2, _mm512_load_epi32(&res[2][0] + m * 16));
+        vacc3 = _mm512_add_epi32(vacc3, _mm512_load_epi32(&res[3][0] + m * 16));
+
+        vacc0 = _mm512_srai_epi32(vacc0, 4);
+        vacc1 = _mm512_srai_epi32(vacc1, 4);
+        vacc2 = _mm512_srai_epi32(vacc2, 4);
+        vacc3 = _mm512_srai_epi32(vacc3, 4);
+        __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
+        __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
+        __m512 vscaled2 = _mm512_cvtepi32_ps(vacc2);
+        __m512 vscaled3 = _mm512_cvtepi32_ps(vacc3);
+
+        vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
+        vscaled1 = _mm512_mul_ps(vscaled1, vinv_scale);
+        vscaled2 = _mm512_mul_ps(vscaled2, vinv_scale);
+        vscaled3 = _mm512_mul_ps(vscaled3, vinv_scale);
+        vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
+        vscaled1 = _mm512_fmadd_ps(vscaled1, vfilter_output_scale1, vbias1);
+        vscaled2 = _mm512_fmadd_ps(vscaled2, vfilter_output_scale2, vbias2);
+        vscaled3 = _mm512_fmadd_ps(vscaled3, vfilter_output_scale3, vbias3);
+        vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
+        vscaled1 = _mm512_max_ps(vscaled1, voutput_min);
+        vscaled2 = _mm512_max_ps(vscaled2, voutput_min);
+        vscaled3 = _mm512_max_ps(vscaled3, voutput_min);
+        vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
+        vscaled1 = _mm512_min_ps(vscaled1, voutput_max);
+        vscaled2 = _mm512_min_ps(vscaled2, voutput_max);
+        vscaled3 = _mm512_min_ps(vscaled3, voutput_max);
+
         _mm512_storeu_ps(c0 + 0, vscaled0);
         _mm512_storeu_ps(c0 + 16, vscaled1);
         _mm512_storeu_ps(c0 + 32, vscaled2);
         _mm512_storeu_ps(c0 + 48, vscaled3);
       } else {
-        // Prepare mask for valid 32-bit elements (depends on nc).
+        __m512i vacc0 = _mm512_mullo_epi32(vksum0, vzero_point);
+        vacc0 = _mm512_add_epi32(vacc0, _mm512_load_epi32(&res[0][0] + m * 16));
+        vacc0 = _mm512_srai_epi32(vacc0, 4);
+        __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
+        vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
+        vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
+        vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
+        vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
         const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
         _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0);
+        if (nc > 16) {
+        __m512i vacc1 = _mm512_mullo_epi32(vksum1, vzero_point);
+        vacc1 = _mm512_add_epi32(vacc1, _mm512_load_epi32(&res[1][0] + m * 16));
+        vacc1 = _mm512_srai_epi32(vacc1, 4);
+        __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
+        vscaled1 = _mm512_mul_ps(vscaled1, vinv_scale);
+        vscaled1 = _mm512_fmadd_ps(vscaled1, vfilter_output_scale1, vbias1);
+        vscaled1 = _mm512_max_ps(vscaled1, voutput_min);
+        vscaled1 = _mm512_min_ps(vscaled1, voutput_max);
         const __mmask16 vmask1 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 16) & 0xFFFF));
         _mm512_mask_storeu_ps(c0 + 16, vmask1, vscaled1);
+        }
+        if (nc > 32) {
+        __m512i vacc2 = _mm512_mullo_epi32(vksum2, vzero_point);
+        vacc2 = _mm512_add_epi32(vacc2, _mm512_load_epi32(&res[2][0] + m * 16));
+        vacc2 = _mm512_srai_epi32(vacc2, 4);
+        __m512 vscaled2 = _mm512_cvtepi32_ps(vacc2);
+        vscaled2 = _mm512_mul_ps(vscaled2, vinv_scale);
+        vscaled2 = _mm512_fmadd_ps(vscaled2, vfilter_output_scale2, vbias2);
+        vscaled2 = _mm512_max_ps(vscaled2, voutput_min);
+        vscaled2 = _mm512_min_ps(vscaled2, voutput_max);
         const __mmask16 vmask2 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 32) & 0xFFFF));
         _mm512_mask_storeu_ps(c0 + 32, vmask2, vscaled2);
+        }
+        if (nc > 48) {
+        __m512i vacc3 = _mm512_mullo_epi32(vksum3, vzero_point);
+        vacc3 = _mm512_add_epi32(vacc3, _mm512_load_epi32(&res[3][0] + m * 16));
+        vacc3 = _mm512_srai_epi32(vacc3, 4);
+        __m512 vscaled3 = _mm512_cvtepi32_ps(vacc3);
+        vscaled3 = _mm512_mul_ps(vscaled3, vinv_scale);
+        vscaled3 = _mm512_fmadd_ps(vscaled3, vfilter_output_scale3, vbias3);
+        vscaled3 = _mm512_max_ps(vscaled3, voutput_min);
+        vscaled3 = _mm512_min_ps(vscaled3, voutput_max);
         const __mmask16 vmask3 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 48) & 0xFFFF));
         _mm512_mask_storeu_ps(c0 + 48, vmask3, vscaled3);
+        }
       }
       c0 = (float*) ((uintptr_t) c0 + cm_stride);
     }

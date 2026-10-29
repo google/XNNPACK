@@ -596,29 +596,6 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_AVXVNNIINT8 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-  INSTANTIATE_TEST_SUITE_P(
-      QS8_QC8W_GEMM_MINMAX_FP32_7X64C4__AVX512AMX, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/64,
-          /*adj_k_block=*/64,
-          /*mr=*/7, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x64c4__avx512amx,
-                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qs8_gemm_goi_w,
-                        xnn_qs8_requantize_fp32);
-          },
-          xnn_arch_x86_avx512amx)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-
-
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC8W_GEMM_MINMAX_FP32_1X8__ASM_AARCH32_NEON_MLAL_LANE_CORTEX_A7, GemmTest,
