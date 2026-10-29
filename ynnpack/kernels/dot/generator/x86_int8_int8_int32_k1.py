@@ -16,6 +16,9 @@ from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 class x86_int8_int8_int32_k1(x86):
 
+  def b_alignment_bytes(self):
+    return 1
+
   def header(self):
     return super().header() + """
 
@@ -30,10 +33,6 @@ YNN_INTRINSIC int16_t unaligned_load_int8x2(const int8_t* ptr) {
 
 }  // namespace
 """
-
-  def b_alignment_bytes(self):
-    # This kernel loads half-vectors at a time from b.
-    return self.tile_shape[1] * self.tile_shape[2] // 2
 
   def load_a_tile(self, i, k):
     if k % 2 != 0:
@@ -75,6 +74,36 @@ __m{bits}i b_{k}_{j1} =
     {mm}_cvtepi8_epi16({mm_2}_unpackhi_epi8(b_r0_{k}_{j}, b_r1_{k}_{j}));
 """
 
+  def load_b_tile_tail(self, k, j):
+    if k % 2 != 0:
+      return ""
+    bits = self.bits
+    mm = self._mm()
+    mm_2 = self._mm(bits // 2)
+    m_2 = f"__m{bits // 2}i"
+    j0 = j
+    j1 = j + self.tile_shape[1] // 2
+
+    zero = f"{mm_2}_setzero_si{bits // 2}()"
+    size = f"min(sizeof({m_2}), sub_sat(N, {j}) * sizeof({self.b_type}))"
+    if self.block_shape[2] % 2 == 0:
+      b1_tail = f"""\
+{m_2} b_r1_{k}_{j} = {zero};
+std::memcpy(&b_r1_{k}_{j}, {self.b_ptr(k + 1, j)}, {size});
+"""
+    else:
+      b1_tail = f"{m_2} b_r1_{k}_{j} = {zero};\n"
+
+    return f"""\
+{m_2} b_r0_{k}_{j} = {zero};
+std::memcpy(&b_r0_{k}_{j}, {self.b_ptr(k + 0, j)}, {size});
+{b1_tail}\
+__m{bits}i b_{k}_{j0} =
+    {mm}_cvtepi8_epi16({mm_2}_unpacklo_epi8(b_r0_{k}_{j}, b_r1_{k}_{j}));
+__m{bits}i b_{k}_{j1} =
+    {mm}_cvtepi8_epi16({mm_2}_unpackhi_epi8(b_r0_{k}_{j}, b_r1_{k}_{j}));
+"""
+
   def product(self, i, j, k):
     if k % 2 != 0:
       return ""
@@ -98,6 +127,7 @@ class x86_avx2_int8_int8_int32_k1(x86_avx, x86_int8_int8_int32_k1):
     self.a_type = "int8_t"
     self.b_type = "int8_t"
     self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::unaligned_b"]
 
 
 class x86_avx512_int8_int8_int32_k1(x86_avx512, x86_int8_int8_int32_k1):
@@ -109,6 +139,36 @@ class x86_avx512_int8_int8_int32_k1(x86_avx512, x86_int8_int8_int32_k1):
     self.a_type = "int8_t"
     self.b_type = "int8_t"
     self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::unaligned_b"]
+
+  def load_b_tile_tail(self, k, j):
+    if k % 2 != 0:
+      return ""
+    bits = self.bits
+    mm = self._mm()
+    mm_2 = self._mm(bits // 2)
+    m_2 = f"__m{bits // 2}i"
+    j0 = j
+    j1 = j + self.tile_shape[1] // 2
+
+    mask = f"(uint32_t)((1ULL << min(32, sub_sat(N, {j}))) - 1)"
+    mask = f"_cvtu32_mask32({mask})"
+    if self.block_shape[2] % 2 == 0:
+      b1_tail = (
+          f"const {m_2} b_r1_{k}_{j} = {mm_2}_maskz_loadu_epi8({mask},"
+          f" {self.b_ptr(k + 1, j)});\n"
+      )
+    else:
+      b1_tail = f"const {m_2} b_r1_{k}_{j} = {mm_2}_setzero_si{bits // 2}();\n"
+
+    return f"""\
+const {m_2} b_r0_{k}_{j} = {mm_2}_maskz_loadu_epi8({mask}, {self.b_ptr(k + 0, j)});
+{b1_tail}\
+__m{bits}i b_{k}_{j0} =
+    {mm}_cvtepi8_epi16({mm_2}_unpacklo_epi8(b_r0_{k}_{j}, b_r1_{k}_{j}));
+__m{bits}i b_{k}_{j1} =
+    {mm}_cvtepi8_epi16({mm_2}_unpackhi_epi8(b_r0_{k}_{j}, b_r1_{k}_{j}));
+"""
 
   def finalize_c_tile(self, i, j):
     c0 = f"c_{i}_{j}"

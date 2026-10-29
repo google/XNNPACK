@@ -43,7 +43,7 @@ YNN_INTRINSIC __m{self.bits}d unaligned_load_broadcast(const double* ptr) {{
   def load_b_tile(self, k, j):
     return (
         f"__m{self.bits}d b_{k}_{j} ="
-        f" {self._mm()}_load_pd({self.b_ptr(k, j)});\n"
+        f" {self._mm()}_loadu_pd({self.b_ptr(k, j)});\n"
     )
 
   def product(self, i, j, k):

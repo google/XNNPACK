@@ -20,6 +20,10 @@ class arm_neon_bf16_bf16_fp32(arm_neon):
     self.b_type = "bfloat16"
     self.b_load_type = "uint16_t"
     self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::unaligned_b"]
+
+  def b_alignment_bytes(self):
+    return 2
 
   def header(self):
     return super().header() + """
@@ -50,6 +54,15 @@ YNN_INTRINSIC float32x4_t bf16_to_f32(uint16x4_t x) {
   def load_b_tile(self, k, j):
     b_ptr = self.b_ptr(k, j)
     return f"float32x4_t b_{k}_{j} = bf16_to_f32(vld1_u16({b_ptr}));\n"
+
+  def load_b_tile_tail(self, k, j):
+    b_ptr = self.b_ptr(k, j)
+    size = f"min(sizeof(uint16x4_t), sub_sat(N, {j}) * sizeof({self.b_type}))"
+    return f"""\
+uint16x4_t b_raw_{k}_{j} = vdup_n_u16(0);
+std::memcpy(&b_raw_{k}_{j}, {b_ptr}, {size});
+float32x4_t b_{k}_{j} = bf16_to_f32(b_raw_{k}_{j});
+"""
 
 
 class arm64_neon_bf16_bf16_fp32(arm_neon_bf16_bf16_fp32):

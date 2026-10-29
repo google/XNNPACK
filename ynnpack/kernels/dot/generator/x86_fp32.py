@@ -27,7 +27,7 @@ class x86_fp32(x86):
 
   def load_b_tile(self, k, j):
     b_ptr = self.b_ptr(k, j)
-    return f"__m{self.bits} b_{k}_{j} = {self._mm()}_load_ps({b_ptr});\n"
+    return f"__m{self.bits} b_{k}_{j} = {self._mm()}_loadu_ps({b_ptr});\n"
 
   def product(self, i, j, k):
     mm = self._mm()
@@ -38,6 +38,18 @@ class x86_fp32(x86):
 class x86_sse2_fp32(x86_fp32, x86_sse2):
   def __init__(self):
     super().__init__("sse2", 128, (1, 4, 1))
+    self.flags += ["dot_flag::unaligned_b"]
+
+  def b_alignment_bytes(self):
+    return 4
+
+  def load_b_tile_tail(self, k, j):
+    ptr = self.b_ptr(k, j)
+    size = f"min(sizeof(__m128), sub_sat(N, {j}) * sizeof(float))"
+    return f"""\
+__m128 b_{k}_{j} = _mm_setzero_ps();
+std::memcpy(&b_{k}_{j}, {ptr}, {size});
+"""
 
 
 class x86_avx_fp32(x86_fp32, x86_avx):
