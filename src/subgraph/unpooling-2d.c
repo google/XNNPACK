@@ -215,7 +215,7 @@ enum xnn_status xnn_define_unpooling_2d(
         "failed to define %s operator with input value ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_unpooling_2d), input_value_id,
         xnn_datatype_to_string(input_value_value->datatype), input_value_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (input_index_id >= subgraph->num_values) {
@@ -252,7 +252,7 @@ enum xnn_status xnn_define_unpooling_2d(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_unpooling_2d), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
