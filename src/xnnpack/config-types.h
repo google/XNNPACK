@@ -200,6 +200,8 @@ struct xnn_gemm_config {
   xnn_pack_conv_goki_w_fn pack_igemm_goki;
   xnn_pack_conv_kgo_w_fn pack_igemm_kgo;
   xnn_pack_deconv_goki_w_fn pack_deconv_goki;
+  // Fully-connected M=1 N scheduling step; zero uses nr. Does not affect packing.
+  size_t gemv_n_step;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;

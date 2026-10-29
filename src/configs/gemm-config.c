@@ -677,6 +677,16 @@ static void init_pqs8_qc4w_gemm_config(void) {
       return;
     }
     pqs8_qc4w_gemm_config.arch = xnn_arch_arm_sme2;
+    // GEMV shares the packed RHS panels, but requires a larger N task step.
+    assert(nr ==
+        xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_nr());
+    pqs8_qc4w_gemm_config.gemv_n_step =
+        xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_n_step();
+    assert(pqs8_qc4w_gemm_config.gemv_n_step >= nr);
+    assert(pqs8_qc4w_gemm_config.gemv_n_step % nr == 0);
+    pqs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] =
+        XNN_INIT_HMP_GEMM_UKERNEL(
+            xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2);
     pqs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_GEMM_UKERNEL(
             xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2);
