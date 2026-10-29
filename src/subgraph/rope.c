@@ -307,6 +307,18 @@ enum xnn_status xnn_define_rope(
     return status;
   }
 
+  if (weights_value->datatype != input_value->datatype) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32
+        " and weights ID #%" PRIu32
+        ": mixed precision is not supported, weights datatype %s must match "
+        "input datatype %s",
+        xnn_node_type_to_string(xnn_node_type_rope), input_id, weights_id,
+        xnn_datatype_to_string(weights_value->datatype),
+        xnn_datatype_to_string(input_value->datatype));
+    return xnn_status_unsupported_parameter;
+  }
+
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;
