@@ -23,7 +23,7 @@
 #define YNN_TILE_DP_IMPL(name, dst, src1, src2)                             \
   __asm__ volatile(                                                         \
       "{t" #name "\t%%tmm%c[_src2], %%tmm%c[_src1], %%tmm%c[_dst]|t" #name    \
-      "\t%%tmm%c[_dst], %%tmm%c[_src1], %%tmm%c[_src1]}" ::[_dst] "i"(dst), \
+      "\t%%tmm%c[_dst], %%tmm%c[_src1], %%tmm%c[_src2]}" ::[_dst] "i"(dst), \
       [_src1] "i"(src1), [_src2] "i"(src2))
 
 #define YNN_TILE_DPBF16PS(a, b, c) YNN_TILE_DP_IMPL(dpbf16ps, a, b, c)
