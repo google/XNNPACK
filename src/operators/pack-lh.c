@@ -116,14 +116,14 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
                              : gemm_config->mr_packed ? gemm_config->mr_packed
                                                       : gemm_config->mr;
     // Arch-specific parameters.
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
   // For SME1 operator type = xnn_operator_type_pack_lh_x8, kernel support for mr = 1 (GEMV) 
   // does not exist in Kleidiai.                                                 
   if (gemm_config->arch == xnn_arch_arm_sme && pack_lh_op->type == xnn_operator_type_pack_lh_x8) {
     mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed
                                        : gemm_config->mr;
   }
-#endif // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 

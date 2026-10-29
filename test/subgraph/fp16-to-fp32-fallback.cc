@@ -1667,7 +1667,8 @@ TEST_F(Fp16ToFp32FallbackTest, Bf16PassDoesNotModifyUnloweredFp16PackedLhs) {
 class Fp16ToFp32PackedGemmSupportTest : public testing::Test {
  public:
   void SetUp() override {
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && \
+    (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
     // The host must support SME2: pf16/pf32 GEMM configs init queries the SME
     // vector length.
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();

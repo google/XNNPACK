@@ -243,7 +243,7 @@ std::vector<GemmTestParams> CreateTests1(
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
-  #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
   INSTANTIATE_TEST_SUITE_P(
       PF16_F16_IGEMM_MINMAX_FP16_32X32C2__NEONSME2, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -294,12 +294,12 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
-  #if XNN_ENABLE_ARM_SME && XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_ARM_SME && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
   INSTANTIATE_TEST_SUITE_P(
       PF16_F16_IGEMM_MINMAX_FP16_32X32C2__NEONSME, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -350,7 +350,7 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_ARM_SME && XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_ARM_SME && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 

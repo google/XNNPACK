@@ -452,7 +452,7 @@ std::vector<GemmTestParams> CreateTests1(
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_1X64C4__NEONSME2, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -550,12 +550,12 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_1X64C4__NEONSME, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -653,12 +653,12 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_1X32C4__SME2, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -756,7 +756,7 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 
 

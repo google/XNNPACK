@@ -7,11 +7,11 @@
 
 // arch_flags, igemm_ukernel, igemm_size_fn, igemm_packed_offset_fn
 
-#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 XNN_UKERNEL(xnn_arch_arm_sme, xnn_x8_pack_lh_ukernel__igemm_neonsme,
             xnn_x8_pack_lh_size__igemm_neonsme,
             xnn_x8_pack_lh_offset__igemm_neonsme)
 XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_pack_lh_ukernel__igemm_neonsme2,
             xnn_x8_pack_lh_size__igemm_neonsme2,
             xnn_x8_pack_lh_offset__igemm_neonsme2)
-#endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE

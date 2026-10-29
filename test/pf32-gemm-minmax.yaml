@@ -11,7 +11,7 @@
   pack-lh-size-fn: xnn_x32_pack_lh_size__neonsme2
   pack-lh-offset-fn: xnn_x32_pack_lh_offset__neonsme2
   packed-stride: xnn_packed_stride_kai_f32_weights_and_biases_sme2
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   k-block: 1
   mr-packed: 1
 - name: xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2
@@ -21,7 +21,7 @@
   pack-lh-size-fn: xnn_x32_pack_lh_size__neonsme2
   pack-lh-offset-fn: xnn_x32_pack_lh_offset__neonsme2
   packed-stride: xnn_packed_stride_kai_f32_weights_and_biases_sme2
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   k-block: 1
   mr-packed: 32
 - name: xnn_pf32_gemm_minmax_ukernel_1x32__neonsme
@@ -31,7 +31,7 @@
   pack-lh-size-fn: xnn_x32_pack_lh_size__neonsme
   pack-lh-offset-fn: xnn_x32_pack_lh_offset__neonsme
   packed-stride: xnn_packed_stride_kai_f32_weights_and_biases_sme
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   k-block: 1
   mr-packed: 1
 - name: xnn_pf32_gemm_minmax_ukernel_32x32__neonsme
@@ -41,7 +41,7 @@
   pack-lh-size-fn: xnn_x32_pack_lh_size__neonsme
   pack-lh-offset-fn: xnn_x32_pack_lh_offset__neonsme
   packed-stride: xnn_packed_stride_kai_f32_weights_and_biases_sme
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   k-block: 1
   mr-packed: 32
 
@@ -53,7 +53,7 @@
   pack-lh-size-fn: xnn_x32_pack_lh_size__sme2
   pack-lh-offset-fn: xnn_x32_pack_lh_offset__sme2
   packed-stride: xnn_packed_stride_kai_f32_weights_and_biases_sme
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   k-block: 8
   mr-packed: 1
 - name: xnn_pf32_gemm_minmax_ukernel_32x32__sme2
@@ -63,6 +63,6 @@
   pack-lh-size-fn: xnn_x32_pack_lh_size__sme2
   pack-lh-offset-fn: xnn_x32_pack_lh_offset__sme2
   packed-stride: xnn_packed_stride_kai_f32_weights_and_biases_sme
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   k-block: 8
   mr-packed: 32
