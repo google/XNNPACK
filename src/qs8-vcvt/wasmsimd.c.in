@@ -34,6 +34,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_u${BATCH_TILE}(
   const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
   const v128_t vmultiplier = wasm_i16x8_splat(-params->scalar.multiplier);
   const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  const int32_t shift = params->scalar.shift;
   XNN_FORCE_REALIZATION(vinput_zero_point);
   XNN_FORCE_REALIZATION(vmultiplier);
   XNN_FORCE_REALIZATION(voutput_zero_point);
@@ -48,7 +49,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_u${BATCH_TILE}(
         vacc${ABC[N]} = wasm_i16x8_sub(vinput_zero_point, vacc${ABC[N]});
 
       $for N in range(2*SIMD_TILE):
-        vacc${ABC[N]} = wasm_i16x8_shl(vacc${ABC[N]}, 7);
+        vacc${ABC[N]} = wasm_i16x8_shl(vacc${ABC[N]}, shift);
 
       $for N in range(2*SIMD_TILE):
         vacc${ABC[N]} = ${WASM_I16X8_Q15MULR}(vacc${ABC[N]}, vmultiplier);
@@ -67,7 +68,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_u${BATCH_TILE}(
   for (; batch >= 8 * sizeof(${XINT8_T}); batch -= 8 * sizeof(${XINT8_T})) {
     v128_t vacc = ${WASM_X16X8_LOAD8X8}(input);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
-    vacc = wasm_i16x8_shl(vacc, 7);
+    vacc = wasm_i16x8_shl(vacc, shift);
     vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     input += 8;
@@ -82,7 +83,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_u${BATCH_TILE}(
 
     v128_t vacc = ${WASM_X16X8_LOAD8X8}(input);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
-    vacc = wasm_i16x8_shl(vacc, 7);
+    vacc = wasm_i16x8_shl(vacc, shift);
     vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 

@@ -27,16 +27,17 @@ void xnn_qu8_vcvt_ukernel__rvv_u4v(
   const uint8_t input_zero_point = params->scalar.input_zero_point;
   const int16_t multiplier = params->scalar.multiplier;
   const int16_t output_zero_point = params->scalar.output_zero_point;
+  const size_t shift = (size_t) params->scalar.shift;
 
   do {
     size_t vl = __riscv_vsetvl_e8m4(batch); batch -= vl;
     vuint8m4_t in_u8v = __riscv_vle8_v_u8m4(input, vl); input += vl;
     vint16m8_t acc_i16v = __riscv_vreinterpret_i16m8(__riscv_vwsubu_vx(in_u8v, input_zero_point, vl));
-    acc_i16v = __riscv_vsll(acc_i16v, 7, vl);
+    acc_i16v = __riscv_vsll(acc_i16v, shift, vl);
     acc_i16v = __riscv_vsmul(acc_i16v, multiplier, __RISCV_VXRM_RNU, vl);
     acc_i16v = __riscv_vsadd(acc_i16v, output_zero_point, vl);
     acc_i16v = __riscv_vmax(acc_i16v, 0, vl);
-    vuint8m4_t out_u8v = __riscv_vnclipu(__riscv_vreinterpret_u16m8(acc_i16v), 0, __RISCV_VXRM_RDN, vl);
+    vuint8m4_t out_u8v = __riscv_vnclipu(__riscv_vreinterpret_u16m8(acc_i16v), 0, __RISCV_VXRM_RNU, vl);
     __riscv_vse8(output, out_u8v, vl); output += vl;
   } while (batch != 0);
 }
