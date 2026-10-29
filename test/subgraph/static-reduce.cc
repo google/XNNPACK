@@ -466,4 +466,96 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16Rewrite, params3,
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32Rewrite, params3,
                          [](auto p) { return p.param.Name(); });
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(StaticReduce, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(2, xnn_datatype_int32, 0)
+      .AddOutputTensor(2, xnn_datatype_int32, 1);
+  const int64_t reduction_axes[1] = {1};
+  EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), xnn_reduce_sum,
+                                        /*num_reduction_axes=*/1,
+                                        reduction_axes, /*input_id=*/0,
+                                        /*output_id=*/1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(StaticReduce, DefineRejectsUnsupportedQuantizedSumSquared) {
+  const xnn_quantization_params quantization = {0, 1.0f};
+  const int64_t reduction_axes[1] = {1};
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    for (xnn_reduce_operator op :
+         {xnn_reduce_sum_squared, xnn_reduce_mean_squared}) {
+      SubgraphTester subgraph(2);
+      subgraph.AddInputTensor(2, datatype, quantization, 0)
+          .AddOutputTensor(2, datatype, quantization, 1);
+      EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), op,
+                                            /*num_reduction_axes=*/1,
+                                            reduction_axes, /*input_id=*/0,
+                                            /*output_id=*/1, /*flags=*/0),
+                xnn_status_unsupported_parameter);
+    }
+  }
+}
+
+TEST(StaticReduce, DefineRejectsTooManyReductionAxes) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(2, xnn_datatype_fp32, 0)
+      .AddOutputTensor(2, xnn_datatype_fp32, 1);
+  const int64_t reduction_axes[XNN_MAX_TENSOR_DIMS + 1] = {};
+  EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), xnn_reduce_sum,
+                                        XNN_MAX_TENSOR_DIMS + 1, reduction_axes,
+                                        /*input_id=*/0, /*output_id=*/1,
+                                        /*flags=*/0),
+            xnn_status_unsupported_parameter);
+  const size_t unsigned_reduction_axes[XNN_MAX_TENSOR_DIMS + 1] = {};
+  EXPECT_EQ(xnn_define_static_reduce(
+                subgraph.Subgraph(), xnn_reduce_sum, XNN_MAX_TENSOR_DIMS + 1,
+                unsigned_reduction_axes, /*input_id=*/0, /*output_id=*/1,
+                /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(StaticReduce, DefineRejectsZeroReductionAxes) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(2, xnn_datatype_fp32, 0)
+      .AddOutputTensor(2, xnn_datatype_fp32, 1);
+  EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), xnn_reduce_sum,
+                                        /*num_reduction_axes=*/0,
+                                        /*reduction_axes=*/nullptr,
+                                        /*input_id=*/0, /*output_id=*/1,
+                                        /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
+TEST(StaticReduce, DefineRejectsQuantizedMinMaxRequantization) {
+  const xnn_quantization_params input_quantization = {1, 0.5f};
+  const int64_t reduction_axes[1] = {1};
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    for (xnn_reduce_operator op : {xnn_reduce_min, xnn_reduce_max}) {
+      for (xnn_quantization_params output_quantization :
+           {xnn_quantization_params{2, 0.5f},
+            xnn_quantization_params{1, 0.25f}}) {
+        SubgraphTester subgraph(2);
+        subgraph.AddInputTensor(2, datatype, input_quantization, 0)
+            .AddOutputTensor(2, datatype, output_quantization, 1);
+        EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), op,
+                                              /*num_reduction_axes=*/1,
+                                              reduction_axes, /*input_id=*/0,
+                                              /*output_id=*/1, /*flags=*/0),
+                  xnn_status_unsupported_parameter);
+      }
+
+      SubgraphTester subgraph(2);
+      subgraph.AddInputTensor(2, datatype, input_quantization, 0)
+          .AddOutputTensor(2, datatype, input_quantization, 1);
+      EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), op,
+                                            /*num_reduction_axes=*/1,
+                                            reduction_axes, /*input_id=*/0,
+                                            /*output_id=*/1, /*flags=*/0),
+                xnn_status_success);
+    }
+  }
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack
