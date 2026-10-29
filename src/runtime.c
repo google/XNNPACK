@@ -990,8 +990,12 @@ enum xnn_status xnn_reshape_runtime(xnn_runtime_t runtime) {
     }
   }
   if (reallocation_required || !runtime->memory_planned) {
+    runtime->memory_planned = false;
+    const enum xnn_status status = xnn_plan_memory(runtime);
+    if (status != xnn_status_success) {
+      return status;
+    }
     runtime->memory_planned = true;
-    return xnn_plan_memory(runtime);
   }
   return xnn_status_success;
 }
