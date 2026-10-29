@@ -242,7 +242,7 @@ std::vector<GemmTestParams> CreateTests1(
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       PQS8_QC8W_GEMM_MINMAX_1X32C4__NEONSME2, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -251,7 +251,8 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2_get_mr();
         } else {
           return 0;
@@ -260,7 +261,8 @@ std::vector<GemmTestParams> CreateTests1(
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2_get_nr();
         } else {
           return 0;
@@ -270,7 +272,8 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2_get_mr();
         } else {
           return 0;
@@ -286,7 +289,7 @@ std::vector<GemmTestParams> CreateTests1(
                         xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
                         xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme);
           },
-          xnn_arch_arm_sme2)),
+          (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme))),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
@@ -300,7 +303,8 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr();
         } else {
           return 0;
@@ -309,7 +313,8 @@ std::vector<GemmTestParams> CreateTests1(
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr();
         } else {
           return 0;
@@ -319,7 +324,8 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr();
         } else {
           return 0;
@@ -335,17 +341,17 @@ std::vector<GemmTestParams> CreateTests1(
                         xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
                         xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme);
           },
-          xnn_arch_arm_sme2)),
+          (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme))),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       PQS8_QC8W_GEMM_MINMAX_32X32C4__NEONSME, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -394,7 +400,7 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 

@@ -230,15 +230,19 @@ XNN_INTERNAL void xnn_pack_f32_qc4w_gemm_goi_w(
     size_t n_stride, const void* kernel, const float* bias, const float* scale,
     void* packed_weights, size_t extra_bytes, const void* params);
 
-typedef void (*xnn_pack_f32_qs8w_gemm_fn)(
-    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    size_t n_stride, const int8_t* kernel, const float* bias, const float* scale,
-    void* packed_weights, size_t extra_bytes, const void* params);
+typedef void (*xnn_pack_f32_qs8w_gemm_fn)(size_t g, size_t nc, size_t kc,
+                                          size_t nr, size_t kr, size_t sr,
+                                          size_t n_stride, const int8_t* kernel,
+                                          const float* bias, const float* scale,
+                                          void* packed_weights,
+                                          size_t extra_bytes,
+                                          const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_qs8w_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    size_t n_stride, const int8_t* kernel, const float* bias, const float* scale,
-    void* packed_weights, size_t extra_bytes, const void* params);
+    size_t n_stride, const int8_t* kernel, const float* bias,
+    const float* scale, void* packed_weights, size_t extra_bytes,
+    const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_gemm_gio_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
@@ -380,7 +384,7 @@ XNN_INTERNAL size_t xnn_packed_stride_qu8_weights_and_biases(
     size_t k_stride,                            //
     size_t extra_bytes);
 
-#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 XNN_INTERNAL void xnn_pack_kai_qs4_weights_and_biases(
     uint32_t flags,                                //
     const struct xnn_gemm_config* gemm_config,     //
@@ -667,7 +671,7 @@ XNN_INTERNAL size_t xnn_packed_size_kai_f16_conv_goki_w(size_t nc,  //
                                                         size_t ks,  //
                                                         size_t kc   //
 );
-#endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 
 XNN_INTERNAL size_t xnn_packed_stride_qc2w_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k,

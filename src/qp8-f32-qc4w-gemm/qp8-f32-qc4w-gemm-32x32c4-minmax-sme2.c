@@ -3,850 +3,266 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+#include "src/xnnpack/common.h"
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 #include <arm_sme.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
-#define PREFETCH_W_MATRIX
+#include "src/xnnpack/microparams.h"
 
-__arm_locally_streaming __arm_new("za", "zt0")
-void xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2(
-    size_t mr,
-    size_t nc,
-    size_t kc,
-    const void* a,
-    const void* w,
-    float* c,
-    size_t cm_stride,
-    size_t cn_stride,
-    const void* params)
-{
+__arm_locally_streaming __arm_new(
+    "za") void xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2(size_t mr,
+                                                                  size_t nc,
+                                                                  size_t kc,
+                                                                  const void* a,
+                                                                  const void* w,
+                                                                  float* c,
+                                                                  size_t
+                                                                      cm_stride,
+                                                                  size_t
+                                                                      cn_stride,
+                                                                  const void*
+                                                                      params) {
+  (void)cn_stride;
   const size_t vl = svcntw();
-  const size_t nr = 2 * vl;
   const size_t mr_packed = 2 * vl;
-  const size_t kloop_bytes = 16 * vl;
+  const size_t nr = 2 * vl;
+  const size_t k_internal = (kc + 31) & ~(size_t)31;
+  const size_t lhs_block_stride = mr_packed * (k_internal * sizeof(int8_t) +
+                                               sizeof(int32_t) + sizeof(float));
+  const size_t rhs_block_stride =
+      nr * ((k_internal / 2) + sizeof(int32_t) + sizeof(float) + sizeof(float));
   const struct xnn_f32_qc4w_minmax_params* minmax_params =
-      (const struct xnn_f32_qc4w_minmax_params*) params;
-  kc = ((kc + 31) / 32) * 32;
-  cn_stride = nr * cn_stride;
+      (const struct xnn_f32_qc4w_minmax_params*)params;
+  const svbool_t pg8 = svptrue_b8();
+  const svbool_t pg32 = svptrue_b32();
+  const svfloat32_t vmin = svdup_n_f32(minmax_params->scalar.min);
+  const svfloat32_t vmax = svdup_n_f32(minmax_params->scalar.max);
 
-  static const int8_t lut[64] = {
-      0,  0, 0, 0, 1,  0, 0, 0, 2,  0, 0,  0, 3,  0, 0,  0, 4,  0, 0,  0, 5, 0,
-      0,  0, 6, 0, 0,  0, 7, 0, 0,  0, -8, 0, 0,  0, -7, 0, 0,  0, -6, 0, 0, 0,
-      -5, 0, 0, 0, -4, 0, 0, 0, -3, 0, 0,  0, -2, 0, 0,  0, -1, 0, 0,  0};
-  svldr_zt(0, &lut[0]);
+  for (size_t m_idx = 0; m_idx < mr; m_idx += mr_packed) {
+    const size_t m_rem = mr - m_idx < mr_packed ? mr - m_idx : mr_packed;
+    const uint8_t* lhs_block =
+        (const uint8_t*)a + (m_idx / mr_packed) * lhs_block_stride;
+    const int32_t* lhs_neg_zps =
+        (const int32_t*)(lhs_block + mr_packed * k_internal);
+    const float* lhs_scales = (const float*)(lhs_neg_zps + mr_packed);
 
-  const int8_t* a0 = (const int8_t*)a;
-  float* c0 = c;
+    for (size_t n_idx = 0; n_idx < nc; n_idx += nr) {
+      if (m_rem <= vl && n_idx + nr < nc) {
+        const uint8_t* rhs_block0 =
+            (const uint8_t*)w + (n_idx / nr) * rhs_block_stride;
+        const uint8_t* rhs_block1 = rhs_block0 + rhs_block_stride;
+        svzero_za();
 
-  svbool_t pg_8_all = svptrue_b8();
-  svbool_t pg_32_all = svptrue_b32();
+        const int8_t* a_ptr = (const int8_t*)lhs_block;
+        const int8_t* w0_ptr = (const int8_t*)rhs_block0;
+        const int8_t* w1_ptr = (const int8_t*)rhs_block1;
+        for (size_t k_idx = 0; k_idx < k_internal; k_idx += 16) {
+#pragma clang loop unroll(full)
+          for (int u = 0; u < 4; ++u) {
+            const svint8_t va0 = svld1_vnum_s8(pg8, a_ptr, 2 * u);
+            const svint8_t vraw0 = svld1_vnum_s8(pg8, w0_ptr, u);
+            const svint8_t vraw1 = svld1_vnum_s8(pg8, w1_ptr, u);
+            const svint8_t vlo0 = svlsl_n_s8_x(pg8, vraw0, 4);
+            const svint8_t vhi0 = svand_n_s8_x(pg8, vraw0, (int8_t)0xF0);
+            const svint8_t vb0 = svzip1_s8(vlo0, vhi0);
+            const svint8_t vb1 = svzip2_s8(vlo0, vhi0);
+            const svint8_t vlo1 = svlsl_n_s8_x(pg8, vraw1, 4);
+            const svint8_t vhi1 = svand_n_s8_x(pg8, vraw1, (int8_t)0xF0);
+            const svint8_t vb2 = svzip1_s8(vlo1, vhi1);
+            const svint8_t vb3 = svzip2_s8(vlo1, vhi1);
 
-  if (mr <= vl) {
-    size_t k_rup_32 = ((kc + 31) / 32) * 32;
-    size_t w_offset_nr = nr * (k_rup_32 / 2 + 12);
-    const void* w0 = w;
-    const void* w1 = (nc > nr) ? (const void*)((const int8_t*)w + w_offset_nr) : w;
+            svmopa_za32_s8_m(0, pg8, pg8, va0, vb0);
+            svmopa_za32_s8_m(1, pg8, pg8, va0, vb1);
+            svmopa_za32_s8_m(2, pg8, pg8, va0, vb2);
+            svmopa_za32_s8_m(3, pg8, pg8, va0, vb3);
+          }
+          a_ptr += 16 * mr_packed;
+          w0_ptr += 8 * nr;
+          w1_ptr += 8 * nr;
+        }
 
-#ifdef PREFETCH_W_MATRIX
-    const size_t kPrefetchDistance = 16;
-    const size_t kBytesPerKLoop = kloop_bytes;
-    const size_t kCacheLineSize = 64;
-    const size_t kCacheLinesPerLoop = kBytesPerKLoop / kCacheLineSize;
-    const size_t kPrfmStride = kBytesPerKLoop / 4;
-    const size_t kTrailerPrfmStride = 2 * nr;
+        const int32_t* rhs_sums0 =
+            (const int32_t*)(rhs_block0 + nr * (k_internal / 2));
+        const float* rhs_scales0 = (const float*)(rhs_sums0 + nr);
+        const float* rhs_biases0 = rhs_scales0 + nr;
+        const int32_t* rhs_sums1 =
+            (const int32_t*)(rhs_block1 + nr * (k_internal / 2));
+        const float* rhs_scales1 = (const float*)(rhs_sums1 + nr);
+        const float* rhs_biases1 = rhs_scales1 + nr;
 
-    size_t block_size = w_offset_nr;
-    size_t nc_rup_nr = ((nc + nr - 1) / nr) * nr;
-    size_t total_w_size = (kc * nc_rup_nr) / 2 + nc_rup_nr * (4*3);
-    bool need_prfm_0 = (block_size >= kPrefetchDistance * kBytesPerKLoop) && (total_w_size > (128*1024));
-    bool need_prfm_1 = (nc > nr) && need_prfm_0;
-    size_t prfm_acc_w_size_0 = 0;
-    size_t prfm_acc_w_size_1 = 0;
-    const int8_t* prfm_ptr_0 = (const int8_t*)w0;
-    const int8_t* prfm_ptr_1 = (const int8_t*)w1;
+        const svint32_t vrsum0 = svld1_vnum_s32(pg32, rhs_sums0, 0);
+        const svint32_t vrsum1 = svld1_vnum_s32(pg32, rhs_sums0, 1);
+        const svint32_t vrsum2 = svld1_vnum_s32(pg32, rhs_sums1, 0);
+        const svint32_t vrsum3 = svld1_vnum_s32(pg32, rhs_sums1, 1);
+        const svfloat32_t vrscale0 = svld1_vnum_f32(pg32, rhs_scales0, 0);
+        const svfloat32_t vrscale1 = svld1_vnum_f32(pg32, rhs_scales0, 1);
+        const svfloat32_t vrscale2 = svld1_vnum_f32(pg32, rhs_scales1, 0);
+        const svfloat32_t vrscale3 = svld1_vnum_f32(pg32, rhs_scales1, 1);
+        const svfloat32_t vrbias0 = svld1_vnum_f32(pg32, rhs_biases0, 0);
+        const svfloat32_t vrbias1 = svld1_vnum_f32(pg32, rhs_biases0, 1);
+        const svfloat32_t vrbias2 = svld1_vnum_f32(pg32, rhs_biases1, 0);
+        const svfloat32_t vrbias3 = svld1_vnum_f32(pg32, rhs_biases1, 1);
 
-    if (need_prfm_0) {
-      prfm_acc_w_size_0 = kPrefetchDistance * kBytesPerKLoop;
-      int i = 0;
-      for (; i < (kPrefetchDistance * kCacheLinesPerLoop); i++) {
-        __builtin_prefetch(prfm_ptr_0 + kCacheLineSize * i, 0, 2);
+        const size_t n_rem = nc - n_idx;
+        const svbool_t p_out2 = svwhilelt_b32_u64(2 * vl, n_rem);
+        const svbool_t p_out3 = svwhilelt_b32_u64(3 * vl, n_rem);
+
+        for (size_t row = 0; row < m_rem; ++row) {
+          const svint32_t vlhs_zp = svdup_n_s32(lhs_neg_zps[row]);
+          const svfloat32_t vlhs_scale = svdup_n_f32(lhs_scales[row]);
+
+          svint32_t vacc0 = svasr_n_s32_x(
+              pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 0, row), 4);
+          svint32_t vacc1 = svasr_n_s32_x(
+              pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 1, row), 4);
+          svint32_t vacc2 = svasr_n_s32_x(
+              pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 2, row), 4);
+          svint32_t vacc3 = svasr_n_s32_x(
+              pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 3, row), 4);
+
+          vacc0 = svmla_s32_m(pg32, vacc0, vrsum0, vlhs_zp);
+          vacc1 = svmla_s32_m(pg32, vacc1, vrsum1, vlhs_zp);
+          vacc2 = svmla_s32_m(pg32, vacc2, vrsum2, vlhs_zp);
+          vacc3 = svmla_s32_m(pg32, vacc3, vrsum3, vlhs_zp);
+
+          svfloat32_t vf0 = svcvt_f32_s32_x(pg32, vacc0);
+          svfloat32_t vf1 = svcvt_f32_s32_x(pg32, vacc1);
+          svfloat32_t vf2 = svcvt_f32_s32_x(pg32, vacc2);
+          svfloat32_t vf3 = svcvt_f32_s32_x(pg32, vacc3);
+
+          vf0 = svmla_f32_m(pg32, vrbias0, vf0,
+                            svmul_f32_x(pg32, vlhs_scale, vrscale0));
+          vf1 = svmla_f32_m(pg32, vrbias1, vf1,
+                            svmul_f32_x(pg32, vlhs_scale, vrscale1));
+          vf2 = svmla_f32_m(pg32, vrbias2, vf2,
+                            svmul_f32_x(pg32, vlhs_scale, vrscale2));
+          vf3 = svmla_f32_m(pg32, vrbias3, vf3,
+                            svmul_f32_x(pg32, vlhs_scale, vrscale3));
+
+          vf0 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf0, vmin), vmax);
+          vf1 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf1, vmin), vmax);
+          vf2 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf2, vmin), vmax);
+          vf3 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf3, vmin), vmax);
+
+          float* dst_ptr =
+              (float*)((uintptr_t)c + (m_idx + row) * cm_stride) + n_idx;
+          svst1_vnum_f32(pg32, dst_ptr, 0, vf0);
+          svst1_vnum_f32(pg32, dst_ptr, 1, vf1);
+          svst1_vnum_f32(p_out2, dst_ptr, 2, vf2);
+          svst1_vnum_f32(p_out3, dst_ptr, 3, vf3);
+        }
+        n_idx += nr;
+        continue;
       }
 
-      prfm_ptr_0 += kCacheLineSize * i;
-    }
-
-    if (need_prfm_1) {
-      prfm_acc_w_size_1 = kPrefetchDistance * kBytesPerKLoop;
-      int i = 0;
-      for (; i < (kPrefetchDistance * kCacheLinesPerLoop); i++) {
-        __builtin_prefetch(prfm_ptr_1 + kCacheLineSize * i, 0, 2);
-      }
-
-      prfm_ptr_1 += kCacheLineSize * i;
-    }
-#endif
-
-    do {
+      const uint8_t* rhs_block =
+          (const uint8_t*)w + (n_idx / nr) * rhs_block_stride;
       svzero_za();
-      size_t k = kc;  // always roundup(kc, 32);
-      const int8_t* a_inc = a0;
 
-      while (k >= 16 * sizeof(int8_t)) {
-        svcount_t pcnt_8_all = svptrue_c8();
-        svcount_t pcnt_8_next_nr32 =
-            (nc > nr) ? svptrue_c8() : svpfalse_c();
-        // load w matrix
-        svint8x4_t vb_x4_0 = svld1_s8_x4(pcnt_8_all, w0);
-        w0 = (const int8_t*)w0 + kloop_bytes;
-        svint8x4_t vb_x4_1 = svld1_s8_x4(pcnt_8_next_nr32, w1);
-        if (nc > nr) {
-          w1 = (const int8_t*)w1 + kloop_bytes;
+      const int8_t* a_ptr = (const int8_t*)lhs_block;
+      const int8_t* w_ptr = (const int8_t*)rhs_block;
+      for (size_t k_idx = 0; k_idx < k_internal; k_idx += 16) {
+#pragma clang loop unroll(full)
+        for (int u = 0; u < 4; ++u) {
+          const svint8_t va0 = svld1_vnum_s8(pg8, a_ptr, 2 * u + 0);
+          const svint8_t va1 = svld1_vnum_s8(pg8, a_ptr, 2 * u + 1);
+          const svint8_t vraw = svld1_vnum_s8(pg8, w_ptr, u);
+          const svint8_t vlo = svlsl_n_s8_x(pg8, vraw, 4);
+          const svint8_t vhi = svand_n_s8_x(pg8, vraw, (int8_t)0xF0);
+          const svint8_t vb0 = svzip1_s8(vlo, vhi);
+          const svint8_t vb1 = svzip2_s8(vlo, vhi);
+
+          svmopa_za32_s8_m(0, pg8, pg8, va0, vb0);
+          svmopa_za32_s8_m(1, pg8, pg8, va0, vb1);
+          svmopa_za32_s8_m(2, pg8, pg8, va1, vb0);
+          svmopa_za32_s8_m(3, pg8, pg8, va1, vb1);
         }
-
-#ifdef PREFETCH_W_MATRIX
-        if (need_prfm_0 &&
-            (prfm_acc_w_size_0 <= (block_size - kBytesPerKLoop))) {
-          prfm_acc_w_size_0 += kBytesPerKLoop;
-          __builtin_prefetch(prfm_ptr_0 + 0 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 1 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 2 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 3 * kPrfmStride, 0, 2);
-
-          prfm_ptr_0 += kBytesPerKLoop;
-        }
-        if (need_prfm_1 &&
-            (prfm_acc_w_size_1 <= (block_size - kBytesPerKLoop))) {
-          prfm_acc_w_size_1 += kBytesPerKLoop;
-          __builtin_prefetch(prfm_ptr_1 + 0 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 1 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 2 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 3 * kPrfmStride, 0, 2);
-
-          prfm_ptr_1 += kBytesPerKLoop;
-        }
-#endif
-
-        // load a matrix
-        svint8x4_t va_x4_0 = svld1_s8_x4(pcnt_8_all, a_inc); a_inc += kloop_bytes;
-        svint8x4_t va_x4_1 = svld1_s8_x4(pcnt_8_all, a_inc); a_inc += kloop_bytes;
-
-        svint8x2_t luti_0 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_0, 0)), 0);
-        svint8x2_t luti_1 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_0, 1)), 0);
-        svint8x2_t luti_2 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_0, 2)), 0);
-        svint8x2_t luti_3 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_0, 3)), 0);
-        svint8x2_t luti_4 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_1, 0)), 0);
-        svint8x2_t luti_5 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_1, 1)), 0);
-        svint8x2_t luti_6 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_1, 2)), 0);
-        svint8x2_t luti_7 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4_1, 3)), 0);
-
-        svint8_t va0_0 = svget4(va_x4_0, 0);
-        svint8_t va1_0 = svget4(va_x4_0, 2);
-        svint8_t va2_0 = svget4(va_x4_1, 0);
-        svint8_t va3_0 = svget4(va_x4_1, 2);
-
-        svint8_t vb0_0 = svget2(luti_0, 0);
-        svint8_t vb1_0 = svget2(luti_1, 0);
-        svint8_t vb2_0 = svget2(luti_2, 0);
-        svint8_t vb3_0 = svget2(luti_3, 0);
-
-        svint8_t vb0_1 = svget2(luti_0, 1);
-        svint8_t vb1_1 = svget2(luti_1, 1);
-        svint8_t vb2_1 = svget2(luti_2, 1);
-        svint8_t vb3_1 = svget2(luti_3, 1);
-
-        svint8_t vb0_2 = svget2(luti_4, 0);
-        svint8_t vb1_2 = svget2(luti_5, 0);
-        svint8_t vb2_2 = svget2(luti_6, 0);
-        svint8_t vb3_2 = svget2(luti_7, 0);
-
-        svint8_t vb0_3 = svget2(luti_4, 1);
-        svint8_t vb1_3 = svget2(luti_5, 1);
-        svint8_t vb2_3 = svget2(luti_6, 1);
-        svint8_t vb3_3 = svget2(luti_7, 1);
-
-        //============== SMOPA 16x16x4
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va0_0, vb0_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va0_0, vb0_1);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va0_0, vb0_2);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va0_0, vb0_3);
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va1_0, vb1_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va1_0, vb1_1);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va1_0, vb1_2);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va1_0, vb1_3);
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va2_0, vb2_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va2_0, vb2_1);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va2_0, vb2_2);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va2_0, vb2_3);
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va3_0, vb3_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va3_0, vb3_1);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va3_0, vb3_2);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va3_0, vb3_3);
-
-        k -= 16 * sizeof(int8_t);
+        a_ptr += 16 * mr_packed;
+        w_ptr += 8 * nr;
       }
 
-      // Load 1. zero_point  2. inv_scale from A matrix
-      // Load 3. ksum  4. filter/scale  5. bias from W matrix
-      svbool_t pg_ksum = svptrue_b32();  // nr, int32_t
-      svbool_t pg_filt = svptrue_b32();  // nr, float
-      svbool_t pg_bias = svptrue_b32();  // nr, float
+      const int32_t* rhs_sums =
+          (const int32_t*)(rhs_block + nr * (k_internal / 2));
+      const float* rhs_scales = (const float*)(rhs_sums + nr);
+      const float* rhs_biases = rhs_scales + nr;
 
-#ifdef PREFETCH_W_MATRIX
-      if (need_prfm_0) {
-        if (prfm_acc_w_size_0 <= (block_size - 12 * nr)) {
-          prfm_acc_w_size_0 += 12 * nr;
-          __builtin_prefetch(prfm_ptr_0 + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 1 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 2 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 3 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 4 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 5 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr_0 += 12 * nr;
-        } else if (prfm_acc_w_size_0 <= (block_size - 8 * nr)) {
-          prfm_acc_w_size_0 += 8 * nr;
-          __builtin_prefetch(prfm_ptr_0 + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 1 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 2 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 3 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr_0 += 8 * nr;
-        } else if (prfm_acc_w_size_0 <= (block_size - 4 * nr)) {
-          prfm_acc_w_size_0 += 4 * nr;
-          __builtin_prefetch(prfm_ptr_0 + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_0 + 1 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr_0 += 4 * nr;
-        }
-      }
-      if (need_prfm_1) {
-        if (prfm_acc_w_size_1 <= (block_size - 12 * nr)) {
-          prfm_acc_w_size_1 += 12 * nr;
-          __builtin_prefetch(prfm_ptr_1 + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 1 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 2 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 3 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 4 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 5 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr_1 += 12 * nr;
-        } else if (prfm_acc_w_size_1 <= (block_size - 8 * nr)) {
-          prfm_acc_w_size_1 += 8 * nr;
-          __builtin_prefetch(prfm_ptr_1 + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 1 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 2 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 3 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr_1 += 8 * nr;
-        } else if (prfm_acc_w_size_1 <= (block_size - 4 * nr)) {
-          prfm_acc_w_size_1 += 4 * nr;
-          __builtin_prefetch(prfm_ptr_1 + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr_1 + 1 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr_1 += 4 * nr;
-        }
-      }
-#endif
+      const svint32_t vrsum0 = svld1_vnum_s32(pg32, rhs_sums, 0);
+      const svint32_t vrsum1 = svld1_vnum_s32(pg32, rhs_sums, 1);
+      const svfloat32_t vrscale0 = svld1_vnum_f32(pg32, rhs_scales, 0);
+      const svfloat32_t vrscale1 = svld1_vnum_f32(pg32, rhs_scales, 1);
+      const svfloat32_t vrbias0 = svld1_vnum_f32(pg32, rhs_biases, 0);
+      const svfloat32_t vrbias1 = svld1_vnum_f32(pg32, rhs_biases, 1);
 
-      // Load ksum for columns [0, 2 * nr)
-      svint32_t vksum_0 = svld1_s32(pg_ksum, w0); w0 = (const int32_t*)w0 + vl;
-      svint32_t vksum_1 = svld1_s32(pg_ksum, w0); w0 = (const int32_t*)w0 + vl;
-      svint32_t vksum_2 = svdup_s32(0);
-      svint32_t vksum_3 = svdup_s32(0);
-      if (nc > nr) {
-        vksum_2 = svld1_s32(pg_ksum, w1);
-        w1 = (const int32_t*)w1 + vl;
-        vksum_3 = svld1_s32(pg_ksum, w1);
-        w1 = (const int32_t*)w1 + vl;
-      }
-      // Load kernel/filter for columns [0, 2 * nr)
-      svfloat32_t vfilter_0 = svreinterpret_f32_s32(svld1_s32(pg_filt, w0)); w0 = (const int32_t*)w0 + vl;
-      svfloat32_t vfilter_1 = svreinterpret_f32_s32(svld1_s32(pg_filt, w0)); w0 = (const int32_t*)w0 + vl;
-      svfloat32_t vfilter_2 = svdup_f32(0.0f);
-      svfloat32_t vfilter_3 = svdup_f32(0.0f);
-      if (nc > nr) {
-        vfilter_2 = svreinterpret_f32_s32(svld1_s32(pg_filt, w1));
-        w1 = (const int32_t*)w1 + vl;
-        vfilter_3 = svreinterpret_f32_s32(svld1_s32(pg_filt, w1));
-        w1 = (const int32_t*)w1 + vl;
-      }
-      // Load bias for columns [0, 2 * nr)
-      svfloat32_t vbias_0 = svreinterpret_f32_s32(svld1_s32(pg_bias, w0));
-      w0 = (const int32_t*)w0 + vl;
-      svfloat32_t vbias_1 = svreinterpret_f32_s32(svld1_s32(pg_bias, w0));
-      w0 = (const int32_t*)w0 + vl;
+      const size_t n_rem = nc - n_idx;
+      const svbool_t p_out0 = svwhilelt_b32_u64(0 * vl, n_rem);
+      const svbool_t p_out1 = svwhilelt_b32_u64(1 * vl, n_rem);
 
-      svfloat32_t vbias_2 = svdup_f32(0.0f);
-      svfloat32_t vbias_3 = svdup_f32(0.0f);
-      if (nc > nr) {
-        vbias_2 = svreinterpret_f32_s32(svld1_s32(pg_bias, w1));
-        w1 = (const int32_t*)w1 + vl;
-        vbias_3 = svreinterpret_f32_s32(svld1_s32(pg_bias, w1));
-        w1 = (const int32_t*)w1 + vl;
+      const size_t m0_limit = m_rem < vl ? m_rem : vl;
+      for (size_t row = 0; row < m0_limit; ++row) {
+        const svint32_t vlhs_zp = svdup_n_s32(lhs_neg_zps[row]);
+        const svfloat32_t vlhs_scale = svdup_n_f32(lhs_scales[row]);
+
+        svint32_t vacc0 = svasr_n_s32_x(
+            pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 0, row), 4);
+        svint32_t vacc1 = svasr_n_s32_x(
+            pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 1, row), 4);
+
+        vacc0 = svmla_s32_m(pg32, vacc0, vrsum0, vlhs_zp);
+        vacc1 = svmla_s32_m(pg32, vacc1, vrsum1, vlhs_zp);
+
+        svfloat32_t vf0 = svcvt_f32_s32_x(pg32, vacc0);
+        svfloat32_t vf1 = svcvt_f32_s32_x(pg32, vacc1);
+
+        vf0 = svmla_f32_m(pg32, vrbias0, vf0,
+                          svmul_f32_x(pg32, vlhs_scale, vrscale0));
+        vf1 = svmla_f32_m(pg32, vrbias1, vf1,
+                          svmul_f32_x(pg32, vlhs_scale, vrscale1));
+
+        vf0 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf0, vmin), vmax);
+        vf1 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf1, vmin), vmax);
+
+        float* dst_ptr =
+            (float*)((uintptr_t)c + (m_idx + row) * cm_stride) + n_idx;
+        svst1_vnum_f32(p_out0, dst_ptr, 0, vf0);
+        svst1_vnum_f32(p_out1, dst_ptr, 1, vf1);
       }
 
-      const int8_t* a_inc_zp = a0 + mr_packed * kc;
-      const int8_t* a_inc_inv = a_inc_zp + mr_packed * sizeof(int32_t);
-      const int8_t* a_inc_zp0;
-      const int8_t* a_inc_inv0;
+      for (size_t row = vl; row < m_rem; ++row) {
+        const svint32_t vlhs_zp = svdup_n_s32(lhs_neg_zps[row]);
+        const svfloat32_t vlhs_scale = svdup_n_f32(lhs_scales[row]);
 
-      svfloat32_t voutput_min = svdup_n_f32(minmax_params->scalar.min);
-      svfloat32_t voutput_max = svdup_n_f32(minmax_params->scalar.max);
+        svint32_t vacc0 = svasr_n_s32_x(
+            pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 2, row - vl), 4);
+        svint32_t vacc1 = svasr_n_s32_x(
+            pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 3, row - vl), 4);
 
-      size_t si_rup_2 = (mr + 1) / 2;
-      for (size_t si = 0; si < si_rup_2; si++) {  // process 2 rows per iteration
+        vacc0 = svmla_s32_m(pg32, vacc0, vrsum0, vlhs_zp);
+        vacc1 = svmla_s32_m(pg32, vacc1, vrsum1, vlhs_zp);
 
-        // mr0~mr1, mr2~mr3, ...
-        a_inc_zp0 = a_inc_zp + (si * 2 * sizeof(int32_t));
-        a_inc_inv0 = a_inc_inv + (si * 2 * sizeof(int32_t));
+        svfloat32_t vf0 = svcvt_f32_s32_x(pg32, vacc0);
+        svfloat32_t vf1 = svcvt_f32_s32_x(pg32, vacc1);
 
-        svbool_t pg_row = svwhilelt_b32_s32(0, mr - si * 2);
+        vf0 = svmla_f32_m(pg32, vrbias0, vf0,
+                          svmul_f32_x(pg32, vlhs_scale, vrscale0));
+        vf1 = svmla_f32_m(pg32, vrbias1, vf1,
+                          svmul_f32_x(pg32, vlhs_scale, vrscale1));
 
-        svint32_t vinput_zero_point_0 = svld1_s32(pg_row, (const int32_t*)a_inc_zp0);
-        svint32_t vzp_01_0 = svdupq_lane_s32(vinput_zero_point_0, 0);
+        vf0 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf0, vmin), vmax);
+        vf1 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf1, vmin), vmax);
 
-        svfloat32_t vinv_scale_0 = svreinterpret_f32_s32(svld1_s32(pg_row, (const int32_t*)a_inc_inv0));
-        svfloat32_t vinvs_01_0 = svdupq_lane_f32(vinv_scale_0, 0);
-
-        // za0
-        svint32x2_t za0_vacco_x2 = svread_hor_za32_s32_vg2(0, si * 2);
-        svint32_t za0_vout0 = svget2(za0_vacco_x2, 0);
-        svint32_t za0_vout1 = svget2(za0_vacco_x2, 1);
-
-        svfloat32_t vscale0 = svmul_lane_f32(vfilter_0, vinvs_01_0, 0);
-        za0_vout0 = svmla_lane_s32(za0_vout0, vksum_0, vzp_01_0, 0);
-
-        svfloat32_t vscale1 = svmul_lane_f32(vfilter_0, vinvs_01_0, 1);
-        za0_vout1 = svmla_lane_s32(za0_vout1, vksum_0, vzp_01_0, 1);
-
-        svfloat32x2_t vout_x2 = svcvt_f32(svcreate2(za0_vout0, za0_vout1));
-
-        svfloat32_t vout0_0 = svget2(vout_x2, 0);
-        svfloat32_t vout1_0 = svget2(vout_x2, 1);
-
-        vout0_0 = svmad_f32_m(pg_32_all, vout0_0, vscale0, vbias_0);
-        vout1_0 = svmad_f32_m(pg_32_all, vout1_0, vscale1, vbias_0);
-
-        vout_x2 = svcreate2(vout0_0, vout1_0);
-        svwrite_hor_za32_f32_vg2(0, si * 2, vout_x2);
-
-        // za1
-        svint32x2_t za1_vacco_x2 = svread_hor_za32_s32_vg2(1, si * 2);
-        svint32_t za1_vout0 = svget2(za1_vacco_x2, 0);
-        svint32_t za1_vout1 = svget2(za1_vacco_x2, 1);
-
-        vscale0 = svmul_lane_f32(vfilter_1, vinvs_01_0, 0);
-        za1_vout0 = svmla_lane_s32(za1_vout0, vksum_1, vzp_01_0, 0);
-
-        vscale1 = svmul_lane_f32(vfilter_1, vinvs_01_0, 1);
-        za1_vout1 = svmla_lane_s32(za1_vout1, vksum_1, vzp_01_0, 1);
-
-        vout_x2 = svcvt_f32(svcreate2(za1_vout0, za1_vout1));
-
-        svfloat32_t vout0_1 = svget2(vout_x2, 0);
-        svfloat32_t vout1_1 = svget2(vout_x2, 1);
-
-        vout0_1 = svmad_f32_m(pg_32_all, vout0_1, vscale0, vbias_1);
-        vout1_1 = svmad_f32_m(pg_32_all, vout1_1, vscale1, vbias_1);
-
-        vout_x2 =svcreate2(vout0_1, vout1_1);
-        svwrite_hor_za32_f32_vg2(1, si * 2, vout_x2);
-
-        // za2,3
-        if (nc > nr) {
-          // za2
-          svint32x2_t za2_vacco_x2 = svread_hor_za32_s32_vg2(2, si * 2);
-          svint32_t za2_vout0 = svget2(za2_vacco_x2, 0);
-          svint32_t za2_vout1 = svget2(za2_vacco_x2, 1);
-
-          vscale0 = svmul_lane_f32(vfilter_2, vinvs_01_0, 0);
-          za2_vout0 = svmla_lane_s32(za2_vout0, vksum_2, vzp_01_0, 0);
-
-          vscale1 = svmul_lane_f32(vfilter_2, vinvs_01_0, 1);
-          za2_vout1 = svmla_lane_s32(za2_vout1, vksum_2, vzp_01_0, 1);
-
-          vout_x2 = svcvt_f32(svcreate2(za2_vout0, za2_vout1));
-
-          svfloat32_t vout0_2 = svget2(vout_x2, 0);
-          svfloat32_t vout1_2 = svget2(vout_x2, 1);
-
-          vout0_2 = svmad_f32_m(pg_32_all, vout0_2, vscale0, vbias_2);
-          vout1_2 = svmad_f32_m(pg_32_all, vout1_2, vscale1, vbias_2);
-
-          vout_x2 = svcreate2(vout0_2, vout1_2);
-          svwrite_hor_za32_f32_vg2(2, si * 2, vout_x2);
-
-          // za3
-          svint32x2_t za3_vacco_x2 = svread_hor_za32_s32_vg2(3, si * 2);
-          svint32_t za3_vout0 = svget2(za3_vacco_x2, 0);
-          svint32_t za3_vout1 = svget2(za3_vacco_x2, 1);
-
-          vscale0 = svmul_lane_f32(vfilter_3, vinvs_01_0, 0);
-          za3_vout0 = svmla_lane_s32(za3_vout0, vksum_3, vzp_01_0, 0);
-
-          vscale1 = svmul_lane_f32(vfilter_3, vinvs_01_0, 1);
-          za3_vout1 = svmla_lane_s32(za3_vout1, vksum_3, vzp_01_0, 1);
-
-          vout_x2 = svcvt_f32(svcreate2(za3_vout0, za3_vout1));
-
-          svfloat32_t vout0_3 = svget2(vout_x2, 0);
-          svfloat32_t vout1_3 = svget2(vout_x2, 1);
-
-          vout0_3 = svmad_f32_m(pg_32_all, vout0_3, vscale0, vbias_3);
-          vout1_3 = svmad_f32_m(pg_32_all, vout1_3, vscale1, vbias_3);
-
-          vout_x2 = svcreate2(vout0_3, vout1_3);
-          svwrite_hor_za32_f32_vg2(3, si * 2, vout_x2);
-        }
+        float* dst_ptr =
+            (float*)((uintptr_t)c + (m_idx + row) * cm_stride) + n_idx;
+        svst1_vnum_f32(p_out0, dst_ptr, 0, vf0);
+        svst1_vnum_f32(p_out1, dst_ptr, 1, vf1);
       }
-
-      float* c_inc = c0;
-
-      size_t n_len = (nc >= 2 * nr) ? 2 * nr : nc;
-
-      if (XNN_LIKELY(nc != 0)) {
-        svcount_t pcnt_32_len_x4 = svwhilelt_c32_u64(0, n_len, 4);
-
-        size_t mr_idx = 0;
-        for (size_t i = 0; i < mr; i++) {
-          svfloat32x4_t za0x4 = svreinterpret_f32( svread_hor_za8_u8_vg4(0, mr_idx) );
-          za0x4 = svclamp(za0x4, voutput_min, voutput_max);
-          svst1_f32_x4(pcnt_32_len_x4,  c_inc, za0x4);
-          c_inc = (float*) ((uintptr_t)c_inc + cm_stride);
-          mr_idx += 4;
-        }
-
-        if (nc > 2 * nr) {
-          a_inc = a0;
-          // Adjust pointers - set next output pointers
-          c0 = (float*)((uintptr_t)c0 + cn_stride * 2);
-          w0 = (const int8_t*)w0 + w_offset_nr;
-          nc -= 2 * nr;  // start next Nr loop
-          w1 = (nc > nr) ? (const void*)((const int8_t*)w0 + w_offset_nr) : w0;
-
-#ifdef PREFETCH_W_MATRIX
-          need_prfm_1 = (nc > nr) && need_prfm_0;
-          if (need_prfm_0 && nc > 0) {
-            prfm_ptr_0 = (const int8_t*)w0;
-            prfm_acc_w_size_0 = kPrefetchDistance * kBytesPerKLoop;
-            int i = 0;
-            for (; i < (kPrefetchDistance * kCacheLinesPerLoop); i++) {
-              __builtin_prefetch(prfm_ptr_0 + kCacheLineSize * i, 0, 2);
-            }
-            prfm_ptr_0 += kCacheLineSize * i;
-          }
-          if (need_prfm_1) {
-            prfm_ptr_1 = (const int8_t*)w1;
-            prfm_acc_w_size_1 = kPrefetchDistance * kBytesPerKLoop;
-            int i = 0;
-            for (; i < (kPrefetchDistance * kCacheLinesPerLoop); i++) {
-              __builtin_prefetch(prfm_ptr_1 + kCacheLineSize * i, 0, 2);
-            }
-            prfm_ptr_1 += kCacheLineSize * i;
-          }
-#endif
-        } else {
-          nc = 0;  // finish kernel
-        }
-
-      }  // store
-
-    } while (nc != 0);
-
-
-  } else {  // mr>vl
-
-#ifdef PREFETCH_W_MATRIX
-    size_t nc_rup_nr = ((nc + nr - 1) / nr) * nr;
-    size_t total_w_size = (kc * nc_rup_nr) / 2 + nc_rup_nr * (4 * 3);
-
-    bool need_prfm = (total_w_size > (128 * 1024));
-    const size_t kPrfmStride = kloop_bytes / 4;
-    const size_t kTrailerPrfmStride = 2 * nr;
-    size_t prfm_acc_w_size = 0;
-    const int8_t* prfm_ptr = (const int8_t*)w;
-
-    if (need_prfm) {
-      prfm_acc_w_size = (24 * 4) * kPrfmStride;
-      int i = 0;
-      for (; i < (24 * 4); i=i+4) {  // 24 means prefetch 24 k-loops w, 4 prefetches of kPrfmStride (kloop_bytes / 4) bytes per k-loop
-        __builtin_prefetch((const int8_t*)w + kPrfmStride * (i+0), 0, 2);
-        __builtin_prefetch((const int8_t*)w + kPrfmStride * (i+1), 0, 2);
-        __builtin_prefetch((const int8_t*)w + kPrfmStride * (i+2), 0, 2);
-        __builtin_prefetch((const int8_t*)w + kPrfmStride * (i+3), 0, 2);
-      }
-      prfm_ptr = (const int8_t*)w + kPrfmStride * i;
     }
-#endif
-
-    do {
-      svzero_za();
-      size_t k = kc;  // always roundup(kc, 32);
-      const int8_t* a_inc = a0;
-
-      while (k >= 16 * sizeof(int8_t)) {
-        svcount_t pcnt_8_all = svptrue_c8();
-        // load w matrix
-        svint8x4_t vb_x4 = svld1_s8_x4(pcnt_8_all, w); w = (const int8_t*)w + kloop_bytes;
-        // load a matrix
-        svint8x4_t va_x4_0 = svld1_s8_x4(pcnt_8_all, a_inc); a_inc += kloop_bytes;
-        svint8x4_t va_x4_1 = svld1_s8_x4(pcnt_8_all, a_inc); a_inc += kloop_bytes;
-
-        svint8x2_t luti_0 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4, 0)), 0);  // left, right  k4
-        svint8x2_t luti_1 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4, 1)), 0);  // left, right  k4
-        svint8x2_t luti_2 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4, 2)), 0);  // left, right  k4
-        svint8x2_t luti_3 = svluti4_lane_zt_s8_x2(0, svreinterpret_u8(svget4(vb_x4, 3)), 0);  // left, right  k4
-        svint8_t vb0_0 = svget2(luti_0, 0);
-        svint8_t vb1_0 = svget2(luti_1, 0);
-        svint8_t vb2_0 = svget2(luti_2, 0);
-        svint8_t vb3_0 = svget2(luti_3, 0);
-        svint8_t vb0_1 = svget2(luti_0, 1);
-        svint8_t vb1_1 = svget2(luti_1, 1);
-        svint8_t vb2_1 = svget2(luti_2, 1);
-        svint8_t vb3_1 = svget2(luti_3, 1);
-
-        svint8_t va0_0 = svget4(va_x4_0, 0);
-        svint8_t va1_0 = svget4(va_x4_0, 2);
-        svint8_t va2_0 = svget4(va_x4_1, 0);
-        svint8_t va3_0 = svget4(va_x4_1, 2);
-        svint8_t va0_1 = svget4(va_x4_0, 1);
-        svint8_t va1_1 = svget4(va_x4_0, 3);
-        svint8_t va2_1 = svget4(va_x4_1, 1);
-        svint8_t va3_1 = svget4(va_x4_1, 3);
-
-#ifdef PREFETCH_W_MATRIX
-        if (need_prfm && (prfm_acc_w_size <= (total_w_size - kloop_bytes))) {
-          prfm_acc_w_size = prfm_acc_w_size + kloop_bytes;
-          __builtin_prefetch(prfm_ptr + 0 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 1 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 2 * kPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 3 * kPrfmStride, 0, 2);
-          prfm_ptr += kloop_bytes;
-        }
-#endif
-
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va0_0, vb0_0);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va0_1, vb0_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va0_0, vb0_1);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va0_1, vb0_1);
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va1_0, vb1_0);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va1_1, vb1_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va1_0, vb1_1);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va1_1, vb1_1);
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va2_0, vb2_0);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va2_1, vb2_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va2_0, vb2_1);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va2_1, vb2_1);
-        svmopa_za32_s8_m(0, pg_8_all, pg_8_all, va3_0, vb3_0);
-        svmopa_za32_s8_m(2, pg_8_all, pg_8_all, va3_1, vb3_0);
-        svmopa_za32_s8_m(1, pg_8_all, pg_8_all, va3_0, vb3_1);
-        svmopa_za32_s8_m(3, pg_8_all, pg_8_all, va3_1, vb3_1);
-
-        k -= 16 * sizeof(int8_t);
-      }
-
-      // Load 1. zero_point  2. inv_scale from A matrix
-      // Load 3. ksum  4. filter/scale  5. bias from W matrix
-      svbool_t pg_zp = svwhilelt_b32_s32(0, 4);     // mr, int32_t
-      svbool_t pg_inv = svwhilelt_b32_s32(0, 4);    // mr, float
-      svbool_t pg_ksum = svptrue_b32();  // nr, int32_t
-      svbool_t pg_filt = svptrue_b32();  // nr, float
-      svbool_t pg_bias = svptrue_b32();  // nr, float
-
-      // Load ksum for columns [0, nr)
-      svint32_t vksum_l = svld1_s32(pg_ksum, w); w = (const int32_t*)w + vl;
-      svint32_t vksum_r = svld1_s32(pg_ksum, w); w = (const int32_t*)w + vl;
-      // Load kernel/filter for columns [0, nr)
-      svfloat32_t vfilter_l = svreinterpret_f32_s32(svld1_s32(pg_filt, w)); w = (const int32_t*)w + vl;
-      svfloat32_t vfilter_r = svreinterpret_f32_s32(svld1_s32(pg_filt, w)); w = (const int32_t*)w + vl;
-      // Load bias for columns [0, nr)
-      svfloat32_t vbias_l = svreinterpret_f32_s32(svld1_s32(pg_bias, w)); w = (const int32_t*)w + vl;
-      svfloat32_t vbias_r = svreinterpret_f32_s32(svld1_s32(pg_bias, w)); w = (const int32_t*)w + vl;
-
-#ifdef PREFETCH_W_MATRIX
-      if (need_prfm) {
-        if (prfm_acc_w_size <= (total_w_size - 12 * nr)) {
-          prfm_acc_w_size = prfm_acc_w_size + 12 * nr;
-          __builtin_prefetch(prfm_ptr + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 1 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 2 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 3 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 4 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 5 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr += 12 * nr;
-        } else if (prfm_acc_w_size <= (total_w_size - 8 * nr)) {
-          prfm_acc_w_size = prfm_acc_w_size + 8 * nr;
-          __builtin_prefetch(prfm_ptr + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 1 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 2 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 3 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr += 8 * nr;
-        } else if (prfm_acc_w_size <= (total_w_size - 4 * nr)) {
-          prfm_acc_w_size = prfm_acc_w_size + 4 * nr;
-          __builtin_prefetch(prfm_ptr + 0 * kTrailerPrfmStride, 0, 2);
-          __builtin_prefetch(prfm_ptr + 1 * kTrailerPrfmStride, 0, 2);
-          prfm_ptr += 4 * nr;
-        }
-      }
-#endif
-
-      const int8_t* a_inc_zp = a_inc;
-      const int8_t* a_inc_inv = a_inc + mr_packed * sizeof(int32_t);
-      const int8_t* a_inc_zp0;
-      const int8_t* a_inc_zp1;
-      const int8_t* a_inc_inv0;
-      const int8_t* a_inc_inv1;
-
-      size_t si_rup_4 = vl / 4;
-      for (size_t si = 0; si < si_rup_4; si++) {
-
-        // za0,1
-        a_inc_zp0 = a_inc_zp + ((0 + si * 4) * sizeof(int32_t));
-        a_inc_inv0 = a_inc_inv + ((0 + si * 4) * sizeof(int32_t));
-
-        svint32_t vinput_zero_point_0 =  svld1_s32(pg_zp, (const int32_t*)a_inc_zp0);
-        svint32_t vzp_0123_0 = svdupq_lane_s32(vinput_zero_point_0, 0);
-
-        svfloat32_t vinv_scale_0 = svreinterpret_f32_s32(svld1_s32(pg_inv, (const int32_t*)a_inc_inv0));
-        svfloat32_t vinvs_0123_0 = svdupq_lane_f32(vinv_scale_0, 0);
-
-        // za0
-        svint32x4_t za0_vacco_x4_0 = svread_hor_za32_s32_vg4(0, 4 * si);
-
-        svfloat32_t vinv_filter_scale0 = svmul_lane_f32(vfilter_l, vinvs_0123_0, 0);
-        svfloat32_t vinv_filter_scale1 = svmul_lane_f32(vfilter_l, vinvs_0123_0, 1);
-        svfloat32_t vinv_filter_scale2 = svmul_lane_f32(vfilter_l, vinvs_0123_0, 2);
-        svfloat32_t vinv_filter_scale3 = svmul_lane_f32(vfilter_l, vinvs_0123_0, 3);
-
-        svint32_t za0_vout0 = svmla_lane_s32(svget4(za0_vacco_x4_0, 0), vksum_l, vzp_0123_0, 0);
-        svint32_t za0_vout1 = svmla_lane_s32(svget4(za0_vacco_x4_0, 1), vksum_l, vzp_0123_0, 1);
-        svint32_t za0_vout2 = svmla_lane_s32(svget4(za0_vacco_x4_0, 2), vksum_l, vzp_0123_0, 2);
-        svint32_t za0_vout3 = svmla_lane_s32(svget4(za0_vacco_x4_0, 3), vksum_l, vzp_0123_0, 3);
-
-        svfloat32x4_t vout0_x4_0 = svcvt_f32(svcreate4(za0_vout0, za0_vout1, za0_vout2, za0_vout3));
-        svfloat32_t vout0_0 = svget4(vout0_x4_0, 0);
-        svfloat32_t vout1_0 = svget4(vout0_x4_0, 1);
-        svfloat32_t vout2_0 = svget4(vout0_x4_0, 2);
-        svfloat32_t vout3_0 = svget4(vout0_x4_0, 3);
-
-        vout0_0 = svmad_f32_m(pg_32_all, vout0_0, vinv_filter_scale0, vbias_l);
-        vout1_0 = svmad_f32_m(pg_32_all, vout1_0, vinv_filter_scale1, vbias_l);
-        vout2_0 = svmad_f32_m(pg_32_all, vout2_0, vinv_filter_scale2, vbias_l);
-        vout3_0 = svmad_f32_m(pg_32_all, vout3_0, vinv_filter_scale3, vbias_l);
-
-        svfloat32x4_t vout0123_0 = svcreate4(vout0_0, vout1_0, vout2_0, vout3_0);
-        svwrite_hor_za32_f32_vg4(0, 4 * si, vout0123_0);
-
-        // za1
-        svint32x4_t za1_vacco_x4_0 = svread_hor_za32_s32_vg4(1, 4 * si);
-
-        vinv_filter_scale0 = svmul_lane_f32(vfilter_r, vinvs_0123_0, 0);
-        vinv_filter_scale1 = svmul_lane_f32(vfilter_r, vinvs_0123_0, 1);
-        vinv_filter_scale2 = svmul_lane_f32(vfilter_r, vinvs_0123_0, 2);
-        vinv_filter_scale3 = svmul_lane_f32(vfilter_r, vinvs_0123_0, 3);
-
-        svint32_t za1_vout0 = svmla_lane_s32(svget4(za1_vacco_x4_0, 0), vksum_r, vzp_0123_0, 0);
-        svint32_t za1_vout1 = svmla_lane_s32(svget4(za1_vacco_x4_0, 1), vksum_r, vzp_0123_0, 1);
-        svint32_t za1_vout2 = svmla_lane_s32(svget4(za1_vacco_x4_0, 2), vksum_r, vzp_0123_0, 2);
-        svint32_t za1_vout3 = svmla_lane_s32(svget4(za1_vacco_x4_0, 3), vksum_r, vzp_0123_0, 3);
-
-        svfloat32x4_t vout1_x4_0 = svcvt_f32(svcreate4(za1_vout0, za1_vout1, za1_vout2, za1_vout3));
-        svfloat32_t vout0_1 = svget4(vout1_x4_0, 0);
-        svfloat32_t vout1_1 = svget4(vout1_x4_0, 1);
-        svfloat32_t vout2_1 = svget4(vout1_x4_0, 2);
-        svfloat32_t vout3_1 = svget4(vout1_x4_0, 3);
-
-        vout0_1 = svmad_f32_m(pg_32_all, vout0_1, vinv_filter_scale0, vbias_r);
-        vout1_1 = svmad_f32_m(pg_32_all, vout1_1, vinv_filter_scale1, vbias_r);
-        vout2_1 = svmad_f32_m(pg_32_all, vout2_1, vinv_filter_scale2, vbias_r);
-        vout3_1 = svmad_f32_m(pg_32_all, vout3_1, vinv_filter_scale3, vbias_r);
-
-        svfloat32x4_t vout0123_1 = svcreate4(vout0_1, vout1_1, vout2_1, vout3_1);
-        svwrite_hor_za32_f32_vg4(1, 4 * si, vout0123_1);
-
-        // za2,3
-        a_inc_zp1 = a_inc_zp + ((vl + si * 4) * sizeof(int32_t));
-        a_inc_inv1 = a_inc_inv + ((vl + si * 4) * sizeof(int32_t));
-
-        svint32_t vinput_zero_point_1 = svld1_s32(pg_zp, (const int32_t*)a_inc_zp1);
-        svint32_t vzp_0123_1 = svdupq_lane_s32(vinput_zero_point_1, 0);
-
-        svfloat32_t vinv_scale_1 = svreinterpret_f32_s32(svld1_s32(pg_inv, (const int32_t*)a_inc_inv1));
-        svfloat32_t vinvs_0123_1 = svdupq_lane_f32(vinv_scale_1, 0);
-
-        // za2
-        za0_vacco_x4_0 = svread_hor_za32_s32_vg4(2, 4 * si);
-
-        vinv_filter_scale0 = svmul_lane_f32(vfilter_l, vinvs_0123_1, 0);
-        vinv_filter_scale1 = svmul_lane_f32(vfilter_l, vinvs_0123_1, 1);
-        vinv_filter_scale2 = svmul_lane_f32(vfilter_l, vinvs_0123_1, 2);
-        vinv_filter_scale3 = svmul_lane_f32(vfilter_l, vinvs_0123_1, 3);
-
-        za0_vout0 = svmla_lane_s32(svget4(za0_vacco_x4_0, 0), vksum_l, vzp_0123_1, 0);
-        za0_vout1 = svmla_lane_s32(svget4(za0_vacco_x4_0, 1), vksum_l, vzp_0123_1, 1);
-        za0_vout2 = svmla_lane_s32(svget4(za0_vacco_x4_0, 2), vksum_l, vzp_0123_1, 2);
-        za0_vout3 = svmla_lane_s32(svget4(za0_vacco_x4_0, 3), vksum_l, vzp_0123_1, 3);
-
-        vout0_x4_0 = svcvt_f32(svcreate4(za0_vout0, za0_vout1, za0_vout2, za0_vout3));
-        vout0_0 = svget4(vout0_x4_0, 0);
-        vout1_0 = svget4(vout0_x4_0, 1);
-        vout2_0 = svget4(vout0_x4_0, 2);
-        vout3_0 = svget4(vout0_x4_0, 3);
-
-        vout0_0 = svmad_f32_m(pg_32_all, vout0_0, vinv_filter_scale0, vbias_l);
-        vout1_0 = svmad_f32_m(pg_32_all, vout1_0, vinv_filter_scale1, vbias_l);
-        vout2_0 = svmad_f32_m(pg_32_all, vout2_0, vinv_filter_scale2, vbias_l);
-        vout3_0 = svmad_f32_m(pg_32_all, vout3_0, vinv_filter_scale3, vbias_l);
-
-        vout0123_0 = svcreate4(vout0_0, vout1_0, vout2_0, vout3_0);
-        svwrite_hor_za32_f32_vg4(2, 4 * si, vout0123_0);
-
-        // za3
-        za1_vacco_x4_0 = svread_hor_za32_s32_vg4(3, 4 * si);
-
-        vinv_filter_scale0 = svmul_lane_f32(vfilter_r, vinvs_0123_1, 0);
-        vinv_filter_scale1 = svmul_lane_f32(vfilter_r, vinvs_0123_1, 1);
-        vinv_filter_scale2 = svmul_lane_f32(vfilter_r, vinvs_0123_1, 2);
-        vinv_filter_scale3 = svmul_lane_f32(vfilter_r, vinvs_0123_1, 3);
-
-        za1_vout0 = svmla_lane_s32(svget4(za1_vacco_x4_0, 0), vksum_r, vzp_0123_1, 0);
-        za1_vout1 = svmla_lane_s32(svget4(za1_vacco_x4_0, 1), vksum_r, vzp_0123_1, 1);
-        za1_vout2 = svmla_lane_s32(svget4(za1_vacco_x4_0, 2), vksum_r, vzp_0123_1, 2);
-        za1_vout3 = svmla_lane_s32(svget4(za1_vacco_x4_0, 3), vksum_r, vzp_0123_1, 3);
-
-        vout1_x4_0 = svcvt_f32(svcreate4(za1_vout0, za1_vout1, za1_vout2, za1_vout3));
-        vout0_1 = svget4(vout1_x4_0, 0);
-        vout1_1 = svget4(vout1_x4_0, 1);
-        vout2_1 = svget4(vout1_x4_0, 2);
-        vout3_1 = svget4(vout1_x4_0, 3);
-
-        vout0_1 = svmad_f32_m(pg_32_all, vout0_1, vinv_filter_scale0, vbias_r);
-        vout1_1 = svmad_f32_m(pg_32_all, vout1_1, vinv_filter_scale1, vbias_r);
-        vout2_1 = svmad_f32_m(pg_32_all, vout2_1, vinv_filter_scale2, vbias_r);
-        vout3_1 = svmad_f32_m(pg_32_all, vout3_1, vinv_filter_scale3, vbias_r);
-
-        vout0123_1 = svcreate4(vout0_1, vout1_1, vout2_1, vout3_1);
-        svwrite_hor_za32_f32_vg4(3, 4 * si, vout0123_1);
-
-      }
-
-
-      svfloat32_t voutput_min = svdup_n_f32(minmax_params->scalar.min);
-      svfloat32_t voutput_max = svdup_n_f32(minmax_params->scalar.max);
-      float* c_inc = c0;
-      svcount_t pn = svwhilelt_c32_u64(0, nc, 2);
-      size_t m_chunk = mr;
-
-      size_t m_chunk_0 = (m_chunk < vl) ? m_chunk : vl;
-      size_t m_chunk_0_vec4 = m_chunk_0 & ~3;
-      #pragma clang loop unroll(disable)
-      for (size_t i = 0; i < m_chunk_0_vec4; i += 4) {
-          svfloat32x4_t z0x4 = svread_hor_za32_f32_vg4(0, i);
-          svfloat32x4_t z1x4 = svread_hor_za32_f32_vg4(1, i);
-          z0x4 = svclamp(z0x4, voutput_min, voutput_max);
-          z1x4 = svclamp(z1x4, voutput_min, voutput_max);
-
-          svfloat32x2_t z01 = svundef2_f32();
-          z01 = svcreate2(svget4_f32(z0x4, 0), svget4_f32(z1x4, 0));
-          svst1_f32_x2(pn, c_inc + 0, z01);
-
-          z01 = svcreate2(svget4_f32(z0x4, 1), svget4_f32(z1x4, 1));
-          svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + cm_stride), z01);
-
-          z01 = svcreate2(svget4_f32(z0x4, 2), svget4_f32(z1x4, 2));
-          svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + 2 * cm_stride), z01);
-
-          z01 = svcreate2(svget4_f32(z0x4, 3), svget4_f32(z1x4, 3));
-          svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + 3 * cm_stride), z01);
-
-          c_inc = (float*) ((uintptr_t)c_inc + 4 * cm_stride);
-      }
-
-      if (m_chunk_0_vec4 < m_chunk_0) {
-          size_t i = m_chunk_0_vec4;
-          svfloat32x4_t z0x4 = svread_hor_za32_f32_vg4(0, i);
-          svfloat32x4_t z1x4 = svread_hor_za32_f32_vg4(1, i);
-          z0x4 = svclamp(z0x4, voutput_min, voutput_max);
-          z1x4 = svclamp(z1x4, voutput_min, voutput_max);
-
-          svfloat32x2_t z01 = svundef2_f32();
-          z01 = svcreate2(svget4_f32(z0x4, 0), svget4_f32(z1x4, 0));
-          svst1_f32_x2(pn, c_inc + 0, z01);
-
-          if (i + 1 < m_chunk_0) {
-              z01 = svcreate2(svget4_f32(z0x4, 1), svget4_f32(z1x4, 1));
-              svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + cm_stride), z01);
-          }
-          if (i + 2 < m_chunk_0) {
-              z01 = svcreate2(svget4_f32(z0x4, 2), svget4_f32(z1x4, 2));
-              svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + 2 * cm_stride), z01);
-          }
-          c_inc = (float*) ((uintptr_t)c_inc + (m_chunk_0 - m_chunk_0_vec4) * cm_stride);
-      }
-
-      c_inc = (float*)((uintptr_t)c0 + vl * cm_stride);
-
-      size_t m_chunk_1_rem = m_chunk - vl;
-      size_t m_chunk_1_vec4 = m_chunk_1_rem & ~3;
-      #pragma clang loop unroll(disable)
-      for (size_t i = 0; i < m_chunk_1_vec4; i += 4) {
-          svfloat32x4_t z2x4 = svread_hor_za32_f32_vg4(2, i);
-          svfloat32x4_t z3x4 = svread_hor_za32_f32_vg4(3, i);
-          z2x4 = svclamp(z2x4, voutput_min, voutput_max);
-          z3x4 = svclamp(z3x4, voutput_min, voutput_max);
-
-          svfloat32x2_t z23 = svundef2_f32();
-          z23 = svcreate2(svget4_f32(z2x4, 0), svget4_f32(z3x4, 0));
-          svst1_f32_x2(pn, c_inc + 0, z23);
-
-          z23 = svcreate2(svget4_f32(z2x4, 1), svget4_f32(z3x4, 1));
-          svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + cm_stride), z23);
-
-          z23 = svcreate2(svget4_f32(z2x4, 2), svget4_f32(z3x4, 2));
-          svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + 2 * cm_stride), z23);
-
-          z23 = svcreate2(svget4_f32(z2x4, 3), svget4_f32(z3x4, 3));
-          svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + 3 * cm_stride), z23);
-
-          c_inc = (float*) ((uintptr_t)c_inc + 4 * cm_stride);
-      }
-
-      if (m_chunk_1_vec4 < m_chunk_1_rem) {
-          size_t i = m_chunk_1_vec4;
-          svfloat32x4_t z2x4 = svread_hor_za32_f32_vg4(2, i);
-          svfloat32x4_t z3x4 = svread_hor_za32_f32_vg4(3, i);
-          z2x4 = svclamp(z2x4, voutput_min, voutput_max);
-          z3x4 = svclamp(z3x4, voutput_min, voutput_max);
-
-          svfloat32x2_t z23 = svundef2_f32();
-          z23 = svcreate2(svget4_f32(z2x4, 0), svget4_f32(z3x4, 0));
-          svst1_f32_x2(pn, c_inc + 0, z23);
-
-          if (i + 1 < m_chunk_1_rem) {
-              z23 = svcreate2(svget4_f32(z2x4, 1), svget4_f32(z3x4, 1));
-              svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + cm_stride), z23);
-          }
-          if (i + 2 < m_chunk_1_rem) {
-              z23 = svcreate2(svget4_f32(z2x4, 2), svget4_f32(z3x4, 2));
-              svst1_f32_x2(pn, (float*)((uintptr_t)c_inc + 2 * cm_stride), z23);
-          }
-          c_inc = (float*) ((uintptr_t)c_inc + (m_chunk_1_rem - m_chunk_1_vec4) * cm_stride);
-      }
-
-      if (nc >= nr) {
-        a_inc = a0;
-        // Adjust pointers - set next output pointers
-        c0 = (float*)((uintptr_t)c0 + cn_stride);
-        nc -= nr;  // start next Nr loop
-
-      } else {
-        nc = 0;  // finish kernel
-      }
-
-    } while (nc != 0);
-
-  }  // mr>vl
+  }
 }
-
-#undef PREFETCH_W_MATRIX
 
 size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2_get_mr() {
   return 2 * svcntsw();
@@ -855,4 +271,4 @@ size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2_get_mr() {
 size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2_get_nr() {
   return 2 * svcntsw();
 }
-#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64

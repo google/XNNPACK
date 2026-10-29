@@ -508,7 +508,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_qp8gemm(
   const uintptr_t packed_input_stride = round_up(kc, kr * sr) * sizeof(int8_t);
 
   while (mr_block_size > 0) {
-    const size_t mr_step = min(mr_block_size, mr);
+    const size_t mr_step =
+        (!context->dynamic_quantization && mr >= 16 && mr == mr_packed)
+            ? mr_block_size
+            : min(mr_block_size, mr);
     const size_t a_offset = context->packed_lh_config->offset_fn(
         mr_block_start, kc, mr_packed, kr, sr);
 
@@ -566,7 +569,10 @@ XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_hmp_qp8gemm(
                                        nr_block_start * context->w_stride);
 
   while (mr_block_size > 0) {
-    const size_t mr_step = min(mr_block_size, mr);
+    const size_t mr_step =
+        (!context->dynamic_quantization && mr >= 16 && mr == mr_packed)
+            ? mr_block_size
+            : min(mr_block_size, mr);
     const size_t a_offset = context->packed_lh_config->offset_fn(
         mr_block_start, context->kc, mr_packed, context->kr, context->sr);
 
@@ -1048,11 +1054,13 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(
 void xnn_compute_kai_f32_dwconv(struct kai_f32_dwconv_context* restrict context,
                                 size_t batch_index, size_t output_y,
                                 size_t output_y_tile) {
-  const size_t input_y_start = output_y < context->input_padding_top ? 0
+  const size_t input_y_start = output_y < context->input_padding_top
+                                   ? 0
                                    : output_y - context->input_padding_top;
   const size_t input_y = min(input_y_start, context->input_height);
   const size_t pad_top = output_y < context->input_padding_top
-                             ? context->input_padding_top - output_y : 0;
+                             ? context->input_padding_top - output_y
+                             : 0;
   const size_t valid_input_rows =
       input_y < context->input_height ? context->input_height - input_y : 0;
   const size_t valid_output_rows =
@@ -1065,12 +1073,12 @@ void xnn_compute_kai_f32_dwconv(struct kai_f32_dwconv_context* restrict context,
                          batch_index * context->output_batch_stride +
                          output_y * context->output_height_stride);
 
-  context->ukernel(
-      input, context->packed_weights, output, context->input_height_stride,
-      context->input_pixel_stride, context->output_height_stride,
-      context->output_pixel_stride, valid_input_rows, valid_output_rows,
-      context->input_padding_left, pad_top, /*pad_value=*/0.0f,
-      context->params.scalar.min, context->params.scalar.max);
+  context->ukernel(input, context->packed_weights, output,
+                   context->input_height_stride, context->input_pixel_stride,
+                   context->output_height_stride, context->output_pixel_stride,
+                   valid_input_rows, valid_output_rows,
+                   context->input_padding_left, pad_top, /*pad_value=*/0.0f,
+                   context->params.scalar.min, context->params.scalar.max);
 }
 
 XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv2d_chw(

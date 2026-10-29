@@ -103,28 +103,35 @@ def split_ukernel_name(name):
 
   if "sme2" in target_name:
     # SME2 kernels have a non-constant mr, nr that we need to use functions to
-    # learn the value of. However, we cannot call these functions unless SME2
-    # is supported by the hardware.
+    # learn the value of. However, we cannot call these functions unless SME is
+    # supported by the hardware.
+    sme2_arch_flag = (
+        "(XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme)"
+        if "neonsme2" in target_name
+        else "xnn_arch_arm_sme"
+    )
     mr = """[]() -> size_t {{
       const struct xnn_hardware_config* hardware_config =
             xnn_init_hardware_config();
-      if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {{
+      const uint64_t req_arch = {sme2_arch_flag};
+      if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {{
         return {name}_get_mr();
       }} else {{
         return 0;
       }}
     }}
-""".format(name=name)
+""".format(name=name, sme2_arch_flag=sme2_arch_flag)
     nr = """[]() -> size_t {{
       const struct xnn_hardware_config* hardware_config =
             xnn_init_hardware_config();
-      if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {{
+      const uint64_t req_arch = {sme2_arch_flag};
+      if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {{
         return {name}_get_nr();
       }} else {{
         return 0;
       }}
     }}
-""".format(name=name)
+""".format(name=name, sme2_arch_flag=sme2_arch_flag)
     mr_packed = mr
 
   requantization = common_parts[-3]

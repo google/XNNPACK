@@ -1257,7 +1257,8 @@ TEST(CONVOLUTION_NHWC, fp32_static_bias_size_overflow) {
           nullptr, &convolution_op));
   EXPECT_EQ(nullptr, convolution_op);
 }
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) && \
+    XNN_ENABLE_ARM_SME2
 TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
   if (xnn_init_kai_f32_dwconv_config() == nullptr) {
@@ -1287,7 +1288,8 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
           /*expected_workspace_size=*/SIZE_MAX,
           /*expected_microkernel_type=*/xnn_microkernel_type_dwconv);
 }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) &&
+        // XNN_ENABLE_ARM_SME2
 
 TEST(CONVOLUTION_NHWC_F32, unioutput_1x1) {
   ConvolutionOperatorTester()
@@ -2176,8 +2178,8 @@ TEST(CONVOLUTION_NHWC_QS8, reject_scale_buffer_size_overflow) {
   const int32_t bias[1] = {0};
   xnn_operator_t convolution_op = nullptr;
   const xnn_status status = xnn_create_convolution2d_nhwc_qs8(
-      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f, kernel,
-      bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f, kernel, bias,
+      0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -2187,22 +2189,20 @@ TEST(CONVOLUTION_NHWC_QS8, reject_scale_buffer_size_overflow) {
   const size_t overflowing_group_output_channels =
       std::numeric_limits<size_t>::max() / sizeof(float) + 1;
   convolution_op = nullptr;
-  EXPECT_EQ(
-      xnn_status_invalid_parameter,
-      xnn_create_convolution2d_nhwc_qs8(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-          overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f, kernel,
-          bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+                overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f, kernel,
+                bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
 
   const size_t overflowing_output_channels =
       std::numeric_limits<size_t>::max() / 2 + 1;
   convolution_op = nullptr;
-  EXPECT_EQ(
-      xnn_status_invalid_parameter,
-      xnn_create_convolution2d_nhwc_qs8(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
-          overflowing_output_channels, 2, 2, 0, 1.0f, 1.0f, kernel, bias,
-          0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1, overflowing_output_channels,
+                2, 2, 0, 1.0f, 1.0f, kernel, bias, 0, 1.0f, -128, 127, 0,
+                nullptr, &convolution_op));
 }
 
 TEST(CONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
@@ -2223,12 +2223,11 @@ TEST(CONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
   const size_t overflowing_output_channels =
       std::numeric_limits<size_t>::max() / 2 + 1;
   convolution_op = nullptr;
-  EXPECT_EQ(
-      xnn_status_invalid_parameter,
-      xnn_create_convolution2d_nhwc_qs8_qc8w(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
-          overflowing_output_channels, 2, 2, 0, 1.0f, kernel_scale, kernel,
-          bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_qs8_qc8w(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1, overflowing_output_channels,
+                2, 2, 0, 1.0f, kernel_scale, kernel, bias, 0, 1.0f, -128, 127,
+                0, nullptr, &convolution_op));
 }
 
 TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
@@ -2237,8 +2236,8 @@ TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
   const int32_t bias[1] = {0};
   xnn_operator_t convolution_op = nullptr;
   const xnn_status status = xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
-      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f, kernel,
-      bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f, kernel, bias,
+      0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -2251,18 +2250,17 @@ TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
   EXPECT_EQ(xnn_status_invalid_parameter,
             xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
                 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-                overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f,
-                kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
-                &convolution_op));
+                overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f, kernel,
+                bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
 
   const size_t overflowing_output_channels =
       std::numeric_limits<size_t>::max() / 2 + 1;
   convolution_op = nullptr;
   EXPECT_EQ(xnn_status_invalid_parameter,
             xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
-                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
-                overflowing_output_channels, 2, 2, 0, 1.0f, 1.0f, kernel,
-                bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1, overflowing_output_channels,
+                2, 2, 0, 1.0f, 1.0f, kernel, bias, 0, 1.0f, -128, 127, 0,
+                nullptr, &convolution_op));
 }
 
 TEST(CONVOLUTION_NHWC_F32, input_channels_overflow) {
@@ -2280,8 +2278,7 @@ TEST(CONVOLUTION_NHWC_F32, input_channels_overflow) {
           0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, group_input_channels, 1,
           group_input_channels, 1, kernel, bias,
           -std::numeric_limits<float>::infinity(),
-          std::numeric_limits<float>::infinity(), 0, nullptr,
-          &convolution_op));
+          std::numeric_limits<float>::infinity(), 0, nullptr, &convolution_op));
   EXPECT_EQ(nullptr, convolution_op);
 }
 
@@ -2297,11 +2294,10 @@ TEST(CONVOLUTION_NHWC_F32, output_channels_overflow) {
   EXPECT_EQ(
       xnn_status_invalid_parameter,
       xnn_create_convolution2d_nhwc_f32(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, 1, group_output_channels,
-          1, group_output_channels, kernel, bias,
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, 1, group_output_channels, 1,
+          group_output_channels, kernel, bias,
           -std::numeric_limits<float>::infinity(),
-          std::numeric_limits<float>::infinity(), 0, nullptr,
-          &convolution_op));
+          std::numeric_limits<float>::infinity(), 0, nullptr, &convolution_op));
   EXPECT_EQ(nullptr, convolution_op);
 }
 
@@ -2315,19 +2311,16 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
   ASSERT_EQ(
       xnn_status_success,
       xnn_create_convolution2d_nhwc_f32(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          kernel, bias,
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, kernel, bias,
           -std::numeric_limits<float>::infinity(),
-          std::numeric_limits<float>::infinity(), 0, nullptr,
-          &convolution_op));
+          std::numeric_limits<float>::infinity(), 0, nullptr, &convolution_op));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
       convolution_op, xnn_delete_operator);
   size_t workspace_size = 0;
   const size_t overflow_batch = (SIZE_MAX / 4) + 1;
-  EXPECT_EQ(
-      xnn_status_out_of_memory,
-      xnn_reshape_convolution2d_nhwc_f32(
-          convolution_op, overflow_batch, 1, 1, &workspace_size,
-          nullptr, nullptr, nullptr));
+  EXPECT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_convolution2d_nhwc_f32(convolution_op, overflow_batch,
+                                               1, 1, &workspace_size, nullptr,
+                                               nullptr, nullptr));
 }
 }  // namespace

@@ -39,7 +39,6 @@ const XnnTestParam xnn_test_params[] = {
 
 #undef XNN_UKERNEL
 
-
 TEST_P(XnnTest, k_div_kr_m_div_mr) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t kr : {1, 2, 4}) {
@@ -68,8 +67,8 @@ TEST_P(XnnTest, k_div_kr_m_lt_mr) {
   }
 }
 
-constexpr size_t kKr4Ks[] = {1,  2,  3,  4,  5,  7,  8,   15,  16,
-                             17, 28, 29, 31, 32, 33, 36,  60,  63,
+constexpr size_t kKr4Ks[] = {1,  2,  3,  4,  5,   7,   8,   15,  16,
+                             17, 28, 29, 31, 32,  33,  36,  60,  63,
                              64, 65, 96, 97, 127, 128, 129, 200, 257};
 
 size_t Kr4Mr() {
@@ -77,7 +76,7 @@ size_t Kr4Mr() {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   if (hardware_config != nullptr &&
-      (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+      (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
     return xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2_get_mr();
   }
 #endif
@@ -85,12 +84,7 @@ size_t Kr4Mr() {
 }
 
 void TestKr4(const XnnTestParam& param, size_t m, size_t k, size_t mr) {
-  xnnpack::PackQMicrokernelTester()
-      .m(m)
-      .k(k)
-      .mr(mr)
-      .kr(4)
-      .Test(param.ukernel);
+  xnnpack::PackQMicrokernelTester().m(m).k(k).mr(mr).kr(4).Test(param.ukernel);
 }
 
 TEST_P(XnnTest, kr_eq_4_mr_eq_1_m_eq_1) {
@@ -159,23 +153,19 @@ INSTANTIATE_TEST_SUITE_P(x8_packq, XnnTest, testing::ValuesIn(xnn_test_params),
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
 void TestSme2Kr4(size_t m, size_t k, size_t mr) {
-  xnnpack::PackQMicrokernelTester()
-      .m(m)
-      .k(k)
-      .mr(mr)
-      .kr(4)
-      .Test(xnn_x8_packq_f32qp8_ukernel__sme2);
+  xnnpack::PackQMicrokernelTester().m(m).k(k).mr(mr).kr(4).Test(
+      xnn_x8_packq_f32qp8_ukernel__sme2);
 }
 
 TEST(x8_packq_sme2, kr_eq_4_mr_eq_1_m_eq_1) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
   for (size_t k : kKr4Ks) {
     TestSme2Kr4(1, k, 1);
   }
 }
 
 TEST(x8_packq_sme2, kr_eq_4_mr_eq_1_m_gt_1) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
   for (size_t m : {2, 3, 7, 16}) {
     for (size_t k : kKr4Ks) {
       TestSme2Kr4(m, k, 1);
@@ -184,7 +174,7 @@ TEST(x8_packq_sme2, kr_eq_4_mr_eq_1_m_gt_1) {
 }
 
 TEST(x8_packq_sme2, kr_eq_4_mr_eq_32_m_le_16) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
   const size_t mr = Kr4Mr();
   for (size_t m = 1; m <= mr / 2; m++) {
     for (size_t k : kKr4Ks) {
@@ -194,7 +184,7 @@ TEST(x8_packq_sme2, kr_eq_4_mr_eq_32_m_le_16) {
 }
 
 TEST(x8_packq_sme2, kr_eq_4_mr_eq_32_m_gt_16) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
   const size_t mr = Kr4Mr();
   for (size_t m = mr / 2 + 1; m <= mr; m++) {
     for (size_t k : kKr4Ks) {
@@ -204,7 +194,7 @@ TEST(x8_packq_sme2, kr_eq_4_mr_eq_32_m_gt_16) {
 }
 
 TEST(x8_packq_sme2, kr_eq_4_mr_eq_32_m_gt_32) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
   const size_t mr = Kr4Mr();
   for (size_t m : {mr + 1, mr + 15, 2 * mr, 2 * mr + 1, 3 * mr + 4}) {
     for (size_t k : kKr4Ks) {

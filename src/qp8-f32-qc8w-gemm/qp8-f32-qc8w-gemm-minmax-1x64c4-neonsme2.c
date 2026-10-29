@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
+
 #include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
@@ -16,24 +17,202 @@ size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr() {
 size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr() {
   return kai_get_nr_matmul_clamp_f32_qai8dxp1x4_qsi8cxp4vlx4_1x4vl_sme2_dot();
 }
-#endif  // XNN_ENABLE_KLEIDIAI
 
 // Wraps the `kai_matmul_clamp_f32_qai8dxp1x4_qsi8cxp4vlx4_1x4vl_sme2_dot`
 // GEMM microkernel with a name that is compatible with our tooling.
 void xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
-    size_t dst_stride_col,
-    const void* params) {
-#if XNN_ENABLE_KLEIDIAI
+    size_t dst_stride_col, const void* params) {
   const struct xnn_f32_minmax_params* minmax_params = params;
   kai_run_matmul_clamp_f32_qai8dxp1x4_qsi8cxp4vlx4_1x4vl_sme2_dot(
-      m, n, k, lhs_packed, rhs_packed, dst, dst_stride_row, /*dst_stride_col=*/sizeof(float),
-      minmax_params->scalar.min, minmax_params->scalar.max);
-#else
-  assert(
-      "Calling microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." &&
-      0);
-#endif  // XNN_ENABLE_KLEIDIAI
+      m, n, k, lhs_packed, rhs_packed, dst, dst_stride_row,
+      /*dst_stride_col=*/sizeof(float), minmax_params->scalar.min,
+      minmax_params->scalar.max);
 }
+#elif XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
+#include <arm_sme.h>
+#include <stdint.h>
+
+#include "src/xnnpack/math.h"
+
+size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr() {
+  return 1;
+}
+
+size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr() {
+  return 4 * svcntsw();
+}
+
+__arm_locally_streaming __arm_new(
+    "za") static void xnn_qp8_f32_qc8w_gemm_1x4vl_sme2_dot_impl(size_t m,
+                                                                size_t n,
+                                                                size_t k,
+                                                                const void*
+                                                                    lhs_packed,
+                                                                const void*
+                                                                    rhs_packed,
+                                                                float* dst,
+                                                                size_t
+                                                                    dst_stride_row,
+                                                                float clamp_min,
+                                                                float
+                                                                    clamp_max) {
+  const size_t vl = svcntw();
+  const size_t nr = 4 * vl;
+  const size_t k_internal = (k + 31) & ~(size_t)31;
+  const size_t lhs_row_stride =
+      k_internal * sizeof(int8_t) + sizeof(int32_t) + sizeof(float);
+  const size_t rhs_row_stride =
+      nr * (k_internal * sizeof(int8_t) + sizeof(int32_t) + sizeof(float) +
+            sizeof(float));
+  const svbool_t pg8 = svptrue_b8();
+  const svbool_t pg32 = svptrue_b32();
+  const svbool_t p_row0 = svwhilelt_b8_u64(0, 4);
+  const svbool_t p_row1 = sveor_b_z(pg8, svwhilelt_b8_u64(0, 8), p_row0);
+  const svbool_t p_row2 =
+      sveor_b_z(pg8, svwhilelt_b8_u64(0, 12), svwhilelt_b8_u64(0, 8));
+  const svbool_t p_row3 =
+      sveor_b_z(pg8, svwhilelt_b8_u64(0, 16), svwhilelt_b8_u64(0, 12));
+  const svfloat32_t vmin = svdup_n_f32(clamp_min);
+  const svfloat32_t vmax = svdup_n_f32(clamp_max);
+
+  for (size_t m_idx = 0; m_idx < m; ++m_idx) {
+    const int8_t* lhs_row =
+        (const int8_t*)((uintptr_t)lhs_packed + m_idx * lhs_row_stride);
+    int32_t lhs_neg_zp;
+    float lhs_scale;
+    __builtin_memcpy(&lhs_neg_zp, lhs_row + k_internal, sizeof(lhs_neg_zp));
+    __builtin_memcpy(&lhs_scale, lhs_row + k_internal + sizeof(int32_t),
+                     sizeof(lhs_scale));
+    const svint32_t vlhs_neg_zp = svdup_n_s32(lhs_neg_zp);
+    const svfloat32_t vlhs_scale = svdup_n_f32(lhs_scale);
+    float* dst_row = (float*)((uintptr_t)dst + m_idx * dst_stride_row);
+
+    for (size_t n_idx = 0; n_idx < n; n_idx += nr) {
+      const uint8_t* rhs_block =
+          (const uint8_t*)rhs_packed + (n_idx / nr) * rhs_row_stride;
+      svzero_za();
+
+      const int8_t* w_ptr = (const int8_t*)rhs_block;
+      for (size_t k_idx = 0; k_idx < k_internal; k_idx += 16) {
+        const svint8_t va = svld1rq_s8(pg8, lhs_row + k_idx);
+
+        svmopa_za32_s8_m(0, p_row0, pg8, va, svld1_vnum_s8(pg8, w_ptr, 0));
+        svmopa_za32_s8_m(1, p_row0, pg8, va, svld1_vnum_s8(pg8, w_ptr, 1));
+        svmopa_za32_s8_m(2, p_row0, pg8, va, svld1_vnum_s8(pg8, w_ptr, 2));
+        svmopa_za32_s8_m(3, p_row0, pg8, va, svld1_vnum_s8(pg8, w_ptr, 3));
+
+        svmopa_za32_s8_m(0, p_row1, pg8, va, svld1_vnum_s8(pg8, w_ptr, 4));
+        svmopa_za32_s8_m(1, p_row1, pg8, va, svld1_vnum_s8(pg8, w_ptr, 5));
+        svmopa_za32_s8_m(2, p_row1, pg8, va, svld1_vnum_s8(pg8, w_ptr, 6));
+        svmopa_za32_s8_m(3, p_row1, pg8, va, svld1_vnum_s8(pg8, w_ptr, 7));
+
+        svmopa_za32_s8_m(0, p_row2, pg8, va, svld1_vnum_s8(pg8, w_ptr, 8));
+        svmopa_za32_s8_m(1, p_row2, pg8, va, svld1_vnum_s8(pg8, w_ptr, 9));
+        svmopa_za32_s8_m(2, p_row2, pg8, va, svld1_vnum_s8(pg8, w_ptr, 10));
+        svmopa_za32_s8_m(3, p_row2, pg8, va, svld1_vnum_s8(pg8, w_ptr, 11));
+
+        svmopa_za32_s8_m(0, p_row3, pg8, va, svld1_vnum_s8(pg8, w_ptr, 12));
+        svmopa_za32_s8_m(1, p_row3, pg8, va, svld1_vnum_s8(pg8, w_ptr, 13));
+        svmopa_za32_s8_m(2, p_row3, pg8, va, svld1_vnum_s8(pg8, w_ptr, 14));
+        svmopa_za32_s8_m(3, p_row3, pg8, va, svld1_vnum_s8(pg8, w_ptr, 15));
+
+        w_ptr += 16 * nr;
+      }
+
+      svint32_t vacc0 = svadd_s32_x(
+          pg32,
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 0, 0),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 0, 1)),
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 0, 2),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 0, 3)));
+      svint32_t vacc1 = svadd_s32_x(
+          pg32,
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 1, 0),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 1, 1)),
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 1, 2),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 1, 3)));
+      svint32_t vacc2 = svadd_s32_x(
+          pg32,
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 2, 0),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 2, 1)),
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 2, 2),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 2, 3)));
+      svint32_t vacc3 = svadd_s32_x(
+          pg32,
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 3, 0),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 3, 1)),
+          svadd_s32_x(pg32, svread_hor_za32_s32_m(svundef_s32(), pg32, 3, 2),
+                      svread_hor_za32_s32_m(svundef_s32(), pg32, 3, 3)));
+
+      const int32_t* rhs_sums = (const int32_t*)(rhs_block + nr * k_internal);
+      const float* rhs_scales = (const float*)(rhs_sums + nr);
+      const float* rhs_biases = rhs_scales + nr;
+
+      vacc0 = svmla_s32_m(pg32, vacc0, svld1_vnum_s32(pg32, rhs_sums, 0),
+                          vlhs_neg_zp);
+      vacc1 = svmla_s32_m(pg32, vacc1, svld1_vnum_s32(pg32, rhs_sums, 1),
+                          vlhs_neg_zp);
+      vacc2 = svmla_s32_m(pg32, vacc2, svld1_vnum_s32(pg32, rhs_sums, 2),
+                          vlhs_neg_zp);
+      vacc3 = svmla_s32_m(pg32, vacc3, svld1_vnum_s32(pg32, rhs_sums, 3),
+                          vlhs_neg_zp);
+
+      svfloat32_t vf0 = svcvt_f32_s32_x(pg32, vacc0);
+      svfloat32_t vf1 = svcvt_f32_s32_x(pg32, vacc1);
+      svfloat32_t vf2 = svcvt_f32_s32_x(pg32, vacc2);
+      svfloat32_t vf3 = svcvt_f32_s32_x(pg32, vacc3);
+
+      vf0 = svmla_f32_m(
+          pg32, svld1_vnum_f32(pg32, rhs_biases, 0), vf0,
+          svmul_f32_x(pg32, vlhs_scale, svld1_vnum_f32(pg32, rhs_scales, 0)));
+      vf1 = svmla_f32_m(
+          pg32, svld1_vnum_f32(pg32, rhs_biases, 1), vf1,
+          svmul_f32_x(pg32, vlhs_scale, svld1_vnum_f32(pg32, rhs_scales, 1)));
+      vf2 = svmla_f32_m(
+          pg32, svld1_vnum_f32(pg32, rhs_biases, 2), vf2,
+          svmul_f32_x(pg32, vlhs_scale, svld1_vnum_f32(pg32, rhs_scales, 2)));
+      vf3 = svmla_f32_m(
+          pg32, svld1_vnum_f32(pg32, rhs_biases, 3), vf3,
+          svmul_f32_x(pg32, vlhs_scale, svld1_vnum_f32(pg32, rhs_scales, 3)));
+
+      vf0 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf0, vmin), vmax);
+      vf1 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf1, vmin), vmax);
+      vf2 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf2, vmin), vmax);
+      vf3 = svmin_f32_m(pg32, svmax_f32_m(pg32, vf3, vmin), vmax);
+
+      const size_t n_rem = n - n_idx;
+      svst1_vnum_f32(svwhilelt_b32_u64(0 * vl, n_rem), dst_row + n_idx, 0, vf0);
+      svst1_vnum_f32(svwhilelt_b32_u64(1 * vl, n_rem), dst_row + n_idx, 1, vf1);
+      svst1_vnum_f32(svwhilelt_b32_u64(2 * vl, n_rem), dst_row + n_idx, 2, vf2);
+      svst1_vnum_f32(svwhilelt_b32_u64(3 * vl, n_rem), dst_row + n_idx, 3, vf3);
+    }
+  }
+}
+
+void xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2(
+    size_t m, size_t n, size_t k, const void* lhs_packed,
+    const void* rhs_packed, float* dst, size_t dst_stride_row,
+    size_t dst_stride_col, const void* params) {
+  (void)dst_stride_col;
+  const struct xnn_f32_minmax_params* minmax_params = params;
+  xnn_qp8_f32_qc8w_gemm_1x4vl_sme2_dot_impl(
+      m, n, k, lhs_packed, rhs_packed, dst, dst_stride_row,
+      minmax_params->scalar.min, minmax_params->scalar.max);
+}
+#else
+#include <assert.h>
+size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr() {
+  return 0;
+}
+size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr() {
+  return 0;
+}
+void xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2(
+    size_t m, size_t n, size_t k, const void* lhs_packed,
+    const void* rhs_packed, float* dst, size_t dst_stride_row,
+    size_t dst_stride_col, const void* params) {
+  assert(0);
+}
+#endif  // XNN_ENABLE_KLEIDIAI

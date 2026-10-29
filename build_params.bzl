@@ -424,7 +424,14 @@ XNNPACK_PARAMS_FOR_ARCH = {
     # A18) and faults with SIGILL.
     "neonsme": _create_params(
         cond = "//:arm_sme_enabled",
-        extra_deps = xnnpack_if_kleidiai_enabled([
+        copts = xnnpack_select_if(
+            "//:arm_sme_acle_enabled",
+            ["-march=armv8.2-a+sme+fp16"],
+        ),
+        extra_deps = xnnpack_select_if(
+            "//:arm_sme_acle_enabled",
+            ["//:arm_sme_abi_stubs"],
+        ) + xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
@@ -432,7 +439,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         cond = "//:arm_sme2_enabled",
         copts = xnnpack_select_if(
             "//:arm_sme_acle_enabled",
-            ["-march=armv8.2-a+sme2"],
+            ["-march=armv8.2-a+sme+fp16"],
         ),
         extra_deps = xnnpack_select_if(
             "//:arm_sme_acle_enabled",
