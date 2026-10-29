@@ -1383,12 +1383,263 @@ TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
                 /*data=*/nullptr, /*external_id=*/1,
                 XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
 
-  ASSERT_EQ(xnn_status_invalid_parameter,
-            xnn_define_fully_connected(
-                subgraph, -128.0f, 127.0f, input_id, filter_id,
-                XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
+  ASSERT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_define_fully_connected(subgraph, -128.0f, 127.0f, input_id, filter_id,
+                                 XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
 
   xnn_delete_subgraph(subgraph);
+}
+
+// `xnn_define_fully_connected` returns `xnn_status_unsupported_parameter` for
+// well-formed requests that XNNPACK doesn't implement, and
+// `xnn_status_invalid_parameter` for malformed ones.
+class FullyConnectedDefine : public ::testing::Test {
+ protected:
+  uint32_t DefineTensor(xnn_datatype datatype, std::vector<size_t> dims,
+                        bool is_static) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    if (is_static) {
+      tester_.AddInternalStaticTensor(dims, datatype, &id, data_.data());
+    } else {
+      tester_.AddInternalDynamicTensor(dims, datatype, &id);
+    }
+    return id;
+  }
+
+  uint32_t DefineQuantizedTensor(xnn_datatype datatype, int32_t zero_point,
+                                 std::vector<size_t> dims, bool is_static) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    if (is_static) {
+      tester_.AddInternalStaticTensor(dims, datatype, {zero_point, 1.0f}, &id,
+                                      data_.data());
+    } else {
+      tester_.AddInternalDynamicTensor(dims, datatype, {zero_point, 1.0f}, &id);
+    }
+    return id;
+  }
+
+  uint32_t DefineChannelwiseTensor(xnn_datatype datatype, int32_t zero_point,
+                                   size_t channel_dim, std::vector<size_t> dims,
+                                   bool is_static) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    tester_.AddInternalChannelwiseQuantizedTensor(
+        dims, channel_dim, datatype, zero_point, scale_.data(),
+        /*channelwise_zero_points=*/nullptr, &id,
+        is_static ? data_.data() : nullptr);
+    return id;
+  }
+
+  uint32_t DefineBlockwiseTensor(size_t channel_dim, size_t block_size,
+                                 std::vector<size_t> dims) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    tester_.AddInternalBlockwiseQuantizedTensor(
+        dims, channel_dim, block_size, xnn_datatype_qbint4, /*zero_point=*/8,
+        bf16_scale_.data(), xnn_datatype_bf16, &id, data_.data());
+    return id;
+  }
+
+  uint32_t DefineDynamicallyQuantizedInput() {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    tester_.AddInternalDynamicallyQuantizedTensor(
+        kInputDims, xnn_datatype_qdint8, /*num_nonbatch_dims=*/1, &id);
+    return id;
+  }
+
+  xnn_status DefineFullyConnected(uint32_t input_id, uint32_t filter_id,
+                                  uint32_t bias_id, uint32_t output_id,
+                                  uint32_t flags = 0) {
+    return xnn_define_fully_connected(
+        tester_.Subgraph(), -std::numeric_limits<float>::infinity(),
+        std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
+        output_id, flags);
+  }
+
+  static constexpr size_t kInputChannels = 64;
+  static constexpr size_t kOutputChannels = 4;
+  const std::vector<size_t> kInputDims = {1, kInputChannels};
+  const std::vector<size_t> kFilterDims = {kOutputChannels, kInputChannels};
+  const std::vector<size_t> kBiasDims = {kOutputChannels};
+  const std::vector<size_t> kOutputDims = {1, kOutputChannels};
+
+  SubgraphTester tester_{/*external_value_ids=*/0};
+  std::vector<int32_t> data_ = std::vector<int32_t>(1024, 0);
+  std::vector<float> scale_ = std::vector<float>(kInputChannels, 1.0f);
+  // 1.0 in bf16.
+  std::vector<uint16_t> bf16_scale_ =
+      std::vector<uint16_t>(kInputChannels, 0x3F80);
+};
+
+TEST_F(FullyConnectedDefine, UnsupportedInputDatatype) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_int32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id =
+      DefineTensor(xnn_datatype_fp32, kFilterDims, /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, NonStaticQuantizedFilterIsUnsupported) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id = DefineChannelwiseTensor(
+      xnn_datatype_qcint8, /*zero_point=*/0, /*channel_dim=*/0, kFilterDims,
+      /*is_static=*/false);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, NonStaticBiasWithChannelwiseFilterIsUnsupported) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id = DefineChannelwiseTensor(
+      xnn_datatype_qcint8, /*zero_point=*/0, /*channel_dim=*/0, kFilterDims,
+      /*is_static=*/true);
+  const uint32_t bias_id =
+      DefineTensor(xnn_datatype_fp32, kBiasDims, /*is_static=*/false);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, bias_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, NonStaticQuantizedBiasIsUnsupported) {
+  const uint32_t input_id = DefineQuantizedTensor(
+      xnn_datatype_qint8, /*zero_point=*/0, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id = DefineQuantizedTensor(
+      xnn_datatype_qint8, /*zero_point=*/0, kFilterDims, /*is_static=*/true);
+  const uint32_t bias_id = DefineQuantizedTensor(
+      xnn_datatype_qint32, /*zero_point=*/0, kBiasDims, /*is_static=*/false);
+  const uint32_t output_id = DefineQuantizedTensor(
+      xnn_datatype_qint8, /*zero_point=*/0, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, bias_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, Qcint4FilterZeroPointIsUnsupported) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id = DefineChannelwiseTensor(
+      xnn_datatype_qcint4, /*zero_point=*/3, /*channel_dim=*/0, kFilterDims,
+      /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, UnsupportedFilterDatatype) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id =
+      DefineTensor(xnn_datatype_int32, kFilterDims, /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, ChannelwiseFilterOnInputChannelsUnsupported) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id = DefineChannelwiseTensor(
+      xnn_datatype_qcint8, /*zero_point=*/0, /*channel_dim=*/1, kFilterDims,
+      /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, BlockwiseFilterOnInputChannelsUnsupported) {
+  const uint32_t input_id = DefineDynamicallyQuantizedInput();
+  const uint32_t filter_id = DefineBlockwiseTensor(
+      /*channel_dim=*/1, /*block_size=*/32, kFilterDims);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, UnsupportedBiasDatatype) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id =
+      DefineTensor(xnn_datatype_fp32, kFilterDims, /*is_static=*/true);
+  const uint32_t bias_id =
+      DefineTensor(xnn_datatype_bf16, kBiasDims, /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, bias_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, UnsupportedOutputDatatype) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id =
+      DefineTensor(xnn_datatype_fp32, kFilterDims, /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_int32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, UnsupportedDatatypeCombinationWithoutBias) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id =
+      DefineTensor(xnn_datatype_fp32, kFilterDims, /*is_static=*/true);
+  const uint32_t output_id = DefineQuantizedTensor(
+      xnn_datatype_qint8, /*zero_point=*/0, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, UnsupportedDatatypeCombinationWithBias) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t filter_id =
+      DefineTensor(xnn_datatype_fp32, kFilterDims, /*is_static=*/true);
+  const uint32_t bias_id =
+      DefineTensor(xnn_datatype_fp16, kBiasDims, /*is_static=*/true);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, bias_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(FullyConnectedDefine, InvalidFilterId) {
+  const uint32_t input_id =
+      DefineTensor(xnn_datatype_fp32, kInputDims, /*is_static=*/false);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, /*filter_id=*/100,
+                                 XNN_INVALID_VALUE_ID, output_id),
+            xnn_status_invalid_parameter);
+}
+
+TEST_F(FullyConnectedDefine, BlockSizeNotDividingInputChannels) {
+  const uint32_t input_id = DefineDynamicallyQuantizedInput();
+  const uint32_t filter_id = DefineBlockwiseTensor(
+      /*channel_dim=*/0, /*block_size=*/3 * XNN_MIN_BLOCKSIZE, kFilterDims);
+  const uint32_t output_id =
+      DefineTensor(xnn_datatype_fp32, kOutputDims, /*is_static=*/false);
+  EXPECT_EQ(DefineFullyConnected(input_id, filter_id, XNN_INVALID_VALUE_ID,
+                                 output_id),
+            xnn_status_invalid_parameter);
 }
 #endif  // XNNPACK_USE_YNNPACK
 
