@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -170,6 +171,47 @@ TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
 
 #ifndef XNNPACK_USE_YNNPACK
+static xnn_status DefineAveragePooling2D(xnn_subgraph_t subgraph) {
+  return xnn_define_average_pooling_2d(
+      subgraph, /*input_padding_top=*/0, /*input_padding_right=*/0,
+      /*input_padding_bottom=*/0, /*input_padding_left=*/0,
+      /*pooling_height=*/2, /*pooling_width=*/2, /*stride_height=*/1,
+      /*stride_width=*/1, -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), /*input_id=*/0,
+      /*output_id=*/1, /*flags=*/0);
+}
+
+TEST(AveragePooling2D, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(4, xnn_datatype_int32, 0)
+      .AddOutputTensor(4, xnn_datatype_int32, 1);
+  EXPECT_EQ(DefineAveragePooling2D(subgraph.Subgraph()),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(AveragePooling2D, DefineRejectsUnsupportedOutputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddOutputTensor(4, xnn_datatype_int32, 1);
+  EXPECT_EQ(DefineAveragePooling2D(subgraph.Subgraph()),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(AveragePooling2D, DefineRejectsZeroPoolingSize) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddOutputTensor(4, xnn_datatype_fp32, 1);
+  EXPECT_EQ(xnn_define_average_pooling_2d(
+                subgraph.Subgraph(), /*input_padding_top=*/0,
+                /*input_padding_right=*/0, /*input_padding_bottom=*/0,
+                /*input_padding_left=*/0, /*pooling_height=*/0,
+                /*pooling_width=*/2, /*stride_height=*/1, /*stride_width=*/1,
+                -std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(), /*input_id=*/0,
+                /*output_id=*/1, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
 TEST(AveragePooling2D, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
