@@ -36,25 +36,65 @@ SubgraphTester::SubgraphTester(uint32_t external_value_ids, uint32_t flags) {
   subgraph_.reset(subgraph_ptr);
 }
 
-SubgraphTester& SubgraphTester::AddInternalDynamicTensor(
-    const TensorShape& shape, enum xnn_datatype datatype, uint32_t* id_out,
-    uint32_t flags) {
-  const xnn_status status = xnn_define_tensor_value(
-      subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr,
-      XNN_INVALID_VALUE_ID, flags, id_out);
-  EXPECT_EQ(status, xnn_status_success);
+// Defines an internal value with `data`, quantized with `quantization` if
+// `datatype` is quantized.
+static xnn_status DefineInternalValue(xnn_subgraph_t subgraph,
+                                      const TensorShape& shape,
+                                      enum xnn_datatype datatype,
+                                      xnn_quantization_params quantization,
+                                      const void* data, uint32_t flags,
+                                      uint32_t* id_out) {
+  if (xnn_datatype_is_quantized(datatype)) {
+    return xnn_define_quantized_tensor_value(
+        subgraph, datatype, quantization.zero_point, quantization.scale,
+        shape.Rank(), shape.Dims(), data, XNN_INVALID_VALUE_ID, flags, id_out);
+  }
+  return xnn_define_tensor_value(subgraph, datatype, shape.Rank(), shape.Dims(),
+                                 data, XNN_INVALID_VALUE_ID, flags, id_out);
+}
 
+SubgraphTester& SubgraphTester::AddInternalDynamicTensor(
+    const TensorShape& shape, enum xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t* id_out, uint32_t flags) {
+  EXPECT_EQ(DefineInternalValue(subgraph_.get(), shape, datatype, quantization,
+                                /*data=*/nullptr, flags, id_out),
+            xnn_status_success);
   return *this;
 }
 
 SubgraphTester& SubgraphTester::AddInternalStaticTensor(
-    const TensorShape& shape, enum xnn_datatype datatype, uint32_t* id_out,
-    const void* data, uint32_t flags) {
-  const xnn_status status = xnn_define_tensor_value(
-      subgraph_.get(), datatype, shape.Rank(), shape.Dims(), data,
-      XNN_INVALID_VALUE_ID, flags, id_out);
-  EXPECT_EQ(status, xnn_status_success);
+    const TensorShape& shape, enum xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t* id_out, const void* data,
+    uint32_t flags) {
+  EXPECT_EQ(DefineInternalValue(subgraph_.get(), shape, datatype, quantization,
+                                data, flags, id_out),
+            xnn_status_success);
+  return *this;
+}
 
+SubgraphTester& SubgraphTester::AddInternalChannelwiseQuantizedTensor(
+    const TensorShape& shape, size_t channel_dim, xnn_datatype datatype,
+    int32_t zero_point, const float* scales,
+    const float* channelwise_zero_points, uint32_t* id_out, const void* data,
+    uint32_t flags) {
+  EXPECT_EQ(xnn_define_channelwise_quantized_tensor_value_v3(
+                subgraph_.get(), datatype, zero_point, scales, shape.Rank(),
+                channel_dim, shape.Dims(), data, XNN_INVALID_VALUE_ID, flags,
+                id_out, channelwise_zero_points),
+            xnn_status_success);
+  return *this;
+}
+
+SubgraphTester& SubgraphTester::AddInternalBlockwiseQuantizedTensor(
+    const TensorShape& shape, size_t channel_dim, size_t block_size,
+    xnn_datatype datatype, int32_t zero_point, const void* scales,
+    xnn_datatype scale_type, uint32_t* id_out, const void* data,
+    uint32_t flags) {
+  EXPECT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                subgraph_.get(), datatype, zero_point, scales, shape.Rank(),
+                channel_dim, block_size, shape.Dims(), data,
+                XNN_INVALID_VALUE_ID, flags, scale_type, id_out),
+            xnn_status_success);
   return *this;
 }
 

@@ -68,7 +68,7 @@ struct InlineQd8Bf16Qb4wFullyConnected {
     // The Tensor backend only emits a valid qd8_qb4w graph for FP32 inputs
     // (it inserts a dynamic-quantize convert to qdint8). A BF16 input would
     // reach xnn_define_fully_connected as BF16, which is rejected with
-    // xnn_status_invalid_parameter. Always build with FP32, then patch the
+    // xnn_status_unsupported_parameter. Always build with FP32, then patch the
     // input datatype to the requested type below.
     XnnTensor input({.type = Type::kFP32, .shape = {3, 32}});
     // 2x32 int4 weights (64 nibbles, 32 bytes). {-8, -8} packs to 0x88,
