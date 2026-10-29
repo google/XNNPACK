@@ -417,7 +417,7 @@ enum xnn_status xnn_define_concatenate(
     xnn_log_error(
       "failed to define %s operator with %zu inputs: number of inputs (%zu) exceeds the supported maximum (%zu)",
       xnn_node_type_to_string(xnn_node_type_concatenate), num_inputs, num_inputs, (size_t) XNN_MAX_OPERATOR_OBJECTS);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   for (size_t i = 0; i < num_inputs; i++) {
@@ -425,6 +425,14 @@ enum xnn_status xnn_define_concatenate(
     if (status != xnn_status_success) {
       return status;
     }
+  }
+
+  if (!xnn_datatype_is_byte_addressable(output_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_concatenate), output_id,
+      xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
