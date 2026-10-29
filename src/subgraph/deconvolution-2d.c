@@ -818,7 +818,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                     xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                     input_id, xnn_datatype_to_string(input_value->datatype),
                     input_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (filter_id >= subgraph->num_values) {
@@ -843,7 +843,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                   ": non-static Value",
                   xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                   filter_id);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   switch (filter_value->datatype) {
@@ -869,7 +869,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                     xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                     filter_id, xnn_datatype_to_string(filter_value->datatype),
                     filter_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   const struct xnn_value* bias_value = NULL;
@@ -897,7 +897,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                     ": non-static Value",
                     xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                     bias_id);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
 
     switch (bias_value->datatype) {
@@ -912,7 +912,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                       xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                       bias_id, xnn_datatype_to_string(bias_value->datatype),
                       bias_value->datatype);
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
     }
   }
 
@@ -941,7 +941,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                     xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                     output_id, xnn_datatype_to_string(output_value->datatype),
                     output_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (bias_value != NULL) {
@@ -959,7 +959,7 @@ enum xnn_status xnn_define_deconvolution_2d(
                     xnn_datatype_to_string(filter_value->datatype),
                     xnn_datatype_to_string(bias_value->datatype),
                     xnn_datatype_to_string(output_value->datatype));
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
   } else {
     if (!validate_datatypes_without_bias(input_value->datatype,
@@ -974,17 +974,17 @@ enum xnn_status xnn_define_deconvolution_2d(
                     xnn_datatype_to_string(input_value->datatype),
                     xnn_datatype_to_string(filter_value->datatype),
                     xnn_datatype_to_string(output_value->datatype));
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
   }
 
   if (filter_value->datatype == xnn_datatype_qcint8) {
     if (filter_value->quantization.channel_dimension != 0) {
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
-                    ": invalid channel dimension %zu",
+                    ": unsupported channel dimension %zu",
                     xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                     filter_id, filter_value->quantization.channel_dimension);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
 
     if (bias_value != NULL) {
