@@ -417,7 +417,7 @@ enum xnn_status xnn_define_concatenate(
     xnn_log_error(
       "failed to define %s operator with %zu inputs: number of inputs (%zu) exceeds the supported maximum (%zu)",
       xnn_node_type_to_string(xnn_node_type_concatenate), num_inputs, num_inputs, (size_t) XNN_MAX_OPERATOR_OBJECTS);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   for (size_t i = 0; i < num_inputs; i++) {
