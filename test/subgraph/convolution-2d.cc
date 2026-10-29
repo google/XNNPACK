@@ -554,6 +554,185 @@ TEST(Convolution2D, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+// Checks the status returned by `xnn_define_convolution_2d` for a 3x3
+// convolution with 4 input channels and 8 output channels.
+class Convolution2DDefine : public ::testing::Test {
+ protected:
+  uint32_t DenseTensor(xnn_datatype datatype, std::vector<size_t> dims,
+                       bool is_static = false) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    if (is_static) {
+      tester_.AddInternalStaticTensor(dims, datatype, &id, data_.data());
+    } else {
+      tester_.AddInternalDynamicTensor(dims, datatype, &id);
+    }
+    return id;
+  }
+
+  uint32_t QuantizedTensor(xnn_datatype datatype, int32_t zero_point,
+                           std::vector<size_t> dims, bool is_static = false) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    if (is_static) {
+      tester_.AddInternalStaticTensor(dims, datatype, {zero_point, 1.0f}, &id,
+                                      data_.data());
+    } else {
+      tester_.AddInternalDynamicTensor(dims, datatype, {zero_point, 1.0f}, &id);
+    }
+    return id;
+  }
+
+  uint32_t ChannelwiseTensor(xnn_datatype datatype, std::vector<size_t> dims,
+                             size_t channel_dim,
+                             const float* zero_points = nullptr) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    tester_.AddInternalChannelwiseQuantizedTensor(
+        dims, channel_dim, datatype, /*zero_point=*/0, scales_.data(),
+        zero_points, &id, data_.data());
+    return id;
+  }
+
+  xnn_status Define(uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
+                    uint32_t output_id) {
+    return xnn_define_convolution_2d(
+        tester_.Subgraph(), /*input_padding_top=*/0, /*input_padding_right=*/0,
+        /*input_padding_bottom=*/0, /*input_padding_left=*/0,
+        /*kernel_height=*/3, /*kernel_width=*/3, /*subsampling_height=*/1,
+        /*subsampling_width=*/1, /*dilation_height=*/1, /*dilation_width=*/1,
+        /*groups=*/1, /*group_input_channels=*/4, /*group_output_channels=*/8,
+        -INFINITY, INFINITY, input_id, filter_id, bias_id, output_id,
+        /*flags=*/0);
+  }
+
+  const std::vector<size_t> input_dims_ = {1, 5, 5, 4};
+  const std::vector<size_t> filter_dims_ = {8, 3, 3, 4};
+  const std::vector<size_t> bias_dims_ = {8};
+  const std::vector<size_t> output_dims_ = {1, 3, 3, 8};
+
+ private:
+  SubgraphTester tester_{/*external_value_ids=*/0};
+  std::vector<float> data_ = std::vector<float>(8 * 3 * 3 * 4, 0.0f);
+  std::vector<float> scales_ = std::vector<float>(8, 1.0f);
+};
+
+TEST_F(Convolution2DDefine, UnsupportedInputDatatype) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_int32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, filter_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedFilterDatatype) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_int32, filter_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedBiasDatatype) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, filter_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_int32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedOutputDatatype) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, filter_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_int32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedQint8FilterZeroPoint) {
+  EXPECT_EQ(Define(QuantizedTensor(xnn_datatype_qint8, 0, input_dims_),
+                   QuantizedTensor(xnn_datatype_qint8, /*zero_point=*/1,
+                                   filter_dims_, /*is_static=*/true),
+                   XNN_INVALID_VALUE_ID,
+                   QuantizedTensor(xnn_datatype_qint8, 0, output_dims_)),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedDynamicFilter) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, filter_dims_),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedDynamicBias) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, filter_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedDatatypeCombinationWithBias) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, filter_dims_, /*is_static=*/true),
+             QuantizedTensor(xnn_datatype_qint32, 0, bias_dims_,
+                             /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedDatatypeCombinationWithoutBias) {
+  EXPECT_EQ(Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+                   QuantizedTensor(xnn_datatype_qint8, 0, filter_dims_,
+                                   /*is_static=*/true),
+                   XNN_INVALID_VALUE_ID,
+                   DenseTensor(xnn_datatype_fp32, output_dims_)),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedFilterChannelDimension) {
+  EXPECT_EQ(Define(QuantizedTensor(xnn_datatype_qint8, 0, input_dims_),
+                   ChannelwiseTensor(xnn_datatype_qcint8, filter_dims_,
+                                     /*channel_dim=*/3),
+                   XNN_INVALID_VALUE_ID,
+                   QuantizedTensor(xnn_datatype_qint8, 0, output_dims_)),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, UnsupportedFilterChannelwiseZeroPoint) {
+  const std::vector<float> zero_points(8, 1.0f);
+  EXPECT_EQ(Define(QuantizedTensor(xnn_datatype_qint8, 0, input_dims_),
+                   ChannelwiseTensor(xnn_datatype_qcint8, filter_dims_,
+                                     /*channel_dim=*/0, zero_points.data()),
+                   XNN_INVALID_VALUE_ID,
+                   QuantizedTensor(xnn_datatype_qint8, 0, output_dims_)),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(Convolution2DDefine, InvalidFilterShape) {
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, {4, 3, 3, 4}, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_invalid_parameter);
+}
+
+TEST_F(Convolution2DDefine, ValidQC8) {
+  EXPECT_EQ(Define(QuantizedTensor(xnn_datatype_qint8, 0, input_dims_),
+                   ChannelwiseTensor(xnn_datatype_qcint8, filter_dims_,
+                                     /*channel_dim=*/0),
+                   XNN_INVALID_VALUE_ID,
+                   QuantizedTensor(xnn_datatype_qint8, 0, output_dims_)),
+            xnn_status_success);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
