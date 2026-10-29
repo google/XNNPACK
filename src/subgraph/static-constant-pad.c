@@ -264,6 +264,47 @@ enum xnn_status xnn_define_static_constant_pad_v2(
     return xnn_status_unsupported_parameter;
   }
 
+  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), input_id,
+      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    return xnn_status_unsupported_parameter;
+  }
+
+  uint32_t padding_value_bits;
+  switch (output_value->datatype) {
+    case xnn_datatype_fp32:
+      padding_value_bits = float_as_uint32(padding_value);
+      break;
+    case xnn_datatype_fp16:
+      padding_value_bits = xnn_float16_to_bits(xnn_float16_from_float(padding_value));
+      break;
+    case xnn_datatype_bf16:
+      padding_value_bits = xnn_bfloat16_to_bits(xnn_bfloat16_from_float(padding_value));
+      break;
+    case xnn_datatype_qint8:
+    {
+      const float output_scale = output_value->quantization.scale;
+      const int32_t output_zero_point = output_value->quantization.zero_point;
+      padding_value_bits = xnn_qs8_quantize(padding_value, output_scale, output_zero_point);
+      break;
+    }
+    case xnn_datatype_quint8:
+    {
+      const float output_scale = output_value->quantization.scale;
+      const int32_t output_zero_point = output_value->quantization.zero_point;
+      padding_value_bits = xnn_qu8_quantize(padding_value, output_scale, output_zero_point);
+      break;
+    }
+    default:
+      xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_static_constant_pad), output_id,
+        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+      return xnn_status_unsupported_parameter;
+  }
+
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;
@@ -274,33 +315,7 @@ enum xnn_status xnn_define_static_constant_pad_v2(
   memset(&node->params.static_pad.post_paddings, 0, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
   memcpy(&node->params.static_pad.pre_paddings, pre_paddings, num_padding_dims * sizeof(size_t));
   memcpy(&node->params.static_pad.post_paddings, post_paddings, num_padding_dims * sizeof(size_t));
-  switch (output_value->datatype) {
-    case xnn_datatype_fp32:
-      node->params.static_pad.padding_value = float_as_uint32(padding_value);
-      break;
-    case xnn_datatype_fp16:
-      node->params.static_pad.padding_value = xnn_float16_to_bits(xnn_float16_from_float(padding_value));
-      break;
-    case xnn_datatype_bf16:
-      node->params.static_pad.padding_value = xnn_bfloat16_to_bits(xnn_bfloat16_from_float(padding_value));
-      break;
-    case xnn_datatype_qint8:
-    {
-      const float output_scale = output_value->quantization.scale;
-      const int32_t output_zero_point = output_value->quantization.zero_point;
-      node->params.static_pad.padding_value = xnn_qs8_quantize(padding_value, output_scale, output_zero_point);
-      break;
-    }
-    case xnn_datatype_quint8:
-    {
-      const float output_scale = output_value->quantization.scale;
-      const int32_t output_zero_point = output_value->quantization.zero_point;
-      node->params.static_pad.padding_value = xnn_qu8_quantize(padding_value, output_scale, output_zero_point);
-      break;
-    }
-    default:
-      XNN_UNREACHABLE;
-  }
+  node->params.static_pad.padding_value = padding_value_bits;
 
   node->type = xnn_node_type_static_constant_pad;
   node->num_inputs = 1;

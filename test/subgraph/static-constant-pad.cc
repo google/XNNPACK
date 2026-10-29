@@ -237,6 +237,18 @@ TEST(ConstantPad, DefineRejectsMismatchingDatatypesAsInvalid) {
                 paddings.data(), /*padding_value=*/0.0f, 0, 1, /*flags=*/0),
             xnn_status_invalid_parameter);
 }
+
+TEST(ConstantPad, DefineRejectsUnsupportedPaddingDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_int32)
+      .AddDynamicTensor({4, 5}, 1, xnn_datatype_int32);
+  const std::vector<size_t> paddings = {1, 1};
+  EXPECT_EQ(xnn_define_static_constant_pad_v2(
+                subgraph.Subgraph(), paddings.size(), paddings.data(),
+                paddings.data(), /*padding_value=*/0.0f, 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+  EXPECT_EQ(subgraph.NumNodes(), 0u);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
