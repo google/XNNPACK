@@ -135,6 +135,22 @@ TEST(Softmax, define_rejects_input_output_datatype_mismatch) {
       xnn_status_invalid_parameter);
 }
 
+TEST(Softmax, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(1, xnn_datatype_int32, 0)
+      .AddOutputTensor(1, xnn_datatype_int32, 1);
+  EXPECT_EQ(xnn_define_softmax(subgraph.Subgraph(), 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Softmax, DefineRejectsUnsupportedOutputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(1, xnn_datatype_fp32, 0)
+      .AddOutputTensor(1, xnn_datatype_int32, 1);
+  EXPECT_EQ(xnn_define_softmax(subgraph.Subgraph(), 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
 TEST(Softmax, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
