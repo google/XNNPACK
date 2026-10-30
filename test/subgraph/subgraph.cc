@@ -121,6 +121,74 @@ TEST(SUBGRAPH, define_channelwise_quantized_tensor_value_zero_point) {
   EXPECT_EQ(define(xnn_datatype_qcint32, 7), xnn_status_unsupported_parameter);
 }
 
+TEST(SUBGRAPH, define_tensor_value_wrong_definition) {
+  SubgraphTester tester(/*external_value_ids=*/0, /*flags=*/0);
+  xnn_subgraph_t subgraph = tester.Subgraph();
+
+  const size_t dims[2] = {2, 4};
+  const float channelwise_scale[2] = {1.0f, 1.0f};
+  const uint16_t blockwise_scale[2] = {0x3F80, 0x3F80};  // bf16 1.0f
+  uint32_t id = XNN_INVALID_VALUE_ID;
+
+  // Quantized datatypes need a quantized definition.
+  for (xnn_datatype datatype :
+       {xnn_datatype_qint8, xnn_datatype_qcint8, xnn_datatype_qdint8}) {
+    EXPECT_EQ(xnn_define_tensor_value(subgraph, datatype, 2, dims,
+                                      /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                                      /*flags=*/0, &id),
+              xnn_status_invalid_parameter)
+        << "datatype " << datatype;
+  }
+
+  // Channelwise and blockwise datatypes need their own definitions.
+  for (xnn_datatype datatype :
+       {xnn_datatype_qcint2, xnn_datatype_qcint4, xnn_datatype_qcint8,
+        xnn_datatype_qbint4, xnn_datatype_fp32, xnn_datatype_qdint8}) {
+    EXPECT_EQ(xnn_define_quantized_tensor_value(
+                  subgraph, datatype, /*zero_point=*/0, /*scale=*/1.0f, 2, dims,
+                  /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &id),
+              xnn_status_invalid_parameter)
+        << "datatype " << datatype;
+  }
+  // Per-tensor qcint32 values are accepted, e.g. for biases.
+  EXPECT_EQ(xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint32, /*zero_point=*/0,
+                /*scale=*/1.0f, 2, dims, /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                /*flags=*/0, &id),
+            xnn_status_success);
+
+  for (xnn_datatype datatype :
+       {xnn_datatype_qint8, xnn_datatype_qbint4, xnn_datatype_fp32}) {
+    EXPECT_EQ(xnn_define_channelwise_quantized_tensor_value_v2(
+                  subgraph, datatype, /*zero_point=*/0, channelwise_scale, 2,
+                  /*channel_dim=*/0, dims, /*data=*/nullptr,
+                  XNN_INVALID_VALUE_ID, /*flags=*/0, &id),
+              xnn_status_invalid_parameter)
+        << "datatype " << datatype;
+  }
+
+  for (xnn_datatype datatype :
+       {xnn_datatype_qint4, xnn_datatype_qcint4, xnn_datatype_fp32}) {
+    EXPECT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                  subgraph, datatype, /*zero_point=*/0, blockwise_scale, 2,
+                  /*channel_dim=*/0, /*block_size=*/4, dims, /*data=*/nullptr,
+                  XNN_INVALID_VALUE_ID, /*flags=*/0, xnn_datatype_bf16, &id),
+              xnn_status_invalid_parameter)
+        << "datatype " << datatype;
+  }
+
+  // qpint8 and qduint8 are internal; other datatypes aren't dynamically
+  // quantized.
+  for (xnn_datatype datatype : {xnn_datatype_qpint8, xnn_datatype_qduint8,
+                                xnn_datatype_qint8, xnn_datatype_fp32}) {
+    EXPECT_EQ(xnn_define_dynamically_quantized_tensor_value(
+                  subgraph, datatype, 2, /*num_nonbatch_dims=*/1, dims,
+                  XNN_INVALID_VALUE_ID, /*flags=*/0, &id),
+              xnn_status_invalid_parameter)
+        << "datatype " << datatype;
+  }
+}
+
 TEST(SUBGRAPH, create_subgraph_invalid_external_value_ids) {
   ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
   xnn_subgraph_t subgraph = nullptr;

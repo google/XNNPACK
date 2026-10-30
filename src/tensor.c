@@ -47,6 +47,38 @@ static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* di
   }
 }
 
+// Datatypes that this build of XNNPACK knows about, so that a datatype passed
+// to the wrong definition function can be told apart from an unknown one.
+static bool is_known_datatype(enum xnn_datatype datatype)
+{
+  switch (datatype) {
+    case xnn_datatype_fp32:
+    case xnn_datatype_fp16:
+    case xnn_datatype_bf16:
+    case xnn_datatype_int32:
+    case xnn_datatype_pfp16:
+    case xnn_datatype_pfp32:
+    case xnn_datatype_qint2:
+    case xnn_datatype_qint4:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
+    case xnn_datatype_qint32:
+    case xnn_datatype_qcint2:
+    case xnn_datatype_qcint4:
+    case xnn_datatype_qcint8:
+    case xnn_datatype_qcint32:
+    case xnn_datatype_qbint4:
+    case xnn_datatype_qdint8:
+    case xnn_datatype_qduint8:
+    case xnn_datatype_qpint8:
+    case xnn_datatype_pqint8:
+      return true;
+    case xnn_datatype_invalid:
+      return false;
+  }
+  return false;
+}
+
 static enum xnn_status check_zero_point(
   enum xnn_datatype datatype,
   int32_t zero_point)
@@ -111,6 +143,11 @@ static enum xnn_status check_zero_point(
       }
       break;
     default:
+      if (is_known_datatype(datatype)) {
+        xnn_log_error("failed to create Quantized Dense Tensor value: datatype %s (%d) is not statically quantized",
+          xnn_datatype_to_string(datatype), datatype);
+        return xnn_status_invalid_parameter;
+      }
       xnn_log_error("failed to create Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
@@ -158,6 +195,11 @@ enum xnn_status xnn_define_tensor_value(
     case xnn_datatype_pfp32:  // TODO: Does this really belong here?
       break;
     default:
+      if (is_known_datatype(datatype)) {
+        xnn_log_error("failed to create Dense Tensor value: quantized datatype %s (%d) requires a quantized tensor value definition",
+          xnn_datatype_to_string(datatype), datatype);
+        return xnn_status_invalid_parameter;
+      }
       xnn_log_error("failed to create Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
@@ -289,14 +331,22 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   switch (datatype) {
     case xnn_datatype_qdint8:
       break;
+    case xnn_datatype_qduint8:
     case xnn_datatype_qpint8:
-      // qpint8 is an internal datatype produced downstream of public types
-      // like qdint8; it is not valid as an input to the public define API.
+      // qduint8 and qpint8 are internal datatypes produced downstream of public
+      // types like qdint8; they are not valid as an input to the public define
+      // API.
       xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: "
         "datatype %s (%d) is an internal type and cannot be used through the public API",
         xnn_datatype_to_string(datatype), datatype);
-      return xnn_status_unsupported_parameter;
+      return xnn_status_invalid_parameter;
     default:
+      if (is_known_datatype(datatype)) {
+        xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: "
+          "datatype %s (%d) is not dynamically quantized",
+          xnn_datatype_to_string(datatype), datatype);
+        return xnn_status_invalid_parameter;
+      }
       xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
@@ -384,6 +434,19 @@ enum xnn_status xnn_validate_quantized_tensor(
     return xnn_status_unsupported_parameter;
   }
 
+  // A per-tensor qcint32 value is accepted, as biases are often defined that
+  // way and their scale isn't read as channelwise.
+  if ((xnn_datatype_is_channelwise_quantized(datatype) &&
+       datatype != xnn_datatype_qcint32) ||
+      xnn_datatype_is_blockwise_quantized(datatype)) {
+    xnn_log_error(
+      "failed to create Quantized Dense Tensor value: datatype %s (%d) requires "
+      "xnn_define_channelwise_quantized_tensor_value or "
+      "xnn_define_blockwise_quantized_tensor_value",
+      xnn_datatype_to_string(datatype), datatype);
+    return xnn_status_invalid_parameter;
+  }
+
   enum xnn_status status = check_zero_point(datatype, zero_point);
   if (status != xnn_status_success) {
     return status;
@@ -427,11 +490,6 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
     return xnn_status_invalid_parameter;
   }
 
-  enum xnn_status status = check_zero_point(datatype, zero_point);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
   switch (datatype) {
     case xnn_datatype_qcint2:
     case xnn_datatype_qcint4:
@@ -439,9 +497,19 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
     case xnn_datatype_qcint32:
       break;
     default:
+      if (is_known_datatype(datatype)) {
+        xnn_log_error("failed to create Channelwise Quantized Dense Tensor value: datatype %s (%d) is not channelwise quantized",
+          xnn_datatype_to_string(datatype), datatype);
+        return xnn_status_invalid_parameter;
+      }
       xnn_log_error("failed to create Channelwise Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
+  }
+
+  enum xnn_status status = check_zero_point(datatype, zero_point);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   const size_t channels = dims[channel_dim];
@@ -599,18 +667,23 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     return xnn_status_invalid_parameter;
   }
 
-  enum xnn_status status = check_zero_point(datatype, zero_point);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
   switch (datatype) {
     case xnn_datatype_qbint4:
       break;
     default:
+      if (is_known_datatype(datatype)) {
+        xnn_log_error("failed to create Blockwise Quantized Dense Tensor value: datatype %s (%d) is not blockwise quantized",
+          xnn_datatype_to_string(datatype), datatype);
+        return xnn_status_invalid_parameter;
+      }
       xnn_log_error("failed to create Blockwise Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
+  }
+
+  enum xnn_status status = check_zero_point(datatype, zero_point);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   switch (scale_type) {
