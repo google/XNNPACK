@@ -156,6 +156,10 @@ static void ${UKERNEL_NAME}(benchmark::State& state) {
       ${PACK_FN},
     $if PACKED_STRIDE_FN is not None:
       ${PACKED_STRIDE_FN},
+    $if PACK_LH_OFFSET_FN is not None:
+      ${PACK_LH_FN},
+      ${PACK_LH_SIZE_FN},
+      ${PACK_LH_OFFSET_FN},
     /*mr=*/${MR}, /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR},
     $if PACKED_LHS:
       /*mr_packed=*/${MR_PACKED},
@@ -765,6 +769,7 @@ def generate_test_cases(
     cpp_check,
     isa,
     arch_flags,
+    pack_lh_offset_fn=None,
 ):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -787,6 +792,9 @@ def generate_test_cases(
     pack_lh_fn: Optional name of a function to pack the LHS for the GEMM.
     pack_lh_size_fn: Optional name of a function to compute the size of a packed
       LHS for the GEMM.
+    pack_lh_offset_fn: Optional name of a function to compute the offset of a
+      row in a packed LHS for the GEMM. Only used by the benchmarks, which
+      require all of pack_lh_fn, pack_lh_size_fn and pack_lh_offset_fn.
     packed_stride_fn: C name of the function to compute the packed weights
       stride.
     requantization: name of the requantization scheme used by the microkernel.
@@ -858,6 +866,10 @@ def generate_test_cases(
     raise ValueError(
         "Either both or neither of pack_lh_fn and/or pack_lh_size_fn must be"
         " supplied"
+    )
+  if pack_lh_offset_fn and not pack_lh_fn:
+    raise ValueError(
+        "pack_lh_offset_fn requires pack_lh_fn and pack_lh_size_fn"
     )
 
   if pack_fn:
@@ -941,6 +953,9 @@ def generate_test_cases(
           "INIT_PARAMS": init_fn,
           "PACK_FN": pack_fn,
           "PACKED_STRIDE_FN": packed_stride_fn,
+          "PACK_LH_FN": pack_lh_fn,
+          "PACK_LH_SIZE_FN": pack_lh_size_fn,
+          "PACK_LH_OFFSET_FN": pack_lh_offset_fn,
           "MR": mr,
           "NR": nr,
           "KR": kr,
@@ -1041,6 +1056,7 @@ namespace {{
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
@@ -1076,6 +1092,7 @@ namespace {{
       pack_fn = ukernel_spec.get("pack")
       pack_lh_fn = ukernel_spec.get("pack-lh-fn")
       pack_lh_size_fn = ukernel_spec.get("pack-lh-size-fn")
+      pack_lh_offset_fn = ukernel_spec.get("pack-lh-offset-fn")
       packed_stride_fn = ukernel_spec.get("packed-stride")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       cpp_check = ukernel_spec.get("cpp-check", False)
@@ -1120,6 +1137,7 @@ namespace {{
           cpp_check,
           isa,
           arch_flags,
+          pack_lh_offset_fn=pack_lh_offset_fn,
       )
 
       # Store or reuse the `CreateTests` function?

@@ -6764,6 +6764,16 @@ size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_mr();
 size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_nr();
 size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_mr();
 size_t xnn_qp8_f32_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_nr();
+
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_1x32c2__sme2)
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_32x32c2__sme2)
+
+DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_gemm_minmax_ukernel_1x32__sme2)
+DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_gemm_minmax_ukernel_32x32__sme2)
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
 
 #ifdef __cplusplus

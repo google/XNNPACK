@@ -214,18 +214,50 @@ void GEMMBenchmark(benchmark::State& state,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
 
+typedef void (*xnn_x32_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
+                                           size_t kr, size_t sr,
+                                           size_t m_idx_start,
+                                           const float* lhs,
+                                           size_t lhs_stride,
+                                           void* lhs_packed);
+
+typedef void (*xnn_x16_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
+                                           size_t kr, size_t sr,
+                                           size_t m_idx_start,
+                                           const xnn_float16* lhs,
+                                           size_t lhs_stride,
+                                           void* lhs_packed);
+
+// The LHS is packed with `pack_lh`, which must produce the layout expected by
+// `gemm` for `mr_packed`, `kr` and `sr`.
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf32_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   xnn_x32_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
+// Packs the LHS with the KleidiAI `xnn_x16_pack_lh_*__neonsme(2)` functions.
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f16_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags = 0);
+// The LHS is packed with `pack_lh`, which must produce the layout expected by
+// `gemm` for `mr_packed`, `kr` and `sr`.
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf16_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f16_minmax_params_fn init_minmax_params,
+                   xnn_pack_weights_and_biases_fn pack_weights,
+                   xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   xnn_x16_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
 #endif  // XNN_ENABLE_KLEIDIAI

@@ -19,6 +19,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
@@ -34,6 +35,9 @@ namespace {
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_f32_weights_and_biases_sme2,
       xnn_packed_stride_kai_f32_weights_and_biases_sme2,
+      xnn_x32_pack_lh_ukernel__neonsme2,
+      xnn_x32_pack_lh_size__neonsme2,
+      xnn_x32_pack_lh_offset__neonsme2,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -74,6 +78,9 @@ namespace {
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_f32_weights_and_biases_sme2,
       xnn_packed_stride_kai_f32_weights_and_biases_sme2,
+      xnn_x32_pack_lh_ukernel__neonsme2,
+      xnn_x32_pack_lh_size__neonsme2,
+      xnn_x32_pack_lh_offset__neonsme2,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -119,6 +126,9 @@ namespace {
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_f32_weights_and_biases_sme,
       xnn_packed_stride_kai_f32_weights_and_biases_sme,
+      xnn_x32_pack_lh_ukernel__neonsme,
+      xnn_x32_pack_lh_size__neonsme,
+      xnn_x32_pack_lh_offset__neonsme,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -159,6 +169,9 @@ namespace {
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_f32_weights_and_biases_sme,
       xnn_packed_stride_kai_f32_weights_and_biases_sme,
+      xnn_x32_pack_lh_ukernel__neonsme,
+      xnn_x32_pack_lh_size__neonsme,
+      xnn_x32_pack_lh_offset__neonsme,
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
@@ -194,6 +207,97 @@ namespace {
   BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_32x32__neonsme)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  static void pf32_gemm_minmax_ukernel_1x32__sme2(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_pf32_gemm_minmax_ukernel_1x32__sme2,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_f32_weights_and_biases_sme,
+      xnn_packed_stride_kai_f32_weights_and_biases_sme,
+      xnn_x32_pack_lh_ukernel__sme2,
+      xnn_x32_pack_lh_size__sme2,
+      xnn_x32_pack_lh_offset__sme2,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_gemm_minmax_ukernel_1x32__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_gemm_minmax_ukernel_1x32__sme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/1, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_gemm_minmax_ukernel_1x32__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+      /*arch_flags=*/xnn_arch_arm_sme2);
+  }
+
+  BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_1x32__sme2)
+
+  static void pf32_gemm_minmax_ukernel_32x32__sme2(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_pf32_gemm_minmax_ukernel_32x32__sme2,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_f32_weights_and_biases_sme,
+      xnn_packed_stride_kai_f32_weights_and_biases_sme,
+      xnn_x32_pack_lh_ukernel__sme2,
+      xnn_x32_pack_lh_size__sme2,
+      xnn_x32_pack_lh_offset__sme2,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_gemm_minmax_ukernel_32x32__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_gemm_minmax_ukernel_32x32__sme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/1, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_gemm_minmax_ukernel_32x32__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+      /*arch_flags=*/xnn_arch_arm_sme2);
+  }
+
+  BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_32x32__sme2)
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 
 
 }  // namespace

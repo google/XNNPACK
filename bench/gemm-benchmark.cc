@@ -1373,6 +1373,9 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   xnn_x32_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags) {
@@ -1385,28 +1388,6 @@ void GEMMBenchmark(benchmark::State& state,
   if (xnn_params.allocator.allocate == nullptr) {
     xnn_params.allocator = xnn_default_allocator;
   }
-
-  // Select by benchmark variant: SME benchmarks can run on SME2 hardware but
-  // must still use the SME packed layout.
-#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME
-  const bool use_sme2_lhs_packing = (arch_flags & xnn_arch_arm_sme2) != 0;
-  const auto pack_lh = use_sme2_lhs_packing ? xnn_x32_pack_lh_ukernel__neonsme2
-                                            : xnn_x32_pack_lh_ukernel__neonsme;
-  const auto packed_lh_size = use_sme2_lhs_packing
-                                  ? xnn_x32_pack_lh_size__neonsme2
-                                  : xnn_x32_pack_lh_size__neonsme;
-  const auto packed_lh_offset = use_sme2_lhs_packing
-                                    ? xnn_x32_pack_lh_offset__neonsme2
-                                    : xnn_x32_pack_lh_offset__neonsme;
-#elif XNN_ENABLE_ARM_SME2
-  const auto pack_lh = xnn_x32_pack_lh_ukernel__neonsme2;
-  const auto packed_lh_size = xnn_x32_pack_lh_size__neonsme2;
-  const auto packed_lh_offset = xnn_x32_pack_lh_offset__neonsme2;
-#else
-  const auto pack_lh = xnn_x32_pack_lh_ukernel__neonsme;
-  const auto packed_lh_size = xnn_x32_pack_lh_size__neonsme;
-  const auto packed_lh_offset = xnn_x32_pack_lh_offset__neonsme;
-#endif
 
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
@@ -1444,7 +1425,7 @@ void GEMMBenchmark(benchmark::State& state,
       packed_w_size * num_buffers / sizeof(float));
 
   // Pack the left-hand operand.
-  const size_t input_packed_size = packed_lh_size(mc, kc, mr_packed, kr, sr);
+  const size_t input_packed_size = pack_lh_size(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size);
   pack_lh(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0, a.data(),
@@ -1484,7 +1465,7 @@ void GEMMBenchmark(benchmark::State& state,
     for (uint32_t m = 0; m < mc; m += mr) {
       const uint32_t mb = min(mc - m, mr);
       gemm(mb, nc, kc * sizeof(float),
-           input_packed.data() + packed_lh_offset(m, kc, mr_packed, kr, sr),
+           input_packed.data() + pack_lh_offset(m, kc, mr_packed, kr, sr),
            w.data() + packed_w_size / sizeof(float) * buffer_index,
            c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
            sizeof(float), &minmax_params);
@@ -1508,6 +1489,9 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_init_f16_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   xnn_x16_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags) {
@@ -1551,14 +1535,11 @@ void GEMMBenchmark(benchmark::State& state,
       packed_w_size * num_buffers, /*extra_bytes=*/{0}, "w");
 
   // Pack the left-hand operand.
-  const size_t input_packed_size =
-      xnn_x16_pack_lh_size__neonsme(mc, kc, mr_packed, kr, sr);
+  const size_t input_packed_size = pack_lh_size(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size, /*extra_bytes=*/{0}, "input_packed");
-  xnn_x16_pack_lh_ukernel__neonsme(mc, kc, mr_packed, kr, sr,
-                                   /*m_idx_start=*/0, a.data(),
-                                   /*lhs_stride=*/kc * sizeof(xnn_float16),
-                                   input_packed.data());
+  pack_lh(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0, a.data(),
+          /*lhs_stride=*/kc * sizeof(xnn_float16), input_packed.data());
 
   // RHS packing
   pack_weights(/*flags=*/0, &gemm_config, kc, nc,
@@ -1596,8 +1577,7 @@ void GEMMBenchmark(benchmark::State& state,
     for (uint32_t m = 0; m < mc; m += mr) {
       const uint32_t mb = min(mc - m, mr);
       gemm(mb, nc, kc * sizeof(xnn_float16),
-           input_packed.data() +
-               xnn_x16_pack_lh_offset__neonsme(m, kc, mr_packed, kr, sr),
+           input_packed.data() + pack_lh_offset(m, kc, mr_packed, kr, sr),
            w.data() + packed_w_size * buffer_index,
            &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
            sizeof(xnn_float16), &minmax_params);
@@ -1612,6 +1592,30 @@ void GEMMBenchmark(benchmark::State& state,
   state.counters["OPS"] = benchmark::Counter(
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
+}
+
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf16_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f16_minmax_params_fn init_minmax_params,
+                   xnn_pack_weights_and_biases_fn pack_weights,
+                   xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags) {
+  // `__neonsme` and `__neonsme2` both wrap KleidiAI's
+  // `kai_run_lhs_pack_x16p2vlx2_x16_sme`; use whichever one is compiled in.
+#if XNN_ENABLE_ARM_SME
+  GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
+                xnn_x16_pack_lh_ukernel__neonsme, xnn_x16_pack_lh_size__neonsme,
+                xnn_x16_pack_lh_offset__neonsme, mr, nr, kr, sr, mr_packed,
+                arch_flags);
+#else
+  GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
+                xnn_x16_pack_lh_ukernel__neonsme2,
+                xnn_x16_pack_lh_size__neonsme2,
+                xnn_x16_pack_lh_offset__neonsme2, mr, nr, kr, sr, mr_packed,
+                arch_flags);
+#endif  // XNN_ENABLE_ARM_SME
 }
 
 void GEMMBenchmark(benchmark::State& state,
