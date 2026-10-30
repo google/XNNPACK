@@ -31,7 +31,8 @@
 namespace ynn {
 
 struct Shape {
-  int m, n, k;
+  // Use uint64_t to avoid overflow with integer calculations.
+  uint64_t m, n, k;
 
   static Shape parse(std::string str) {
     std::replace(str.begin(), str.end(), 'x', ' ');
@@ -105,7 +106,7 @@ void dot(benchmark::State& state, uint64_t arch_flags, const dot_kernel& kernel,
   }
 
   // Use the original shape to count the ops, so we don't count padding.
-  const size_t ops = shape.m * shape.n * shape.k * 2;
+  const uint64_t ops = shape.m * shape.n * shape.k * 2;
   state.counters["OP"] =
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 
