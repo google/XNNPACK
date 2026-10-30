@@ -748,6 +748,65 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_large_m_not_rewritten) {
 #endif  // XNNPACK_USE_YNNPACK
 
 #ifndef XNNPACK_USE_YNNPACK
+// `xnn_define_batch_matrix_multiply` returns
+// `xnn_status_unsupported_parameter` for well-formed requests that XNNPACK
+// doesn't implement, and `xnn_status_invalid_parameter` for malformed ones.
+class BatchMatrixMultiplyDefine : public ::testing::Test {
+ protected:
+  uint32_t DefineTensor(xnn_datatype datatype) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    tester_.AddInternalDynamicTensor({1, 2, 2}, datatype, &id);
+    return id;
+  }
+
+  xnn_status DefineBatchMatrixMultiply(uint32_t input1_id, uint32_t input2_id,
+                                       uint32_t output_id) {
+    return xnn_define_batch_matrix_multiply(tester_.Subgraph(), input1_id,
+                                            input2_id, output_id, /*flags=*/0);
+  }
+
+  SubgraphTester tester_{/*external_value_ids=*/0};
+};
+
+TEST_F(BatchMatrixMultiplyDefine, UnsupportedInput1Datatype) {
+  const uint32_t input1_id = DefineTensor(xnn_datatype_int32);
+  const uint32_t input2_id = DefineTensor(xnn_datatype_fp32);
+  const uint32_t output_id = DefineTensor(xnn_datatype_fp32);
+  EXPECT_EQ(DefineBatchMatrixMultiply(input1_id, input2_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(BatchMatrixMultiplyDefine, UnsupportedInput2Datatype) {
+  const uint32_t input1_id = DefineTensor(xnn_datatype_fp32);
+  const uint32_t input2_id = DefineTensor(xnn_datatype_int32);
+  const uint32_t output_id = DefineTensor(xnn_datatype_fp32);
+  EXPECT_EQ(DefineBatchMatrixMultiply(input1_id, input2_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(BatchMatrixMultiplyDefine, UnsupportedOutputDatatype) {
+  const uint32_t input1_id = DefineTensor(xnn_datatype_fp32);
+  const uint32_t input2_id = DefineTensor(xnn_datatype_fp32);
+  const uint32_t output_id = DefineTensor(xnn_datatype_int32);
+  EXPECT_EQ(DefineBatchMatrixMultiply(input1_id, input2_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(BatchMatrixMultiplyDefine, UnsupportedDatatypeCombination) {
+  const uint32_t input1_id = DefineTensor(xnn_datatype_fp32);
+  const uint32_t input2_id = DefineTensor(xnn_datatype_fp16);
+  const uint32_t output_id = DefineTensor(xnn_datatype_fp32);
+  EXPECT_EQ(DefineBatchMatrixMultiply(input1_id, input2_id, output_id),
+            xnn_status_unsupported_parameter);
+}
+
+TEST_F(BatchMatrixMultiplyDefine, InvalidInput2Id) {
+  const uint32_t input1_id = DefineTensor(xnn_datatype_fp32);
+  const uint32_t output_id = DefineTensor(xnn_datatype_fp32);
+  EXPECT_EQ(DefineBatchMatrixMultiply(input1_id, /*input2_id=*/100, output_id),
+            xnn_status_invalid_parameter);
+}
+
 TEST(BatchMatrixMultiply, ReshapeOverflowInputAElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 

@@ -666,7 +666,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
           xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
           input1_id, xnn_datatype_to_string(input1_value->datatype),
           input1_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   status = xnn_subgraph_check_input_node_id(xnn_node_type_batch_matrix_multiply,
@@ -704,7 +704,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
           xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
           input2_id, xnn_datatype_to_string(input2_value->datatype),
           input2_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   status = xnn_subgraph_check_output_node_id(
@@ -732,21 +732,21 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
           xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
           output_id, xnn_datatype_to_string(output_value->datatype),
           output_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (!validate_datatypes(input1_value->datatype, input2_value->datatype,
                           output_value->datatype)) {
     xnn_log_error("failed to define %s operator with input1 ID #%" PRIu32
                   ", input2 ID #%" PRIu32 ", and output ID #%" PRIu32
-                  ": mismatching datatypes across input1 (%s), input2 (%s), "
-                  "and output (%s)",
+                  ": unsupported combination of datatypes across input1 (%s), "
+                  "input2 (%s), and output (%s)",
                   xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
                   input1_id, input2_id, output_id,
                   xnn_datatype_to_string(input1_value->datatype),
                   xnn_datatype_to_string(input2_value->datatype),
                   xnn_datatype_to_string(output_value->datatype));
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
