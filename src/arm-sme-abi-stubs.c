@@ -11,12 +11,24 @@
 // These routines are missing on some platforms, so we define weak fallbacks to
 // avoid linker errors.
 //
-// They must be no-ops rather than XNN_UNREACHABLE: __arm_tpidr2_save is really
-// called whenever one __arm_new("za") microkernel calls another out of line
-// (the caller arms TPIDR2_EL0, and the callee's prologue then branches to it),
-// which happens whenever a large packing helper is too big for clang to inline
-// into its dispatcher. Doing nothing is safe here because such a caller never
-// reads its own ZA state after the call; trapping instead crashes at runtime.
+// They must be no-ops rather than XNN_UNREACHABLE: when compiling without +sve,
+// clang calls __arm_get_current_vg in the prologue of every
+// __arm_locally_streaming function, and __arm_tpidr2_save is called whenever
+// one __arm_new("za") microkernel calls another out of line (the caller arms
+// TPIDR2_EL0, and the callee's prologue then branches to it). Doing nothing is
+// safe here because non-streaming SVE state is unused and callers do not read
+// their own ZA state after such calls; trapping instead crashes at runtime.
+//
+// Per AAPCS64 §8.1, these routines must preserve almost all registers:
+// __arm_get_current_vg preserves x1–x15 (and vector/predicate registers), while
+// __arm_sme_state preserves x2–x15 and __arm_tpidr2_save/restore/za_disable
+// preserve x0–x13. Callers (e.g. __arm_locally_streaming functions) keep
+// incoming arguments in x9 across the call.
+//
+// They must be declared naked with inline assembly to avoid compiler prologues,
+// spills, or sanitizer instrumentation, and no_profile_instrument_function to
+// prevent coverage profiling (gcov / -fprofile-arcs) from injecting counter
+// increments that clobber x8/x9.
 
 #include <stdint.h>
 
@@ -30,12 +42,30 @@ typedef struct sme_state {
   int64_t x1;
 } sme_state_t;
 
-XNN_WEAK_SYMBOL uint64_t __arm_get_current_vg(void) { return 0; }
-XNN_WEAK_SYMBOL sme_state_t __arm_sme_state(void) {
-  return (sme_state_t){0, 0};
-}
-XNN_WEAK_SYMBOL void __arm_tpidr2_restore(void* blk) {}
-XNN_WEAK_SYMBOL void __arm_tpidr2_save(void) {}
-XNN_WEAK_SYMBOL void __arm_za_disable(void) {}
+#define XNN_STUB_ATTRIBUTES \
+  __attribute__((naked, no_profile_instrument_function))
 
-#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) && XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES uint64_t __arm_get_current_vg(void) {
+  __asm__("mov x0, xzr\n\tret");
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES sme_state_t __arm_sme_state(void) {
+  __asm__("mov x0, xzr\n\tmov x1, xzr\n\tret");
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_restore(void* blk) {
+  __asm__("ret");
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_save(void) {
+  __asm__("ret");
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_za_disable(void) {
+  __asm__("ret");
+}
+
+#undef XNN_STUB_ATTRIBUTES
+
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) &&
+        // XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)
