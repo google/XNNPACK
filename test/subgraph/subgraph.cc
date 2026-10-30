@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -223,6 +224,54 @@ TEST(SUBGRAPH, reserve_nodes_overflow) {
                 subgraph, static_cast<size_t>(XNN_INVALID_NODE_ID)),
             xnn_status_out_of_memory);
   ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
+TEST(SUBGRAPH, static_scalar_sub_byte_value) {
+  SubgraphTester tester(/*external_value_ids=*/2, /*flags=*/0);
+  xnn_subgraph_t subgraph = tester.Subgraph();
+
+  const size_t dims[2] = {1, 1};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    /*data=*/nullptr, /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  // A 1x1 qcint4 filter is a static scalar, which the subgraph optimizer reads
+  // when looking for constant values.
+  const float filter_scale[1] = {1.0f};
+  const uint8_t filter_data[16] = {0x09};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_channelwise_quantized_tensor_value_v2(
+          subgraph, xnn_datatype_qcint4, /*zero_point=*/8, filter_scale, 2,
+          /*channel_dim=*/0, dims, filter_data, XNN_INVALID_VALUE_ID,
+          /*flags=*/0, &filter_id),
+      xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    /*data=*/nullptr, /*external_id=*/1,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  ASSERT_EQ(xnn_define_fully_connected(
+                subgraph, -std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(), input_id, filter_id,
+                XNN_INVALID_VALUE_ID, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, /*weights_cache=*/nullptr,
+                            /*workspace=*/nullptr, /*threadpool=*/nullptr,
+                            /*flags=*/0, &runtime);
+  if (status != xnn_status_unsupported_hardware) {
+    EXPECT_EQ(status, xnn_status_success);
+  }
+  if (runtime != nullptr) {
+    ASSERT_EQ(xnn_delete_runtime(runtime), xnn_status_success);
+  }
 }
 
 }  // namespace xnnpack

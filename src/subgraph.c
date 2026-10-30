@@ -2450,6 +2450,10 @@ static void swap_value_pointers(struct xnn_value** a, struct xnn_value** b) {
 }
 
 static float get_scalar_value_as_float(struct xnn_value* val) {
+  if (!xnn_datatype_is_byte_addressable(val->datatype)) {
+    return NAN;
+  }
+
   union {
     float fp32;
     xnn_float16 fp16;
