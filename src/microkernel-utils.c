@@ -31,14 +31,33 @@ static bool gemm_fits_in_cache(size_t mr, size_t nc, size_t m_stride,
   return true;
 }
 
-bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config *gemm_config,
+static size_t xnn_effective_l2_data_cache_bytes(
+    const struct xnn_hardware_config* hardware_config) {
+  size_t cache_bytes = hardware_config->l2_data_cache_bytes;
+#if XNN_ARCH_ARM64
+  if (cache_bytes >= 512 * 1024) {
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
+      if (hardware_config->uarch[i] == xnn_uarch_oryon ||
+          hardware_config->uarch[i] == xnn_uarch_oryon_v3) {
+        cache_bytes = max(cache_bytes, (size_t)(12 * 1024 * 1024));
+      }
+    }
+    if (hardware_config->arch_flags & xnn_arch_arm_sme) {
+      cache_bytes = max(cache_bytes, (size_t)(4 * 1024 * 1024));
+    }
+  }
+#endif  // XNN_ARCH_ARM64
+  return cache_bytes;
+}
+
+bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config* gemm_config,
                                    size_t m_packed_stride, size_t n_stride,
                                    size_t cn_stride, size_t mc, size_t nc) {
-  const struct xnn_hardware_config *hardware_config =
+  const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
 
   // Select which cache we want the tiles to fit in.
-  const size_t cache_bytes = hardware_config->l2_data_cache_bytes;
+  const size_t cache_bytes = xnn_effective_l2_data_cache_bytes(hardware_config);
   const size_t cache_line_size = hardware_config->l2_data_cache_line_size;
 
   // If we don't have any information on the cache size, then all bets are off.
@@ -47,6 +66,15 @@ bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config *gemm_config,
   }
 
   const size_t mr = min(gemm_config->mr, mc);
+
+#if XNN_ARCH_ARM64
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme) &&
+      gemm_config->mr >= 16 && mc > mr &&
+      gemm_fits_in_cache(mc, nc, m_packed_stride, n_stride, cn_stride,
+                         cache_bytes, cache_line_size)) {
+    return false;
+  }
+#endif  // XNN_ARCH_ARM64
 
   // We only want to inline the LHS packing if it's possible to
   // compute an entire row of the GEMM without flooding the cache.
@@ -67,7 +95,7 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
                                size_t m_stride, size_t n_stride,
                                size_t cn_stride, size_t mr, size_t nr,
                                size_t num_threads) {
-  const struct xnn_hardware_config *hardware_config =
+  const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
 
   // Adjust `mr` and `nr` if they are larger than `m` and `n`, respectively.
@@ -87,10 +115,16 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
   // fit, then don't try to fit to the cache size.
   size_t cache_size = hardware_config->l1_data_cache_bytes;
   size_t cache_line_size = hardware_config->l1_data_cache_line_size;
-  if (XNN_ARCH_X86 || XNN_ARCH_X86_64 ||
+  const bool use_l2_for_sme =
+#if XNN_ARCH_ARM64
+      (hardware_config->arch_flags & xnn_arch_arm_sme) && mr >= 16;
+#else
+      false;
+#endif
+  if (XNN_ARCH_X86 || XNN_ARCH_X86_64 || use_l2_for_sme ||
       (cache_size && !gemm_fits_in_cache(mr, nr, m_stride, n_stride, cn_stride,
                                          cache_size, cache_line_size))) {
-    cache_size = hardware_config->l2_data_cache_bytes;
+    cache_size = xnn_effective_l2_data_cache_bytes(hardware_config);
     cache_line_size = hardware_config->l2_data_cache_line_size;
     if (cache_size && !gemm_fits_in_cache(mr, nr, m_stride, n_stride, cn_stride,
                                           cache_size, cache_line_size)) {

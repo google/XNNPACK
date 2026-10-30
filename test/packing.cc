@@ -349,9 +349,10 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
-#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 TEST(PACK_KAI_QS2_WEIGHTS_AND_BIASES_SME2, groups_and_optional_bias) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2
+                                               : xnn_arch_arm_sme);
 
   constexpr size_t groups = 2;
   constexpr size_t output_channels = 3;
@@ -486,7 +487,8 @@ TEST(PACK_KAI_QS2_WEIGHTS_AND_BIASES_SME2, groups_and_optional_bias) {
 }
 
 TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2, groups_gt_1_goi_w) {
-  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  TEST_REQUIRES_ARCH_FLAGS(XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2
+                                               : xnn_arch_arm_sme);
   const size_t groups = 2;
   const size_t output_channels = 3;
   const size_t input_channels = 5;
@@ -632,7 +634,7 @@ TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2,
   EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
                           [](uint8_t value) { return value == 0xA5; }));
 }
-#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 
 #if XNN_ENABLE_KLEIDIAI
 class FailingAllocatorGuard {

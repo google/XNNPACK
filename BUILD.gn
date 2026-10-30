@@ -718,6 +718,7 @@ if (current_cpu == "arm64") {
 
   xnnpack_source_set("sme_microkernels") {
     deps = [
+      ":arm_sme_abi_stubs",
       ":microkernel_defs",
       ":microkernel_headers",
     ]
@@ -731,6 +732,10 @@ if (current_cpu == "arm64") {
       "-target-feature",
       "-Xclang",
       "+sme",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
     ]
   }
 
@@ -754,7 +759,11 @@ if (current_cpu == "arm64") {
       "-Xclang",
       "-target-feature",
       "-Xclang",
-      "+sme2",
+      "+sme",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
     ]
   }
 }

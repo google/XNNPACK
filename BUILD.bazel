@@ -566,7 +566,10 @@ xnnpack_cxx_library(
         "//src/configs:config_hdrs",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
-    ]),
+    ]) + xnnpack_select_if(
+        ":arm_sme_acle_enabled",
+        [":arm_sme_abi_stubs"],
+    ),
 )
 
 py_binary(

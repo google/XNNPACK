@@ -1404,7 +1404,7 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
 };
 
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 #define XNN_MAX_MR 32
 #else
 #define XNN_MAX_MR 16

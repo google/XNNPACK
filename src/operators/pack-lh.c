@@ -113,17 +113,16 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
   }
 
   uint32_t mr_packed = batch_size == 1          ? 1
-                             : gemm_config->mr_packed ? gemm_config->mr_packed
-                                                      : gemm_config->mr;
-    // Arch-specific parameters.
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  // For SME1 operator type = xnn_operator_type_pack_lh_x8, kernel support for mr = 1 (GEMV) 
-  // does not exist in Kleidiai.                                                 
-  if (gemm_config->arch == xnn_arch_arm_sme && pack_lh_op->type == xnn_operator_type_pack_lh_x8) {
-    mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed
-                                       : gemm_config->mr;
+                       : gemm_config->mr_packed ? gemm_config->mr_packed
+                                                : gemm_config->mr;
+  // Arch-specific parameters.
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+  if (gemm_config->minmax.gemm[0].function[XNN_UARCH_DEFAULT] == NULL &&
+      pack_lh_op->type == xnn_operator_type_pack_lh_x8) {
+    mr_packed =
+        gemm_config->mr_packed ? gemm_config->mr_packed : gemm_config->mr;
   }
-#endif // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
@@ -145,9 +144,8 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
 
   if (!xnn_safe_mul(num_groups, group_size, output_size_bytes)) {
     *output_size_bytes = SIZE_MAX;
-    xnn_log_error(
-      "failed to reshape %s operator: output size overflows size_t",
-      xnn_operator_type_to_string(expected_operator_type));
+    xnn_log_error("failed to reshape %s operator: output size overflows size_t",
+                  xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_out_of_memory;
   }
   pack_lh_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;

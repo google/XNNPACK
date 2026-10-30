@@ -1367,7 +1367,8 @@ void GEMMBenchmark(benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
-#if XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
+#if (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) && \
+    (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf32_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
@@ -1375,10 +1376,9 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
                    xnn_x32_pack_lh_ukernel_fn pack_lh,
                    xnn_pack_lh_size_fn pack_lh_size,
-                   xnn_pack_lh_offset_fn pack_lh_offset,
-                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
-                   size_t sr, ConstantOrFunction mr_packed,
-                   uint64_t arch_flags) {
+                   xnn_pack_lh_offset_fn pack_lh_offset, ConstantOrFunction mr,
+                   ConstantOrFunction nr, size_t kr, size_t sr,
+                   ConstantOrFunction mr_packed, uint64_t arch_flags) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -1481,9 +1481,11 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
-#endif  //   XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
+#endif  // (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) &&
+        // (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
-#if XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
+#if (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) && \
+    (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f16_minmax_params_fn init_minmax_params,
@@ -1491,10 +1493,9 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
                    xnn_x16_pack_lh_ukernel_fn pack_lh,
                    xnn_pack_lh_size_fn pack_lh_size,
-                   xnn_pack_lh_offset_fn pack_lh_offset,
-                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
-                   size_t sr, ConstantOrFunction mr_packed,
-                   uint64_t arch_flags) {
+                   xnn_pack_lh_offset_fn pack_lh_offset, ConstantOrFunction mr,
+                   ConstantOrFunction nr, size_t kr, size_t sr,
+                   ConstantOrFunction mr_packed, uint64_t arch_flags) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -1610,11 +1611,10 @@ void GEMMBenchmark(benchmark::State& state,
                 xnn_x16_pack_lh_offset__neonsme, mr, nr, kr, sr, mr_packed,
                 arch_flags);
 #else
-  GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
-                xnn_x16_pack_lh_ukernel__neonsme2,
-                xnn_x16_pack_lh_size__neonsme2,
-                xnn_x16_pack_lh_offset__neonsme2, mr, nr, kr, sr, mr_packed,
-                arch_flags);
+  GEMMBenchmark(
+      state, gemm, init_minmax_params, pack_weights, packed_stride,
+      xnn_x16_pack_lh_ukernel__neonsme2, xnn_x16_pack_lh_size__neonsme2,
+      xnn_x16_pack_lh_offset__neonsme2, mr, nr, kr, sr, mr_packed, arch_flags);
 #endif  // XNN_ENABLE_ARM_SME
 }
 
@@ -1716,7 +1716,8 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
-#endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
+#endif  // (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) &&
+        // (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,

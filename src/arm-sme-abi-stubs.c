@@ -18,6 +18,7 @@
 // into its dispatcher. Doing nothing is safe here because such a caller never
 // reads its own ZA state after the call; trapping instead crashes at runtime.
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
@@ -38,4 +39,38 @@ XNN_WEAK_SYMBOL void __arm_tpidr2_restore(void* blk) {}
 XNN_WEAK_SYMBOL void __arm_tpidr2_save(void) {}
 XNN_WEAK_SYMBOL void __arm_za_disable(void) {}
 
-#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) && XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)
+XNN_WEAK_SYMBOL void* __arm_sc_memcpy(void* dest, const void* src, size_t n) {
+  volatile uint8_t* d = (volatile uint8_t*)dest;
+  const volatile uint8_t* s = (const volatile uint8_t*)src;
+  for (size_t i = 0; i < n; ++i) {
+    d[i] = s[i];
+  }
+  return dest;
+}
+
+XNN_WEAK_SYMBOL void* __arm_sc_memmove(void* dest, const void* src, size_t n) {
+  volatile uint8_t* d = (volatile uint8_t*)dest;
+  const volatile uint8_t* s = (const volatile uint8_t*)src;
+  if (d < s) {
+    for (size_t i = 0; i < n; ++i) {
+      d[i] = s[i];
+    }
+  } else if (d > s) {
+    for (size_t i = n; i > 0; --i) {
+      d[i - 1] = s[i - 1];
+    }
+  }
+  return dest;
+}
+
+XNN_WEAK_SYMBOL void* __arm_sc_memset(void* dest, int c, size_t n) {
+  volatile uint8_t* d = (volatile uint8_t*)dest;
+  const uint8_t v = (uint8_t)c;
+  for (size_t i = 0; i < n; ++i) {
+    d[i] = v;
+  }
+  return dest;
+}
+
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) &&
+        // XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)

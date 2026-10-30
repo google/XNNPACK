@@ -28,7 +28,7 @@ namespace {
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   static void pf16_gemm_minmax_ukernel_1x32c2__neonsme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2,
@@ -38,7 +38,8 @@ namespace {
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr();
         } else {
           return 0;
@@ -47,7 +48,8 @@ namespace {
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr();
         } else {
           return 0;
@@ -57,14 +59,15 @@ namespace {
       /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr();
         } else {
           return 0;
         }
       }
   ,
-      /*arch_flags=*/xnn_arch_arm_sme2);
+      /*arch_flags=*/(XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme));
   }
 
   BENCHMARK_GEMM(pf16_gemm_minmax_ukernel_1x32c2__neonsme2)
@@ -78,7 +81,8 @@ namespace {
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr();
         } else {
           return 0;
@@ -87,7 +91,8 @@ namespace {
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr();
         } else {
           return 0;
@@ -97,23 +102,24 @@ namespace {
       /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr();
         } else {
           return 0;
         }
       }
   ,
-      /*arch_flags=*/xnn_arch_arm_sme2);
+      /*arch_flags=*/(XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme));
   }
 
   BENCHMARK_GEMM(pf16_gemm_minmax_ukernel_32x32c2__neonsme2)
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   static void pf16_gemm_minmax_ukernel_1x32c2__neonsme(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme,
@@ -193,12 +199,12 @@ namespace {
   }
 
   BENCHMARK_GEMM(pf16_gemm_minmax_ukernel_32x32c2__neonsme)
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   static void pf16_gemm_minmax_ukernel_1x32c2__sme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf16_gemm_minmax_ukernel_1x32c2__sme2,
@@ -211,7 +217,8 @@ namespace {
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = xnn_arch_arm_sme;
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_1x32c2__sme2_get_mr();
         } else {
           return 0;
@@ -220,7 +227,8 @@ namespace {
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = xnn_arch_arm_sme;
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_1x32c2__sme2_get_nr();
         } else {
           return 0;
@@ -230,14 +238,15 @@ namespace {
       /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = xnn_arch_arm_sme;
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_1x32c2__sme2_get_mr();
         } else {
           return 0;
         }
       }
   ,
-      /*arch_flags=*/xnn_arch_arm_sme2);
+      /*arch_flags=*/xnn_arch_arm_sme);
   }
 
   BENCHMARK_GEMM(pf16_gemm_minmax_ukernel_1x32c2__sme2)
@@ -254,7 +263,8 @@ namespace {
       /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = xnn_arch_arm_sme;
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_32x32c2__sme2_get_mr();
         } else {
           return 0;
@@ -263,7 +273,8 @@ namespace {
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = xnn_arch_arm_sme;
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_32x32c2__sme2_get_nr();
         } else {
           return 0;
@@ -273,18 +284,19 @@ namespace {
       /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = xnn_arch_arm_sme;
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf16_gemm_minmax_ukernel_32x32c2__sme2_get_mr();
         } else {
           return 0;
         }
       }
   ,
-      /*arch_flags=*/xnn_arch_arm_sme2);
+      /*arch_flags=*/xnn_arch_arm_sme);
   }
 
   BENCHMARK_GEMM(pf16_gemm_minmax_ukernel_32x32c2__sme2)
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 
 

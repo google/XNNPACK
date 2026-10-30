@@ -9,8 +9,8 @@
 // XNN_UKERNEL(arch, ukernel, unroll)
 XNN_UKERNEL(xnn_arch_none, xnn_x8_packq_f32qp8_ukernel__scalar_u1, 1)
 
-#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2, 2)
-#endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 
 

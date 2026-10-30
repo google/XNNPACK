@@ -3614,7 +3614,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       PF32_IGEMM_MINMAX_32X32__NEONSME, GemmTest,
       testing::ValuesIn(CreateTests4(
@@ -3664,12 +3664,12 @@ INSTANTIATE_TEST_SUITE_P(
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   INSTANTIATE_TEST_SUITE_P(
       PF32_IGEMM_MINMAX_32X32__NEONSME2, GemmTest,
       testing::ValuesIn(CreateTests4(
@@ -3678,7 +3678,8 @@ INSTANTIATE_TEST_SUITE_P(
           /*mr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_mr();
         } else {
           return 0;
@@ -3687,7 +3688,8 @@ INSTANTIATE_TEST_SUITE_P(
   , /*nr=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_nr();
         } else {
           return 0;
@@ -3697,7 +3699,8 @@ INSTANTIATE_TEST_SUITE_P(
           /*mr_packed=*/[]() -> size_t {
         const struct xnn_hardware_config* hardware_config =
               xnn_init_hardware_config();
-        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+        const uint64_t req_arch = (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme);
+        if (hardware_config != nullptr && (hardware_config->arch_flags & req_arch) == req_arch) {
           return xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_mr();
         } else {
           return 0;
@@ -3714,12 +3717,12 @@ INSTANTIATE_TEST_SUITE_P(
                         xnn_x32_pack_lh_size__igemm_neonsme2,
                         xnn_pack_kai_pf32_conv_goki_w_sme);
           },
-          xnn_arch_arm_sme2)),
+          (XNN_ENABLE_KLEIDIAI ? xnn_arch_arm_sme2 : xnn_arch_arm_sme))),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
 
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
