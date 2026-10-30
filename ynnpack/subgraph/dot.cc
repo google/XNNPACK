@@ -83,11 +83,7 @@ namespace {
 
 bool is_layout_transform(const ynn_node& node) {
   return std::holds_alternative<ynn_node::copy>(node.op) ||
-         std::holds_alternative<ynn_node::split_dim>(node.op) ||
-         std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
-         std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
-         std::holds_alternative<ynn_node::split_dims>(node.op) ||
-         std::holds_alternative<ynn_node::static_reshape>(node.op) ||
+         std::holds_alternative<ynn_node::reshape>(node.op) ||
          std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
          std::holds_alternative<ynn_node::static_slice>(node.op) ||
          std::holds_alternative<ynn_node::static_transpose>(node.op);

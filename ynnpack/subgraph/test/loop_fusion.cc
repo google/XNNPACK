@@ -11,6 +11,7 @@
 // front.
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -328,6 +329,104 @@ TEST_F(LoopFusionTest, DotFusedIntoTransposeIsParallel) {
   // The batch should be parallelized, not just the tiles of m.
   EXPECT_GE(thread_pool.max_iterations(), B);
 #endif  // !YNN_ARCH_WASM_SIMD128
+}
+
+// The pipeline is negate(split_dim(abs(x))). The split_dim does not reshape
+// the outer dimension, so the producer and consumer of the reshape should be
+// able to fuse with each other in loops over that dimension.
+TEST_F(LoopFusionTest, ElementwiseFusesThroughSplitDim) {
+  const size_t M = 256, N = 64, K = 64;
+  const uint32_t in_id = 0;
+  const uint32_t out_id = 1;
+  uint32_t abs_id = YNN_INVALID_VALUE_ID;
+  uint32_t split_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), in_id)
+      .AddOutput(type_of<float>(), TensorShape(3), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), abs_id)
+      .AddTensor(type_of<float>(), TensorShape(3), split_id)
+      .AddUnary(ynn_unary_abs, in_id, abs_id)
+      .AddSplitDim(1, {N, K}, abs_id, split_id)
+      .AddUnary(ynn_unary_negate, split_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> in({M, N * K});
+  Tensor<float> out({M, N, K});
+  for (size_t i = 0; i < in.size(); ++i) {
+    in.data()[i] = static_cast<float>(i % 7) - 3.0f;
+  }
+  ReshapeExternalTensor(in_id, {M, N * K}, in.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  for (size_t i = 0; i < out.size(); ++i) {
+    ASSERT_EQ(out.data()[i], -std::abs(in.data()[i])) << i;
+  }
+  EXPECT_LT(max_allocation_size_, in.size_bytes());
+}
+
+// Like ElementwiseFusesThroughSplitDim, but with fuse_dims.
+TEST_F(LoopFusionTest, ElementwiseFusesThroughFuseDims) {
+  const size_t M = 256, N = 64, K = 64;
+  const uint32_t in_id = 0;
+  const uint32_t out_id = 1;
+  uint32_t abs_id = YNN_INVALID_VALUE_ID;
+  uint32_t fuse_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<float>(), TensorShape(3), in_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddTensor(type_of<float>(), TensorShape(3), abs_id)
+      .AddTensor(type_of<float>(), TensorShape(2), fuse_id)
+      .AddUnary(ynn_unary_abs, in_id, abs_id)
+      .AddFuseDims({1}, abs_id, fuse_id)
+      .AddUnary(ynn_unary_negate, fuse_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> in({M, N, K});
+  Tensor<float> out({M, N * K});
+  for (size_t i = 0; i < in.size(); ++i) {
+    in.data()[i] = static_cast<float>(i % 7) - 3.0f;
+  }
+  ReshapeExternalTensor(in_id, {M, N, K}, in.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  for (size_t i = 0; i < out.size(); ++i) {
+    ASSERT_EQ(out.data()[i], -std::abs(in.data()[i])) << i;
+  }
+  EXPECT_LT(max_allocation_size_, in.size_bytes());
+}
+
+// The pipeline is split_dim(negate(x)), where the split_dim produces an output
+// of the pipeline. The split_dim must be computed at the root, where it should
+// be aliased with the output of the negate, so we don't need to allocate any
+// intermediate buffers.
+TEST_F(LoopFusionTest, SplitDimOutputIsAliased) {
+  const size_t M = 256, N = 64, K = 64;
+  const uint32_t in_id = 0;
+  const uint32_t out_id = 1;
+  uint32_t negate_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), in_id)
+      .AddOutput(type_of<float>(), TensorShape(3), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), negate_id)
+      .AddUnary(ynn_unary_negate, in_id, negate_id)
+      .AddSplitDim(1, {N, K}, negate_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> in({M, N * K});
+  Tensor<float> out({M, N, K});
+  for (size_t i = 0; i < in.size(); ++i) {
+    in.data()[i] = static_cast<float>(i);
+  }
+  ReshapeExternalTensor(in_id, {M, N * K}, in.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  for (size_t i = 0; i < out.size(); ++i) {
+    ASSERT_EQ(out.data()[i], -in.data()[i]) << i;
+  }
+  EXPECT_EQ(max_allocation_size_, 0);
 }
 
 }  // namespace
