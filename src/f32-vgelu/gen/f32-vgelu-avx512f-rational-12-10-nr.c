@@ -32,7 +32,7 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u16(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1164608002e+00f);
   #else
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1158981323e+00f);
@@ -148,7 +148,7 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1164608002e+00f);
   #else
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1158981323e+00f);
@@ -329,7 +329,7 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u48(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1164608002e+00f);
   #else
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1158981323e+00f);
@@ -531,7 +531,7 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u64(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1164608002e+00f);
   #else
     XNN_SIMD_CONST_F32(vmax_abs_x, 5.1158981323e+00f);

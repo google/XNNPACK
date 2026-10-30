@@ -806,17 +806,23 @@ XNNPACK_PARAMS_FOR_ARCH = {
     # RISC-V.
     "rvv": _create_params(
         cond = "//:riscv_vector_enabled",
-        copts = [
-            "-march=rv64gcv",
-            "-mabi=lp64d",
-        ],
+        copts = xnnpack_select_if(
+            "//build_config:riscv64",
+            [
+                "-march=rv64gcv",
+                "-mabi=lp64d",
+            ],
+        ),
     ),
     "rvvfp16arith": _create_params(
         cond = "//:riscv_fp16_vector_enabled",
-        copts = [
-            "-march=rv64gc_zvfh",
-            "-mabi=lp64d",
-        ],
+        copts = xnnpack_select_if(
+            "//build_config:riscv64",
+            [
+                "-march=rv64gc_zvfh",
+                "-mabi=lp64d",
+            ],
+        ),
     ),
 
     # Hexagon.

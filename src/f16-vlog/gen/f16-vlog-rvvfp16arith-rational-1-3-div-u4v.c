@@ -32,8 +32,11 @@ static XNN_INLINE vfloat16m4_t xnn_signed_getexp_f16(vfloat16m4_t a, size_t vl) 
 
   // Extract the exponent and shift the exponent to the most significant bits of
   // the mantissa.
-  const vuint16m4_t exp =
-      __riscv_vsrl_vx_u16m4(__riscv_vand_vx_u16m4(va, sign_and_exp_mask, vl), 5, vl);
+  const vuint16m4_t exp = __riscv_vreinterpret_v_i16m4_u16m4(
+      __riscv_vsra_vx_i16m4(
+          __riscv_vreinterpret_v_u16m4_i16m4(
+              __riscv_vand_vx_u16m4(va, sign_and_exp_mask, vl)),
+          5, vl));
 
   // Add the shifted exponent to `32.0f` by copying its bits to the mantissa,
   // then subtract out `47.0f`, i.e. the original `32.0f` plus the `15`

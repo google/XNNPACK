@@ -101,7 +101,7 @@ struct xnn_avgpool_config {
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of
   // channels in each call.
-  uint16_t channel_tile;
+  uint32_t channel_tile;
 };
 
 struct xnn_pack_lh_config {
@@ -153,7 +153,7 @@ struct xnn_ibilinear_config {
   // Number of output pixels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of
   // pixels in each call.
-  uint8_t pixel_tile;
+  uint32_t pixel_tile;
   size_t log2_data_element_size;
   size_t log2_weight_element_size;
   xnn_indirection_init_resize_bilinear2d_hwc_fn indirection_init;
@@ -166,7 +166,7 @@ struct xnn_ibilinear_chw_config {
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of
   // channels in each call.
-  uint8_t channel_tile;
+  uint32_t channel_tile;
   size_t log2_data_element_size;
   size_t log2_weight_element_size;
   xnn_indirection_init_resize_bilinear2d_chw_fn indirection_init;
@@ -200,12 +200,12 @@ struct xnn_gemm_config {
   xnn_pack_conv_goki_w_fn pack_igemm_goki;
   xnn_pack_conv_kgo_w_fn pack_igemm_kgo;
   xnn_pack_deconv_goki_w_fn pack_deconv_goki;
-  uint8_t mr;
-  uint8_t nr;
+  uint32_t mr;
+  uint32_t nr;
   uint8_t log2_kr;
   uint8_t log2_sr;
   uint8_t planes;     // number of 4 bit planes (1 for legacy, 2 for unzip)
-  uint8_t mr_packed;  // `mr` value used for packed left-hand operands.
+  uint32_t mr_packed;  // `mr` value used for packed left-hand operands.
   enum xnn_arch_flags arch;
   uint8_t log2_input_element_size;
   uint8_t log2_filter_element_size;
@@ -239,11 +239,11 @@ struct xnn_spmm_config {
   // Number of M-dimension elements in a tile.
   // Corresponds to a block of pixels in 1x1 Convolution and a block of batch
   // size in Fully Connected operator.
-  uint8_t mr;
+  uint32_t mr;
   // Number of N-dimension elements in a tile.
   // Corresponds to a block of output channels/features in 1x1 Convolution and
   // Fully Connected operator.
-  uint8_t nr;
+  uint32_t nr;
 };
 
 struct xnn_dwconv2d_chw_parameters {
@@ -253,7 +253,7 @@ struct xnn_dwconv2d_chw_parameters {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of output width pixels in a tile.
-  uint8_t output_width_tile;
+  uint32_t output_width_tile;
 };
 
 struct xnn_dwconv2d_chw_config {
@@ -279,11 +279,11 @@ struct xnn_conv_hwc2chw_config {
   } init;
   // Number of output channels in a tile.
   // This parameter must be passed as is to weight packing function.
-  uint8_t output_channel_tile;
+  uint32_t output_channel_tile;
   // Number of output height pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of
   // rows in each call.
-  uint8_t output_height_tile;
+  uint32_t output_height_tile;
 };
 
 struct xnn_vmulcaddc_config {
@@ -295,7 +295,7 @@ struct xnn_vmulcaddc_config {
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of
   // channels in each call.
-  uint8_t channel_tile;
+  uint32_t channel_tile;
   // Number of rows of inputs processed in one tile.
   // For best efficiency, micro-kernel must process a multiple of this number of
   // rows in each call.

@@ -2132,7 +2132,7 @@ alias(
 selects.config_setting_group(
     name = "riscv_fp16_vector_enabled_by_default",
     match_any = [
-        "//build_config:riscv",
+        "//build_config:riscv64",
     ],
 )
 

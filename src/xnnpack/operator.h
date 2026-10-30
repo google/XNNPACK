@@ -36,8 +36,8 @@ struct xnn_ukernel_conv2d {
     xnn_conv_hwc2chw_ukernel_fn hwc2chw_fn;
     xnn_conv_hwc_ukernel_fn hwc_fn;
   };
-  uint8_t output_height_tile;
-  uint8_t output_channel_tile;
+  uint32_t output_height_tile;
+  uint32_t output_channel_tile;
 };
 
 struct xnn_ukernel_dwconv {
@@ -56,7 +56,7 @@ struct xnn_ukernel_dwconv2d {
   union {
     xnn_dwconv2d_chw_ukernel_fn chw_fn;
   };
-  uint8_t output_width_tile;
+  uint32_t output_width_tile;
 };
 
 struct xnn_ukernel_gemm {
@@ -65,33 +65,33 @@ struct xnn_ukernel_gemm {
     xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
     xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
   };
-  uint8_t mr;
-  uint8_t mr_packed;
-  uint8_t nr;
-  uint8_t kr;
-  uint8_t sr;
-  uint8_t kp;
+  uint32_t mr;
+  uint32_t mr_packed;
+  uint32_t nr;
+  uint32_t kr;
+  uint32_t sr;
+  uint32_t kp;
 };
 
 struct xnn_ukernel_igemm {
   struct xnn_hmp_igemm_ukernel igemm_cases[XNN_MAX_MR];
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
-  uint8_t mr;
-  uint8_t nr;
-  uint8_t kr;
-  uint8_t sr;
-  uint8_t mr_packed;
+  uint32_t mr;
+  uint32_t nr;
+  uint32_t kr;
+  uint32_t sr;
+  uint32_t mr_packed;
 };
 
 struct xnn_ukernel_spmm {
   xnn_spmm_ukernel_fn function;
-  uint8_t mr;
+  uint32_t mr;
 };
 
 struct xnn_ukernel_vmulcaddc {
   xnn_vmulcaddc_ukernel_fn function;
-  uint8_t mr;
-  uint8_t channel_tile;
+  uint32_t mr;
+  uint32_t channel_tile;
 };
 
 struct xnn_ukernel_vbinary {

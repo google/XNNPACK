@@ -29,8 +29,11 @@ static XNN_INLINE vfloat16m${LMUL}_t xnn_signed_getexp_f16(vfloat16m${LMUL}_t a,
 
   // Extract the exponent and shift the exponent to the most significant bits of
   // the mantissa.
-  const vuint16m${LMUL}_t exp =
-      __riscv_vsrl_vx_u16m${LMUL}(__riscv_vand_vx_u16m${LMUL}(va, sign_and_exp_mask, vl), 5, vl);
+  const vuint16m${LMUL}_t exp = __riscv_vreinterpret_v_i16m${LMUL}_u16m${LMUL}(
+      __riscv_vsra_vx_i16m${LMUL}(
+          __riscv_vreinterpret_v_u16m${LMUL}_i16m${LMUL}(
+              __riscv_vand_vx_u16m${LMUL}(va, sign_and_exp_mask, vl)),
+          5, vl));
 
   // Add the shifted exponent to `32.0f` by copying its bits to the mantissa,
   // then subtract out `47.0f`, i.e. the original `32.0f` plus the `15`

@@ -32,7 +32,7 @@ void xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
     XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
@@ -114,7 +114,7 @@ void xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u2(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
     XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
@@ -252,7 +252,7 @@ void xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u4(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
     XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
@@ -428,7 +428,7 @@ void xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u8(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
-  #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
+  #if XNN_SIMD_HAS_NATIVE_FMA
     XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
     XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
