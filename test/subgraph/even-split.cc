@@ -184,6 +184,49 @@ TEST(EvenSplitTest, OverflowInputStride) {
 
   EXPECT_EQ(xnn_reshape_runtime(runtime), xnn_status_out_of_memory);
 }
+
+TEST(EvenSplitTest, DefineRejectsTooManyOutputsAsUnsupported) {
+  const uint32_t num_outputs = XNN_MAX_OUTPUTS + 1;
+  SubgraphTester subgraph(num_outputs + 1);
+  subgraph.AddDynamicTensor({2, 2 * num_outputs}, 0, xnn_datatype_fp32);
+  std::vector<uint32_t> output_ids(num_outputs);
+  for (uint32_t i = 0; i < num_outputs; ++i) {
+    output_ids[i] = i + 1;
+    subgraph.AddDynamicTensor({2, 2}, output_ids[i], xnn_datatype_fp32);
+  }
+  EXPECT_EQ(xnn_define_even_split(subgraph.Subgraph(), /*split_dim=*/1, 0,
+                                  num_outputs, output_ids.data(),
+                                  /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(EvenSplitTest, DefineRejectsSubByteDatatypeAsUnsupported) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(3);
+  subgraph.AddDynamicTensor({2, 4}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 2}, 1, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 2}, 2, xnn_datatype_qint4, quantization);
+  const std::vector<uint32_t> output_ids = {1, 2};
+  EXPECT_EQ(xnn_define_even_split(subgraph.Subgraph(), /*split_dim=*/1, 0,
+                                  output_ids.size(), output_ids.data(),
+                                  /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(EvenSplitTest, DefineRejectsMismatchingDatatypesAsInvalid) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(3);
+  subgraph.AddDynamicTensor({2, 4}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 2}, 1, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 2}, 2, xnn_datatype_fp32);
+  const std::vector<uint32_t> output_ids = {1, 2};
+  EXPECT_EQ(xnn_define_even_split(subgraph.Subgraph(), /*split_dim=*/1, 0,
+                                  output_ids.size(), output_ids.data(),
+                                  /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

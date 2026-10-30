@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <memory>
 #include <random>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -193,6 +194,21 @@ TEST(RoPE, DefineRejectsInputOutputDatatypeMismatch) {
                             /*input_id=*/0, /*weights_id=*/1,
                             /*output_id=*/2, /*flags=*/0),
             xnn_status_invalid_parameter);
+}
+
+TEST(RoPE, DefineRejectsMixedPrecisionWeights) {
+  for (const auto& [datatype, weights_datatype] :
+       {std::pair{xnn_datatype_fp32, xnn_datatype_fp16},
+        std::pair{xnn_datatype_fp16, xnn_datatype_fp32}}) {
+    SubgraphTester subgraph(3);
+    subgraph.AddInputTensor(4, datatype, 0)
+        .AddInputTensor(2, weights_datatype, 1)
+        .AddOutputTensor(4, datatype, 2);
+    EXPECT_EQ(xnn_define_rope(subgraph.Subgraph(), /*max_tokens=*/0,
+                              /*input_id=*/0, /*weights_id=*/1,
+                              /*output_id=*/2, /*flags=*/0),
+              xnn_status_unsupported_parameter);
+  }
 }
 
 TEST(RoPE, ReshapeRejectZeroChannels) {

@@ -278,7 +278,7 @@ enum xnn_status xnn_define_static_reduce(
         "failed to define reduce operator with %zu reduction axes: "
         "the number of reduction axes must not exceed %zu",
         num_reduction_axes, (size_t) XNN_MAX_TENSOR_DIMS);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
   int64_t signed_reduction_axes[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_reduction_axes; i++) {
@@ -329,7 +329,7 @@ enum xnn_status xnn_define_static_reduce_v2(
             xnn_node_type_to_string(node_type), input_id,
             xnn_datatype_to_string(input_value->datatype),
             input_value->datatype);
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
       }
       break;
     default:
@@ -337,7 +337,7 @@ enum xnn_status xnn_define_static_reduce_v2(
         "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(node_type), input_id,
         xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values);
@@ -351,6 +351,27 @@ enum xnn_status xnn_define_static_reduce_v2(
     return status;
   }
 
+  const bool is_minmax = reduce_operator == xnn_reduce_min ||
+                         reduce_operator == xnn_reduce_max;
+  const bool is_quantized = input_value->datatype == xnn_datatype_qint8 ||
+                            input_value->datatype == xnn_datatype_quint8;
+  if (is_minmax && is_quantized &&
+      (input_value->quantization.zero_point !=
+           output_value->quantization.zero_point ||
+       input_value->quantization.scale != output_value->quantization.scale)) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32
+        " and output ID #%" PRIu32
+        ": requantization is not supported, input (zero point %" PRId32
+        ", scale %.7g) and output (zero point %" PRId32
+        ", scale %.7g) quantization parameters must match",
+        xnn_node_type_to_string(node_type), input_id, output_id,
+        input_value->quantization.zero_point, input_value->quantization.scale,
+        output_value->quantization.zero_point,
+        output_value->quantization.scale);
+    return xnn_status_unsupported_parameter;
+  }
+
   if (num_reduction_axes == 0) {
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
@@ -362,7 +383,7 @@ enum xnn_status xnn_define_static_reduce_v2(
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must not exceed %zu",
       xnn_node_type_to_string(node_type), num_reduction_axes, (size_t) XNN_MAX_TENSOR_DIMS);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

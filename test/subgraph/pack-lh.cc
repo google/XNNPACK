@@ -13,6 +13,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/subgraph.h"
+#include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
 
@@ -86,9 +87,26 @@ TEST(PackLH, DefineRejectsUnsupportedDatatype) {
           subgraph, xnn_datatype_int32, 2, input_dims, nullptr,
           /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
 
-  EXPECT_EQ(
-      xnn_status_invalid_parameter,
-      xnn_define_pack_lh(subgraph, input_id, output_id, 0));
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_pack_lh(subgraph, input_id, output_id, 0));
+}
+
+TEST(PackLH, DefineRejectsUnsupportedOutputDatatype) {
+  SubgraphTester tester(/*external_value_ids=*/0);
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  tester.AddInternalDynamicTensor({2, 4}, xnn_datatype_fp32, &input_id)
+      .AddInternalDynamicTensor({2, 4}, xnn_datatype_int32, &output_id);
+  EXPECT_EQ(xnn_define_pack_lh(tester.Subgraph(), input_id, output_id, 0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(PackLH, DefineRejectsInvalidOutputId) {
+  SubgraphTester tester(/*external_value_ids=*/0);
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  tester.AddInternalDynamicTensor({2, 4}, xnn_datatype_fp32, &input_id);
+  EXPECT_EQ(xnn_define_pack_lh(tester.Subgraph(), input_id, input_id + 1, 0),
+            xnn_status_invalid_parameter);
 }
 #endif  // XNNPACK_USE_YNNPACK
 
