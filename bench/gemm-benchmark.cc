@@ -1426,7 +1426,7 @@ void GEMMBenchmark(benchmark::State& state,
       packed_w_size * num_buffers / sizeof(float));
 
   // Pack the left-hand operand in the same tiles used by the operator runtime.
-  const size_t input_packed_size = packed_lh_size(mc, kc, mr_packed, kr, sr);
+  const size_t input_packed_size = pack_lh_size(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size);
   for (size_t m = 0; m < mc; m += mr_packed) {
@@ -1434,7 +1434,7 @@ void GEMMBenchmark(benchmark::State& state,
     pack_lh(m_step, kc, mr_packed, kr, sr, /*m_idx_start=*/0,
             a.data() + m * kc, /*lhs_stride=*/kc * sizeof(float),
             input_packed.data() +
-                packed_lh_offset(m, kc, mr_packed, kr, sr));
+                pack_lh_offset(m, kc, mr_packed, kr, sr));
   }
 
   pack_weights(/*flags=*/0, &gemm_config, kc, nc,
