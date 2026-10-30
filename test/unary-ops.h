@@ -558,7 +558,7 @@ struct Log : public UnaryOpInfo {
   }
 
   Interval Domain(xnn_datatype datatype) const override {
-    return {std::numeric_limits<float>::epsilon(), 1000.0f};
+    return {xnnpack::epsilon(datatype), 1000.0f};
   }
 };
 
