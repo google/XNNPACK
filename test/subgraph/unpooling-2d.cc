@@ -367,7 +367,10 @@ TEST(Unpooling2D, ReshapeOverflowOutputSize) {
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);
 
-  const size_t large_dim = (SIZE_MAX / (4 * 4 * 2 * sizeof(float))) + 1;
+  // Large enough that the 2x2 indirection buffer (4 * 2 * 2 pointers per batch)
+  // also overflows, so reshape fails without attempting a huge allocation on
+  // 32-bit targets.
+  const size_t large_dim = (SIZE_MAX / (4 * 2 * 2 * sizeof(void*))) + 1;
   runtime->values[input_id].shape.num_dims = 4;
   runtime->values[input_id].shape.dim[0] = large_dim;
   runtime->values[input_id].shape.dim[1] = 2;
