@@ -209,4 +209,41 @@ TEST(Transpose, ReshapeOverflowOutputSize) {
 // an error.
 #endif  // XNNPACK_USE_YNNPACK
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(Transpose, DefineRejectsTooManyDimsAsUnsupported) {
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_fp32)
+      .AddDynamicTensor({3, 2}, 1, xnn_datatype_fp32);
+  std::vector<size_t> perm(XNN_MAX_TENSOR_DIMS + 1);
+  std::iota(perm.begin(), perm.end(), 0);
+  EXPECT_EQ(xnn_define_static_transpose(subgraph.Subgraph(), perm.size(),
+                                        perm.data(), 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Transpose, DefineRejectsSubByteDatatypeAsUnsupported) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({3, 2}, 1, xnn_datatype_qint4, quantization);
+  const std::vector<size_t> perm = {1, 0};
+  EXPECT_EQ(xnn_define_static_transpose(subgraph.Subgraph(), perm.size(),
+                                        perm.data(), 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Transpose, DefineRejectsMismatchingDatatypesAsInvalid) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_fp32)
+      .AddDynamicTensor({3, 2}, 1, xnn_datatype_qint4, quantization);
+  const std::vector<size_t> perm = {1, 0};
+  EXPECT_EQ(xnn_define_static_transpose(subgraph.Subgraph(), perm.size(),
+                                        perm.data(), 0, 1, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack
