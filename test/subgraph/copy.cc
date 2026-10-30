@@ -82,4 +82,48 @@ INSTANTIATE_TEST_SUITE_P(Copy, CopyBF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Copy, CopyF32, rank_params);
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(Copy, DefineRejectsSubByteDatatypeAsUnsupported) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 3}, 1, xnn_datatype_qint4, quantization);
+  xnn_subgraph_t s = subgraph.Subgraph();
+
+  EXPECT_EQ(xnn_define_copy(s, 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+
+  const size_t new_shape[] = {3, 2};
+  EXPECT_EQ(xnn_define_static_reshape(s, 2, new_shape, 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+
+  const size_t new_axes[] = {0};
+  EXPECT_EQ(xnn_define_static_expand_dims(s, 1, new_axes, 0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+
+  EXPECT_EQ(xnn_define_fuse_dims(s, /*axis=*/0, /*axes_count=*/2, 0, 1,
+                                 /*flags=*/0),
+            xnn_status_unsupported_parameter);
+
+  const size_t splits[] = {1, 2};
+  EXPECT_EQ(xnn_define_split_dim(s, /*axis=*/0, /*num_splits=*/2, splits, 0, 1,
+                                 /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Copy, DefineRejectsMismatchingDatatypesAsInvalid) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(3);
+  subgraph.AddDynamicTensor({2, 3}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 3}, 1, xnn_datatype_fp32)
+      .AddDynamicTensor({2, 3}, 2, xnn_datatype_qint4, quantization);
+  EXPECT_EQ(xnn_define_copy(subgraph.Subgraph(), 0, 1, /*flags=*/0),
+            xnn_status_invalid_parameter);
+  EXPECT_EQ(xnn_define_copy(subgraph.Subgraph(), 1, 2, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack

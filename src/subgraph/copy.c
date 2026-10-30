@@ -463,14 +463,6 @@ enum xnn_status define_copy_node(xnn_subgraph_t subgraph, size_t num_dims,
     return status;
   }
 
-  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(node_type), input_id,
-      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-    return xnn_status_invalid_parameter;
-  }
-
   status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
@@ -491,6 +483,14 @@ enum xnn_status define_copy_node(xnn_subgraph_t subgraph, size_t num_dims,
       node_type, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(node_type), input_id,
+      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
