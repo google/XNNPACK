@@ -81,6 +81,46 @@ TEST(SUBGRAPH, even_split3_first_two_outputs_optimized_away) {
   ASSERT_EQ(expected, output);
 }
 
+TEST(SUBGRAPH, define_quantized_tensor_value_zero_point) {
+  SubgraphTester tester(/*external_value_ids=*/0, /*flags=*/0);
+  xnn_subgraph_t subgraph = tester.Subgraph();
+
+  const size_t dims[2] = {2, 4};
+  auto define = [&](xnn_datatype datatype, int32_t zero_point) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    return xnn_define_quantized_tensor_value(
+        subgraph, datatype, zero_point, /*scale=*/1.0f, 2, dims,
+        /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &id);
+  };
+  EXPECT_EQ(define(xnn_datatype_qint2, 0), xnn_status_success);
+  EXPECT_EQ(define(xnn_datatype_qint2, -1), xnn_status_unsupported_parameter);
+  EXPECT_EQ(define(xnn_datatype_qint2, 2), xnn_status_invalid_parameter);
+  EXPECT_EQ(define(xnn_datatype_qint32, 0), xnn_status_success);
+  EXPECT_EQ(define(xnn_datatype_qint32, 1), xnn_status_unsupported_parameter);
+}
+
+TEST(SUBGRAPH, define_channelwise_quantized_tensor_value_zero_point) {
+  SubgraphTester tester(/*external_value_ids=*/0, /*flags=*/0);
+  xnn_subgraph_t subgraph = tester.Subgraph();
+
+  const size_t dims[2] = {2, 4};
+  const float scale[2] = {1.0f, 1.0f};
+  auto define = [&](xnn_datatype datatype, int32_t zero_point) {
+    uint32_t id = XNN_INVALID_VALUE_ID;
+    return xnn_define_channelwise_quantized_tensor_value_v2(
+        subgraph, datatype, zero_point, scale, 2, /*channel_dim=*/0, dims,
+        /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &id);
+  };
+  EXPECT_EQ(define(xnn_datatype_qcint2, 0), xnn_status_success);
+  EXPECT_EQ(define(xnn_datatype_qcint2, 1), xnn_status_unsupported_parameter);
+  EXPECT_EQ(define(xnn_datatype_qcint2, -3), xnn_status_invalid_parameter);
+  EXPECT_EQ(define(xnn_datatype_qcint8, 0), xnn_status_success);
+  EXPECT_EQ(define(xnn_datatype_qcint8, -5), xnn_status_unsupported_parameter);
+  EXPECT_EQ(define(xnn_datatype_qcint8, 128), xnn_status_invalid_parameter);
+  EXPECT_EQ(define(xnn_datatype_qcint32, 0), xnn_status_success);
+  EXPECT_EQ(define(xnn_datatype_qcint32, 7), xnn_status_unsupported_parameter);
+}
+
 TEST(SUBGRAPH, create_subgraph_invalid_external_value_ids) {
   ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
   xnn_subgraph_t subgraph = nullptr;

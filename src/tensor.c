@@ -80,14 +80,34 @@ static enum xnn_status check_zero_point(
       break;
     case xnn_datatype_qint2:
     case xnn_datatype_qcint2:
+      if (zero_point < -2 || zero_point > 1) {
+        xnn_log_error(
+          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [-2, 1] range",
+          zero_point);
+        return xnn_status_invalid_parameter;
+      }
+      if (zero_point != 0) {
+        xnn_log_error(
+          "failed to create Quantized Dense Tensor value: unsupported non-zero zero point %" PRId32,
+          zero_point);
+        return xnn_status_unsupported_parameter;
+      }
+      break;
     case xnn_datatype_qcint8:
+      if ((int32_t) (int8_t) zero_point != zero_point) {
+        xnn_log_error(
+          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [-128, 127] range",
+          zero_point);
+        return xnn_status_invalid_parameter;
+      }
+      XNN_FALLTHROUGH
     case xnn_datatype_qcint32:
     case xnn_datatype_qint32:
       if (zero_point != 0) {
         xnn_log_error(
-          "failed to create Quantized Dense Tensor value: invalid non-zero zero point %" PRId32,
+          "failed to create Quantized Dense Tensor value: unsupported non-zero zero point %" PRId32,
           zero_point);
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
       }
       break;
     default:
