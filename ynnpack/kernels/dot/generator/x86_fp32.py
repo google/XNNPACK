@@ -27,7 +27,7 @@ class x86_fp32(x86):
 
   def load_b_tile(self, k, j):
     b_ptr = self.b_ptr(k, j)
-    return f"__m{self.bits} b_{k}_{j} = {self._mm()}_load_ps({b_ptr});\n"
+    return f"__m{self.bits} b_{k}_{j} = {self._mm()}_loadu_ps({b_ptr});\n"
 
   def product(self, i, j, k):
     mm = self._mm()
@@ -38,6 +38,18 @@ class x86_fp32(x86):
 class x86_sse2_fp32(x86_fp32, x86_sse2):
   def __init__(self):
     super().__init__("sse2", 128, (1, 4, 1))
+    self.flags += ["dot_flag::unaligned_b"]
+
+  def b_alignment_bytes(self):
+    return 4
+
+  def load_b_tile_tail(self, k, j):
+    ptr = self.b_ptr(k, j)
+    size = f"min(sizeof(__m128), sub_sat(N, {j}) * sizeof(float))"
+    return f"""\
+__m128 b_{k}_{j} = _mm_setzero_ps();
+std::memcpy(&b_{k}_{j}, {ptr}, {size});
+"""
 
 
 class x86_avx_fp32(x86_fp32, x86_avx):
@@ -50,12 +62,13 @@ class x86_avx_fp32(x86_fp32, x86_avx):
 
   def load_b_tile(self, k, j):
     ptr = self.b_ptr(k, j)
-    if self.n != "N":
-      return f"__m256 b_{k}_{j} = _mm256_loadu_ps({ptr});\n"
-    else:
-      mask_ptr = f"&mask_table[sub_sat(8, sub_sat({self.n}, {j}))"
-      mask = f"_mm256_loadu_si256((const __m256i*) {mask_ptr}])"
-      return f"__m256 b_{k}_{j} = _mm256_maskload_ps({ptr}, {mask});\n"
+    return f"__m256 b_{k}_{j} = _mm256_loadu_ps({ptr});\n"
+
+  def load_b_tile_tail(self, k, j):
+    ptr = self.b_ptr(k, j)
+    mask_ptr = f"&mask_table[sub_sat(8, sub_sat(N, {j}))"
+    mask = f"_mm256_loadu_si256((const __m256i*) {mask_ptr}])"
+    return f"__m256 b_{k}_{j} = _mm256_maskload_ps({ptr}, {mask});\n"
 
 
 class x86_fma3_fp32(x86_avx_fp32):
@@ -78,15 +91,16 @@ class x86_avx512_fp32(x86_fp32, x86_avx512):
     return 4
 
   def load_b_tile(self, k, j):
+    ptr = self.b_ptr(k, j)
+    return f"__m512 b_{k}_{j} = _mm512_loadu_ps({ptr});\n"
+
+  def load_b_tile_tail(self, k, j):
     mm = self._mm()
     ptr = self.b_ptr(k, j)
-    if self.n != "N":
-      return f"__m512 b_{k}_{j} = _mm512_loadu_ps({ptr});\n"
-    else:
-      zero = "_mm512_setzero_ps()"
-      mask = f"(uint32_t)((1 << min(16, sub_sat({self.n}, {j}))) - 1)"
-      mask = f"_cvtu32_mask16({mask})"
-      return f"__m512 b_{k}_{j} = {mm}_mask_loadu_ps({zero}, {mask}, {ptr});\n"
+    zero = "_mm512_setzero_ps()"
+    mask = f"(uint32_t)((1 << min(16, sub_sat(N, {j}))) - 1)"
+    mask = f"_cvtu32_mask16({mask})"
+    return f"__m512 b_{k}_{j} = {mm}_mask_loadu_ps({zero}, {mask}, {ptr});\n"
 
   def product(self, i, j, k):
     c_ij = f"c_{i}_{j}"

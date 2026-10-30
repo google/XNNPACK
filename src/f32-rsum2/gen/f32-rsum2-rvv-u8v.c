@@ -36,7 +36,7 @@ void xnn_f32_rsum2_ukernel__rvv_u8v(
 
     vfloat32m8_t vinput = __riscv_vle32_v_f32m8(input, vl); input += vl;
 
-    vsum2 = __riscv_vfmacc(vsum2, vinput, vinput, vl);
+    vsum2 = __riscv_vfmacc_vv_f32m8_tu(vsum2, vinput, vinput, vl);
 
   } while (batch > 0);
 

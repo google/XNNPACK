@@ -36,7 +36,7 @@ void xnn_s8_rmin_ukernel__rvv_u8v(
   while (batch > 0) {
     size_t vl = __riscv_vsetvl_e8m8(batch); batch -= vl;
     vint8m8_t vinput = __riscv_vle8_v_i8m8(input, vl); input += vl;
-    vmin = __riscv_vmin(vmin, vinput, vl);
+    vmin = __riscv_vmin_vv_i8m8_tu(vmin, vmin, vinput, vl);
   }
 
   vint8m1_t min = __riscv_vle8_v_i8m1(output, 1);

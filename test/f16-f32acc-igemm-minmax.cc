@@ -58,7 +58,6 @@ std::vector<GemmTestParams> CreateTests1(
     std::function<void(GemmMicrokernelTester& tester)> test_func,
     uint64_t arch_flags = 0) {
   std::string kbs = std::to_string(k_block);
-  std::string kb2s = std::to_string(k_block * 2);
   std::string akbs = std::to_string(adj_k_block);
   std::string nrs = std::to_string(nr);
 
@@ -1040,6 +1039,63 @@ std::vector<GemmTestParams> CreateTests1(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_f32acc_igemm_minmax_ukernel_8x32__avx512skx_broadcast,
+                        xnn_init_f16_minmax_scalar_params,
+                        xnn_pack_f16_conv_goki_w);
+          },
+          xnn_arch_x86_avx512skx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F16_F32ACC_IGEMM_MINMAX_1X64__AVX512SKX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/1, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f16_f32acc_igemm_minmax_ukernel_1x64__avx512skx_broadcast,
+                        xnn_init_f16_minmax_scalar_params,
+                        xnn_pack_f16_conv_goki_w);
+          },
+          xnn_arch_x86_avx512skx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F16_F32ACC_IGEMM_MINMAX_4X64__AVX512SKX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/4, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f16_f32acc_igemm_minmax_ukernel_4x64__avx512skx_broadcast,
+                        xnn_init_f16_minmax_scalar_params,
+                        xnn_pack_f16_conv_goki_w);
+          },
+          xnn_arch_x86_avx512skx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F16_F32ACC_IGEMM_MINMAX_5X64__AVX512SKX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/5, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f16_f32acc_igemm_minmax_ukernel_5x64__avx512skx_broadcast,
                         xnn_init_f16_minmax_scalar_params,
                         xnn_pack_f16_conv_goki_w);
           },

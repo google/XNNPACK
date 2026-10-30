@@ -112,12 +112,18 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx(
       a += 64;
       _tile_loadd(5, (const int8_t*) w + 0, 256);
       _tile_dpbssd(0, 4, 5);
-      _tile_loadd(5, (const int8_t*) w + 64, 256);
-      _tile_dpbssd(1, 4, 5);
-      _tile_loadd(5, (const int8_t*) w + 128, 256);
-      _tile_dpbssd(2, 4, 5);
-      _tile_loadd(5, (const int8_t*) w + 192, 256);
-      _tile_dpbssd(3, 4, 5);
+      if XNN_LIKELY(nc > 16) {
+        _tile_loadd(5, (const int8_t*) w + 64, 256);
+        _tile_dpbssd(1, 4, 5);
+      }
+      if XNN_LIKELY(nc > 32) {
+        _tile_loadd(5, (const int8_t*) w + 128, 256);
+        _tile_dpbssd(2, 4, 5);
+      }
+      if XNN_LIKELY(nc > 48) {
+        _tile_loadd(5, (const int8_t*) w + 192, 256);
+        _tile_dpbssd(3, 4, 5);
+      }
 
       w = (const int8_t*) w + 4096;
       k -= 64 * sizeof(int8_t);
@@ -128,12 +134,18 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx(
       a += kremainder;
       _tile_loadd(7, (const int8_t*) w + 0, 256);
       _tile_dpbssd(0, 6, 7);
-      _tile_loadd(7, (const int8_t*) w + 64, 256);
-      _tile_dpbssd(1, 6, 7);
-      _tile_loadd(7, (const int8_t*) w + 128, 256);
-      _tile_dpbssd(2, 6, 7);
-      _tile_loadd(7, (const int8_t*) w + 192, 256);
-      _tile_dpbssd(3, 6, 7);
+      if XNN_LIKELY(nc > 16) {
+        _tile_loadd(7, (const int8_t*) w + 64, 256);
+        _tile_dpbssd(1, 6, 7);
+      }
+      if XNN_LIKELY(nc > 32) {
+        _tile_loadd(7, (const int8_t*) w + 128, 256);
+        _tile_dpbssd(2, 6, 7);
+      }
+      if XNN_LIKELY(nc > 48) {
+        _tile_loadd(7, (const int8_t*) w + 192, 256);
+        _tile_dpbssd(3, 6, 7);
+      }
 
       w = (const int8_t*) w + kremainder * 64;
       k -= kremainder * sizeof(int8_t);
@@ -142,9 +154,15 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx(
     // TODO: Instead of processing up to 4 tiles (16x64) consider
     // quantizing 1 tile at a time (16 registers)
     _tile_stored(0, &res[0][0], 64);
-    _tile_stored(1, &res[1][0], 64);
-    _tile_stored(2, &res[2][0], 64);
-    _tile_stored(3, &res[3][0], 64);
+    if XNN_LIKELY(nc > 16) {
+      _tile_stored(1, &res[1][0], 64);
+    }
+    if XNN_LIKELY(nc > 32) {
+      _tile_stored(2, &res[2][0], 64);
+    }
+    if XNN_LIKELY(nc > 48) {
+      _tile_stored(3, &res[3][0], 64);
+    }
 
     // TODO: Fix msan for AMX
     #if defined(__has_feature)
@@ -162,57 +180,93 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx(
 
     int8_t* c0 = c;
     {
-      // Add tile to bias
-      __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
-      __m512i vacc1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0]));
-      __m512i vacc2 = _mm512_add_epi32(vksum2, _mm512_load_epi32(&res[2][0]));
-      __m512i vacc3 = _mm512_add_epi32(vksum3, _mm512_load_epi32(&res[3][0]));
-
-      __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
-      __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
-      __m512 vscaled2 = _mm512_cvtepi32_ps(vacc2);
-      __m512 vscaled3 = _mm512_cvtepi32_ps(vacc3);
-
-      vscaled0 = _mm512_mul_ps(vscaled0, vscale0);
-      vscaled1 = _mm512_mul_ps(vscaled1, vscale1);
-      vscaled2 = _mm512_mul_ps(vscaled2, vscale2);
-      vscaled3 = _mm512_mul_ps(vscaled3, vscale3);
-      vscaled0 = _mm512_min_ps(vscaled0, voutput_max_less_zero_point);
-      vscaled1 = _mm512_min_ps(vscaled1, voutput_max_less_zero_point);
-      vscaled2 = _mm512_min_ps(vscaled2, voutput_max_less_zero_point);
-      vscaled3 = _mm512_min_ps(vscaled3, voutput_max_less_zero_point);
-      vacc0 = _mm512_cvtps_epi32(vscaled0);
-      vacc1 = _mm512_cvtps_epi32(vscaled1);
-      vacc2 = _mm512_cvtps_epi32(vscaled2);
-      vacc3 = _mm512_cvtps_epi32(vscaled3);
-      vacc0 = _mm512_add_epi32(vacc0, voutput_zero_point);
-      vacc1 = _mm512_add_epi32(vacc1, voutput_zero_point);
-      vacc2 = _mm512_add_epi32(vacc2, voutput_zero_point);
-      vacc3 = _mm512_add_epi32(vacc3, voutput_zero_point);
-      __m128i vout0 = _mm512_cvtsepi32_epi8(vacc0);
-      __m128i vout1 = _mm512_cvtsepi32_epi8(vacc1);
-      __m128i vout2 = _mm512_cvtsepi32_epi8(vacc2);
-      __m128i vout3 = _mm512_cvtsepi32_epi8(vacc3);
-      vout0 = _mm_max_epi8(vout0, voutput_min);
-      vout1 = _mm_max_epi8(vout1, voutput_min);
-      vout2 = _mm_max_epi8(vout2, voutput_min);
-      vout3 = _mm_max_epi8(vout3, voutput_min);
-
       if XNN_LIKELY(nc >= 64) {
+        // Add tile to bias
+        __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
+        __m512i vacc1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0]));
+        __m512i vacc2 = _mm512_add_epi32(vksum2, _mm512_load_epi32(&res[2][0]));
+        __m512i vacc3 = _mm512_add_epi32(vksum3, _mm512_load_epi32(&res[3][0]));
+
+        __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
+        __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
+        __m512 vscaled2 = _mm512_cvtepi32_ps(vacc2);
+        __m512 vscaled3 = _mm512_cvtepi32_ps(vacc3);
+
+        vscaled0 = _mm512_mul_ps(vscaled0, vscale0);
+        vscaled1 = _mm512_mul_ps(vscaled1, vscale1);
+        vscaled2 = _mm512_mul_ps(vscaled2, vscale2);
+        vscaled3 = _mm512_mul_ps(vscaled3, vscale3);
+        vscaled0 = _mm512_min_ps(vscaled0, voutput_max_less_zero_point);
+        vscaled1 = _mm512_min_ps(vscaled1, voutput_max_less_zero_point);
+        vscaled2 = _mm512_min_ps(vscaled2, voutput_max_less_zero_point);
+        vscaled3 = _mm512_min_ps(vscaled3, voutput_max_less_zero_point);
+        vacc0 = _mm512_cvtps_epi32(vscaled0);
+        vacc1 = _mm512_cvtps_epi32(vscaled1);
+        vacc2 = _mm512_cvtps_epi32(vscaled2);
+        vacc3 = _mm512_cvtps_epi32(vscaled3);
+        vacc0 = _mm512_add_epi32(vacc0, voutput_zero_point);
+        vacc1 = _mm512_add_epi32(vacc1, voutput_zero_point);
+        vacc2 = _mm512_add_epi32(vacc2, voutput_zero_point);
+        vacc3 = _mm512_add_epi32(vacc3, voutput_zero_point);
+        __m128i vout0 = _mm512_cvtsepi32_epi8(vacc0);
+        __m128i vout1 = _mm512_cvtsepi32_epi8(vacc1);
+        __m128i vout2 = _mm512_cvtsepi32_epi8(vacc2);
+        __m128i vout3 = _mm512_cvtsepi32_epi8(vacc3);
+        vout0 = _mm_max_epi8(vout0, voutput_min);
+        vout1 = _mm_max_epi8(vout1, voutput_min);
+        vout2 = _mm_max_epi8(vout2, voutput_min);
+        vout3 = _mm_max_epi8(vout3, voutput_min);
         _mm_storeu_si128((__m128i*) (c0 + 0), vout0);
         _mm_storeu_si128((__m128i*) (c0 + 16), vout1);
         _mm_storeu_si128((__m128i*) (c0 + 32), vout2);
         _mm_storeu_si128((__m128i*) (c0 + 48), vout3);
       } else {
-        // Prepare mask for valid 8-bit elements (depends on nc).
+        __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
+        __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
+        vscaled0 = _mm512_mul_ps(vscaled0, vscale0);
+        vscaled0 = _mm512_min_ps(vscaled0, voutput_max_less_zero_point);
+        vacc0 = _mm512_cvtps_epi32(vscaled0);
+        vacc0 = _mm512_add_epi32(vacc0, voutput_zero_point);
+        __m128i vout0 = _mm512_cvtsepi32_epi8(vacc0);
+        vout0 = _mm_max_epi8(vout0, voutput_min);
         const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
         _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0);
+        if (nc > 16) {
+        __m512i vacc1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0]));
+        __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
+        vscaled1 = _mm512_mul_ps(vscaled1, vscale1);
+        vscaled1 = _mm512_min_ps(vscaled1, voutput_max_less_zero_point);
+        vacc1 = _mm512_cvtps_epi32(vscaled1);
+        vacc1 = _mm512_add_epi32(vacc1, voutput_zero_point);
+        __m128i vout1 = _mm512_cvtsepi32_epi8(vacc1);
+        vout1 = _mm_max_epi8(vout1, voutput_min);
         const __mmask16 vmask1 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 16) & 0xFFFF));
         _mm_mask_storeu_epi8(c0 + 16, vmask1, vout1);
+        }
+        if (nc > 32) {
+        __m512i vacc2 = _mm512_add_epi32(vksum2, _mm512_load_epi32(&res[2][0]));
+        __m512 vscaled2 = _mm512_cvtepi32_ps(vacc2);
+        vscaled2 = _mm512_mul_ps(vscaled2, vscale2);
+        vscaled2 = _mm512_min_ps(vscaled2, voutput_max_less_zero_point);
+        vacc2 = _mm512_cvtps_epi32(vscaled2);
+        vacc2 = _mm512_add_epi32(vacc2, voutput_zero_point);
+        __m128i vout2 = _mm512_cvtsepi32_epi8(vacc2);
+        vout2 = _mm_max_epi8(vout2, voutput_min);
         const __mmask16 vmask2 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 32) & 0xFFFF));
         _mm_mask_storeu_epi8(c0 + 32, vmask2, vout2);
+        }
+        if (nc > 48) {
+        __m512i vacc3 = _mm512_add_epi32(vksum3, _mm512_load_epi32(&res[3][0]));
+        __m512 vscaled3 = _mm512_cvtepi32_ps(vacc3);
+        vscaled3 = _mm512_mul_ps(vscaled3, vscale3);
+        vscaled3 = _mm512_min_ps(vscaled3, voutput_max_less_zero_point);
+        vacc3 = _mm512_cvtps_epi32(vscaled3);
+        vacc3 = _mm512_add_epi32(vacc3, voutput_zero_point);
+        __m128i vout3 = _mm512_cvtsepi32_epi8(vacc3);
+        vout3 = _mm_max_epi8(vout3, voutput_min);
         const __mmask16 vmask3 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 48) & 0xFFFF));
         _mm_mask_storeu_epi8(c0 + 48, vmask3, vout3);
+        }
       }
     }
     if XNN_LIKELY(nc >= 64) {

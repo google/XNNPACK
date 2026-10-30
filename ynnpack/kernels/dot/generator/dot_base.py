@@ -60,6 +60,7 @@ class dot_base:
     self.b_chunk_n = 1
     self.min_tiles = 4
     self.flags = []
+    self.handle_tail = False
     self.dot_cost_model = type(self).__name__
 
   def header(self):
@@ -158,7 +159,11 @@ void {func_name}(
   static_assert({self.b_tile_size_bytes()} % {self.tile_shape[2]} == 0, "");
 """
 
-    if "dot_flag::unaligned_b" not in self.flags:
+    if "dot_flag::unaligned_b" in self.flags:
+      result += f"""\
+  const void* B_end YNN_UNUSED = offset_bytes(B, (K3 - 1) * B_stride_k3 + (K2 - 1) * B_stride_k2 + (K1 - 1) * B_stride_k1 + N * sizeof({self.b_type}));
+"""
+    else:
       result += f"""\
   assert(reinterpret_cast<uintptr_t>(B) % {self.b_alignment_bytes()} == 0);
   assert(B_stride_k1 % {self.b_tile_stride_k()} == 0 || K1 == 1);
@@ -228,16 +233,17 @@ void {func_name}(
     """Load one tile of a(i, k)."""
     raise NotImplementedError()
 
-  # TODO: I think that we should just have `load_a_tile`, and the arguments
-  # should be ranges. This is probably true of all of these functions.
-  def load_a_tile_k_tail(self, i, k, nk):
-    """Load `nk` values starting at a(i, k)."""
-    # We assume that we can just use load_a_tile.
+  def load_a_tile_tail(self, i, k):
+    """Load one tile of a(i, k) for the tail."""
     return self.load_a_tile(i, k)
 
   def load_b_tile(self, k, j):
     """Load one tile of b(k, j)."""
     raise NotImplementedError()
+
+  def load_b_tile_tail(self, k, j):
+    """Load one tile of b(k, j) for the tail."""
+    return self.load_b_tile(k, j)
 
   def product(self, i, j, k):
     """Compute c(i, j) += a(i, k) * b(k, j)."""
@@ -286,26 +292,29 @@ void {func_name}(
     """
     return ""
 
-  def generate_block(self):
+  def generate_block(self, a_tail=False, b_tail=False):
     """Generate the loads and products to implement a `block_shape` of the dot product."""
     result = ""
+    load_a = self.load_a_tile_tail if a_tail else self.load_a_tile
     for i in range(0, self.block_shape[0], self.tile_shape[0]):
       for k in range(0, self.block_shape[2], self.tile_shape[2]):
-        result += self.load_a_tile_k_tail(i, k, self.block_shape[2])
+        result += load_a(i, k)
     result += "\n"
+
+    load_b = self.load_b_tile_tail if b_tail else self.load_b_tile
 
     # TODO: This is a hack, find a better way to decide this loop ordering.
     if "neon" in self.arch:
       for j in range(0, self.block_shape[1], self.tile_shape[1]):
         for k in range(0, self.block_shape[2], self.tile_shape[2]):
-          result += self.load_b_tile(k, j)
+          result += load_b(k, j)
         for i in range(0, self.block_shape[0], self.tile_shape[0]):
           for k in range(0, self.block_shape[2], self.tile_shape[2]):
             result += self.product(i, j, k)
     else:
       for k in range(0, self.block_shape[2], self.tile_shape[2]):
         for j in range(0, self.block_shape[1], self.tile_shape[1]):
-          result += self.load_b_tile(k, j)
+          result += load_b(k, j)
 
       for k in range(0, self.block_shape[2], self.tile_shape[2]):
         for i in range(0, self.block_shape[0], self.tile_shape[0]):
@@ -403,40 +412,65 @@ void {func_name}(
     result += """const void* A_k1 = A_k2;
 std::ptrdiff_t k1 = K1;
 """
-    block_body = self.generate_block()
-    block_shape = self.block_shape
-    self.block_shape = (
-        self.block_shape[0],
-        self.block_shape[1],
-        self.tile_shape[2],
-    )
-    tile_body = self.generate_block()
-    self.block_shape = block_shape
-
     a_step = (
         "A_stride_m"
         if "dot_flag::transpose_a" in self.flags
         else f"sizeof({self.a_type})"
     )
 
+    def advance_k1(k_step):
+      step = f"k1 -= {k_step};\n"
+      for j in range(0, self.block_shape[1], self.b_chunk_n):
+        step += f"B_k1_{j} = offset_bytes(B_k1_{j}, {k_step} * B_stride_k1);\n"
+      step += f"A_k1 = offset_bytes(A_k1, {k_step} * {a_step});\n"
+      return step
+
+    def generate_k_block(k_step, b_tail):
+      block_shape = self.block_shape
+      self.block_shape = (self.block_shape[0], self.block_shape[1], k_step)
+      a_tail = (
+          k_step == self.tile_shape[2] and block_shape[2] != self.tile_shape[2]
+      )
+      body = self.generate_block(a_tail=a_tail, b_tail=b_tail)
+      self.block_shape = block_shape
+      return body
+
+    has_prefix_loop = False
+    if "dot_flag::unaligned_b" in self.flags and self.handle_tail:
+      has_prefix_loop = True
+      if self.block_shape[2] > self.tile_shape[2]:
+        k_max = self.block_shape[2] - self.tile_shape[2]
+        b_load_size = (
+            f"({k_max} * B_stride_k1) +"
+            f" ({self.block_shape[1]} * sizeof({self.b_type}))"
+        )
+      else:
+        b_load_size = f"{self.block_shape[1]} * sizeof({self.b_type})"
+
+      in_bounds_body = generate_k_block(self.block_shape[2], b_tail=False)
+      in_bounds_body += advance_k1(self.block_shape[2])
+      cond = (
+          f"k1 >= {self.block_shape[2]} &&"
+          f" reinterpret_cast<uintptr_t>(offset_bytes(B_k1_0, {b_load_size}))"
+          " <= reinterpret_cast<uintptr_t>(B_end)"
+      )
+      result += f"while ({cond}) {{\n"
+      result += indent(in_bounds_body, "  ") + "\n}\n"
+
+    block_body = generate_k_block(self.block_shape[2], b_tail=self.handle_tail)
+    tile_body = generate_k_block(self.tile_shape[2], b_tail=self.handle_tail)
     if block_body == tile_body:
       tile_body = None
 
     if tile_body:
       result += f"while (k1 >= {self.block_shape[2]}) {{\n"
+    elif has_prefix_loop:
+      result += "while (k1 > 0) {\n"
     else:
       result += "do {\n"
-    block_body += f"k1 -= {self.block_shape[2]};\n"
-    for j in range(0, self.block_shape[1], self.b_chunk_n):
-      block_body += (
-          f"B_k1_{j} = offset_bytes(B_k1_{j}, {self.block_shape[2]} *"
-          " B_stride_k1);\n"
-      )
-    block_body += (
-        f"A_k1 = offset_bytes(A_k1, {self.block_shape[2]} * {a_step});\n"
-    )
+    block_body += advance_k1(self.block_shape[2])
     result += indent(block_body, "  ") + "\n"
-    if tile_body:
+    if tile_body or has_prefix_loop:
       result += "}\n"
     else:
       result += "} while (k1 > 0);\n"
@@ -447,17 +481,8 @@ std::ptrdiff_t k1 = K1;
       else:
         result += "while (k1 > 0) {\n"
       if self.tile_shape[2] * 2 != self.block_shape[2]:
-        tile_body += f"k1 -= {self.tile_shape[2]};\n"
-        for j in range(0, self.block_shape[1], self.b_chunk_n):
-          tile_body += (
-              f"B_k1_{j} = offset_bytes(B_k1_{j}, {self.tile_shape[2]} *"
-              " B_stride_k1);\n"
-          )
-        tile_body += (
-            f"A_k1 = offset_bytes(A_k1, {self.tile_shape[2]} * {a_step});\n"
-        )
-      result += indent(tile_body, "  ") + "\n"
-      result += "}\n"
+        tile_body += advance_k1(self.tile_shape[2])
+      result += indent(tile_body, "  ") + "\n}\n"
 
     return result
 
@@ -515,8 +540,11 @@ do {
     n = min(self.block_shape[1], n * max(1, self.min_tiles // tiles))
 
     # If we're unrolling the tail, we need to avoid reading B out of bounds.
-    self.n = "N" if handle_tail else self.block_shape[1]
-    self.b_chunk_n = self.tile_shape[1] if handle_tail else self.block_shape[1]
+    self.handle_tail = handle_tail
+    if "dot_flag::unaligned_b" in self.flags or not handle_tail:
+      self.b_chunk_n = self.block_shape[1]
+    else:
+      self.b_chunk_n = self.tile_shape[1]
 
     self.block_shape = (self.block_shape[0], n, k)
     body = self.init_c_block()
@@ -559,9 +587,7 @@ do {
     )
 
     src = self.begin_func(func_name)
-    # If we claim b is unaligned, we might use slow masked loads in the tail
-    # case.
-    if (n != self.tile_shape[1] or "dot_flag::unaligned_b" in self.flags):
+    if n != self.tile_shape[1]:
       # The main loop (n = block_shape.n)
       body = self.loop_j(n, k, False)
       src += indent(body, "  ") + "\n"

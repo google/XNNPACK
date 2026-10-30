@@ -23,7 +23,6 @@ void xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v(
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
-  assert(pooling_elements > 9);
   assert(channels != 0);
 
   vuint32m1_t fidx_f32v = __riscv_vmv_v_x_u32m1(0, __riscv_vsetvl_e32m1(channels));

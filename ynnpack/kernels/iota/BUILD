@@ -45,7 +45,6 @@ cc_test(
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
-        "@com_google_googletest//:gtest",  # no g3
     ] + ynn_test_deps(),
 )
 

@@ -21,6 +21,10 @@ class x86_fp16_fp16_fp32(x86):
     self.a_load_type = "int16_t"
     self.b_type = "half"
     self.b_load_type = "int16_t"
+    self.flags += ["dot_flag::unaligned_b"]
+
+  def b_alignment_bytes(self):
+    return 2
 
   def load_a_tile(self, i, k):
     a = f"{self._mm(self.bits // 2)}_set1_epi16(*{self.a_ptr(i, k)})"
@@ -32,6 +36,19 @@ class x86_fp16_fp16_fp32(x86):
     b_ptr = self.b_ptr(k, j, f"__m{self.bits//2}i")
     b = f"{self._mm(self.bits//2)}_loadu_si{self.bits//2}({b_ptr})"
     return f"__m{self.bits} b_{k}_{j} = {self._mm()}_cvtph_ps({b});\n"
+
+  def load_b_tile_tail(self, k, j):
+    half_bits = self.bits // 2
+    b_ptr = self.b_ptr(k, j)
+    zero = f"{self._mm(half_bits)}_setzero_si{half_bits}()"
+    size = (
+        f"min(sizeof(__m{half_bits}i), sub_sat(N, {j}) * sizeof({self.b_type}))"
+    )
+    return f"""\
+__m{half_bits}i b_raw_{k}_{j} = {zero};
+std::memcpy(&b_raw_{k}_{j}, {b_ptr}, {size});
+__m{self.bits} b_{k}_{j} = {self._mm()}_cvtph_ps(b_raw_{k}_{j});
+"""
 
   def product(self, i, j, k):
     mm = self._mm()
@@ -61,6 +78,15 @@ class x86_avx512_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx512):
   def __init__(self):
     super().__init__(arch="avx512", bits=512, tile_shape=(1, 16, 1))
     self.flags += ["dot_flag::consistent_arithmetic"]
+
+  def load_b_tile_tail(self, k, j):
+    ptr = self.b_ptr(k, j)
+    mask = f"(uint32_t)((1 << min(16, sub_sat(N, {j}))) - 1)"
+    mask = f"_cvtu32_mask16({mask})"
+    return f"""\
+__m256i b_raw_{k}_{j} = _mm256_maskz_loadu_epi16({mask}, {ptr});
+__m512 b_{k}_{j} = _mm512_cvtph_ps(b_raw_{k}_{j});
+"""
 
   def product(self, i, j, k):
     c_ij = f"c_{i}_{j}"

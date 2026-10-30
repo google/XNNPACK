@@ -124,8 +124,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
         a0 += 64;
         _tile_loadd(5, (const int8_t*) w + 0, 128);
         _tile_dpbssd(0, 4, 5);
-        _tile_loadd(5, (const int8_t*) w + 64, 128);
-        _tile_dpbssd(1, 4, 5);
+        if XNN_LIKELY(nc > 16) {
+          _tile_loadd(5, (const int8_t*) w + 64, 128);
+          _tile_dpbssd(1, 4, 5);
+        }
 
         w = (const int8_t*) w + 2048;
         k -= 64 * sizeof(int8_t);
@@ -134,8 +136,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
         _tile_loadd(6, a0, 64);
         _tile_loadd(7, (const int8_t*) w + 0, 128);
         _tile_dpbssd(0, 6, 7);
-        _tile_loadd(7, (const int8_t*) w + 64, 128);
-        _tile_dpbssd(1, 6, 7);
+        if XNN_LIKELY(nc > 16) {
+          _tile_loadd(7, (const int8_t*) w + 64, 128);
+          _tile_dpbssd(1, 6, 7);
+        }
 
         w = (const int8_t*) w + kremainder * 32;
         k -= kremainder * sizeof(int8_t);
@@ -147,7 +151,9 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
     // TODO: Instead of processing up to 4 tiles (16x64) consider
     // quantizing 1 tile at a time (16 registers)
     _tile_stored(0, &res[0][0], 64);
-    _tile_stored(1, &res[1][0], 64);
+    if XNN_LIKELY(nc > 16) {
+      _tile_stored(1, &res[1][0], 64);
+    }
 
     // TODO: Fix msan for AMX
     #if defined(__has_feature)
@@ -166,31 +172,44 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
 
     float* c0 = c;
     {
-      // Add tile to bias
-      __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
-      __m512i vacc1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0]));
-
-      __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
-      __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
-
-      vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
-      vscaled1 = _mm512_mul_ps(vscaled1, vinv_scale);
-      vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
-      vscaled1 = _mm512_fmadd_ps(vscaled1, vfilter_output_scale1, vbias1);
-      vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
-      vscaled1 = _mm512_max_ps(vscaled1, voutput_min);
-      vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
-      vscaled1 = _mm512_min_ps(vscaled1, voutput_max);
-
       if XNN_LIKELY(nc >= 32) {
+        // Add tile to bias
+        __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
+        __m512i vacc1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0]));
+
+        __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
+        __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
+
+        vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
+        vscaled1 = _mm512_mul_ps(vscaled1, vinv_scale);
+        vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
+        vscaled1 = _mm512_fmadd_ps(vscaled1, vfilter_output_scale1, vbias1);
+        vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
+        vscaled1 = _mm512_max_ps(vscaled1, voutput_min);
+        vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
+        vscaled1 = _mm512_min_ps(vscaled1, voutput_max);
+
         _mm512_storeu_ps(c0 + 0, vscaled0);
         _mm512_storeu_ps(c0 + 16, vscaled1);
       } else {
-        // Prepare mask for valid 32-bit elements (depends on nc).
+        __m512i vacc0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0]));
+        __m512 vscaled0 = _mm512_cvtepi32_ps(vacc0);
+        vscaled0 = _mm512_mul_ps(vscaled0, vinv_scale);
+        vscaled0 = _mm512_fmadd_ps(vscaled0, vfilter_output_scale0, vbias0);
+        vscaled0 = _mm512_max_ps(vscaled0, voutput_min);
+        vscaled0 = _mm512_min_ps(vscaled0, voutput_max);
         const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
         _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0);
+        if (nc > 16) {
+        __m512i vacc1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0]));
+        __m512 vscaled1 = _mm512_cvtepi32_ps(vacc1);
+        vscaled1 = _mm512_mul_ps(vscaled1, vinv_scale);
+        vscaled1 = _mm512_fmadd_ps(vscaled1, vfilter_output_scale1, vbias1);
+        vscaled1 = _mm512_max_ps(vscaled1, voutput_min);
+        vscaled1 = _mm512_min_ps(vscaled1, voutput_max);
         const __mmask16 vmask1 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 16) & 0xFFFF));
         _mm512_mask_storeu_ps(c0 + 16, vmask1, vscaled1);
+        }
       }
     }
     if XNN_LIKELY(nc >= 32) {

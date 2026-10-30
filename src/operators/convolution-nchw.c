@@ -588,6 +588,10 @@ static enum xnn_status select_convolution2d_ukernel(
                   groups, group_input_channels, groups, group_output_channels);
     return xnn_status_unsupported_parameter;
   }
+  if (*ukernel_type == xnn_microkernel_type_dwconv &&
+      (*dwconv2d_parameters)->ukernel == NULL) {
+    return xnn_status_unsupported_hardware;
+  }
   return xnn_status_success;
 }
 

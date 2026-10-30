@@ -994,17 +994,6 @@ namespace {
 
   BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__avx512amx)
 
-  static void qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx,
-      xnn_init_f32_qc4w_minmax_scalar_params,
-      xnn_pack_qs8_qc4w_gemm_goi_w,
-      /*mr=*/7, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_x86_avx512amx);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx)
-
   static void qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx,
@@ -1037,17 +1026,6 @@ namespace {
   }
 
   BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_1x32c4__avx512amx)
-
-  static void qd8_f32_qc4w_gemm_minmax_ukernel_7x32c4__avx512amx(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x32c4__avx512amx,
-      xnn_init_f32_qc4w_minmax_scalar_params,
-      xnn_pack_qs8_qc4w_gemm_goi_w,
-      /*mr=*/7, /*nr=*/32, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_x86_avx512amx);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_7x32c4__avx512amx)
 
   static void qd8_f32_qc4w_gemm_minmax_ukernel_16x32c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,

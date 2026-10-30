@@ -305,17 +305,6 @@ namespace {
 
   BENCHMARK_GEMM(qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx)
 
-  static void qd8_f16_qc8w_gemm_minmax_ukernel_7x64c4__avx512amx(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x64c4__avx512amx,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/7, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_x86_avx512amx);
-  }
-
-  BENCHMARK_GEMM(qd8_f16_qc8w_gemm_minmax_ukernel_7x64c4__avx512amx)
-
   static void qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx,

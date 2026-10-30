@@ -63,6 +63,11 @@ config_setting(
 )
 
 config_setting(
+    name = "linux_riscv32",
+    values = {"cpu": "riscv32"},
+)
+
+config_setting(
     name = "linux_riscv64",
     values = {"cpu": "riscv64"},
 )
@@ -389,8 +394,21 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
-    name = "riscv",
+    name = "riscv32",
+    match_any = [":linux_riscv32"],
+)
+
+selects.config_setting_group(
+    name = "riscv64",
     match_any = [":linux_riscv64"],
+)
+
+selects.config_setting_group(
+    name = "riscv",
+    match_any = [
+        ":riscv32",
+        ":riscv64",
+    ],
 )
 
 # Define a hidden setting which no other modules can change.

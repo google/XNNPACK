@@ -263,6 +263,8 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = TEST_DEPS + [
         "//ynnpack/subgraph",
+        "@slinky//slinky/base",
+        "@slinky//slinky/base:thread_pool",
         "@slinky//slinky/runtime",
     ],
 )

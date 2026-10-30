@@ -147,20 +147,31 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       a += 64;
       $for N in range(0, NR, 16):
         $if DATATYPE in ["QC4_F32", "QC4_F16"]:
-          _tile_loadd(5, weight_buffer[${(N // 16) % 2}], 64);
-          _tile_dpbssd(${N // 16}, 4, 5);
-          $if N + 16 < NR:
-            $for K in range(8):
-              const __m512i vb${K}x${(N//16)+1} = _mm512_load_epi32((const int8_t*) w + ${(N + 16) * 4 + NR * K * 4});
-            $for K in range(8):
-              const __m512i vl${K}x${(N//16)+1} = _mm512_gf2p8affine_epi64_epi8(vb${K}x${(N//16)+1}, vshl4, 0);
-              const __m512i vh${K}x${(N//16)+1} = _mm512_and_si512(vb${K}x${(N//16)+1}, vmask);
-            $for K in range(8):
-              _mm512_store_epi32(weight_buffer[${((N // 16) + 1) % 2}] + ${64*K*2+0}, vl${K}x${(N//16)+1});
-              _mm512_store_epi32(weight_buffer[${((N // 16) + 1) % 2}] + ${64*K*2+64}, vh${K}x${(N//16)+1});
+          $if N == 0:
+            _tile_loadd(5, weight_buffer[${(N // 16) % 2}], 64);
+            _tile_dpbssd(${N // 16}, 4, 5);
+          $else:
+            if XNN_LIKELY(nc > ${N}) {
+              $for K in range(8):
+                const __m512i vb${K}x${N // 16} = _mm512_load_epi32((const int8_t*) w + ${N * 4 + NR * K * 4});
+              $for K in range(8):
+                const __m512i vl${K}x${N // 16} = _mm512_gf2p8affine_epi64_epi8(vb${K}x${N // 16}, vshl4, 0);
+                const __m512i vh${K}x${N // 16} = _mm512_and_si512(vb${K}x${N // 16}, vmask);
+              $for K in range(8):
+                _mm512_store_epi32(weight_buffer[${(N // 16) % 2}] + ${64*K*2+0}, vl${K}x${N // 16});
+                _mm512_store_epi32(weight_buffer[${(N // 16) % 2}] + ${64*K*2+64}, vh${K}x${N // 16});
+              _tile_loadd(5, weight_buffer[${(N // 16) % 2}], 64);
+              _tile_dpbssd(${N // 16}, 4, 5);
+            }
         $else:
-          _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-          _tile_dpbssd(${N // 16}, 4, 5);
+          $if N == 0:
+            _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+            _tile_dpbssd(${N // 16}, 4, 5);
+          $else:
+            if XNN_LIKELY(nc > ${N}) {
+              _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpbssd(${N // 16}, 4, 5);
+            }
       $if PREFETCH:
         $for P in range(4096, 5120 + NR // 16 * 1024, 64):
           xnn_prefetch_to_l1((const int8_t*) w + ${P});
@@ -177,17 +188,37 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       a += kremainder;
       $for N in range(0, NR, 16):
         $if DATATYPE in ["QC4_F32", "QC4_F16"]:
-          for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
-            const __m512i vb${N//16} = _mm512_load_epi32((const int8_t*) w + ${N * 4} + ${NR * 4} * k);
-            const __m512i vl${N//16} = _mm512_gf2p8affine_epi64_epi8(vb${N//16}, vshl4, 0);
-            const __m512i vh${N//16} = _mm512_and_si512(vb${N//16}, vmask);
-            _mm512_store_epi32(weight_buffer[0] + ${64*2} * k + 0, vl${N//16});
-            _mm512_store_epi32(weight_buffer[0] + ${64*2} * k + 64, vh${N//16});
-          }
-          _tile_loadd(7, weight_buffer[0], 64);
+          $if N == 0:
+            for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+              const __m512i vb${N//16} = _mm512_load_epi32((const int8_t*) w + ${N * 4} + ${NR * 4} * k);
+              const __m512i vl${N//16} = _mm512_gf2p8affine_epi64_epi8(vb${N//16}, vshl4, 0);
+              const __m512i vh${N//16} = _mm512_and_si512(vb${N//16}, vmask);
+              _mm512_store_epi32(weight_buffer[0] + ${64*2} * k + 0, vl${N//16});
+              _mm512_store_epi32(weight_buffer[0] + ${64*2} * k + 64, vh${N//16});
+            }
+            _tile_loadd(7, weight_buffer[0], 64);
+            _tile_dpbssd(${N // 16}, 6, 7);
+          $else:
+            if XNN_LIKELY(nc > ${N}) {
+              for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+                const __m512i vb${N//16} = _mm512_load_epi32((const int8_t*) w + ${N * 4} + ${NR * 4} * k);
+                const __m512i vl${N//16} = _mm512_gf2p8affine_epi64_epi8(vb${N//16}, vshl4, 0);
+                const __m512i vh${N//16} = _mm512_and_si512(vb${N//16}, vmask);
+                _mm512_store_epi32(weight_buffer[0] + ${64*2} * k + 0, vl${N//16});
+                _mm512_store_epi32(weight_buffer[0] + ${64*2} * k + 64, vh${N//16});
+              }
+              _tile_loadd(7, weight_buffer[0], 64);
+              _tile_dpbssd(${N // 16}, 6, 7);
+            }
         $else:
-          _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-        _tile_dpbssd(${N // 16}, 6, 7);
+          $if N == 0:
+            _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
+            _tile_dpbssd(${N // 16}, 6, 7);
+          $else:
+            if XNN_LIKELY(nc > ${N}) {
+              _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpbssd(${N // 16}, 6, 7);
+            }
 
       $if DATATYPE in ["QC4_F32", "QC4_F16"]:
         w = (const int8_t*) w + ((kremainder + 7) >> 3) * ${NR * 4};
@@ -199,7 +230,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     // TODO: Instead of processing up to 4 tiles (16x64) consider
     // quantizing 1 tile at a time (16 registers)
     $for N in range(0, NR, 16):
-      _tile_stored(${N // 16}, &res[${N // 16}][0], 64);
+      $if N == 0:
+        _tile_stored(${N // 16}, &res[${N // 16}][0], 64);
+      $else:
+        if XNN_LIKELY(nc > ${N}) {
+          _tile_stored(${N // 16}, &res[${N // 16}][0], 64);
+        }
 
     // TODO: Fix msan for AMX
     #if defined(__has_feature)
@@ -227,80 +263,171 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     {
       $M_IDX = "0" if MR == 1 else "m"
       $ROW_OFFSET = "" if MR == 1 else " + m * 16"
-      $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-        const __m512i vzero_point = _mm512_set1_epi32((int) quantization_params[${M_IDX}].zero_point);
-        const __m512 vinv_scale = _mm512_set1_ps(quantization_params[${M_IDX}].inv_scale);
-        $for N in range(0, NR, 16):
-          __m512i vacc${N//16} = _mm512_mullo_epi32(vksum${N//16}, vzero_point);
-        // Add tile to bias
-        $for N in range(0, NR, 16):
-          vacc${N//16} = _mm512_add_epi32(vacc${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
-      $else:
-        // Add tile to bias
-        $for N in range(0, NR, 16):
-          __m512i vacc${N//16} = _mm512_add_epi32(vksum${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
-
-      $if DATATYPE in ["QC4_F32", "QC4_F16"]:
-        $for N in range(0, NR, 16):
-          vacc${N//16} = _mm512_srai_epi32(vacc${N//16}, 4);
-      $for N in range(0, NR, 16):
-        __m512 vscaled${N//16} = _mm512_cvtepi32_ps(vacc${N//16});
-
-      $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-        $for N in range(0, NR, 16):
-          vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vinv_scale);
-        $for N in range(0, NR, 16):
-          vscaled${N//16} = _mm512_fmadd_ps(vscaled${N//16}, vfilter_output_scale${N//16}, vbias${N//16});
-        $for N in range(0, NR, 16):
-          vscaled${N//16} = _mm512_max_ps(vscaled${N//16}, voutput_min);
-        $for N in range(0, NR, 16):
-          vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max);
-
-        $if DATATYPE in ["QC4_F16", "QD8_F16"]:
-          $for N in range(0, NR, 16):
-            __m256i vfp16out${N//16} = _mm512_cvtps_ph(vscaled${N//16}, _MM_FROUND_TO_NEAREST_INT);
-          if XNN_LIKELY(nc >= ${NR}) {
-            $for N in range(0, NR, 16):
-              _mm256_storeu_si256((__m256i*) (c0 + ${N}), vfp16out${N//16});
-          } else {
-            // Prepare mask for valid 32-bit elements (depends on nc).
-            $for N in range(0, NR, 16):
-              const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
-              _mm256_mask_storeu_epi16(c0 + ${N}, vmask${N // 16}, vfp16out${N//16});
-          }
-        $else:
-          if XNN_LIKELY(nc >= ${NR}) {
-            $for N in range(0, NR, 16):
-              _mm512_storeu_ps(c0 + ${N}, vscaled${N//16});
-          } else {
-            // Prepare mask for valid 32-bit elements (depends on nc).
-            $for N in range(0, NR, 16):
-              const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
-              _mm512_mask_storeu_ps(c0 + ${N}, vmask${N // 16}, vscaled${N//16});
-          }
-      $elif DATATYPE == "QC8":
-        $for N in range(0, NR, 16):
-          vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vscale${N//16});
-        $for N in range(0, NR, 16):
-          vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max_less_zero_point);
-        $for N in range(0, NR, 16):
-          vacc${N//16} = _mm512_cvtps_epi32(vscaled${N//16});
-        $for N in range(0, NR, 16):
-          vacc${N//16} = _mm512_add_epi32(vacc${N//16}, voutput_zero_point);
-        $for N in range(0, NR, 16):
-          __m128i vout${N//16} = ${_MM512_CVTXEPI32_EPI8}(vacc${N//16});
-        $for N in range(0, NR, 16):
-          vout${N//16} = ${_MM_MAX_EPX8}(vout${N//16}, voutput_min);
-
+      $if NR > 16:
+        $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+          const __m512i vzero_point = _mm512_set1_epi32((int) quantization_params[${M_IDX}].zero_point);
+          const __m512 vinv_scale = _mm512_set1_ps(quantization_params[${M_IDX}].inv_scale);
         if XNN_LIKELY(nc >= ${NR}) {
+          $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+            $for N in range(0, NR, 16):
+              __m512i vacc${N//16} = _mm512_mullo_epi32(vksum${N//16}, vzero_point);
+            // Add tile to bias
+            $for N in range(0, NR, 16):
+              vacc${N//16} = _mm512_add_epi32(vacc${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
+          $else:
+            // Add tile to bias
+            $for N in range(0, NR, 16):
+              __m512i vacc${N//16} = _mm512_add_epi32(vksum${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
+
+          $if DATATYPE in ["QC4_F32", "QC4_F16"]:
+            $for N in range(0, NR, 16):
+              vacc${N//16} = _mm512_srai_epi32(vacc${N//16}, 4);
           $for N in range(0, NR, 16):
-            _mm_storeu_si128((__m128i*) (c0 + ${N}), vout${N//16});
+            __m512 vscaled${N//16} = _mm512_cvtepi32_ps(vacc${N//16});
+
+          $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+            $for N in range(0, NR, 16):
+              vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vinv_scale);
+            $for N in range(0, NR, 16):
+              vscaled${N//16} = _mm512_fmadd_ps(vscaled${N//16}, vfilter_output_scale${N//16}, vbias${N//16});
+            $for N in range(0, NR, 16):
+              vscaled${N//16} = _mm512_max_ps(vscaled${N//16}, voutput_min);
+            $for N in range(0, NR, 16):
+              vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max);
+
+            $if DATATYPE in ["QC4_F16", "QD8_F16"]:
+              $for N in range(0, NR, 16):
+                __m256i vfp16out${N//16} = _mm512_cvtps_ph(vscaled${N//16}, _MM_FROUND_TO_NEAREST_INT);
+              $for N in range(0, NR, 16):
+                _mm256_storeu_si256((__m256i*) (c0 + ${N}), vfp16out${N//16});
+            $else:
+              $for N in range(0, NR, 16):
+                _mm512_storeu_ps(c0 + ${N}, vscaled${N//16});
+          $elif DATATYPE == "QC8":
+            $for N in range(0, NR, 16):
+              vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vscale${N//16});
+            $for N in range(0, NR, 16):
+              vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max_less_zero_point);
+            $for N in range(0, NR, 16):
+              vacc${N//16} = _mm512_cvtps_epi32(vscaled${N//16});
+            $for N in range(0, NR, 16):
+              vacc${N//16} = _mm512_add_epi32(vacc${N//16}, voutput_zero_point);
+            $for N in range(0, NR, 16):
+              __m128i vout${N//16} = ${_MM512_CVTXEPI32_EPI8}(vacc${N//16});
+            $for N in range(0, NR, 16):
+              vout${N//16} = ${_MM_MAX_EPX8}(vout${N//16}, voutput_min);
+            $for N in range(0, NR, 16):
+              _mm_storeu_si128((__m128i*) (c0 + ${N}), vout${N//16});
         } else {
-          // Prepare mask for valid 8-bit elements (depends on nc).
           $for N in range(0, NR, 16):
-            const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
-            _mm_mask_storeu_epi8(c0 + ${N}, vmask${N // 16}, vout${N//16});
+            $if N > 0:
+              if (nc > ${N}) {
+            $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+              __m512i vacc${N//16} = _mm512_mullo_epi32(vksum${N//16}, vzero_point);
+              vacc${N//16} = _mm512_add_epi32(vacc${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
+            $else:
+              __m512i vacc${N//16} = _mm512_add_epi32(vksum${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
+            $if DATATYPE in ["QC4_F32", "QC4_F16"]:
+              vacc${N//16} = _mm512_srai_epi32(vacc${N//16}, 4);
+            __m512 vscaled${N//16} = _mm512_cvtepi32_ps(vacc${N//16});
+            $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+              vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vinv_scale);
+              vscaled${N//16} = _mm512_fmadd_ps(vscaled${N//16}, vfilter_output_scale${N//16}, vbias${N//16});
+              vscaled${N//16} = _mm512_max_ps(vscaled${N//16}, voutput_min);
+              vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max);
+              const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+              $if DATATYPE in ["QC4_F16", "QD8_F16"]:
+                __m256i vfp16out${N//16} = _mm512_cvtps_ph(vscaled${N//16}, _MM_FROUND_TO_NEAREST_INT);
+                _mm256_mask_storeu_epi16(c0 + ${N}, vmask${N // 16}, vfp16out${N//16});
+              $else:
+                _mm512_mask_storeu_ps(c0 + ${N}, vmask${N // 16}, vscaled${N//16});
+            $elif DATATYPE == "QC8":
+              vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vscale${N//16});
+              vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max_less_zero_point);
+              vacc${N//16} = _mm512_cvtps_epi32(vscaled${N//16});
+              vacc${N//16} = _mm512_add_epi32(vacc${N//16}, voutput_zero_point);
+              __m128i vout${N//16} = ${_MM512_CVTXEPI32_EPI8}(vacc${N//16});
+              vout${N//16} = ${_MM_MAX_EPX8}(vout${N//16}, voutput_min);
+              const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+              _mm_mask_storeu_epi8(c0 + ${N}, vmask${N // 16}, vout${N//16});
+            $if N > 0:
+              }
         }
+      $else:
+        $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+          const __m512i vzero_point = _mm512_set1_epi32((int) quantization_params[${M_IDX}].zero_point);
+          const __m512 vinv_scale = _mm512_set1_ps(quantization_params[${M_IDX}].inv_scale);
+          $for N in range(0, NR, 16):
+            __m512i vacc${N//16} = _mm512_mullo_epi32(vksum${N//16}, vzero_point);
+          // Add tile to bias
+          $for N in range(0, NR, 16):
+            vacc${N//16} = _mm512_add_epi32(vacc${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
+        $else:
+          // Add tile to bias
+          $for N in range(0, NR, 16):
+            __m512i vacc${N//16} = _mm512_add_epi32(vksum${N//16}, _mm512_load_epi32(&res[${N // 16}][0]${ROW_OFFSET}));
+
+        $if DATATYPE in ["QC4_F32", "QC4_F16"]:
+          $for N in range(0, NR, 16):
+            vacc${N//16} = _mm512_srai_epi32(vacc${N//16}, 4);
+        $for N in range(0, NR, 16):
+          __m512 vscaled${N//16} = _mm512_cvtepi32_ps(vacc${N//16});
+
+        $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+          $for N in range(0, NR, 16):
+            vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vinv_scale);
+          $for N in range(0, NR, 16):
+            vscaled${N//16} = _mm512_fmadd_ps(vscaled${N//16}, vfilter_output_scale${N//16}, vbias${N//16});
+          $for N in range(0, NR, 16):
+            vscaled${N//16} = _mm512_max_ps(vscaled${N//16}, voutput_min);
+          $for N in range(0, NR, 16):
+            vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max);
+
+          $if DATATYPE in ["QC4_F16", "QD8_F16"]:
+            $for N in range(0, NR, 16):
+              __m256i vfp16out${N//16} = _mm512_cvtps_ph(vscaled${N//16}, _MM_FROUND_TO_NEAREST_INT);
+            if XNN_LIKELY(nc >= ${NR}) {
+              $for N in range(0, NR, 16):
+                _mm256_storeu_si256((__m256i*) (c0 + ${N}), vfp16out${N//16});
+            } else {
+              // Prepare mask for valid 32-bit elements (depends on nc).
+              $for N in range(0, NR, 16):
+                const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+                _mm256_mask_storeu_epi16(c0 + ${N}, vmask${N // 16}, vfp16out${N//16});
+            }
+          $else:
+            if XNN_LIKELY(nc >= ${NR}) {
+              $for N in range(0, NR, 16):
+                _mm512_storeu_ps(c0 + ${N}, vscaled${N//16});
+            } else {
+              // Prepare mask for valid 32-bit elements (depends on nc).
+              $for N in range(0, NR, 16):
+                const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+                _mm512_mask_storeu_ps(c0 + ${N}, vmask${N // 16}, vscaled${N//16});
+            }
+        $elif DATATYPE == "QC8":
+          $for N in range(0, NR, 16):
+            vscaled${N//16} = _mm512_mul_ps(vscaled${N//16}, vscale${N//16});
+          $for N in range(0, NR, 16):
+            vscaled${N//16} = _mm512_min_ps(vscaled${N//16}, voutput_max_less_zero_point);
+          $for N in range(0, NR, 16):
+            vacc${N//16} = _mm512_cvtps_epi32(vscaled${N//16});
+          $for N in range(0, NR, 16):
+            vacc${N//16} = _mm512_add_epi32(vacc${N//16}, voutput_zero_point);
+          $for N in range(0, NR, 16):
+            __m128i vout${N//16} = ${_MM512_CVTXEPI32_EPI8}(vacc${N//16});
+          $for N in range(0, NR, 16):
+            vout${N//16} = ${_MM_MAX_EPX8}(vout${N//16}, voutput_min);
+
+          if XNN_LIKELY(nc >= ${NR}) {
+            $for N in range(0, NR, 16):
+              _mm_storeu_si128((__m128i*) (c0 + ${N}), vout${N//16});
+          } else {
+            // Prepare mask for valid 8-bit elements (depends on nc).
+            $for N in range(0, NR, 16):
+              const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+              _mm_mask_storeu_epi8(c0 + ${N}, vmask${N // 16}, vout${N//16});
+          }
       $if MR > 1:
         c0 = (${OUT_T}*) ((uintptr_t) c0 + cm_stride);
     }

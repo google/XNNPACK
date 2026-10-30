@@ -35,7 +35,7 @@ void xnn_qu8_rsum_ukernel__rvv_u1v(
     vuint8m1_t vinput = __riscv_vle8_v_u8m1(input, vl); input += vl;
     vuint16m2_t vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);
 
-    vsum = __riscv_vwaddu_wv_u32m4(vsum, vinput16, vl);
+    vsum = __riscv_vwaddu_wv_u32m4_tu(vsum, vsum, vinput16, vl);
 
   } while (batch != 0);
 

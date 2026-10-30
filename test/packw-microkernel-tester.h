@@ -97,6 +97,15 @@ class PackWMicrokernelTester {
     return this->n_stride_ == 0 ? k() : this->n_stride_;
   }
 
+  PackWMicrokernelTester& k_stride(size_t k_stride) {
+    this->k_stride_ = k_stride;
+    return *this;
+  }
+
+  size_t k_stride() const {
+    return this->k_stride_ == 0 ? n() : this->k_stride_;
+  }
+
   PackWMicrokernelTester& bl(size_t bl) {
     this->bl_ = bl;
     return *this;
@@ -558,10 +567,11 @@ class PackWMicrokernelTester {
     xnnpack::Buffer<xnn_float16> packed_w_ref(
         g() * (packed_n() * packed_k() + packed_n()));
 
-    const xnn_float16 pad_value =
-        xnn_float16_from_bits(std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0);
+    const xnn_float16 pad_value = xnn_float16_from_bits(UINT16_C(0xDEAD));
     std::iota(weights.begin(), weights.end(), 1.0f);
     std::iota(bias.begin(), bias.end(), 0.5f);
+    std::fill(packed_w.begin(), packed_w.end(),
+              xnn_float16_from_bits(UINT16_C(0x1234)));
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
 
     // Mandate zero-padding of weights to packed_k() in K dimension.
@@ -801,8 +811,8 @@ class PackWMicrokernelTester {
   }
 
   void TestGIO(xnn_x16_packw_gemm_gio_ukernel_fn packw) const {
-    xnnpack::Buffer<uint16_t> weights(g() * n() * k());
-    xnnpack::Buffer<uint16_t> padded_weights(g() * n() * packed_k());
+    xnnpack::Buffer<uint16_t> weights(g() * k() * k_stride());
+    xnnpack::Buffer<uint16_t> padded_weights(g() * packed_k() * k_stride());
     xnnpack::Buffer<uint16_t> bias(g() * n());
     xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
         g() * (packed_n() * packed_k() + packed_n()));
@@ -817,29 +827,30 @@ class PackWMicrokernelTester {
 
     std::fill(padded_weights.begin(), padded_weights.end(), 0);
     for (size_t gid = 0; gid < g(); gid++) {
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t j = 0; j < k(); j++) {
-          padded_weights[(gid * n() + i) * packed_k() + j] =
-              weights[(gid * n() + i) * k() + j];
+      for (size_t j = 0; j < k(); j++) {
+        for (size_t i = 0; i < n(); i++) {
+          padded_weights[(gid * packed_k() + j) * k_stride() + i] =
+              weights[(gid * k() + j) * k_stride() + i];
         }
       }
     }
 
     const uint16_t* bias_data = nullbias() ? nullptr : bias.data();
 
-    xnn_pack_f16_gemm_gio_w(g(), n(), packed_k(), nr(), kr(), sr(), n(),
+    xnn_pack_f16_gemm_gio_w(g(), n(), packed_k(), nr(), kr(), sr(), k_stride(),
                             padded_weights.data(), bias_data,
                             /*scale=*/nullptr, packed_w_ref.data(),
                             /*extra_bytes=*/0, /*params=*/nullptr);
 
-    packw(g(), n(), k(), nr(), kr(), sr(), n(), weights.data(), bias_data,
-          /*scale=*/nullptr, packed_w.data(),
+    packw(g(), n(), k(), nr(), kr(), sr(), k_stride(), weights.data(),
+          bias_data, /*scale=*/nullptr, packed_w.data(),
           /*extra_bytes=*/0, /*params=*/nullptr);
 
     for (size_t i = 0; i < packed_w.size(); i++) {
       if (packed_w_ref[i] != pad_value) {
         ASSERT_EQ(packed_w[i], packed_w_ref[i])
-            << "at position " << i << " / " << packed_w.size();
+            << "at position " << i << " / " << packed_w.size() << ", n " << n()
+            << ", k " << k();
       }
     }
   }
@@ -986,6 +997,7 @@ class PackWMicrokernelTester {
   size_t sr_{1};
   size_t k_{1};
   size_t n_stride_{0};
+  size_t k_stride_{0};
   size_t bl_{1};
   bool nullbias_{false};
   size_t izp_{0};

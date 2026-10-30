@@ -32,17 +32,27 @@ inline bool isfinite(int x) { return true; }
 #endif  // _MSC_VER
 
 // std::min/std::max don't handle NaN correctly, these do.
-// These works because if a or b is NaN, a < b is false. If b is NaN, that's
+// These work because if a or b is NaN, a < b is false. If b is NaN, that's
 // fine, we were going to return that anyways, but if a is NaN, we need to
 // return a.
 template <typename T>
 T min(T a, T b) {
+#ifdef YNN_ARCH_HEXAGON
+  // Work around a Hexagon Clang bug that lowers `a < b ? a : b` to `sfmin`,
+  // which returns `a` when `b` is NaN.
+  return (a < b && !isnan(b)) || isnan(a) ? a : b;
+#else
   return a < b || isnan(a) ? a : b;
+#endif  // YNN_ARCH_HEXAGON
 }
 
 template <typename T>
 T max(T a, T b) {
+#ifdef YNN_ARCH_HEXAGON
+  return (a > b && !isnan(b)) || isnan(a) ? a : b;
+#else
   return a > b || isnan(a) ? a : b;
+#endif  // YNN_ARCH_HEXAGON
 }
 
 template <typename T>

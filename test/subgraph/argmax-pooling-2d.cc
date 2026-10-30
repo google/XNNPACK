@@ -175,6 +175,46 @@ void TestImpl() {
 TEST(ArgMaxPooling2DF32, test) { TestImpl<float>(); }
 
 #ifndef XNNPACK_USE_YNNPACK
+static xnn_status DefineArgMaxPooling2D(xnn_subgraph_t subgraph) {
+  return xnn_define_argmax_pooling_2d(
+      subgraph, /*input_padding_top=*/0, /*input_padding_right=*/0,
+      /*input_padding_bottom=*/0, /*input_padding_left=*/0,
+      /*pooling_height=*/2, /*pooling_width=*/2, /*input_id=*/0,
+      /*output_value_id=*/1, /*output_index_id=*/2, /*flags=*/0);
+}
+
+TEST(ArgMaxPooling2D, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp16, 0)
+      .AddOutputTensor(4, xnn_datatype_fp16, 1)
+      .AddOutputTensor(4, xnn_datatype_int32, 2);
+  EXPECT_EQ(DefineArgMaxPooling2D(subgraph.Subgraph()),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(ArgMaxPooling2D, DefineRejectsUnsupportedOutputValueDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddOutputTensor(4, xnn_datatype_fp16, 1)
+      .AddOutputTensor(4, xnn_datatype_int32, 2);
+  EXPECT_EQ(DefineArgMaxPooling2D(subgraph.Subgraph()),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(ArgMaxPooling2D, DefineRejectsZeroPoolingSize) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddOutputTensor(4, xnn_datatype_fp32, 1)
+      .AddOutputTensor(4, xnn_datatype_int32, 2);
+  EXPECT_EQ(xnn_define_argmax_pooling_2d(
+                subgraph.Subgraph(), /*input_padding_top=*/0,
+                /*input_padding_right=*/0, /*input_padding_bottom=*/0,
+                /*input_padding_left=*/0, /*pooling_height=*/2,
+                /*pooling_width=*/0, /*input_id=*/0, /*output_value_id=*/1,
+                /*output_index_id=*/2, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
 TEST(ArgMaxPooling2D, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 

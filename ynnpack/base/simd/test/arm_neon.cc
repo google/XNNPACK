@@ -199,8 +199,8 @@ TEST_EXTRACT(arm_neon, u8x16, 8);
 TEST_CONCAT(arm_neon, u8x8);
 
 #ifdef YNN_ARCH_ARM64
-TEST_UNARY(arm_neon, exp, bf16, 4, std::exp, 2);
-TEST_UNARY(arm_neon, exp, f32, 4, std::exp, 2);
+TEST_UNARY(arm_neon, exp, bf16, 4, std::exp, 1);
+TEST_UNARY(arm_neon, exp, f32, 4, std::exp, 1);
 #else
 // TODO: b/515053903 - 32-bit ARM does something weird here.
 #endif

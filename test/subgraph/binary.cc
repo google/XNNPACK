@@ -505,6 +505,41 @@ TEST(Binary, ReshapeOverflowInput2Elements) {
   const enum xnn_status reshape_status = xnn_reshape_runtime(runtime);
   EXPECT_EQ(xnn_status_invalid_parameter, reshape_status);
 }
+
+// Returns the status of defining a binary node whose inputs and output are
+// all `datatype` values.
+xnn_status DefineBinary(xnn_binary_operator op, xnn_datatype datatype) {
+  SubgraphTester tester(/*external_value_ids=*/0);
+  uint32_t input1_id, input2_id, output_id;
+  tester.AddInternalDynamicTensor({2, 3}, datatype, &input1_id)
+      .AddInternalDynamicTensor({2, 3}, datatype, &input2_id)
+      .AddInternalDynamicTensor({2, 3}, datatype, &output_id);
+  return xnn_define_binary(tester.Subgraph(), op, nullptr, input1_id, input2_id,
+                           output_id, /*flags=*/0);
+}
+
+TEST(Binary, DefineInvalidOperator) {
+  EXPECT_EQ(DefineBinary(xnn_binary_invalid, xnn_datatype_fp32),
+            xnn_status_invalid_parameter);
+  EXPECT_EQ(DefineBinary(static_cast<xnn_binary_operator>(
+                             xnn_binary_shift_right_arithmetic + 1),
+                         xnn_datatype_fp32),
+            xnn_status_invalid_parameter);
+}
+
+TEST(Binary, DefineUnsupportedDatatype) {
+  EXPECT_EQ(DefineBinary(xnn_binary_bitwise_and, xnn_datatype_fp32),
+            xnn_status_unsupported_parameter);
+  EXPECT_EQ(DefineBinary(xnn_binary_atan2, xnn_datatype_int32),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Binary, DefineSupportedDatatype) {
+  EXPECT_EQ(DefineBinary(xnn_binary_bitwise_and, xnn_datatype_int32),
+            xnn_status_success);
+  EXPECT_EQ(DefineBinary(xnn_binary_atan2, xnn_datatype_fp32),
+            xnn_status_success);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

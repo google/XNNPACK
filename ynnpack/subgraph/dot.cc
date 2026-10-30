@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -1083,8 +1084,10 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   // use data we load from either side.
   // - Tasks shouldn't be too small, to avoid parallelism overhead.
   // - Tasks shouldn't be too large, so we get enough parallelism.
+  const index_t max_tiles_1d = 32;
+  const index_t min_tile = std::max<index_t>(std::min(m, n) / max_tiles_1d, 64);
   const index_t min_area_2d =
-      std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
+      std::min<index_t>(m, min_tile) * std::min<index_t>(n, min_tile);
   const index_t min_area_1d = 256;
   const index_t min_area = std::max<index_t>(min_area_2d, min_area_1d);
   const index_t max_area = 256 * 256;
@@ -1353,6 +1356,7 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // the fly as if B were dynamic).
     return true;
   }
+
   const int block_m = unpacked_kernel.block_m;
   slinky::expr a_batch = 1;
   slinky::expr b_batch = 1;
@@ -1367,7 +1371,45 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   slinky::expr blocks_m =
       slinky::ceil_div<slinky::expr>(a.extent(num_k_dims), block_m);
 
-  if (slinky::prove_true(blocks_m * a_batch <= b_batch * 10)) {
+  // Assuming that the cost of packing is comparable to the cost of the packed
+  // dot, how many blocks should we allow to be unpacked?
+  int max_unpacked_blocks = 1;
+  if (kernel.cost > 0.0f && unpacked_kernel.cost > kernel.cost) {
+    const float relative_penalty =
+        (unpacked_kernel.cost - kernel.cost) / kernel.cost;
+    max_unpacked_blocks =
+        std::clamp<int>(std::round(1.0f / relative_penalty), 1, 10);
+  } else {
+    max_unpacked_blocks = 10;
+  }
+
+  // The packing cost is not the only thing we need to consider. The logic so
+  // far assumes that memory bandwidth is similar in both cases. However, the
+  // loads of unpacked data are strided.
+  const int b_elem_size = type_size_bytes(b.type);
+  const int block_n = unpacked_kernel.block_n;
+  if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
+    slinky::expr b_bytes = b_batch * b_elem_size;
+    for (size_t i = 0; i < num_k_dims + 1; ++i) {
+      if (b.extent(i).defined()) b_bytes *= b.extent(i);
+    }
+
+    const slinky::index_t cache_budget = get_dot_cache_budgets()[1];
+
+    // The kernel doesn't load whole cache lines. This can require much more
+    // memory bandwidth than the packed case.
+    if (!slinky::prove_true(b_bytes < cache_budget || b.extent(0) <= block_n)) {
+      // B doesn't fit in cache, we should pack if we load it more than once.
+      max_unpacked_blocks = 1;
+    }
+  }
+
+  // TODO: b/579134224 - Some CPUs perform very poorly with the large strided
+  // loads of B in the unpacked case. It generally seems like newer CPUs do well
+  // while older CPUs perform poorly. For now, we optimize for the newer CPU
+  // case by not reducing `max_unpacked_blocks` for large B.
+
+  if (slinky::prove_true(blocks_m * a_batch <= b_batch * max_unpacked_blocks)) {
     // A is small relative to B, we should not bother packing B because we're
     // not going to read it very much, and packing itself costs a read of B.
     return false;
@@ -1483,6 +1525,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   uint32_t packed_b_id = input_b_id;
   if (pack_b) {
     packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims, input_b_id);
+  } else {
+    kernel = unpacked_kernel;
   }
 
   ynn_node node;
@@ -1559,9 +1603,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size, unpacked_kernel.block_n);
   // Estimate the throughput of the kernel we expect to run from its cost model
   // (for the shape it was selected for), to decide how small tasks can be.
-  const dot_kernel& expected_kernel = pack_b ? kernel : unpacked_kernel;
   const float seconds_per_mac =
-      expected_kernel.cost /
+      kernel.cost /
       (static_cast<float>(std::max<size_t>(1, shape.m)) *
        std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
   node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,

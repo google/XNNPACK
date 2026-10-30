@@ -37,7 +37,7 @@ void xnn_f16_f32acc_rsum_ukernel__rvvfp16arith_u2v(
 
     vfloat16m2_t vinput = __riscv_vle16_v_f16m2(input, vl); input += vl;
 
-    vsum = __riscv_vfwadd_wv(vsum, vinput, vl);
+    vsum = __riscv_vfwadd_wv_f32m4_tu(vsum, vsum, vinput, vl);
 
   } while (batch > 0);
 

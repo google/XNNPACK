@@ -772,6 +772,7 @@ jobs:
         --define=xnn_enable_avx256vnni=false
         --define=xnn_enable_avxvnniint8=false
         --define=xnn_enable_avx512amx=false
+        --define=xnn_enable_avx512amxfp16=false
         --define=xnn_enable_avx512fp16=false
         --define=xnn_enable_avx512bf16=false
         --define=xnn_enable_avx512vnni=false

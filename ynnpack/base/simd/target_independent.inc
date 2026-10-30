@@ -192,8 +192,10 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor1(vec<T, N> x, const P& p,
   auto r = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
   r = multiply_add(b, broadcast<N>(-ln2_lo), r);
 
-  // Compute 2^b.
-  auto exp2_b = exp2_round(b);
+  // Compute 2^b, avoiding overflow if b is the max exponent. We double the
+  // result below in this case (the missing factor of 2).
+  constexpr T max_b = static_cast<T>(std::numeric_limits<T>::max_exponent - 1);
+  auto exp2_b = exp2_round(min(b, max_b));
   exp2_b = select(isnan(x), x, exp2_b);
 
   auto exp2_r = eval_polynomial(p, r) * r;
@@ -203,7 +205,7 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor1(vec<T, N> x, const P& p,
   // 2^b = m we keep the low bits of the result.
   auto exp_x =
       multiply_add(exp2_b, exp2_r, exp2_b - broadcast<N>(static_cast<T>(m)));
-  return select(isinf(exp2_b), exp2_b, exp_x);
+  return select(b > broadcast<N>(max_b), exp_x + exp_x, exp_x);
 }
 
 // Implements exp(x) (m = 0) or expm1(x) (m = 1), given a polynomial
@@ -222,8 +224,10 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
   auto r = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
   r = multiply_add(b, broadcast<N>(-ln2_lo), r);
 
-  // Compute 2^b.
-  auto exp2_b = exp2_round(b);
+  // Compute 2^b, avoiding overflow if b is the max exponent. We double the
+  // result below in this case (the missing factor of 2).
+  constexpr T max_b = static_cast<T>(std::numeric_limits<T>::max_exponent - 1);
+  auto exp2_b = exp2_round(min(b, max_b));
   exp2_b = select(isnan(x), x, exp2_b);
 
   auto r2 = r * r;
@@ -236,7 +240,7 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
   // 2^b = m we keep the low bits of the result.
   auto exp_x =
       multiply_add(exp2_b, exp2_r, exp2_b - broadcast<N>(static_cast<T>(m)));
-  return select(isinf(exp2_b), exp2_b, exp_x);
+  return select(b > broadcast<N>(max_b), exp_x + exp_x, exp_x);
 }
 
 // TODO: b/515053903 - We should be able to make an `exp_impl` that works with
@@ -298,7 +302,7 @@ static vec<double, N> exp_impl(vec<double, N> x) {
   constexpr double ln2_hi = 6.93147180369123816490e-01;
   constexpr double ln2_lo = 1.90821492927058770002e-10;
   constexpr double min_x = -709.0895657128241;
-  constexpr double max_x = 709.782712893384;
+  constexpr double max_x = 709.78271289338409;
 
   return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }

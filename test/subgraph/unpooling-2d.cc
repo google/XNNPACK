@@ -154,6 +154,46 @@ TEST(Unpooling2D, reshape_rejects_index_shape_mismatch) {
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
 
+static xnn_status DefineUnpooling2D(xnn_subgraph_t subgraph) {
+  return xnn_define_unpooling_2d(
+      subgraph, /*padding_top=*/0, /*padding_right=*/0,
+      /*padding_bottom=*/0, /*padding_left=*/0, /*pooling_height=*/2,
+      /*pooling_width=*/2, /*input_value_id=*/0, /*input_index_id=*/1,
+      /*output_id=*/2, /*flags=*/0);
+}
+
+TEST(Unpooling2D, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp16, 0)
+      .AddInputTensor(4, xnn_datatype_int32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp16, 2);
+  EXPECT_EQ(DefineUnpooling2D(subgraph.Subgraph()),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Unpooling2D, DefineRejectsUnsupportedOutputDatatype) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(4, xnn_datatype_int32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp16, 2);
+  EXPECT_EQ(DefineUnpooling2D(subgraph.Subgraph()),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Unpooling2D, DefineRejectsZeroPoolingSize) {
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(4, xnn_datatype_int32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp32, 2);
+  EXPECT_EQ(xnn_define_unpooling_2d(
+                subgraph.Subgraph(), /*padding_top=*/0, /*padding_right=*/0,
+                /*padding_bottom=*/0, /*padding_left=*/0,
+                /*pooling_height=*/0, /*pooling_width=*/2,
+                /*input_value_id=*/0, /*input_index_id=*/1, /*output_id=*/2,
+                /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
 TEST(Unpooling2D, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -327,7 +367,10 @@ TEST(Unpooling2D, ReshapeOverflowOutputSize) {
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);
 
-  const size_t large_dim = (SIZE_MAX / (4 * 4 * 2 * sizeof(float))) + 1;
+  // Large enough that the 2x2 indirection buffer (4 * 2 * 2 pointers per batch)
+  // also overflows, so reshape fails without attempting a huge allocation on
+  // 32-bit targets.
+  const size_t large_dim = (SIZE_MAX / (4 * 2 * 2 * sizeof(void*))) + 1;
   runtime->values[input_id].shape.num_dims = 4;
   runtime->values[input_id].shape.dim[0] = large_dim;
   runtime->values[input_id].shape.dim[1] = 2;

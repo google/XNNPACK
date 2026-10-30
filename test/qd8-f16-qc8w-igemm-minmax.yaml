@@ -8,10 +8,6 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 64
-- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 64
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w

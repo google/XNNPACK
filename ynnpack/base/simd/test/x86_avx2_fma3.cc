@@ -23,9 +23,9 @@ class x86_avx2_fma3 : public ::testing::Test {
   }
 };
 
-TEST_UNARY(x86_avx2_fma3, exp, bf16, 16, std::exp, 2);
-TEST_UNARY(x86_avx2_fma3, exp, f32, 8, std::exp, 2);
-TEST_UNARY(x86_avx2_fma3, exp, f64, 4, std::exp, 2);
+TEST_UNARY(x86_avx2_fma3, exp, bf16, 16, std::exp, 1);
+TEST_UNARY(x86_avx2_fma3, exp, f32, 8, std::exp, 1);
+TEST_UNARY(x86_avx2_fma3, exp, f64, 4, std::exp, 1);
 TEST_UNARY(x86_avx2_fma3, expm1, bf16, 16, std::expm1, 2);
 TEST_UNARY(x86_avx2_fma3, expm1, f32, 8, std::expm1, 2);
 TEST_UNARY(x86_avx2_fma3, expm1, f64, 4, std::expm1, 2);

@@ -171,8 +171,6 @@ TEST_P(InputOutput, SlidingWindow) {
   Tensor<float> output(dims);
   subgraph.SetupExternalTensor(output.base(), output_id).SetupRuntime();
 
-  // We should start out with a buffer of zeros.
-  std::vector<float> expected(dims.front(), 0.0f);
   for (size_t t = 0; t < slices * 2; ++t) {
     std::fill(input.begin(), input.end(), static_cast<float>(t));
     subgraph.InvokeRuntime();

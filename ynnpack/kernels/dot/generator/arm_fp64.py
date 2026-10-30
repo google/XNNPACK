@@ -18,18 +18,29 @@ class arm_neon_fp64(arm_neon):
     self.a_type = "double"
     self.b_type = "double"
     self.flags += ["dot_flag::consistent_arithmetic"]
+    self.flags += ["dot_flag::unaligned_b"]
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    a_ptr = self.a_ptr(i, k)
-    if nk == 1:
-      return f"float64x2_t a_{i}_{k} = vdupq_n_f64(*{a_ptr});\n"
-    elif k % 2 == 0:
-      return f"float64x2_t a_{i}_{k} = vld1q_f64({a_ptr});\n"
-    else:
-      return ""
+  def b_alignment_bytes(self):
+    return 8
+
+  def load_a_tile(self, i, k):
+    if k % 2 == 0:
+      return f"float64x2_t a_{i}_{k} = vld1q_f64({self.a_ptr(i, k)});\n"
+    return ""
+
+  def load_a_tile_tail(self, i, k):
+    return f"float64x2_t a_{i}_{k} = vdupq_n_f64(*{self.a_ptr(i, k)});\n"
 
   def load_b_tile(self, k, j):
     return f"float64x2_t b_{k}_{j} = vld1q_f64({self.b_ptr(k, j)});\n"
+
+  def load_b_tile_tail(self, k, j):
+    ptr = self.b_ptr(k, j)
+    size = f"min(sizeof(float64x2_t), sub_sat(N, {j}) * sizeof(double))"
+    return f"""\
+float64x2_t b_{k}_{j} = vdupq_n_f64(0.0);
+std::memcpy(&b_{k}_{j}, {ptr}, {size});
+"""
 
 
 class arm64_neon_fp64(arm_neon_fp64):

@@ -43,7 +43,7 @@ YNN_INTRINSIC __m{self.bits}d unaligned_load_broadcast(const double* ptr) {{
   def load_b_tile(self, k, j):
     return (
         f"__m{self.bits}d b_{k}_{j} ="
-        f" {self._mm()}_load_pd({self.b_ptr(k, j)});\n"
+        f" {self._mm()}_loadu_pd({self.b_ptr(k, j)});\n"
     )
 
   def product(self, i, j, k):
@@ -61,12 +61,13 @@ class x86_avx_fp64(x86_fp64, x86_avx):
 
   def load_b_tile(self, k, j):
     ptr = self.b_ptr(k, j)
-    if self.n != "N":
-      return f"__m256d b_{k}_{j} = _mm256_loadu_pd({ptr});\n"
-    else:
-      mask_ptr = f"&mask_table[sub_sat(8, sub_sat({self.n}, {j}) * 2)"
-      mask = f"_mm256_loadu_si256((const __m256i*) {mask_ptr}])"
-      return f"__m256d b_{k}_{j} = _mm256_maskload_pd({ptr}, {mask});\n"
+    return f"__m256d b_{k}_{j} = _mm256_loadu_pd({ptr});\n"
+
+  def load_b_tile_tail(self, k, j):
+    ptr = self.b_ptr(k, j)
+    mask_ptr = f"&mask_table[sub_sat(8, sub_sat(N, {j}) * 2)"
+    mask = f"_mm256_loadu_si256((const __m256i*) {mask_ptr}])"
+    return f"__m256d b_{k}_{j} = _mm256_maskload_pd({ptr}, {mask});\n"
 
 
 class x86_fma3_fp64(x86_avx_fp64):
@@ -90,15 +91,16 @@ class x86_avx512_fp64(x86_fp64, x86_avx512):
     return 8
 
   def load_b_tile(self, k, j):
+    ptr = self.b_ptr(k, j)
+    return f"__m512d b_{k}_{j} = _mm512_loadu_pd({ptr});\n"
+
+  def load_b_tile_tail(self, k, j):
     mm = self._mm()
     ptr = self.b_ptr(k, j)
-    if self.n != "N":
-      return f"__m512d b_{k}_{j} = _mm512_loadu_pd({ptr});\n"
-    else:
-      zero = "_mm512_setzero_pd()"
-      mask = f"(uint32_t)((1 << min(8, sub_sat({self.n}, {j}))) - 1)"
-      mask = f"_cvtu32_mask16({mask})"
-      return f"__m512d b_{k}_{j} = {mm}_mask_loadu_pd({zero}, {mask}, {ptr});\n"
+    zero = "_mm512_setzero_pd()"
+    mask = f"(uint32_t)((1 << min(8, sub_sat(N, {j}))) - 1)"
+    mask = f"_cvtu32_mask16({mask})"
+    return f"__m512d b_{k}_{j} = {mm}_mask_loadu_pd({zero}, {mask}, {ptr});\n"
 
   def product(self, i, j, k):
     return (

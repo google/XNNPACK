@@ -54,4 +54,19 @@ tools/xngen src/x16-packw/avx512skx.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=16 -o 
 tools/xngen src/x16-packw/avx512skx.c.in -D NR=64 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16.c &
 tools/xngen src/x16-packw/avx512skx.c.in -D NR=64 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16-prfm.c &
 
+### C2 packing for AMX-FP16
+tools/xngen src/x16-packw/c2-avx512skx.c.in -D NR=16 -D KR=2 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x16c2-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/c2-avx512skx.c.in -D NR=16 -D KR=2 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x16c2-gemm-goi-avx512skx-u16-prfm.c &
+tools/xngen src/x16-packw/c2-avx512skx.c.in -D NR=32 -D KR=2 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x32c2-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/c2-avx512skx.c.in -D NR=32 -D KR=2 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x32c2-gemm-goi-avx512skx-u16-prfm.c &
+tools/xngen src/x16-packw/c2-avx512skx.c.in -D NR=64 -D KR=2 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64c2-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/c2-avx512skx.c.in -D NR=64 -D KR=2 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64c2-gemm-goi-avx512skx-u16-prfm.c &
+
+tools/xngen src/x16-packw/gio-c2-avx512skx.c.in -D NR=16 -D KR=2 -D PREFETCH=0 -D KBLOCK=2 -o src/x16-packw/gen/x16-packw-x16c2-gemm-gio-avx512skx-u2.c &
+tools/xngen src/x16-packw/gio-c2-avx512skx.c.in -D NR=16 -D KR=2 -D PREFETCH=1 -D KBLOCK=2 -o src/x16-packw/gen/x16-packw-x16c2-gemm-gio-avx512skx-u2-prfm.c &
+tools/xngen src/x16-packw/gio-c2-avx512skx.c.in -D NR=32 -D KR=2 -D PREFETCH=0 -D KBLOCK=2 -o src/x16-packw/gen/x16-packw-x32c2-gemm-gio-avx512skx-u2.c &
+tools/xngen src/x16-packw/gio-c2-avx512skx.c.in -D NR=32 -D KR=2 -D PREFETCH=1 -D KBLOCK=2 -o src/x16-packw/gen/x16-packw-x32c2-gemm-gio-avx512skx-u2-prfm.c &
+tools/xngen src/x16-packw/gio-c2-avx512skx.c.in -D NR=64 -D KR=2 -D PREFETCH=0 -D KBLOCK=2 -o src/x16-packw/gen/x16-packw-x64c2-gemm-gio-avx512skx-u2.c &
+tools/xngen src/x16-packw/gio-c2-avx512skx.c.in -D NR=64 -D KR=2 -D PREFETCH=1 -D KBLOCK=2 -o src/x16-packw/gen/x16-packw-x64c2-gemm-gio-avx512skx-u2-prfm.c &
+
 wait

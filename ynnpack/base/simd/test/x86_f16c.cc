@@ -26,7 +26,7 @@ class x86_f16c : public ::testing::Test {
 TEST_CAST(x86_f16c, f32, f16x8);
 TEST_CAST(x86_f16c, f32, f16x16);
 
-TEST_UNARY(x86_f16c, exp, f16, 16, std::exp, 2);
+TEST_UNARY(x86_f16c, exp, f16, 16, std::exp, 1);
 TEST_UNARY(x86_f16c, expm1, f16, 16, std::expm1, 2);
 TEST_UNARY(x86_f16c, log, f16, 16, std::log, 1);
 TEST_UNARY(x86_f16c, log1p, f16, 16, std::log1p, 1);

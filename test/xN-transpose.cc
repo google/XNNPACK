@@ -95,7 +95,7 @@ transpose_ukernel make_ukernel_wrapper(xnn_transposev_ukernel_fn ukernel) {
 // This set of test params has all transpose ukernels
 TestParams transpose_ukernels[] = {
 #define XNN_TRANSPOSE_UKERNEL(arch_flags, ukernel, element_size, element_type, \
-                              block_width, block_height)                       \
+                              block_height, block_width)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
 #include "src/x16-transposec/x16-transposec.inc"
@@ -110,14 +110,25 @@ TestParams transpose_ukernels[] = {
 // This set of test params has only transposev ukernels.
 TestParams transposev_ukernels[] = {
 #define XNN_TRANSPOSE_UKERNEL(arch_flags, ukernel, element_size, element_type, \
-                              block_width, block_height)                       \
+                              block_height, block_width)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
 #include "src/xx-transposev/xx-transposev.inc"
 };
 #undef XNN_TRANSPOSE_UKERNEL
 
-class TransposeTest : public testing::TestWithParam<TestParams> {};
+class TransposeTest : public testing::TestWithParam<TestParams> {
+ protected:
+  void SetUp() override {
+#if XNN_ARCH_RISCV
+    if ((GetParam().arch_flags & xnn_arch_riscv_vector) &&
+        get_batch_scale(GetParam().element_size / 8) <
+            GetParam().block_height) {
+      GTEST_SKIP();
+    }
+#endif
+  }
+};
 
 TEST_P(TransposeTest, bh_bw) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -307,7 +318,7 @@ INSTANTIATE_TEST_SUITE_P(transpose, TransposeTest,
                          ::testing::ValuesIn(transpose_ukernels),
                          [](const auto& info) { return info.param.name; });
 
-class TransposeVTest : public testing::TestWithParam<TestParams> {};
+class TransposeVTest : public TransposeTest {};
 
 TEST_P(TransposeVTest, bhx17_bwx19_ies_esp11) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);

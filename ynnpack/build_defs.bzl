@@ -345,7 +345,14 @@ def ynn_arch_flag(arch):
     return _YNN_PARAMS_FOR_ARCH[arch].get("arch_flag", "")
 
 def ynn_arch_defines(arch):
-    """Returns a list of architecture-specific macros to define."""
+    """Returns a list of architecture-specific macros to define.
+
+    Args:
+      arch: The architecture name (as found in _YNN_PARAMS_FOR_ARCH).
+
+    Returns:
+      A list of macro names to define for the architecture and its implied architectures.
+    """
     archs = {arch: True}
     for _ in range(10):
         new_archs = {}
@@ -419,6 +426,7 @@ def ynn_benchmark_deps():
 def ynn_cc_library(
         name,
         srcs = [],
+        hdrs = [],
         per_arch_srcs = {},
         copts = [],
         defines = [],
@@ -432,6 +440,7 @@ def ynn_cc_library(
     Args:
       name: The name of the library target to define.
       srcs: The list of architecture-independent source files.
+      hdrs: The list of header files for this library.
       per_arch_srcs: A dictionary of architectures (as found in _YNN_PARAMS_FOR_ARCH) to
           architecture-specific source files.
       copts: A list of compiler options to use for all srcs and per_arch_srcs.
@@ -442,12 +451,12 @@ def ynn_cc_library(
     """
     deps_plus_arch_deps = deps
     for arch, arch_srcs in per_arch_srcs.items():
-        arch_params = _YNN_PARAMS_FOR_ARCH[arch]
         arch_copts = ynn_arch_copts(arch)
 
         cc_library(
             name = name + "_" + arch,
             srcs = ynn_if_arch(arch, arch_srcs, []),
+            hdrs = ynn_if_arch(arch, hdrs, []),
             defines = defines + ynn_if_arch(arch, ynn_arch_defines(arch)),
             local_defines = local_defines + ynn_arch_defines(arch),
             copts = copts + arch_copts,
@@ -467,6 +476,7 @@ def ynn_cc_library(
     cc_library(
         name = name,
         srcs = srcs,
+        hdrs = hdrs,
         defines = defines,
         copts = copts,
         local_defines = local_defines,

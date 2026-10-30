@@ -181,6 +181,39 @@ TEST(ResizeBilinearF16, test) { TestImpl<xnn_float16>(); }
 TEST(ResizeBilinearF32, test) { TestImpl<float>(); }
 
 #ifndef XNNPACK_USE_YNNPACK
+TEST(ResizeBilinear, DefineRejectsUnsupportedInputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(4, xnn_datatype_int32, 0)
+      .AddOutputTensor(4, xnn_datatype_int32, 1);
+  EXPECT_EQ(xnn_define_static_resize_bilinear_2d(
+                subgraph.Subgraph(), /*new_height=*/4, /*new_width=*/4,
+                /*input_id=*/0, /*output_id=*/1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(ResizeBilinear, DefineRejectsUnsupportedOutputDatatype) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddOutputTensor(4, xnn_datatype_int32, 1);
+  EXPECT_EQ(xnn_define_static_resize_bilinear_2d(
+                subgraph.Subgraph(), /*new_height=*/4, /*new_width=*/4,
+                /*input_id=*/0, /*output_id=*/1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(ResizeBilinear, DefineRejectsUnknownFlags) {
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddOutputTensor(4, xnn_datatype_fp32, 1);
+  const uint32_t supported_flags = XNN_FLAG_TENSORFLOW_LEGACY_MODE |
+                                   XNN_FLAG_ALIGN_CORNERS |
+                                   XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+  EXPECT_EQ(xnn_define_static_resize_bilinear_2d(
+                subgraph.Subgraph(), /*new_height=*/4, /*new_width=*/4,
+                /*input_id=*/0, /*output_id=*/1, ~supported_flags),
+            xnn_status_invalid_parameter);
+}
+
 TEST(ResizeBilinear, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 

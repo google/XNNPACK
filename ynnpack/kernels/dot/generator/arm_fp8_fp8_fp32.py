@@ -51,19 +51,19 @@ YNN_INTRINSIC uint32_t unaligned_load_uint8x4(const uint8_t* ptr) {
   fpm = __arm_set_fpm_src2_format(fpm, {fpm_format});
 """
 
-  def load_a_tile_k_tail(self, i, k, nk):
+  def load_a_tile(self, i, k):
     if k % 8 != 0:
       return ""
-    if nk == 8:
-      return (
-          f"mfloat8x8_t a_{i}_{k} ="
-          f" vreinterpret_mf8_u8(vld1_u8({self.a_ptr(i, k)}));\n"
-      )
-    else:
-      a_x4 = f"unaligned_load_uint8x4({self.a_ptr(i, k)})"
-      return (
-          f"mfloat8x8_t a_{i}_{k} = vreinterpret_mf8_u32(vdup_n_u32({a_x4}));\n"
-      )
+    return (
+        f"mfloat8x8_t a_{i}_{k} ="
+        f" vreinterpret_mf8_u8(vld1_u8({self.a_ptr(i, k)}));\n"
+    )
+
+  def load_a_tile_tail(self, i, k):
+    a_x4 = f"unaligned_load_uint8x4({self.a_ptr(i, k)})"
+    return (
+        f"mfloat8x8_t a_{i}_{k} = vreinterpret_mf8_u32(vdup_n_u32({a_x4}));\n"
+    )
 
   def load_b_tile(self, k, j):
     return (

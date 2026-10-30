@@ -143,8 +143,24 @@ void packer::pack(size_t m, size_t n, const void* input,
   } else if (transpose_fn) {
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
-      transpose_fn(ceil_div(m, tile_m), n_i, m * elem_size_bits / 8, stride_n,
-                   input, output_stride, output);
+      const size_t m_tiles = ceil_div(m, tile_m);
+      transpose_fn(m_tiles, n_i, m * elem_size_bits / 8, stride_n, input,
+                   output_stride, output);
+      if (n_i < tile_n) {
+        // The transpose only produces `n_i` columns of each row, set the
+        // padding columns to 0. This should not be necessary, but the kernels
+        // do process this data. We never care about the results in these
+        // columns, but on some hardware, denormals/NaNs in this data causes the
+        // dot kernel to be very slow.
+        const size_t row_size = n_i * tile_m * elem_size_bits / 8;
+        const size_t padding_size =
+            (tile_n - n_i) * tile_m * elem_size_bits / 8;
+        assert(m_tiles == 1 || row_size + padding_size <= output_stride);
+        for (size_t i = 0; i < m_tiles; ++i) {
+          memset(offset_bytes(output, i * output_stride + row_size), 0,
+                 padding_size);
+        }
+      }
       size_t elem_count = std::max<size_t>(8 / elem_size_bits, 1);
       input = offset_bytes(input, stride_n * (tile_n / elem_count));
       output = offset_bytes(output, output_block_stride);

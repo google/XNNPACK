@@ -300,28 +300,213 @@ TEST_P(XnnTestGIO, k_eq_kblock) {
       .TestGIO(GetParam().ukernel);
 }
 
-TEST_P(XnnTestGIO, null_bias) {
+TEST_P(XnnTestGIO, k_stride) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t n = GetParam().nr * GetParam().nr_scale * 2 + 2;
   PackWMicrokernelTester()
-      .nullbias(true)
-      .n(GetParam().nr * GetParam().nr_scale)
-      .k(GetParam().kblock)
+      .n(n)
+      .k(GetParam().kblock + 1)
+      .k_stride(n + 17)
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .TestGIO(GetParam().ukernel);
 }
 
-TEST_P(XnnTestGIO, n_lt_nr) {
+TEST_P(XnnTestGIO, k_div_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t n = 1; n < GetParam().nr * GetParam().nr_scale; n++) {
+  PackWMicrokernelTester()
+      .n(GetParam().nr * GetParam().nr_scale)
+      .k(GetParam().kblock * 5)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .TestGIO(GetParam().ukernel);
+}
+
+TEST_P(XnnTestGIO, k_lt_kblock) {
+  if (GetParam().kblock <= 1) {
+    GTEST_SKIP();
+  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t k = 1; k < GetParam().kblock; k++) {
     PackWMicrokernelTester()
-        .n(n)
-        .k(GetParam().kblock)
+        .n(GetParam().nr * GetParam().nr_scale)
+        .k(k)
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .TestGIO(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestGIO, k_gt_kblock) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t k = GetParam().kblock + 1;
+       k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2); k++) {
+    PackWMicrokernelTester()
+        .n(GetParam().nr * GetParam().nr_scale)
+        .k(k)
+        .nr(GetParam().nr * GetParam().nr_scale)
+        .kr(GetParam().kr)
+        .sr(GetParam().sr)
+        .TestGIO(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestGIO, n_eq_nr) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2);
+       k++) {
+    PackWMicrokernelTester()
+        .n(GetParam().nr * GetParam().nr_scale)
+        .k(k)
+        .nr(GetParam().nr * GetParam().nr_scale)
+        .kr(GetParam().kr)
+        .sr(GetParam().sr)
+        .TestGIO(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestGIO, n_div_nr) {
+  if (GetParam().nr <= 1 || GetParam().nr_scale != 1) {
+    GTEST_SKIP();
+  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2);
+       k++) {
+    PackWMicrokernelTester()
+        .n(GetParam().nr * 2 * GetParam().nr_scale)
+        .k(k)
+        .nr(GetParam().nr * GetParam().nr_scale)
+        .kr(GetParam().kr)
+        .sr(GetParam().sr)
+        .TestGIO(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestGIO, n_lt_nr) {
+  if (GetParam().nr <= 1 || GetParam().nr_scale != 1) {
+    GTEST_SKIP();
+  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2);
+       k++) {
+    for (size_t n = 1; n < GetParam().nr * GetParam().nr_scale; n++) {
+      PackWMicrokernelTester()
+          .n(n)
+          .k(k)
+          .nr(GetParam().nr * GetParam().nr_scale)
+          .kr(GetParam().kr)
+          .sr(GetParam().sr)
+          .TestGIO(GetParam().ukernel);
+    }
+  }
+}
+
+TEST_P(XnnTestGIO, n_gt_nr) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2);
+       k++) {
+    if (GetParam().nr_scale == 1) {
+      for (size_t n = GetParam().nr + 1;
+           n < (GetParam().nr == 1 ? 4 : GetParam().nr * 2); n++) {
+        PackWMicrokernelTester()
+            .n(n)
+            .k(k)
+            .nr(GetParam().nr)
+            .kr(GetParam().kr)
+            .sr(GetParam().sr)
+            .TestGIO(GetParam().ukernel);
+      }
+    } else {
+      for (size_t n = (GetParam().nr + 1) * GetParam().nr_scale;
+           n <
+           (GetParam().nr == 1 ? 4 : GetParam().nr * 2) * GetParam().nr_scale;
+           n += 1 * GetParam().nr_scale) {
+        PackWMicrokernelTester()
+            .n(n)
+            .k(k)
+            .nr(GetParam().nr * GetParam().nr_scale)
+            .kr(GetParam().kr)
+            .sr(GetParam().sr)
+            .TestGIO(GetParam().ukernel);
+      }
+    }
+  }
+}
+
+TEST_P(XnnTestGIO, g_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t g = 2; g <= 3; g++) {
+    for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2);
+         k++) {
+      if (GetParam().nr_scale == 1) {
+        for (size_t n = GetParam().nr + 1;
+             n < (GetParam().nr == 1 ? 4 : GetParam().nr * 2); n++) {
+          PackWMicrokernelTester()
+              .g(g)
+              .n(n)
+              .k(k)
+              .nr(GetParam().nr)
+              .kr(GetParam().kr)
+              .sr(GetParam().sr)
+              .TestGIO(GetParam().ukernel);
+        }
+      } else {
+        for (size_t n = (GetParam().nr + 1) * GetParam().nr_scale;
+             n <
+             (GetParam().nr == 1 ? 4 : GetParam().nr * 2) * GetParam().nr_scale;
+             n += 1 * GetParam().nr_scale) {
+          PackWMicrokernelTester()
+              .g(g)
+              .n(n)
+              .k(k)
+              .nr(GetParam().nr * GetParam().nr_scale)
+              .kr(GetParam().kr)
+              .sr(GetParam().sr)
+              .TestGIO(GetParam().ukernel);
+        }
+      }
+    }
+  }
+}
+
+TEST_P(XnnTestGIO, null_bias) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t g = 2; g <= 3; g++) {
+    for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2);
+         k++) {
+      if (GetParam().nr_scale == 1) {
+        for (size_t n = GetParam().nr + 1;
+             n < (GetParam().nr == 1 ? 4 : GetParam().nr * 2); n++) {
+          PackWMicrokernelTester()
+              .nullbias(true)
+              .g(g)
+              .n(n)
+              .k(k)
+              .nr(GetParam().nr)
+              .kr(GetParam().kr)
+              .sr(GetParam().sr)
+              .TestGIO(GetParam().ukernel);
+        }
+      } else {
+        for (size_t n = (GetParam().nr + 1) * GetParam().nr_scale;
+             n <
+             (GetParam().nr == 1 ? 4 : GetParam().nr * 2) * GetParam().nr_scale;
+             n += 1 * GetParam().nr_scale) {
+          PackWMicrokernelTester()
+              .nullbias(true)
+              .g(g)
+              .n(n)
+              .k(k)
+              .nr(GetParam().nr * GetParam().nr_scale)
+              .kr(GetParam().kr)
+              .sr(GetParam().sr)
+              .TestGIO(GetParam().ukernel);
+        }
+      }
+    }
   }
 }
 

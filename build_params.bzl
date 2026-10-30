@@ -739,6 +739,29 @@ XNNPACK_PARAMS_FOR_ARCH = {
         mingw_copts = ["-fno-asynchronous-unwind-tables"],
         msys_copts = ["-fno-asynchronous-unwind-tables"],
     ),
+    "avx512amxfp16": _create_params(
+        cond = "//:avx512amxfp16_enabled",
+        copts = _x86_align_stack(64),
+        gcc_x86_copts = [
+            "-mf16c",
+            "-mfma",
+            "-mavx512f",
+            "-mavx512cd",
+            "-mavx512bw",
+            "-mavx512dq",
+            "-mavx512vl",
+            "-mavx512vnni",
+            "-mgfni",
+            "-mavx512fp16",
+            "-mamx-tile",
+            "-mamx-int8",
+            "-mamx-fp16",
+        ],
+        msvc_x86_32_copts = ["/arch:AVX512"],
+        msvc_x86_64_copts = ["/arch:AVX512"],
+        mingw_copts = ["-fno-asynchronous-unwind-tables"],
+        msys_copts = ["-fno-asynchronous-unwind-tables"],
+    ),
     "avx512fp16": _create_params(
         cond = "//:avx512fp16_enabled",
         copts = _x86_align_stack(64),
@@ -783,17 +806,23 @@ XNNPACK_PARAMS_FOR_ARCH = {
     # RISC-V.
     "rvv": _create_params(
         cond = "//:riscv_vector_enabled",
-        copts = [
-            "-march=rv64gcv",
-            "-mabi=lp64d",
-        ],
+        copts = xnnpack_select_if(
+            "//build_config:riscv64",
+            [
+                "-march=rv64gcv",
+                "-mabi=lp64d",
+            ],
+        ),
     ),
     "rvvfp16arith": _create_params(
         cond = "//:riscv_fp16_vector_enabled",
-        copts = [
-            "-march=rv64gc_zvfh",
-            "-mabi=lp64d",
-        ],
+        copts = xnnpack_select_if(
+            "//build_config:riscv64",
+            [
+                "-march=rv64gc_zvfh",
+                "-mabi=lp64d",
+            ],
+        ),
     ),
 
     # Hexagon.

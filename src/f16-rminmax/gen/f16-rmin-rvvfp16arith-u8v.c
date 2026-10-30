@@ -37,7 +37,7 @@ void xnn_f16_rmin_ukernel__rvvfp16arith_u8v(
   for (avl = N - vl; avl; avl -= vl, input += vl) {
     vl = __riscv_vsetvl_e16m8(avl);
     vfloat16m8_t vec = __riscv_vle16_v_f16m8(input, vl);
-    t0 = __riscv_vfmin(t0, vec, vl);
+    t0 = __riscv_vfmin_vv_f16m8_tu(t0, t0, vec, vl);
   }
 
   vfloat16m1_t fmin = __riscv_vle16_v_f16m1(output, 1);

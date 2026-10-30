@@ -29,11 +29,11 @@ void xnn_qu8_vcvt_ukernel__scalar_u2(
   assert(input != NULL);
   assert(output != NULL);
 
+  const int32_t vmultiplier = params->scalar.multiplier << params->scalar.shift;
   const int32_t vbias =
-      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) -
-      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point +
-      INT32_C(0x80);
-  const int32_t vmultiplier = params->scalar.multiplier;
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 15) -
+      vmultiplier * (int32_t) params->scalar.input_zero_point +
+      INT32_C(0x4000);
   for (; batch >= 2 * sizeof(uint8_t); batch -= 2 * sizeof(uint8_t)) {
     int32_t vacc0 = input[0];
     int32_t vacc1 = input[1];
@@ -42,8 +42,8 @@ void xnn_qu8_vcvt_ukernel__scalar_u2(
     vacc0 = vbias + vacc0 * vmultiplier;
     vacc1 = vbias + vacc1 * vmultiplier;
 
-    int32_t vout0 = math_asr_s32(vacc0, 8);
-    int32_t vout1 = math_asr_s32(vacc1, 8);
+    int32_t vout0 = math_asr_s32(vacc0, 15);
+    int32_t vout1 = math_asr_s32(vacc1, 15);
 
     vout0 = math_max_s32(vout0, 0);
     vout1 = math_max_s32(vout1, 0);
@@ -59,7 +59,7 @@ void xnn_qu8_vcvt_ukernel__scalar_u2(
     int32_t vacc = *input;
     vacc = vbias + vacc * vmultiplier;
 
-    int32_t vout = math_asr_s32(vacc, 8);
+    int32_t vout = math_asr_s32(vacc, 15);
     vout = math_max_s32(vout, 0);
     vout = math_min_s32(vout, 255);
     *output = (uint8_t) vout;

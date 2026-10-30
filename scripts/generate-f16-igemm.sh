@@ -76,6 +76,20 @@ tools/xngen src/f16-igemm/avx512fp16-broadcast.c.in -D MR=6 -D NR=64 -D DATATYPE
 tools/xngen src/f16-igemm/avx512fp16-broadcast.c.in -D MR=7 -D NR=64 -D DATATYPE=F16 -o src/f16-igemm/gen/f16-igemm-7x64-minmax-avx512fp16-broadcast.c &
 tools/xngen src/f16-igemm/avx512fp16-broadcast.c.in -D MR=8 -D NR=64 -D DATATYPE=F16 -o src/f16-igemm/gen/f16-igemm-8x64-minmax-avx512fp16-broadcast.c &
 
+################################# x86 AVX512 AMX FP16 ################################
+### C2 micro-kernels
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=0 -D MR=1  -D NR=16 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-1x16c2-minmax-avx512amxfp16.c &
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=0 -D MR=16 -D NR=16 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-16x16c2-minmax-avx512amxfp16.c &
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=1 -D MR=16 -D NR=16 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-16x16c2-minmax-avx512amxfp16-prfm.c &
+
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=0 -D MR=1  -D NR=32 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-1x32c2-minmax-avx512amxfp16.c &
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=0 -D MR=16 -D NR=32 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-16x32c2-minmax-avx512amxfp16.c &
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=1 -D MR=16 -D NR=32 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-16x32c2-minmax-avx512amxfp16-prfm.c &
+
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=0 -D MR=1  -D NR=64 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-1x64c2-minmax-avx512amxfp16.c &
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=0 -D MR=16 -D NR=64 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-16x64c2-minmax-avx512amxfp16.c &
+tools/xngen src/f16-igemm/c2-avx512amxfp16.c.in -D PREFETCH=1 -D MR=16 -D NR=64 -D DATATYPE=f16 -o src/f16-igemm/gen/f16-igemm-16x64c2-minmax-avx512amxfp16-prfm.c &
+
 ################################# x86 AVX-512 SKX #################################
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-1x16-minmax-avx512skx-broadcast.c &
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-4x16-minmax-avx512skx-broadcast.c &
@@ -104,6 +118,10 @@ tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=5 -D NR=32 -D ACCTYPE=F
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=6 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-6x32-minmax-avx512skx-broadcast.c &
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=7 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-7x32-minmax-avx512skx-broadcast.c &
 tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=8 -D NR=32 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-8x32-minmax-avx512skx-broadcast.c &
+
+tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=1 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x64-minmax-avx512skx-broadcast.c &
+tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=4 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x64-minmax-avx512skx-broadcast.c &
+tools/xngen src/f16-igemm/avx512skx-broadcast.c.in -D MR=5 -D NR=64 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x64-minmax-avx512skx-broadcast.c &
 
 ################################ RISC-V Vector #####################################
 tools/xngen src/f16-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -o src/f16-igemm/gen/f16-igemm-1x4v-minmax-rvvfp16arith.c &

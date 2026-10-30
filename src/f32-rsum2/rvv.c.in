@@ -32,7 +32,7 @@ void xnn_f32_rsum2_ukernel__rvv_u${LMUL}v(
 
     vfloat32m${LMUL}_t vinput = __riscv_vle32_v_f32m${LMUL}(input, vl); input += vl;
 
-    vsum2 = __riscv_vfmacc(vsum2, vinput, vinput, vl);
+    vsum2 = __riscv_vfmacc_vv_f32m${LMUL}_tu(vsum2, vinput, vinput, vl);
 
   } while (batch > 0);
 

@@ -58,7 +58,6 @@ std::vector<GemmTestParams> CreateTests1(
     std::function<void(GemmMicrokernelTester& tester)> test_func,
     uint64_t arch_flags = 0) {
   std::string kbs = std::to_string(k_block);
-  std::string kb2s = std::to_string(k_block * 2);
   std::string akbs = std::to_string(adj_k_block);
   std::string nrs = std::to_string(nr);
 
@@ -310,7 +309,6 @@ std::vector<GemmTestParams> CreateTests1(
       std::function<void(GemmMicrokernelTester& tester)> test_func,
       uint64_t arch_flags = 0) {
     std::string kbs = std::to_string(k_block);
-    std::string kb2s = std::to_string(k_block * 2);
     std::string akbs = std::to_string(adj_k_block);
     nr = nr * xnn_init_hardware_config()->vlenb / sizeof(xnn_float16);
     std::string nrs = std::to_string(nr);
@@ -568,25 +566,6 @@ std::vector<GemmTestParams> CreateTests1(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x64c4__avx512amx,
-                        xnn_init_f16_minmax_scalar_params,
-                        xnn_pack_qs8_conv_goki_w);
-          },
-          xnn_arch_x86_avx512amx)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QD8_F16_QC8W_IGEMM_MINMAX_7X64C4__AVX512AMX, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/64,
-          /*adj_k_block=*/64,
-          /*mr=*/7, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx,
                         xnn_init_f16_minmax_scalar_params,
                         xnn_pack_qs8_conv_goki_w);
           },

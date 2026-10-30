@@ -59,6 +59,7 @@ enum xnn_arch_flags {
   xnn_arch_x86_avx512vnni = 1 << 18,
   xnn_arch_x86_avx512vnnigfni = 1 << 19,
   xnn_arch_x86_avx512amx = 1 << 20,
+  xnn_arch_x86_avx512amxfp16 = 1 << 21,
 #elif XNN_ARCH_RISCV
   xnn_arch_riscv_vector = 1 << 0,
   xnn_arch_riscv_vector_fp16_arith = 1 << 1,

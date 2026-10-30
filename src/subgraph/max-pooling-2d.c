@@ -380,7 +380,7 @@ enum xnn_status xnn_define_max_pooling_2d(
         "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_max_pooling_2d), input_id,
         xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   status = xnn_subgraph_check_output_node_id(xnn_node_type_max_pooling_2d, output_id, subgraph->num_values);
@@ -408,7 +408,7 @@ enum xnn_status xnn_define_max_pooling_2d(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_max_pooling_2d), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   status = xnn_subgraph_check_datatype_matches(

@@ -117,6 +117,9 @@ const struct xnn_conv_hwc2chw_config* xnn_init_f16_conv_hwc2chw_3x3c3s2_config()
     return NULL;
   }
   XNN_INIT_ONCE(f16_conv_hwc2chw_3x3c3s2);
+  if (f16_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding == NULL) {
+    return NULL;
+  }
   return &f16_conv_hwc2chw_3x3c3s2_config;
 }
 

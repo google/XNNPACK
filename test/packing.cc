@@ -907,7 +907,6 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   size_t bl = 8;
   size_t k_num_blocks = kc / bl;
 
-  std::vector<int32_t> b(g * nc);
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0xA8; k[1] = 0xEC; k[2] = 0x20; k[3] = 0x64; k[4] = 0xB9; k[5] = 0xFD; k[6] = 0x31; k[7] = 0x75;
 

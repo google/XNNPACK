@@ -147,8 +147,15 @@ enum xnn_status {
   /// The call succeeded, and all output arguments now contain valid data.
   xnn_status_success = 0,
   xnn_status_uninitialized = 1,
+  /// The call is malformed: bad value/node ID, wrong value type, inconsistent
+  /// shapes or parameters, non-finite/inverted ranges, mismatching datatypes or
+  /// quantization between values that must match, or a value used in a way its
+  /// definition doesn't allow.
   xnn_status_invalid_parameter = 2,
   xnn_status_invalid_state = 3,
+  /// The call is well-formed but requests something (a datatype or datatype
+  /// combination, quantization scheme, flag, block size, rank, ...) that this
+  /// build of XNNPACK doesn't implement.
   xnn_status_unsupported_parameter = 4,
   xnn_status_unsupported_hardware = 5,
   xnn_status_out_of_memory = 6,

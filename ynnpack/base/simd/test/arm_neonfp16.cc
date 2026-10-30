@@ -28,7 +28,7 @@ TEST_CAST(arm_neonfp16, f32, f16x8);
 TEST_CAST(arm_neonfp16, f16, f32x4);
 TEST_CAST(arm_neonfp16, f16, f32x8);
 
-TEST_UNARY(arm_neonfp16, exp, f16, 8, std::exp, 2);
+TEST_UNARY(arm_neonfp16, exp, f16, 8, std::exp, 1);
 TEST_UNARY(arm_neonfp16, expm1, f16, 8, std::expm1, 2);
 TEST_UNARY(arm_neonfp16, log, f16, 8, std::log, 1);
 TEST_UNARY(arm_neonfp16, log1p, f16, 8, std::log1p, 1);
