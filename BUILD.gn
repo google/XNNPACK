@@ -754,6 +754,10 @@ if (current_cpu == "arm64") {
       "-Xclang",
       "-target-feature",
       "-Xclang",
+      "+sme",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
       "+sme2",
     ]
   }
