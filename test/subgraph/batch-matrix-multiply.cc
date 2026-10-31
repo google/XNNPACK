@@ -745,6 +745,46 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_large_m_not_rewritten) {
   EXPECT_EQ(b_val->datatype, xnn_datatype_fp32)
       << "bmm input B should remain fp32 when M > mr";
 }
+
+TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b_rank_change_rejected) {
+  const uint32_t external_input_a = 0;
+  const uint32_t external_input_b = 1;
+  const uint32_t external_output = 2;
+  uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+  const uint32_t flags =
+      xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING;
+  SubgraphTester tester(/*external_value_ids=*/3, flags);
+  tester.AddInputTensorF32({1, 4}, external_input_a)
+      .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {4, 2},
+                         external_input_b)
+      .AddInternalDynamicTensorF32({4, 2}, &internal_b_f32)
+      .AddOutputTensor({1, 2}, xnn_datatype_fp32, external_output)
+      .AddConvert(external_input_b, internal_b_f32)
+      .AddBatchMatrixMultiply(external_input_a, internal_b_f32,
+                              external_output);
+  const xnn_status status = tester.CreateRuntime(nullptr, flags);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(status, xnn_status_success);
+  for (size_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* n = tester.Node(i);
+    if (n->type == xnn_node_type_batch_matrix_multiply &&
+        tester.Value(n->inputs[1])->datatype != xnn_datatype_qcint8) {
+      GTEST_SKIP() << "bmm input B was not rewritten to qcint8";
+    }
+  }
+
+  Tensor<float> input_a({1, 4}, XnnExtraBytes);
+  input_a.fill(1.0f);
+  Tensor<int8_t> input_b({3, 4, 64}, XnnExtraBytes);
+  input_b.fill(1);
+  tester
+      .ReshapeExternalTensor(input_a.shape(), input_a.base(), external_input_a)
+      .ReshapeExternalTensor(input_b.shape(), input_b.base(), external_input_b)
+      .ReshapeRuntime();
+  EXPECT_EQ(tester.Status(), xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 #ifndef XNNPACK_USE_YNNPACK

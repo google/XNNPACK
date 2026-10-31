@@ -355,6 +355,18 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
       padded_dims_b[transpose_b ? num_output_dims - 2 : num_output_dims - 1];
   const size_t k_b =
       padded_dims_b[transpose_b ? num_output_dims - 1 : num_output_dims - 2];
+  if (input_b->datatype == xnn_datatype_qcint8 &&
+      !xnn_value_is_static(input_b->allocation_type) &&
+      input_b->quantization.channel_dimension !=
+          input_b->shape.num_dims - (transpose_b ? 2 : 1)) {
+    xnn_log_error("failed to reshape %s operator with input_b ID #%" PRIu32
+                  ": channel dimension %zu is not the N dimension of a "
+                  "%zu-dimensional input",
+                  xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+                  input_b_id, input_b->quantization.channel_dimension,
+                  input_b->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   if (k != k_b) {
     xnn_log_error("failed to reshape %s operator with input_a ID #%" PRIu32
                   " and input_b ID #%" PRIu32
