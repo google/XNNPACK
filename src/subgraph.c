@@ -3042,6 +3042,10 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
   // If the input is a static value, apply the new shape to it directly.
   bool elide = true;
   if (xnn_value_is_static(input_value->allocation_type)) {
+    if (xnn_shape_multiply_all_dims(&new_shape) !=
+        xnn_shape_multiply_all_dims(&input_value->shape)) {
+      return xnn_status_success;  // Skip optimization, let runtime validate.
+    }
     input_value->shape = new_shape;
   } else {
     elide = xnn_shape_match(&new_shape, &input_value->shape);
