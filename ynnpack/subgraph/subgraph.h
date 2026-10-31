@@ -132,6 +132,9 @@ struct ynn_value {
 
   bool is_static() const { return !is_external() && data && data->base; }
 
+  // Returns true if this value is allocated and computed internally.
+  bool is_internal() const { return !is_external() && !is_static(); }
+
   bool is_static_scalar() const {
     return is_static() && data->size_bytes() == data->elem_size;
   }

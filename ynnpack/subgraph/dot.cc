@@ -1800,9 +1800,16 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
     std::vector<int> loop_order;
-    const bool pack_b_outer = rank >= 2 && !input_b.is_static();
+    // We need to choose whether m or n is an outermost loop. n outermost allows
+    // fusing producers of B, while m outermost allows fusing producers of A.
+    // We should prefer fusing the larger of A or B if both are candidates for
+    // fusion.
+    // TODO: b/555814090 - More sophisticated automatic scheduling would help.
+    const bool n_outer =
+        rank >= 2 && !input_b.is_static() &&
+        (!input_a.is_internal() || !slinky::prove_true(n < m));
     if (is_split_k) {
-      if (pack_b_outer) {
+      if (n_outer) {
         loop_order.push_back(num_k_dims + 1);  // m (innermost)
         loop_order.push_back(num_k_dims);      // n
       } else {
@@ -1817,7 +1824,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       for (size_t i = 2; i < rank; ++i) {
         loop_order.push_back(num_k_dims + i);  // batch dims (outermost)
       }
-    } else if (pack_b_outer) {
+    } else if (n_outer) {
       loop_order.resize(num_k_dims + 2);
       for (size_t i = 0; i < loop_order.size(); ++i) {
         loop_order[i] = i;
