@@ -206,4 +206,36 @@ TEST(Reshape, DotBitcastSliceReduceRegression) {
   runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
 }
 
+TEST(Reshape, DeducedDimension) {
+  std::vector<size_t> input_shape = {2, 3, 4};
+  std::vector<size_t> target_shape = {0, 6};
+
+  Tensor<float> input(input_shape);
+  Tensor<float> output({4, 6});
+
+  std::iota(input.data(), input.data() + input.size(), 1.0f);
+
+  uint32_t input_id = 0;
+  uint32_t output_id = 1;
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(ynn_type_fp32, input_shape, input_id)
+      .AddOutput(ynn_type_fp32, {4, 6}, output_id)
+      .AddReshape(target_shape, input_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(input_shape, input.base(), input_id)
+      .ReshapeRuntime();
+
+  // Check deduced shape
+  ASSERT_EQ(runtime.GetExternalTensorShape(output_id),
+            std::vector<size_t>({4, 6}));
+
+  runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
+
+  ASSERT_THAT(output, testing::ElementsAreArray(input));
+}
+
 }  // namespace ynn
