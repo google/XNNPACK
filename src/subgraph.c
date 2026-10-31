@@ -1678,7 +1678,10 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
         const uint32_t padding_value =
             producer->params.static_pad.padding_value;
         const bool is_zero_padding =
-            (padding_datatype == xnn_datatype_fp32 && padding_value == 0) ||
+            ((padding_datatype == xnn_datatype_fp32 ||
+              padding_datatype == xnn_datatype_fp16 ||
+              padding_datatype == xnn_datatype_bf16) &&
+             padding_value == 0) ||
             ((padding_datatype == xnn_datatype_qint8 ||
               padding_datatype == xnn_datatype_quint8) &&
              padding_value == (uint32_t)subgraph->values[producer->outputs[0]]

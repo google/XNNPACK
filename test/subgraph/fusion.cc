@@ -507,6 +507,86 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, not_fused_due_to_padding_value_not_zero) {
   ASSERT_EQ(tester.NumOperators(), 2);
 }
 
+TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion_fp16) {
+  SubgraphTester tester(5);
+  uint32_t input_id = 0;
+  uint32_t intermediate_id = 1;
+  uint32_t filter_id = 2;
+  uint32_t bias_id = 3;
+  uint32_t output_id = 4;
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
+  float padding_value = 0.0f;
+  xnnpack::Buffer<xnn_float16> filter_data(32 * 3 * 3 * 3);
+  xnnpack::Buffer<xnn_float16> bias_data(32);
+
+  tester.AddInputTensor<xnn_float16>({1, 254, 254, 3}, input_id)
+      .AddDynamicTensor({1, 262, 266, 3}, intermediate_id, xnn_datatype_fp16)
+      .AddStaticTensorF16({32, 3, 3, 3}, filter_id, filter_data.data())
+      .AddStaticTensorF16({32}, bias_id, bias_data.data())
+      .AddOutputTensor<xnn_float16>({1, 131, 133, 32}, output_id)
+      .AddConstantPad(pre_paddings, post_paddings, padding_value, input_id,
+                      intermediate_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{2, 2},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/32,
+          },
+          intermediate_id, filter_id, bias_id, output_id)
+      .Optimize();
+
+  ASSERT_EQ(tester.Node(0)->type, xnn_node_type_invalid);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_top, 2);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_left, 4);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_right, 8);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_bottom, 6);
+  ASSERT_EQ(tester.Node(1)->inputs[0], input_id);
+}
+
+TEST(CONSTANT_PAD_THEN_CONVOLUTION,
+     not_fused_due_to_fp16_padding_value_not_zero) {
+  SubgraphTester tester(5);
+  uint32_t input_id = 0;
+  uint32_t intermediate_id = 1;
+  uint32_t filter_id = 2;
+  uint32_t bias_id = 3;
+  uint32_t output_id = 4;
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
+  float padding_value = 1.0f;
+  xnnpack::Buffer<xnn_float16> filter_data(32 * 3 * 3 * 3);
+  xnnpack::Buffer<xnn_float16> bias_data(32);
+
+  tester.AddInputTensor<xnn_float16>({1, 254, 254, 3}, input_id)
+      .AddDynamicTensor({1, 262, 266, 3}, intermediate_id, xnn_datatype_fp16)
+      .AddStaticTensorF16({32, 3, 3, 3}, filter_id, filter_data.data())
+      .AddStaticTensorF16({32}, bias_id, bias_data.data())
+      .AddOutputTensor<xnn_float16>({1, 131, 133, 32}, output_id)
+      .AddConstantPad(pre_paddings, post_paddings, padding_value, input_id,
+                      intermediate_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{2, 2},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/32,
+          },
+          intermediate_id, filter_id, bias_id, output_id)
+      .Optimize();
+
+  ASSERT_EQ(tester.Node(0)->type, xnn_node_type_static_constant_pad);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_top, 0);
+  ASSERT_EQ(tester.Node(1)->inputs[0], intermediate_id);
+}
+
 TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION, fusion) {
   RuntimeTester tester(5);
   uint32_t input_id = 0;
@@ -547,6 +627,46 @@ TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION, fusion) {
       tester.Node(1)->params.depthwise_convolution_2d.input_padding_bottom, 6);
   ASSERT_EQ(tester.Node(1)->outputs[0], output_id);
   ASSERT_EQ(unoptimized_output, optimized_output);
+}
+
+TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION, fusion_fp16) {
+  SubgraphTester tester(5);
+  uint32_t input_id = 0;
+  uint32_t intermediate_id = 1;
+  uint32_t filter_id = 2;
+  uint32_t bias_id = 3;
+  uint32_t output_id = 4;
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
+  float padding_value = 0.0f;
+  xnnpack::Buffer<xnn_float16> filter_data(1 * 3 * 3 * 4);
+  xnnpack::Buffer<xnn_float16> bias_data(4);
+
+  tester.AddInputTensor<xnn_float16>({1, 128, 128, 4}, input_id)
+      .AddDynamicTensor({1, 136, 140, 4}, intermediate_id, xnn_datatype_fp16)
+      .AddStaticTensorF16({1, 3, 3, 4}, filter_id, filter_data.data())
+      .AddStaticTensorF16({4}, bias_id, bias_data.data())
+      .AddOutputTensor<xnn_float16>({1, 134, 140, 4}, output_id)
+      .AddConstantPad(pre_paddings, post_paddings, padding_value, input_id,
+                      intermediate_id)
+      .AddDepthwiseConvolution2D(
+          DepthwiseConvolutionParams{Padding{0, 0, 0, 0}, Kernel{3, 3},
+                                     Subsampling{1, 1}, Dilation{1, 1},
+                                     /*depth_multiplier=*/1,
+                                     /*input_channels=*/4},
+          intermediate_id, filter_id, bias_id, output_id)
+      .Optimize();
+
+  ASSERT_EQ(tester.Node(0)->type, xnn_node_type_invalid);
+  ASSERT_EQ(tester.Node(1)->params.depthwise_convolution_2d.input_padding_top,
+            2);
+  ASSERT_EQ(tester.Node(1)->params.depthwise_convolution_2d.input_padding_left,
+            4);
+  ASSERT_EQ(tester.Node(1)->params.depthwise_convolution_2d.input_padding_right,
+            8);
+  ASSERT_EQ(
+      tester.Node(1)->params.depthwise_convolution_2d.input_padding_bottom, 6);
+  ASSERT_EQ(tester.Node(1)->inputs[0], input_id);
 }
 
 TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION,
