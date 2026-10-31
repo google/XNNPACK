@@ -1,5 +1,7 @@
 // Copyright 2020-2025 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -659,7 +661,8 @@ enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph);
 // Rewrites the pattern `bmm(a:f32, dequant(b:qint8):f32) -> f32` into
 // `bmm(convert(a:f32 -> qdint8), convert(b:qint8 -> qcint8)) -> f32`. The
 // per-tensor scale of `b` is broadcast to a per-channel scale array.
-enum xnn_status xnn_subgraph_rewrite_dequant_bmm(xnn_subgraph_t subgraph);
+enum xnn_status xnn_subgraph_rewrite_dequant_bmm(
+    xnn_subgraph_t subgraph, uint32_t optimization_flags);
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
