@@ -192,6 +192,7 @@ SHARD_TEST(qs8-dwconv-minmax-fp32-test 10)
 SHARD_TEST(qs8-qc8w-dwconv-minmax-fp32-test 10)
 
 SET(MICROKERNEL_GEMM_UNIT_TESTS
+    bf16-f32-gemm-minmax
     bf16-gemm-minmax
     f16-f32acc-gemm-minmax
     f16-f32acc-igemm-minmax
@@ -222,11 +223,14 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     qd8-f32-qc2w-gemm-minmax
     qd8-f16-qc2w-gemm-minmax
     qd8-f32-qc8w-gemm-minmax
+    qd8-f16-qc8w-igemm-minmax
     qd8-f32-qc8w-igemm-minmax
     qp8-f32-qb4w-gemm-minmax
     qp8-f32-qc2w-gemm-minmax
     qp8-f32-qc4w-gemm-minmax
     qp8-f32-qc8w-gemm-minmax
+    qs8-qc2w-gemm-minmax-fp32
+    qs8-qc4w-gemm-minmax-fp32
     qs8-qc8w-gemm-minmax-fp32
     qs8-qc8w-igemm-minmax-fp32
     qu8-gemm-minmax-fp32
@@ -250,10 +254,13 @@ FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
   ENDIF()
 ENDFOREACH()
 SHARD_TEST(qd8-f16-qc8w-gemm-minmax-test 10)
+SHARD_TEST(qd8-f16-qc8w-igemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc4w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc2w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc8w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc8w-igemm-minmax-test 10)
+SHARD_TEST(qs8-qc2w-gemm-minmax-fp32-test 10)
+SHARD_TEST(qs8-qc4w-gemm-minmax-fp32-test 10)
 SHARD_TEST(qs8-qc8w-gemm-minmax-fp32-test 10)
 SHARD_TEST(qs8-qc8w-igemm-minmax-fp32-test 10)
 
@@ -462,6 +469,17 @@ ENDIF()
 IF(XNNPACK_ENABLE_KLEIDIAI)
   TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE kleidiai)
 ENDIF()
+
+ADD_EXECUTABLE(x16-x32-packw-test x16-x32-packw.cc)
+TARGET_LINK_LIBRARIES(x16-x32-packw-test PRIVATE
+  xnnpack-hardware-config
+  xnnpack-logging
+  xnnpack-microkernels-all
+  xnnpack-microparams-init
+  pthreadpool
+  xnnpack-test)
+ADD_TEST(NAME x16-x32-packw-test COMMAND x16-x32-packw-test)
+SET_TARGET_PROPERTIES(x16-x32-packw-test PROPERTIES CXX_EXTENSIONS YES)
 
 ADD_EXECUTABLE(buffer-test buffer.cc)
 TARGET_LINK_LIBRARIES(buffer-test PRIVATE
