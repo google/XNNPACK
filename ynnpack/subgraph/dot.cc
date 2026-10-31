@@ -1434,13 +1434,139 @@ ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
   }
 }
 
+// Decides whether to rewrite `dot(a, transpose(b_untransposed))` into
+// `transpose(dot(b_untransposed, transpose(a)))` using the identity
+// `A * B^T = (B * A^T)^T`.
+//
+// In standard `dot(a, transpose(b_untransposed))` (where `a` has shape
+// `[k, m, ...]` and `b_untransposed` has shape `[k, n, ...]`), `define_dot`
+// fuses the transpose of `b_untransposed` into `pack_b`, which reads and packs
+// all `n * k` elements of `b_untransposed` at runtime when `b_untransposed` is
+// dynamic (e.g. a KV cache in LLM decode). When `m` is very small compared to
+// `n` and `k`, it is much cheaper to swap the operands so `b_untransposed` is
+// read in-place as the left-hand operand (`input_a`) and only the small `m * k`
+// tensor `a` is transposed/packed as the right-hand operand (`input_b`),
+// followed by transposing the small `m * n` output.
+bool should_transpose_dot(const ynn_subgraph& subgraph, size_t num_k_dims,
+                          uint32_t input_a_id, uint32_t input_b_id,
+                          uint32_t input_c_id) {
+  if (num_k_dims != 1 || input_c_id != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+  const ynn_value& a = subgraph.value(input_a_id);
+  const ynn_value& b = subgraph.value(input_b_id);
+  if (a.type != b.type || !type_is_floating_point(a.type) || a.rank() < 2 ||
+      a.rank() != b.rank()) {
+    return false;
+  }
+  const ynn_node* b_producer = subgraph.get_producer(input_b_id);
+  if (!b_producer) {
+    return false;
+  }
+  // Check that `b` is produced by a non-aliasing 2D inner transpose
+  // (`permutation = {1, 0, 2, 3, ...}`). If `b_transpose->alias` is already
+  // true, the transpose is a zero-cost metadata view and does not need to be
+  // rewritten.
+  const auto* b_transpose =
+      std::get_if<ynn_node::static_transpose>(&b_producer->op);
+  if (!b_transpose || b_transpose->alias ||
+      b_transpose->permutation.size() != b.rank() ||
+      b_transpose->permutation[0] != 1 || b_transpose->permutation[1] != 0) {
+    return false;
+  }
+  // Do not rewrite if `b_untransposed` is constant (or a gather of a constant):
+  // constant `b` inputs have their transpose + `pack_b` folded once during
+  // subgraph optimization, whereas moving `b` to `input_a` would prevent
+  // constant packing.
+  uint32_t b_untransposed_id = b_producer->inputs[0];
+  if (subgraph.value(b_untransposed_id).rank() != b.rank() ||
+      is_constant_or_gather_of_constant(subgraph, b_untransposed_id)) {
+    return false;
+  }
+  // Batch dimensions (`d >= 2`) must not be permuted by `b_transpose` and must
+  // match between `a` and `b` so that swapping the operands preserves batch
+  // broadcasting semantics.
+  for (size_t d = 2; d < a.rank(); ++d) {
+    if (b_transpose->permutation[d] != static_cast<int32_t>(d) ||
+        !slinky::prove_true(a.extent(d) == b.extent(d))) {
+      return false;
+    }
+  }
+  slinky::expr k = a.extent(0);
+  slinky::expr m = a.extent(1);
+  slinky::expr n = b.extent(0);
+  // After swapping operands, `m` becomes the `n` dimension of the rewritten
+  // dot. Require `m <= 8` so the new `n` fits within a single dot kernel
+  // `block_n` tile, and require `2 * m * (k + n) <= n * k` so that transposing
+  // `a` (`m * k`) plus transposing the output (`m * n`) touches at most half as
+  // much memory as transposing/packing `b` (`n * k`).
+  if (!slinky::prove_true(m <= 8) ||
+      !slinky::prove_true(2 * m * (k + n) <= n * k)) {
+    return false;
+  }
+  // In the rewritten `dot(b_untransposed, transpose(a))`, `b_untransposed` is
+  // the first operand (`input_a`). We must ensure there is a viable dot kernel
+  // with `transpose_a = false`; otherwise `define_dot` would pick a kernel with
+  // `dot_flag::transpose_a` and insert a `transpose_a(b_untransposed)` node,
+  // transposing the large `n * k` matrix anyway and defeating the rewrite.
+  const ynn_type c_type = deduce_output_type(a.type, b.type);
+  const dot_cost_models& cost_models = ynn::get_dot_cost_models();
+  const dot_kernel kernel_no_transpose_a =
+      get_dot_kernel({a.type, b.type, c_type}, cost_models, {}, {},
+                     /*required_flags=*/0, /*transpose_a=*/false);
+  if (!kernel_no_transpose_a.kernel ||
+      (kernel_no_transpose_a.cost_model == &dot_cost_avoid &&
+       get_dot_kernel({a.type, b.type, c_type}, cost_models).cost_model !=
+           &dot_cost_avoid)) {
+    return false;
+  }
+  return true;
+}
+
 ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                       uint32_t input_a_id, uint32_t input_b_id,
-                      uint32_t input_c_id, uint32_t* output_id,
-                      uint32_t flags) {
+                      uint32_t input_c_id, uint32_t* output_id, uint32_t flags,
+                      std::optional<bool> require_transpose_a = std::nullopt) {
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
+  if (should_transpose_dot(subgraph, num_k_dims, input_a_id, input_b_id,
+                           input_c_id)) {
+    const ynn_node* b_producer = subgraph.get_producer(input_b_id);
+    const std::vector<int32_t> perm =
+        std::get<ynn_node::static_transpose>(b_producer->op).permutation;
+    uint32_t b_untransposed_id = b_producer->inputs[0];
+
+    YNN_LOG_DEBUG() << "Rewriting dot(" << input_a_id << ", transpose("
+                    << b_untransposed_id << ")) to transpose(dot("
+                    << b_untransposed_id << ", transpose(" << input_a_id
+                    << ")))";
+
+    // Define `transpose(a)` as the new `input_b` of the inner dot. In the
+    // recursive `define_dot` call below, `always_alias_transpose` marks this
+    // transpose as an alias so it is fused directly into `pack_b(a)` (or read
+    // with transposed strides by an unpacked kernel).
+    uint32_t a_transposed_id = YNN_INVALID_VALUE_ID;
+    ynn_node transpose_a_node;
+    define_static_transpose(subgraph, transpose_a_node, perm, input_a_id,
+                            &a_transposed_id, /*alias=*/false);
+    subgraph.add_node(std::move(transpose_a_node));
+
+    // Force `require_transpose_a = false` so the inner dot does not select a
+    // kernel with `dot_flag::transpose_a`, which would insert a `transpose_a`
+    // op on the large `b_untransposed` tensor.
+    uint32_t dot_output_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(define_dot(subgraph, num_k_dims, b_untransposed_id,
+                                   a_transposed_id, YNN_INVALID_VALUE_ID,
+                                   &dot_output_id, flags,
+                                   /*require_transpose_a=*/false));
+
+    ynn_node transpose_out_node;
+    define_static_transpose(subgraph, transpose_out_node, perm, dot_output_id,
+                            output_id, /*alias=*/false);
+    subgraph.add_node(std::move(transpose_out_node));
+    return ynn_status_success;
+  }
   const bool b_transposed =
       always_alias_transpose(subgraph, input_b_id, 0, 1) == ynn_status_success;
 
@@ -1500,8 +1626,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   shape.n = std::min<size_t>(shape.n, 384);
   shape.k1 = std::min<size_t>(shape.k1, 256);
 
-  dot_kernel kernel =
-      get_dot_kernel(type, cost_models, shape, packed_shape, kernel_flags);
+  dot_kernel kernel = get_dot_kernel(type, cost_models, shape, packed_shape,
+                                     kernel_flags, require_transpose_a);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.

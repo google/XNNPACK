@@ -254,6 +254,84 @@ TEST_F(LoopFusionTest, TwoDotsShareLoops) {
   }
 }
 
+TEST_F(LoopFusionTest, AttentionWithReshapesFusesScoresAndProbs) {
+  const size_t H = 4, S = 512, D = 256;
+  const uint32_t q_id = 0;
+  const uint32_t k_id = 1;
+  const uint32_t v_id = 2;
+  const uint32_t mask_id = 3;
+  const uint32_t out_id = 4;
+  uint32_t q_flat_id = YNN_INVALID_VALUE_ID;
+  uint32_t kt_id = YNN_INVALID_VALUE_ID;
+  uint32_t scores_flat_id = YNN_INVALID_VALUE_ID;
+  uint32_t scores_id = YNN_INVALID_VALUE_ID;
+  uint32_t masked_scores_id = YNN_INVALID_VALUE_ID;
+  uint32_t masked_scores_flat_id = YNN_INVALID_VALUE_ID;
+  uint32_t max_id = YNN_INVALID_VALUE_ID;
+  uint32_t shifted_id = YNN_INVALID_VALUE_ID;
+  uint32_t exp_id = YNN_INVALID_VALUE_ID;
+  uint32_t sum_id = YNN_INVALID_VALUE_ID;
+  uint32_t probs_flat_id = YNN_INVALID_VALUE_ID;
+  uint32_t out_flat_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(5);
+  const uint32_t neg_inf_id =
+      subgraph.DefineScalar(-std::numeric_limits<float>::infinity());
+  const uint32_t zero_id = subgraph.DefineScalar(0.0f);
+
+  subgraph.AddInput(type_of<float>(), {1, H, S, D}, q_id)
+      .AddInput(type_of<float>(), {1, 1, S, D}, k_id)
+      .AddInput(type_of<float>(), {1, 1, S, D}, v_id)
+      .AddInput(type_of<float>(), {1, 1, S, S}, mask_id)
+      .AddOutput(type_of<float>(), {1, H, S, D}, out_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, D}, q_flat_id)
+      .AddTensor(type_of<float>(), {1, 1, D, S}, kt_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, S}, scores_flat_id)
+      .AddTensor(type_of<float>(), {1, H, S, S}, scores_id)
+      .AddTensor(type_of<float>(), {1, H, S, S}, masked_scores_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, S}, masked_scores_flat_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, 1}, max_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, S}, shifted_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, S}, exp_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, 1}, sum_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, S}, probs_flat_id)
+      .AddTensor(type_of<float>(), {1, 1, H * S, D}, out_flat_id)
+      .AddReshape({1, 1, H * S, D}, q_id, q_flat_id)
+      .AddTranspose({0, 1, 3, 2}, k_id, kt_id)
+      .AddDot(1, q_flat_id, kt_id, YNN_INVALID_VALUE_ID, scores_flat_id)
+      .AddReshape({1, H, S, S}, scores_flat_id, scores_id)
+      .AddBinary(ynn_binary_add, scores_id, mask_id, masked_scores_id)
+      .AddReshape({1, 1, H * S, S}, masked_scores_id, masked_scores_flat_id)
+      .AddReduce(ynn_reduce_max, {-1}, masked_scores_flat_id, neg_inf_id,
+                 max_id, YNN_NODE_FLAG_KEEP_DIMS)
+      .AddBinary(ynn_binary_subtract, masked_scores_flat_id, max_id, shifted_id)
+      .AddUnary(ynn_unary_exp, shifted_id, exp_id)
+      .AddReduce(ynn_reduce_sum, {-1}, exp_id, zero_id, sum_id,
+                 YNN_NODE_FLAG_KEEP_DIMS)
+      .AddBinary(ynn_binary_divide, exp_id, sum_id, probs_flat_id)
+      .AddDot(1, probs_flat_id, v_id, YNN_INVALID_VALUE_ID, out_flat_id)
+      .AddReshape({1, H, S, D}, out_flat_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> q({1, H, S, D});
+  Tensor<float> k({1, 1, S, D});
+  Tensor<float> v({1, 1, S, D});
+  Tensor<float> mask({1, 1, S, S});
+  Tensor<float> out({1, H, S, D});
+  q.fill(0.01f);
+  k.fill(0.01f);
+  v.fill(1.0f);
+  mask.fill(0.0f);
+  ReshapeExternalTensor(q_id, {1, H, S, D}, q.data());
+  ReshapeExternalTensor(k_id, {1, 1, S, D}, k.data());
+  ReshapeExternalTensor(v_id, {1, 1, S, D}, v.data());
+  ReshapeExternalTensor(mask_id, {1, 1, S, S}, mask.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  EXPECT_LE(max_allocation_size_, S * S * sizeof(float));
+}
+
 // When B is static, the packing is constant folded during
 // ynn_optimize_subgraph: it has no dot loop nest to fuse into, so it runs
 // with its own loops, which should still be parallelized.
