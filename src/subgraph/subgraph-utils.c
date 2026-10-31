@@ -24,6 +24,9 @@ static struct xnn_mutex mutex;
 
 void xnn_print_flags(const int flags, const int count, const int values[],
                      const char* names) {
+  if (count <= 0 || values == NULL || names == NULL) {
+    return;
+  }
   const char* separator = "";
   for (int i = 0; i < count - 1; ++i) {
     const char* next_name = strchr(names, ',');
@@ -52,48 +55,72 @@ void xnn_print_flags(const int flags, const int count, const int values[],
 static void print_node_type(FILE* out, const xnn_subgraph_t subgraph,
                             const struct xnn_node* node,
                             const char* separator) {
+  if (out == NULL || node == NULL) {
+    return;
+  }
   fprintf(out, "%s", xnn_node_type_to_string(node->type));
+  if (subgraph == NULL) {
+    return;
+  }
   switch (node->type) {
     case xnn_node_type_unary_elementwise:
-      if (node->unary_operator == xnn_unary_clamp) {
-        fprintf(
-            out, "%s(%s [%f, %f], %s)", separator,
-            xnn_unary_operator_to_string(node->unary_operator),
-            node->params.unary.clamp.min, node->params.unary.clamp.max,
-            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
-      } else {
-        fprintf(
-            out, "%s(%s, %s)", separator,
-            xnn_unary_operator_to_string(node->unary_operator),
-            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+      if (node->num_inputs > 0 && node->inputs[0] < subgraph->num_values) {
+        if (node->unary_operator == xnn_unary_clamp) {
+          fprintf(
+              out, "%s(%s [%f, %f], %s)", separator,
+              xnn_unary_operator_to_string(node->unary_operator),
+              node->params.unary.clamp.min, node->params.unary.clamp.max,
+              xnn_datatype_to_string(
+                  subgraph->values[node->inputs[0]].datatype));
+        } else {
+          fprintf(
+              out, "%s(%s, %s)", separator,
+              xnn_unary_operator_to_string(node->unary_operator),
+              xnn_datatype_to_string(
+                  subgraph->values[node->inputs[0]].datatype));
+        }
       }
       break;
     case xnn_node_type_binary_elementwise:
-      fprintf(
-          out, "%s(%s, %s)", separator,
-          xnn_binary_operator_to_string(node->binary_operator),
-          xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+      if (node->num_inputs > 0 && node->inputs[0] < subgraph->num_values) {
+        fprintf(
+            out, "%s(%s, %s)", separator,
+            xnn_binary_operator_to_string(node->binary_operator),
+            xnn_datatype_to_string(
+                subgraph->values[node->inputs[0]].datatype));
+      }
       break;
     case xnn_node_type_convert:
-      fprintf(
-          out, "%s(%s -> %s)", separator,
-          xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype),
-          xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype));
+      if (node->num_inputs > 0 && node->inputs[0] < subgraph->num_values &&
+          node->num_outputs > 0 && node->outputs[0] < subgraph->num_values) {
+        fprintf(
+            out, "%s(%s -> %s)", separator,
+            xnn_datatype_to_string(
+                subgraph->values[node->inputs[0]].datatype),
+            xnn_datatype_to_string(
+                subgraph->values[node->outputs[0]].datatype));
+      }
       break;
     case xnn_node_type_fully_connected:
     case xnn_node_type_batch_matrix_multiply:
-      fprintf(
-          out, "%s(%s, %s, %s, %s)", separator,
-          xnn_datatype_to_string(
-              node->packed_input_datatype != xnn_datatype_invalid
-                  ? node->packed_input_datatype
-                  : subgraph->values[node->inputs[0]].datatype),
-          xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype),
-          xnn_datatype_to_string(subgraph->values[node->inputs[1]].datatype),
-          (node->type == xnn_node_type_fully_connected) ^
-                  !(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
-              ? "gio"
-              : "goi");
+      if (node->num_inputs > 1 && node->inputs[0] < subgraph->num_values &&
+          node->inputs[1] < subgraph->num_values && node->num_outputs > 0 &&
+          node->outputs[0] < subgraph->num_values) {
+        fprintf(
+            out, "%s(%s, %s, %s, %s)", separator,
+            xnn_datatype_to_string(
+                node->packed_input_datatype != xnn_datatype_invalid
+                    ? node->packed_input_datatype
+                    : subgraph->values[node->inputs[0]].datatype),
+            xnn_datatype_to_string(
+                subgraph->values[node->outputs[0]].datatype),
+            xnn_datatype_to_string(
+                subgraph->values[node->inputs[1]].datatype),
+            (node->type == xnn_node_type_fully_connected) ^
+                    !(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+                ? "gio"
+                : "goi");
+      }
       break;
     case xnn_node_type_static_transpose:
       fprintf(out, "%s(perm=[", separator);
@@ -138,6 +165,9 @@ static void print_node_type(FILE* out, const xnn_subgraph_t subgraph,
 
 void xnn_subgraph_log_impl(const char* filename, size_t line_number,
                            xnn_subgraph_t subgraph, FILE* out) {
+  if (subgraph == NULL || out == NULL) {
+    return;
+  }
   xnn_mutex_lock(&mutex);
   fprintf(out,
           "Warning: logging the graph triggers an analysis of its producers "
@@ -198,7 +228,8 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
     }
     fprintf(out, "    %03" PRIu32 ": dtype=%s, shape=[", value_id,
             xnn_datatype_to_string(value->datatype));
-    if (value->shape.num_dims) {
+    if (value->shape.num_dims &&
+        value->shape.num_dims <= XNN_MAX_TENSOR_DIMS) {
       fprintf(out, "%zu", value->shape.dim[0]);
       for (size_t i = 1; i < value->shape.num_dims; i++) {
         fprintf(out, ", %zu", value->shape.dim[i]);
@@ -222,10 +253,12 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
     if (value->first_consumer != XNN_INVALID_NODE_ID) {
       fprintf(out, ", first_consumer=%u", value->first_consumer);
     }
-    if (value->fp16_rewrite.fp16_compatible && value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID) {
+    if (value->fp16_rewrite.fp16_compatible &&
+        value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID) {
       fprintf(out, ", fp16_rewrite.fp16_id=%u", value->fp16_rewrite.fp16_id);
     }
-    if (value->fp16_rewrite.fp16_compatible && value->fp16_rewrite.fp32_id != XNN_INVALID_VALUE_ID) {
+    if (value->fp16_rewrite.fp16_compatible &&
+        value->fp16_rewrite.fp32_id != XNN_INVALID_VALUE_ID) {
       fprintf(out, ", fp16_rewrite.fp32_id=%u", value->fp16_rewrite.fp32_id);
     }
     if (value->flags &
@@ -244,6 +277,9 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
 }
 
 void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
+  if (subgraph == NULL || out == NULL) {
+    return;
+  }
   xnn_mutex_lock(&mutex);
 
   fprintf(out,
@@ -265,7 +301,8 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
     if (node->type == xnn_node_type_invalid) {
       continue;
     }
-    fprintf(out, "  n%03" PRIu32 " [shape=box, label=\"#%03" PRIu32 ": ", node->id, node->id);
+    fprintf(out, "  n%03" PRIu32 " [shape=box, label=\"#%03" PRIu32 ": ",
+            node->id, node->id);
     print_node_type(out, subgraph, node, "\\n");
     fprintf(out, "\"]\n");
   }
@@ -296,16 +333,24 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
           fprintf(out, "???");
         } else {
           switch (value->datatype) {
-            case xnn_datatype_fp32:
-              fprintf(out, "%f", *(const float*)value->data);
+            case xnn_datatype_fp32: {
+              float val = 0.0f;
+              memcpy(&val, value->data, sizeof(float));
+              fprintf(out, "%f", val);
               break;
-            case xnn_datatype_fp16:
-              fprintf(out, "%f",
-                      xnn_float16_to_float(*(const xnn_float16*)value->data));
+            }
+            case xnn_datatype_fp16: {
+              xnn_float16 val;
+              memcpy(&val, value->data, sizeof(xnn_float16));
+              fprintf(out, "%f", xnn_float16_to_float(val));
               break;
-            case xnn_datatype_int32:
-              fprintf(out, "%i", *(const int*)value->data);
+            }
+            case xnn_datatype_int32: {
+              int val = 0;
+              memcpy(&val, value->data, sizeof(int));
+              fprintf(out, "%i", val);
               break;
+            }
             default:
               fprintf(out, "???");
               break;
@@ -324,7 +369,8 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
                   : "");
       if (value->producer != XNN_INVALID_NODE_ID &&
           xnn_value_is_external(value->flags)) {
-        fprintf(out, "  n%03" PRIu32 " -> v%03" PRIu32 "\n", value->producer, value->id);
+        fprintf(out, "  n%03" PRIu32 " -> v%03" PRIu32 "\n",
+                value->producer, value->id);
       }
     }
   }
@@ -337,11 +383,16 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
     }
     for (uint32_t k = 0; k < node->num_inputs; k++) {
       const uint32_t input_id = node->inputs[k];
-      assert(input_id != XNN_INVALID_VALUE_ID);
+      if (input_id >= subgraph->num_values) {
+        continue;
+      }
       const struct xnn_value* value = &subgraph->values[input_id];
       if (value->producer != XNN_INVALID_NODE_ID) {
-        fprintf(out, "  n%03" PRIu32 " -> n%03" PRIu32 " [label=\"v%03" PRIu32 ": %s[", value->producer,
-                node->id, value->id, xnn_datatype_to_string(value->datatype));
+        fprintf(out,
+                "  n%03" PRIu32 " -> n%03" PRIu32 " [label=\"v%03" PRIu32
+                ": %s[",
+                value->producer, node->id, value->id,
+                xnn_datatype_to_string(value->datatype));
         if (value->shape.num_dims) {
           fprintf(out, "%zu", value->shape.dim[0]);
           for (size_t i = 1; i < value->shape.num_dims; i++) {
@@ -357,7 +408,8 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
                                                        : ",\\nstatic shape"
                     : "");
       } else {
-        fprintf(out, "  v%03" PRIu32 " -> n%03" PRIu32 "\n", value->id, node->id);
+        fprintf(out, "  v%03" PRIu32 " -> n%03" PRIu32 "\n",
+                value->id, node->id);
       }
     }
   }
