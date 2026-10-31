@@ -312,6 +312,7 @@ def main(args):
               and basename.startswith('f16-')
               and not basename.startswith('f16-f32acc-')
               and not basename.startswith('f16-f32-vcvt-')
+              and not basename.startswith('f16-raddstoreexpminusmax-')
           ):
             isa = 'wasmrelaxedsimdfp16'
           key = isa if arch is None else f'{isa}_{arch}'
