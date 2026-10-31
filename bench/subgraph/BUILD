@@ -21,6 +21,7 @@ BENCHMARKS_SLOW_LARGE = {
     "rms_norm": (False, False),
     "layer_norm": (False, False),
     "mobilenet": (False, False),
+    "resnet50": (True, False),
     "softmax": (False, False),
     "static_reduce": (False, False),
     "transformer": (True, False),
@@ -81,15 +82,19 @@ xnnpack_cxx_library(
         "fp32-mobilenet-v2.cc",
         "fp32-mobilenet-v3-large.cc",
         "fp32-mobilenet-v3-small.cc",
+        "fp32-resnet50.cc",
         "fp32-transformer.cc",
         "qd8-transformer.cc",
         "qs8-mobilenet-v2.cc",
+        "qs8-resnet50.cc",
     ],
     hdrs = [
         "models.h",
     ],
     deps = [
         "//:XNNPACK",
+        "//:datatype",
+        "//:math",
         "//test:replicable_random_device",
     ],
 )
