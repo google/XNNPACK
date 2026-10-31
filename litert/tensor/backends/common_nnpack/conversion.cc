@@ -17,6 +17,7 @@ limitations under the License.
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <utility>
 #include <variant>
@@ -52,6 +53,25 @@ absl::StatusOr<std::vector<float>> DequantizeInt8ConstantTensor(
   }
   const size_t out_channels = info.shape[0];
   const size_t in_channels = info.shape[1];
+  if (pcq.scales.size() < out_channels) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Per-channel scale count %zu is smaller than "
+                        "out_channels %zu",
+                        pcq.scales.size(), out_channels));
+  }
+  if (!pcq.zero_points.empty() && pcq.zero_points.size() < out_channels) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Per-channel zero_point count %zu is smaller than "
+                        "out_channels %zu",
+                        pcq.zero_points.size(), out_channels));
+  }
+  if (out_channels != 0 &&
+      in_channels > std::numeric_limits<size_t>::max() / out_channels) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Weight tensor element count overflows size_t "
+                        "(%zu x %zu)",
+                        out_channels, in_channels));
+  }
   const size_t num_elements = out_channels * in_channels;
 
   if (raw_data.size() < num_elements) {
