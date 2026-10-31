@@ -3021,6 +3021,14 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     const uint8_t* kernel, const float* bias, float output_min,
     float output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+    xnn_log_error(
+        "failed to create %s operator with XNN_FLAG_TRANSPOSE_WEIGHTS: not "
+        "supported",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_f32_qc4w));
+    return xnn_status_unsupported_parameter;
+  }
   struct fc_context context = {
       .input_channels = input_channels,
       .output_channels = output_channels,
