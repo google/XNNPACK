@@ -42,6 +42,7 @@ typedef struct sme_state {
   int64_t x1;
 } sme_state_t;
 
+#if XNN_COMPILER_CLANG
 #define XNN_STUB_ATTRIBUTES \
   __attribute__((naked, no_profile_instrument_function))
 
@@ -66,6 +67,28 @@ XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_za_disable(void) {
 }
 
 #undef XNN_STUB_ATTRIBUTES
+#else
+// GCC does not support __attribute__((naked)) on AArch64.
+#define XNN_STUB_ATTRIBUTES __attribute__((no_profile_instrument_function))
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES uint64_t __arm_get_current_vg(void) {
+  return 0;
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES sme_state_t __arm_sme_state(void) {
+  return (sme_state_t){0, 0};
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_restore(void* blk) {
+  (void) blk;
+}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_save(void) {}
+
+XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_za_disable(void) {}
+
+#undef XNN_STUB_ATTRIBUTES
+#endif  // XNN_COMPILER_CLANG
 
 #endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) &&
         // XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)
