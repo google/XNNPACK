@@ -1863,12 +1863,461 @@ bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
     }
   }
 
+  bool is_identity = permutation.size() == input.rank();
+  for (size_t d = 0; is_identity && d < permutation.size(); ++d) {
+    is_identity = permutation[d] == static_cast<int32_t>(d) &&
+                  output.extents[d].defined() == input.extents[d].defined();
+  }
+  if (is_identity && (!output.is_external_output() || !input.is_external())) {
+    YNN_LOG_DEBUG() << "Removing identity reshape";
+    if (replace_uses(analysis, subgraph, node, output.id, input.id)) {
+      analysis.invalidate_node(node);
+    }
+    return true;
+  }
+
   YNN_LOG_DEBUG() << "Rewriting reshape to static_transpose";
   analysis.update_node(node, [&]() {
     ynn::define_static_transpose(subgraph, node, std::move(permutation),
                                  input.id, &output.id);
   });
   return true;
+}
+
+// Rewrite static_reshape(static_reshape(x)) to static_reshape(x).
+bool rewrite_reshape_reshape(ynn_subgraph& subgraph, ynn_node& node,
+                             subgraph_analysis& analysis) {
+  auto* reshape = std::get_if<ynn_node::static_reshape>(&node.op);
+  if (!reshape) return false;
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer ||
+      !std::holds_alternative<ynn_node::static_reshape>(producer->op)) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting static_reshape(static_reshape(x)) to "
+                     "static_reshape(x)";
+  uint32_t input_id = producer->inputs[0];
+  std::vector<size_t> new_dims = std::move(reshape->new_dims);
+  analysis.update_node(node, [&]() {
+    node.checks.clear();
+    ynn::define_static_reshape(subgraph, node, std::move(new_dims), input_id,
+                               &node.outputs[0]);
+  });
+  return true;
+}
+
+// Returns true if reshaping `x` to `y` preserves the innermost `prefix_dims`
+// dimensions and only fuses contiguous outer dimensions (with at least one
+// pair of non-unit outer dimensions fused into a single dimension).
+bool is_fusing_outer_reshape(const ynn_value& x, const ynn_value& y,
+                             size_t prefix_dims) {
+  if (x.rank() < prefix_dims || y.rank() < prefix_dims) {
+    return false;
+  }
+  for (size_t d = 0; d < prefix_dims; ++d) {
+    if (!slinky::prove_true(x.extent(d) == y.extent(d))) {
+      return false;
+    }
+  }
+  size_t i = prefix_dims;
+  size_t o = prefix_dims;
+  bool fused_any = false;
+  while (o < y.rank()) {
+    if (slinky::prove_true(y.extent(o) == 1)) {
+      ++o;
+      continue;
+    }
+    while (i < x.rank() && slinky::prove_true(x.extent(i) == 1)) {
+      ++i;
+    }
+    if (i >= x.rank()) {
+      return false;
+    }
+    slinky::expr prod = x.extent(i++);
+    size_t count = 1;
+    while (!slinky::prove_true(prod == y.extent(o))) {
+      while (i < x.rank() && slinky::prove_true(x.extent(i) == 1)) {
+        ++i;
+      }
+      if (i >= x.rank()) {
+        return false;
+      }
+      prod = slinky::simplify(prod * x.extent(i++));
+      ++count;
+    }
+    if (count >= 2) {
+      fused_any = true;
+    }
+    ++o;
+  }
+  while (i < x.rank()) {
+    if (!slinky::prove_true(x.extent(i) == 1)) {
+      return false;
+    }
+    ++i;
+  }
+  return fused_any;
+}
+
+// Rewrite static_reshape(dot(a, packed_b, c)) to
+// dot(static_reshape(a), packed_b, c) when the reshape splits outer batch/M
+// dimensions of the dot output and `packed_b` / `c` are broadcast in batch
+// dimensions.
+bool rewrite_reshape_dot(ynn_subgraph& subgraph, ynn_node& node,
+                         subgraph_analysis& analysis) {
+  const ynn_node::static_reshape* reshape_op =
+      std::get_if<ynn_node::static_reshape>(&node.op);
+  if (!reshape_op) return false;
+
+  const uint32_t dot_out_id = node.inputs[0];
+  if (analysis.consumers[dot_out_id].size() != 1 ||
+      subgraph.value(dot_out_id).is_external_output()) {
+    return false;
+  }
+  ynn_node* dot_node = analysis.producer_of(dot_out_id);
+  if (!dot_node) return false;
+  const ynn_node::dot* dot_op = std::get_if<ynn_node::dot>(&dot_node->op);
+  if (!dot_op) return false;
+  const size_t num_k_dims = dot_op->num_k_dims;
+
+  const uint32_t output_id = node.outputs[0];
+  const ynn_value& dot_out = subgraph.value(dot_out_id);
+  const ynn_value& output = subgraph.value(output_id);
+  if (output.rank() < dot_out.rank() ||
+      !is_fusing_outer_reshape(output, dot_out, /*prefix_dims=*/1)) {
+    return false;
+  }
+  if (slinky::prove_true(output.extent(1) == 1) &&
+      !slinky::prove_true(dot_out.extent(1) == 1)) {
+    return false;
+  }
+
+  const uint32_t packed_b_id = dot_node->inputs[1];
+  const ynn_value& packed_b = subgraph.value(packed_b_id);
+  for (size_t d = 3 + num_k_dims; d < packed_b.rank(); ++d) {
+    if (!slinky::prove_true(packed_b.extent(d) == 1)) {
+      return false;
+    }
+  }
+
+  const uint32_t input_c_id = dot_node->inputs[2];
+  if (input_c_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& input_c = subgraph.value(input_c_id);
+    for (size_t d = 1; d < input_c.rank(); ++d) {
+      if (!slinky::prove_true(input_c.extent(d) == 1)) {
+        return false;
+      }
+    }
+  }
+
+  uint32_t a_id = dot_node->inputs[0];
+  ynn_node* a_producer = analysis.producer_of(a_id);
+  const ynn_node::transpose_a* ta_op =
+      a_producer ? std::get_if<ynn_node::transpose_a>(&a_producer->op)
+                 : nullptr;
+  if (ta_op) {
+    if (analysis.consumers[a_id].size() != 1 ||
+        subgraph.value(a_id).is_external_output()) {
+      return false;
+    }
+    a_id = a_producer->inputs[0];
+  }
+  const ynn_value& a = subgraph.value(a_id);
+  if (a.rank() < num_k_dims) return false;
+
+  const size_t max_batch_dims =
+      std::max<size_t>(a.rank() - num_k_dims, dot_out.rank() - 1);
+  for (size_t d = 0; d < max_batch_dims; ++d) {
+    if (!slinky::prove_true(a.extent(num_k_dims + d) ==
+                            dot_out.extent(1 + d))) {
+      return false;
+    }
+  }
+
+  if (ta_op &&
+      !slinky::prove_true(output.extent(1) %
+                              static_cast<slinky::index_t>(ta_op->tile_m) ==
+                          0)) {
+    return false;
+  }
+
+  std::vector<size_t> a_new_dims(num_k_dims + output.rank() - 1);
+  for (size_t d = 0; d < num_k_dims; ++d) {
+    auto k_const = slinky::as_constant(a.extent(d));
+    if (!k_const) return false;
+    a_new_dims[d] = static_cast<size_t>(*k_const);
+  }
+  for (size_t d = 1; d < output.rank(); ++d) {
+    auto m_const = slinky::as_constant(output.extent(d));
+    if (!m_const) return false;
+    a_new_dims[num_k_dims + d - 1] = static_cast<size_t>(*m_const);
+  }
+
+  YNN_LOG_DEBUG()
+      << "Rewriting static_reshape(dot(a, b)) to dot(static_reshape(a), b)";
+
+  uint32_t a_reshaped_id = YNN_INVALID_VALUE_ID;
+  ynn_node reshape_a_node;
+  ynn::define_static_reshape(subgraph, reshape_a_node, std::move(a_new_dims),
+                             a_id, &a_reshaped_id);
+  subgraph.add_node(std::move(reshape_a_node));
+
+  uint32_t dot_a_id = a_reshaped_id;
+  if (ta_op) {
+    a_producer->checks.clear();
+    dot_a_id = a_producer->outputs[0];
+    ynn::define_transpose_a(subgraph, *a_producer, ta_op->tile_m, ta_op->tile_k,
+                            ta_op->m_dim, a_reshaped_id, dot_a_id);
+  }
+
+  node.inputs = {dot_a_id, packed_b_id, input_c_id};
+  node.outputs = {output_id};
+  node.op = ynn_node::dot{num_k_dims};
+  node.checks.clear();
+  node.create = std::move(dot_node->create);
+  analysis.invalidate_node(*dot_node);
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
+// Rewrite reduce(static_reshape(x)) to static_reshape(reduce(x)) when the
+// reshape only fuses outer dimensions not reduced by `reduce`.
+bool rewrite_reduce_reshape(ynn_subgraph& subgraph, ynn_node& node,
+                            subgraph_analysis& analysis) {
+  const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
+  if (!reduce_op || reduce_op->op == ynn_reduce_min_max ||
+      reduce_op->k_dims.none()) {
+    return false;
+  }
+  if (node.inputs.size() > 1 && node.inputs[1] != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+  const ynn_node::static_reshape* reshape_op =
+      std::get_if<ynn_node::static_reshape>(&producer->op);
+  if (!reshape_op) return false;
+
+  const uint32_t x_id = producer->inputs[0];
+  const uint32_t y_id = producer->outputs[0];
+  const ynn_value& x = subgraph.value(x_id);
+  const ynn_value& y = subgraph.value(y_id);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+
+  size_t prefix_dims = 0;
+  for (size_t d = 0; d < reduce_op->k_dims.size(); ++d) {
+    if (reduce_op->k_dims[d]) {
+      if (reduce_op->keep_dims && d < output.rank() &&
+          output.extents[d].defined()) {
+        // Partial reduction: the reduced axis still has extent > 1.
+        return false;
+      }
+      prefix_dims = d + 1;
+    }
+  }
+  if (!is_fusing_outer_reshape(x, y, prefix_dims)) {
+    return false;
+  }
+
+  const ynn_reduce_operator op = reduce_op->op;
+  const ynn::axes_set k_dims = reduce_op->k_dims;
+  const bool keep_dims = reduce_op->keep_dims;
+  std::vector<size_t> new_dims;
+  new_dims.reserve(reshape_op->new_dims.size());
+  for (size_t d = 0; d < reshape_op->new_dims.size(); ++d) {
+    if (d < prefix_dims && k_dims[d]) {
+      if (keep_dims) {
+        new_dims.push_back(1);
+      }
+    } else {
+      new_dims.push_back(reshape_op->new_dims[d]);
+    }
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting reduce(static_reshape(x)) to "
+                     "static_reshape(reduce(x))";
+
+  uint32_t reduced_id = YNN_INVALID_VALUE_ID;
+  ynn_node reduce_node;
+  ynn::define_reduce(subgraph, reduce_node, op, k_dims, x_id,
+                     YNN_INVALID_VALUE_ID, &reduced_id, keep_dims);
+  subgraph.add_node(std::move(reduce_node));
+
+  node.checks.clear();
+  ynn::define_static_reshape(subgraph, node, std::move(new_dims), reduced_id,
+                             &node.outputs[0]);
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
+bool matches_fusing_outer_reshape(const ynn_value& pre_a, const ynn_value& a,
+                                  const ynn_value& pre_b, const ynn_value& b,
+                                  size_t prefix_dims) {
+  if (pre_b.rank() != pre_a.rank() || b.rank() != a.rank()) {
+    return false;
+  }
+  for (size_t d = 0; d < prefix_dims; ++d) {
+    if (!slinky::prove_true(pre_b.extent(d) == b.extent(d))) {
+      return false;
+    }
+  }
+  for (size_t d = prefix_dims; d < pre_a.rank(); ++d) {
+    if (!slinky::prove_true(pre_b.extent(d) == pre_a.extent(d))) {
+      return false;
+    }
+  }
+  for (size_t d = prefix_dims; d < a.rank(); ++d) {
+    if (!slinky::prove_true(b.extent(d) == a.extent(d))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+uint32_t get_unreshaped_binary_rhs(const ynn_value& pre_a, const ynn_value& a,
+                                   const ynn_value& out, const ynn_value* pre_b,
+                                   const ynn_value& b) {
+  if (a.rank() != out.rank()) return YNN_INVALID_VALUE_ID;
+  for (size_t d = 0; d < out.rank(); ++d) {
+    if (!slinky::prove_true(a.extent(d) == out.extent(d))) {
+      return YNN_INVALID_VALUE_ID;
+    }
+  }
+  size_t prefix_dims = 0;
+  while (
+      prefix_dims < std::min(pre_a.rank(), a.rank()) &&
+      slinky::prove_true(pre_a.extent(prefix_dims) == a.extent(prefix_dims))) {
+    ++prefix_dims;
+  }
+  if (!is_fusing_outer_reshape(pre_a, a, prefix_dims)) {
+    return YNN_INVALID_VALUE_ID;
+  }
+
+  if (pre_b != nullptr &&
+      matches_fusing_outer_reshape(pre_a, a, *pre_b, b, prefix_dims)) {
+    return pre_b->id;
+  }
+
+  if (b.rank() > pre_a.rank()) return YNN_INVALID_VALUE_ID;
+  for (size_t d = prefix_dims; d < b.rank(); ++d) {
+    if (!slinky::prove_true(b.extent(d) == 1)) {
+      return YNN_INVALID_VALUE_ID;
+    }
+  }
+  return b.id;
+}
+
+// Rewrite elementwise(static_reshape(x), ...) to
+// static_reshape(elementwise(x, ...)) when the reshape only fuses outer
+// dimensions.
+bool rewrite_elementwise_reshape(ynn_subgraph& subgraph, ynn_node& node,
+                                 subgraph_analysis& analysis) {
+  if (const auto* unary = std::get_if<ynn_node::unary_elementwise>(&node.op)) {
+    ynn_node* producer = analysis.producer_of(node.inputs[0]);
+    if (!producer) return false;
+    const auto* reshape_op =
+        std::get_if<ynn_node::static_reshape>(&producer->op);
+    if (!reshape_op) return false;
+
+    const uint32_t x_id = producer->inputs[0];
+    const uint32_t y_id = producer->outputs[0];
+    if (!is_fusing_outer_reshape(subgraph.value(x_id), subgraph.value(y_id),
+                                 /*prefix_dims=*/0)) {
+      return false;
+    }
+
+    const uint32_t output_id = node.outputs[0];
+    const ynn_type output_type = subgraph.value(output_id).type;
+    const ynn_unary_operator op = unary->op;
+    const unary_params params = unary->params;
+    std::vector<size_t> new_dims = reshape_op->new_dims;
+    const unary_kernel_fn kernel =
+        get_unary_kernel(op, subgraph.value(x_id).type, output_type);
+    if (!kernel) return false;
+
+    YNN_LOG_DEBUG() << "Rewriting " << to_string(op)
+                    << "(static_reshape(x)) to static_reshape(" << to_string(op)
+                    << "(x))";
+
+    ynn_value& u_val = subgraph.new_internal_value(output_type);
+    const uint32_t u_id = u_val.id;
+    ynn_node unary_node;
+    define_unary(subgraph, unary_node, x_id, u_id, op, kernel, params);
+    subgraph.add_node(std::move(unary_node));
+
+    node.checks.clear();
+    define_static_reshape(subgraph, node, std::move(new_dims), u_id,
+                          &node.outputs[0]);
+    subgraph.topological_sort();
+    analysis.invalidate();
+    return true;
+  }
+
+  if (const auto* binary =
+          std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+    const uint32_t output_id = node.outputs[0];
+    const ynn_value& out = subgraph.value(output_id);
+    for (int i : {0, 1}) {
+      ynn_node* prod_a = analysis.producer_of(node.inputs[i]);
+      if (!prod_a) continue;
+      const auto* reshape_a =
+          std::get_if<ynn_node::static_reshape>(&prod_a->op);
+      if (!reshape_a) continue;
+
+      const uint32_t pre_a_id = prod_a->inputs[0];
+      const ynn_value& pre_a = subgraph.value(pre_a_id);
+      const ynn_value& a = subgraph.value(node.inputs[i]);
+
+      const uint32_t b_id = node.inputs[1 - i];
+      const ynn_value& b = subgraph.value(b_id);
+      ynn_node* prod_b = analysis.producer_of(b_id);
+      const ynn_value* pre_b = nullptr;
+      if (prod_b &&
+          std::holds_alternative<ynn_node::static_reshape>(prod_b->op)) {
+        pre_b = &subgraph.value(prod_b->inputs[0]);
+      }
+
+      const uint32_t new_b_id =
+          get_unreshaped_binary_rhs(pre_a, a, out, pre_b, b);
+      if (new_b_id == YNN_INVALID_VALUE_ID) {
+        continue;
+      }
+
+      const uint32_t new_in0 = (i == 0) ? pre_a_id : new_b_id;
+      const uint32_t new_in1 = (i == 1) ? pre_a_id : new_b_id;
+      const ynn_type output_type = out.type;
+      const ynn_binary_operator op = binary->op;
+      std::vector<size_t> new_dims = reshape_a->new_dims;
+      const binary_kernel_fn kernel =
+          get_binary_kernel(op, subgraph.value(new_in0).type,
+                            subgraph.value(new_in1).type, output_type);
+      if (!kernel) continue;
+
+      YNN_LOG_DEBUG() << "Rewriting " << to_string(op)
+                      << "(static_reshape(a), b) to static_reshape("
+                      << to_string(op) << "(a, b))";
+
+      ynn_value& b_val = subgraph.new_internal_value(output_type);
+      const uint32_t b_out_id = b_val.id;
+      ynn_node binary_node;
+      define_binary(subgraph, binary_node, new_in0, new_in1, b_out_id, op,
+                    kernel);
+      subgraph.add_node(std::move(binary_node));
+
+      node.checks.clear();
+      define_static_reshape(subgraph, node, std::move(new_dims), b_out_id,
+                            &node.outputs[0]);
+      subgraph.topological_sort();
+      analysis.invalidate();
+      return true;
+    }
+  }
+  return false;
 }
 
 // Rewrite transpose(transpose(x)) to transpose(x)
@@ -2687,7 +3136,11 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_exp_subtract(*this, node, analysis) ||
                 ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
                 ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
+                ynn::rewrite_reshape_reshape(*this, node, analysis) ||
                 ynn::rewrite_reshape(*this, node, analysis) ||
+                ynn::rewrite_reshape_dot(*this, node, analysis) ||
+                ynn::rewrite_reduce_reshape(*this, node, analysis) ||
+                ynn::rewrite_elementwise_reshape(*this, node, analysis) ||
                 ynn::rewrite_transpose_transpose(*this, node, analysis) ||
                 ynn::rewrite_divide_sqrt(*this, node, analysis) ||
                 ynn::rewrite_multiply_reciprocal(*this, node, analysis) ||
