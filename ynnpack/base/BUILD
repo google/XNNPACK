@@ -67,6 +67,14 @@ cc_library(
         ":debug_build": ["YNN_LOG_LEVEL=YNN_LOG_LEVEL_DEBUG"],
         "//conditions:default": ["YNN_LOG_LEVEL=YNN_LOG_LEVEL_WARNING"],
     }),
+    visibility = [
+        "//test:__subpackages__",
+        "//ynnpack:__subpackages__",
+    ],
+    deps = [
+        "//:logging",  # build_cleaner: keep
+        "//:xnnpack_h",
+    ],
 )
 
 cc_library(
