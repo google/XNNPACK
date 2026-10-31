@@ -86,6 +86,26 @@ TEST_F(U8SimdNEONTest, Xor) {
   }
 }
 
+TEST_F(U8SimdNEONTest, ReduceMin) {
+  const xnn_simd_u8_t a = xnn_loadu_u8(inputs_.data());
+  uint8_t res = xnn_reduce_min_u8(a);
+  uint8_t expected = std::numeric_limits<uint8_t>::max();
+  for (size_t i = 0; i < xnn_simd_size_u8; ++i) {
+    expected = std::min<uint8_t>(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
+TEST_F(U8SimdNEONTest, ReduceMax) {
+  const xnn_simd_u8_t a = xnn_loadu_u8(inputs_.data());
+  uint8_t res = xnn_reduce_max_u8(a);
+  uint8_t expected = std::numeric_limits<uint8_t>::min();
+  for (size_t i = 0; i < xnn_simd_size_u8; ++i) {
+    expected = std::max<uint8_t>(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
 TEST_F(U8SimdNEONTest, StoreTail) {
   const xnn_simd_u8_t a = xnn_loadu_u8(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_u8;
