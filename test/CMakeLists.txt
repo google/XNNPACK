@@ -130,6 +130,7 @@ SET(MICROKERNEL_UNIT_TESTS
     u8-ibilinear
     u8-lut32norm
     x16-packw
+    x16-x32-packw
     x32-packw
     x32-packx
     x32-unpool
