@@ -21,11 +21,41 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/runtime-flags.h"
 
 namespace {
+
+class FailingAllocatorGuard {
+ public:
+  explicit FailingAllocatorGuard(size_t fail_bytes)
+      : saved_allocator_(xnn_params.allocator), fail_bytes_(fail_bytes) {
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.allocate = FailingAllocate;
+  }
+  ~FailingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+  FailingAllocatorGuard(const FailingAllocatorGuard&) = delete;
+  FailingAllocatorGuard& operator=(const FailingAllocatorGuard&) = delete;
+
+ private:
+  static void* FailingAllocate(void* context, size_t size) {
+    auto* self = static_cast<FailingAllocatorGuard*>(context);
+    if (self->fail_active_ && size == self->fail_bytes_) {
+      self->fail_active_ = false;
+      return nullptr;
+    }
+    return self->saved_allocator_.allocate(
+        self->saved_allocator_.context, size);
+  }
+
+  const struct xnn_allocator saved_allocator_;
+  const size_t fail_bytes_;
+  bool fail_active_ = true;
+};
+
 void DefineGraphWithoutInternalTensors(xnn_subgraph_t* subgraph,
                                        std::array<size_t, 4> dims) {
   xnn_create_subgraph(/*external_value_ids=*/0, /*flags=*/0, subgraph);
@@ -769,3 +799,21 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters) {
     ASSERT_EQ(dq_tensors, 1);
   }
 }
+
+TEST(WORKSPACE, failure_allocating_workspace_reports_out_of_memory) {
+  xnn_subgraph_t subgraph = nullptr;
+  DefineGraphWithoutInternalTensors(&subgraph, {1, 1, 1, 1});
+  ASSERT_NE(subgraph, nullptr);
+
+  xnn_runtime_t runtime = reinterpret_cast<xnn_runtime_t>(-1);
+  {
+    FailingAllocatorGuard guard(sizeof(struct xnn_workspace));
+    const xnn_status status = xnn_create_runtime_v4(
+        subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+    EXPECT_EQ(status, xnn_status_out_of_memory);
+    EXPECT_EQ(runtime, nullptr);
+  }
+
+  xnn_delete_subgraph(subgraph);
+}
+
