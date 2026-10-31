@@ -100,4 +100,21 @@ TEST(ReshapeBF16, test) { TestImpl<xnn_bfloat16>(); }
 TEST(ReshapeF16, test) { TestImpl<xnn_float16>(); }
 TEST(ReshapeF32, test) { TestImpl<float>(); }
 
+TEST(StaticReshape, OverflowOutputShape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> input_shape = {4, 4};
+  Tensor<float> input(input_shape, xnnpack::XnnExtraBytes);
+  Tensor<float> output({4, 4});
+
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(input.extents(), input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.extents(), output.data(), /*external_id=*/1)
+      .AddReshape({0, SIZE_MAX / 2, 3}, 0, 1);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  subgraph.ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+
 }  // namespace xnnpack
