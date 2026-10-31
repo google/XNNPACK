@@ -1421,6 +1421,14 @@ void xnn_qs8_packw_gemm_goi_ukernel_x16c8__scalar(
         out[118] = v14x6;
         out[119] = v14x7;
         w14 += 8;
+        out[120] = 0;
+        out[121] = 0;
+        out[122] = 0;
+        out[123] = 0;
+        out[124] = 0;
+        out[125] = 0;
+        out[126] = 0;
+        out[127] = 0;
         out += 128;
       }
 
