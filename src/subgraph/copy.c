@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -285,32 +286,73 @@ static enum xnn_status resize_split_dims_output_tensor(
   }
 
   size_t count = 1;
+  size_t num_dynamic_dims = 0;
   for (size_t k = 0; k < num_dims; k++) {
-    if (splits[k]) {
-      count *= splits[k];
+    if (splits[k] == 0) {
+      num_dynamic_dims++;
+    } else {
+      if (!xnn_safe_mul(count, splits[k], &count)) {
+        xnn_log_error(
+            "failed to split dims in %s operator with input ID #%" PRIu32
+            " and output ID #%" PRIu32
+            ": product of defined splits overflows size_t",
+            xnn_node_type_to_string(xnn_node_type_split_dims),
+            input_id, output_id);
+        return xnn_status_invalid_parameter;
+      }
     }
   }
-  size_t remainder = input_shape->dim[axis] / count;
-  if (remainder * count != input_shape->dim[axis]) {
-    xnn_log_error("failed to split dims in %s operator with input ID #%" PRIu32
-                  " and output ID #%" PRIu32
-                  ": product of defined splits, %zu, does not divide the split "
-                  "input dimension, %zu",
-                  xnn_node_type_to_string(xnn_node_type_split_dims),
-                  input_id, output_id, count, input_shape->dim[axis]);
+
+  if (num_dynamic_dims > 1) {
+    xnn_log_error(
+        "failed to split dims in %s operator with input ID #%" PRIu32
+        " and output ID #%" PRIu32
+        ": at most one split dimension can be 0 (inferred), found %zu",
+        xnn_node_type_to_string(xnn_node_type_split_dims),
+        input_id, output_id, num_dynamic_dims);
     return xnn_status_invalid_parameter;
   }
+
+  if (count == 0) {
+    xnn_log_error(
+        "failed to split dims in %s operator with input ID #%" PRIu32
+        " and output ID #%" PRIu32 ": product of defined splits is zero",
+        xnn_node_type_to_string(xnn_node_type_split_dims),
+        input_id, output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (num_dynamic_dims == 0) {
+    if (count != input_shape->dim[axis]) {
+      xnn_log_error(
+          "failed to split dims in %s operator with input ID #%" PRIu32
+          " and output ID #%" PRIu32
+          ": product of defined splits, %zu, does not match the split "
+          "input dimension, %zu",
+          xnn_node_type_to_string(xnn_node_type_split_dims),
+          input_id, output_id, count, input_shape->dim[axis]);
+      return xnn_status_invalid_parameter;
+    }
+  } else {
+    if (input_shape->dim[axis] % count != 0) {
+      xnn_log_error(
+          "failed to split dims in %s operator with input ID #%" PRIu32
+          " and output ID #%" PRIu32
+          ": product of defined splits, %zu, does not divide the split "
+          "input dimension, %zu",
+          xnn_node_type_to_string(xnn_node_type_split_dims),
+          input_id, output_id, count, input_shape->dim[axis]);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  const size_t remainder = input_shape->dim[axis] / count;
 
   for (size_t k = 0; k < axis; k++) {
     output_shape->dim[k] = input_shape->dim[k];
   }
   for (size_t k = 0; k < num_dims; k++) {
-    if (splits[k]) {
-      output_shape->dim[axis + k] = splits[k];
-    } else {
-      output_shape->dim[axis + k] = remainder;
-      remainder = 1;
-    }
+    output_shape->dim[axis + k] = splits[k] == 0 ? remainder : splits[k];
   }
   for (size_t k = axis + 1; k < input_shape->num_dims; k++) {
     output_shape->dim[k + num_dims - 1] = input_shape->dim[k];
@@ -318,6 +360,14 @@ static enum xnn_status resize_split_dims_output_tensor(
   output_shape->num_dims = input_shape->num_dims + num_dims - 1;
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
+  if (new_size == SIZE_MAX) {
+    xnn_log_error(
+        "failed to split dims in %s operator with input ID #%" PRIu32
+        " and output ID #%" PRIu32 ": output tensor size overflows size_t",
+        xnn_node_type_to_string(xnn_node_type_split_dims),
+        input_id, output_id);
+    return xnn_status_out_of_memory;
+  }
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -598,11 +648,17 @@ enum xnn_status xnn_define_fuse_dims(
 }
 
 enum xnn_status xnn_define_split_dim(xnn_subgraph_t subgraph,
-                                             size_t axis, size_t num_splits,
-                                             const size_t* splits,
-                                             uint32_t input_id,
-                                             uint32_t output_id,
-                                             uint32_t flags) {
+                                     size_t axis, size_t num_splits,
+                                     const size_t* splits,
+                                     uint32_t input_id,
+                                     uint32_t output_id,
+                                     uint32_t flags) {
+  if (splits == NULL) {
+    xnn_log_error(
+        "failed to define %s operator: splits must not be NULL",
+        xnn_node_type_to_string(xnn_node_type_split_dims));
+    return xnn_status_invalid_parameter;
+  }
   if (num_splits == 0) {
     xnn_log_error(
         "failed to define %s operator with %zu num_splits: num_splits must "
@@ -615,9 +671,22 @@ enum xnn_status xnn_define_split_dim(xnn_subgraph_t subgraph,
     xnn_log_error(
         "failed to define %s operator with %zu-dimensional output shape: at "
         "most %zu dimensions are supported",
-        xnn_node_type_to_string(xnn_node_type_fuse_dims), axis + num_splits,
+        xnn_node_type_to_string(xnn_node_type_split_dims), axis + num_splits,
         (size_t)XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
+  }
+  size_t num_dynamic_dims = 0;
+  for (size_t k = 0; k < num_splits; k++) {
+    if (splits[k] == 0) {
+      num_dynamic_dims++;
+    }
+  }
+  if (num_dynamic_dims > 1) {
+    xnn_log_error(
+        "failed to define %s operator: at most one split dimension can be 0 "
+        "(inferred), but %zu were provided",
+        xnn_node_type_to_string(xnn_node_type_split_dims), num_dynamic_dims);
+    return xnn_status_invalid_parameter;
   }
   return define_copy_node(subgraph, /*num_dims=*/num_splits,
                           /*new_shape=*/splits, axis,
