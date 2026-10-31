@@ -103,6 +103,10 @@ struct UnaryOpInfo {
     }
   }
 
+  virtual float InputTolerance(float /*x*/, xnn_datatype /*datatype*/) const {
+    return 0.0f;
+  }
+
   virtual Interval Domain(xnn_datatype) const { return Interval::All(); }
 
   // Quantization parameters to use by default.
@@ -243,6 +247,15 @@ struct GELU : public UnaryOpInfo {
         return 1;
       default:
         XNN_UNREACHABLE;
+    }
+  }
+
+  float InputTolerance(float x, xnn_datatype datatype) const override {
+    switch (datatype) {
+      case xnn_datatype_fp32:
+        return 2.0f * std::abs(x) * std::numeric_limits<float>::epsilon();
+      default:
+        return 0.0f;
     }
   }
 
