@@ -56,6 +56,13 @@ absl::StatusOr<NnpackPadding> ComputePadding(
     return NnpackPadding{};
   }
 
+  if ((dilation_h > 1 && kernel_height > 1 &&
+       (kernel_height - 1) > std::numeric_limits<size_t>::max() / dilation_h) ||
+      (dilation_w > 1 && kernel_width > 1 &&
+       (kernel_width - 1) > std::numeric_limits<size_t>::max() / dilation_w)) {
+    return absl::InvalidArgumentError(
+        "dilation overflows effective kernel size on this platform");
+  }
   const size_t effective_kernel_height = (kernel_height - 1) * dilation_h + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation_w + 1;
 
