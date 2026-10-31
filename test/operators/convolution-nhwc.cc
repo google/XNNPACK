@@ -2330,4 +2330,28 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
           convolution_op, overflow_batch, 1, 1, &workspace_size,
           nullptr, nullptr, nullptr));
 }
+
+TEST(CONVOLUTION_NHWC_F32, zero_batch_workspace) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  static float kernel[9] = {0};
+  static float bias[1] = {0.0f};
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_convolution2d_nhwc_f32(
+          0, 0, 0, 0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, kernel, bias,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+  size_t workspace_size = SIZE_MAX;
+  size_t output_height = SIZE_MAX;
+  size_t output_width = SIZE_MAX;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_reshape_convolution2d_nhwc_f32(
+          op, /*batch_size=*/0, /*input_height=*/4, /*input_width=*/4,
+          &workspace_size, &output_height, &output_width, nullptr));
+  EXPECT_EQ(workspace_size, 0u);
+}
 }  // namespace
