@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -269,13 +270,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_op(
     uint32_t flags) {
   op->type = xnn_operator_type_unary_elementwise;
   op->flags = flags;
-  op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
-  op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
   op->unary_elementwise.op_type = op_type;
 
   if (lut) {
     assert(xnn_datatype_size_bytes(input_datatype) == 1);
     assert(xnn_datatype_size_bytes(output_datatype) == 1);
+    op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
+    op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
     // This op is a LUT.
     return init_lut_op(op, lut);
   }
@@ -283,20 +284,24 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_op(
   const struct xnn_unary_elementwise_config* config =
       get_config(op_type, input_datatype, output_datatype, input_quantization,
                  output_quantization, flags);
-  if (config && config->ukernel) {
-    // We have an elementwise config, use it.
-    op->unary_elementwise_config = config;
-    op->state = xnn_run_state_invalid;
-
-    if (config->init != NULL) {
-      config->init(&op->params.unary, params, input_quantization, output_quantization);
+  const bool use_reference = config == NULL || config->ukernel == NULL;
+  if (use_reference) {
+    // Fall back to reference.
+    config = xnn_init_unary_reference_config(op_type, input_datatype, output_datatype);
+    if (config == NULL) {
+      xnn_log_error(
+        "unsupported operator %s for datatypes %s -> %s",
+        xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
+      return xnn_status_unsupported_parameter;
     }
-    return xnn_status_success;
   }
 
-  // Fall back to reference.
-  config = xnn_init_unary_reference_config(op_type, input_datatype, output_datatype);
-  if (config) {
+  // Only query the element sizes once a config exists for these datatypes:
+  // sub-byte datatypes don't have a log2 size in bytes.
+  op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
+  op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
+
+  if (use_reference) {
     if (xnn_datatype_size_bytes(input_datatype) == 1 && xnn_datatype_size_bytes(output_datatype) == 1) {
       // We can use a LUT for this op.
       return init_lut_op_with_config(op, config, params, input_quantization, output_quantization);
@@ -305,20 +310,15 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_op(
     xnn_log_debug(
       "unsupported operator %s for datatypes %s -> %s, falling back to reference kernel",
       xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
-
-    op->unary_elementwise_config = config;
-    op->state = xnn_run_state_invalid;
-
-    if (config->init != NULL) {
-      config->init(&op->params.unary, params, input_quantization, output_quantization);
-    }
-    return xnn_status_success;
-  } else {
-    xnn_log_error(
-      "unsupported operator %s for datatypes %s -> %s",
-      xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
-    return xnn_status_unsupported_parameter;
   }
+
+  op->unary_elementwise_config = config;
+  op->state = xnn_run_state_invalid;
+
+  if (config->init != NULL) {
+    config->init(&op->params.unary, params, input_quantization, output_quantization);
+  }
+  return xnn_status_success;
 }
 
 static size_t get_tile_size(xnn_operator_t op) {
