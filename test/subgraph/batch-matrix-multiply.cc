@@ -980,6 +980,50 @@ TEST(BatchMatrixMultiply, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(BatchMatrixMultiply, RankOneTransposedB) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_a_id = XNN_INVALID_VALUE_ID;
+  const size_t input_a_dims[2] = {2, 4};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 2, input_a_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_a_id));
+
+  uint32_t input_b_id = XNN_INVALID_VALUE_ID;
+  const size_t input_b_dims[1] = {4};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 1, input_b_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_b_id));
+
+  uint32_t transposed_b_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1,
+                                    input_b_dims, nullptr, XNN_INVALID_VALUE_ID,
+                                    /*flags=*/0, &transposed_b_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[1] = {2};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 1, output_dims, nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  const size_t perm[1] = {0};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_static_transpose(subgraph, 1, perm, input_b_id,
+                                        transposed_b_id, /*flags=*/0));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_batch_matrix_multiply(
+                subgraph, input_a_id, transposed_b_id, output_id, /*flags=*/0));
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
