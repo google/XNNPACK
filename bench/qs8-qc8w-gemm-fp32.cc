@@ -817,6 +817,17 @@ namespace {
 
   BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm)
 
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm_zip(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm_zip,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon,
+      /*mr=*/4, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_i8mm);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm_zip)
+
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__neoni8mm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__neoni8mm,
