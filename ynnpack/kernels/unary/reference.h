@@ -246,6 +246,8 @@ struct sqrt : public unary_op_info {
     switch (type) {
       case ynn_type_fp16:
         return {1.0e-4f, 10.0f};
+      case ynn_type_bf16:
+        return {type_info<bfloat16>::epsilon(), type_info<float>::max() / 4};
       case ynn_type_fp32:
         // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
         // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
@@ -304,6 +306,8 @@ struct rsqrt : public unary_op_info {
     switch (type) {
       case ynn_type_fp16:
         return {1.0e-4f, 10.0f};
+      case ynn_type_bf16:
+        return {type_info<bfloat16>::epsilon(), type_info<float>::max() / 4};
       case ynn_type_fp32:
         // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
         // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger

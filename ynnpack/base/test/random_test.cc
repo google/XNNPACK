@@ -53,6 +53,10 @@ Stats RunFillRandom(Args... args) {
           ++results.subnormal_count;
           break;
         default:
+          if (std::abs(x) != 0.0 &&
+              std::abs(x) < type_info<T>::smallest_normal()) {
+            ++results.subnormal_count;
+          }
           break;
       }
     }
@@ -78,6 +82,7 @@ template <typename T>
 void TestFillRandomFloats() {
   const double min = type_info<T>::min();
   const double max = type_info<T>::max();
+  const double inf = type_info<T>::infinity();
 
   // In these cases, we generate floats with a uniformly distributed exponent.
   TestFillRandomFloats<T>(min * 0.5f, max * 0.5f);
@@ -86,6 +91,8 @@ void TestFillRandomFloats() {
   // In these cases, we generate uniformly distributed values.
   TestFillRandomFloats<T>(max * 0.01f, max * 0.99f, 0.0f, max);
   TestFillRandomFloats<T>(min * 0.99f, min * 0.01f, min, 0.0f);
+  TestFillRandomFloats<T>(max * 0.01f, max * 0.99f, 0.0f, inf);
+  TestFillRandomFloats<T>(min * 0.99f, min * 0.01f, -inf, 0.0f);
   TestFillRandomFloats<T>(-0.99f, 0.99f, -1.0f, 1.0f);
   TestFillRandomFloats<T>(-9.9f, 9.9f, -10.0f, 10.0f);
 }
