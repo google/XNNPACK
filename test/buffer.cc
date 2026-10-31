@@ -139,18 +139,56 @@ TEST(EnumerateIndices, Rank4) {
   } while (std::next_permutation(extents.begin(), extents.end()));
 }
 
-TEST(DatatypeGenerator, Float) {
+template <typename T, typename... Args>
+void TestDatatypeGeneratorFloats(float min, float max, Args... args) {
   ReplicableRandomDevice rng;
 
   int inf_count = 0;
-  constexpr int kSamples = 1000000;
-  DatatypeGenerator<float> gen;
+  int nan_count = 0;
+  int subnormal_count = 0;
+  float min_val = NumericLimits<T>::infinity();
+  float max_val = -NumericLimits<T>::infinity();
+  constexpr int kSamples = 100000;
+  DatatypeGenerator<T> gen(args...);
   for (int i = 0; i < kSamples; ++i) {
     float x = gen(rng);
+    min_val = std::min(min_val, x);
+    max_val = std::max(max_val, x);
     if (std::isinf(x)) ++inf_count;
+    if (std::isnan(x)) ++nan_count;
+    if (std::abs(x) != 0.0f &&
+        std::abs(x) < static_cast<float>(NumericLimits<T>::smallest_normal())) {
+      ++subnormal_count;
+    }
   }
+  EXPECT_LE(min_val, min);
+  EXPECT_GE(max_val, max);
   // Don't allow more than 0.1% of samples to be infinity.
-  ASSERT_LT(inf_count, kSamples / 1000);
+  EXPECT_LT(inf_count, kSamples / 1000);
+  EXPECT_EQ(nan_count, 0);
+  EXPECT_EQ(subnormal_count, 0);
+}
+
+template <typename T>
+void TestDatatypeGeneratorFloats() {
+  const float min = NumericLimits<T>::min();
+  const float max = NumericLimits<T>::max();
+  const float inf = NumericLimits<T>::infinity();
+
+  TestDatatypeGeneratorFloats<T>(min * 0.5f, max * 0.5f);
+  TestDatatypeGeneratorFloats<T>(min * 0.5f, max * 0.5f, min, max);
+  TestDatatypeGeneratorFloats<T>(max * 0.01f, max * 0.99f, 0.0f, max);
+  TestDatatypeGeneratorFloats<T>(min * 0.99f, min * 0.01f, min, 0.0f);
+  TestDatatypeGeneratorFloats<T>(max * 0.01f, max * 0.99f, 0.0f, inf);
+  TestDatatypeGeneratorFloats<T>(min * 0.99f, min * 0.01f, -inf, 0.0f);
+  TestDatatypeGeneratorFloats<T>(-0.99f, 0.99f, -1.0f, 1.0f);
+  TestDatatypeGeneratorFloats<T>(-9.9f, 9.9f, -10.0f, 10.0f);
+}
+
+TEST(DatatypeGenerator, Float) { TestDatatypeGeneratorFloats<float>(); }
+TEST(DatatypeGenerator, Float16) { TestDatatypeGeneratorFloats<xnn_float16>(); }
+TEST(DatatypeGenerator, BFloat16) {
+  TestDatatypeGeneratorFloats<xnn_bfloat16>();
 }
 
 TEST(Pad, RepeatEdge1D) {

@@ -233,11 +233,20 @@ void fill_random(T* data, size_t size, Rng& rng, double min, double max,
       // Floating point types
       using DistT =
           std::conditional_t<std::is_same_v<T, double>, double, float>;
+      min = std::max<double>(min, type_info<T>::min());
+      max = std::min<double>(max, type_info<T>::max());
+      if (min > 0.0) {
+        min = std::max<double>(min, type_info<T>::smallest_normal());
+      }
+      if (max < 0.0) {
+        max = std::min<double>(max, -type_info<T>::smallest_normal());
+      }
       std::uniform_real_distribution<DistT> dist(static_cast<DistT>(min),
                                                  static_cast<DistT>(max));
       for (size_t i = 0; i < size; ++i) {
         type_info<T>::set(data, i, dist(rng));
       }
+      replace_denormals(data, size);
     }
   }
 }

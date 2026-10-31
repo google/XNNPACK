@@ -43,7 +43,9 @@ class NumericLimits {
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
-  static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }
+  static constexpr T smallest_normal() {
+    return std::is_integral<T>::value ? 0 : std::numeric_limits<T>::min();
+  }
 
   // These are the identity values (values such that f(x, identity) = x) for a
   // min or max operation.
@@ -956,6 +958,12 @@ class DatatypeGenerator {
       reinterpret_ = false;
       min = std::max<double>(min, NumericLimits<T>::min());
       max = std::min<double>(max, NumericLimits<T>::max());
+      if (min > 0.0) {
+        min = std::max<double>(min, NumericLimits<T>::smallest_normal());
+      }
+      if (max < 0.0) {
+        max = std::min<double>(max, -NumericLimits<T>::smallest_normal());
+      }
       dist_ = std::uniform_real_distribution<float>(min, max);
     }
   }
@@ -964,21 +972,21 @@ class DatatypeGenerator {
 
   template <typename Rng>
   T operator()(Rng& rng) {
+    T result;
     if (reinterpret_) {
       static_assert(Rng::min() == 0, "");
       static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1, "");
       auto bits = rng();
-      T result;
       memcpy(&result, &bits, sizeof(T));
-      if (std::abs(static_cast<float>(result)) >
-          NumericLimits<T>::smallest_normal()) {
-        return result;
-      } else {
-        // Flush denormals (and NaN) to 0.
-        return static_cast<T>(0.0f);
-      }
     } else {
-      return dist_(rng);
+      result = dist_(rng);
+    }
+    if (std::abs(static_cast<float>(result)) >=
+        NumericLimits<T>::smallest_normal()) {
+      return result;
+    } else {
+      // Flush denormals (and NaN) to 0.
+      return static_cast<T>(0.0f);
     }
   }
 };
