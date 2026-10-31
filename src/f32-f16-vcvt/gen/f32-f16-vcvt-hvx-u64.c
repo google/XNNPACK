@@ -34,17 +34,9 @@ void xnn_f32_f16_vcvt_ukernel__hvx_u64(
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 32);
     input += 64;
 
-    #if __HVX_ARCH__ >= 81
-    const xnn_simd_f16_t vy0 = Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(vx0, vx1));
+    const xnn_simd_f16_t vy0 = xnn_cvt_f16_f32_f32(vx0, vx1);
 
     xnn_storeu_f16(output + 0, vy0);
-    #else
-    const xnn_simd_f16_t vy0 = xnn_cvt_f16_f32(vx0);
-    const xnn_simd_f16_t vy1 = xnn_cvt_f16_f32(vx1);
-
-    xnn_store_tail_f16(output + 0, vy0, 32);
-    xnn_store_tail_f16(output + 32, vy1, 32);
-    #endif
     output += 64;
   }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {

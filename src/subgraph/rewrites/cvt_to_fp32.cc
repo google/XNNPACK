@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/fp16.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
@@ -61,11 +62,24 @@ struct HasUKernel<T, std::void_t<decltype(T::ukernel)>> : std::true_type {};
 template <class Config>
 bool IsValid(const Config* config) {
   if constexpr (HasUKernel<Config>::value) {
+    if constexpr (std::is_same_v<Config, xnn_avgpool_config>) {
+      return config && config->ukernel &&
+             (xnn_is_f16_supported_natively(xnn_init_hardware_config()) ||
+              config->channel_tile > 1);
+    } else if constexpr (std::is_same_v<Config, xnn_unary_elementwise_config>) {
+      return config && config->ukernel &&
+             (xnn_is_f16_supported_natively(xnn_init_hardware_config()) ||
+              config->element_tile > 1);
+    }
     return config && config->ukernel;
   } else if constexpr (std::is_same_v<Config, xnn_dwconv_config>) {
     return config && config->minmax;
   } else if constexpr (std::is_same_v<Config, xnn_gemm_config>) {
     return config && config->minmax.gemm[0].function[0];
+  } else if constexpr (std::is_same_v<Config, xnn_binary_elementwise_config>) {
+    return config && config->op_ukernel &&
+           (xnn_is_f16_supported_natively(xnn_init_hardware_config()) ||
+            config->element_tile > 1);
   } else {
     return config && config->op_ukernel;
   }
@@ -189,6 +203,12 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
         }
       } else {
         if (IsValid(xnn_init_f16_gemm_config())) {
+          if ((node.type == xnn_node_type_fully_connected ||
+               node.type == xnn_node_type_batch_matrix_multiply) &&
+              subgraph->values[node.inputs[1]].datatype == xnn_datatype_fp16 &&
+              !xnn_is_f16_supported_natively(xnn_init_hardware_config())) {
+            return OpAction::kNeedsXF16Inputs;
+          }
           return OpAction::kTransparent;
         }
       }
@@ -522,6 +542,10 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
         const xnn_value value = subgraph->values[CurrentNode().inputs[i]];
         if (value.datatype == xnn_datatype_fp32 &&
             value.to_fp32_fallback.was_overwritten) {
+          if (value.id >= fp32_id_to_from_id.size()) {
+            fp32_id_to_from_id.resize(subgraph->num_values,
+                                      XNN_INVALID_VALUE_ID);
+          }
           if (fp32_id_to_from_id[value.id] == XNN_INVALID_VALUE_ID) {
             const xnn_value* value_ptr =
                 subgraph->values + CurrentNode().inputs[i];
@@ -535,6 +559,9 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
                             xnn_datatype_to_string(from_dt));
               return xnn_status_out_of_memory;
             }
+            RemoveFlag(from_value.flags, XNN_VALUE_FLAG_EXTERNAL_INPUT |
+                                             XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+            from_value.to_fp32_fallback.was_overwritten = false;
             from_value.allocation_type = xnn_allocation_type_workspace;
             xnn_log_debug("Adding a convert[fp32, %s](%d, %d) node.",
                           xnn_datatype_to_string(from_dt), value.id,
@@ -767,6 +794,9 @@ xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
       // references.
       const xnn_value value = subgraph->values[input_id];
       if (value.datatype == from_dt) {
+        if (value.id >= from_id_to_fp32_id.size()) {
+          from_id_to_fp32_id.resize(subgraph->num_values, XNN_INVALID_VALUE_ID);
+        }
         if (from_id_to_fp32_id[value.id] == XNN_INVALID_VALUE_ID) {
           const xnn_value* value_ptr =
               subgraph->values + CurrentNode().inputs[i];
