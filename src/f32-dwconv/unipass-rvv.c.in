@@ -33,7 +33,73 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
   $if ACTIVATION == "MINMAX":
     const float vmin = params->scalar.min;
     const float vmax = params->scalar.max;
-  do {
+  const size_t vlmax = __riscv_vsetvlmax_e32m${LMUL}();
+  const size_t output_pixel_stride = channels * sizeof(float) + output_increment;
+
+  // Two output pixels per iteration: the ${KERNEL_TILE} weight vectors are loaded
+  // once and reused for both pixels, so the weight traffic is halved. At
+  // CHANNEL_TILE=m8 this needs 4 live vector registers (2 accumulators + weight +
+  // input), which is exactly the 32-entry register file; a wider block spills and
+  // ends up slower than not blocking at all.
+  while (output_width > 1) {
+    const float** input1 = (const float**) ((uintptr_t) input + input_stride);
+    $for K in range(KERNEL_TILE):
+      const float* i0_${K} = input[${K}];
+      assert(i0_${K} != NULL);
+      if XNN_UNPREDICTABLE(i0_${K} != zero) {
+        i0_${K} = (const float*) ((uintptr_t) i0_${K} + input_offset);
+      }
+    $for K in range(KERNEL_TILE):
+      const float* i1_${K} = input1[${K}];
+      assert(i1_${K} != NULL);
+      if XNN_UNPREDICTABLE(i1_${K} != zero) {
+        i1_${K} = (const float*) ((uintptr_t) i1_${K} + input_offset + input_pixel_stride);
+      }
+    input = (const float**) ((uintptr_t) input + 2 * input_stride);
+
+    float* o0 = output;
+    float* o1 = (float*) ((uintptr_t) output + output_pixel_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    do {
+      size_t vl = __riscv_vsetvl_e32m${LMUL}(c);
+      // load bias to vAcc0 and vAcc1, both pixels share the same bias
+      vfloat32m${LMUL}_t vAcc0 = __riscv_vundefined_f32m${LMUL}();
+      vAcc0 = __riscv_vle32_v_f32m${LMUL}_tu(vAcc0, w, vl);
+      vfloat32m${LMUL}_t vAcc1 = vAcc0;
+      w += vlmax;
+
+      vfloat32m${LMUL}_t va = __riscv_vundefined_f32m${LMUL}();
+      vfloat32m${LMUL}_t vb = __riscv_vundefined_f32m${LMUL}();
+      $for K in range(KERNEL_TILE):
+        vb = __riscv_vle32_v_f32m${LMUL}_tu(vb, w, vl);
+        w  += vlmax;
+        va = __riscv_vle32_v_f32m${LMUL}_tu(va, i0_${K}, vl);
+        i0_${K} += vlmax;
+        vAcc0 = __riscv_vfmacc_vv_f32m${LMUL}_tu(vAcc0, va, vb, vl);
+        va = __riscv_vle32_v_f32m${LMUL}_tu(va, i1_${K}, vl);
+        i1_${K} += vlmax;
+        vAcc1 = __riscv_vfmacc_vv_f32m${LMUL}_tu(vAcc1, va, vb, vl);
+
+      $if ACTIVATION == "MINMAX":
+        vAcc0 = __riscv_vfmax_vf_f32m${LMUL}_tu(vAcc0, vAcc0, vmin, vl);
+        vAcc1 = __riscv_vfmax_vf_f32m${LMUL}_tu(vAcc1, vAcc1, vmin, vl);
+        vAcc0 = __riscv_vfmin_vf_f32m${LMUL}_tu(vAcc0, vAcc0, vmax, vl);
+        vAcc1 = __riscv_vfmin_vf_f32m${LMUL}_tu(vAcc1, vAcc1, vmax, vl);
+      __riscv_vse32_v_f32m${LMUL}(o0, vAcc0, vl);
+      __riscv_vse32_v_f32m${LMUL}(o1, vAcc1, vl);
+      o0 += vl;
+      o1 += vl;
+      c -= vl;
+    } while(c != 0);
+
+    input_offset += 2 * input_pixel_stride;
+    output = (float*) ((uintptr_t) output + 2 * output_pixel_stride);
+    output_width -= 2;
+  }
+
+  if (output_width != 0) {
     $for K in range(KERNEL_TILE):
       const float* i${K} = input[${K}];
       assert(i${K} != NULL);
@@ -44,9 +110,7 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
 
     size_t c = channels;
     const float* w = weights;
-    const size_t vlmax = __riscv_vsetvlmax_e32m${LMUL}();
     size_t vl;
-
     do {
       vl = __riscv_vsetvl_e32m${LMUL}(c);
       // load bias to vAcc
@@ -70,7 +134,5 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
       output += vl;
       c -= vl;
     } while(c != 0);
-    input_offset += input_pixel_stride;
-    output = (float*) ((uintptr_t) output + output_increment);
-  } while (--output_width != 0);
+  }
 }
