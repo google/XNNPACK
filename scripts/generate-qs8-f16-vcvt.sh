@@ -16,4 +16,9 @@ tools/xngen src/qs8-f16-vcvt/rvvfp16arith.c.in -D LMUL=1 -o src/qs8-f16-vcvt/gen
 tools/xngen src/qs8-f16-vcvt/rvvfp16arith.c.in -D LMUL=2 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-rvvfp16arith-u2v.c &
 tools/xngen src/qs8-f16-vcvt/rvvfp16arith.c.in -D LMUL=4 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-rvvfp16arith-u4v.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/qs8-f16-vcvt/hvx.c.in -D BATCH_TILE=32  -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-hvx-u32.c &
+tools/xngen src/qs8-f16-vcvt/hvx.c.in -D BATCH_TILE=64  -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-hvx-u64.c &
+tools/xngen src/qs8-f16-vcvt/hvx.c.in -D BATCH_TILE=128 -o src/qs8-f16-vcvt/gen/qs8-f16-vcvt-hvx-u128.c &
+
 wait

@@ -86,6 +86,15 @@ tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/
 tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-rvv-u2v.c &
 tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=4 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-rvv-u4v.c &
 
+################################# Hexagon HVX #################################
+tools/xngen src/qs8-vcvt/hvx.c.in -D BATCH_TILE=32  -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-hvx-u32.c &
+tools/xngen src/qs8-vcvt/hvx.c.in -D BATCH_TILE=64  -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-hvx-u64.c &
+tools/xngen src/qs8-vcvt/hvx.c.in -D BATCH_TILE=128 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-hvx-u128.c &
+
+tools/xngen src/qs8-vcvt/hvx.c.in -D BATCH_TILE=32  -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-hvx-u32.c &
+tools/xngen src/qs8-vcvt/hvx.c.in -D BATCH_TILE=64  -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-hvx-u64.c &
+tools/xngen src/qs8-vcvt/hvx.c.in -D BATCH_TILE=128 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-hvx-u128.c &
+
 #################################### Scalar ###################################
 tools/xngen src/qs8-vcvt/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-scalar-u1.c &
 tools/xngen src/qs8-vcvt/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-scalar-u2.c &
