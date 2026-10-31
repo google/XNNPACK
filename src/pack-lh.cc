@@ -28,9 +28,14 @@ size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
   m = round_up(m, mr_packed);
   k = round_up(k, kr * sr);
   const size_t alignment = alignof(struct xnn_qd8_quantization_params);
-  return m * round_up(sizeof(struct xnn_qd8_quantization_params) +
-                          k * sizeof(int8_t),
-                      alignment);
+  const size_t inner = round_up(
+      sizeof(struct xnn_qd8_quantization_params) + k * sizeof(int8_t),
+      alignment);
+  size_t result;
+  if (!xnn_safe_mul(m, inner, &result)) {
+    return std::numeric_limits<size_t>::max();
+  }
+  return result;
 }
 
 size_t xnn_pack_lh_fx_qd8_row_sums_packed_size(size_t m, size_t k,
@@ -42,9 +47,14 @@ size_t xnn_pack_lh_fx_qd8_row_sums_packed_size(size_t m, size_t k,
   m = round_up(m, mr_packed);
   k = round_up(k, kr * sr);
   const size_t alignment = alignof(struct xnn_qd8_quantization_params);
-  return m * round_up(sizeof(struct xnn_qd8_quantization_params) +
-                          sizeof(float) + k * sizeof(int8_t),
-                      alignment);
+  const size_t inner = round_up(sizeof(struct xnn_qd8_quantization_params) +
+                                    sizeof(float) + k * sizeof(int8_t),
+                                alignment);
+  size_t result;
+  if (!xnn_safe_mul(m, inner, &result)) {
+    return std::numeric_limits<size_t>::max();
+  }
+  return result;
 }
 
 size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
@@ -54,9 +64,14 @@ size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
   assert(m % mr_packed == 0);
   k = round_up(k, kr * sr);
   const size_t alignment = alignof(struct xnn_qd8_quantization_params);
-  return m * round_up(sizeof(struct xnn_qd8_quantization_params) +
-                          k * sizeof(int8_t),
-                      alignment);
+  const size_t inner = round_up(
+      sizeof(struct xnn_qd8_quantization_params) + k * sizeof(int8_t),
+      alignment);
+  size_t result;
+  if (!xnn_safe_mul(m, inner, &result)) {
+    return std::numeric_limits<size_t>::max();
+  }
+  return result;
 }
 
 size_t xnn_pack_lh_fx_qd8_qc2w_packed_offset(size_t m, size_t k,
@@ -68,9 +83,14 @@ size_t xnn_pack_lh_fx_qd8_qc2w_packed_offset(size_t m, size_t k,
   assert(m % mr_packed == 0);
   k = round_up(k, kr * sr);
   const size_t alignment = alignof(struct xnn_qd8_quantization_params);
-  return m * round_up(sizeof(struct xnn_qd8_quantization_params) +
-                          sizeof(float) + k * sizeof(int8_t),
-                      alignment);
+  const size_t inner = round_up(sizeof(struct xnn_qd8_quantization_params) +
+                                    sizeof(float) + k * sizeof(int8_t),
+                                alignment);
+  size_t result;
+  if (!xnn_safe_mul(m, inner, &result)) {
+    return std::numeric_limits<size_t>::max();
+  }
+  return result;
 }
 
 // Wraps a templated function that generates `xnn_qd8_quantization_params` from
