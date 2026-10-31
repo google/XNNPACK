@@ -18,6 +18,9 @@
 
 enum xnn_status xnn_delete_operator(xnn_operator_t op)
 {
+  if (op == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   enum xnn_status status = xnn_destroy_operator(op);
   if (status != xnn_status_success) {
     return status;
