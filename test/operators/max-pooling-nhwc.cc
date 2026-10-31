@@ -1919,6 +1919,33 @@ TEST(MAX_POOLING_NHWC_F32, reshape_overflow_input_stride) {
           &output_height, &output_width, nullptr));
 }
 
+TEST(MAX_POOLING_NHWC_F32, padded_input_height_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t max_pooling_op = nullptr;
+  const xnn_status status = xnn_create_max_pooling2d_nhwc_f32(
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/1,
+      /*padding_left=*/0, /*pooling_height=*/1, /*pooling_width=*/1,
+      /*stride_height=*/1, /*stride_width=*/1, /*dilation_height=*/1,
+      /*dilation_width=*/1, -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), /*flags=*/0, &max_pooling_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      max_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_max_pooling2d_nhwc_f32(
+          max_pooling_op, /*batch_size=*/1, /*input_height=*/SIZE_MAX,
+          /*input_width=*/1, /*channels=*/1, /*input_pixel_stride=*/1,
+          /*output_pixel_stride=*/1, &output_height, &output_width,
+          /*threadpool=*/nullptr));
+}
+
 TEST(MAX_POOLING_NHWC_F32, reshape_overflow_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   xnn_operator_t max_pooling_op = nullptr;
