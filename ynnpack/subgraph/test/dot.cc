@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <utility>
@@ -796,5 +797,116 @@ INSTANTIATE_TEST_SUITE_P(Test, Dot, testing::ValuesIn(dot_types),
                          [](const testing::TestParamInfo<multi_type>& info) {
                            return to_string(info.param);
                          });
+
+template <typename A, typename B, typename C>
+void TestRaggedDot(size_t G, size_t M, size_t K, size_t N,
+                   const std::vector<int32_t>& group_sizes, bool with_c) {
+  ReplicableRandomDevice rng;
+  constexpr float max_abs_value = 10.0f;
+  ASSERT_EQ(group_sizes.size(), G);
+
+  Tensor<A> a({M, K});
+  Tensor<B> b({G, K, N});
+  Tensor<C> init_c({M, N});
+  Tensor<int32_t> rg({M, 1});
+  fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(init_c.data(), init_c.size(), rng, -max_abs_value, max_abs_value);
+  size_t active_rows = 0;
+  for (size_t g = 0; g < G; ++g) {
+    const size_t count = std::max<int32_t>(0, group_sizes[g]);
+    for (size_t r = 0; r < count && active_rows < M; ++r, ++active_rows) {
+      rg(active_rows, 0) = static_cast<int32_t>(g);
+    }
+  }
+  const A a_poison = std::numeric_limits<A>::has_quiet_NaN
+                         ? std::numeric_limits<A>::quiet_NaN()
+                         : static_cast<A>(max_abs_value);
+  const C c_poison = std::numeric_limits<C>::has_quiet_NaN
+                         ? std::numeric_limits<C>::quiet_NaN()
+                         : static_cast<C>(12345);
+  for (size_t i = active_rows; i < M; ++i) {
+    rg(i, 0) = -1;
+    for (size_t k = 0; k < K; ++k) a(i, k) = a_poison;
+    for (size_t j = 0; j < N; ++j) init_c(i, j) = c_poison;
+  }
+
+  SubgraphBuilder subgraph(5);
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t c_id = with_c ? 2 : YNN_INVALID_VALUE_ID;
+  const uint32_t rg_id = 3;
+  uint32_t output_id = 4;
+  subgraph.AddInput(type_of<A>(), a.extents(), a_id)
+      .AddInput(type_of<B>(), b.extents(), b_id)
+      .AddInput(ynn_type_int32, rg.extents(), rg_id)
+      .AddOutput(type_of<C>(), std::vector<size_t>{M, N}, output_id);
+  if (with_c) {
+    subgraph.AddInput(type_of<C>(), init_c.extents(), c_id);
+  }
+  ASSERT_EQ(ynn_define_ragged_dot(subgraph.GetSubgraph(), /*num_k_dims=*/1,
+                                  a_id, b_id, c_id, rg_id, &output_id,
+                                  /*flags=*/0),
+            ynn_status_success);
+
+  Tensor<C> x({M, N});
+  x.fill(static_cast<C>(7));
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  runtime.SetupExternalTensor(a.data(), a_id)
+      .SetupExternalTensor(b.data(), b_id)
+      .SetupExternalTensor(rg.data(), rg_id)
+      .SetupExternalTensor(x.data(), output_id);
+  if (with_c) {
+    runtime.SetupExternalTensor(init_c.data(), c_id);
+  }
+  runtime.ReshapeRuntime().InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  size_t row = 0;
+  for (size_t g = 0; g < G; ++g) {
+    const size_t count = std::max<int32_t>(0, group_sizes[g]);
+    for (size_t r = 0; r < count && row < M; ++r, ++row) {
+      for (size_t j = 0; j < N; ++j) {
+        double expected = with_c ? static_cast<double>(init_c(row, j)) : 0.0;
+        for (size_t k = 0; k < K; ++k) {
+          expected +=
+              static_cast<double>(a(row, k)) * static_cast<double>(b(g, k, j));
+        }
+        const double tolerance = is_integral<C>::value
+                                     ? 0.0
+                                     : get_dot_tolerance<C>(K, max_abs_value);
+        ASSERT_NEAR(static_cast<double>(x(row, j)), expected, tolerance)
+            << "g=" << g << " row=" << row << " j=" << j;
+      }
+    }
+  }
+  for (; row < M; ++row) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(x(row, j), static_cast<C>(0)) << "row=" << row << " j=" << j;
+    }
+  }
+}
+
+TEST(RaggedDot, BasicFloat) {
+  TestRaggedDot<float, float, float>(/*G=*/4, /*M=*/10, /*K=*/16, /*N=*/7,
+                                     /*group_sizes=*/{3, 0, 4, 2},
+                                     /*with_c=*/false);
+}
+
+TEST(RaggedDot, WithInitializerAndTrailingRows) {
+  TestRaggedDot<float, float, float>(/*G=*/4, /*M=*/12, /*K=*/16, /*N=*/7,
+                                     /*group_sizes=*/{2, 5, 0, 1},
+                                     /*with_c=*/true);
+}
+
+TEST(RaggedDot, Int8KTailAndLarge) {
+  TestRaggedDot<int8_t, int8_t, int32_t>(/*G=*/5, /*M=*/67, /*K=*/67, /*N=*/33,
+                                         /*group_sizes=*/{13, 0, 29, 17, 5},
+                                         /*with_c=*/true);
+  TestRaggedDot<int8_t, int8_t, int32_t>(/*G=*/5, /*M=*/67, /*K=*/67, /*N=*/33,
+                                         /*group_sizes=*/{13, 0, 29, 17, 5},
+                                         /*with_c=*/false);
+}
 
 }  // namespace ynn

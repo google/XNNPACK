@@ -157,12 +157,13 @@ ynn_status define_blockwise_scale(ynn_subgraph_t subgraph, uint32_t scale_id,
 
 }  // namespace
 
-ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
-                                uint32_t a_zero_point_id, uint32_t a_scale_id,
-                                uint32_t b_id, uint32_t b_zero_point_id,
-                                uint32_t b_scale_id, size_t block_size,
-                                uint32_t bias_id, ynn_type output_type,
-                                uint32_t& output_id, uint32_t flags) {
+ynn_status define_blockwise_dot(
+    ynn_subgraph_t subgraph, uint32_t a_id, uint32_t a_zero_point_id,
+    uint32_t a_scale_id, uint32_t b_id, uint32_t b_zero_point_id,
+    uint32_t b_scale_id, size_t block_size, uint32_t bias_id,
+    ynn_type output_type, uint32_t& output_id, uint32_t flags,
+    uint32_t row_group_id) {
+  const bool is_ragged = row_group_id != YNN_INVALID_VALUE_ID;
   if (block_size == 0) {
     return ynn_status_invalid_parameter;
   }
@@ -176,34 +177,66 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
   // Transpose M and num_blocks axes:
   // [..., M, num_blocks, block_size] -> [..., num_blocks, M, block_size].
   int32_t perm_a[2] = {-2, -3};
-  uint32_t transposed_a_id = YNN_INVALID_VALUE_ID;
+  uint32_t a_inner_id = YNN_INVALID_VALUE_ID;
   YNN_RETURN_IF_ERROR(ynn_define_static_transpose(subgraph, 2, perm_a,
-                                                  a_split_id, &transposed_a_id,
+                                                  a_split_id, &a_inner_id,
                                                   YNN_NODE_FLAG_KEEP_DIMS));
-  uint32_t a_inner_id = transposed_a_id;
 
   // Split B's second-to-last axis (K) into [num_blocks, block_size].
   // B: [..., K, N] -> [..., num_blocks, block_size, N].
-  uint32_t b_inner_id = YNN_INVALID_VALUE_ID;
+  uint32_t b_split_id = YNN_INVALID_VALUE_ID;
   YNN_RETURN_IF_ERROR(
-      ynn_define_split_dim(subgraph, -2, 2, split_dims, b_id, &b_inner_id, 0));
+      ynn_define_split_dim(subgraph, -2, 2, split_dims, b_id, &b_split_id, 0));
 
-  // Align B's scale.
+  uint32_t b_inner_id = b_split_id;
+  if (is_ragged) {
+    // [G, num_blocks, block_size, N] -> [num_blocks, G, block_size, N].
+    int32_t perm_b[3] = {-3, -4, -2};
+    b_inner_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_static_transpose(subgraph, 3, perm_b,
+                                                    b_split_id, &b_inner_id,
+                                                    YNN_NODE_FLAG_KEEP_DIMS));
+  }
+
+  // Align B's scale and zero point to [..., num_blocks, 1, N] (which is
+  // [G, num_blocks, 1, N] in ragged mode, matching b_split_id).
   uint32_t b_scale_aligned_id = YNN_INVALID_VALUE_ID;
   YNN_RETURN_IF_ERROR(define_blockwise_scale(
       subgraph, b_scale_id, b_scale_aligned_id, /*expand_m_dim=*/true));
 
-  // Align B's zero point (if present).
   uint32_t b_zp_aligned_id = YNN_INVALID_VALUE_ID;
   if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
     YNN_RETURN_IF_ERROR(define_blockwise_scale(
         subgraph, b_zero_point_id, b_zp_aligned_id, /*expand_m_dim=*/true));
   }
 
+  int32_t gather_axis_0 = 0;
+  uint32_t row_group_3d_id = YNN_INVALID_VALUE_ID;
+  if (is_ragged) {
+    int32_t expand_axis_last = -1;
+    YNN_RETURN_IF_ERROR(ynn_define_static_expand_dims(
+        subgraph, 1, &expand_axis_last, row_group_id, &row_group_3d_id, 0));
+  }
+  auto gather_and_align_m = [&](uint32_t param_id,
+                                uint32_t& aligned_id) -> ynn_status {
+    uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_gather(subgraph, 1, &gather_axis_0, 3,
+                                          param_id, row_group_3d_id,
+                                          &gathered_id, 0));
+    int32_t perm_m[3] = {2, 0, 1};
+    return ynn_define_static_transpose(subgraph, 3, perm_m, gathered_id,
+                                       &aligned_id, 0);
+  };
+
   // B's zero point contribution per block is -b_zp * sum_k(a), which varies at
   // runtime and is initialized in each block's accumulator.
   uint32_t accum_init_id = YNN_INVALID_VALUE_ID;
   if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
+    uint32_t b_zp_m_id = b_zp_aligned_id;
+    if (is_ragged) {
+      b_zp_m_id = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(gather_and_align_m(b_zero_point_id, b_zp_m_id));
+    }
     int32_t a_k_axis = -1;
     uint32_t sum_a_id = YNN_INVALID_VALUE_ID;
     YNN_RETURN_IF_ERROR(ynn_define_reduce(
@@ -211,22 +244,33 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
         YNN_INVALID_VALUE_ID, &sum_a_id, YNN_NODE_FLAG_KEEP_DIMS));
     uint32_t b_zp_term_id = YNN_INVALID_VALUE_ID;
     YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
-                                          b_zp_aligned_id, sum_a_id,
-                                          &b_zp_term_id, 0));
+                                          b_zp_m_id, sum_a_id, &b_zp_term_id,
+                                          0));
     YNN_RETURN_IF_ERROR(ynn_define_unary(subgraph, ynn_unary_negate,
                                          b_zp_term_id, &accum_init_id, 0));
   }
 
   // Run inner dot: produces [..., num_blocks, M, N].
   uint32_t dot_blocks_id = YNN_INVALID_VALUE_ID;
-  YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, a_inner_id,
-                                     b_inner_id, accum_init_id, &dot_blocks_id,
-                                     flags));
+  if (is_ragged) {
+    YNN_RETURN_IF_ERROR(ynn_define_ragged_dot(
+        subgraph, /*num_k_dims=*/1, a_inner_id, b_inner_id, accum_init_id,
+        row_group_id, &dot_blocks_id, flags));
+  } else {
+    YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, a_inner_id,
+                                       b_inner_id, accum_init_id,
+                                       &dot_blocks_id, flags));
+  }
 
   // Multiply by b_scale.
+  uint32_t b_scale_m_id = b_scale_aligned_id;
+  if (is_ragged) {
+    b_scale_m_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(gather_and_align_m(b_scale_id, b_scale_m_id));
+  }
   uint32_t scaled_blocks_id = YNN_INVALID_VALUE_ID;
   YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
-                                        dot_blocks_id, b_scale_aligned_id,
+                                        dot_blocks_id, b_scale_m_id,
                                         &scaled_blocks_id, 0));
 
   // Reduce sum along num_blocks axis.
@@ -243,11 +287,11 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
   // once from the final result instead of initializing every block's
   // accumulator with it.
   if (a_zero_point_id != YNN_INVALID_VALUE_ID) {
-    uint32_t b_eff_id = b_inner_id;
+    uint32_t b_eff_id = b_split_id;
     if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
       b_eff_id = YNN_INVALID_VALUE_ID;
       YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_subtract,
-                                            b_inner_id, b_zp_aligned_id,
+                                            b_split_id, b_zp_aligned_id,
                                             &b_eff_id, 0));
     }
 
@@ -262,9 +306,21 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
                                           colsum_id, b_scale_aligned_id,
                                           &scaled_colsum_id, 0));
     uint32_t c_id = YNN_INVALID_VALUE_ID;
-    YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, 1,
-                                          &reduce_axis, scaled_colsum_id,
-                                          YNN_INVALID_VALUE_ID, &c_id, 0));
+    if (is_ragged) {
+      int32_t reduce_axes_g[2] = {-3, -2};
+      uint32_t c_per_group_id = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, 2,
+                                            reduce_axes_g, scaled_colsum_id,
+                                            YNN_INVALID_VALUE_ID,
+                                            &c_per_group_id, 0));
+      YNN_RETURN_IF_ERROR(ynn_define_gather(subgraph, 1, &gather_axis_0, 2,
+                                            c_per_group_id, row_group_id, &c_id,
+                                            0));
+    } else {
+      YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, 1,
+                                            &reduce_axis, scaled_colsum_id,
+                                            YNN_INVALID_VALUE_ID, &c_id, 0));
+    }
 
     // reduced -= a_zp * C, applied once to the final result.
     uint32_t zp_correction_id = YNN_INVALID_VALUE_ID;

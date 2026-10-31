@@ -600,6 +600,24 @@ enum ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                                uint32_t input_c_id, uint32_t* output_id,
                                uint32_t flags);
 
+// Performs a grouped/ragged dot product where each row `i` of `a` (dimension
+// `i`, axis `-1 - num_k_dims`) selects group `g = row_group(batch_dims..., i,
+// 0)` of `b` (`row_group` is `ynn_type_int32` of shape
+// `[batch_dims..., M, 1]`):
+//
+//   output(batch_dims..., i, j) = c(batch_dims..., i, j) +
+//     sum_{k_dims} a(batch_dims..., i, k_dims...) *
+//                  b(batch_dims..., row_group(batch_dims..., i, 0), k_dims...,
+//                    j)
+//
+// Any rows where `row_group(batch_dims..., i, 0)` is outside `[0, G)` are
+// zeroed. `input_c_id` is optional (`YNN_INVALID_VALUE_ID`).
+enum ynn_status ynn_define_ragged_dot(ynn_subgraph_t subgraph,
+                                      size_t num_k_dims, uint32_t input_a_id,
+                                      uint32_t input_b_id, uint32_t input_c_id,
+                                      uint32_t row_group_id,
+                                      uint32_t* output_id, uint32_t flags);
+
 enum ynn_reduce_operator {
   ynn_reduce_invalid = 0,
 

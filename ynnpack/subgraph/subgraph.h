@@ -566,11 +566,13 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
+    bool is_ragged = false;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims;
+      return a.num_k_dims == b.num_k_dims && a.is_ragged == b.is_ragged;
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return a.num_k_dims < b.num_k_dims;
+      return std::tie(a.num_k_dims, a.is_ragged) <
+             std::tie(b.num_k_dims, b.is_ragged);
     }
   };
   struct iota {
