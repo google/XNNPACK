@@ -27,6 +27,13 @@ enum xnn_status resize_unary_elementwise_output_tensor(
 
   // Propagate input shape to output.
   const struct xnn_runtime_value* input = &values[opdata->inputs[0]];
+  if (input->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to resize output tensor with ID #%" PRIu32
+        ": input rank (%zu) exceeds the supported maximum (%d)",
+        output_id, input->shape.num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
   output->shape.num_dims = input->shape.num_dims;
   size_t old_dynamic_quant_params_size =
       xnn_tensor_get_dynamic_quant_param_size(output->datatype, &output->shape,
