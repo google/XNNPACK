@@ -61,8 +61,8 @@ void xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
       break;
     }
   }
-  if (i >= fingerprint_vector_size) {
-    assert(fingerprint_vector_size < XNN_FINGERPRINT_MAX_COUNT);
+  if (i >= fingerprint_vector_size &&
+      fingerprint_vector_size < XNN_FINGERPRINT_MAX_COUNT) {
     fingerprint_vector[fingerprint_vector_size++] = fingerprint;
   }
   xnn_mutex_unlock(&mutex);
