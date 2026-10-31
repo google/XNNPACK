@@ -645,3 +645,208 @@ TEST(CONSTANT_PAD_ND_X32, stride_overflow) {
           constant_pad_op, 2, input_shape, pre_padding, post_padding,
           nullptr));
 }
+
+TEST(CONSTANT_PAD_ND_X8, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X8, null_padding_value) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_constant_pad_nd_x8(nullptr, 0, &op));
+  EXPECT_EQ(nullptr, op);
+
+  const size_t shape[1] = {1};
+  const size_t pre[1] = {0};
+  const size_t post[1] = {0};
+  uint8_t in = 0, out = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_run_constant_pad_nd_x8(0, 1, shape, pre, post, &in, &out,
+                                       nullptr, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X16, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint16_t padding_value = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_constant_pad_nd_x16(&padding_value, 0, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X16, null_padding_value) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_constant_pad_nd_x16(nullptr, 0, &op));
+  EXPECT_EQ(nullptr, op);
+
+  const size_t shape[1] = {1};
+  const size_t pre[1] = {0};
+  const size_t post[1] = {0};
+  uint16_t in = 0, out = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_run_constant_pad_nd_x16(0, 1, shape, pre, post, &in, &out,
+                                        nullptr, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X32, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint32_t padding_value = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_constant_pad_nd_x32(&padding_value, 0, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X32, null_padding_value) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  xnn_operator_t op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_constant_pad_nd_x32(nullptr, 0, &op));
+  EXPECT_EQ(nullptr, op);
+
+  const size_t shape[1] = {1};
+  const size_t pre[1] = {0};
+  const size_t post[1] = {0};
+  uint32_t in = 0, out = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_run_constant_pad_nd_x32(0, 1, shape, pre, post, &in, &out,
+                                        nullptr, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X8, null_operator) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const size_t shape[1] = {1};
+  const size_t pre[1] = {0};
+  const size_t post[1] = {0};
+  uint8_t in = 0, out = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_constant_pad_nd_x8(nullptr, 1, shape, pre, post,
+                                           nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_setup_constant_pad_nd_x8(nullptr, &in, &out));
+}
+
+TEST(CONSTANT_PAD_ND_X8, null_parameters_in_reshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[1] = {1};
+  const size_t pre[1] = {0};
+  const size_t post[1] = {0};
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_constant_pad_nd_x8(op, 1, nullptr, pre, post, nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_constant_pad_nd_x8(op, 1, shape, nullptr, post,
+                                           nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_constant_pad_nd_x8(op, 1, shape, pre, nullptr,
+                                           nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X8, null_pointers_in_setup) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[1] = {1};
+  const size_t pre[1] = {0};
+  const size_t post[1] = {0};
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_constant_pad_nd_x8(op, 1, shape, pre, post, nullptr));
+
+  uint8_t buffer = 0;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_setup_constant_pad_nd_x8(op, nullptr, &buffer));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_setup_constant_pad_nd_x8(op, &buffer, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X8, unsupported_num_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[XNN_MAX_TENSOR_DIMS + 1] = {1};
+  const size_t pre[XNN_MAX_TENSOR_DIMS + 1] = {0};
+  const size_t post[XNN_MAX_TENSOR_DIMS + 1] = {0};
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_reshape_constant_pad_nd_x8(
+                op, XNN_MAX_TENSOR_DIMS + 1, shape, pre, post, nullptr));
+}
+
+TEST(CONSTANT_PAD_ND_X8, padded_dim_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[1] = {SIZE_MAX};
+  const size_t pre[1] = {1};
+  const size_t post[1] = {0};
+  const enum xnn_status status1 =
+      xnn_reshape_constant_pad_nd_x8(op, 1, shape, pre, post, nullptr);
+  EXPECT_TRUE(status1 == xnn_status_out_of_memory ||
+              status1 == xnn_status_unsupported_parameter);
+
+  const size_t shape2[1] = {1};
+  const size_t pre2[1] = {SIZE_MAX};
+  const size_t post2[1] = {1};
+  const enum xnn_status status2 =
+      xnn_reshape_constant_pad_nd_x8(op, 1, shape2, pre2, post2, nullptr);
+  EXPECT_TRUE(status2 == xnn_status_out_of_memory ||
+              status2 == xnn_status_unsupported_parameter);
+}
+
+TEST(CONSTANT_PAD_ND_X8, squeezed_dim_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[2] = {SIZE_MAX / 2 + 1, 2};
+  const size_t pre[2] = {0, 0};
+  const size_t post[2] = {0, 0};
+  const enum xnn_status status =
+      xnn_reshape_constant_pad_nd_x8(op, 2, shape, pre, post, nullptr);
+  EXPECT_TRUE(status == xnn_status_out_of_memory ||
+              status == xnn_status_unsupported_parameter);
+}
+
+TEST(CONSTANT_PAD_ND_X8, output_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint8_t padding_value = 0;
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x8(&padding_value, 0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  const size_t shape[2] = {SIZE_MAX / 2 + 1, 3};
+  const size_t pre[2] = {1, 0};
+  const size_t post[2] = {0, 0};
+  const enum xnn_status status =
+      xnn_reshape_constant_pad_nd_x8(op, 2, shape, pre, post, nullptr);
+  EXPECT_TRUE(status == xnn_status_out_of_memory ||
+              status == xnn_status_unsupported_parameter);
+}
