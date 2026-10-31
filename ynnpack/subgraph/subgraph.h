@@ -393,67 +393,26 @@ struct ynn_node {
       return a.axes < b.axes;
     }
   };
-  struct fuse_dim {
-    // Fuse `axes_count` dimensions starting at `axis` into one dimension.
-    int32_t axis;
-    size_t axes_count;
-    friend bool operator==(const fuse_dim& a, const fuse_dim& b) {
-      return a.axis == b.axis && a.axes_count == b.axes_count;
-    }
-    friend bool operator<(const fuse_dim& a, const fuse_dim& b) {
-      return std::tie(a.axis, a.axes_count) < std::tie(b.axis, b.axes_count);
-    }
-  };
-  struct fuse_dims {
-    // Set of dimensions to fuse with the next dimension.
-    ynn::axes_set axes;
-    friend bool operator==(const fuse_dims& a, const fuse_dims& b) {
-      return a.axes == b.axes;
-    }
-    friend bool operator<(const fuse_dims& a, const fuse_dims& b) {
-      return a.axes < b.axes;
-    }
-  };
-  struct split_dim {
-    // Split `axis` into new axes of extent `new_dims`.
-    int32_t axis;
-    std::vector<size_t> new_dims;
-    friend bool operator==(const split_dim& a, const split_dim& b) {
-      return a.axis == b.axis && a.new_dims == b.new_dims;
-    }
-    friend bool operator<(const split_dim& a, const split_dim& b) {
-      return std::tie(a.axis, a.new_dims) < std::tie(b.axis, b.new_dims);
-    }
-  };
-  struct split_dims {
-    struct split {
-      // Axis to split.
-      int32_t axis;
-      size_t factor;
-      friend bool operator==(const split& a, const split& b) {
-        return a.axis == b.axis && a.factor == b.factor;
+  struct reshape {
+    // Reshapes are represented by groups of dimensions that are fused and then
+    // split into different dimensions.
+    struct group {
+      int32_t input_dims;
+      int32_t output_dims;
+      friend bool operator==(const group& a, const group& b) {
+        return a.input_dims == b.input_dims && a.output_dims == b.output_dims;
       }
-      friend bool operator<(const split& a, const split& b) {
-        return std::tie(a.axis, a.factor) < std::tie(b.axis, b.factor);
+      friend bool operator<(const group& a, const group& b) {
+        return std::tie(a.input_dims, a.output_dims) <
+               std::tie(b.input_dims, b.output_dims);
       }
     };
-    std::vector<split> splits;
-    friend bool operator==(const split_dims& a, const split_dims& b) {
-      return a.splits == b.splits;
+    std::vector<group> groups;
+    friend bool operator==(const reshape& a, const reshape& b) {
+      return a.groups == b.groups;
     }
-    friend bool operator<(const split_dims& a, const split_dims& b) {
-      return a.splits < b.splits;
-    }
-  };
-  struct static_reshape {
-    // Extents of the new dimensions after a reshape. '0' is replaced with the
-    // extent that preserves the total number of elements.
-    std::vector<size_t> new_dims;
-    friend bool operator==(const static_reshape& a, const static_reshape& b) {
-      return a.new_dims == b.new_dims;
-    }
-    friend bool operator<(const static_reshape& a, const static_reshape& b) {
-      return a.new_dims < b.new_dims;
+    friend bool operator<(const reshape& a, const reshape& b) {
+      return a.groups < b.groups;
     }
   };
   struct static_broadcast {
@@ -654,12 +613,11 @@ struct ynn_node {
   std::vector<uint32_t> inputs;
   std::vector<uint32_t> outputs;
   std::variant<invalid, opaque, broadcast_like, concatenate, even_split, copy,
-               gather, split_dim, fuse_dim, fuse_dims, split_dims, stack,
-               static_reshape, static_broadcast, static_pad, static_slice,
-               slice_like, static_transpose, stencil_copy, unary_elementwise,
-               binary_elementwise, ternary_elementwise, dot, iota, pack_b,
-               transpose_a, get_tensor_shape, reduce, dequantize_dot,
-               dynamic_quantization>
+               gather, stack, reshape, static_broadcast, static_pad,
+               static_slice, slice_like, static_transpose, stencil_copy,
+               unary_elementwise, binary_elementwise, ternary_elementwise, dot,
+               iota, pack_b, transpose_a, get_tensor_shape, reduce,
+               dequantize_dot, dynamic_quantization>
       op;
 
   const char* name() const;

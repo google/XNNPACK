@@ -58,6 +58,18 @@ bool is_ternary_node(const ynn_node& node, ternary_op op) {
   return ternary && ternary->op == op;
 }
 
+// Returns true if `node` is a convert that consumers can read through, i.e.
+// read the input of the convert instead of its output. This is only allowed if
+// the convert is lossless, or excess precision is allowed.
+bool is_elidable_convert(const ynn_subgraph& subgraph, const ynn_node& node) {
+  if (!is_unary_node(node, ynn_unary_convert)) return false;
+  const ynn_value& input = subgraph.value(node.inputs[0]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  if (is_convert_lossless(input.type, output.type)) return true;
+  return (subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) == 0 &&
+         (output.flags & YNN_VALUE_FLAG_NO_EXCESS_PRECISION) == 0;
+}
+
 bool is_square_node(const ynn_node& node) {
   if (is_unary_node(node, ynn_unary_square)) {
     return true;
@@ -82,11 +94,7 @@ bool is_layout_transform(const ynn_node& node) {
   return std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
          std::holds_alternative<ynn_node::copy>(node.op) ||
          std::holds_alternative<ynn_node::gather>(node.op) ||
-         std::holds_alternative<ynn_node::split_dim>(node.op) ||
-         std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
-         std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
-         std::holds_alternative<ynn_node::split_dims>(node.op) ||
-         std::holds_alternative<ynn_node::static_reshape>(node.op) ||
+         std::holds_alternative<ynn_node::reshape>(node.op) ||
          std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
          std::holds_alternative<ynn_node::static_slice>(node.op) ||
          std::holds_alternative<ynn_node::static_transpose>(node.op);
@@ -445,8 +453,8 @@ bool rewrite_binary_convert(ynn_subgraph& subgraph, ynn_node& node,
   ynn_node* producers[2] = {analysis.producer_of(node.inputs[0]),
                             analysis.producer_of(node.inputs[1])};
   bool is_convert[2] = {
-      producers[0] && is_unary_node(*producers[0], ynn_unary_convert),
-      producers[1] && is_unary_node(*producers[1], ynn_unary_convert)};
+      producers[0] && is_elidable_convert(subgraph, *producers[0]),
+      producers[1] && is_elidable_convert(subgraph, *producers[1])};
 
   if (!is_convert[0] && !is_convert[1]) {
     return false;
@@ -1261,7 +1269,7 @@ bool rewrite_reduce_convert(ynn_subgraph& subgraph, ynn_node& node,
   if (!reduce_op) return false;
 
   ynn_node* convert = analysis.producer_of(node.inputs[0]);
-  if (!convert || !is_unary_node(*convert, ynn_unary_convert)) {
+  if (!convert || !is_elidable_convert(subgraph, *convert)) {
     return false;
   }
 
@@ -1545,9 +1553,9 @@ bool rewrite_ternary_convert(ynn_subgraph& subgraph, ynn_node& node,
                             analysis.producer_of(node.inputs[1]),
                             analysis.producer_of(node.inputs[2])};
   bool is_convert[3] = {
-      producers[0] && is_unary_node(*producers[0], ynn_unary_convert),
-      producers[1] && is_unary_node(*producers[1], ynn_unary_convert),
-      producers[2] && is_unary_node(*producers[2], ynn_unary_convert)};
+      producers[0] && is_elidable_convert(subgraph, *producers[0]),
+      producers[1] && is_elidable_convert(subgraph, *producers[1]),
+      producers[2] && is_elidable_convert(subgraph, *producers[2])};
 
   if (!is_convert[0] && !is_convert[1] && !is_convert[2]) {
     return false;
@@ -1825,48 +1833,32 @@ bool rewrite_binary(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
-// Rewrite reshape to static_transpose if possible.
-bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
-                     subgraph_analysis& analysis) {
-  const ynn_node::static_reshape* reshape =
-      std::get_if<ynn_node::static_reshape>(&node.op);
-  if (!reshape) return false;
+// Rewrite reshape(reshape(x)) to reshape(x)
+bool rewrite_reshape_reshape(ynn_subgraph& subgraph, ynn_node& node,
+                             subgraph_analysis& analysis) {
+  const auto* reshape2 = std::get_if<ynn_node::reshape>(&node.op);
+  if (!reshape2) return false;
 
-  const ynn_value& input = subgraph.value(node.inputs[0]);
-  ynn_value& output = subgraph.value(node.outputs[0]);
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
 
-  std::vector<int32_t> permutation;
+  const auto* reshape1 = std::get_if<ynn_node::reshape>(&producer->op);
+  if (!reshape1) return false;
 
-  size_t i = 0;
-  size_t o = 0;
-  while (o < output.rank()) {
-    if (i < input.rank() &&
-        slinky::prove_true(output.extent(o) == input.extent(i))) {
-      permutation.push_back(i);
-      ++i;
-      ++o;
-    } else if (slinky::prove_true(output.extent(o) == 1)) {
-      permutation.push_back(input.rank());
-      ++o;
-    } else if (i < input.rank() && slinky::prove_true(input.extent(i) == 1)) {
-      ++i;
-    } else {
-      return false;
-    }
-  }
+  const uint32_t input_id = producer->inputs[0];
+  uint32_t output_id = node.outputs[0];
+  std::vector<ynn_node::reshape::group> groups =
+      compose_reshape_groups(reshape1->groups, reshape2->groups);
+  std::vector<slinky::expr> output_extents = subgraph.value(output_id).extents;
 
-  while (i < input.rank()) {
-    if (slinky::prove_true(input.extent(i) == 1)) {
-      ++i;
-    } else {
-      return false;
-    }
-  }
-
-  YNN_LOG_DEBUG() << "Rewriting reshape to static_transpose";
+  YNN_LOG_DEBUG() << "Rewriting reshape(reshape(x)) to reshape(x)";
+  // The first reshape might become dead and get removed, so we need to keep
+  // its checks.
+  node.checks.insert(node.checks.end(), producer->checks.begin(),
+                     producer->checks.end());
   analysis.update_node(node, [&]() {
-    ynn::define_static_transpose(subgraph, node, std::move(permutation),
-                                 input.id, &output.id);
+    ynn::define_reshape(subgraph, node, input_id, &output_id,
+                        std::move(output_extents), std::move(groups));
   });
   return true;
 }
@@ -2687,7 +2679,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_exp_subtract(*this, node, analysis) ||
                 ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
                 ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
-                ynn::rewrite_reshape(*this, node, analysis) ||
+                ynn::rewrite_reshape_reshape(*this, node, analysis) ||
                 ynn::rewrite_transpose_transpose(*this, node, analysis) ||
                 ynn::rewrite_divide_sqrt(*this, node, analysis) ||
                 ynn::rewrite_multiply_reciprocal(*this, node, analysis) ||

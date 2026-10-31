@@ -493,6 +493,127 @@ TEST(fusion, reshape_to_slice) {
   EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticTranspose());
 }
 
+TEST(fusion, static_reshape_groups) {
+  // A static reshape that only fuses some dimensions should have groups that
+  // only reshape those dimensions.
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+
+  builder.AddInput(ynn_type_fp32, {3, 6, 4, 5}, x_id)
+      .AddOutput(ynn_type_fp32, {3, 24, 5}, out_id)
+      .AddReshape({3, 24, 5}, x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  const ynn_node::reshape* reshape =
+      std::get_if<ynn_node::reshape>(&ProducerOf(out_id, subgraph).op);
+  ASSERT_NE(reshape, nullptr);
+  using group = ynn_node::reshape::group;
+  EXPECT_THAT(reshape->groups,
+              testing::ElementsAre(group{1, 1}, group{2, 1}, group{1, 1}));
+}
+
+TEST(fusion, reshape_reshape) {
+  // rewrite reshape(reshape(x)) -> reshape(x)
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t split_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {6, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {24, 5}, out_id)
+      .AddTensor(ynn_type_fp32, {6, 4, 5}, split_id);
+
+  builder.AddSplitDim(1, {4, 5}, x_id, split_id)
+      .AddFuseDim(0, 2, split_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsReshape(), InputsAre(x_id)));
+}
+
+TEST(fusion, reshape_reshape_reshape) {
+  // rewrite reshape(reshape(reshape(x))) -> reshape(x)
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t reshape1_id = YNN_INVALID_VALUE_ID;
+  uint32_t reshape2_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, 3, x_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, reshape1_id)
+      .AddTensor(ynn_type_fp32, 3, reshape2_id);
+
+  builder.AddFuseDims({1}, x_id, reshape1_id)
+      .AddSplitDim(0, {2, 0}, reshape1_id, reshape2_id)
+      .AddFuseDim(0, 2, reshape2_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsReshape(), InputsAre(x_id)));
+}
+
+TEST(fusion, reshape_reshape_to_transpose) {
+  // rewrite reshape(reshape(x)) -> transpose(x) if the reshapes cancel out.
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t split_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {6, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {6, 20}, out_id)
+      .AddTensor(ynn_type_fp32, {6, 4, 5}, split_id);
+
+  builder.AddSplitDim(1, {4, 0}, x_id, split_id)
+      .AddFuseDim(1, 2, split_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(0, 1)),
+                    InputsAre(x_id)));
+}
+
+TEST(fusion, reshape_reshape_multiple_consumers) {
+  // rewrite reshape(reshape(x)) -> reshape(x), when the intermediate reshape
+  // has other consumers.
+  const uint32_t x_id = 0;
+  const uint32_t out1_id = 1;
+  const uint32_t out2_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t split_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {6, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {24, 5}, out1_id)
+      .AddOutput(ynn_type_fp32, {6, 4, 5}, out2_id)
+      .AddTensor(ynn_type_fp32, {6, 4, 5}, split_id);
+
+  builder.AddSplitDim(1, {4, 5}, x_id, split_id)
+      .AddFuseDim(0, 2, split_id, out1_id)
+      .AddUnary(ynn_unary_negate, split_id, out2_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out1_id, subgraph),
+              AllOf(IsReshape(), InputsAre(x_id)));
+  EXPECT_THAT(ProducerOf(split_id, subgraph),
+              AllOf(IsReshape(), InputsAre(x_id)));
+}
+
 TEST(fusion, transpose_transpose) {
   // rewrite transpose(transpose(x)) -> transpose(x)
   const uint32_t x_id = 0;

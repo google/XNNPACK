@@ -163,6 +163,39 @@ void TestReduceSumOfSquared(ynn_type type, bool use_square) {
 
 }  // namespace
 
+TEST(fusion, reduce_sum_squared_of_convert_convert) {
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  for (uint32_t flags : {0, YNN_FLAG_NO_EXCESS_PRECISION}) {
+    // reduce_sum_squared(convert_fp32(convert_bf16(x_fp32))) can only be
+    // rewritten to reduce_sum_squared(x_fp32) if excess precision is allowed.
+    SubgraphBuilder builder(2, flags);
+    uint32_t bf16_id = YNN_INVALID_VALUE_ID;
+    uint32_t fp32_id = YNN_INVALID_VALUE_ID;
+    builder.AddInput(ynn_type_fp32, 2, x_id)
+        .AddOutput(ynn_type_fp32, 1, y_id)
+        .AddTensor(ynn_type_bf16, 2, bf16_id)
+        .AddTensor(ynn_type_fp32, 2, fp32_id);
+    builder.AddUnary(ynn_unary_convert, x_id, bf16_id)
+        .AddUnary(ynn_unary_convert, bf16_id, fp32_id)
+        .AddReduce(ynn_reduce_sum_squared, {1}, fp32_id, YNN_INVALID_VALUE_ID,
+                   y_id, 0);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
+
+    const ynn_node& reduce = ProducerOf(y_id, subgraph);
+    ASSERT_THAT(reduce, IsReduce(ynn_reduce_sum_squared));
+    if ((flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
+      EXPECT_NE(reduce.inputs[0], x_id);
+    } else {
+      EXPECT_THAT(reduce, InputsAre(x_id, YNN_INVALID_VALUE_ID));
+    }
+  }
+}
+
 TEST(fusion, reduce_sum_of_squared_f32) {
   // reduce_sum(x_f32 * x_f32) -> reduce_sum_squared(x_f32)
   for (bool use_square : {false, true}) {

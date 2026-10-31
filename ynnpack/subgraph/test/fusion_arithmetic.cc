@@ -620,6 +620,40 @@ TEST(fusion, convert_convert) {
   }
 }
 
+TEST(fusion, binary_convert_convert) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  for (uint32_t flags : {0, YNN_FLAG_NO_EXCESS_PRECISION}) {
+    // multiply(convert<fp32>(convert<bf16>(a_fp32)), b_fp32) can only be
+    // rewritten to multiply(a_fp32, b_fp32) if excess precision is allowed.
+    SubgraphBuilder builder(3, flags);
+    uint32_t bf16_id = YNN_INVALID_VALUE_ID;
+    uint32_t fp32_id = YNN_INVALID_VALUE_ID;
+    builder.AddInput(ynn_type_fp32, 2, a_id)
+        .AddInput(ynn_type_fp32, 2, b_id)
+        .AddOutput(ynn_type_fp32, 2, x_id)
+        .AddTensor(ynn_type_bf16, 2, bf16_id)
+        .AddTensor(ynn_type_fp32, 2, fp32_id);
+    builder.AddUnary(ynn_unary_convert, a_id, bf16_id)
+        .AddUnary(ynn_unary_convert, bf16_id, fp32_id)
+        .AddBinary(ynn_binary_multiply, fp32_id, b_id, x_id);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
+
+    const ynn_node& multiply = ProducerOf(x_id, subgraph);
+    ASSERT_THAT(multiply, IsBinary(ynn_binary_multiply));
+    if ((flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
+      EXPECT_NE(multiply.inputs[0], a_id);
+    } else {
+      EXPECT_THAT(multiply, InputsAre(a_id, b_id));
+    }
+  }
+}
+
 TEST(fusion, dequantize_quantize) {
   // rewrite dequantize(quantize(a_fp32)) -> a_fp32.
   const uint32_t a_id = 0;
