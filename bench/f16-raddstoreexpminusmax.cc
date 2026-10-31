@@ -125,6 +125,17 @@ BENCHMARK_CAPTURE(
     ->UseRealTime();
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+BENCHMARK_CAPTURE(
+    f16_raddstoreexpminusmax, avx512fp16_rr2_p2_u32,
+    xnn_f16_rmax_ukernel__avx512fp16_u128_acc4,
+    xnn_f16_raddstoreexpminusmax_ukernel__avx512fp16_rr2_p2_u32, nullptr,
+    xnn_arch_x86_avx512fp16)
+    ->Apply(
+        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 #if XNN_ENABLE_AVX2 && XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u16,
                   xnn_f16_rmax_ukernel__f16c_u32,
