@@ -126,10 +126,12 @@ std::optional<Tensor> Scope::GetBoundaryTensor(absl::string_view role) const {
   return it->second.Lock();
 }
 
-std::shared_ptr<Scope> CurrentScope() { return MutableCurrentScope(); }
+std::shared_ptr<Scope> CurrentScope() {
+  return g_current_scope != nullptr ? *g_current_scope : nullptr;
+}
 
 ScopeGuard::ScopeGuard(absl::string_view kind, absl::string_view name)
-    : prev_scope_(MutableCurrentScope()), scope_(std::make_shared<Scope>()) {
+    : prev_scope_(CurrentScope()), scope_(std::make_shared<Scope>()) {
   scope_->kind = std::string(kind);
   scope_->name = name.empty() ? std::string(kind) : std::string(name);
   scope_->parent = prev_scope_;
@@ -139,7 +141,14 @@ ScopeGuard::ScopeGuard(absl::string_view kind, absl::string_view name)
   MutableCurrentScope() = scope_;
 }
 
-ScopeGuard::~ScopeGuard() { MutableCurrentScope() = std::move(prev_scope_); }
+ScopeGuard::~ScopeGuard() {
+  if (prev_scope_ == nullptr) {
+    delete g_current_scope;
+    g_current_scope = nullptr;
+  } else {
+    MutableCurrentScope() = std::move(prev_scope_);
+  }
+}
 
 ScopeGuard& ScopeGuard::Attr(absl::string_view key, int64_t value) {
   scope_->SetAttr(key, value);

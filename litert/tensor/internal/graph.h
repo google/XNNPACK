@@ -53,6 +53,7 @@ limitations under the License.
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
 #include "absl/types/source_location.h"
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
@@ -126,10 +127,81 @@ struct BlockwiseQuantization : Quantization {
     return id == internal::TypeId::Get<BlockwiseQuantization>();
   }
 
+  // Returns a thread-safe cached BF16 representation of `scales` so multi-pass
+  // backends (such as XNNPACK prepack + prefill + decode) do not re-allocate or
+  // re-convert hundreds of millions of blockwise scales on every pass.
+  std::shared_ptr<const std::vector<bf16_t>> GetOrCreateBf16Scales() const {
+    {
+      absl::MutexLock lock(&bf16_cache_.mu);
+      if (bf16_cache_.scales != nullptr &&
+          bf16_cache_.scales->size() == scales.size()) {
+        return bf16_cache_.scales;
+      }
+    }
+    auto built = std::make_shared<std::vector<bf16_t>>(scales.size());
+    bf16_t* dst = built->data();
+    const float* src = scales.data();
+    const size_t n = scales.size();
+    for (size_t i = 0; i < n; ++i) {
+      dst[i] = bf16_t(src[i]);
+    }
+    absl::MutexLock lock(&bf16_cache_.mu);
+    if (bf16_cache_.scales == nullptr ||
+        bf16_cache_.scales->size() != scales.size()) {
+      bf16_cache_.scales = std::move(built);
+    }
+    return bf16_cache_.scales;
+  }
+
+  void InvalidateBf16ScalesCache() {
+    absl::MutexLock lock(&bf16_cache_.mu);
+    bf16_cache_.scales.reset();
+  }
+
   std::vector<float> scales;
   std::vector<int64_t> zero_points;
   int block_size;
   int quantized_dimension;
+
+ private:
+  struct CachedBf16Scales {
+    CachedBf16Scales() = default;
+    CachedBf16Scales(const CachedBf16Scales& other) {
+      absl::MutexLock lock(&other.mu);
+      scales = other.scales;
+    }
+    CachedBf16Scales& operator=(const CachedBf16Scales& other) {
+      if (this == &other) return *this;
+      std::shared_ptr<const std::vector<bf16_t>> copy;
+      {
+        absl::MutexLock lock(&other.mu);
+        copy = other.scales;
+      }
+      absl::MutexLock lock(&mu);
+      scales = std::move(copy);
+      return *this;
+    }
+    CachedBf16Scales(CachedBf16Scales&& other) noexcept {
+      absl::MutexLock lock(&other.mu);
+      scales = std::move(other.scales);
+    }
+    CachedBf16Scales& operator=(CachedBf16Scales&& other) noexcept {
+      if (this == &other) return *this;
+      std::shared_ptr<const std::vector<bf16_t>> moved;
+      {
+        absl::MutexLock lock(&other.mu);
+        moved = std::move(other.scales);
+      }
+      absl::MutexLock lock(&mu);
+      scales = std::move(moved);
+      return *this;
+    }
+
+    mutable absl::Mutex mu;
+    std::shared_ptr<const std::vector<bf16_t>> scales;
+  };
+
+  mutable CachedBf16Scales bf16_cache_;
 };
 
 using Shape = std::vector<int32_t>;
