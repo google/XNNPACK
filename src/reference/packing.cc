@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
@@ -4004,6 +4005,125 @@ void xnn_pack_qd8_qc2w_weights_and_biases(
         reinterpret_cast<void*>(
             reinterpret_cast<uintptr_t>(packed_weights_ptr) +
             nr * (packed_stride - sizeof(float))));
+  }
+}
+
+size_t xnn_packed_stride_qs8_qc2w_weights_and_biases_sme2(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  (void)gemm_config;
+  (void)unused_block_size;
+  (void)unused_k_stride;
+  (void)extra_bytes;
+  const size_t rounded_k = round_up(k, 32);
+  return sizeof(int32_t) + (rounded_k / 4) + sizeof(float);
+}
+
+void xnn_pack_qs8_qc2w_weights_and_biases_sme2(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  (void)init_extra_data0_fn;
+  (void)init_extra_data1_fn;
+  (void)extra_data1;
+  (void)extra_data1_element_size;
+  (void)unused_block_size;
+
+  const struct xnn_qs8_qc2w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc2w_packing_params*>(params);
+
+  if (extra_data0 == nullptr) {
+    xnn_log_error("QS8 QC2W SME2 RHS packing requires scale data");
+    return;
+  }
+
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+    assert((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0);
+    xnn_log_error("QS8 QC2W SME2 RHS packing requires NxK weights");
+    return;
+  }
+
+  if (accumulator_init == nullptr) {
+    xnn_log_error("QS8 QC2W SME2 RHS packing requires bias data");
+    return;
+  }
+
+  const size_t nr = gemm_config->nr;
+  const size_t rounded_k = round_up(input_channels, 32);
+  const size_t packed_stride_per_channel =
+      sizeof(int32_t) + (rounded_k / 4) + sizeof(float);
+  const size_t packed_block_stride = nr * packed_stride_per_channel;
+  const size_t rounded_output_channels = round_up(output_channels, nr);
+  const size_t packed_group_size =
+      (rounded_output_channels / nr) * packed_block_stride;
+  const size_t rhs_stride_row = (k_stride + 3) / 4;
+  const size_t rhs_group_stride = output_channels * rhs_stride_row;
+  const int32_t k_sum_scale = -(int32_t)xnn_params->input_zero_point;
+  std::vector<int32_t> sums(nr);
+
+  for (size_t group = 0; group < groups; group++) {
+    const uint8_t* group_rhs =
+        (const uint8_t*)weights + group * rhs_group_stride;
+    const int32_t* group_bias =
+        (const int32_t*)accumulator_init + group * output_channels;
+    const float* group_scale =
+        (const float*)((const uint8_t*)extra_data0 +
+                       group * output_channels * extra_data0_element_size);
+    uint8_t* group_packed =
+        (uint8_t*)packed_weights_ptr + group * packed_group_size;
+
+    for (size_t n_base = 0; n_base < output_channels; n_base += nr) {
+      const size_t block_width = min(output_channels - n_base, nr);
+      std::fill(sums.begin(), sums.end(), 0);
+
+      uint8_t* payload = group_packed + nr * sizeof(int32_t);
+
+      for (size_t slice = 0; slice < rounded_k / 4; ++slice) {
+        uint8_t* slice_out = payload + slice * nr;
+        for (size_t col = 0; col < block_width; ++col) {
+          const uint8_t* row = group_rhs + (n_base + col) * rhs_stride_row;
+          const size_t k_start = slice * 4;
+          uint8_t byte_val = 0;
+          if (k_start < input_channels) {
+            byte_val = row[k_start / 4];
+          }
+          slice_out[col] = byte_val;
+
+          for (size_t ki = 0; ki < 4; ++ki) {
+            if (k_start + ki < input_channels) {
+              const uint8_t crumb = (byte_val >> (ki * 2)) & 0x3;
+              sums[col] += sign_extend_int2(crumb);
+            }
+          }
+        }
+        for (size_t col = block_width; col < nr; ++col) {
+          slice_out[col] = 0;
+        }
+      }
+
+      int32_t* bias_out = (int32_t*)group_packed;
+      for (size_t col = 0; col < block_width; ++col) {
+        bias_out[col] = group_bias[n_base + col] + k_sum_scale * sums[col];
+      }
+      for (size_t col = block_width; col < nr; ++col) {
+        bias_out[col] = 0;
+      }
+
+      float* scale_out = (float*)(payload + (rounded_k / 4) * nr);
+      for (size_t col = 0; col < block_width; ++col) {
+        scale_out[col] = group_scale[n_base + col];
+      }
+      for (size_t col = block_width; col < nr; ++col) {
+        scale_out[col] = 0.0f;
+      }
+
+      group_packed += packed_block_stride;
+    }
   }
 }
 

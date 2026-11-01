@@ -41,11 +41,18 @@ SET(NON_PROD_NEONSME2_MICROKERNEL_SRCS
   src/pf16-gemm/pf16-gemm-32x32c2-minmax-sme2.c
   src/pf32-gemm/pf32-gemm-1x32-minmax-sme2.c
   src/pf32-gemm/pf32-gemm-32x32-minmax-sme2.c
+  src/pqs8-qc2w-gemm/pqs8-qc2w-gemm-1x32c4-minmax-sme2.c
+  src/pqs8-qc2w-gemm/pqs8-qc2w-gemm-32x32c4-minmax-sme2.c
+  src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-1x32c4-minmax-sme2.c
   src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-1x64c4-minmax-neonsme2.c
+  src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-32x32c4-minmax-sme2.c
+  src/pqs8-qc8w-gemm/pqs8-qc8w-gemm-1x32c4-minmax-sme2.c
+  src/pqs8-qc8w-gemm/pqs8-qc8w-gemm-32x32c4-minmax-sme2.c
   src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-1x32c4-minmax-sme2.c
   src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-32x32c4-minmax-sme2.c
   src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-1x32c4-minmax-sme2.c
   src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-32x32c4-minmax-sme2.c
+  src/x8-pack-lh/x8-packlh-sme2.c
   src/x8-packq/x8-packq-f32qp8-sme2.c
   src/x16-pack-lh/x16-packlh-sme2.c
   src/x32-pack-lh/x32-packlh-sme2.c)

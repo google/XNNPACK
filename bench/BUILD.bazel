@@ -205,6 +205,7 @@ xnnpack_cxx_library(
     "f16_gemm_minmax",
     "f32_gemm_minmax",
     "f32_gemm",
+    "pqs8_qc2w_gemm_minmax",
     "pqs8_qc8w_gemm_minmax",
     "qs8_gemm",
     "qu8_gemm",

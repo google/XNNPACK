@@ -643,6 +643,17 @@ std::vector<GemmTestParams> CreateTests(
                 .m(mr).n(nr).k(128)
                 .b_zero_point(0)
             , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pqs8" and WEIGHTS_DATATYPE == "qc2w":
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_512",
+            tester.clone()
+                .m(mr).n(nr).k(512)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "large_weights",
+            tester.clone()
+                .m(1).n(4096).k(1024)
+            , test_func, arch_flags));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",
@@ -905,6 +916,8 @@ def generate_test_cases(
     test_fun_name = "Test_QP8F32QC2W"
   elif input_datatype == "pqs8" and weights_datatype == "qc4w":
     test_fun_name = "Test_PQS8QC4W"
+  elif input_datatype == "pqs8" and weights_datatype == "qc2w":
+    test_fun_name = "Test_PQS8QC2W"
   elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
   elif input_datatype in {"pf32", "pf16", "pqs8"}:

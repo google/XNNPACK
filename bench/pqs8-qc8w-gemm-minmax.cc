@@ -19,6 +19,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
@@ -154,6 +155,97 @@ namespace {
   BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  static void pqs8_qc8w_gemm_minmax_ukernel_1x32c4__sme2(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__sme2,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
+      xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme,
+      xnn_x8_pack_lh_ukernel__sme2,
+      xnn_x8_pack_lh_size__sme2,
+      xnn_x8_pack_lh_offset__sme2,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+      /*arch_flags=*/xnn_arch_arm_sme2);
+  }
+
+  BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_1x32c4__sme2)
+
+  static void pqs8_qc8w_gemm_minmax_ukernel_32x32c4__sme2(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__sme2,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_kai_qs8_qc8w_weights_and_biases_sme,
+      xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme,
+      xnn_x8_pack_lh_ukernel__sme2,
+      xnn_x8_pack_lh_size__sme2,
+      xnn_x8_pack_lh_offset__sme2,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__sme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+      /*arch_flags=*/xnn_arch_arm_sme2);
+  }
+
+  BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_32x32c4__sme2)
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 
 
 }  // namespace
