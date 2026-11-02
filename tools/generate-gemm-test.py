@@ -691,6 +691,30 @@ std::vector<GemmTestParams> CreateTests(
             $if WEIGHTS_DATATYPE in ['qb4w']:
               .bl(32)
         , test_func, arch_flags));
+  $if ISA == 'hmx':
+    // Partial and multiple 32-deep HMX K tiles, including odd K and the
+    // 64-element LHS transfer tail.
+    gemm_tests.push_back(GemmTestParams(
+        "k_tiles",
+        tester.clone()
+            .m(mr).n(nr)
+        , test_func, arch_flags)
+        .loop_k(1, 72, 5));
+    gemm_tests.push_back(GemmTestParams(
+        "k_tiles_subtile_m",
+        tester.clone()
+            .n(nr)
+        , test_func, arch_flags)
+        .loop_k(31, 65, 11, LoopStepType::Linear)
+        .loop_m(1, mr, 7));
+    // K around and beyond one VTCM-resident chunk (1024) exercises the full
+    // 64 KB HMX operand size and the chunked K path.
+    gemm_tests.push_back(GemmTestParams(
+        "k_large",
+        tester.clone()
+            .m(mr).n(nr)
+        , test_func, arch_flags)
+        .loop_k(1023, 1025, 2, LoopStepType::Linear));
   return gemm_tests;
 }
 """
@@ -934,6 +958,7 @@ def generate_test_cases(
       "next_prime": next_prime,
       "CPP_CHECK": cpp_check,
       "OUTPUT_DATATYPE": output_datatype,
+      "ISA": isa,
       "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
   }
 
@@ -1143,9 +1168,14 @@ namespace {{
       # Store or reuse the `CreateTests` function?
       create_tests_hash = hash(create_tests)
       create_tests_idx = idx_from_create_tests_hash[create_tests_hash]
+      create_tests_fn = (
+          "CreateHmxGemmTests"
+          if isa == "hmx"
+          else f"CreateTests{create_tests_idx}"
+      )
       if create_tests_idx not in create_tests_from_idx:
         create_tests_from_idx[create_tests_idx] = create_tests.replace(
-            "CreateTests(", f"CreateTests{create_tests_idx}("
+            "CreateTests(", f"{create_tests_fn}("
         )
         if isa in {"rvv", "rvvfp16arith"}:
           create_tests_from_idx[create_tests_idx] = (
@@ -1154,7 +1184,7 @@ namespace {{
               )
           )
       test_case = test_case.replace(
-          "CreateTests(", f"CreateTests{create_tests_idx}("
+          "CreateTests(", f"{create_tests_fn}("
       )
 
       # Hash the name of each microkernel and figure out which output file to
