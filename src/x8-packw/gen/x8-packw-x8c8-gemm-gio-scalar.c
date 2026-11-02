@@ -567,6 +567,16 @@ void xnn_x8_packw_gemm_gio_ukernel_x8c8__scalar(
           out[N*8 + 6] = v6;
           out[N*8 + 7] = v7;
         }
+        for (size_t N = n; N < 8; ++N) {
+          out[N*8 + 0] = 0;
+          out[N*8 + 1] = 0;
+          out[N*8 + 2] = 0;
+          out[N*8 + 3] = 0;
+          out[N*8 + 4] = 0;
+          out[N*8 + 5] = 0;
+          out[N*8 + 6] = 0;
+          out[N*8 + 7] = 0;
+        }
         w0 += k * k_stride;
         w1 += k * k_stride;
         w2 += k * k_stride;

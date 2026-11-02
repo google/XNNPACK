@@ -115,17 +115,13 @@ void xnn_f16_gemm_minmax_ukernel_16x32c2__avx512amxfp16(
     }
 
     if XNN_UNLIKELY(k != 0) {
-      if XNN_UNLIKELY((k & 2) != 0) {
-        const xnn_float16* a0 = a;
-        for (size_t m = 0; m < mr; ++m) {
-          const __m512i vin = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
-          a0 = (const xnn_float16*) ((uintptr_t) a0 + a_stride);
-          _mm512_store_epi32(&res[0][m * 16], vin);
-        }
-        _tile_loadd(6, &res[0][0], 64);
-      } else {
-        _tile_loadd(6, a, a_stride);
+      const xnn_float16* a0 = a;
+      for (size_t m = 0; m < mr; ++m) {
+        const __m512i vin = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
+        a0 = (const xnn_float16*) ((uintptr_t) a0 + a_stride);
+        _mm512_store_epi32(&res[0][m * 16], vin);
       }
+      _tile_loadd(6, &res[0][0], 64);
       a = (const xnn_float16*) ((uintptr_t) a + kremainder);
       _tile_loadd(7, (const int8_t*) w + 0, 128);
       _tile_dpfp16ps(0, 6, 7);

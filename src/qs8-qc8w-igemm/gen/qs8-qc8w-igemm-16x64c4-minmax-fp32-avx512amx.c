@@ -66,9 +66,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
   XNN_ALIGN(64) int32_t res[4][16 * 16];
   XNN_ALIGN(64) int32_t vintile[2][16 * 16];
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
-  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+  const size_t kremainder_colsb = round_up_po2(kremainder, 4 * sizeof(int8_t));
+  const __mmask64 kremainder_mask = _cvtu64_mask64((UINT64_C(1) << (kc & 63)) - 1);
 
   // Load tile configuration
   tile_data.palette_id = 1;
@@ -77,18 +77,18 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
   tile_data.rows[2] = mr;              // tmm2 = res[2]
   tile_data.rows[3] = mr;              // tmm3 = res[3]
   tile_data.rows[4] = mr;              // tmm4 = input
-  tile_data.rows[5] = 16;              // tmm5 = weights
+  tile_data.rows[5] = 16;                    // tmm5 = weights
   tile_data.rows[6] = mr;              // tmm6 = input remainder
-  tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
+  tile_data.rows[7] = kremainder_colsb >> 2; // tmm7 = weights remainder
 
-  tile_data.colsb[0] = 64;          // tmm0 = res[0]
-  tile_data.colsb[1] = 64;          // tmm1 = res[1]
-  tile_data.colsb[2] = 64;          // tmm2 = res[2]
-  tile_data.colsb[3] = 64;          // tmm3 = res[3]
-  tile_data.colsb[4] = 64;          // tmm4 = input
-  tile_data.colsb[5] = 64;          // tmm5 = weights
-  tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
-  tile_data.colsb[7] = 64;          // tmm7 = weights remainder
+  tile_data.colsb[0] = 64;                   // tmm0 = res[0]
+  tile_data.colsb[1] = 64;                   // tmm1 = res[1]
+  tile_data.colsb[2] = 64;                   // tmm2 = res[2]
+  tile_data.colsb[3] = 64;                   // tmm3 = res[3]
+  tile_data.colsb[4] = 64;                   // tmm4 = input
+  tile_data.colsb[5] = 64;                   // tmm5 = weights
+  tile_data.colsb[6] = kremainder_colsb;     // tmm6 = input remainder
+  tile_data.colsb[7] = 64;                   // tmm7 = weights remainder
 
   _tile_loadconfig(&tile_data);
 
@@ -144,7 +144,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
           k -= 64 * sizeof(int8_t);
         }
         if XNN_UNLIKELY(k != 0) {
-          _tile_loadd(6, a0, 64);
+          const __m512i vin0 = _mm512_maskz_loadu_epi8(kremainder_mask, a0);
+          _mm512_store_epi32(&vintile[0][0], vin0);
+          _tile_loadd(6, &vintile[0][0], 64);
           _tile_loadd(7, (const int8_t*) w + 0, 256);
           _tile_dpbssd(0, 6, 7);
           if XNN_LIKELY(nc > 16) {
@@ -160,7 +162,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
             _tile_dpbssd(3, 6, 7);
           }
 
-          w = (const int8_t*) w + kremainder * 64;
+          w = (const int8_t*) w + kremainder_colsb * 64;
           k -= kremainder * sizeof(int8_t);
         }
       } else {
@@ -297,52 +299,52 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
           k -= 64 * sizeof(int8_t);
         }
         if XNN_UNLIKELY(k != 0) {
-          const __m512i vin0 = _mm512_maskz_loadu_epi32(kremainder_mask, a0);
+          const __m512i vin0 = _mm512_maskz_loadu_epi8(kremainder_mask, a0);
           a0 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][0], vin0);
-          const __m512i vin1 = _mm512_maskz_loadu_epi32(kremainder_mask, a1);
+          const __m512i vin1 = _mm512_maskz_loadu_epi8(kremainder_mask, a1);
           a1 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][16], vin1);
-          const __m512i vin2 = _mm512_maskz_loadu_epi32(kremainder_mask, a2);
+          const __m512i vin2 = _mm512_maskz_loadu_epi8(kremainder_mask, a2);
           a2 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][32], vin2);
-          const __m512i vin3 = _mm512_maskz_loadu_epi32(kremainder_mask, a3);
+          const __m512i vin3 = _mm512_maskz_loadu_epi8(kremainder_mask, a3);
           a3 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][48], vin3);
-          const __m512i vin4 = _mm512_maskz_loadu_epi32(kremainder_mask, a4);
+          const __m512i vin4 = _mm512_maskz_loadu_epi8(kremainder_mask, a4);
           a4 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][64], vin4);
-          const __m512i vin5 = _mm512_maskz_loadu_epi32(kremainder_mask, a5);
+          const __m512i vin5 = _mm512_maskz_loadu_epi8(kremainder_mask, a5);
           a5 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][80], vin5);
-          const __m512i vin6 = _mm512_maskz_loadu_epi32(kremainder_mask, a6);
+          const __m512i vin6 = _mm512_maskz_loadu_epi8(kremainder_mask, a6);
           a6 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][96], vin6);
-          const __m512i vin7 = _mm512_maskz_loadu_epi32(kremainder_mask, a7);
+          const __m512i vin7 = _mm512_maskz_loadu_epi8(kremainder_mask, a7);
           a7 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][112], vin7);
-          const __m512i vin8 = _mm512_maskz_loadu_epi32(kremainder_mask, a8);
+          const __m512i vin8 = _mm512_maskz_loadu_epi8(kremainder_mask, a8);
           a8 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][128], vin8);
-          const __m512i vin9 = _mm512_maskz_loadu_epi32(kremainder_mask, a9);
+          const __m512i vin9 = _mm512_maskz_loadu_epi8(kremainder_mask, a9);
           a9 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][144], vin9);
-          const __m512i vin10 = _mm512_maskz_loadu_epi32(kremainder_mask, a10);
+          const __m512i vin10 = _mm512_maskz_loadu_epi8(kremainder_mask, a10);
           a10 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][160], vin10);
-          const __m512i vin11 = _mm512_maskz_loadu_epi32(kremainder_mask, a11);
+          const __m512i vin11 = _mm512_maskz_loadu_epi8(kremainder_mask, a11);
           a11 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][176], vin11);
-          const __m512i vin12 = _mm512_maskz_loadu_epi32(kremainder_mask, a12);
+          const __m512i vin12 = _mm512_maskz_loadu_epi8(kremainder_mask, a12);
           a12 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][192], vin12);
-          const __m512i vin13 = _mm512_maskz_loadu_epi32(kremainder_mask, a13);
+          const __m512i vin13 = _mm512_maskz_loadu_epi8(kremainder_mask, a13);
           a13 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][208], vin13);
-          const __m512i vin14 = _mm512_maskz_loadu_epi32(kremainder_mask, a14);
+          const __m512i vin14 = _mm512_maskz_loadu_epi8(kremainder_mask, a14);
           a14 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][224], vin14);
-          const __m512i vin15 = _mm512_maskz_loadu_epi32(kremainder_mask, a15);
+          const __m512i vin15 = _mm512_maskz_loadu_epi8(kremainder_mask, a15);
           a15 += kremainder;
           _mm512_store_epi32(&vintile[buf_idx][240], vin15);
           _tile_loadd(6, &vintile[buf_idx][0], 64);
@@ -361,7 +363,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
             _tile_dpbssd(3, 6, 7);
           }
 
-          w = (const int8_t*) w + kremainder * 64;
+          w = (const int8_t*) w + kremainder_colsb * 64;
           k -= kremainder * sizeof(int8_t);
         }
       }

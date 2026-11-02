@@ -751,6 +751,12 @@ void xnn_qs8_packw_gemm_gio_ukernel_x16c4__scalar(
           out[N*4 + 2] = v2;
           out[N*4 + 3] = v3;
         }
+        for (size_t N = n; N < 16; ++N) {
+          out[N*4 + 0] = 0;
+          out[N*4 + 1] = 0;
+          out[N*4 + 2] = 0;
+          out[N*4 + 3] = 0;
+        }
         w0 += k * k_stride;
         w1 += k * k_stride;
         w2 += k * k_stride;

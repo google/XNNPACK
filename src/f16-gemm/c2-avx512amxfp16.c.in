@@ -140,17 +140,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c2__avx512amxfp16${"_pr
         _mm512_store_epi32(&res[0][0], vin0);
         _tile_loadd(6, &res[0][0], 64);
       $else:
-        if XNN_UNLIKELY((k & 2) != 0) {
-          const xnn_float16* a0 = a;
-          for (size_t m = 0; m < mr; ++m) {
-            const __m512i vin = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
-            a0 = (const xnn_float16*) ((uintptr_t) a0 + a_stride);
-            _mm512_store_epi32(&res[0][m * 16], vin);
-          }
-          _tile_loadd(6, &res[0][0], 64);
-        } else {
-          _tile_loadd(6, a, a_stride);
+        const xnn_float16* a0 = a;
+        for (size_t m = 0; m < mr; ++m) {
+          const __m512i vin = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
+          a0 = (const xnn_float16*) ((uintptr_t) a0 + a_stride);
+          _mm512_store_epi32(&res[0][m * 16], vin);
         }
+        _tile_loadd(6, &res[0][0], 64);
         a = (const xnn_float16*) ((uintptr_t) a + kremainder);
       $for N in range(0, NR, 16):
         $if N == 0:
