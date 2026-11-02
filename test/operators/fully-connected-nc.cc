@@ -1119,6 +1119,29 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch_without_bias) {
       .TestF32QC4W();
 }
 
+TEST(FULLY_CONNECTED_NC_F32_QC4W, transpose_weights_unsupported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 22;
+  constexpr size_t output_channels = 19;
+  uint8_t kernel[output_channels * ((input_channels + 1) / 2)] = {};
+  float kernel_scale[output_channels];
+  for (size_t i = 0; i < output_channels; i++) {
+    kernel_scale[i] = 1.0f;
+  }
+
+  xnn_operator_t fully_connected_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_create_fully_connected_nc_f32_qc4w(
+          input_channels, output_channels, input_channels, output_channels,
+          /*kernel_zero_point=*/0, kernel_scale, kernel, /*bias=*/nullptr,
+          /*output_min=*/-1.0f, /*output_max=*/1.0f,
+          XNN_FLAG_TRANSPOSE_WEIGHTS, /*weights_cache=*/nullptr,
+          &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
 TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch) {
   FullyConnectedOperatorTester()
       .batch_size(12)
