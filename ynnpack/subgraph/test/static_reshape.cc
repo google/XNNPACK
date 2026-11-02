@@ -9,6 +9,8 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <numeric>
 #include <random>
 #include <vector>
 
@@ -106,6 +108,154 @@ INSTANTIATE_TEST_SUITE_P(Reshape, Reshape,
                                          ynn_type_fp16, ynn_type_bf16,
                                          ynn_type_fp32),
                          [](auto p) { return to_string(p.param); });
+
+// Like random_reshape, but with at most `max_rank` dimensions.
+template <typename Rng>
+std::vector<size_t> random_reshape(Rng& rng, size_t n, size_t max_rank) {
+  std::vector<size_t> new_shape = random_reshape(rng, n);
+  while (new_shape.size() > max_rank) {
+    new_shape[new_shape.size() - 2] *= new_shape.back();
+    new_shape.pop_back();
+  }
+  return new_shape;
+}
+
+// Add a random reshape-like op to `subgraph` that reshapes `input_id` (which
+// has shape `shape`). Updates `shape` to the shape of the output, and returns
+// the id of the output.
+template <typename Rng>
+uint32_t AddRandomReshape(Rng& rng, SubgraphBuilder& subgraph,
+                          std::vector<size_t>& shape, uint32_t input_id) {
+  const size_t rank = shape.size();
+  const size_t size = std::accumulate(shape.begin(), shape.end(), size_t{1},
+                                      std::multiplies<>());
+  std::uniform_int_distribution<int> op_dist(0, 3);
+  std::uniform_int_distribution<size_t> axis_dist(
+      1, std::max<size_t>(rank, 2) - 1);
+  int op = op_dist(rng);
+  if (rank < 2 && (op == 1 || op == 2)) {
+    // These ops need to modify a dimension other than the outermost.
+    op = 3;
+  }
+  uint32_t output_id = YNN_INVALID_VALUE_ID;
+  switch (op) {
+    case 0: {
+      // Reshape everything but the outermost dimension.
+      std::vector<size_t> new_shape =
+          random_reshape(rng, size / shape[0], YNN_MAX_TENSOR_RANK - 1);
+      new_shape.insert(new_shape.begin(), shape[0]);
+      subgraph.AddTensor(ynn_type_fp32, TensorShape(new_shape.size()),
+                         output_id);
+      subgraph.AddReshape(new_shape, input_id, output_id);
+      shape = new_shape;
+      break;
+    }
+    case 1: {
+      // Split one dimension.
+      const size_t axis = axis_dist(rng);
+      std::vector<size_t> splits =
+          random_reshape(rng, shape[axis], YNN_MAX_TENSOR_RANK + 1 - rank);
+      if (splits.empty()) {
+        splits.push_back(1);
+      }
+      subgraph.AddTensor(ynn_type_fp32, TensorShape(rank + splits.size() - 1),
+                         output_id);
+      subgraph.AddSplitDim(axis, splits, input_id, output_id);
+      shape.erase(shape.begin() + axis);
+      shape.insert(shape.begin() + axis, splits.begin(), splits.end());
+      break;
+    }
+    case 2: {
+      // Fuse some dimensions.
+      const size_t axis = axis_dist(rng);
+      std::uniform_int_distribution<size_t> count_dist(1, rank - axis);
+      const size_t count = count_dist(rng);
+      subgraph.AddTensor(ynn_type_fp32, TensorShape(rank - count + 1),
+                         output_id);
+      subgraph.AddFuseDim(axis, count, input_id, output_id);
+      const size_t fused =
+          std::accumulate(shape.begin() + axis, shape.begin() + axis + count,
+                          size_t{1}, std::multiplies<>());
+      shape.erase(shape.begin() + axis, shape.begin() + axis + count);
+      shape.insert(shape.begin() + axis, fused);
+      break;
+    }
+    default: {
+      // Reshape everything.
+      std::vector<size_t> new_shape =
+          random_reshape(rng, size, YNN_MAX_TENSOR_RANK);
+      subgraph.AddTensor(ynn_type_fp32, TensorShape(new_shape.size()),
+                         output_id);
+      subgraph.AddReshape(new_shape, input_id, output_id);
+      shape = new_shape;
+      break;
+    }
+  }
+  return output_id;
+}
+
+// Test chains of reshapes (which may be combined by fusion) with producers and
+// consumers.
+TEST(Reshape, ReshapesBetweenElementwise) {
+  ReplicableRandomDevice rng;
+  std::bernoulli_distribution bool_dist(0.5);
+  std::uniform_int_distribution<size_t> outer_dist(1, 300);
+  std::uniform_int_distribution<size_t> inner_dist(1, 2000);
+  std::uniform_int_distribution<int> num_reshapes_dist(1, 3);
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(2000))) {
+    std::vector<size_t> shape =
+        random_reshape(rng, inner_dist(rng), YNN_MAX_TENSOR_RANK - 1);
+    shape.insert(shape.begin(), outer_dist(rng));
+    const std::vector<size_t> input_shape = shape;
+    const bool static_shape = bool_dist(rng);
+
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    SubgraphBuilder subgraph(2);
+    subgraph.AddInput(ynn_type_fp32,
+                      static_shape ? TensorShape(input_shape)
+                                   : TensorShape(input_shape.size()),
+                      input_id);
+
+    // All of the elementwise ops are abs, and the input is positive, so the
+    // output should be equal to the input.
+    uint32_t x_id = YNN_INVALID_VALUE_ID;
+    subgraph.AddTensor(ynn_type_fp32, TensorShape(shape.size()), x_id)
+        .AddUnary(ynn_unary_abs, input_id, x_id);
+
+    const int num_reshapes = num_reshapes_dist(rng);
+    for (int i = 0; i < num_reshapes; ++i) {
+      if (i > 0 && bool_dist(rng)) {
+        // Add an op between reshapes.
+        uint32_t abs_id = YNN_INVALID_VALUE_ID;
+        subgraph.AddTensor(ynn_type_fp32, TensorShape(shape.size()), abs_id)
+            .AddUnary(ynn_unary_abs, x_id, abs_id);
+        x_id = abs_id;
+      }
+      x_id = AddRandomReshape(rng, subgraph, shape, x_id);
+    }
+
+    subgraph.AddOutput(ynn_type_fp32, TensorShape(shape.size()), output_id)
+        .AddUnary(ynn_unary_abs, x_id, output_id);
+
+    Runtime runtime(subgraph.GetSubgraph());
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<float> input(input_shape);
+    std::uniform_real_distribution<float> value_dist(1.0f, 10.0f);
+    for (size_t i = 0; i < input.size(); ++i) {
+      input.data()[i] = value_dist(rng);
+    }
+    runtime.ReshapeExternalTensor(input_shape, input.base(), input_id)
+        .ReshapeRuntime();
+    ASSERT_EQ(runtime.GetExternalTensorShape(output_id), shape);
+
+    Tensor<float> output(shape);
+    runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
+    ASSERT_THAT(output, testing::ElementsAreArray(input));
+  }
+}
 
 // A reshape followed by a slice could cause the internal allocation to be too
 // small, because the reshape was writing its full output into an allocation

@@ -445,12 +445,8 @@ bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
   const auto* transpose = std::get_if<ynn_node::static_transpose>(&node.op);
   if ((transpose && transpose->alias) ||
       std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
-      std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
-      std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
-      std::holds_alternative<ynn_node::split_dim>(node.op) ||
-      std::holds_alternative<ynn_node::split_dims>(node.op) ||
-      std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
-      std::holds_alternative<ynn_node::static_reshape>(node.op)) {
+      std::holds_alternative<ynn_node::reshape>(node.op) ||
+      std::holds_alternative<ynn_node::static_broadcast>(node.op)) {
     // Don't constant fold these "free" ops. If we allowed them to constant
     // fold and the heuristic below allowed it, it's possible we would produce
     // two copies of the same value.
@@ -1195,13 +1191,7 @@ const char* name_of(const ynn_node::stack&) { return "stack"; }
 const char* name_of(const ynn_node::even_split&) { return "even_split"; }
 const char* name_of(const ynn_node::copy&) { return "copy"; }
 const char* name_of(const ynn_node::gather&) { return "gather"; }
-const char* name_of(const ynn_node::fuse_dim&) { return "fuse_dim"; }
-const char* name_of(const ynn_node::fuse_dims&) { return "fuse_dims"; }
-const char* name_of(const ynn_node::split_dim&) { return "split_dim"; }
-const char* name_of(const ynn_node::split_dims&) { return "split_dims"; }
-const char* name_of(const ynn_node::static_reshape&) {
-  return "static_reshape";
-}
+const char* name_of(const ynn_node::reshape&) { return "reshape"; }
 const char* name_of(const ynn_node::static_broadcast&) {
   return "static_broadcast";
 }
@@ -1229,8 +1219,8 @@ const char* name_of(const ynn_node::get_tensor_shape&) {
 using ynn::operator<<;  // NOLINT(misc-unused-using-decls)
 
 std::ostream& operator<<(std::ostream& os,
-                         const ynn_node::split_dims::split& new_dim) {
-  os << "{axis=" << new_dim.axis << ",factor=" << new_dim.factor << "}";
+                         const ynn_node::reshape::group& group) {
+  os << group.input_dims << ":" << group.output_dims;
   return os;
 }
 
@@ -1322,24 +1312,8 @@ void print(std::ostream& os, const ynn_node::gather& op) {
   os << "axes=" << op.axes;
 }
 
-void print(std::ostream& os, const ynn_node::fuse_dim& op) {
-  os << "axis=" << op.axis << " axes_count=" << op.axes_count;
-}
-
-void print(std::ostream& os, const ynn_node::fuse_dims& op) {
-  os << "axes=" << op.axes;
-}
-
-void print(std::ostream& os, const ynn_node::split_dim& op) {
-  os << "axis=" << op.axis << " " << op.new_dims;
-}
-
-void print(std::ostream& os, const ynn_node::split_dims& op) {
-  os << "splits=" << op.splits;
-}
-
-void print(std::ostream& os, const ynn_node::static_reshape& op) {
-  os << "new_dims=" << op.new_dims;
+void print(std::ostream& os, const ynn_node::reshape& op) {
+  os << "groups=" << op.groups;
 }
 
 void print(std::ostream& os, const ynn_node::static_broadcast& op) {

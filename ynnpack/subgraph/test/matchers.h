@@ -291,8 +291,8 @@ MATCHER(IsBroadcastLike, "") {
 MATCHER(IsStaticBroadcast, "") {
   return std::holds_alternative<ynn_node::static_broadcast>(arg.op);
 }
-MATCHER(IsStaticReshape, "") {
-  return std::holds_alternative<ynn_node::static_reshape>(arg.op);
+MATCHER(IsReshape, "") {
+  return std::holds_alternative<ynn_node::reshape>(arg.op);
 }
 MATCHER(IsStaticSlice, "") {
   return std::holds_alternative<ynn_node::static_slice>(arg.op);
