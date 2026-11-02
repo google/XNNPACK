@@ -1050,7 +1050,7 @@ void GemmMicrokernelTester::Test(
     }
   }
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ARCH_HEXAGON && (__HEXAGON_ARCH__ < 81)
   // HVX losses 1 bit of accuracy due to qfloat for FP32 quantization on V73
   // V79 should be lossless.
   const int32_t tolerance = 1;
@@ -1168,7 +1168,7 @@ void GemmMicrokernelTester::Test(
     }
   }
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ARCH_HEXAGON && (__HEXAGON_ARCH__ < 81)
   // HVX losses 1 bit of accuracy due to qfloat for FP32 quantization on V73
   // V79 should be lossless.
   const int32_t tolerance = 1;
@@ -1324,7 +1324,7 @@ void GemmMicrokernelTester::Test(
     }
   }
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ARCH_HEXAGON && (__HEXAGON_ARCH__ < 81)
   // HVX losses 1 bit of accuracy due to qfloat for FP32 quantization on V73
   // V79 should be lossless.
   const int32_t tolerance = 1;
@@ -3823,7 +3823,7 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ARCH_HEXAGON && (__HEXAGON_ARCH__ < 81)
   // HVX losses 1 bit of accuracy due to qfloat for FP32 quantization on V73
   // V79 should be lossless.
   const int32_t tolerance = 1;
