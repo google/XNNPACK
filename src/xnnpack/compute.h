@@ -1215,6 +1215,9 @@ struct f16_qd8_convert_context {
   } params;
 };
 
+// Upper bound on batch_size * num_chunks when a row is split across threads.
+#define XNN_QD8_CONVERT_MAX_CHUNKS 32
+
 struct f32_qd8_convert_context {
   size_t n;
   const float* x;
@@ -1231,6 +1234,11 @@ struct f32_qd8_convert_context {
   union {
     struct xnn_f32_default_params f32_default;
   } params;
+  size_t chunk_size;
+  size_t num_chunks;
+  float chunk_minmax[XNN_QD8_CONVERT_MAX_CHUNKS][2];
+  int32_t chunk_rsum[XNN_QD8_CONVERT_MAX_CHUNKS];
+  float scale[XNN_QD8_CONVERT_MAX_CHUNKS];
 };
 
 XNN_PRIVATE void xnn_compute_bf16_qd8_convert(
@@ -1259,6 +1267,23 @@ XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
 
 XNN_PRIVATE void xnn_compute_pad_qd8_params(
     struct f32_qd8_convert_context* context, size_t batch_index);
+
+XNN_PRIVATE void xnn_compute_f32_qx8_convert_minmax_chunk(
+    struct f32_qd8_convert_context* context, size_t batch_index,
+    size_t chunk_index);
+
+XNN_PRIVATE void xnn_compute_f32_qd8_convert_params(
+    struct f32_qd8_convert_context* context, size_t batch_index);
+
+XNN_PRIVATE void xnn_compute_f32_qdu8_convert_params(
+    struct f32_qd8_convert_context* context, size_t batch_index);
+
+XNN_PRIVATE void xnn_compute_f32_qx8_convert_chunk(
+    struct f32_qd8_convert_context* context, size_t batch_index,
+    size_t chunk_index);
+
+XNN_PRIVATE void xnn_compute_f32_qx8_convert_finalize(
+    struct f32_qd8_convert_context* context, size_t unused);
 
 struct pack_lh_context {
   size_t m;
