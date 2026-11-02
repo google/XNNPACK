@@ -1,0 +1,40 @@
+# Copyright 2026 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# SME2 ACLE kernels
+- name: xnn_pf32_qc8w_gemm_minmax_ukernel_1x32__sme2
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_qs8w_gemm_goi_w
+  pack-lh-fn: xnn_x32_pack_lh_ukernel__sme2
+  pack-lh-size-fn: xnn_x32_pack_lh_size__sme2
+  pack-lh-offset-fn: xnn_x32_pack_lh_offset__sme2
+  k-block: 4
+  mr-packed: 1
+- name: xnn_pf32_qc8w_gemm_minmax_ukernel_32x32__sme2
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_qs8w_gemm_goi_w
+  pack-lh-fn: xnn_x32_pack_lh_ukernel__sme2
+  pack-lh-size-fn: xnn_x32_pack_lh_size__sme2
+  pack-lh-offset-fn: xnn_x32_pack_lh_offset__sme2
+  k-block: 4
+  mr-packed: 32
+
+# SME ACLE kernels
+- name: xnn_pf32_qc8w_gemm_minmax_ukernel_1x32__sme
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_qs8w_gemm_goi_w
+  pack-lh-fn: xnn_x32_pack_lh_ukernel__sme
+  pack-lh-size-fn: xnn_x32_pack_lh_size__sme
+  pack-lh-offset-fn: xnn_x32_pack_lh_offset__sme
+  k-block: 4
+  mr-packed: 1
+- name: xnn_pf32_qc8w_gemm_minmax_ukernel_32x32__sme
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_qs8w_gemm_goi_w
+  pack-lh-fn: xnn_x32_pack_lh_ukernel__sme
+  pack-lh-size-fn: xnn_x32_pack_lh_size__sme
+  pack-lh-offset-fn: xnn_x32_pack_lh_offset__sme
+  k-block: 4
+  mr-packed: 32
