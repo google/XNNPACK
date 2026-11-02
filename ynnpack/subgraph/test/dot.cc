@@ -223,7 +223,7 @@ void TestStaticB(A, B, C) {
     std::vector<size_t> b_shape(num_k_dims + 1);
     std::generate(b_shape.begin(), b_shape.end(),
                   [&]() { return dim_dist(rng); });
-    for (int d = 1; d < num_k_dims; ++d) {
+    for (size_t d = 0; d + 1 < num_k_dims; ++d) {
       b_shape[d] = k23_dim_dist(rng);
     }
 
@@ -350,12 +350,12 @@ DotShapes RandomDotShapes(Rng& rng, size_t num_k_dims, size_t a_rank,
   DotShapes shapes = {batch_dims, batch_dims, batch_dims, batch_dims};
 
   // Add the dot dimensions (m, k..., n)
-  std::vector<size_t> dot_dims(num_k_dims + 2);
-  std::generate(dot_dims.begin(), dot_dims.end(),
-                [&]() { return dim_dist(rng); });
-  for (int d = 1; d < num_k_dims; ++d) {
+  std::vector<size_t> dot_dims =
+      random_shape(rng, num_k_dims + 2, 1, max_output_dim);
+  for (size_t d = 0; d + 1 < num_k_dims; ++d) {
     dot_dims[1 + d] = k23_dim_dist(rng);
   }
+  dot_dims[num_k_dims] = dim_dist(rng);
 
   // Align the shape as required by the type of B.
   dot_dims = align_logical_shape<B>(dot_dims);
