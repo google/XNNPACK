@@ -115,13 +115,13 @@ declare_args() {
   xnnpack_enable_arm_kleidiai = false
 
   # Enables Arm Scalable Matrix Extension (SME)
-  xnnpack_enable_arm_sme = target_cpu == "arm64"
+  xnnpack_enable_arm_sme = target_cpu == "arm64" && !is_win
 
   # Enables Arm Scalable Matrix Extension (SME2)
-  xnnpack_enable_arm_sme2 = target_cpu == "arm64"
+  xnnpack_enable_arm_sme2 = target_cpu == "arm64" && !is_win
 
   # Enables Arm Scalable Matrix Extension (SME) C Language Extensions (ACLE) microkernels
-  xnnpack_enable_arm_sme_acle = target_cpu == "arm64"
+  xnnpack_enable_arm_sme_acle = target_cpu == "arm64" && !is_win
 
   # Enable Arm's Neon Dot Product extension
   xnnpack_enable_arm_dotprod = target_cpu == "arm64" || target_cpu == "arm"
