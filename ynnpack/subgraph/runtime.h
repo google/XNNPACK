@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -25,6 +26,25 @@
 #include "slinky/runtime/stmt.h"
 
 #define YNN_FLAG_ENABLE_SLINKY_TRACE (1 << 31)
+
+namespace ynn {
+
+// The estimated duration of a task below which it is not worth running in
+// parallel with other tasks: waking up threads and synchronizing with them
+// costs ~5-20us per parallel loop on x86 and ARM servers.
+constexpr float min_task_seconds = 16e-6f;
+
+// Conservative estimates of the bandwidths (in bytes per second) at which one
+// core streams the operands of a task from L3 or DRAM, and writes its outputs
+// (to cache, which is faster). The kernel cost models are fit to L1-resident
+// benchmarks, and don't account for these, which dominate small tasks: adding
+// them makes the estimated duration of tasks track their measured duration
+// within ~2x on x86 and ARM servers, including AMX kernels, whose cost models
+// alone underestimate it by ~10x.
+constexpr float task_bytes_per_second = 8e9f;
+constexpr float task_output_bytes_per_second = 16e9f;
+
+}  // namespace ynn
 
 struct ynn_runtime_value : public ynn_value {
   explicit ynn_runtime_value(const ynn_value& value) : ynn_value(value) {}
@@ -60,6 +80,13 @@ struct ynn_runtime {
   // The evaluateable slinky pipeline, and the context to run it.
   slinky::pipeline pipeline;
   slinky::eval_context eval_context;
+
+  struct cost_term {
+    std::vector<slinky::expr> extents;
+    float seconds_per_element = 0.0f;
+  };
+  std::vector<cost_term> cost_terms;
+  float estimated_duration = std::numeric_limits<float>::infinity();
 
   const ynn_runtime_value& value(uint32_t id) const {
     assert(id < values.size());

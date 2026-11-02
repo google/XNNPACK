@@ -1004,6 +1004,50 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+std::vector<slinky::expr> defined_extents(const ynn_runtime_value& value) {
+  std::vector<slinky::expr> result;
+  result.reserve(value.extents.size());
+  for (const slinky::expr& ext : value.extents) {
+    if (ext.defined()) {
+      result.push_back(ext);
+    }
+  }
+  return result;
+}
+
+std::optional<float> evaluate_static_duration(
+    const std::vector<ynn_runtime::cost_term>& cost_terms) {
+  double total_seconds = 0.0;
+  for (const ynn_runtime::cost_term& term : cost_terms) {
+    double elements = 1.0;
+    for (const slinky::expr& ext : term.extents) {
+      std::optional<slinky::index_t> c =
+          slinky::as_constant(slinky::simplify(ext));
+      if (!c) {
+        return std::nullopt;
+      }
+      elements *= static_cast<double>(std::max<slinky::index_t>(0, *c));
+    }
+    total_seconds += elements * term.seconds_per_element;
+  }
+  return static_cast<float>(total_seconds);
+}
+
+float evaluate_dynamic_duration(
+    const std::vector<ynn_runtime::cost_term>& cost_terms,
+    slinky::eval_context& ctx) {
+  double total_seconds = 0.0;
+  for (const ynn_runtime::cost_term& term : cost_terms) {
+    double elements = 1.0;
+    for (const slinky::expr& ext : term.extents) {
+      slinky::index_t v = slinky::evaluate(ext, ctx);
+      elements *= static_cast<double>(std::max<slinky::index_t>(0, v));
+    }
+    total_seconds += elements * term.seconds_per_element;
+  }
+  return static_cast<float>(total_seconds);
+}
+
 // This generates a call that populates all the shapes of the xnn_values using
 // the forward bounds expressions.
 auto make_reshape_impl(ynn_runtime* runtime) {
@@ -1053,6 +1097,8 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         ynn::init_buffer_strides(*i.data);
       }
     }
+    runtime->estimated_duration =
+        evaluate_dynamic_duration(runtime->cost_terms, ctx);
     return 0;
   };
 }
@@ -1184,6 +1230,7 @@ ynn_status ynn_runtime::build() {
   std::vector<slinky::buffer_expr_ptr> inputs;
   std::vector<slinky::buffer_expr_ptr> outputs;
   funcs.clear();
+  cost_terms.clear();
   for (ynn_runtime_value& value : values) {
     if (!value.is_valid()) {
       // This value was removed or never defined.
@@ -1200,9 +1247,47 @@ ynn_status ynn_runtime::build() {
 
   for (const ynn_node& i : subgraph->nodes) {
     if (!i.is_valid()) continue;
+    const size_t funcs_before = funcs.size();
     ynn_status status = i.create(i, *this);
     if (status != ynn_status_success) {
       return status;
+    }
+
+    if (!std::holds_alternative<ynn_node::dot>(i.op) &&
+        funcs.size() > funcs_before) {
+      const bool is_gather = std::holds_alternative<ynn_node::gather>(i.op);
+      for (size_t in_idx = 0; in_idx < i.inputs.size(); ++in_idx) {
+        if (is_gather && in_idx == 0) {
+          // Gather reads output-sized slices of input 0 rather than the full
+          // table.
+          if (!i.outputs.empty() && i.outputs[0] != YNN_INVALID_VALUE_ID) {
+            const ynn_runtime_value& out = values[i.outputs[0]];
+            if (out.is_valid()) {
+              cost_terms.push_back({defined_extents(out),
+                                    (ynn::type_size_bits(out.type) / 8.0f) /
+                                        ynn::task_bytes_per_second});
+            }
+          }
+          continue;
+        }
+        const uint32_t in_id = i.inputs[in_idx];
+        if (in_id == YNN_INVALID_VALUE_ID) continue;
+        const ynn_runtime_value& in = values[in_id];
+        if (in.is_valid()) {
+          cost_terms.push_back(
+              {defined_extents(in), (ynn::type_size_bits(in.type) / 8.0f) /
+                                        ynn::task_bytes_per_second});
+        }
+      }
+      for (uint32_t out_id : i.outputs) {
+        if (out_id == YNN_INVALID_VALUE_ID) continue;
+        const ynn_runtime_value& out = values[out_id];
+        if (out.is_valid()) {
+          cost_terms.push_back(
+              {defined_extents(out), (ynn::type_size_bits(out.type) / 8.0f) /
+                                         ynn::task_output_bytes_per_second});
+        }
+      }
     }
 
     for (uint32_t j : i.outputs) {
@@ -1265,6 +1350,8 @@ ynn_status ynn_runtime::build() {
   reshape_impl = slinky::let_stmt::make(
       globals.lets, slinky::call_stmt::make(make_reshape_impl(this), {}, {}, {},
                                             std::move(attrs)));
+  estimated_duration = evaluate_static_duration(cost_terms)
+                           .value_or(std::numeric_limits<float>::infinity());
   return ynn_status_success;
 }
 
@@ -1438,6 +1525,18 @@ ynn_status ynn_query_runtime(ynn_runtime_t runtime,
       *result_size = sizeof(int32_t);
       int32_t max_threads = get_max_concurrency(*runtime);
       memcpy(result, &max_threads, sizeof(int32_t));
+      return ynn_status_success;
+    }
+    case ynn_runtime_property_may_block: {
+      memset(result, 0, *result_size);
+      if (*result_size < sizeof(int32_t)) {
+        YNN_LOG_ERROR() << "result must be an int32_t.";
+        return ynn_status_error;
+      }
+      *result_size = sizeof(int32_t);
+      int32_t may_block =
+          runtime->estimated_duration >= ynn::min_task_seconds ? 1 : 0;
+      memcpy(result, &may_block, sizeof(int32_t));
       return ynn_status_success;
     }
   }

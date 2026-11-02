@@ -1054,21 +1054,6 @@ index_t choose_split_k(index_t k, size_t a_elem_size) {
   return std::min<index_t>(split_k, max_multiplier_k * step_k);
 }
 
-// The estimated duration of a task below which it is not worth running in
-// parallel with other tasks: waking up threads and synchronizing with them
-// costs ~5-20us per parallel loop on x86 and ARM servers.
-constexpr float min_task_seconds = 16e-6f;
-
-// Conservative estimates of the bandwidths (in bytes per second) at which one
-// core streams the operands of a task from L3 or DRAM, and writes its outputs
-// (to cache, which is faster). The kernel cost models are fit to L1-resident
-// benchmarks, and don't account for these, which dominate small tasks: adding
-// them makes the estimated duration of tasks track their measured duration
-// within ~2x on x86 and ARM servers, including AMX kernels, whose cost models
-// alone underestimate it by ~10x.
-constexpr float task_bytes_per_second = 8e9f;
-constexpr float task_output_bytes_per_second = 16e9f;
-
 std::tuple<index_t, index_t, index_t> choose_split_factors(
     index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
     size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac) {
@@ -1603,10 +1588,15 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size, unpacked_kernel.block_n);
   // Estimate the throughput of the kernel we expect to run from its cost model
   // (for the shape it was selected for), to decide how small tasks can be.
+  // Uncalibrated cost models use unitless penalty weights (>= 5.0) rather than
+  // seconds.
+  constexpr float default_seconds_per_mac = 1e-9f;
   const float seconds_per_mac =
-      kernel.cost /
-      (static_cast<float>(std::max<size_t>(1, shape.m)) *
-       std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
+      (kernel.cost_model && kernel.cost_model->load_a_cost < 1.0f)
+          ? kernel.cost /
+                (static_cast<float>(std::max<size_t>(1, shape.m)) *
+                 std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1))
+          : default_seconds_per_mac;
   node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
                  block_n_unpacked, seconds_per_mac, tile_k = kernel.tile_k,
                  tile_m = kernel.tile_m](const ynn_node& node,
@@ -1791,6 +1781,29 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     for (size_t d = 1; d < num_k_dims; ++d) {
       k *= input_b.extent(b_k2_dim + d);
     }
+
+    auto append_batch_extents = [](std::vector<slinky::expr> base,
+                                   const ynn_runtime_value& val,
+                                   int first_batch_dim) {
+      for (int d = first_batch_dim; d < val.rank(); ++d) {
+        if (val.extents[d].defined()) {
+          base.push_back(val.extents[d]);
+        }
+      }
+      return base;
+    };
+    runtime.cost_terms.push_back(
+        {append_batch_extents({m, n, k}, output, 2), seconds_per_mac});
+    runtime.cost_terms.push_back(
+        {append_batch_extents({m, k}, input_a, num_a_k_dims + 1),
+         type_size_bytes(input_a.type) / task_bytes_per_second});
+    runtime.cost_terms.push_back(
+        {append_batch_extents({n, k}, input_b,
+                              b_k2_dim + static_cast<int>(num_k_dims)),
+         (type_size_bits(input_b.type) / 8.0f) / task_bytes_per_second});
+    runtime.cost_terms.push_back(
+        {append_batch_extents({m, n}, output, 2),
+         type_size_bytes(output.type) / task_output_bytes_per_second});
 
     auto [split_n, split_m, split_k] = choose_split_factors(
         runtime, m, n, k, block_n, type_size_bytes(input_a.type),
