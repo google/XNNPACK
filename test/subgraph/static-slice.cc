@@ -253,6 +253,62 @@ TEST(Slice, RejectsNumDimsLessThanInputRank) {
                                        ends4.data(), /*strides=*/nullptr,
                                        input_id, output_id, /*flags=*/0));
 }
+
+TEST(Slice, DefineRejectsZeroStrideAsInvalid) {
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({4, 6}, 0, xnn_datatype_fp32)
+      .AddDynamicTensor({2, 3}, 1, xnn_datatype_fp32);
+  const std::vector<int64_t> begins = {0, 0};
+  const std::vector<int64_t> ends = {4, 6};
+  const std::vector<int64_t> strides = {2, 0};
+  EXPECT_EQ(xnn_define_static_slice_v3(subgraph.Subgraph(), 2, begins.data(),
+                                       ends.data(), strides.data(), 0, 1,
+                                       /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
+TEST(Slice, DefineRejectsNonUnitStrideAsUnsupported) {
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({4, 6}, 0, xnn_datatype_fp32)
+      .AddDynamicTensor({2, 3}, 1, xnn_datatype_fp32);
+  const std::vector<int64_t> begins = {0, 0};
+  const std::vector<int64_t> ends = {4, 6};
+  for (const std::vector<int64_t>& strides :
+       {std::vector<int64_t>{2, 2}, std::vector<int64_t>{1, -1}}) {
+    EXPECT_EQ(xnn_define_static_slice_v3(subgraph.Subgraph(), 2, begins.data(),
+                                         ends.data(), strides.data(), 0, 1,
+                                         /*flags=*/0),
+              xnn_status_unsupported_parameter);
+  }
+}
+
+TEST(Slice, DefineRejectsSubByteDatatypeAsUnsupported) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({4, 6}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 3}, 1, xnn_datatype_qint4, quantization);
+  const std::vector<int64_t> begins = {0, 0};
+  const std::vector<int64_t> ends = {2, 3};
+  EXPECT_EQ(xnn_define_static_slice_v3(subgraph.Subgraph(), 2, begins.data(),
+                                       ends.data(), /*strides=*/nullptr, 0, 1,
+                                       /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(Slice, DefineRejectsMismatchingDatatypesAsInvalid) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({4, 6}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({2, 3}, 1, xnn_datatype_fp32);
+  const std::vector<int64_t> begins = {0, 0};
+  const std::vector<int64_t> ends = {2, 3};
+  EXPECT_EQ(xnn_define_static_slice_v3(subgraph.Subgraph(), 2, begins.data(),
+                                       ends.data(), /*strides=*/nullptr, 0, 1,
+                                       /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

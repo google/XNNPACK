@@ -273,6 +273,14 @@ static inline bool validate_datatypes_with_bias(
         return true;
       }
       break;
+    case xnn_datatype_fp16:
+      if (input_datatype == xnn_datatype_fp32 &&
+          (bias_datatype == xnn_datatype_fp16 ||
+           bias_datatype == xnn_datatype_fp32) &&
+          output_datatype == xnn_datatype_fp32) {
+        return true;
+      }
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -290,6 +298,12 @@ static inline bool validate_datatypes_without_bias(
         return true;
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return true;
+      }
+      break;
+    case xnn_datatype_fp16:
+      if (input_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32) {
         return true;
       }
       break;
@@ -339,7 +353,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
         "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), input_id,
         xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (filter_id >= subgraph->num_values) {
@@ -359,9 +373,10 @@ enum xnn_status xnn_define_fully_connected_sparse(
 
   if (kernel_value->data == NULL) {
     xnn_log_error(
-      "failed to define %s operator with filter ID #%" PRIu32 ": non-static Value",
+      "failed to define %s operator with filter ID #%" PRIu32
+      ": unsupported non-static Value",
       xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), filter_id);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   switch (kernel_value->datatype) {
@@ -373,7 +388,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
         "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), filter_id,
         xnn_datatype_to_string(kernel_value->datatype), kernel_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   const struct xnn_value* bias_value = NULL;
@@ -395,9 +410,10 @@ enum xnn_status xnn_define_fully_connected_sparse(
 
     if (bias_value->data == NULL) {
       xnn_log_error(
-        "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
+        "failed to define %s operator with bias ID #%" PRIu32
+      ": unsupported non-static Value",
         xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), bias_id);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
 
     switch (bias_value->datatype) {
@@ -409,7 +425,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
           "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
           xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), bias_id,
           xnn_datatype_to_string(bias_value->datatype), bias_value->datatype);
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
     }
   }
 
@@ -433,7 +449,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (bias_value != NULL) {
@@ -443,15 +459,15 @@ enum xnn_status xnn_define_fully_connected_sparse(
           "failed to define %s operator with input ID #%" PRIu32
           ", filter ID #%" PRIu32 ", bias ID #%" PRIu32
           ", and output ID #%" PRIu32
-          ": mismatching datatypes across input (%s), filter (%s), bias (%s), "
-          "and output (%s)",
+          ": unsupported combination of datatypes across input (%s), "
+          "filter (%s), bias (%s), and output (%s)",
           xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
           input_id, filter_id, bias_id, output_id,
           xnn_datatype_to_string(input_value->datatype),
           xnn_datatype_to_string(kernel_value->datatype),
           xnn_datatype_to_string(bias_value->datatype),
           xnn_datatype_to_string(output_value->datatype));
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
   } else {
     if (!validate_datatypes_without_bias(
@@ -459,14 +475,14 @@ enum xnn_status xnn_define_fully_connected_sparse(
       xnn_log_error(
           "failed to define %s operator with input ID #%" PRIu32
           ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
-          ": mismatching datatypes across input (%s), filter (%s), and output "
-          "(%s)",
+          ": unsupported combination of datatypes across input (%s), "
+          "filter (%s), and output (%s)",
           xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
           input_id, filter_id, output_id,
           xnn_datatype_to_string(input_value->datatype),
           xnn_datatype_to_string(kernel_value->datatype),
           xnn_datatype_to_string(output_value->datatype));
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
   }
 

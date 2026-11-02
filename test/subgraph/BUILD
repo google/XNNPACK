@@ -268,6 +268,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "pack_lh_test",
+    srcs = ["pack-lh.cc"],
+    tags = ["no_ynnpack"],
+    deps = SUBGRAPH_TEST_DEPS + [
+        "//:internal",
+        "//:subgraph",
+    ],
+)
+
+xnnpack_unit_test(
     name = "rope_test",
     timeout = "moderate",
     srcs = ["rope.cc"],

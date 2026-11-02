@@ -1976,7 +1976,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     input_id, xnn_datatype_to_string(input_value->datatype),
                     input_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (filter_id >= subgraph->num_values) {
@@ -2004,10 +2004,10 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     default:
       if (kernel_value->data == NULL) {
         xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
-                      ": non-static Value",
+                      ": unsupported non-static Value",
                       xnn_node_type_to_string(xnn_node_type_fully_connected),
                       filter_id);
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
       }
       break;
   }
@@ -2026,7 +2026,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                       xnn_node_type_to_string(xnn_node_type_fully_connected),
                       filter_id, kernel_value->quantization.zero_point,
                       xnn_datatype_to_string(kernel_value->datatype));
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
       }
       break;
     case xnn_datatype_qbint4:
@@ -2040,7 +2040,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                       xnn_node_type_to_string(xnn_node_type_fully_connected),
                       filter_id, kernel_value->quantization.zero_point,
                       xnn_datatype_to_string(kernel_value->datatype));
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
       }
       break;
     case xnn_datatype_qcint8:
@@ -2053,7 +2053,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                       xnn_node_type_to_string(xnn_node_type_fully_connected),
                       filter_id, kernel_value->quantization.zero_point,
                       xnn_datatype_to_string(kernel_value->datatype));
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
       }
       break;
     case xnn_datatype_quint8:
@@ -2064,7 +2064,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     filter_id, xnn_datatype_to_string(kernel_value->datatype),
                     kernel_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   const bool is_channelwise_quantized =
@@ -2077,10 +2077,10 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
         ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) ? 1 : 0;
     if (kernel_value->quantization.channel_dimension != output_channels_dim) {
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
-                    ": invalid channel dimension %zu",
+                    ": unsupported channel dimension %zu",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     filter_id, kernel_value->quantization.channel_dimension);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
   }
 
@@ -2088,8 +2088,13 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       kernel_value->datatype == xnn_datatype_qbint4;
 
   if (is_blockwise_quantized) {
-    // TODO: Unsupported features
-    assert((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0);
+    if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+      xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
+                    ": unsupported transposed weights for datatype %s",
+                    xnn_node_type_to_string(xnn_node_type_fully_connected),
+                    filter_id, xnn_datatype_to_string(kernel_value->datatype));
+      return xnn_status_unsupported_parameter;
+    }
 
     const size_t input_channels_dim =
         ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) ? 0 : 1;
@@ -2098,19 +2103,33 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     if (kernel_value->quantization.channel_dimension_blockwise !=
         output_channels_dim) {
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
-                    ": invalid channel dimension %zu",
+                    ": unsupported channel dimension %zu",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     filter_id,
                     kernel_value->quantization.channel_dimension_blockwise);
+      return xnn_status_unsupported_parameter;
+    }
+    const size_t block_size = kernel_value->quantization.block_size;
+    if (block_size == 0) {
+      xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
+                    ": invalid block size 0",
+                    xnn_node_type_to_string(xnn_node_type_fully_connected),
+                    filter_id);
       return xnn_status_invalid_parameter;
     }
+    if (block_size < XNN_MIN_BLOCKSIZE || block_size % XNN_MIN_BLOCKSIZE != 0) {
+      xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
+                    ": unsupported block size %zu, must be a multiple of %d",
+                    xnn_node_type_to_string(xnn_node_type_fully_connected),
+                    filter_id, block_size, XNN_MIN_BLOCKSIZE);
+      return xnn_status_unsupported_parameter;
+    }
     const size_t input_channels = kernel_value->shape.dim[input_channels_dim];
-    if (input_channels % kernel_value->quantization.block_size) {
+    if (input_channels % block_size) {
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
                     ": invalid block size %zu, input_channels %zu",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
-                    filter_id, kernel_value->quantization.block_size,
-                    input_channels);
+                    filter_id, block_size, input_channels);
       return xnn_status_invalid_parameter;
     }
   }
@@ -2140,19 +2159,19 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       case xnn_datatype_fp32:
         if (is_channelwise_quantized && bias_value->data == NULL) {
           xnn_log_error("failed to define %s operator with bias ID #%" PRIu32
-                        ": non-static Value",
+                        ": unsupported non-static Value",
                         xnn_node_type_to_string(xnn_node_type_fully_connected),
                         bias_id);
-          return xnn_status_invalid_parameter;
+          return xnn_status_unsupported_parameter;
         }
         break;  // non-static bias is supported
       default:
         if (bias_value->data == NULL) {
           xnn_log_error("failed to define %s operator with bias ID #%" PRIu32
-                        ": non-static Value",
+                        ": unsupported non-static Value",
                         xnn_node_type_to_string(xnn_node_type_fully_connected),
                         bias_id);
-          return xnn_status_invalid_parameter;
+          return xnn_status_unsupported_parameter;
         }
         break;
     }
@@ -2169,7 +2188,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                       xnn_node_type_to_string(xnn_node_type_fully_connected),
                       bias_id, xnn_datatype_to_string(bias_value->datatype),
                       bias_value->datatype);
-        return xnn_status_invalid_parameter;
+        return xnn_status_unsupported_parameter;
     }
   }
 
@@ -2199,7 +2218,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     output_id, xnn_datatype_to_string(output_value->datatype),
                     output_value->datatype);
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
   }
 
   if (bias_value != NULL) {
@@ -2209,15 +2228,15 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                     ", filter ID #%" PRIu32 ", bias ID #%" PRIu32
                     ", and output ID #%" PRIu32
-                    ": mismatching datatypes across input (%s), filter (%s), "
-                    "bias (%s), and output (%s)",
+                    ": unsupported combination of datatypes across input (%s), "
+                    "filter (%s), bias (%s), and output (%s)",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     input_id, filter_id, bias_id, output_id,
                     xnn_datatype_to_string(input_value->datatype),
                     xnn_datatype_to_string(kernel_value->datatype),
                     xnn_datatype_to_string(bias_value->datatype),
                     xnn_datatype_to_string(output_value->datatype));
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
   } else {
     if (!validate_datatypes_without_bias(input_value->datatype,
@@ -2225,15 +2244,29 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                                          output_value->datatype)) {
       xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                     ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
-                    ": mismatching datatypes across input (%s), filter (%s), "
-                    "and output (%s)",
+                    ": unsupported combination of datatypes across input (%s), "
+                    "filter (%s), and output (%s)",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
                     input_id, filter_id, output_id,
                     xnn_datatype_to_string(input_value->datatype),
                     xnn_datatype_to_string(kernel_value->datatype),
                     xnn_datatype_to_string(output_value->datatype));
-      return xnn_status_invalid_parameter;
+      return xnn_status_unsupported_parameter;
     }
+  }
+
+  if (kernel_value->datatype == xnn_datatype_fp32 &&
+      output_value->datatype == xnn_datatype_fp16 &&
+      (kernel_value->data == NULL ||
+       (bias_value != NULL && bias_value->data == NULL))) {
+    xnn_log_error("failed to define %s operator with input ID #%" PRIu32
+                  ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
+                  ": unsupported non-static fp32 filter or bias with %s "
+                  "input and output",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected),
+                  input_id, filter_id, output_id,
+                  xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

@@ -2138,6 +2138,29 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_no_bias) {
   }
 }
 
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, unsupported_block_size) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  const size_t input_channels = 64;
+  const size_t output_channels = 4;
+  const size_t block_size = XNN_MIN_BLOCKSIZE / 2;
+  std::vector<uint8_t> kernel(output_channels * input_channels / 2);
+  // 1.0 in bf16.
+  std::vector<uint16_t> kernel_scale(
+      output_channels * input_channels / block_size, 0x3F80);
+  xnn_operator_t op = nullptr;
+  const xnn_status status = xnn_create_fully_connected_nc_qd8_f32_qb4w(
+      input_channels, output_channels, /*input_stride=*/input_channels,
+      /*output_stride=*/output_channels, block_size, /*kernel_zero_point=*/8,
+      kernel_scale.data(), kernel.data(), /*bias=*/nullptr,
+      -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), /*flags=*/0,
+      /*weights_cache=*/nullptr, &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(status, xnn_status_unsupported_parameter);
+}
+
 TEST(FULLY_CONNECTED_NC_QD8_F32_QC8W, unit_batch) {
   FullyConnectedOperatorTester()
       .batch_size(1)

@@ -91,10 +91,10 @@ http_archive(
     name = "cpuinfo",
     patch_args = ["-p1"],
     patches = ["//:cpuinfo_windows_arm64_msvc.patch"],
-    sha256 = "b93044263ee072e9be3577bda52f48d5a4dd9fcb80091529471c8d2bfe59219d",
-    strip_prefix = "cpuinfo-66ee79c038d70dad9f08705b2c9b3e58f6d8f512",
+    sha256 = "60f758240032413a31d288e7c76e8a3a81e869c8d6ce05869ad799b33e7b0a63",
+    strip_prefix = "cpuinfo-783a616b2197d7e48d6507210d1d0009fbf1f590",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/66ee79c038d70dad9f08705b2c9b3e58f6d8f512.zip",
+        "https://github.com/pytorch/cpuinfo/archive/783a616b2197d7e48d6507210d1d0009fbf1f590.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
@@ -103,10 +103,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "c89b7c1dbcef363458ec5f46b8e7edd757bbebf8e7b27e9c9f2dc6a857d7a89f",
-    strip_prefix = "kleidiai-c80157210987eedaab2509638ef5e15950c53a8c",
+    sha256 = "17f5b233b9afa3abe873da40e6832a98423aa0de8c66205d09197ca5fbfa3135",
+    strip_prefix = "kleidiai-0e1439fe30a039880b3633252ae8390fd301a125",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/c80157210987eedaab2509638ef5e15950c53a8c/kleidiai-c80157210987eedaab2509638ef5e15950c53a8c.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/0e1439fe30a039880b3633252ae8390fd301a125/kleidiai-0e1439fe30a039880b3633252ae8390fd301a125.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
@@ -123,9 +123,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "e1380282d065ef40350f79876e50a6c682ccca1c8756204f119c8d1d17512a4b",
-    strip_prefix = "slinky-a34d74bd9a3c6c0a4f5dec6a7430273ec9bb7f66",
+    sha256 = "8ca25be2a8750d47a5bea7e2b85e035ebed1c87729802b310c05ccd7f419f9f0",
+    strip_prefix = "slinky-4449dd1499efbe239ab6ee320058450bab59b97b",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/a34d74bd9a3c6c0a4f5dec6a7430273ec9bb7f66.zip",
+        "https://github.com/dsharlet/slinky/archive/4449dd1499efbe239ab6ee320058450bab59b97b.zip",
     ],
 )

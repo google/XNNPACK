@@ -38,7 +38,8 @@
 #define YNN_ARCH_FLOAT16 1
 #endif
 
-#if defined(__riscv) && defined(__riscv_zvfh) && __clang__ >= 1600
+#if defined(__riscv) && defined(__riscv_zvfh) && defined(__clang__) && \
+    __clang_major__ >= 16
 #define YNN_ARCH_FLOAT16 1
 #endif
 

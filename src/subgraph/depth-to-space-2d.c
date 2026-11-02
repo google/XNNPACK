@@ -281,14 +281,6 @@ enum xnn_status xnn_define_depth_to_space_2d(
     return status;
   }
 
-  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), input_id,
-      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-    return xnn_status_invalid_parameter;
-  }
-
   status = xnn_subgraph_check_output_node_id(xnn_node_type_depth_to_space_2d, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
@@ -298,14 +290,6 @@ enum xnn_status xnn_define_depth_to_space_2d(
   status = xnn_subgraph_check_output_type_dense(xnn_node_type_depth_to_space_2d, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
-  }
-
-  if (!xnn_datatype_is_byte_addressable(output_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), output_id,
-      xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-    return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_datatype_matches(
@@ -325,6 +309,14 @@ enum xnn_status xnn_define_depth_to_space_2d(
       "failed to define %s operator with block size #%" PRIu32 ": invalid block_size",
       xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), block_size);
     return xnn_status_invalid_parameter;
+  }
+
+  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), input_id,
+      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

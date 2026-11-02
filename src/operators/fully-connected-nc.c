@@ -690,7 +690,7 @@ static enum xnn_status check_block_size(const struct fc_variant* variant,
         "block_size to be a multiple of %d.",
         xnn_operator_type_to_string(context->operator_type),
         context->block_size, XNN_MIN_BLOCKSIZE);
-    return xnn_status_invalid_parameter;
+    return xnn_status_unsupported_parameter;
   }
 
   if (context->input_channels % context->block_size != 0) {

@@ -225,17 +225,9 @@ enum xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph,
     return xnn_status_invalid_parameter;
   }
 
-  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
-      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-    return xnn_status_invalid_parameter;
-  }
-
   if (strides != NULL) {
     for (size_t i = 0; i < num_dims; i++) {
-      if (strides[i] != 1) {
+      if (strides[i] == 0) {
         xnn_log_error(
           "failed to define %s operator with input ID #%" PRIu32 ": Illegal stride value %" PRIi64 " in dimension #%zu",
           xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
@@ -256,14 +248,6 @@ enum xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph,
     return status;
   }
 
-  if (!xnn_datatype_is_byte_addressable(output_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_static_slice), output_id,
-      xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-    return xnn_status_invalid_parameter;
-  }
-
   status =
     xnn_subgraph_check_datatype_matches(xnn_node_type_static_slice, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
@@ -274,6 +258,26 @@ enum xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph,
       xnn_node_type_static_slice, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
+      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    return xnn_status_unsupported_parameter;
+  }
+
+  if (strides != NULL) {
+    for (size_t i = 0; i < num_dims; i++) {
+      if (strides[i] != 1) {
+        xnn_log_error(
+          "failed to define %s operator with input ID #%" PRIu32 ": unsupported stride value %" PRIi64 " in dimension #%zu",
+          xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
+          strides[i], i);
+        return xnn_status_unsupported_parameter;
+      }
+    }
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

@@ -198,6 +198,28 @@ TEST(SpaceToDepth2D, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(SpaceToDepth2D, DefineRejectsSubByteDatatypeAsUnsupported) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({1, 4, 4, 1}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({1, 2, 2, 4}, 1, xnn_datatype_qint4, quantization);
+  EXPECT_EQ(xnn_define_space_to_depth_2d(subgraph.Subgraph(), /*block_size=*/2,
+                                         0, 1, /*flags=*/0),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(SpaceToDepth2D, DefineRejectsMismatchingDatatypesAsInvalid) {
+  const xnn_quantization_params quantization = {/*zero_point=*/8,
+                                                /*scale=*/1.0f};
+  SubgraphTester subgraph(2);
+  subgraph.AddDynamicTensor({1, 4, 4, 1}, 0, xnn_datatype_qint4, quantization)
+      .AddDynamicTensor({1, 2, 2, 4}, 1, xnn_datatype_fp32);
+  EXPECT_EQ(xnn_define_space_to_depth_2d(subgraph.Subgraph(), /*block_size=*/2,
+                                         0, 1, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

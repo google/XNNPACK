@@ -308,11 +308,14 @@ static void init_hardware_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_CPUINFO
   set_arch_flag(xnn_arch_arm_neon_dot, cpuinfo_has_arm_neon_dot());
   set_arch_flag(xnn_arch_arm_neon_i8mm, cpuinfo_has_arm_i8mm());
+#if !XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+  // msan (understandably) does not support SVE/SME (b/494230133).
   set_arch_flag(xnn_arch_arm_sve, cpuinfo_has_arm_sve());
   set_arch_flag(xnn_arch_arm_sve2, cpuinfo_has_arm_sve2());
   set_arch_flag(xnn_arch_arm_sme, cpuinfo_has_arm_sme());
   set_arch_flag(xnn_arch_arm_sme2, cpuinfo_has_arm_sme2());
   set_arch_flag(xnn_arch_arm_sme2p1, cpuinfo_has_arm_sme2p1());
+#endif  // !XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 #endif
 
 #if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_CPUINFO
