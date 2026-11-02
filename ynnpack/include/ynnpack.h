@@ -708,6 +708,10 @@ enum ynn_runtime_property {
   // The maximum number of tasks the runtime expects to run concurrently.
   // `result` should be an `int32_t`
   ynn_runtime_property_concurrency = 0,
+  // Non-zero if invoking the runtime is expected to take long enough to warrant
+  // asynchronous execution alongside independent work, 0 otherwise.
+  // `result` should be an `int32_t`
+  ynn_runtime_property_may_block = 1,
 };
 
 // Query the runtime for the value of a property identified by `property`.

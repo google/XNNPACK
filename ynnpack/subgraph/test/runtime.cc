@@ -3,7 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
 #include <cstdint>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/test/util.h"
@@ -108,6 +110,69 @@ TEST(runtime, cross_runtime_isolation) {
   for (float v : out_b) {
     EXPECT_FLOAT_EQ(v, -2.0f);
   }
+}
+
+TEST(runtime, may_block) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t b_id = 1;
+  constexpr uint32_t c_id = 2;
+  constexpr uint32_t init_zero = YNN_INVALID_VALUE_ID;
+
+  TestScheduler scheduler(3);
+
+  auto query_may_block = [](Runtime& runtime) -> int32_t {
+    int32_t may_block = -1;
+    EXPECT_EQ(runtime.Query(ynn_runtime_property_may_block, &may_block),
+              ynn_status_success);
+    return may_block;
+  };
+
+  SubgraphBuilder tiny_dot(3);
+  tiny_dot.AddInput(type_of<float>(), {8, 8}, a_id);
+  tiny_dot.AddInput(type_of<float>(), {8, 8}, b_id);
+  tiny_dot.AddOutput(type_of<float>(), {8, 8}, c_id);
+  tiny_dot.AddDot(1, a_id, b_id, init_zero, c_id);
+  Runtime tiny_runtime(tiny_dot.GetSubgraph(), &scheduler);
+  ASSERT_EQ(tiny_runtime.Status(), ynn_status_success);
+  EXPECT_EQ(query_may_block(tiny_runtime), 0);
+
+  SubgraphBuilder medium_dot(3);
+  medium_dot.AddInput(type_of<float>(), {256, 128}, a_id);
+  medium_dot.AddInput(type_of<float>(), {128, 128}, b_id);
+  medium_dot.AddOutput(type_of<float>(), {256, 128}, c_id);
+  medium_dot.AddDot(1, a_id, b_id, init_zero, c_id);
+  Runtime medium_single_thread(medium_dot.GetSubgraph());
+  ASSERT_EQ(medium_single_thread.Status(), ynn_status_success);
+  EXPECT_EQ(query_may_block(medium_single_thread), 1);
+
+  SubgraphBuilder dynamic_dot(3);
+  dynamic_dot.AddInput(type_of<float>(), 2, a_id);
+  dynamic_dot.AddInput(type_of<float>(), 2, b_id);
+  dynamic_dot.AddOutput(type_of<float>(), 2, c_id);
+  dynamic_dot.AddDot(1, a_id, b_id, init_zero, c_id);
+  Runtime dynamic_runtime(dynamic_dot.GetSubgraph(), &scheduler);
+  ASSERT_EQ(dynamic_runtime.Status(), ynn_status_success);
+  EXPECT_EQ(query_may_block(dynamic_runtime), 1);
+
+  std::vector<float> a_small(16, 1.0f);
+  std::vector<float> b_small(16, 1.0f);
+  dynamic_runtime.ReshapeExternalTensor(TensorShape({4, 4}), a_small.data(),
+                                        a_id);
+  dynamic_runtime.ReshapeExternalTensor(TensorShape({4, 4}), b_small.data(),
+                                        b_id);
+  dynamic_runtime.ReshapeRuntime();
+  ASSERT_EQ(dynamic_runtime.Status(), ynn_status_success);
+  EXPECT_EQ(query_may_block(dynamic_runtime), 0);
+
+  std::vector<float> a_large(256 * 256, 1.0f);
+  std::vector<float> b_large(256 * 256, 1.0f);
+  dynamic_runtime.ReshapeExternalTensor(TensorShape({256, 256}), a_large.data(),
+                                        a_id);
+  dynamic_runtime.ReshapeExternalTensor(TensorShape({256, 256}), b_large.data(),
+                                        b_id);
+  dynamic_runtime.ReshapeRuntime();
+  ASSERT_EQ(dynamic_runtime.Status(), ynn_status_success);
+  EXPECT_EQ(query_may_block(dynamic_runtime), 1);
 }
 
 }  // namespace ynn
