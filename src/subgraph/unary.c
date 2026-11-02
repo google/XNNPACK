@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -17,6 +18,7 @@
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
+#include "src/xnnpack/reference-config.h"
 #include "src/xnnpack/reshape-helpers.h"
 #include "src/xnnpack/subgraph-validation.h"
 #include "src/xnnpack/subgraph.h"
@@ -453,6 +455,14 @@ enum xnn_status xnn_define_unary(
     return status;
   }
 
+  if (type <= xnn_unary_invalid || type > xnn_unary_sign) {
+    xnn_log_error("failed to define %s node with input ID #%" PRIu32
+                  " and output ID #%" PRIu32 ": invalid operator type %d",
+                  xnn_node_type_to_string(xnn_node_type_unary_elementwise),
+                  input_id, output_id, (int) type);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (type) {
     case xnn_unary_clamp:
     case xnn_unary_leaky_relu:
@@ -493,6 +503,35 @@ enum xnn_status xnn_define_unary(
       xnn_init_convert_node(node, input_id, output_id, flags);
       return xnn_status_success;
     }
+  }
+
+  const enum xnn_datatype input_datatype = input_value->datatype;
+  const enum xnn_datatype output_datatype = output_value->datatype;
+  if (type != xnn_unary_convert && input_datatype != output_datatype) {
+    xnn_log_error("failed to define %s operator with input ID #%" PRIu32
+                  " and output ID #%" PRIu32
+                  ": mismatching datatypes across input (%s) and output (%s)",
+                  xnn_unary_operator_to_string(type), input_id, output_id,
+                  xnn_datatype_to_string(input_datatype),
+                  xnn_datatype_to_string(output_datatype));
+    return xnn_status_invalid_parameter;
+  }
+
+  // The reference configs cover every implemented operator and datatype
+  // combination, except fp32 -> qpint8, which only has an optimized kernel.
+  const bool is_convert_f32_to_qp8 = type == xnn_unary_convert &&
+                                     input_datatype == xnn_datatype_fp32 &&
+                                     output_datatype == xnn_datatype_qpint8;
+  if (!is_convert_f32_to_qp8 &&
+      xnn_init_unary_reference_config(type, input_datatype, output_datatype) ==
+          NULL) {
+    xnn_log_error("failed to define %s operator with input ID #%" PRIu32
+                  " and output ID #%" PRIu32
+                  ": unsupported datatypes %s -> %s",
+                  xnn_unary_operator_to_string(type), input_id, output_id,
+                  xnn_datatype_to_string(input_datatype),
+                  xnn_datatype_to_string(output_datatype));
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
