@@ -203,6 +203,7 @@ ynn::multi_type parse(const char* str, ynn::multi_type) {
   if (!strcmp(str, "bf16")) return ynn::multi_type::bf16_bf16_fp32;
   if (!strcmp(str, "fp16")) return ynn::multi_type::fp16_fp16_fp32;
   if (!strcmp(str, "fp32")) return ynn::multi_type::fp32;
+  if (!strcmp(str, "fp64")) return ynn::multi_type::fp64;
 
   return static_cast<ynn::multi_type>(-1);
 }
@@ -221,7 +222,7 @@ void usage(const char* name) {
   std::cout << R"(
 Options:
   --thread_count=N
-  --type=t1,t2,...     (int8, int8_int4, int8_int2, bf16, fp16, fp32)
+  --type=t1,t2,...     (int8, int8_int4, int8_int2, bf16, fp16, fp32, fp64)
   --transpose_a=b1,... (0, 1, false, true)
   --transpose_b=b1,... (0, 1, false, true)
   --static_b=b1,...    (0, 1, false, true)
