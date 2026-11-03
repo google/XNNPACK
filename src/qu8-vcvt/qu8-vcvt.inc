@@ -68,6 +68,12 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qu8_vcvt_ukernel__rvv_u2v, 2, true, XNN_Q
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qu8_vcvt_ukernel__rvv_u4v, 4, true, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_qu8_vcvt_ukernel__hvx_u32, 32, false, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_qu8_vcvt_ukernel__hvx_u64, 64, false, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_qu8_vcvt_ukernel__hvx_u128, 128, false, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_qu8_vcvt_ukernel__scalar_u1, 1, false, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_qu8_vcvt_ukernel__scalar_u2, 2, false, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_qu8_vcvt_ukernel__scalar_u4, 4, false, XNN_QUANTIZED(uint8_t), XNN_QUANTIZED(uint8_t), struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)

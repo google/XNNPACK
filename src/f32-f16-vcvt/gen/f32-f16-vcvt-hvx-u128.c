@@ -36,24 +36,22 @@ void xnn_f32_f16_vcvt_ukernel__hvx_u128(
     const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 96);
     input += 128;
 
-    #if __HVX_ARCH__ >= 81
     const xnn_simd_f16_t vy0 = Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(vx0, vx1));
     const xnn_simd_f16_t vy1 = Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(vx2, vx3));
 
     xnn_storeu_f16(output + 0, vy0);
     xnn_storeu_f16(output + 64, vy1);
-    #else
-    const xnn_simd_f16_t vy0 = xnn_cvt_f16_f32(vx0);
-    const xnn_simd_f16_t vy1 = xnn_cvt_f16_f32(vx1);
-    const xnn_simd_f16_t vy2 = xnn_cvt_f16_f32(vx2);
-    const xnn_simd_f16_t vy3 = xnn_cvt_f16_f32(vx3);
-
-    xnn_store_tail_f16(output + 0, vy0, 32);
-    xnn_store_tail_f16(output + 32, vy1, 32);
-    xnn_store_tail_f16(output + 64, vy2, 32);
-    xnn_store_tail_f16(output + 96, vy3, 32);
-    #endif
     output += 128;
+  }
+  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 32);
+    input += 64;
+
+    const xnn_simd_f16_t vy = Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(vx0, vx1));
+
+    xnn_storeu_f16(output, vy);
+    output += 64;
   }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -69,7 +67,7 @@ void xnn_f32_f16_vcvt_ukernel__hvx_u128(
     assert(batch <= 31 * sizeof(float));
 
     const size_t num_elements = batch >> XNN_LOG2_SIZEOF_FLOAT;
-    const xnn_simd_f32_t vx = xnn_load_tail_f32(input, num_elements);
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
     const xnn_simd_f16_t vy = xnn_cvt_f16_f32(vx);
     xnn_store_tail_f16(output, vy, num_elements);
   }
