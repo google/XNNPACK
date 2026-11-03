@@ -51,9 +51,10 @@ const struct xnn_fingerprint* xnn_get_fingerprint_by_idx(const uint32_t idx) {
   return result;
 }
 
-void xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
+enum xnn_status xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
   XNN_INIT_ONCE(mutex);
   uint32_t i = 0;
+  enum xnn_status status = xnn_status_success;
   xnn_mutex_lock(&mutex);
   for (; i < fingerprint_vector_size; ++i) {
     if (fingerprint_vector[i].id == fingerprint.id) {
@@ -62,10 +63,14 @@ void xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
     }
   }
   if (i >= fingerprint_vector_size) {
-    assert(fingerprint_vector_size < XNN_FINGERPRINT_MAX_COUNT);
-    fingerprint_vector[fingerprint_vector_size++] = fingerprint;
+    if (fingerprint_vector_size >= XNN_FINGERPRINT_MAX_COUNT) {
+      status = xnn_status_invalid_state;
+    } else {
+      fingerprint_vector[fingerprint_vector_size++] = fingerprint;
+    }
   }
   xnn_mutex_unlock(&mutex);
+  return status;
 }
 
 void xnn_clear_fingerprints() {
@@ -168,10 +173,12 @@ static XNN_NO_SANITIZE_FUNCTION void free_fingerprint_cache_provider(
   }
 }
 
-void finalize_fingerprint_context(struct fingerprint_context* const context) {
+enum xnn_status finalize_fingerprint_context(
+    struct fingerprint_context* const context) {
   assert(context);
+  enum xnn_status status = xnn_status_success;
   if (context->status == xnn_status_uninitialized) {
-    xnn_set_fingerprint((struct xnn_fingerprint){
+    status = xnn_set_fingerprint((struct xnn_fingerprint){
         .id = context->fingerprint_id,
         .value = fingerprint_cache_get_fingerprint(&context->cache)});
   }
@@ -179,6 +186,7 @@ void finalize_fingerprint_context(struct fingerprint_context* const context) {
   if (context->op) {
     xnn_delete_operator(context->op);
   }
+  return status;
 }
 
 uint32_t fingerprint_cache_get_fingerprint(

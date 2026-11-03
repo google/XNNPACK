@@ -107,8 +107,9 @@ const struct xnn_fingerprint* xnn_get_fingerprint(uint32_t id);
 /// Return the `idx`_th fingerprint or NULL if it wasn't set.
 const struct xnn_fingerprint* xnn_get_fingerprint_by_idx(uint32_t idx);
 
-/// Set the given fingerprint.
-void xnn_set_fingerprint(struct xnn_fingerprint fingerprint);
+/// Set the given fingerprint. Returns xnn_status_success on insertion or
+/// replacement, or xnn_status_invalid_state if a new ID cannot fit.
+enum xnn_status xnn_set_fingerprint(struct xnn_fingerprint fingerprint);
 
 /// Clear all fingerprints that were computed until now.
 void xnn_clear_fingerprints();

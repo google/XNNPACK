@@ -1376,8 +1376,11 @@ enum xnn_status xnn_fingerprint_deconvolution2d_nhwc(
   XNN_IF_ERROR_GOTO(error, generate_fingerprint_parameters(&context));
   XNN_IF_ERROR_GOTO(error, create_deconvolution2d_nhwc_helper(&context));
 error:
-  finalize_fingerprint_context(&f_context);
-  return status;
+  {
+    const enum xnn_status finalize_status =
+        finalize_fingerprint_context(&f_context);
+    return status == xnn_status_success ? finalize_status : status;
+  }
 }
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_qs8_qc8w(

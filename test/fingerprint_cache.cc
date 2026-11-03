@@ -5,10 +5,12 @@
 
 #include "src/operators/fingerprint_cache.h"
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
 #include <set>
+#include <thread>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -65,11 +67,95 @@ TEST_F(FingerprintCacheTest, SetAndGetFingerprint) {
   const struct xnn_fingerprint expected{
       /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
       /*value=*/314};
-  xnn_set_fingerprint(expected);
+  ASSERT_EQ(xnn_set_fingerprint(expected), xnn_status_success);
   const struct xnn_fingerprint* fingerprint = xnn_get_fingerprint(expected.id);
   ASSERT_THAT(fingerprint, NotNull());
   EXPECT_THAT(fingerprint->id, Eq(expected.id));
   EXPECT_THAT(fingerprint->value, Eq(expected.value));
+}
+
+TEST_F(FingerprintCacheTest, NewIdAtCapacityIsRejected) {
+  constexpr uint32_t kCapacity = 256;
+  for (uint32_t id = 0; id < kCapacity; ++id) {
+    ASSERT_EQ(xnn_set_fingerprint({id, id + 1}), xnn_status_success);
+  }
+  const xnn_fingerprint* last = xnn_get_fingerprint_by_idx(kCapacity - 1);
+  ASSERT_THAT(last, NotNull());
+  EXPECT_EQ(last->id, kCapacity - 1);
+
+  EXPECT_EQ(xnn_set_fingerprint({kCapacity, 123}), xnn_status_invalid_state);
+  EXPECT_EQ(xnn_get_fingerprint_by_idx(kCapacity), nullptr);
+  EXPECT_EQ(xnn_get_fingerprint(kCapacity), nullptr);
+
+  EXPECT_EQ(xnn_set_fingerprint({0, 456}), xnn_status_success);
+  const xnn_fingerprint* updated = xnn_get_fingerprint(0);
+  ASSERT_THAT(updated, NotNull());
+  EXPECT_EQ(updated->value, 456);
+
+  xnn_clear_fingerprints();
+  EXPECT_EQ(xnn_set_fingerprint({kCapacity, 123}), xnn_status_success);
+  ASSERT_THAT(xnn_get_fingerprint(kCapacity), NotNull());
+}
+
+TEST_F(FingerprintCacheTest, ConcurrentInsertionsAtCapacity) {
+  constexpr uint32_t kCapacity = 256;
+  constexpr uint32_t kThreads = 8;
+  constexpr uint32_t kAttemptsPerThread = 64;
+  std::vector<xnn_status> statuses(kThreads * kAttemptsPerThread);
+  std::atomic<uint32_t> ready{0};
+  std::atomic<bool> start{false};
+  std::vector<std::thread> threads;
+  for (uint32_t thread = 0; thread < kThreads; ++thread) {
+    threads.emplace_back([&, thread] {
+      ready.fetch_add(1);
+      while (!start.load()) {
+        std::this_thread::yield();
+      }
+      for (uint32_t i = 0; i < kAttemptsPerThread; ++i) {
+        const uint32_t id = thread * kAttemptsPerThread + i;
+        statuses[id] = xnn_set_fingerprint({id, id + 1});
+      }
+    });
+  }
+  while (ready.load() != kThreads) {
+    std::this_thread::yield();
+  }
+  start.store(true);
+  for (std::thread& thread : threads) {
+    thread.join();
+  }
+
+  uint32_t inserted = 0;
+  for (uint32_t id = 0; id < statuses.size(); ++id) {
+    if (statuses[id] == xnn_status_success) {
+      ++inserted;
+      const xnn_fingerprint* fingerprint = xnn_get_fingerprint(id);
+      ASSERT_THAT(fingerprint, NotNull());
+      EXPECT_EQ(fingerprint->value, id + 1);
+    } else {
+      EXPECT_EQ(statuses[id], xnn_status_invalid_state);
+      EXPECT_EQ(xnn_get_fingerprint(id), nullptr);
+    }
+  }
+  EXPECT_EQ(inserted, kCapacity);
+  EXPECT_EQ(xnn_get_fingerprint_by_idx(kCapacity), nullptr);
+}
+
+TEST_F(FingerprintCacheTest, FinalizeReportsFullCache) {
+  constexpr uint32_t kCapacity = 256;
+  const uint32_t target_id = xnn_fingerprint_id_test_f16_f32_qc8w_nr2;
+  for (uint32_t id = 0, inserted = 0; inserted < kCapacity; ++id) {
+    if (id != target_id) {
+      ASSERT_EQ(xnn_set_fingerprint({id, id + 1}), xnn_status_success);
+      ++inserted;
+    }
+  }
+  struct fingerprint_context context = create_fingerprint_context(
+      xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
+  ASSERT_EQ(context.status, xnn_status_uninitialized);
+  ASSERT_THAT(context.cache.context, NotNull());
+  EXPECT_EQ(finalize_fingerprint_context(&context), xnn_status_invalid_state);
+  EXPECT_EQ(xnn_get_fingerprint(target_id), nullptr);
 }
 
 TEST_F(FingerprintCacheTest, SetGetFingerprintMultipleTimesDoesntDeadlock) {
@@ -82,11 +168,11 @@ TEST_F(FingerprintCacheTest, SetGetFingerprintMultipleTimesDoesntDeadlock) {
   static_assert(finger1.id == finger2.id,
                 "This test checks that updating a fingerprint value doesn't "
                 "deadlock. Do use different ids for the two fingerprints.");
-  xnn_set_fingerprint(finger1);
-  xnn_set_fingerprint(finger1);
+  EXPECT_EQ(xnn_set_fingerprint(finger1), xnn_status_success);
+  EXPECT_EQ(xnn_set_fingerprint(finger1), xnn_status_success);
   // Update the value of the fingerprint.
-  xnn_set_fingerprint(finger2);
-  xnn_set_fingerprint(finger2);
+  EXPECT_EQ(xnn_set_fingerprint(finger2), xnn_status_success);
+  EXPECT_EQ(xnn_set_fingerprint(finger2), xnn_status_success);
 
   xnn_get_fingerprint(finger1.id);
   xnn_get_fingerprint(finger2.id);
@@ -100,7 +186,7 @@ TEST_F(FingerprintCacheTest, InitializeAndFinalize) {
   EXPECT_THAT(context.status, Eq(xnn_status_uninitialized));
   EXPECT_THAT(context.fingerprint_id,
               Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
-  finalize_fingerprint_context(&context);
+  EXPECT_EQ(finalize_fingerprint_context(&context), xnn_status_success);
   EXPECT_THAT(xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2),
               NotNull());
 }
@@ -120,7 +206,7 @@ TEST_F(FingerprintCacheTest, ReserveAndWrite) {
   // The fingerprinting cache never returns a positive look up.
   EXPECT_THAT(context.cache.look_up(context.cache.context, &key),
               Eq(XNN_CACHE_NOT_FOUND));
-  finalize_fingerprint_context(&context);
+  EXPECT_EQ(finalize_fingerprint_context(&context), xnn_status_success);
   const xnn_fingerprint* fingerprint =
       xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
   ASSERT_THAT(fingerprint, NotNull());

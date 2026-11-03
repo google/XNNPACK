@@ -1073,9 +1073,9 @@ enum xnn_status xnn_fingerprint_convolution2d_nchw(
   params.weights_cache = &context.cache;
 
   enum xnn_status status = create_convolution2d_nchw(variant, &params, &context.op);
-  finalize_fingerprint_context(&context);
+  const enum xnn_status finalize_status = finalize_fingerprint_context(&context);
   xnn_release_simd_memory(data.data);
-  return status;
+  return status == xnn_status_success ? finalize_status : status;
 }
 
 static enum xnn_fingerprint_id get_fingerprint_id_for(
@@ -1346,11 +1346,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
   };
   context.fingerprint_id = get_fingerprint_id_for(&f32_conv, &context);
   enum xnn_status status = xnn_fingerprint_convolution2d_nchw(context.fingerprint_id);
-  if (status != xnn_status_success) {
+  if (status == xnn_status_success) {
+    status = create_convolution2d_nchw(&f32_conv, &context, convolution_op_out);
+  } else {
     xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(context.operator_type));
-    return status;
   }
-  status = create_convolution2d_nchw(&f32_conv, &context, convolution_op_out);
 
   // Release temporary `f32` buffers.
   xnn_release_memory(fp32_kernel_buffer);
