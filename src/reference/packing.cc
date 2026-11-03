@@ -3144,10 +3144,11 @@ void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
 }
 
 static void transpose_weights_x16(const uint16_t* in, uint16_t* out,
-                                  size_t height, size_t width) {
+                                  size_t height, size_t width,
+                                  size_t input_stride) {
   for (size_t j = 0; j < width; ++j) {
     for (size_t i = 0; i < height; ++i) {
-      out[j * height + i] = in[i * width + j];
+      out[j * height + i] = in[i * input_stride + j];
     }
   }
 }
@@ -3307,7 +3308,7 @@ void xnn_pack_kai_qs8_weights_and_biases(
   }
 }
 
-size_t xnn_packed_stride_kai_f16_weights_and_biases(
+size_t xnn_packed_stride_kai_f16_weights_and_biases_sme(
     const struct xnn_gemm_config* unused_gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride,
     size_t unused_extra_bytes) {
@@ -3317,7 +3318,24 @@ size_t xnn_packed_stride_kai_f16_weights_and_biases(
   return ret_val;
 }
 
-void xnn_pack_kai_f16_weights_and_biases(
+static struct kai_matmul_pack_rhs_uker_api
+xnn_kleidiai_pf16_rhs_pack_api() {
+  return kai_matmul_pack_rhs_kxn_x16p4vsx2bx16_x16_x16_sme();
+}
+
+static size_t xnn_kleidiai_pf16_rhs_packed_stride(size_t k) {
+  const struct kai_matmul_pack_rhs_uker_config config = {};
+  const struct kai_matmul_pack_rhs_uker_api api =
+      xnn_kleidiai_pf16_rhs_pack_api();
+  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args shape = {};
+  shape.n = api.get_step(&config).n;
+  shape.k = k;
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args stride =
+      api.get_rhs_packed_stride(&config, &shape);
+  return stride.n / shape.n;
+}
+
+void xnn_pack_kai_f16_weights_and_biases_sme(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
     size_t unused_block_size, size_t k_stride, const void* accumulator_init,
@@ -3353,7 +3371,7 @@ void xnn_pack_kai_f16_weights_and_biases(
       sizeof(xnn_float16) * input_channels * output_channels;
   const size_t n_stride = round_up(output_channels, nr);
   const size_t packed_weights_group_stride =
-      n_stride * xnn_packed_stride_kai_f16_weights_and_biases(
+      n_stride * xnn_packed_stride_kai_f16_weights_and_biases_sme(
                      gemm_config, input_channels, unused_block_size,
                      /*unused_k_stride=*/0,
                      /*unused_extra_bytes=*/0);
@@ -3393,6 +3411,149 @@ void xnn_pack_kai_f16_weights_and_biases(
   }
   if (free_accumulator_init) {
     free((void*)accumulator_init);
+  }
+}
+
+size_t xnn_packed_stride_kai_f16_weights_and_biases_sme2(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  (void)gemm_config;
+  (void)unused_block_size;
+  (void)unused_k_stride;
+  (void)extra_bytes;
+  return xnn_kleidiai_pf16_rhs_packed_stride(k);
+}
+
+void xnn_pack_kai_f16_weights_and_biases_sme2(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  if (groups == 0 || input_channels == 0 || output_channels == 0) {
+    return;
+  }
+  assert(extra_data0 == nullptr);
+  assert(extra_data1 == nullptr);
+  const uint32_t nr = gemm_config->nr;
+
+  const size_t weights_group_rows =
+      (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? input_channels : output_channels;
+  size_t weights_group_elements;
+  size_t weights_group_stride;
+  if (!xnn_safe_mul(weights_group_rows, k_stride, &weights_group_elements) ||
+      !xnn_safe_mul(weights_group_elements, sizeof(uint16_t),
+                    &weights_group_stride)) {
+    xnn_log_error("KleidiAI SME2 weights group stride overflows size_t");
+    assert(false);
+    return;
+  }
+
+  size_t transpose_size = 0;
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0) {
+    size_t transpose_elements;
+    if (!xnn_safe_mul(input_channels, output_channels,
+                      &transpose_elements) ||
+        !xnn_safe_mul(transpose_elements, sizeof(uint16_t),
+                      &transpose_size)) {
+      xnn_log_error(
+          "KleidiAI SME2 weight transpose buffer size overflows size_t");
+      assert(false);
+      return;
+    }
+  }
+
+  const struct kai_matmul_pack_rhs_uker_config config = {};
+  const struct kai_matmul_pack_rhs_uker_api api =
+      xnn_kleidiai_pf16_rhs_pack_api();
+  const size_t n_step = api.get_step(&config).n;
+  if (n_step == 0 || nr % n_step != 0) {
+    xnn_log_error(
+        "KleidiAI SME2 RHS packer N step %zu is incompatible with NR %zu",
+        n_step, nr);
+    assert(false);
+    return;
+  }
+
+  uint16_t* zero_bias = nullptr;
+  if (accumulator_init == nullptr) {
+    zero_bias = static_cast<uint16_t*>(
+        calloc(output_channels, sizeof(uint16_t)));
+    if (zero_bias == nullptr) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME2 bias substitute "
+          "buffer",
+          output_channels * sizeof(uint16_t));
+      assert(false);
+      return;
+    }
+    accumulator_init = zero_bias;
+  }
+
+  uint16_t* transposed_weights = nullptr;
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0) {
+    // TODO: Remove this O(NK) temporary once a NxK variant of the
+    // x16p4vsx2 RHS packer is available.
+    transposed_weights = static_cast<uint16_t*>(malloc(transpose_size));
+    if (transposed_weights == nullptr) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME2 weight transpose "
+          "buffer",
+          transpose_size);
+      if (zero_bias != nullptr) {
+        free(zero_bias);
+      }
+      assert(false);
+      return;
+    }
+  }
+
+  const size_t n_stride = round_up(output_channels, nr);
+  const size_t packed_weights_group_stride =
+      n_stride * xnn_packed_stride_kai_f16_weights_and_biases_sme2(
+                     gemm_config, input_channels, unused_block_size,
+                     /*unused_k_stride=*/0, /*unused_extra_bytes=*/0);
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args packed_shape = {
+      output_channels, input_channels};
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args packed_stride =
+      api.get_rhs_packed_stride(&config, &packed_shape);
+
+  for (size_t group = 0; group < groups; ++group) {
+    const uint16_t* group_weights = reinterpret_cast<const uint16_t*>(
+        static_cast<const uint8_t*>(weights) + group * weights_group_stride);
+    const void* rhs = group_weights;
+    size_t rhs_stride_k = k_stride * sizeof(uint16_t);
+    if (transposed_weights != nullptr) {
+      transpose_weights_x16(group_weights, transposed_weights,
+                            output_channels, input_channels, k_stride);
+      rhs = transposed_weights;
+      rhs_stride_k = output_channels * sizeof(uint16_t);
+    }
+
+    struct kai_matmul_pack_rhs_uker_args args = {};
+    args.shape.n = output_channels;
+    args.shape.k = input_channels;
+    args.operand.rhs.ptr = rhs;
+    args.operand.rhs.stride.n = sizeof(uint16_t);
+    args.operand.rhs.stride.k = rhs_stride_k;
+    args.operand.rhs_packed.ptr =
+        static_cast<uint8_t*>(packed_weights_ptr) +
+        group * packed_weights_group_stride;
+    args.operand.rhs_packed.stride = packed_stride;
+    args.operand.bias_n.ptr =
+        static_cast<const uint16_t*>(accumulator_init) +
+        (zero_bias == nullptr ? group * output_channels : 0);
+    api.run(&config, &args);
+  }
+
+  if (transposed_weights != nullptr) {
+    free(transposed_weights);
+  }
+  if (zero_bias != nullptr) {
+    free(zero_bias);
   }
 }
 
@@ -3723,7 +3884,7 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
   for (size_t g_idx = 0; g_idx < g; ++g_idx) {
     // TODO: Remove transpose_weights_x16 if KleidiAI release imatmul_pack_nxk
     // packing variant
-    transpose_weights_x16(k, tmp_data, nc, ks * kc);
+    transpose_weights_x16(k, tmp_data, nc, ks * kc, ks * kc);
     // Pass FP16 bias directly to the rhs_imatmul packer which expects FP16 bias
     // for this kernel.
     kai_run_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(

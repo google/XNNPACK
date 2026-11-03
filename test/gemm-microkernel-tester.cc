@@ -3335,9 +3335,9 @@ void GemmMicrokernelTester::Test_PF16(
       pack_lh_size_fn(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size, /*extra_bytes=*/{0},
                                        "input_packed");
-  pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
-             /*m_idx_start=*/0, input_f16.data(),
-             /*lhs_stride=*/k() * sizeof(xnn_float16), input_packed.data());
+  pack_lh_fn(m(), k(), mr_packed(), kr(), sr(), /*m_idx_start=*/0,
+             input_f16.data(), /*lhs_stride=*/k() * sizeof(xnn_float16),
+             input_packed.data());
 
   for (size_t idx = 0; idx < weights.size(); idx++) {
     weights[idx] = xnn_float16_from_float(f32rng());
