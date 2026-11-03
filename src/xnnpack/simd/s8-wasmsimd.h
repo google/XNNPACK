@@ -17,7 +17,7 @@
 // SIMD vector type for s8 using wasm.
 typedef v128_t xnn_simd_s8_t;
 #define xnn_simd_size_s8 16
-#define xnn_simd_log2_size_s8 0
+#define xnn_simd_log2_size_s8 4
 #define xnn_simd_bytes_s8 (xnn_simd_size_s8 * sizeof(int8_t))
 
 #define XNN_SIMD_CONST_S8(var, val) \

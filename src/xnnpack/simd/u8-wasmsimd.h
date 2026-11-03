@@ -17,11 +17,11 @@
 // SIMD vector type for u8 using wasm.
 typedef v128_t xnn_simd_u8_t;
 #define xnn_simd_size_u8 16
-#define xnn_simd_log2_size_u8 0
+#define xnn_simd_log2_size_u8 4
 #define xnn_simd_bytes_u8 (xnn_simd_size_u8 * sizeof(uint8_t))
 
 #define XNN_SIMD_CONST_U8(var, val) \
-  const xnn_simd_u8_t var = wasm_i8x16_splat(val);
+  const xnn_simd_u8_t var = wasm_u8x16_splat((uint8_t)(val));
 
 // Arithmetic operations.
 
@@ -94,7 +94,7 @@ static XNN_INLINE void xnn_store_u8(uint8_t* ptr, xnn_simd_u8_t v) {
 }
 
 static XNN_INLINE xnn_simd_u8_t xnn_set1_u8(uint8_t v) {
-  return wasm_i8x16_splat(v);
+  return wasm_u8x16_splat(v);
 }
 
 // Tail load/store operations.

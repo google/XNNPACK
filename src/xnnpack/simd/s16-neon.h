@@ -57,7 +57,7 @@ static XNN_INLINE void xnn_store_s16(int16_t* ptr, xnn_simd_s16_t v) {
 }
 
 static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
-  return vld1q_dup_s16(&v);
+  return vdupq_n_s16(v);
 }
 
 // Tail load/store operations.

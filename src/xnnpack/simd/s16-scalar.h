@@ -39,31 +39,36 @@ static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
 }
 
 // Load/store operations.
-static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t *ptr) {
+static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
   return *ptr;
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16_t *ptr) {
+static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16_t* ptr) {
   return *ptr;
 }
 
-static XNN_INLINE void xnn_storeu_s16(int16_t *ptr, xnn_simd_s16_t v) {
+static XNN_INLINE void xnn_storeu_s16(int16_t* ptr, xnn_simd_s16_t v) {
   *ptr = v;
 }
 
-static XNN_INLINE void xnn_store_s16(int16_t *ptr, xnn_simd_s16_t v) {
+static XNN_INLINE void xnn_store_s16(int16_t* ptr, xnn_simd_s16_t v) {
   *ptr = v;
 }
 
 static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) { return v; }
 
 // Tail load/store operations.
-static XNN_INLINE xnn_simd_s16_t xnn_load_tail_s16(const int16_t *input,
+static XNN_INLINE xnn_simd_s16_t xnn_load_tail_s16(const int16_t* input,
                                                    size_t num_elements) {
   return *input;
 }
 
-static XNN_INLINE void xnn_store_tail_s16(int16_t *output, xnn_simd_s16_t v,
+static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
+                                                        size_t num_elements) {
+  return *input;
+}
+
+static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
                                           size_t num_elements) {
   *output = v;
 }

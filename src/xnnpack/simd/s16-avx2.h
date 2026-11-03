@@ -18,7 +18,7 @@
 // SIMD vector type for s16 using AVX2.
 typedef __m256i xnn_simd_s16_t;
 #define xnn_simd_size_s16 16
-#define xnn_simd_log2_size_s16 3
+#define xnn_simd_log2_size_s16 4
 #define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16_t))
 
 #define XNN_SIMD_CONST_S16(var, val) \
@@ -68,6 +68,8 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
 
 static XNN_INLINE xnn_simd_s16_t
 xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_s16);
   __m128i low = _mm_loadu_si128((const __m128i*)input);
   __m128i high =
       num_elements > 8 ? _mm_loadu_si128((const __m128i*)(input + 8)) : low;

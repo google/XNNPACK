@@ -20,6 +20,7 @@
 // SIMD vector type for s8 using HVX.
 typedef HVX_Vector xnn_simd_s8_t;
 #define xnn_simd_size_s8 128
+#define xnn_simd_log2_size_s8 7
 #define xnn_simd_bytes_s8 128
 
 #define XNN_SIMD_CONST_S8(var, val) const HVX_Vector var = Q6_Vb_vsplat_R(val);
@@ -86,14 +87,16 @@ static XNN_INLINE xnn_simd_s8_t xnn_set1_s8(int8_t v) {
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s8_t
 xnn_load_tail_s8(const int8_t* input, size_t num_elements) XNN_OOB_READS {
-  assert(num_elements <= xnn_simd_size_s8);
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_s8);
 
   return *((HVX_UVector*)input);
 }
 
 static XNN_INLINE xnn_simd_s8_t xnn_load_tail_safe_s8(const int8_t* input,
                                                       size_t num_elements) {
-  assert(num_elements <= xnn_simd_size_s8);
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_s8);
 
   xnn_simd_s8_t padded;
   memcpy(&padded, input, num_elements * sizeof(int8_t));
@@ -102,7 +105,8 @@ static XNN_INLINE xnn_simd_s8_t xnn_load_tail_safe_s8(const int8_t* input,
 
 static XNN_INLINE void xnn_store_tail_s8(int8_t* output, xnn_simd_s8_t v,
                                          size_t num_elements) {
-  assert(num_elements <= xnn_simd_size_s8);
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_s8);
 
   return Q6_V_vstu_variable(output, num_elements, v);
 }

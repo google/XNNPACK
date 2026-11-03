@@ -75,12 +75,14 @@ xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
   return *((HVX_UVector*)input);
 }
 
-static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_safe_s32(const int32_t* input, size_t num_elements) {
+static XNN_INLINE xnn_simd_s32_t xnn_load_tail_safe_s32(const int32_t* input,
+                                                        size_t num_elements) {
   assert(num_elements <= xnn_simd_size_s32);
 
-  xnn_simd_s32_t padded;
-  memcpy(&padded, input, num_elements * sizeof(int32_t));
+  xnn_simd_s32_t padded = Q6_V_vzero();
+  if (num_elements != 0) {
+    memcpy(&padded, input, num_elements * sizeof(int32_t));
+  }
   return xnn_load_s32((const int32_t*)&padded);
 }
 
@@ -90,6 +92,5 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
   return Q6_V_vstu_variable(output, num_elements << XNN_LOG2_SIZEOF_INT32_T, v);
 }
-
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_

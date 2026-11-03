@@ -18,10 +18,10 @@
 // SIMD vector type for s8 using NEON.
 typedef int8x16_t xnn_simd_s8_t;
 #define xnn_simd_size_s8 16
-#define xnn_simd_log2_size_s8 0
+#define xnn_simd_log2_size_s8 4
 #define xnn_simd_bytes_s8 (xnn_simd_size_s8 * sizeof(int8_t))
 
-#define XNN_SIMD_CONST_U8(var, val) const xnn_simd_s8_t var = vdupq_n_s8(val);
+#define XNN_SIMD_CONST_S8(var, val) const xnn_simd_s8_t var = vdupq_n_s8(val);
 
 // Arithmetic operations.
 
@@ -38,21 +38,29 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
 }
 
 static XNN_INLINE int8_t xnn_reduce_max_s8(xnn_simd_s8_t a) {
+#if XNN_ARCH_ARM64
+  return vmaxvq_s8(a);
+#else
   int8x8_t max0 = vpmax_s8(vget_low_s8(a), vget_high_s8(a));
   max0 = vpmax_s8(max0, max0);
   max0 = vpmax_s8(max0, max0);
   max0 = vpmax_s8(max0, max0);
 
   return vget_lane_s8(max0, 0);
+#endif
 }
 
 static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t a) {
+#if XNN_ARCH_ARM64
+  return vminvq_s8(a);
+#else
   int8x8_t min0 = vpmin_s8(vget_low_s8(a), vget_high_s8(a));
   min0 = vpmin_s8(min0, min0);
   min0 = vpmin_s8(min0, min0);
   min0 = vpmin_s8(min0, min0);
 
   return vget_lane_s8(min0, 0);
+#endif
 }
 
 static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {

@@ -18,11 +18,11 @@
 // SIMD vector type for s8 using SSE41.
 typedef __m128i xnn_simd_s8_t;
 #define xnn_simd_size_s8 16
-#define xnn_simd_log2_size_s8 0
+#define xnn_simd_log2_size_s8 4
 #define xnn_simd_bytes_s8 (xnn_simd_size_s8 * sizeof(int8_t))
 
 #define XNN_SIMD_CONST_S8(var, val) \
-  const xnn_simd_s8_t var = _mm_set1_epi8(val);
+  const xnn_simd_s8_t var = _mm_set1_epi8((char)(int8_t)(val));
 
 // Arithmetic operations.
 
@@ -54,6 +54,10 @@ static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t a) {
   return (int8_t)_mm_cvtsi128_si32(vmin);
 }
 
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return _mm_xor_si128(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t* ptr) {
@@ -73,7 +77,7 @@ static XNN_INLINE void xnn_store_s8(int8_t* ptr, xnn_simd_s8_t v) {
 }
 
 static XNN_INLINE xnn_simd_s8_t xnn_set1_s8(int8_t v) {
-  return _mm_set1_epi8(v);
+  return _mm_set1_epi8((char)v);
 }
 
 // Tail load/store operations.
