@@ -1644,6 +1644,9 @@ xnnpack_test("xx_pad") {
 xnnpack_test("standalone") {
   # TODO: fix the tests that need ynnpack
   deps = [ ":operators" ]
+  if (xnnpack_enable_arm_kleidiai) {
+    deps += [ "//third_party/kleidiai" ]
+  }
   sources = [
     "test/buffer.cc",
 
@@ -1791,6 +1794,7 @@ if (!build_with_chromium && xnnpack_build_all_microkernels) {
   }
 
   BENCHMARKS = [
+    "bench/kleidiai-packing.cc",
     "bench/indirection.cc",
     "bench/bf16-gemm.cc",
     "bench/f16-conv-hwc2chw.cc",
@@ -1878,6 +1882,9 @@ if (!build_with_chromium && xnnpack_build_all_microkernels) {
     # Define the benchmark
     xnnpack_benchmark(name) {
       sources = [ benchmark_src ]
+      if (name == "kleidiai_packing" && xnnpack_enable_arm_kleidiai) {
+        deps = [ "//third_party/kleidiai" ]
+      }
     }
   }
 }
