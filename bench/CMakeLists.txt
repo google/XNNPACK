@@ -135,6 +135,13 @@ FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
   SET_TARGET_PROPERTIES(${BENCH}-bench PROPERTIES CXX_EXTENSIONS YES)
 ENDFOREACH()
 
+ADD_EXECUTABLE(kleidiai-packing-bench kleidiai-packing.cc)
+TARGET_LINK_LIBRARIES(kleidiai-packing-bench PRIVATE
+  XNNPACK xnnpack-bench-utils benchmark::benchmark)
+IF(XNNPACK_ENABLE_KLEIDIAI)
+  TARGET_LINK_LIBRARIES(kleidiai-packing-bench PRIVATE kleidiai)
+ENDIF()
+
 # Special-case
 IF(XNNPACK_ENABLE_KLEIDIAI)
   TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE kleidiai)
