@@ -43,7 +43,7 @@ without modification, and *some* of those will perform well.
 
 XNNPACK can be thought of as a more "CISC" and YNNPACK a more "RISC" design.
 The best way to see this is to look at the
-[XNNPACK compatibility layer](ynnpack/xnnpack/subgraph.cc)
+[XNNPACK compatibility layer](xnnpack/subgraph.cc)
 implementation. For example, instead of providing an explicit
 `xnn_define_max_pooling_2d` operator, YNNPACK provides the building blocks
 needed to implement this operator (padding, stencil copies, reductions).
@@ -111,7 +111,7 @@ others. An incomplete list of the gaps are:
 
 - Major features are missing. The most up-to-date status can be found by looking
   at the
-  [XNNPACK compatibility layer](ynnpack/xnnpack/subgraph.cc)
+  [XNNPACK compatibility layer](xnnpack/subgraph.cc)
   implementation.
 - Some features may be implemented, but have poor performance due to
   not-yet-done optimization work.
