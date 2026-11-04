@@ -287,10 +287,32 @@ void xnn_normalize_reduction(
     size_t* num_input_dims_ptr,
     size_t* input_dims)
 {
-  size_t num_reduction_axes = *num_reduction_axes_ptr;
+  size_t num_reduced_elements = 1;
+  for (size_t k = 0; k < *num_reduction_axes_ptr; k++) {
+    num_reduced_elements *= input_dims[reduction_axes[k]];
+  }
 
-  // The original number of input dimensions.
-  const size_t num_input_dims = *num_input_dims_ptr;
+  // Remove all input_dims[k] == 1 unless the reduction is over a single
+  // element.
+  size_t num_input_dims = 0;
+  size_t num_reduction_axes = 0;
+  for (size_t input_index = 0, reduction_index = 0;
+       input_index < *num_input_dims_ptr; input_index++) {
+    if (reduction_index < *num_reduction_axes_ptr &&
+        reduction_axes[reduction_index] == input_index) {
+      if (input_dims[input_index] != 1 ||
+          (num_reduced_elements == 1 && num_reduction_axes == 0)) {
+        reduction_axes[num_reduction_axes++] = num_input_dims;
+        input_dims[num_input_dims++] = input_dims[input_index];
+      }
+      reduction_index++;
+    } else if (input_dims[input_index] != 1) {
+      input_dims[num_input_dims++] = input_dims[input_index];
+    }
+  }
+  if (num_input_dims == 0 && *num_input_dims_ptr > 0) {
+    input_dims[num_input_dims++] = 1;
+  }
 
   // Running variables for tracking sequences of adjacent axes, e.g. 1, 2, 3
   size_t axes_sequence_start = SIZE_MAX;
