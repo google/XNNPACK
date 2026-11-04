@@ -103,8 +103,7 @@ int32_t copy_n_and_sum(const Src* src, size_t n, Dst* dst) {
 
 #if XNN_ENABLE_KLEIDIAI
 template <size_t tail_size>
-static void pack_qs8_nxk_tail(size_t nc, size_t stride, const int8_t* weights,
-                              uint32_t* packed_weights) {
+static void pack_qs8_nxk_tail(size_t nc, size_t stride, const int8_t* weights, uint32_t* packed_weights) {
   for (size_t channel = 0; channel < nc; ++channel) {
     uint32_t tail = 0;
     std::memcpy(&tail, weights + channel * stride, tail_size);
