@@ -20,6 +20,90 @@
 #include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
+void max_pooling_s8(benchmark::State& state, const char* net) {
+  const size_t batch_size = state.range(0);
+  const size_t input_height = state.range(1);
+  const size_t input_width = state.range(2);
+  const size_t pooling_size = state.range(3);
+  const size_t padding_size = state.range(4);
+  const size_t stride = state.range(5);
+  const size_t channels = state.range(6);
+
+  xnnpack::ReplicableRandomDevice rng;
+
+  const size_t output_height =
+      (2 * padding_size + input_height - pooling_size) / stride + 1;
+  const size_t output_width =
+      (2 * padding_size + input_width - pooling_size) / stride + 1;
+
+  xnnpack::Buffer<int8_t> input(
+      batch_size * input_height * input_width * channels,
+      xnnpack::XnnExtraBytes);
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+  xnnpack::Buffer<int8_t> output(batch_size * output_height * output_width *
+                                 channels);
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t pooling_op = nullptr;
+  status = xnn_create_max_pooling2d_nhwc_s8(
+      padding_size, padding_size, padding_size, padding_size, pooling_size,
+      pooling_size, stride, stride, 1 /* dilation height */,
+      1 /* dilation width */, std::numeric_limits<int8_t>::min(),
+      std::numeric_limits<int8_t>::max(), 0 /* flags */, &pooling_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create Max Pooling operator");
+    return;
+  }
+
+  status = xnn_reshape_max_pooling2d_nhwc_s8(
+      pooling_op, batch_size, input_height, input_width, channels,
+      /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+      /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Max Pooling operator");
+    return;
+  }
+
+  status =
+      xnn_setup_max_pooling2d_nhwc_s8(pooling_op, input.data(), output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup Max Pooling operator");
+    return;
+  }
+
+  for (auto _ : state) {
+    status = xnn_run_operator(pooling_op, /*threadpool=*/nullptr);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to run Max Pooling operator");
+      return;
+    }
+  }
+
+  status = xnn_delete_operator(pooling_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete Max Pooling operator");
+    return;
+  }
+  pooling_op = nullptr;
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * batch_size *
+          (input_height * input_width + output_height * output_width) *
+          channels * sizeof(int8_t),
+      benchmark::Counter::kIsRate);
+}
+
 void max_pooling_u8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
@@ -100,6 +184,92 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
       static_cast<uint64_t>(state.iterations()) * batch_size *
           (input_height * input_width + output_height * output_width) *
           channels * sizeof(uint8_t),
+      benchmark::Counter::kIsRate);
+}
+
+void max_pooling_f16(benchmark::State& state, const char* net) {
+  const size_t batch_size = state.range(0);
+  const size_t input_height = state.range(1);
+  const size_t input_width = state.range(2);
+  const size_t pooling_size = state.range(3);
+  const size_t padding_size = state.range(4);
+  const size_t stride = state.range(5);
+  const size_t channels = state.range(6);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
+                          std::ref(rng));
+
+  const size_t output_height =
+      (2 * padding_size + input_height - pooling_size) / stride + 1;
+  const size_t output_width =
+      (2 * padding_size + input_width - pooling_size) / stride + 1;
+
+  xnnpack::Buffer<xnn_float16> input(
+      batch_size * input_height * input_width * channels,
+      xnnpack::XnnExtraBytes);
+  std::generate(input.begin(), input.end(), std::ref(f32rng));
+  xnnpack::Buffer<xnn_float16> output(batch_size * output_height *
+                                      output_width * channels);
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t pooling_op = nullptr;
+  status = xnn_create_max_pooling2d_nhwc_f16(
+      padding_size, padding_size, padding_size, padding_size, pooling_size,
+      pooling_size, stride, stride, 1 /* dilation height */,
+      1 /* dilation width */, -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), 0 /* flags */, &pooling_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create Max Pooling operator");
+    return;
+  }
+
+  status = xnn_reshape_max_pooling2d_nhwc_f16(
+      pooling_op, batch_size, input_height, input_width, channels,
+      /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+      /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Max Pooling operator");
+    return;
+  }
+
+  status =
+      xnn_setup_max_pooling2d_nhwc_f16(pooling_op, input.data(), output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup Max Pooling operator");
+    return;
+  }
+
+  for (auto _ : state) {
+    status = xnn_run_operator(pooling_op, /*threadpool=*/nullptr);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to run Max Pooling operator");
+      return;
+    }
+  }
+
+  status = xnn_delete_operator(pooling_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete Max Pooling operator");
+    return;
+  }
+  pooling_op = nullptr;
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * batch_size *
+          (input_height * input_width + output_height * output_width) *
+          channels * sizeof(xnn_float16),
       benchmark::Counter::kIsRate);
 }
 
@@ -238,6 +408,17 @@ static void VGG(benchmark::Benchmark* b) {
   b->Args({1, 14, 14, 2, 1, 2, 512});
 }
 
+BENCHMARK_CAPTURE(max_pooling_f16, shufflenet, "ShuffleNet v1/v2")
+    ->Apply(ShuffleNet)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(max_pooling_f16, squeezenet_v10, "SqueezeNet v1.0")
+    ->Apply(SqueezeNetV10)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(max_pooling_f16, squeezenet_v11, "SqueezeNet v1.1")
+    ->Apply(SqueezeNetV11)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(max_pooling_f16, vgg, "VGG")->Apply(VGG);
+
 BENCHMARK_CAPTURE(max_pooling_f32, shufflenet, "ShuffleNet v1/v2")
     ->Apply(ShuffleNet)
     ->UseRealTime();
@@ -248,6 +429,17 @@ BENCHMARK_CAPTURE(max_pooling_f32, squeezenet_v11, "SqueezeNet v1.1")
     ->Apply(SqueezeNetV11)
     ->UseRealTime();
 BENCHMARK_CAPTURE(max_pooling_f32, vgg, "VGG")->Apply(VGG);
+
+BENCHMARK_CAPTURE(max_pooling_s8, shufflenet, "ShuffleNet v1/v2")
+    ->Apply(ShuffleNet)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(max_pooling_s8, squeezenet_v10, "SqueezeNet v1.0")
+    ->Apply(SqueezeNetV10)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(max_pooling_s8, squeezenet_v11, "SqueezeNet v1.1")
+    ->Apply(SqueezeNetV11)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(max_pooling_s8, vgg, "VGG")->Apply(VGG);
 
 BENCHMARK_CAPTURE(max_pooling_u8, shufflenet, "ShuffleNet v1/v2")
     ->Apply(ShuffleNet)

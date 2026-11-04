@@ -7,8 +7,11 @@
 ##################################### SIMD #####################################
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=scalar -D SIMD_SIZE=1 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-scalar-u1.c &
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=sse41 -D SIMD_SIZE=16 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-sse41-u16.c &
+tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=avx2 -D SIMD_SIZE=32 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-avx2-u32.c &
+tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=avx512skx -D SIMD_SIZE=64 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-avx512skx-u64.c &
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=wasmsimd -D SIMD_SIZE=16 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-wasmsimd-u16.c &
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=neon -D SIMD_SIZE=16 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-neon-u16.c &
+tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=hvx -D SIMD_SIZE=128 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-hvx-u128.c &
 
 ################################ RISC-V Vector #################################
 tools/xngen src/f32-maxpool/rvv.c.in -D DATATYPE=s8 -D LMUL=2 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-rvv-u2v.c &

@@ -51,6 +51,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx2.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x8c8-minmax-avx2.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x8c8-minmax-avx2.c
+  src/qs8-avgpool/gen/qs8-avgpool-9p-minmax-fp32-avx2-u32.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx2-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx2-mul32.c
   src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u16.c
@@ -77,6 +78,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qs8-vprelu/gen/qs8-vprelu-avx2-u16.c
   src/qs8-vpreluc/gen/qs8-vpreluc-avx2-u16.c
   src/qs8-vrpreluc/gen/qs8-vrpreluc-avx2-u16.c
+  src/qu8-avgpool/gen/qu8-avgpool-9p-minmax-fp32-avx2-u32.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-fp32-avx2-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-fp32-avx2-mul32.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-avx2-u16.c
@@ -94,7 +96,9 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-vprelu/gen/qu8-vprelu-avx2-u16.c
   src/qu8-vpreluc/gen/qu8-vpreluc-avx2-u16.c
   src/qu8-vrpreluc/gen/qu8-vrpreluc-avx2-u16.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-avx2-u32.c
   src/s8-vclamp/s8-vclamp-avx2-u128.c
+  src/u8-maxpool/gen/u8-maxpool-9p-minmax-avx2-u32.c
   src/u8-vclamp/u8-vclamp-avx2-u128.c
   src/x8-lut/gen/x8-lut-avx2-u128.c
   src/x8-packw/gen/x8-packw-x16-gemm-goi-avx2-u16.c

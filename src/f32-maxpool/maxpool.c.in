@@ -9,7 +9,8 @@ $assert(SIMD_SIZE > 0)
 #include <stddef.h>
 #include <stdint.h>
 
-$DATATYPE_IMPL = {"f32": "f32", "f16": "f16" if ARCH == "neonfp16arith" else "s16", "u8": "u8", "s8": "u8" if ARCH == "sse2" else "s8"}[DATATYPE]
+$DATATYPE_IMPL = {"f32": "f32", "f16": "f16" if ARCH in ["neonfp16arith", "wasmrelaxedsimd"] else "s16", "u8": "u8", "s8": "u8" if ARCH == "sse2" else "s8"}[DATATYPE]
+$UKERNEL_ARCH = "wasmrelaxedsimdfp16" if DATATYPE == "f16" and ARCH == "wasmrelaxedsimd" else ARCH
 
 // On some architectures, we have max(u8, u8) but not max(s8, s8). We can emulate max(s8, s8) on these architectures by
 // xoring with the sign bit mask.
@@ -18,7 +19,7 @@ $if ARCH == "sse2" and DATATYPE == "s8":
   #define xnn_load_tail_impl(x, c) xnn_xor_u8(xnn_load_tail_u8(x, c), vsign_bit_mask)
   #define xnn_load_tail_safe_impl(x, c) xnn_xor_u8(xnn_load_tail_safe_u8(x, c), vsign_bit_mask)
   #define xnn_pre_store_impl(x) xnn_xor_u8(x, vsign_bit_mask)
-$elif DATATYPE == "f16" and ARCH != "neonfp16arith":
+$elif DATATYPE == "f16" and ARCH not in ["neonfp16arith", "wasmrelaxedsimd"]:
   #define xnn_load_impl(x) xnn_signcomplement_s16(xnn_loadu_s16(x))
   #define xnn_load_tail_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_s16(x, c))
   #define xnn_load_tail_safe_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_safe_s16(x, c))
@@ -36,7 +37,7 @@ $else:
 
 $CTYPE = {"f32": "float", "f16": "xnn_float16", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE]
 $CTYPE_IMPL = {"f32": "float", "f16": "xnn_float16", "s16": "int16_t", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE_IMPL]
-void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
+void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -58,7 +59,7 @@ void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
     const xnn_simd_u8_t vmax = xnn_xor_u8(xnn_set1_u8(params->scalar.max), vsign_bit_mask);
     XNN_FORCE_REALIZATION(vmin);
     XNN_FORCE_REALIZATION(vmax);
-$elif DATATYPE == "f16" and ARCH != "neonfp16arith":
+$elif DATATYPE == "f16" and ARCH not in ["neonfp16arith", "wasmrelaxedsimd"]:
     const xnn_simd_s16_t vmin = xnn_signcomplement_s16(xnn_set1_s16(*(const int16_t*) &params->scalar.min));
     const xnn_simd_s16_t vmax = xnn_signcomplement_s16(xnn_set1_s16(*(const int16_t*) &params->scalar.max));
     XNN_FORCE_REALIZATION(vmin);

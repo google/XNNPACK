@@ -380,6 +380,198 @@ class Tester {
     }
   }
 
+  void Test(xnn_qs8_avgpool_ukernel_fn avgpool_minmax,
+            xnn_init_qs8_avgpool_minmax_params_fn init_params) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> i8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
+
+    const int8_t izp = static_cast<int8_t>(input_zero_point() - 128);
+    const int8_t ozp = static_cast<int8_t>(output_zero_point() - 128);
+    const int8_t output_min = static_cast<int8_t>(qmin() - 128);
+    const int8_t output_max = static_cast<int8_t>(qmax() - 128);
+
+    xnnpack::Buffer<const int8_t*> indirect_input(
+        (output_pixels() - 1) * step() + pooling_elements());
+    xnnpack::Buffer<int8_t> input(
+        input_offset() + indirect_input.size() * channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> zero(channels(), izp, xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> multiplier(output_pixels());
+    xnnpack::Buffer<int8_t> output((output_pixels() - 1) * output_stride() +
+                                   channels());
+    xnnpack::Buffer<int8_t> output_ref(output_pixels() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::fill(input.begin(), input.begin() + input_offset(),
+                static_cast<int8_t>(0xA5));
+      std::generate(multiplier.begin(), multiplier.end(),
+                    [&]() { return m32dist(rng); });
+
+      for (size_t i = 0;
+           i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
+        indirect_input[i] = input.data() + i * channels();
+      }
+      std::shuffle(indirect_input.begin(),
+                   indirect_input.begin() + (output_pixels() - 1) * step() +
+                       pooling_elements(),
+                   rng);
+      if (zero_index_mod2() != SIZE_MAX) {
+        for (size_t i = zero_index_mod2(); i < indirect_input.size(); i += 2) {
+          indirect_input[i] = zero.data();
+        }
+      }
+
+      const float scale =
+          input_scale() / (output_scale() * float(pooling_elements()));
+      for (size_t x = 0; x < output_pixels(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          int32_t acc = 0;
+          for (size_t p = 0; p < pooling_elements(); p++) {
+            const int8_t* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += int32_t(row[c + input_offset()]) - int32_t(izp);
+            }
+          }
+          const float pixel_scale = pixelwise_ ? multiplier[x] : scale;
+          output_ref[x * channels() + c] = xnn_qs8_requantize_fp32(
+              acc, pixel_scale, ozp, output_min, output_max);
+        }
+      }
+
+      xnn_qs8_avgpool_minmax_params params;
+      init_params(&params, -9 * int32_t(izp), scale, ozp, output_min,
+                  output_max);
+
+      avgpool_minmax(output_pixels(), pooling_elements(), channels(),
+                     indirect_input.data(), input_offset() * sizeof(int8_t),
+                     /*input_pixel_stride=*/0, zero.data(),
+                     pixelwise_ ? multiplier.data() : nullptr, output.data(),
+                     step() * sizeof(void*), (output_stride()) * sizeof(int8_t),
+                     &params);
+
+      for (size_t x = 0; x < output_pixels(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_GE(int32_t(output[x * output_stride() + c]),
+                    int32_t(output_min))
+              << "at pixel " << x << " / " << output_pixels() << ", channel "
+              << c << " / " << channels()
+              << ", pooling elements = " << pooling_elements()
+              << ", step = " << step() << ", input offset = " << input_offset();
+          ASSERT_LE(int32_t(output[x * output_stride() + c]),
+                    int32_t(output_max))
+              << "at pixel " << x << " / " << output_pixels() << ", channel "
+              << c << " / " << channels()
+              << ", pooling elements = " << pooling_elements()
+              << ", step = " << step() << ", input offset = " << input_offset();
+          ASSERT_NEAR(int32_t(output[x * output_stride() + c]),
+                      int32_t(output_ref[x * channels() + c]), 1)
+              << "at pixel " << x << " / " << output_pixels() << ", channel "
+              << c << " / " << channels()
+              << ", pooling elements = " << pooling_elements()
+              << ", step = " << step() << ", input offset = " << input_offset();
+        }
+      }
+    }
+  }
+
+  void Test(xnn_qu8_avgpool_ukernel_fn avgpool_minmax,
+            xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> u8dist(
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
+    std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
+
+    const uint8_t izp = input_zero_point();
+    const uint8_t ozp = output_zero_point();
+    const uint8_t output_min = qmin();
+    const uint8_t output_max = qmax();
+
+    xnnpack::Buffer<const uint8_t*> indirect_input(
+        (output_pixels() - 1) * step() + pooling_elements());
+    xnnpack::Buffer<uint8_t> input(
+        input_offset() + indirect_input.size() * channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint8_t> zero(channels(), izp, xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> multiplier(output_pixels());
+    xnnpack::Buffer<uint8_t> output((output_pixels() - 1) * output_stride() +
+                                    channels());
+    xnnpack::Buffer<uint8_t> output_ref(output_pixels() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      std::fill(input.begin(), input.begin() + input_offset(), 0xA5);
+      std::generate(multiplier.begin(), multiplier.end(),
+                    [&]() { return m32dist(rng); });
+
+      for (size_t i = 0;
+           i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
+        indirect_input[i] = input.data() + i * channels();
+      }
+      std::shuffle(indirect_input.begin(),
+                   indirect_input.begin() + (output_pixels() - 1) * step() +
+                       pooling_elements(),
+                   rng);
+      if (zero_index_mod2() != SIZE_MAX) {
+        for (size_t i = zero_index_mod2(); i < indirect_input.size(); i += 2) {
+          indirect_input[i] = zero.data();
+        }
+      }
+
+      const float scale =
+          input_scale() / (output_scale() * float(pooling_elements()));
+      for (size_t x = 0; x < output_pixels(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          int32_t acc = 0;
+          for (size_t p = 0; p < pooling_elements(); p++) {
+            const uint8_t* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += int32_t(row[c + input_offset()]) - int32_t(izp);
+            }
+          }
+          const float pixel_scale = pixelwise_ ? multiplier[x] : scale;
+          output_ref[x * channels() + c] = xnn_qu8_requantize_fp32(
+              acc, pixel_scale, ozp, output_min, output_max);
+        }
+      }
+
+      xnn_qu8_avgpool_minmax_params params;
+      init_params(&params, -9 * int32_t(izp), scale, ozp, output_min,
+                  output_max);
+
+      avgpool_minmax(output_pixels(), pooling_elements(), channels(),
+                     indirect_input.data(), input_offset() * sizeof(uint8_t),
+                     /*input_pixel_stride=*/0, zero.data(),
+                     pixelwise_ ? multiplier.data() : nullptr, output.data(),
+                     step() * sizeof(void*),
+                     (output_stride()) * sizeof(uint8_t), &params);
+
+      for (size_t x = 0; x < output_pixels(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_GE(int32_t(output[x * output_stride() + c]),
+                    int32_t(output_min))
+              << "at pixel " << x << " / " << output_pixels() << ", channel "
+              << c << " / " << channels()
+              << ", pooling elements = " << pooling_elements()
+              << ", step = " << step() << ", input offset = " << input_offset();
+          ASSERT_LE(int32_t(output[x * output_stride() + c]),
+                    int32_t(output_max))
+              << "at pixel " << x << " / " << output_pixels() << ", channel "
+              << c << " / " << channels()
+              << ", pooling elements = " << pooling_elements()
+              << ", step = " << step() << ", input offset = " << input_offset();
+          ASSERT_NEAR(int32_t(output[x * output_stride() + c]),
+                      int32_t(output_ref[x * channels() + c]), 1)
+              << "at pixel " << x << " / " << output_pixels() << ", channel "
+              << c << " / " << channels()
+              << ", pooling elements = " << pooling_elements()
+              << ", step = " << step() << ", input offset = " << input_offset();
+        }
+      }
+    }
+  }
+
   struct Kernel {
     explicit Kernel(xnn_f16_avgpool_ukernel_fn fn,
                     xnn_init_f16_scaleminmax_params_fn init) {
@@ -387,6 +579,14 @@ class Tester {
     }
     explicit Kernel(xnn_f32_avgpool_ukernel_fn fn,
                     xnn_init_f32_scaleminmax_params_fn init) {
+      dispatch = [=](const Tester& tester) { tester.Test(fn, init); };
+    }
+    explicit Kernel(xnn_qs8_avgpool_ukernel_fn fn,
+                    xnn_init_qs8_avgpool_minmax_params_fn init) {
+      dispatch = [=](const Tester& tester) { tester.Test(fn, init); };
+    }
+    explicit Kernel(xnn_qu8_avgpool_ukernel_fn fn,
+                    xnn_init_qu8_avgpool_minmax_params_fn init) {
       dispatch = [=](const Tester& tester) { tester.Test(fn, init); };
     }
     std::function<void(const Tester&)> dispatch;
@@ -443,6 +643,8 @@ const XnnTestParam xnn_test_params[] = {
 
 #include "src/f16-avgpool/f16-avgpool-minmax.inc"
 #include "src/f32-avgpool/f32-avgpool-minmax.inc"
+#include "src/qs8-avgpool/qs8-avgpool-minmax-fp32.inc"
+#include "src/qu8-avgpool/qu8-avgpool-minmax-fp32.inc"
 
 #undef XNN_UKERNEL
 
@@ -696,7 +898,9 @@ TEST_P(XnnTest, few_output_pixels_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
     for (size_t pooling_elements : std::vector<size_t>{
-             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile,
+              GetParam().primary_tile + 1, GetParam().primary_tile * 2,
+              GetParam().primary_tile * 2 + 1}}) {
       for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
            channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         Tester(GetParam())

@@ -13,6 +13,18 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_s8_maxpool_minmax_ukernel_9p__neon_u16, 16, 9
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16, 16, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_s8_maxpool_minmax_ukernel_9p__avx2_u32, 32, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_s8_maxpool_minmax_ukernel_9p__avx512skx_u64, 64, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+XNN_UKERNEL(xnn_arch_hvx, xnn_s8_maxpool_minmax_ukernel_9p__hvx_u128, 128, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_s8_maxpool_minmax_ukernel_9p__wasmsimd_u16, 16, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

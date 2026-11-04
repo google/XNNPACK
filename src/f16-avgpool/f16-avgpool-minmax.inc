@@ -17,14 +17,34 @@ XNN_UKERNEL(xnn_arch_none, xnn_f16_avgpool_minmax_ukernel_9p__wasmrelaxedsimdfp1
 XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__wasmrelaxedsimd_u4, 4, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__wasmsimd_u4, 4, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8, 8, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_neon_fp16, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__neonfp16_u4, 4, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8, 8, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__avx512f_u16, 16, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_avgpool_minmax_ukernel_9p__avx512fp16_u32, 32, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_avgpool_minmax_ukernel_9p__rvvfp16arith_u2v, (2*xnn_init_hardware_config()->vlenb/sizeof(xnn_float16)), 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__hvx_u32, 32, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX

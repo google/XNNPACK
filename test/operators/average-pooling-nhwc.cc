@@ -5005,3 +5005,121 @@ TEST(AVERAGE_POOLING_NHWC_F32, create_rejects_inverted_output_range) {
                 0, &average_pooling_op));
   EXPECT_EQ(nullptr, average_pooling_op);
 }
+
+TEST(AVERAGE_POOLING_NHWC_QS8, small_pool) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(3, 3)
+        .channels(channels)
+        .TestQS8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QS8, small_pool_with_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(3, 3)
+        .padding(1, 1)
+        .channels(channels)
+        .TestQS8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QS8, small_pool_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(3, 3)
+        .stride(2, 2)
+        .padding_tf_same(true)
+        .channels(channels)
+        .TestQS8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QS8, large_pool) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(5, 5)
+        .channels(channels)
+        .TestQS8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QS8, large_pool_with_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(5, 5)
+        .padding(2, 2)
+        .channels(channels)
+        .TestQS8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(3, 3)
+        .channels(channels)
+        .TestQU8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(3, 3)
+        .padding(1, 1)
+        .channels(channels)
+        .TestQU8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(3, 3)
+        .stride(2, 2)
+        .padding_tf_same(true)
+        .channels(channels)
+        .TestQU8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(5, 5)
+        .channels(channels)
+        .TestQU8();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    AveragePoolingOperatorTester()
+        .input_size(25, 37)
+        .pooling_size(5, 5)
+        .padding(2, 2)
+        .channels(channels)
+        .TestQU8();
+  }
+}

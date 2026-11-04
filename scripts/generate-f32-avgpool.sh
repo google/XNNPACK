@@ -7,6 +7,7 @@
 ##################################### SIMD #####################################
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=scalar   -D DATATYPE=f32 -D SIMD_SIZE=1  -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-scalar-u1.c &
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=wasmsimd -D DATATYPE=f32 -D SIMD_SIZE=4  -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-wasmsimd-u4.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=wasmrelaxedsimd -D DATATYPE=f32 -D SIMD_SIZE=4 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-wasmrelaxedsimd-u4.c &
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=neon     -D DATATYPE=f32 -D SIMD_SIZE=4  -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-neon-u4.c &
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=sse2     -D DATATYPE=f32 -D SIMD_SIZE=4  -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-sse2-u4.c &
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=avx      -D DATATYPE=f32 -D SIMD_SIZE=8  -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx-u8.c &
