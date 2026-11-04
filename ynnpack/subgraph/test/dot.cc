@@ -752,6 +752,101 @@ void TestBroadcastExtent1(A, B, C) {
   }
 }
 
+template <typename A, typename B, typename C>
+void TestUnalignedK1(A, B, C) {
+  ReplicableRandomDevice rng;
+  const float max_abs_value = is_integral<C>::value ? 10.0f : 2.0f;
+  TestScheduler scheduler(3);
+
+  struct Case {
+    size_t m;
+    size_t n;
+    std::vector<size_t> k_dims;
+    bool broadcast_a_m = false;
+  };
+  const std::vector<Case> cases = {
+      // Pure tail (k1 < tile_k, so aligned k1 == 0).
+      {7, 36, {1}},
+      {7, 36, {3}},
+      {7, 36, {7}},
+      // Single-pass folded body + tail (k1 > 0, k1_extent * elem_size < 384).
+      {19, 68, {5}},
+      {19, 68, {65}},
+      {19, 68, {133}},
+      // Two-pass body + tail (k1_extent * elem_size >= 384), both within a
+      // single k-step and across multiple k-steps.
+      {19, 68, {689}},
+      {1, 16, {2115}},
+      {35, 68, {2115}},
+      // Multi-dimensional reduction (num_k_dims = 3).
+      {9, 36, {2, 3, 1}},
+      {9, 36, {2, 3, 19}},
+      // Broadcasted A along m (a_stride_m == 0) with unaligned k1.
+      {9, 36, {1}, /*broadcast_a_m=*/true},
+      {9, 36, {19}, /*broadcast_a_m=*/true},
+  };
+
+  for (const Case& tc : cases) {
+    const size_t num_k_dims = tc.k_dims.size();
+    const size_t n = align_up(tc.n, type_element_count(type_of<B>()));
+    const std::vector<size_t> batch_dims = {2};
+
+    std::vector<size_t> a_shape = {2, tc.broadcast_a_m ? 1 : tc.m};
+    a_shape.insert(a_shape.end(), tc.k_dims.begin(), tc.k_dims.end());
+
+    std::vector<size_t> b_shape = tc.k_dims;
+    b_shape.push_back(n);
+
+    const std::vector<size_t> output_shape = {2, tc.m, n};
+
+    Tensor<B> b(b_shape);
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+
+    // Use static B so B is packed (tile_k > 1 where supported) while A remains
+    // unpacked on architectures without transpose_a.
+    SubgraphBuilder subgraph(4);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t c_id = 2;
+    const uint32_t output_id = 3;
+    subgraph.AddInput(type_of<A>(), a_shape, a_id)
+        .AddTensor(b, b_id)
+        .AddInput(type_of<C>(), output_shape, c_id)
+        .AddOutput(type_of<C>(), output_shape, output_id)
+        .AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+
+    Runtime runtime(subgraph.GetSubgraph(), &scheduler);
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<A> a(a_shape);
+    Tensor<C> c_init(output_shape);
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+    fill_random(c_init.data(), c_init.size(), rng, -max_abs_value,
+                max_abs_value);
+
+    Tensor<C> expected(output_shape);
+    expected.assign(c_init);
+
+    Tensor<C> output(output_shape);
+    runtime.SetupExternalTensor(a.data(), a_id)
+        .SetupExternalTensor(c_init.data(), c_id)
+        .SetupExternalTensor(output.data(), output_id)
+        .ReshapeRuntime()
+        .InvokeRuntime();
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<A> a_ref = a;
+    if (tc.broadcast_a_m) {
+      broadcast_extent_1(a_ref);
+      std::vector<size_t> ref_extents = a_ref.extents();
+      ref_extents[1] = tc.m;
+      a_ref.set_shape(std::move(ref_extents), a_ref.strides());
+    }
+    VerifyDotResults(a_ref, b, output, expected, batch_dims, a_shape, b_shape,
+                     num_k_dims, max_abs_value);
+  }
+}
+
 class Dot : public testing::TestWithParam<multi_type> {};
 
 TEST_P(Dot, StaticB) {
@@ -775,6 +870,12 @@ TEST_P(Dot, StaticShapeDynamicB) {
 TEST_P(Dot, BroadcastExtent1) {
   SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
     TestBroadcastExtent1(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, UnalignedK1) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestUnalignedK1(a_type, b_type, c_type);
   });
 }
 

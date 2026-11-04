@@ -148,6 +148,28 @@ TEST_F(LoopFusionTest, PackFusesWithDot) {
   EXPECT_LT(max_allocation_size_, b.size_bytes());
 }
 
+TEST_F(LoopFusionTest, PackFusesWithSmallKDot) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddInput(type_of<float>(), TensorShape(2), b_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> a({1024, 32});
+  Tensor<float> b({32, 1024});
+  Tensor<float> out({1024, 1024});
+  ReshapeExternalTensor(a_id, {1024, 32}, a.data());
+  ReshapeExternalTensor(b_id, {32, 1024}, b.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  EXPECT_LT(max_allocation_size_, b.size_bytes());
+}
+
 // The pipeline is dot(A, pack(exp(B))). exp's natural loop order does not
 // match the dot's loop nest positionally (its n dimension is innermost, while
 // the dot's nest iterates n outermost), so fusing it requires the scheduler
