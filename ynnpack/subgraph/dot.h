@@ -6,7 +6,6 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_DOT_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_DOT_H_
 
-#include <cstddef>
 #include <cstdint>
 
 #include "ynnpack/include/ynnpack.h"
@@ -24,8 +23,7 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node,
 // int8 x `b_type`.
 bool prefer_uint8_dot(ynn_type b_type);
 
-uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
-                       const dot_kernel& kernel, size_t num_k_dims,
+uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_kernel& kernel,
                        uint32_t input_b_id);
 
 }  // namespace ynn
