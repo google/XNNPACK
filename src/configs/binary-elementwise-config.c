@@ -73,6 +73,7 @@ XNN_INIT_ONCE_GUARD(qu8_vprelu);
   xnn_log_info("Using binary microkernel '%s'.", #ukernel);
 
 static void init_f16_vadd_config(void) {
+  f16_vadd_config.op_ukernel = NULL;
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -310,6 +311,7 @@ static void init_f16_vmin_config(void) {
 }
 
 static void init_f16_vmul_config(void) {
+  f16_vmul_config.op_ukernel = NULL;
 #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();

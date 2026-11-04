@@ -200,6 +200,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
 }
 #endif
 
+// HVX-specific: used by `src/f32-vrnd/simd.c.in` for `f32-vrndz`.
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
@@ -224,6 +225,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
 }
 #endif  // __HVX_ARCH__ >= 73
 
+// HVX-specific: used by `src/f32-vrnd/simd.c.in` for `f32-vrndu`.
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
@@ -259,6 +261,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
 }
 #endif  // __HVX_ARCH__ >= 73
 
+// HVX-specific: used by `src/f32-vrnd/simd.c.in` for `f32-vrndd`.
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_floor_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
@@ -466,21 +469,12 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
 // SIMD vector type for f16 using HVX.
 typedef HVX_Vector xnn_simd_f16_t;
 
-#if __HVX_ARCH__ >= 81
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
   return *((const HVX_UVector*)ptr);
 }
 
 static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
   *((HVX_UVector*)ptr) = v;
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
-  return Q6_V_lo_W(Q6_Wsf_vcvt_Vhf(Q6_Vh_vshuff_Vh(a)));
-}
-
-static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
-  return Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(a, Q6_V_vzero()));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
@@ -494,51 +488,64 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
                                           size_t num_elements) {
   Q6_V_vstu_variable(output, num_elements * sizeof(xnn_float16), v);
 }
-#else   // __HVX_ARCH__ < 81
-static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
-  XNN_ALIGN(128) xnn_float16 padded[64] = {0};
-  memcpy(padded, ptr, 64 * sizeof(xnn_float16));
-  return *(const HVX_Vector*)padded;
+
+#if __HVX_ARCH__ >= 81
+// HVX-specific: 128B HVX_Vector holds 64 fp16s, widening to an f32 pair.
+static XNN_INLINE HVX_VectorPair xnn_cvt_w_f32_f16(xnn_simd_f16_t a) {
+  return Q6_Wsf_vcvt_Vhf(Q6_Vh_vshuff_Vh(a));
 }
 
-static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
-  XNN_ALIGN(128) xnn_float16 padded[64];
-  *(HVX_Vector*)padded = v;
-  memcpy(ptr, padded, 64 * sizeof(xnn_float16));
-}
-
+// Converts the low 32 fp16 elements of `a` to 32 f32 elements.
 static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
-  XNN_ALIGN(128) xnn_float16 input[64];
-  XNN_ALIGN(128) float output[32];
-  *(HVX_Vector*)input = a;
-  for (size_t k = 0; k < 32; ++k) {
-    output[k] = xnn_float16_to_float(input[k]);
-  }
-  return *(const HVX_Vector*)output;
+  return Q6_V_lo_W(xnn_cvt_w_f32_f16(a));
 }
 
+// HVX-specific: narrows two 32-element f32 vectors into one 64-fp16 vector.
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32_f32(xnn_simd_f32_t a,
+                                                     xnn_simd_f32_t b) {
+  return Q6_Vh_vdeal_Vh(Q6_Vhf_vcvt_VsfVsf(a, b));
+}
+
+// Converts 32 f32 elements in `a` to the low 32 fp16 elements of the result.
 static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
-  XNN_ALIGN(128) float input[32];
-  XNN_ALIGN(128) xnn_float16 output[64] = {0};
-  *(HVX_Vector*)input = a;
-  for (size_t k = 0; k < 32; ++k) {
-    output[k] = xnn_float16_from_float(input[k]);
-  }
-  return *(const HVX_Vector*)output;
+  return xnn_cvt_f16_f32_f32(a, Q6_V_vzero());
+}
+#else   // __HVX_ARCH__ < 81
+// HVX-specific: 128B HVX_Vector holds 64 fp16s, widening to an f32 pair.
+static XNN_INLINE HVX_VectorPair xnn_cvt_w_f32_f16(xnn_simd_f16_t a) {
+  const HVX_Vector v_one = Q6_V_vsplat_R(0x3C003C00);
+  const HVX_VectorPair vw_qf32 =
+      Q6_Wqf32_vmpy_VhfVhf(Q6_Vh_vshuff_Vh(a), v_one);
+  return Q6_W_vcombine_VV(Q6_Vsf_equals_Vqf32(Q6_V_hi_W(vw_qf32)),
+                          Q6_Vsf_equals_Vqf32(Q6_V_lo_W(vw_qf32)));
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
-                                                   size_t num_elements) {
-  XNN_ALIGN(128) xnn_float16 padded[64] = {0};
-  memcpy(padded, input, num_elements * sizeof(xnn_float16));
-  return *(const HVX_Vector*)padded;
+// Converts the low 32 fp16 elements of `a` to 32 f32 elements.
+static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  const HVX_Vector v_one = Q6_V_vsplat_R(0x3C003C00);
+  const HVX_VectorPair vw_qf32 =
+      Q6_Wqf32_vmpy_VhfVhf(Q6_Vh_vshuff_Vh(a), v_one);
+  return Q6_Vsf_equals_Vqf32(Q6_V_lo_W(vw_qf32));
 }
 
-static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
-                                          size_t num_elements) {
-  XNN_ALIGN(128) xnn_float16 padded[64];
-  *(HVX_Vector*)padded = v;
-  memcpy(output, padded, num_elements * sizeof(xnn_float16));
+// HVX-specific: narrows two 32-element f32 vectors into one 64-fp16 vector.
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32_f32(xnn_simd_f32_t a,
+                                                     xnn_simd_f32_t b) {
+  const HVX_Vector vzero = Q6_V_vzero();
+  const HVX_Vector va_qf32 = Q6_Vqf32_vadd_VsfVsf(a, vzero);
+  const HVX_Vector vb_qf32 = Q6_Vqf32_vadd_VsfVsf(b, vzero);
+  const HVX_Vector vhf =
+      Q6_Vh_vdeal_Vh(Q6_Vhf_equals_Wqf32(Q6_W_vcombine_VV(vb_qf32, va_qf32)));
+  const HVX_Vector vexp_mask = Q6_V_vsplat_R(0x7C007C00);
+  const HVX_VectorPred q_inf =
+      Q6_Q_vcmp_eq_VhVh(Q6_V_vand_VV(vhf, vexp_mask), vexp_mask);
+  return Q6_V_vmux_QVV(q_inf, Q6_V_vand_VV(vhf, Q6_V_vsplat_R(0xFC00FC00)),
+                       vhf);
+}
+
+// Converts 32 f32 elements in `a` to the low 32 fp16 elements of the result.
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
+  return xnn_cvt_f16_f32_f32(a, Q6_V_vzero());
 }
 #endif  // __HVX_ARCH__ >= 81
 

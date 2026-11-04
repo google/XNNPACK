@@ -22,6 +22,7 @@ xnnpack_cxx_library(
         "//:subgraph_h",
         "//:xnnpack_h",
         "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
         "//src/configs:microkernel_configs",  # build_cleaner: keep
     ],
 )
