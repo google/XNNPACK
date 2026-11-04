@@ -405,9 +405,9 @@ static enum xnn_status reshape_deconvolution_operator(
     size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  if (values[input_id].shape.num_dims != 3 && values[input_id].shape.num_dims != 4) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": num_dims (%zu) must be 3 or 4",
+  if (values[input_id].shape.num_dims != 4) {
+     xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32 ": num_dims (%zu) must be 4",
       xnn_node_type_to_string(xnn_node_type_deconvolution_2d), input_id, values[input_id].shape.num_dims);
     return xnn_status_invalid_parameter;
   }
@@ -423,12 +423,11 @@ static enum xnn_status reshape_deconvolution_operator(
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
+  const size_t input_channels = values[input_id].shape.dim[3];
 
   // The indirection buffer strides across input pixels by the operator's
   // create-time input_pixel_stride, so an input carrying fewer channels than
   // that makes the microkernel read past the end of the input buffer.
-  const size_t input_channels =
-      values[input_id].shape.dim[values[input_id].shape.num_dims - 1];
   if (input_channels != opdata->operator_objects[0]->input_pixel_stride) {
     xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
                   ": mismatch at channel dimension (%zu != %zu)",
