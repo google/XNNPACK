@@ -5699,6 +5699,8 @@ DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_uker
 DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_6x128c4__hvx_prfm)
 DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x128c4__hvx_prfm)
 DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x128c4__hvx_prfm)
+DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_32x64c4__hmx)
 
 #define DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)           \
   XNN_INTERNAL void fn_name(                                             \
@@ -6781,6 +6783,9 @@ DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x128c4__hvx_prfm)
 DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x128c4__hvx_prfm)
+
+DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx)
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
 DECLARE_QP8_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(

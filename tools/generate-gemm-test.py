@@ -698,12 +698,20 @@ std::vector<GemmTestParams> CreateTests(
         "k_tiles",
         tester.clone()
             .m(mr).n(nr)
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
         , test_func, arch_flags)
         .loop_k(1, 72, 5));
     gemm_tests.push_back(GemmTestParams(
         "k_tiles_subtile_m",
         tester.clone()
             .n(nr)
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
         , test_func, arch_flags)
         .loop_k(31, 65, 11, LoopStepType::Linear)
         .loop_m(1, mr, 7));
@@ -713,6 +721,10 @@ std::vector<GemmTestParams> CreateTests(
         "k_large",
         tester.clone()
             .m(mr).n(nr)
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
         , test_func, arch_flags)
         .loop_k(1023, 1025, 2, LoopStepType::Linear));
   return gemm_tests;

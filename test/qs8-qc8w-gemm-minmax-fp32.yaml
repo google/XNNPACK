@@ -1970,6 +1970,12 @@
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
 
+# Hexagon HMX
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+
 # RISC-V Vector
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x1v__rvv
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params

@@ -2407,6 +2407,10 @@ tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=6  -D NR=128 -D DATATYPE=QS8_QC4 -D P
 tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=7  -D NR=128 -D DATATYPE=QS8_QC4 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-7x128c4-minmax-fp32-hvx-prfm.c &
 tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=8  -D NR=128 -D DATATYPE=QS8_QC4 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-8x128c4-minmax-fp32-hvx-prfm.c &
 
+################################## Hexagon HMX #################################
+tools/xngen src/qs8-gemm/c4-hmx.c.in -D MR=32 -D NR=64 -D DATATYPE=QS8_QC4 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-32x64c4-minmax-fp32-hmx.c &
+tools/xngen src/qs8-gemm/c4-hmx.c.in -D MR=32 -D NR=64 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-32x64c4-minmax-fp32-hmx.c &
+
 tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=1  -D NR=128 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x128c4-minmax-hvx.c &
 tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=2  -D NR=128 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x128c4-minmax-hvx.c &
 

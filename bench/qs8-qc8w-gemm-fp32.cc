@@ -5386,6 +5386,20 @@ static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf(benchmark::Stat
 
 BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf)
 
+#if XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/32, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx)
+#endif  // XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+
+
 }  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

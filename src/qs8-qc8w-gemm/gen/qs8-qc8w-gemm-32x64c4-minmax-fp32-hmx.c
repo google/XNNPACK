@@ -1,0 +1,849 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/c4-hmx.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+
+#include <HAP_compute_res.h>
+#include <HAP_power.h>
+#include <assert.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+#include <hvx_hexagon_protos.h>
+#include <math.h>
+#include <pthread.h>
+#include <qurt.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/unaligned.h"
+
+#if __HEXAGON_ARCH__ >= 73
+
+// HMX activation operand sizes are limited to 64 KB (32 tiles of 2048 bytes,
+// K = 1024) per issue on Hexagon V81; earlier generations stall above ~32 KB
+// (K = 512), so `max_k_chunk` is chosen at init.
+#define XNN_HMX_MAX_K_CHUNK 1024
+
+static XNN_INLINE void l2fetch_2d(const void* p, uint32_t stride,
+                                  uint32_t width, uint32_t height) {
+  const uint64_t control =
+      ((uint64_t) stride << 32) | ((uint64_t) width << 16) | (uint64_t) height;
+  __asm__ __volatile__("l2fetch(%0,%1)" : : "r"(p), "r"(control));
+}
+
+static XNN_INLINE void xnn_hmx_tile_clear(void) {
+  __asm__ __volatile__("mxclracc" ::: "memory");
+}
+
+static XNN_INLINE void xnn_hmx_mpy_ub_cm_b(const void* act_addr,
+                                           uint32_t act_ctrl,
+                                           const void* wgt_addr,
+                                           uint32_t wgt_ctrl) {
+  __asm__ __volatile__(
+      "{\n\t"
+      "  activation.ub = mxmem(%0, %1):deep:cm\n\t"
+      "  weight.b = mxmem(%2, %3)\n\t"
+      "}"
+      :
+      : "r"(act_addr), "r"(act_ctrl), "r"(wgt_addr), "r"(wgt_ctrl)
+      : "memory");
+}
+
+// Extract exact 24-bit signed accumulators from odd `:cm` pegs (with even pegs
+// zeroed, scale S = 16 at `bias_lo16_addr`, and scale S = 8 at
+// `bias_hi8_addr`): `cvt.uh:2x1` with retain (0x0003) writes bits [7:0] to even
+// pegs and bits [15:8] to odd pegs of `out_lo16`, while `cvt.ub` with consume
+// (0x0002) writes bits [23:16] to odd pegs of `out_hi8`. Loading each bias
+// descriptor immediately before its `cvt` works across all HMX revisions
+// (including Hexagon V73, which has a single bias register file).
+static XNN_INLINE void xnn_hmx_store_cvt_i24_cm(
+    void* out_lo16_addr, void* out_hi8_addr, const void* bias_lo16_addr,
+    const void* bias_hi8_addr) {
+  __asm__ __volatile__(
+      "bias = mxmem(%2)\n\t"
+      "cvt.uh = acc(%4):2x1\n\t"
+      "mxmem(%0, %6):cm = cvt\n\t"
+      "bias = mxmem(%3)\n\t"
+      "cvt.ub = acc(%5)\n\t"
+      "mxmem(%1, %6):cm = cvt"
+      :
+      : "r"(out_lo16_addr), "r"(out_hi8_addr), "r"(bias_lo16_addr),
+        "r"(bias_hi8_addr), "r"((uint32_t) 0x0003), "r"((uint32_t) 0x0002),
+        "r"((uint32_t) 0x7FF)
+      : "memory");
+}
+
+// Drain preceding HVX vector stores to VTCM before HMX `mxmem` reads them.
+static XNN_INLINE void xnn_hvx_vtcm_fence(const void* vtcm_ptr) {
+  HVX_Vector vdummy;
+  __asm__ __volatile__("%0 = vmem(%1+#0)"
+                       : "=v"(vdummy)
+                       : "r"(vtcm_ptr)
+                       : "memory");
+}
+
+#define XNN_HMX_MAX_CACHED_PANELS 16
+
+struct xnn_hmx_qs8_vtcm_context {
+  pthread_mutex_t mutex;
+  bool initialized;
+  bool init_failed;
+  bool shared_lock;
+  uint32_t context_id;
+  int power_ctx;
+  uint8_t* vtcm_base;
+  HVX_Vector* vtcm_bias;
+  uint8_t* vtcm_act0;
+  HVX_Vector* vtcm_wgt0;
+  HVX_Vector* vtcm_wgt1;
+  HVX_Vector* vtcm_out;
+  HVX_Vector* vtcm_acc;
+  size_t max_k_chunk;
+  qurt_thread_t locked_tids[8];
+  size_t num_locked_tids;
+  uint32_t last_datatype;
+  const int8_t* last_a;
+  size_t last_a_stride;
+  size_t last_mr;
+  size_t last_kc;
+  size_t last_nc;
+  const void* last_w_start;
+  HVX_Vector last_vbias0[XNN_HMX_MAX_CACHED_PANELS];
+  HVX_Vector last_vbias1[XNN_HMX_MAX_CACHED_PANELS];
+  HVX_Vector last_vscale0[XNN_HMX_MAX_CACHED_PANELS];
+  HVX_Vector last_vscale1[XNN_HMX_MAX_CACHED_PANELS];
+};
+
+__attribute__((weak)) struct xnn_hmx_qs8_vtcm_context xnn_hmx_ctx = {
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
+};
+
+// Must be called with `xnn_hmx_ctx.mutex` held.
+static bool xnn_hmx_lock_thread(void) {
+  const qurt_thread_t tid = qurt_thread_get_id();
+  for (size_t i = 0; i < xnn_hmx_ctx.num_locked_tids; ++i) {
+    if (xnn_hmx_ctx.locked_tids[i] == tid) {
+      return true;
+    }
+  }
+  if (!xnn_hmx_ctx.shared_lock ||
+      HAP_compute_res_hmx_lock2(xnn_hmx_ctx.context_id,
+                                HAP_COMPUTE_RES_HMX_SHARED) != 0) {
+    return false;
+  }
+  if (xnn_hmx_ctx.num_locked_tids < 8) {
+    xnn_hmx_ctx.locked_tids[xnn_hmx_ctx.num_locked_tids++] = tid;
+  }
+  return true;
+}
+
+// Must be called with `xnn_hmx_ctx.mutex` held.
+static bool xnn_init_hmx_vtcm(void) {
+  HAP_power_request_t request = {
+      .type = HAP_power_set_apptype,
+      .apptype = HAP_POWER_COMPUTE_CLIENT_CLASS,
+  };
+  HAP_power_set(&xnn_hmx_ctx.power_ctx, &request);
+
+  request = (HAP_power_request_t) {
+      .type = HAP_power_set_DCVS_v2,
+      .dcvs_v2 = {
+          .dcvs_enable = 1,
+          .dcvs_option = HAP_DCVS_V2_PERFORMANCE_MODE,
+          .set_latency = 1,
+          .latency = 100,
+          .set_dcvs_params = 1,
+          .dcvs_params = {
+              .min_corner = HAP_DCVS_VCORNER_MAX,
+              .max_corner = HAP_DCVS_VCORNER_MAX,
+              .target_corner = HAP_DCVS_VCORNER_MAX,
+          },
+      },
+  };
+  HAP_power_set(&xnn_hmx_ctx.power_ctx, &request);
+
+  request = (HAP_power_request_t) {
+      .type = HAP_power_set_HVX,
+      .hvx.power_up = 1,
+  };
+  HAP_power_set(&xnn_hmx_ctx.power_ctx, &request);
+
+  request = (HAP_power_request_t) {
+      .type = HAP_power_set_HMX,
+      .hmx.power_up = 1,
+  };
+  if (HAP_power_set(&xnn_hmx_ctx.power_ctx, &request) != 0) {
+    return false;
+  }
+
+  // VTCM layout for XNN_HMX_MAX_K_CHUNK = 1024 (all sections 2048B-aligned):
+  //   [0 .. 2KB):       bias/scale descriptor (2 KB)
+  //   [2KB .. 66KB):    act0: 32 rows at odd `:cm` pegs, 32 K-tiles (64 KB)
+  //   [66KB .. 194KB):  wgt: up to 16 cached 64-col panels (128 KB)
+  //   [194KB .. 202KB): 4 x 2048B `:cm` readout tiles (8 KB)
+  //   [202KB .. 210KB): 32 x 64 x int32 multi-chunk accumulator (8 KB)
+  const unsigned int required_vtcm_bytes = 224 * 1024;
+  compute_res_attr_t compute_res;
+  HAP_compute_res_attr_init(&compute_res);
+  HAP_compute_res_attr_set_vtcm_param(&compute_res, required_vtcm_bytes, 1);
+  HAP_compute_res_attr_set_hmx_param(&compute_res, 1);
+  xnn_hmx_ctx.context_id = HAP_compute_res_acquire(&compute_res, 100000);
+  if (xnn_hmx_ctx.context_id == 0) {
+    return false;
+  }
+  xnn_hmx_ctx.vtcm_base =
+      (uint8_t*) HAP_compute_res_attr_get_vtcm_ptr(&compute_res);
+  if (xnn_hmx_ctx.vtcm_base == NULL) {
+    HAP_compute_res_release(xnn_hmx_ctx.context_id);
+    xnn_hmx_ctx.context_id = 0;
+    return false;
+  }
+  if (HAP_compute_res_hmx_lock2(xnn_hmx_ctx.context_id,
+                                HAP_COMPUTE_RES_HMX_SHARED) == 0) {
+    xnn_hmx_ctx.shared_lock = true;
+  } else if (HAP_compute_res_hmx_lock(xnn_hmx_ctx.context_id) != 0) {
+    HAP_compute_res_release(xnn_hmx_ctx.context_id);
+    xnn_hmx_ctx.context_id = 0;
+    xnn_hmx_ctx.vtcm_base = NULL;
+    return false;
+  }
+  xnn_hmx_ctx.locked_tids[0] = qurt_thread_get_id();
+  xnn_hmx_ctx.num_locked_tids = 1;
+  memset(xnn_hmx_ctx.vtcm_base, 0, required_vtcm_bytes);
+
+  qurt_arch_version_t arch = {0};
+  const unsigned int arch_version =
+      (qurt_sysenv_get_arch_version(&arch) == QURT_EOK)
+          ? (arch.arch_version & 0xFF)
+          : 0;
+  xnn_hmx_ctx.max_k_chunk = arch_version >= 0x81 ? XNN_HMX_MAX_K_CHUNK
+                                                 : XNN_HMX_MAX_K_CHUNK / 2;
+
+  uintptr_t vtcm_aligned =
+      ((uintptr_t) xnn_hmx_ctx.vtcm_base + 2047) & ~(uintptr_t) 2047;
+  xnn_hmx_ctx.vtcm_bias = (HVX_Vector*) vtcm_aligned;
+  xnn_hmx_ctx.vtcm_act0 = (uint8_t*) (vtcm_aligned + 2048);
+  xnn_hmx_ctx.vtcm_wgt0 = (HVX_Vector*) (vtcm_aligned + 2048 + 65536);
+  xnn_hmx_ctx.vtcm_wgt1 = (HVX_Vector*) (vtcm_aligned + 2048 + 65536 + 65536);
+  xnn_hmx_ctx.vtcm_out = (HVX_Vector*) (vtcm_aligned + 2048 + 65536 + 131072);
+  xnn_hmx_ctx.vtcm_acc =
+      (HVX_Vector*) (vtcm_aligned + 2048 + 65536 + 131072 + 8192);
+
+  // Area 0 uses S = 16 (16 << 10 = 0x4000) to extract bits [15:0] via
+  // `cvt.uh:2x1`, and Area 1 uses S = 8 (8 << 10 = 0x2000) to extract bits
+  // [23:16] via `cvt.ub`.
+  xnn_hmx_ctx.vtcm_bias[0] = Q6_V_vsplat_R(0x4000);
+  xnn_hmx_ctx.vtcm_bias[1] = Q6_V_vsplat_R(0x2000);
+  xnn_hvx_vtcm_fence(&xnn_hmx_ctx.vtcm_bias[1]);
+
+  xnn_hmx_ctx.initialized = true;
+  return true;
+}
+
+// Pack up to 32 activation rows [0 .. m_count) into the 32 odd `:cm` spatial
+// pegs (2*r + 1) of a 64-peg 2048B tile in `vtcm_act`, leaving the 32 even pegs
+// (2*r) zeroed so `cvt.uh = acc:2x1` (`(acc[2*r] >> 8) + acc[2*r + 1]`) reads
+// `acc[2*r + 1]` losslessly.
+static void xnn_pack_act_qs8_to_qu8_cm_32rows(
+    uint8_t* restrict vtcm_act, const int8_t* a, size_t a_stride,
+    size_t m_count, size_t k_offset, size_t k_per_chunk) {
+  const size_t num_v = (m_count + 1) >> 1;
+  HVX_Vector* restrict vtcm_vec = (HVX_Vector*) vtcm_act;
+  const HVX_Vector vzero = Q6_V_vzero();
+  const HVX_Vector v0x80 = Q6_Vb_vsplat_R(-128);
+
+  for (size_t v = 0; v < num_v; ++v) {
+    const size_t r0 = 2 * v;
+    const uint8_t* src_r0 =
+        (const uint8_t*) ((const uintptr_t) a + r0 * a_stride + k_offset);
+    const uint8_t* src_r1 =
+        (r0 + 1 < m_count)
+            ? (const uint8_t*) ((const uintptr_t) a + (r0 + 1) * a_stride +
+                                k_offset)
+            : NULL;
+
+    size_t k = k_per_chunk;
+    size_t t = 0;
+    for (; k >= 128; k -= 128, t += 4) {
+      const HVX_Vector v_r0 =
+          Q6_V_vxor_VV(*((const HVX_UVector*) src_r0), v0x80);
+      src_r0 += 128;
+      HVX_Vector v_r1 = vzero;
+      if (src_r1 != NULL) {
+        v_r1 = Q6_V_vxor_VV(*((const HVX_UVector*) src_r1), v0x80);
+        src_r1 += 128;
+      }
+      const HVX_VectorPair p0 = Q6_W_vshuff_VVR(v_r0, vzero, -32);
+      const HVX_VectorPair p1 = Q6_W_vshuff_VVR(v_r1, vzero, -32);
+      const HVX_VectorPair q01 =
+          Q6_W_vshuff_VVR(Q6_V_lo_W(p1), Q6_V_lo_W(p0), -64);
+      const HVX_VectorPair q23 =
+          Q6_W_vshuff_VVR(Q6_V_hi_W(p1), Q6_V_hi_W(p0), -64);
+      vtcm_vec[(t + 0) * 16 + v] = Q6_V_lo_W(q01);
+      vtcm_vec[(t + 1) * 16 + v] = Q6_V_hi_W(q01);
+      vtcm_vec[(t + 2) * 16 + v] = Q6_V_lo_W(q23);
+      vtcm_vec[(t + 3) * 16 + v] = Q6_V_hi_W(q23);
+    }
+    if (k > 0) {
+#if defined(__HEXAGON_ARCH__)
+      const HVX_VectorPred qmask = Q6_Q_vsetq_R(k);
+      const HVX_Vector v_r0 = Q6_V_vmux_QVV(
+          qmask, Q6_V_vxor_VV(*((const HVX_UVector*) src_r0), v0x80), vzero);
+      HVX_Vector v_r1 = vzero;
+      if (src_r1 != NULL) {
+        v_r1 = Q6_V_vmux_QVV(
+            qmask, Q6_V_vxor_VV(*((const HVX_UVector*) src_r1), v0x80), vzero);
+      }
+#else
+      uint8_t tmp0[128];
+      for (size_t i = 0; i < k; ++i) {
+        tmp0[i] = src_r0[i] ^ 0x80;
+      }
+      for (size_t i = k; i < 128; ++i) {
+        tmp0[i] = 0;
+      }
+      const HVX_Vector v_r0 = *((const HVX_UVector*) tmp0);
+      HVX_Vector v_r1 = vzero;
+      if (src_r1 != NULL) {
+        uint8_t tmp1[128];
+        for (size_t i = 0; i < k; ++i) {
+          tmp1[i] = src_r1[i] ^ 0x80;
+        }
+        for (size_t i = k; i < 128; ++i) {
+          tmp1[i] = 0;
+        }
+        v_r1 = *((const HVX_UVector*) tmp1);
+      }
+#endif
+      const HVX_VectorPair p0 = Q6_W_vshuff_VVR(v_r0, vzero, -32);
+      const HVX_VectorPair p1 = Q6_W_vshuff_VVR(v_r1, vzero, -32);
+      const HVX_VectorPair q01 =
+          Q6_W_vshuff_VVR(Q6_V_lo_W(p1), Q6_V_lo_W(p0), -64);
+      const HVX_VectorPair q23 =
+          Q6_W_vshuff_VVR(Q6_V_hi_W(p1), Q6_V_hi_W(p0), -64);
+      const size_t rem_tiles = (k + 31) >> 5;
+      vtcm_vec[(t + 0) * 16 + v] = Q6_V_lo_W(q01);
+      if (rem_tiles > 1) {
+        vtcm_vec[(t + 1) * 16 + v] = Q6_V_hi_W(q01);
+      }
+      if (rem_tiles > 2) {
+        vtcm_vec[(t + 2) * 16 + v] = Q6_V_lo_W(q23);
+      }
+      if (rem_tiles > 3) {
+        vtcm_vec[(t + 3) * 16 + v] = Q6_V_hi_W(q23);
+      }
+    }
+  }
+}
+
+// XNNPACK `qs8_qc8w` weights (`nr=64`, `kr=4`) match HMX `weight.b` 1x layout
+// bit-for-bit (4 int8_t weights per 32-bit word across 32 columns per 128B
+// vector), so we copy cols 0..31 and 32..63 directly into `vtcm_wgt0` and
+// `vtcm_wgt1` while accumulating `-128 * ksum` into independent even/odd k4
+// accumulators to avoid HVX pipeline stalls.
+static const void* xnn_pack_wgt_to_hmx_1x(HVX_Vector* restrict vtcm_wgt0,
+                                          HVX_Vector* restrict vtcm_wgt1,
+                                          const void* w,
+                                          size_t k_per_chunk,
+                                          HVX_Vector* inout_vbias0,
+                                          HVX_Vector* inout_vbias1) {
+  const size_t num_k4 = round_up_po2(k_per_chunk, 4) >> 2;
+  const size_t num_k_tiles = (k_per_chunk + 31) >> 5;
+  const size_t total_vecs = num_k_tiles * 8;
+  const HVX_Vector vzero = Q6_V_vzero();
+  const HVX_Vector vneg128 = Q6_Vb_vsplat_R(-128);
+
+  HVX_Vector vbias0_0 = *inout_vbias0;
+  HVX_Vector vbias0_1 = vzero;
+  HVX_Vector vbias1_0 = *inout_vbias1;
+  HVX_Vector vbias1_1 = vzero;
+  const HVX_UVector* w_vec = (const HVX_UVector*) w;
+
+  size_t k4 = 0;
+  for (; k4 + 2 <= num_k4; k4 += 2) {
+    const HVX_Vector v0_n0_31 = w_vec[0];
+    const HVX_Vector v0_n32_63 = w_vec[1];
+    const HVX_Vector v1_n0_31 = w_vec[2];
+    const HVX_Vector v1_n32_63 = w_vec[3];
+    w_vec += 4;
+    vtcm_wgt0[k4 + 0] = v0_n0_31;
+    vtcm_wgt1[k4 + 0] = v0_n32_63;
+    vtcm_wgt0[k4 + 1] = v1_n0_31;
+    vtcm_wgt1[k4 + 1] = v1_n32_63;
+
+    vbias0_0 = Q6_Vw_vrmpyacc_VwVbVb(vbias0_0, vneg128, v0_n0_31);
+    vbias1_0 = Q6_Vw_vrmpyacc_VwVbVb(vbias1_0, vneg128, v0_n32_63);
+    vbias0_1 = Q6_Vw_vrmpyacc_VwVbVb(vbias0_1, vneg128, v1_n0_31);
+    vbias1_1 = Q6_Vw_vrmpyacc_VwVbVb(vbias1_1, vneg128, v1_n32_63);
+  }
+  if (k4 < num_k4) {
+    const HVX_Vector v0_n0_31 = w_vec[0];
+    const HVX_Vector v0_n32_63 = w_vec[1];
+    w_vec += 2;
+    vtcm_wgt0[k4] = v0_n0_31;
+    vtcm_wgt1[k4] = v0_n32_63;
+    vbias0_0 = Q6_Vw_vrmpyacc_VwVbVb(vbias0_0, vneg128, v0_n0_31);
+    vbias1_0 = Q6_Vw_vrmpyacc_VwVbVb(vbias1_0, vneg128, v0_n32_63);
+  }
+  for (size_t i = num_k4; i < total_vecs; ++i) {
+    vtcm_wgt0[i] = vzero;
+    vtcm_wgt1[i] = vzero;
+  }
+
+  *inout_vbias0 = Q6_Vw_vadd_VwVw(vbias0_0, vbias0_1);
+  *inout_vbias1 = Q6_Vw_vadd_VwVw(vbias1_0, vbias1_1);
+  return (const void*) w_vec;
+}
+
+// Reconstruct two 32-column signed int32 rows `(2*v, 2*v + 1)` from `out_lo16`
+// (even peg = bits [7:0], odd peg = bits [15:8]) and `out_hi8` (odd peg =
+// signed bits [23:16]).
+static XNN_INLINE void xnn_unpack_hmx_i24_2rows(const HVX_Vector* out_lo16,
+                                                const HVX_Vector* out_hi8,
+                                                size_t v, HVX_Vector* out_r0,
+                                                HVX_Vector* out_r1) {
+  const HVX_VectorPair w_lo = Q6_Wuh_vunpack_Vub(out_lo16[v]);
+  const HVX_VectorPair w_hi = Q6_Wh_vunpack_Vb(out_hi8[v]);
+
+  const HVX_VectorPair w_r0_01 = Q6_Wuw_vunpack_Vuh(Q6_V_lo_W(w_lo));
+  const HVX_Vector v_r0_2 = Q6_V_hi_W(Q6_Ww_vunpack_Vh(Q6_V_lo_W(w_hi)));
+  const HVX_Vector vacc0 =
+      Q6_Vw_vaslacc_VwVwR(Q6_V_lo_W(w_r0_01), Q6_V_hi_W(w_r0_01), 8);
+  *out_r0 = Q6_Vw_vaslacc_VwVwR(vacc0, v_r0_2, 16);
+
+  const HVX_VectorPair w_r1_01 = Q6_Wuw_vunpack_Vuh(Q6_V_hi_W(w_lo));
+  const HVX_Vector v_r1_2 = Q6_V_hi_W(Q6_Ww_vunpack_Vh(Q6_V_hi_W(w_hi)));
+  const HVX_Vector vacc1 =
+      Q6_Vw_vaslacc_VwVwR(Q6_V_lo_W(w_r1_01), Q6_V_hi_W(w_r1_01), 8);
+  *out_r1 = Q6_Vw_vaslacc_VwVwR(vacc1, v_r1_2, 16);
+}
+
+#endif  // __HEXAGON_ARCH__ >= 73
+
+#if __HVX_ARCH__ < 73
+static HVX_Vector xnn_rescale_fp32(HVX_Vector vacc, HVX_Vector vscale) {
+  XNN_ALIGN(128) int32_t vacc_buffer[32];
+  XNN_ALIGN(128) float vscale_buffer[32];
+  *((HVX_Vector*) vacc_buffer) = vacc;
+  *((HVX_Vector*) vscale_buffer) = vscale;
+  for (int i = 0; i < 32; ++i) {
+    vacc_buffer[i] =
+        (int32_t) lrintf((float) vacc_buffer[i] * vscale_buffer[i]);
+  }
+  return *((const HVX_Vector*) vacc_buffer);
+}
+#endif  // __HVX_ARCH__ < 73
+
+static XNN_INLINE void xnn_requantize_and_store_row_qs8(
+    int8_t* c_row, size_t nc, HVX_Vector vacc0, HVX_Vector vacc1,
+    HVX_Vector vscale0, HVX_Vector vscale1, HVX_Vector vmagic_bias,
+    HVX_Vector vmagic_bias_less_zero_point, HVX_Vector voutput_min,
+    HVX_Vector voutput_max) {
+#if __HVX_ARCH__ >= 81
+  HVX_Vector vaf0 = Q6_Vsf_equals_Vw(vacc0);
+  HVX_Vector vaf1 = Q6_Vsf_equals_Vw(vacc1);
+
+  vaf0 = xnn_fmadd_f32(vaf0, vscale0, vmagic_bias);
+  vaf1 = xnn_fmadd_f32(vaf1, vscale1, vmagic_bias);
+
+  vacc0 = Q6_Vw_vsub_VwVw_sat(vaf0, vmagic_bias_less_zero_point);
+  vacc1 = Q6_Vw_vsub_VwVw_sat(vaf1, vmagic_bias_less_zero_point);
+
+  const HVX_Vector vpack_h = Q6_Vh_vpack_VwVw_sat(vacc1, vacc0);
+#elif __HVX_ARCH__ >= 73
+  // On HVX v73-v79, `Vqf32` has a 24-bit signed 2's complement mantissa (23
+  // magnitude bits), so using `vmagic_bias = 6291456.0f` (`1.5 * 2^22`,
+  // `0x4AC00000`) places the ULP at 1.0 in `Vqf32` for exact round-to-nearest-
+  // even rounding; converting back to 24-bit IEEE-754 `Vsf` shifts the integer
+  // left by 1 bit (`0x4AC00000 + (N << 1)`).
+  HVX_Vector vaf0 = Q6_Vsf_equals_Vw(vacc0);
+  HVX_Vector vaf1 = Q6_Vsf_equals_Vw(vacc1);
+
+  vaf0 = xnn_fmadd_f32(vaf0, vscale0, vmagic_bias);
+  vaf1 = xnn_fmadd_f32(vaf1, vscale1, vmagic_bias);
+
+  vacc0 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vaf0, 1),
+                              vmagic_bias_less_zero_point);
+  vacc1 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vaf1, 1),
+                              vmagic_bias_less_zero_point);
+
+  const HVX_Vector vpack_h = Q6_Vh_vpack_VwVw_sat(vacc1, vacc0);
+#else
+  (void) vmagic_bias;
+  vacc0 = xnn_rescale_fp32(vacc0, vscale0);
+  vacc1 = xnn_rescale_fp32(vacc1, vscale1);
+  HVX_Vector vpack_h = Q6_Vh_vpack_VwVw_sat(vacc1, vacc0);
+  vpack_h = Q6_Vh_vadd_VhVh_sat(vpack_h, vmagic_bias_less_zero_point);
+#endif
+  HVX_Vector vout = Q6_Vb_vpack_VhVh_sat(vpack_h, vpack_h);
+  vout = Q6_Vb_vmax_VbVb(vout, voutput_min);
+  vout = Q6_Vb_vmin_VbVb(vout, voutput_max);
+
+  const size_t n_store = nc < 64 ? nc : 64;
+  Q6_V_vstu_variable(c_row, n_store, vout);
+}
+
+// HVX fallback used if HMX/VTCM cannot be acquired.
+static void xnn_qs8_qc8w_gemm_minmax_hvx_fallback(
+    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+    const void* restrict w, int8_t* restrict c, size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
+  kc = round_up_po2(kc, 4);
+#if __HVX_ARCH__ >= 81
+  const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
+  const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
+      INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
+#elif __HVX_ARCH__ >= 73
+  const HVX_Vector vmagic_bias = xnn_set1_f32(6291456.5f);
+  const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
+      INT32_C(0x25600000) - (int32_t) params->fp32_scalar.output_zero_point);
+#else
+  const HVX_Vector vmagic_bias = Q6_V_vzero();
+  const HVX_Vector vmagic_bias_less_zero_point =
+      Q6_Vh_vsplat_R(params->fp32_scalar.output_zero_point);
+#endif
+  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
+  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
+
+  do {
+    const HVX_Vector vinit0 = *((const HVX_UVector*) w);
+    const HVX_Vector vinit1 =
+        *((const HVX_UVector*) ((const int32_t*) w + 32));
+    w = (const int32_t*) w + 64;
+
+    const void* w_panel = w;
+    for (size_t m = 0; m < mr; ++m) {
+      const int8_t* a_row = (const int8_t*) ((uintptr_t) a + m * a_stride);
+      const int8_t* w_ptr = (const int8_t*) w_panel;
+      HVX_Vector vacc0 = vinit0;
+      HVX_Vector vacc1 = vinit1;
+
+      size_t k = kc;
+      for (; k >= 4; k -= 4) {
+        const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
+        a_row += 4;
+
+        const HVX_Vector vb0x0123 = *((const HVX_UVector*) w_ptr);
+        const HVX_Vector vb1x0123 = *((const HVX_UVector*) (w_ptr + 128));
+        w_ptr += 256;
+
+        vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
+        vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
+      }
+
+      const HVX_Vector vscale0 = *((const HVX_UVector*) w_ptr);
+      const HVX_Vector vscale1 =
+          *((const HVX_UVector*) ((const float*) w_ptr + 32));
+
+
+      int8_t* c_row = (int8_t*) ((uintptr_t) c + m * cm_stride);
+      xnn_requantize_and_store_row_qs8(
+          c_row, nc, vacc0, vacc1, vscale0, vscale1, vmagic_bias,
+          vmagic_bias_less_zero_point, voutput_min, voutput_max);
+    }
+
+    w = (const void*) ((const uintptr_t) w_panel +
+                       (round_up_po2(kc, 4) >> 2) * 256 +
+                       64 * sizeof(float));
+    c = (int8_t*) ((uintptr_t) c + cn_stride);
+    nc = (nc > 64) ? (nc - 64) : 0;
+  } while (nc != 0);
+}
+
+#if __HEXAGON_ARCH__ >= 73
+
+// Must be called with `xnn_hmx_ctx.mutex` held and the HMX lock taken by this
+// thread.
+static void xnn_qs8_qc8w_gemm_minmax_32x64c4__hmx_locked(
+    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+    const void* restrict w, int8_t* restrict c, size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
+  const size_t k_chunk_max = xnn_hmx_ctx.max_k_chunk;
+  HVX_Vector* vtcm_bias = xnn_hmx_ctx.vtcm_bias;
+  uint8_t* vtcm_act0 = xnn_hmx_ctx.vtcm_act0;
+  HVX_Vector* vtcm_wgt0 = xnn_hmx_ctx.vtcm_wgt0;
+  HVX_Vector* vtcm_wgt1 = xnn_hmx_ctx.vtcm_wgt1;
+  HVX_Vector* vtcm_out = xnn_hmx_ctx.vtcm_out;
+  HVX_Vector* vtcm_acc = xnn_hmx_ctx.vtcm_acc;
+
+#if __HVX_ARCH__ >= 81
+  const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
+  const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
+      INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
+#else
+  const HVX_Vector vmagic_bias = xnn_set1_f32(6291456.5f);
+  const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
+      INT32_C(0x25600000) - (int32_t) params->fp32_scalar.output_zero_point);
+#endif
+  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
+  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
+
+  const size_t num_v = (mr + 1) >> 1;
+  const HVX_Vector vzero = Q6_V_vzero();
+
+  if (kc <= k_chunk_max) {
+    const size_t num_k_tiles = (kc + 31) >> 5;
+    const uint32_t act_ctrl = (uint32_t) (num_k_tiles * 2048) - 1;
+    const uint32_t wgt_ctrl = (uint32_t) (num_k_tiles * 1024) - 1;
+    const uint32_t panel_rows_256B =
+        (uint32_t) ((round_up_po2(kc, 4) >> 2) + 2);
+    const size_t panel_bytes = (size_t) panel_rows_256B * 256;
+    const size_t half_panel_vecs =
+        (num_k_tiles * 8 + 15) & ~(size_t) 15;
+    const size_t panel_vecs = 2 * half_panel_vecs;
+    const size_t max_cached_panels =
+        min((size_t) XNN_HMX_MAX_CACHED_PANELS, (size_t) 1024 / panel_vecs);
+    const size_t orig_nc = nc;
+    const size_t num_panels = (orig_nc + 63) >> 6;
+    const bool can_cache_all_panels = (num_panels <= max_cached_panels);
+    const void* const w_start = w;
+    const uintptr_t w_delta =
+        (uintptr_t) w - (uintptr_t) xnn_hmx_ctx.last_w_start;
+    const uintptr_t a_delta = (uintptr_t) a - (uintptr_t) xnn_hmx_ctx.last_a;
+    const bool same_dtype = (xnn_hmx_ctx.last_datatype == 2);
+    const bool reuse_act =
+        (same_dtype && a == xnn_hmx_ctx.last_a &&
+         a_stride == xnn_hmx_ctx.last_a_stride && mr == xnn_hmx_ctx.last_mr &&
+         kc == xnn_hmx_ctx.last_kc && w_delta > 0 && w_delta <= panel_bytes);
+    const bool reuse_wgt =
+        (same_dtype && can_cache_all_panels &&
+         orig_nc == xnn_hmx_ctx.last_nc && w == xnn_hmx_ctx.last_w_start &&
+         kc == xnn_hmx_ctx.last_kc && a_stride == xnn_hmx_ctx.last_a_stride &&
+         a_delta > 0 && a_delta == xnn_hmx_ctx.last_mr * a_stride);
+    xnn_hmx_ctx.last_datatype = 2;
+
+    if (!reuse_wgt) {
+      l2fetch_2d(w, 256, 256, panel_rows_256B);
+    }
+    if (!reuse_act) {
+      xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+                                        /*k_offset=*/0, kc);
+      xnn_hmx_ctx.last_a = a;
+      xnn_hmx_ctx.last_a_stride = a_stride;
+      xnn_hmx_ctx.last_mr = mr;
+      xnn_hmx_ctx.last_kc = kc;
+    }
+    xnn_hvx_vtcm_fence((HVX_Vector*) &vtcm_act0[num_k_tiles * 2048 - 128]);
+
+    size_t panel_idx = 0;
+    do {
+      const size_t step_nc = min(nc, 64);
+      const size_t slot = can_cache_all_panels ? panel_idx : 0;
+      HVX_Vector* const cur_wgt0 = vtcm_wgt0 + slot * panel_vecs;
+      HVX_Vector* const cur_wgt1 = cur_wgt0 + half_panel_vecs;
+
+      HVX_Vector vbias0, vbias1, vscale0, vscale1;
+      if (reuse_wgt) {
+        vbias0 = xnn_hmx_ctx.last_vbias0[panel_idx];
+        vbias1 = xnn_hmx_ctx.last_vbias1[panel_idx];
+        vscale0 = xnn_hmx_ctx.last_vscale0[panel_idx];
+        vscale1 = xnn_hmx_ctx.last_vscale1[panel_idx];
+      } else {
+        if (nc > 64) {
+          l2fetch_2d((const uint8_t*) w + panel_bytes, 256, 256,
+                     panel_rows_256B);
+        }
+        const HVX_Vector vpacked_b0 = *((const HVX_UVector*) w);
+        const HVX_Vector vpacked_b1 =
+            *((const HVX_UVector*) ((const int32_t*) w + 32));
+        w = (const int32_t*) w + 64;
+
+        vbias0 = vpacked_b0;
+        vbias1 = vpacked_b1;
+        w = xnn_pack_wgt_to_hmx_1x(cur_wgt0, cur_wgt1, w, kc, &vbias0,
+                                   &vbias1);
+        xnn_hvx_vtcm_fence(&cur_wgt1[num_k_tiles * 8 - 1]);
+
+        vscale0 = *((const HVX_UVector*) w);
+        vscale1 = *((const HVX_UVector*) ((const float*) w + 32));
+        w = (const float*) w + 64;
+
+        if (can_cache_all_panels) {
+          xnn_hmx_ctx.last_vbias0[panel_idx] = vbias0;
+          xnn_hmx_ctx.last_vbias1[panel_idx] = vbias1;
+          xnn_hmx_ctx.last_vscale0[panel_idx] = vscale0;
+          xnn_hmx_ctx.last_vscale1[panel_idx] = vscale1;
+        }
+      }
+
+      xnn_hmx_tile_clear();
+      xnn_hmx_mpy_ub_cm_b(vtcm_act0, act_ctrl, cur_wgt0, wgt_ctrl);
+      xnn_hmx_store_cvt_i24_cm(&vtcm_out[0], &vtcm_out[16], &vtcm_bias[0],
+                               &vtcm_bias[1]);
+
+      if (step_nc > 32) {
+        xnn_hmx_tile_clear();
+        xnn_hmx_mpy_ub_cm_b(vtcm_act0, act_ctrl, cur_wgt1, wgt_ctrl);
+        xnn_hmx_store_cvt_i24_cm(&vtcm_out[32], &vtcm_out[48], &vtcm_bias[0],
+                                 &vtcm_bias[1]);
+      }
+
+      for (size_t v = 0; v < num_v; ++v) {
+        HVX_Vector vacc0_0, vacc0_1;
+        HVX_Vector vacc1_0 = vzero, vacc1_1 = vzero;
+        xnn_unpack_hmx_i24_2rows(&vtcm_out[0], &vtcm_out[16], v, &vacc0_0,
+                                 &vacc0_1);
+        if (step_nc > 32) {
+          xnn_unpack_hmx_i24_2rows(&vtcm_out[32], &vtcm_out[48], v, &vacc1_0,
+                                   &vacc1_1);
+        }
+        const size_t m_base = 2 * v;
+        int8_t* c_row = (int8_t*) ((uintptr_t) c + m_base * cm_stride);
+        xnn_requantize_and_store_row_qs8(
+            c_row, step_nc, Q6_Vw_vadd_VwVw(vacc0_0, vbias0),
+            Q6_Vw_vadd_VwVw(vacc1_0, vbias1), vscale0, vscale1, vmagic_bias,
+            vmagic_bias_less_zero_point, voutput_min, voutput_max);
+        if (m_base + 1 < mr) {
+          c_row = (int8_t*) ((uintptr_t) c_row + cm_stride);
+          xnn_requantize_and_store_row_qs8(
+              c_row, step_nc, Q6_Vw_vadd_VwVw(vacc0_1, vbias0),
+              Q6_Vw_vadd_VwVw(vacc1_1, vbias1), vscale0, vscale1, vmagic_bias,
+              vmagic_bias_less_zero_point, voutput_min, voutput_max);
+        }
+      }
+
+      c = (int8_t*) ((uintptr_t) c + cn_stride);
+      nc = (nc > 64) ? (nc - 64) : 0;
+      ++panel_idx;
+    } while (nc != 0);
+    if (can_cache_all_panels) {
+      xnn_hmx_ctx.last_w_start = w_start;
+      xnn_hmx_ctx.last_nc = orig_nc;
+    } else {
+      xnn_hmx_ctx.last_w_start = NULL;
+      xnn_hmx_ctx.last_nc = 0;
+    }
+  } else {
+    xnn_hmx_ctx.last_w_start = NULL;
+    xnn_hmx_ctx.last_nc = 0;
+    do {
+      const size_t step_nc = min(nc, 64);
+      const HVX_Vector vpacked_b0 = *((const HVX_UVector*) w);
+      const HVX_Vector vpacked_b1 =
+          *((const HVX_UVector*) ((const int32_t*) w + 32));
+      w = (const int32_t*) w + 64;
+
+      HVX_Vector vbias0 = vpacked_b0;
+      HVX_Vector vbias1 = vpacked_b1;
+
+      for (size_t k_offset = 0; k_offset < kc; k_offset += k_chunk_max) {
+        const size_t chunk_k = min(kc - k_offset, k_chunk_max);
+        const size_t chunk_tiles = (chunk_k + 31) >> 5;
+        const uint32_t act_ctrl = (uint32_t) (chunk_tiles * 2048) - 1;
+        const uint32_t wgt_ctrl =
+            (uint32_t) (chunk_tiles * 1024) - 1;
+
+        xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr, k_offset,
+                                          chunk_k);
+        w = xnn_pack_wgt_to_hmx_1x(vtcm_wgt0, vtcm_wgt1, w, chunk_k, &vbias0,
+                                   &vbias1);
+        xnn_hvx_vtcm_fence(&vtcm_wgt1[chunk_tiles * 8 - 1]);
+
+        xnn_hmx_tile_clear();
+        xnn_hmx_mpy_ub_cm_b(vtcm_act0, act_ctrl, vtcm_wgt0, wgt_ctrl);
+        xnn_hmx_store_cvt_i24_cm(&vtcm_out[0], &vtcm_out[16], &vtcm_bias[0],
+                                 &vtcm_bias[1]);
+
+        if (step_nc > 32) {
+          xnn_hmx_tile_clear();
+          xnn_hmx_mpy_ub_cm_b(vtcm_act0, act_ctrl, vtcm_wgt1, wgt_ctrl);
+          xnn_hmx_store_cvt_i24_cm(&vtcm_out[32], &vtcm_out[48], &vtcm_bias[0],
+                                   &vtcm_bias[1]);
+        }
+
+        for (size_t v = 0; v < num_v; ++v) {
+          HVX_Vector vacc0_0, vacc0_1;
+          HVX_Vector vacc1_0 = vzero, vacc1_1 = vzero;
+          xnn_unpack_hmx_i24_2rows(&vtcm_out[0], &vtcm_out[16], v, &vacc0_0,
+                                   &vacc0_1);
+          if (step_nc > 32) {
+            xnn_unpack_hmx_i24_2rows(&vtcm_out[32], &vtcm_out[48], v, &vacc1_0,
+                                     &vacc1_1);
+          }
+          HVX_Vector* acc_ptr = &vtcm_acc[v * 4];
+          if (k_offset == 0) {
+            acc_ptr[0] = vacc0_0;
+            acc_ptr[1] = vacc1_0;
+            acc_ptr[2] = vacc0_1;
+            acc_ptr[3] = vacc1_1;
+          } else {
+            acc_ptr[0] = Q6_Vw_vadd_VwVw(acc_ptr[0], vacc0_0);
+            acc_ptr[1] = Q6_Vw_vadd_VwVw(acc_ptr[1], vacc1_0);
+            acc_ptr[2] = Q6_Vw_vadd_VwVw(acc_ptr[2], vacc0_1);
+            acc_ptr[3] = Q6_Vw_vadd_VwVw(acc_ptr[3], vacc1_1);
+          }
+        }
+      }
+
+      const HVX_Vector vscale0 = *((const HVX_UVector*) w);
+      const HVX_Vector vscale1 =
+          *((const HVX_UVector*) ((const float*) w + 32));
+      w = (const float*) w + 64;
+
+      for (size_t m = 0; m < mr; ++m) {
+        int8_t* c_row = (int8_t*) ((uintptr_t) c + m * cm_stride);
+        const HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 0], vbias0);
+        const HVX_Vector vacc1 = Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 1], vbias1);
+        xnn_requantize_and_store_row_qs8(
+            c_row, step_nc, vacc0, vacc1, vscale0, vscale1, vmagic_bias,
+            vmagic_bias_less_zero_point, voutput_min, voutput_max);
+      }
+
+      c = (int8_t*) ((uintptr_t) c + cn_stride);
+      nc = (nc > 64) ? (nc - 64) : 0;
+    } while (nc != 0);
+  }
+}
+
+#endif  // __HEXAGON_ARCH__ >= 73
+
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx(
+    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+    const void* restrict w, int8_t* restrict c, size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
+  assert(mr != 0);
+  assert(mr <= 32);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+#if __HEXAGON_ARCH__ >= 73
+  pthread_mutex_lock(&xnn_hmx_ctx.mutex);
+  if XNN_UNLIKELY(!xnn_hmx_ctx.initialized && !xnn_hmx_ctx.init_failed) {
+    xnn_hmx_ctx.init_failed = !xnn_init_hmx_vtcm();
+  }
+  const bool hmx_ready = xnn_hmx_ctx.initialized && xnn_hmx_lock_thread();
+  if XNN_LIKELY(hmx_ready) {
+    xnn_qs8_qc8w_gemm_minmax_32x64c4__hmx_locked(
+        mr, nc, kc, a, a_stride, w, c, cm_stride, cn_stride, params);
+  }
+  pthread_mutex_unlock(&xnn_hmx_ctx.mutex);
+
+  if XNN_UNLIKELY(!hmx_ready) {
+    xnn_qs8_qc8w_gemm_minmax_hvx_fallback(mr, nc, kc, a, a_stride, w, c,
+                                                  cm_stride, cn_stride, params);
+  }
+#else
+  xnn_qs8_qc8w_gemm_minmax_hvx_fallback(mr, nc, kc, a, a_stride, w, c,
+                                                cm_stride, cn_stride, params);
+#endif  // __HEXAGON_ARCH__ >= 73
+}
