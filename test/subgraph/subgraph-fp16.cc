@@ -351,6 +351,48 @@ TEST(SUBGRAPH_FP16, with_static_value) {
   // ASSERT_EQ(input->allocation_type, xnn_allocation_type_external);
 }
 
+TEST(SUBGRAPH_FP16, reduce_sum_times_static_scale) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  ASSERT_NE(hardware_config, nullptr);
+  if (!xnn_is_f16_compatible_config(hardware_config)) {
+    GTEST_SKIP();
+  }
+
+  SubgraphTester tester(4);
+  xnn_float16 scale_data[1 + XNN_EXTRA_BYTES / sizeof(xnn_float16)] = {0.125f};
+  // external input[0]
+  //        |
+  //  [reduce_sum]
+  //        |
+  //    value[1]   static[2]
+  //         \     /
+  //          [mul]
+  //            |
+  //         external
+  //         output[3]
+  tester.AddInputTensor({4, 8}, xnn_datatype_fp16, 0)
+      .AddDynamicTensor({4, 1}, 1, xnn_datatype_fp16)
+      .AddStaticTensorF16({1}, 2, scale_data)
+      .AddOutputTensor({4, 1}, xnn_datatype_fp16, 3)
+      .AddReduce(xnn_reduce_sum, {1}, 0, 1, XNN_FLAG_KEEP_DIMS)
+      .AddMultiply(1, 2, 3);
+  ASSERT_EQ(tester.CreateRuntime(), xnn_status_success);
+
+  std::vector<xnn_float16> input(4 * 8 + XNN_EXTRA_BYTES / sizeof(xnn_float16),
+                                 1.0f);
+  std::vector<xnn_float16> output(4 + XNN_EXTRA_BYTES / sizeof(xnn_float16),
+                                  0.0f);
+  tester.ReshapeExternalTensor({4, 8}, input.data(), 0)
+      .ReshapeExternalTensor({4, 1}, output.data(), 3)
+      .ReshapeRuntime()
+      .SetupRuntime();
+  ASSERT_EQ(tester.InvokeRuntime(), xnn_status_success);
+  for (size_t i = 0; i < 4; i++) {
+    EXPECT_EQ(static_cast<float>(output[i]), 1.0f);
+  }
+}
+
 TEST(SUBGRAPH_FP16, external_inputs_allocation_type_remains_external) {
   // external input[0]   static[1]
   //               \     /
