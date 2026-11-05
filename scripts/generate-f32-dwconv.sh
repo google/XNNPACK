@@ -322,4 +322,14 @@ tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=3 
 tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=4 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-4p8vc-minmax-rvv.c &
 tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-9p8vc-minmax-rvv.c &
 tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p8vc-minmax-rvv.c &
+
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=3 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-3p4vc-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=4 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-4p4vc-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=9 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-9p4vc-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=25 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-25p4vc-rvv.c &
+
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=3 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-3p4vc-minmax-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=4 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-4p4vc-minmax-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=9 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-9p4vc-minmax-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv-2px.c.in -D CHANNEL_TILE=m4 -D KERNEL_TILE=25 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p4vc-minmax-rvv.c &
 wait
