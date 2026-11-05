@@ -3510,7 +3510,7 @@ static void init_f32_to_bf16_cvt_config(void) {
 }
 
 static void init_f32_to_qp8_cvt_config(void) {
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
   f32_to_qp8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2);
   f32_to_qp8_cvt_config.element_tile = 2;
 #else

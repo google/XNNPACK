@@ -30,65 +30,129 @@
 // prevent coverage profiling (gcov / -fprofile-arcs) from injecting counter
 // increments that clobber x8/x9.
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
 
 #if XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) && \
-    XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)
+    XNN_ENABLE_ARM_SME_ACLE
 
 typedef struct sme_state {
   int64_t x0;
   int64_t x1;
 } sme_state_t;
 
+// On Windows/COFF (clang-cl / MSVC), __declspec(selectany) is only valid on
+// data symbols; use linker /alternatename directives to provide weak function
+// fallbacks instead.
+#if defined(_MSC_VER)
+#define XNN_SME_STUB_DECL(ret, name)                                     \
+  __pragma(comment(linker, "/alternatename:" #name "=__xnn_" #name)) ret \
+      __xnn_##name
+#else
+#define XNN_SME_STUB_DECL(ret, name) __attribute__((weak)) ret name
+#endif
+
 #if XNN_COMPILER_CLANG
 #define XNN_STUB_ATTRIBUTES \
   __attribute__((naked, no_profile_instrument_function))
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES uint64_t __arm_get_current_vg(void) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(uint64_t, __arm_get_current_vg)(void) {
   __asm__("mov x0, xzr\n\tret");
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES sme_state_t __arm_sme_state(void) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(sme_state_t, __arm_sme_state)(void) {
   __asm__("mov x0, xzr\n\tmov x1, xzr\n\tret");
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_restore(void* blk) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void, __arm_tpidr2_restore)(void* blk) {
   __asm__("ret");
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_save(void) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void, __arm_tpidr2_save)(void) {
   __asm__("ret");
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_za_disable(void) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void, __arm_za_disable)(void) {
   __asm__("ret");
 }
 
 #undef XNN_STUB_ATTRIBUTES
 #else
-// GCC does not support __attribute__((naked)) on AArch64.
+// GCC and MSVC cl.exe do not support __attribute__((naked)) on AArch64.
+#if XNN_COMPILER_GCC
 #define XNN_STUB_ATTRIBUTES __attribute__((no_profile_instrument_function))
+#else
+#define XNN_STUB_ATTRIBUTES
+#endif
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES uint64_t __arm_get_current_vg(void) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(uint64_t, __arm_get_current_vg)(void) {
   return 0;
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES sme_state_t __arm_sme_state(void) {
-  return (sme_state_t){0, 0};
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(sme_state_t, __arm_sme_state)(void) {
+  sme_state_t s = {0, 0};
+  return s;
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_restore(void* blk) {
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void, __arm_tpidr2_restore)(void* blk) {
   (void) blk;
 }
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_tpidr2_save(void) {}
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void, __arm_tpidr2_save)(void) {}
 
-XNN_WEAK_SYMBOL XNN_STUB_ATTRIBUTES void __arm_za_disable(void) {}
+XNN_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void, __arm_za_disable)(void) {}
 
 #undef XNN_STUB_ATTRIBUTES
 #endif  // XNN_COMPILER_CLANG
 
+#if XNN_COMPILER_CLANG || XNN_COMPILER_GCC
+#define XNN_SC_STUB_ATTRIBUTES \
+  __attribute__((target("general-regs-only"), no_profile_instrument_function))
+#else
+#define XNN_SC_STUB_ATTRIBUTES
+#endif
+
+XNN_SC_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void*, __arm_sc_memcpy)(
+    void* dest, const void* src, size_t n) {
+  volatile uint8_t* d = (volatile uint8_t*)dest;
+  const volatile uint8_t* s = (const volatile uint8_t*)src;
+  for (size_t i = 0; i < n; ++i) {
+    d[i] = s[i];
+  }
+  return dest;
+}
+
+XNN_SC_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void*, __arm_sc_memmove)(
+    void* dest, const void* src, size_t n) {
+  volatile uint8_t* d = (volatile uint8_t*)dest;
+  const volatile uint8_t* s = (const volatile uint8_t*)src;
+  if (d < s) {
+    for (size_t i = 0; i < n; ++i) {
+      d[i] = s[i];
+    }
+  } else if (d > s) {
+    for (size_t i = n; i > 0; --i) {
+      d[i - 1] = s[i - 1];
+    }
+  }
+  return dest;
+}
+
+XNN_SC_STUB_ATTRIBUTES XNN_SME_STUB_DECL(void*, __arm_sc_memset)(void* dest,
+                                                                 int c,
+                                                                 size_t n) {
+  volatile uint8_t* d = (volatile uint8_t*)dest;
+  const uint8_t v = (uint8_t)c;
+  for (size_t i = 0; i < n; ++i) {
+    d[i] = v;
+  }
+  return dest;
+}
+
+#undef XNN_SC_STUB_ATTRIBUTES
+#undef XNN_SME_STUB_DECL
+
 #endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) &&
-        // XNN_ENABLE_ARM_SME_ACLE && !defined(_WIN32)
+        // XNN_ENABLE_ARM_SME_ACLE

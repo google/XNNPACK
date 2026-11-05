@@ -384,6 +384,14 @@
 #define XNN_INLINE inline
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define XNN_NOINLINE __attribute__((__noinline__))
+#elif defined(_MSC_VER)
+#define XNN_NOINLINE __declspec(noinline)
+#else
+#define XNN_NOINLINE
+#endif
+
 #ifndef XNN_INTERNAL
 #if defined(__ELF__)
 #define XNN_INTERNAL __attribute__((__visibility__("internal")))
@@ -426,7 +434,8 @@
 #define XNN_ALLOCATION_ALIGNMENT 64
 #elif XNN_ARCH_HEXAGON
 #define XNN_ALLOCATION_ALIGNMENT 128
-#elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+#elif XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) && \
+    XNN_ENABLE_ARM_SME_ACLE
 #define XNN_ALLOCATION_ALIGNMENT 64
 #else
 #define XNN_ALLOCATION_ALIGNMENT 16

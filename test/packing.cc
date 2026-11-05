@@ -33,24 +33,6 @@ using testing::ElementsAreArray;
 using testing::Matcher;
 using testing::_;
 
-static void set_packed_i2(std::vector<uint8_t>& data, size_t byte_offset,
-                          size_t index, uint8_t value) {
-  const size_t shift = (index & 3) * 2;
-  uint8_t& byte = data[byte_offset + (index >> 2)];
-  byte = static_cast<uint8_t>((byte & ~(UINT8_C(0x3) << shift)) |
-                              ((value & UINT8_C(0x3)) << shift));
-}
-
-static void set_packed_i4(std::vector<uint8_t>& data, size_t byte_offset,
-                          size_t index, uint8_t value) {
-  uint8_t& byte = data[byte_offset + (index >> 1)];
-  if ((index & 1) == 0) {
-    byte = (byte & 0xF0) | (value & 0x0F);
-  } else {
-    byte = (byte & 0x0F) | ((value & 0x0F) << 4);
-  }
-}
-
 // QS8-QC2W GEMM packing tests.
 
 TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
@@ -349,7 +331,25 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
-#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+static void set_packed_i2(std::vector<uint8_t>& data, size_t byte_offset,
+                          size_t index, uint8_t value) {
+  const size_t shift = (index & 3) * 2;
+  uint8_t& byte = data[byte_offset + (index >> 2)];
+  byte = static_cast<uint8_t>((byte & ~(UINT8_C(0x3) << shift)) |
+                              ((value & UINT8_C(0x3)) << shift));
+}
+
+static void set_packed_i4(std::vector<uint8_t>& data, size_t byte_offset,
+                          size_t index, uint8_t value) {
+  uint8_t& byte = data[byte_offset + (index >> 1)];
+  if ((index & 1) == 0) {
+    byte = (byte & 0xF0) | (value & 0x0F);
+  } else {
+    byte = (byte & 0x0F) | ((value & 0x0F) << 4);
+  }
+}
+
 TEST(PACK_KAI_QS2_WEIGHTS_AND_BIASES_SME2, groups_and_optional_bias) {
   TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
 
@@ -632,7 +632,7 @@ TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2,
   EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
                           [](uint8_t value) { return value == 0xA5; }));
 }
-#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 
 #if XNN_ENABLE_KLEIDIAI
 class FailingAllocatorGuard {

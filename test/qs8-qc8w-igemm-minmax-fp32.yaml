@@ -608,7 +608,7 @@
   pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme
   pack: xnn_pack_kai_qs8_conv_goki_w_sme
   k-block: 4
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 
 # ARM SME
 - name: xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme
@@ -617,7 +617,7 @@
   pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme
   pack: xnn_pack_kai_qs8_conv_goki_w_sme
   k-block: 4
-  cpp-check: XNN_ENABLE_KLEIDIAI
+  cpp-check: XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 
 # x86 SSE
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64
