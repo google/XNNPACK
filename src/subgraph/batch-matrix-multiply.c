@@ -707,6 +707,14 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
       return xnn_status_unsupported_parameter;
   }
 
+  if (input2_value->shape.num_dims < 2) {
+    xnn_log_error("failed to define %s operator with input2 ID #%" PRIu32
+                  ": number of dimensions (%zu) must be at least 2",
+                  xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+                  input2_id, input2_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   status = xnn_subgraph_check_output_node_id(
       xnn_node_type_batch_matrix_multiply, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
