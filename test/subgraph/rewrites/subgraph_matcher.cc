@@ -471,6 +471,8 @@ class LogGraphStreamAdapter {
 #if defined(_MSC_VER)
     FILE* out;
     c_ret = tmpfile_s(&out);
+#elif defined(__hexagon__)
+    FILE* out = tmpfile();
 #else
     FILE* out = open_memstream(&str, &len);
 #endif
@@ -486,20 +488,30 @@ class LogGraphStreamAdapter {
     } else {
       fputs("<invalid subgraph handle>", out);
     }
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__hexagon__)
     // Get position in file for length.
+#if defined(_MSC_VER)
     int64_t pos = _ftelli64(out);
-    // Allocate buffer.
-    str = reinterpret_cast<char*>(malloc(pos + 1));
-    // Read temp file.
-    fseek(out, 0, SEEK_SET);
-    len = fread(str, sizeof(char), static_cast<size_t>(pos), out);
-    if (len == 0 && errno == EINVAL) {
+#else
+    int64_t pos = ftell(out);
+#endif
+    if (pos < 0 || fseek(out, 0, SEEK_SET) != 0) {
       const char error_msg[] = "<error reading tmp file to get graph log>";
       str = reinterpret_cast<char*>(malloc(sizeof(error_msg)));
       std::memcpy(str, error_msg, sizeof(error_msg));
     } else {
-      str[len] = '\0';
+      // Allocate buffer.
+      str = reinterpret_cast<char*>(malloc(static_cast<size_t>(pos) + 1));
+      // Read temp file.
+      len = fread(str, sizeof(char), static_cast<size_t>(pos), out);
+      if (ferror(out) || (len == 0 && pos > 0)) {
+        free(str);
+        const char error_msg[] = "<error reading tmp file to get graph log>";
+        str = reinterpret_cast<char*>(malloc(sizeof(error_msg)));
+        std::memcpy(str, error_msg, sizeof(error_msg));
+      } else {
+        str[len] = '\0';
+      }
     }
 #endif
     fclose(out);
