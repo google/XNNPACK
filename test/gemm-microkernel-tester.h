@@ -396,6 +396,18 @@ class GemmMicrokernelTester {
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+  void Test_PF32_QC8W(xnn_pf32_qc8w_gemm_minmax_ukernel_fn gemm,
+                      xnn_init_f32_minmax_params_fn init_minmax_params,
+                      xnn_x32_pack_lh_ukernel_fn pack_lh_fn,
+                      xnn_pack_lh_size_fn pack_lh_size_fn,
+                      xnn_pack_f32_qs8w_gemm_fn pack) const;
+
+  void Test_PF32_QC4W(xnn_pf32_qc4w_gemm_minmax_ukernel_fn gemm,
+                      xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
+                      xnn_x32_pack_lh_ukernel_fn pack_lh_fn,
+                      xnn_pack_lh_size_fn pack_lh_size_fn,
+                      xnn_pack_f32_qc4w_gemm_fn pack) const;
+
   void Test_PF32(xnn_pf32_packed_lhs_igemm_ukernel_fn packed_igemm,
                  xnn_init_f32_minmax_params_fn init_minmax_params,
                  xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,

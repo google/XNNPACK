@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <limits>
 #include <random>
@@ -3155,6 +3156,270 @@ void GemmMicrokernelTester::Test_PF32(
           << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
           << ", M x N x K = " << m() << " x " << n() << " x " << k()
           << ", nr = " << nr() << ", cm_stride = " << cm_stride();
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test_PF32_QC8W(
+    xnn_pf32_qc8w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_f32_minmax_params_fn init_minmax_params,
+    xnn_x32_pack_lh_ukernel_fn pack_lh_fn, xnn_pack_lh_size_fn pack_lh_size_fn,
+    xnn_pack_f32_qs8w_gemm_fn pack) const {
+  ASSERT_LE(m(), mr());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
+                          std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
+                            std::ref(rng));
+  auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
+                             std::numeric_limits<int8_t>::min(),
+                             std::numeric_limits<int8_t>::max()),
+                         std::ref(rng));
+  const float max_abs_product = 1.0f * 128.0f * 2.0f;
+
+  xnnpack::Buffer<float> input_f32(m() * k());
+  xnnpack::Buffer<int8_t> weights(n() * k());
+  xnnpack::Buffer<float> bias(n(), 0.0f);
+  xnnpack::Buffer<float> kernel_scale(n());
+  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<float> c_ref(m() * n(), 0.0f);
+
+  const size_t num_n_blocks = (n() + nr() - 1) / nr();
+  const size_t packed_w_stride =
+      nr() * sizeof(float) + nr() * k() * sizeof(int8_t) + nr() * sizeof(float);
+  const size_t packed_w_size = packed_w_stride * num_n_blocks;
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
+
+  std::generate(input_f32.begin(), input_f32.end(), std::ref(f32rng));
+
+  const size_t input_packed_size =
+      pack_lh_size_fn(m(), k(), mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t> input_packed(input_packed_size);
+  pack_lh_fn(m(), k(), mr_packed(), kr(), sr(), /*m_idx_start=*/0,
+             input_f32.data(), /*lhs_stride=*/k() * sizeof(float),
+             input_packed.data());
+
+  std::generate(weights.begin(), weights.end(), std::ref(w8rng));
+  std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+  std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
+
+  pack(/*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k(), weights.data(),
+       bias.data(), /*scale=*/nullptr, packed_w.data(),
+       /*extra_bytes=*/nr() * sizeof(float), /*params=*/nullptr);
+
+  xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), packed_w_stride, kernel_scale.data(),
+      (void*)((uintptr_t)packed_w.data() +
+              nr() * (sizeof(float) + k() * sizeof(int8_t))));
+
+  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      for (size_t k_index = 0; k_index < k(); k_index++) {
+        c_ref[m_index * n() + n_index] +=
+            input_f32[m_index * k() + k_index] *
+            static_cast<float>(weights[n_index * k() + k_index]);
+      }
+      c_ref[m_index * n() + n_index] += bias[n_index];
+      c_ref[m_index * n() + n_index] *= kernel_scale[n_index];
+    }
+  }
+
+  xnn_f32_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, min(), max());
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      c_ref[m_index * n() + n_index] =
+          std::max(std::min(c_ref[m_index * n() + n_index], max()), min());
+    }
+  }
+
+  gemm(m(), n(), k() * sizeof(float), input_packed.data(), packed_w.data(),
+       c.data(), cm_stride() * sizeof(float), sizeof(float), &minmax_params);
+
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], tolerance)
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << c[i * cm_stride() + j]
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k()
+          << ", nr = " << nr() << ", cm_stride = " << cm_stride();
+    }
+  }
+
+  if (n() > nr()) {
+    auto chunkrng = std::bind(std::uniform_int_distribution<size_t>(1, 3),
+                              std::ref(rng));
+    for (size_t split = 0; split < 3; split++) {
+      xnnpack::Buffer<float> c_split(c.size());
+      for (size_t n_start = 0; n_start < n();) {
+        const size_t chunk =
+            split == 0 ? nr() : (split == 1 ? 3 * nr() : chunkrng() * nr());
+        const size_t n_size = std::min(n() - n_start, chunk);
+        gemm(m(), n_size, k() * sizeof(float), input_packed.data(),
+             (const void*)((uintptr_t)packed_w.data() +
+                           n_start / nr() * packed_w_stride),
+             c_split.data() + n_start, cm_stride() * sizeof(float),
+             sizeof(float), &minmax_params);
+        n_start += n_size;
+      }
+      for (size_t i = 0; i < m(); i++) {
+        for (size_t j = 0; j < n(); j++) {
+          uint32_t split_bits;
+          uint32_t full_bits;
+          std::memcpy(&split_bits, &c_split[i * cm_stride() + j],
+                      sizeof(split_bits));
+          std::memcpy(&full_bits, &c[i * cm_stride() + j], sizeof(full_bits));
+          ASSERT_EQ(split_bits, full_bits)
+              << "at " << i << ", " << j << ": full = " << c[i * cm_stride() + j]
+              << ", split = " << c_split[i * cm_stride() + j]
+              << ", split pattern = " << split << ", M x N x K = " << m()
+              << " x " << n() << " x " << k() << ", nr = " << nr();
+        }
+      }
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test_PF32_QC4W(
+    xnn_pf32_qc4w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
+    xnn_x32_pack_lh_ukernel_fn pack_lh_fn, xnn_pack_lh_size_fn pack_lh_size_fn,
+    xnn_pack_f32_qc4w_gemm_fn pack) const {
+  ASSERT_LE(m(), mr());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
+                          std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
+                            std::ref(rng));
+  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
+                             0, std::numeric_limits<uint8_t>::max()),
+                         std::ref(rng));
+  const float max_abs_product = 1.0f * 15.0f * 2.0f;
+
+  const size_t k_stride = (k() + 1) / 2;
+  const size_t skr = kr() * sr();
+  const size_t packed_k_bytes = (k_stride + skr - 1) / skr * skr;
+  xnnpack::Buffer<float> input_f32(m() * k());
+  xnnpack::Buffer<uint8_t> weights(n() * k_stride);
+  xnnpack::Buffer<float> bias(n(), 0.0f);
+  xnnpack::Buffer<float> kernel_scale(n());
+  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<double> c_ref(m() * n(), 0.0);
+
+  const size_t num_n_blocks = (n() + nr() - 1) / nr();
+  const size_t packed_w_stride =
+      nr() * sizeof(float) + nr() * packed_k_bytes + nr() * sizeof(float);
+  const size_t packed_w_size = packed_w_stride * num_n_blocks;
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
+
+  std::generate(input_f32.begin(), input_f32.end(), std::ref(f32rng));
+
+  const size_t input_packed_size =
+      pack_lh_size_fn(m(), k(), mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t> input_packed(input_packed_size);
+  pack_lh_fn(m(), k(), mr_packed(), kr(), sr(), /*m_idx_start=*/0,
+             input_f32.data(), /*lhs_stride=*/k() * sizeof(float),
+             input_packed.data());
+
+  std::generate(weights.begin(), weights.end(), std::ref(u8rng));
+  if (k() & 1) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      weights[n_index * k_stride + k_stride - 1] &= UINT8_C(0xF);
+    }
+  }
+  std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+  std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
+
+  pack(/*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k(), weights.data(),
+       bias.data(), /*scale=*/nullptr, packed_w.data(),
+       /*extra_bytes=*/nr() * sizeof(float), /*params=*/nullptr);
+
+  xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), packed_w_stride, kernel_scale.data(),
+      (void*)((uintptr_t)packed_w.data() +
+              nr() * (sizeof(float) + packed_k_bytes)));
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      double acc = static_cast<double>(bias[n_index]);
+      for (size_t k_index = 0; k_index < k(); k_index++) {
+        const uint8_t byte = weights[n_index * k_stride + k_index / 2];
+        const int32_t w4 =
+            (k_index % 2 == 0) ? (byte & UINT8_C(0xF)) : (byte >> 4);
+        acc += static_cast<double>(input_f32[m_index * k() + k_index]) *
+               static_cast<double>(w4 - static_cast<int32_t>(b_zero_point()));
+      }
+      c_ref[m_index * n() + n_index] =
+          acc * static_cast<double>(kernel_scale[n_index]);
+    }
+  }
+
+  xnn_f32_qc4w_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, min(), max(), b_zero_point());
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      c_ref[m_index * n() + n_index] =
+          std::max(std::min(c_ref[m_index * n() + n_index],
+                            static_cast<double>(max())),
+                   static_cast<double>(min()));
+    }
+  }
+
+  gemm(m(), n(), k() * sizeof(float), input_packed.data(), packed_w.data(),
+       c.data(), cm_stride() * sizeof(float), sizeof(float), &minmax_params);
+
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], tolerance)
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << c[i * cm_stride() + j]
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k()
+          << ", nr = " << nr() << ", cm_stride = " << cm_stride()
+          << ", kernel zero point = " << static_cast<int32_t>(b_zero_point());
+    }
+  }
+
+  if (n() > nr()) {
+    auto chunkrng = std::bind(std::uniform_int_distribution<size_t>(1, 3),
+                              std::ref(rng));
+    for (size_t split = 0; split < 3; split++) {
+      xnnpack::Buffer<float> c_split(c.size());
+      for (size_t n_start = 0; n_start < n();) {
+        const size_t chunk =
+            split == 0 ? nr() : (split == 1 ? 3 * nr() : chunkrng() * nr());
+        const size_t n_size = std::min(n() - n_start, chunk);
+        gemm(m(), n_size, k() * sizeof(float), input_packed.data(),
+             (const void*)((uintptr_t)packed_w.data() +
+                           n_start / nr() * packed_w_stride),
+             c_split.data() + n_start, cm_stride() * sizeof(float),
+             sizeof(float), &minmax_params);
+        n_start += n_size;
+      }
+      for (size_t i = 0; i < m(); i++) {
+        for (size_t j = 0; j < n(); j++) {
+          uint32_t split_bits;
+          uint32_t full_bits;
+          std::memcpy(&split_bits, &c_split[i * cm_stride() + j],
+                      sizeof(split_bits));
+          std::memcpy(&full_bits, &c[i * cm_stride() + j], sizeof(full_bits));
+          ASSERT_EQ(split_bits, full_bits)
+              << "at " << i << ", " << j << ": full = " << c[i * cm_stride() + j]
+              << ", split = " << c_split[i * cm_stride() + j]
+              << ", split pattern = " << split << ", M x N x K = " << m()
+              << " x " << n() << " x " << k() << ", nr = " << nr();
+        }
+      }
     }
   }
 }

@@ -5,6 +5,8 @@
 #   Generator: tools/update-microkernels.py
 #
 
+"""Microkernel filenames lists for neonsme."""
+
 PROD_NEONSME_MICROKERNEL_SRCS = [
     "src/pf16-f16-f16-igemm/pf16-f16-f16-igemm-32x32c2-minmax-neonsme.c",
     "src/pf16-gemm/pf16-gemm-1x32c2-minmax-neonsme.c",
@@ -27,6 +29,11 @@ PROD_NEONSME_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEONSME_MICROKERNEL_SRCS = [
+    "src/pf32-qc4w-gemm/pf32-qc4w-gemm-1x32-minmax-sme.c",
+    "src/pf32-qc4w-gemm/pf32-qc4w-gemm-32x32-minmax-sme.c",
+    "src/pf32-qc8w-gemm/pf32-qc8w-gemm-1x32-minmax-sme.c",
+    "src/pf32-qc8w-gemm/pf32-qc8w-gemm-32x32-minmax-sme.c",
+    "src/x32-pack-lh/x32-packlh-sme.c",
 ]
 
 ALL_NEONSME_MICROKERNEL_SRCS = PROD_NEONSME_MICROKERNEL_SRCS + NON_PROD_NEONSME_MICROKERNEL_SRCS

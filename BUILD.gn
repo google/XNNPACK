@@ -718,6 +718,7 @@ if (current_cpu == "arm64") {
 
   xnnpack_source_set("sme_microkernels") {
     deps = [
+      ":arm_sme_abi_stubs",
       ":microkernel_defs",
       ":microkernel_headers",
     ]
@@ -1419,6 +1420,8 @@ GEMM_MICROKERNEL_TESTS = [
   "test/f32-igemm-minmax.cc",
   "test/f32-igemm-minmax-2.cc",
   "test/pf32-gemm-minmax.cc",
+  "test/pf32-qc4w-gemm-minmax.cc",
+  "test/pf32-qc8w-gemm-minmax.cc",
   "test/f32-qc8w-gemm.cc",
   "test/f32-qc4w-gemm-minmax.cc",
   "test/f32-qc8w-gemm-minmax.cc",
@@ -1769,6 +1772,8 @@ if (!build_with_chromium && xnnpack_build_all_microkernels) {
     "bench/f32-vscaleextexp.cc",
     "bench/pf16-gemm-minmax.cc",
     "bench/pf32-gemm-minmax.cc",
+    "bench/pf32-qc4w-gemm-minmax.cc",
+    "bench/pf32-qc8w-gemm-minmax.cc",
     "bench/pqs8-qc8w-gemm-minmax.cc",
     "bench/qb4-packw.cc",
     "bench/qd8-bf16-qb4w-gemm.cc",

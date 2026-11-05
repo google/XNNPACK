@@ -72,6 +72,7 @@ _ISA_LIST = frozenset({
     'rvv',
     'rvvfp16arith',
     'scalar',
+    'sme',
     'sme2',
     'sse',
     'sse2',
@@ -89,6 +90,7 @@ _ISA_LIST = frozenset({
 })
 
 _ISA_MAP = {
+    'sme': 'neonsme',
     'sme2': 'neonsme2',
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
@@ -394,7 +396,7 @@ def main(args):
 #
 ''' + (
             f'\n"""Microkernel filenames lists for {key}."""\n'
-            if key in ('hmx', 'sve2')
+            if key in ('hmx', 'neonsme', 'neonsme2', 'sve2')
             else ''
         ))
         prod_c_vars = write_grouped_microkernels_bzl(

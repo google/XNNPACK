@@ -3,7 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+#include "src/xnnpack/common.h"
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
 #include <arm_sme.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -11,7 +13,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/pack-lh.h"
 
@@ -43,7 +44,16 @@ static void xnn_x32_packlh_sme_m32__sme2(
     const size_t vl = svcntw();
     const size_t mr2 = 2 * vl;
 #ifdef PREFETCH_A_MATRIX
-    bool need_prfm = (k >= 4 * vl);
+#if defined(__APPLE__)
+    const size_t prfm_line_size = 128;
+    const size_t prfm_min_lhs_size = (1024 * 1024);
+#else
+    const size_t prfm_line_size = 64;
+    const size_t prfm_min_lhs_size = (128 * 1024);
+#endif
+    const size_t prfm_line = prfm_line_size / sizeof(float);
+    const size_t prfm_dist = 4 * vl;
+    const bool need_prfm = (m * k * sizeof(float) >= prfm_min_lhs_size);
 #endif
 
     size_t m_roundup_mr = ((m + mr2 - 1) / mr2) * mr2;
@@ -56,13 +66,13 @@ static void xnn_x32_packlh_sme_m32__sme2(
       float* lhs_packed_0 = lhs_packed + mr_blk_idx * k;
 
 #ifdef PREFETCH_A_MATRIX
+      size_t pf_col = 0;
       if (need_prfm) {
-        for (size_t r = 0; r < current_m; r++) {
-          const float* row_ptr = lhs_blk + (r * lhs_row_stride);
-          __builtin_prefetch(row_ptr + 0, 0, 2);
-          __builtin_prefetch(row_ptr + vl, 0, 2);
-          __builtin_prefetch(row_ptr + 2 * vl, 0, 2);
-          __builtin_prefetch(row_ptr + 3 * vl, 0, 2);
+        const size_t pf_end = (k < prfm_dist) ? k : prfm_dist;
+        for (; pf_col < pf_end; pf_col += prfm_line) {
+          for (size_t r = 0; r < current_m; r++) {
+            __builtin_prefetch(lhs_blk + r * lhs_row_stride + pf_col, 0, 2);
+          }
         }
       }
 #endif
@@ -85,12 +95,11 @@ static void xnn_x32_packlh_sme_m32__sme2(
 
 #ifdef PREFETCH_A_MATRIX
           if (need_prfm) {
-            for (size_t r = 0; r < mr2; r++) {
-              const float* r_ptr = lhs_offset + (r * lhs_row_stride);
-              if (k_idx + 4 * vl < k) __builtin_prefetch(r_ptr + 4 * vl, 0, 2);
-              if (k_idx + 5 * vl < k) __builtin_prefetch(r_ptr + 5 * vl, 0, 2);
-              if (k_idx + 6 * vl < k) __builtin_prefetch(r_ptr + 6 * vl, 0, 2);
-              if (k_idx + 7 * vl < k) __builtin_prefetch(r_ptr + 7 * vl, 0, 2);
+            const size_t pf_end = (k_idx + 4 * vl + prfm_dist < k) ? (k_idx + 4 * vl + prfm_dist) : k;
+            for (; pf_col < pf_end; pf_col += prfm_line) {
+              for (size_t r = 0; r < mr2; r++) {
+                __builtin_prefetch(lhs_blk + r * lhs_row_stride + pf_col, 0, 2);
+              }
             }
           }
 #endif
@@ -108,10 +117,10 @@ static void xnn_x32_packlh_sme_m32__sme2(
               svfloat32x4_t r2_x4 = svld1_f32_x4(svptrue_c32(), src2);
               svfloat32x4_t r3_x4 = svld1_f32_x4(svptrue_c32(), src3);
 
-              svwrite_hor_za32_f32_vg4(0, row_idx, svcreate4(svget4(r0_x4, 0), svget4(r1_x4, 0), svget4(r2_x4, 0), svget4(r3_x4, 0)));
-              svwrite_hor_za32_f32_vg4(1, row_idx, svcreate4(svget4(r0_x4, 1), svget4(r1_x4, 1), svget4(r2_x4, 1), svget4(r3_x4, 1)));
-              svwrite_hor_za32_f32_vg4(2, row_idx, svcreate4(svget4(r0_x4, 2), svget4(r1_x4, 2), svget4(r2_x4, 2), svget4(r3_x4, 2)));
-              svwrite_hor_za32_f32_vg4(3, row_idx, svcreate4(svget4(r0_x4, 3), svget4(r1_x4, 3), svget4(r2_x4, 3), svget4(r3_x4, 3)));
+              svwrite_hor_za32_f32_vg4(0, row_idx, svcreate4_f32(svget4_f32(r0_x4, 0), svget4_f32(r1_x4, 0), svget4_f32(r2_x4, 0), svget4_f32(r3_x4, 0)));
+              svwrite_hor_za32_f32_vg4(1, row_idx, svcreate4_f32(svget4_f32(r0_x4, 1), svget4_f32(r1_x4, 1), svget4_f32(r2_x4, 1), svget4_f32(r3_x4, 1)));
+              svwrite_hor_za32_f32_vg4(2, row_idx, svcreate4_f32(svget4_f32(r0_x4, 2), svget4_f32(r1_x4, 2), svget4_f32(r2_x4, 2), svget4_f32(r3_x4, 2)));
+              svwrite_hor_za32_f32_vg4(3, row_idx, svcreate4_f32(svget4_f32(r0_x4, 3), svget4_f32(r1_x4, 3), svget4_f32(r2_x4, 3), svget4_f32(r3_x4, 3)));
             }
 
             for (size_t c = 0; c < vl; c += 1) {
@@ -138,6 +147,17 @@ static void xnn_x32_packlh_sme_m32__sme2(
           const float* src_ptr_1;
           const float* lhs_offset = lhs_blk + k_idx;
 
+#ifdef PREFETCH_A_MATRIX
+          if (need_prfm) {
+            const size_t pf_end = (k_idx + mr2 + prfm_dist < k) ? (k_idx + mr2 + prfm_dist) : k;
+            for (; pf_col < pf_end; pf_col += prfm_line) {
+              for (size_t r = 0; r < current_m; r++) {
+                __builtin_prefetch(lhs_blk + r * lhs_row_stride + pf_col, 0, 2);
+              }
+            }
+          }
+#endif
+
           for (size_t row_idx = 0; row_idx < row_end; row_idx = row_idx + 2) {
             size_t m_valid_0 = 1;
             size_t m_valid_1 = 1;
@@ -160,10 +180,10 @@ static void xnn_x32_packlh_sme_m32__sme2(
             if (XNN_LIKELY(len_2x == mr2 && m_valid_0 && m_valid_1)) {
               svfloat32x2_t s0_x2 = svld1_f32_x2(svptrue_c32(), src_ptr_0);
               svfloat32x2_t s1_x2 = svld1_f32_x2(svptrue_c32(), src_ptr_1);
-              s0_l = svget2(s0_x2, 0);
-              s0_h = svget2(s0_x2, 1);
-              s1_l = svget2(s1_x2, 0);
-              s1_h = svget2(s1_x2, 1);
+              s0_l = svget2_f32(s0_x2, 0);
+              s0_h = svget2_f32(s0_x2, 1);
+              s1_l = svget2_f32(s1_x2, 0);
+              s1_h = svget2_f32(s1_x2, 1);
             } else {
               svbool_t pg_0_low  = svwhilelt_b32_u64(0, m_valid_0 ? len_2x : 0);
               svbool_t pg_0_high = svwhilelt_b32_u64(vl, m_valid_0 ? len_2x : 0);
@@ -176,25 +196,13 @@ static void xnn_x32_packlh_sme_m32__sme2(
               s1_h = svld1_f32(pg_1_high, src_ptr_1 + vl);
             }
 
-#ifdef PREFETCH_A_MATRIX
-            if (need_prfm) {
-              if (k_idx + mr2 < k) {
-                if (m_valid_0) __builtin_prefetch(src_ptr_0 + mr2, 0, 2);
-                if (m_valid_1) __builtin_prefetch(src_ptr_1 + mr2, 0, 2);
-              }
-              if (k_idx + 3 * vl < k) {
-                if (m_valid_0) __builtin_prefetch(src_ptr_0 + 3 * vl, 0, 2);
-                if (m_valid_1) __builtin_prefetch(src_ptr_1 + 3 * vl, 0, 2);
-              }
-            }
-#endif
 
             if (row_idx < vl) {
-              svwrite_hor_za32_f32_vg2(0, row_idx,      svcreate2(s0_l, s1_l));
-              svwrite_hor_za32_f32_vg2(1, row_idx,      svcreate2(s0_h, s1_h));
+              svwrite_hor_za32_f32_vg2(0, row_idx,      svcreate2_f32(s0_l, s1_l));
+              svwrite_hor_za32_f32_vg2(1, row_idx,      svcreate2_f32(s0_h, s1_h));
             } else {
-              svwrite_hor_za32_f32_vg2(2, row_idx - vl, svcreate2(s0_l, s1_l));
-              svwrite_hor_za32_f32_vg2(3, row_idx - vl, svcreate2(s0_h, s1_h));
+              svwrite_hor_za32_f32_vg2(2, row_idx - vl, svcreate2_f32(s0_l, s1_l));
+              svwrite_hor_za32_f32_vg2(3, row_idx - vl, svcreate2_f32(s0_h, s1_h));
             }
           }
 
@@ -218,6 +226,9 @@ void xnn_x32_pack_lh_ukernel__sme2(
     size_t m, size_t k, size_t mr, size_t kr, size_t sr, size_t m_idx_start, const float* restrict lhs,
     size_t lhs_stride, void* restrict lhs_packed)
 {
+  if XNN_UNLIKELY(m == 0 || k == 0) {
+    return;
+  }
   assert(kr == 1);
   assert(sr == 1);
   assert(mr == 1 || mr == 2 * svcntsw());
@@ -237,4 +248,4 @@ void xnn_x32_pack_lh_ukernel__sme2(
   }
 }
 
-#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
