@@ -22,8 +22,11 @@ class packer {
   // `stride_m` and `stride_n` are the strides in bytes of the two input
   // dimensions.
   // `tile_m` must be a power of 2.
+  // `transpose` indicates the input is transposed, i.e. the `m` dimension is
+  // contiguous. This is inferred from the strides when possible, but it must be
+  // specified for sub-byte types, where the strides are ambiguous.
   packer(size_t stride_m, size_t stride_n, size_t elem_size_bits, size_t tile_m,
-         size_t tile_n, size_t output_stride);
+         size_t tile_n, size_t output_stride, bool transpose = false);
 
   // Run the packing operation for input and output buffers. The input has an
   // un-transposed shape of `m` x `n`. The output will be rounded up to a

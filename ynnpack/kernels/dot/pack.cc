@@ -55,7 +55,8 @@ interleave_kernel_fn get_broadcast_interleave_kernel(size_t elem_size_bits) {
 }  // namespace
 
 packer::packer(size_t stride_m, size_t stride_n, size_t elem_size_bits,
-               size_t tile_m, size_t tile_n, size_t output_stride)
+               size_t tile_m, size_t tile_n, size_t output_stride,
+               bool transpose)
     : stride_m(stride_m),
       stride_n(stride_n),
       elem_size_bits(elem_size_bits),
@@ -83,9 +84,13 @@ packer::packer(size_t stride_m, size_t stride_n, size_t elem_size_bits,
     interleave_fn = get_broadcast_interleave_kernel(elem_size_bits);
     return;
   }
-  const size_t elem_size_bytes = elem_size_bits / 8;
-  if (stride_m == elem_size_bytes && tile_n == 1 &&
-      output_stride == elem_size_bytes * tile_m) {
+  // Note that for sub-byte elements, a stride in bytes can never be equal to
+  // the element size, so we can only detect that the input is transposed via
+  // the `transpose` flag.
+  const bool m_contiguous = stride_m * 8 == elem_size_bits;
+  const bool n_contiguous = stride_n * 8 == elem_size_bits;
+  if (m_contiguous && tile_n == 1 &&
+      output_stride * 8 == elem_size_bits * tile_m) {
     // This is a transpose of a row or column that remains contiguous.
     transpose_fn = [](size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                       const void* a, size_t stride_x, void* x) {
@@ -97,8 +102,7 @@ packer::packer(size_t stride_m, size_t stride_n, size_t elem_size_bits,
                     m * stride_x - copy_bytes);
       }
     };
-  } else if (stride_m == elem_size_bytes &&
-             (stride_n != elem_size_bytes || tile_n == 1)) {
+  } else if (transpose || (m_contiguous && (!n_contiguous || tile_n == 1))) {
     // We have all 3 transposes.
     // We're transposing columns of the input to rows of the output, but doing
     // `tile_m` of them at a time. In this case, (2) and (3) are equivalent to
@@ -144,8 +148,8 @@ void packer::pack(size_t m, size_t n, const void* input,
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
       const size_t m_tiles = ceil_div(m, tile_m);
-      transpose_fn(m_tiles, n_i, m * elem_size_bits / 8, stride_n, input,
-                   output_stride, output);
+      transpose_fn(m_tiles, n_i, ceil_div(m * elem_size_bits, 8), stride_n,
+                   input, output_stride, output);
       if (n_i < tile_n) {
         // The transpose only produces `n_i` columns of each row, set the
         // padding columns to 0. This should not be necessary, but the kernels
@@ -161,8 +165,7 @@ void packer::pack(size_t m, size_t n, const void* input,
                  padding_size);
         }
       }
-      size_t elem_count = std::max<size_t>(8 / elem_size_bits, 1);
-      input = offset_bytes(input, stride_n * (tile_n / elem_count));
+      input = offset_bytes(input, stride_n * tile_n);
       output = offset_bytes(output, output_block_stride);
       n = sub_sat(n, tile_n);
     }
