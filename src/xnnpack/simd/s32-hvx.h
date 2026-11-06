@@ -91,5 +91,29 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
   return Q6_V_vstu_variable(output, num_elements << XNN_LOG2_SIZEOF_INT32_T, v);
 }
 
+// Conversion operations.
+static XNN_INLINE HVX_Vector xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+#if __HVX_ARCH__ >= 73
+  return Q6_Vsf_equals_Vw(a);
+#else
+  // Integer-only conversion with round-to-nearest-even (no vconv.sf.w).
+  const HVX_Vector vsign = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x80000000));
+  const HVX_Vector vabs = Q6_Vw_vabs_Vw(a);  // INT32_MIN -> 0x80000000 (2^31).
+  const HVX_Vector vclz = Q6_Vuw_vcl0_Vuw(vabs);
+  const HVX_Vector vnorm = Q6_Vw_vasl_VwVw(vabs, vclz);
+  const HVX_Vector vmant = Q6_Vuw_vlsr_VuwR(vnorm, 8);
+  const HVX_Vector vrem = Q6_V_vand_VV(vnorm, Q6_V_vsplat_R(0xFF));
+  const HVX_Vector vodd = Q6_V_vand_VV(vmant, Q6_V_vsplat_R(1));
+  const HVX_Vector vinc = Q6_Vuw_vlsr_VuwR(
+      Q6_Vw_vadd_VwVw(Q6_Vw_vadd_VwVw(vrem, vodd), Q6_V_vsplat_R(0x7F)), 8);
+  // Biased exponent minus 1; the implicit mantissa bit carries it back.
+  const HVX_Vector vexp =
+      Q6_Vw_vasl_VwR(Q6_Vw_vsub_VwVw(Q6_V_vsplat_R(157), vclz), 23);
+  const HVX_Vector vresult = Q6_V_vor_VV(
+      Q6_Vw_vadd_VwVw(Q6_Vw_vadd_VwVw(vexp, vmant), vinc), vsign);
+  return Q6_V_vmux_QVV(Q6_Q_vcmp_eq_VwVw(a, Q6_V_vzero()), Q6_V_vzero(),
+                       vresult);
+#endif
+}
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_

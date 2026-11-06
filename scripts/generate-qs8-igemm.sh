@@ -1191,8 +1191,17 @@ tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=6  -D NR=128 -D DATATYPE=QC8 -D PREF
 tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=7  -D NR=128 -D DATATYPE=QC8 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x128c4-minmax-fp32-hvx-prfm.c &
 tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=128 -D DATATYPE=QC8 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x128c4-minmax-fp32-hvx-prfm.c &
 
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=64  -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x64c4-minmax-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=64  -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x64c4-minmax-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=64  -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x64c4-minmax-hvx.c &
+
 tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=128 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x128c4-minmax-hvx.c &
 tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=128 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x128c4-minmax-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=128 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x128c4-minmax-hvx.c &
+
+################################## Hexagon HMX #################################
+tools/xngen src/qs8-igemm/c4-hmx.c.in -D MR=32 -D NR=64 -D DATATYPE=QC8     -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-32x64c4-minmax-fp32-hmx.c &
+tools/xngen src/qs8-igemm/c4-hmx.c.in -D MR=32 -D NR=64 -D DATATYPE=QD8_F32 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-32x64c4-minmax-hmx.c &
 
 ################################### x86 ACE ###################################
 tools/xngen src/qs8-igemm/c4-ace.c.in -D MR=1  -D NR=32 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x32c4-minmax-ace.c &

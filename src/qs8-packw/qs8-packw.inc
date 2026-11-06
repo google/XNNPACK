@@ -100,3 +100,11 @@ XNN_QS8_UKERNEL(xnn_arch_arm_neon, xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon, 1
 XNN_QS8_UKERNEL(xnn_arch_arm_neon, xnn_qs8_packw_gemm_goi_ukernel_x16c8__neon_prfm, 16, 8, 1, 16, 1, 0)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_QS8_UKERNEL(xnn_arch_hvx, xnn_qs8_packw_gemm_goi_ukernel_x64c4__hvx, 64, 4, 1, 128, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_hvx, xnn_qs8_packw_gemm_goi_ukernel_x128c4__hvx, 128, 4, 1, 128, 1, 0)
+
+XNN_QS8_GIO_UKERNEL(xnn_arch_hvx, xnn_qs8_packw_gemm_gio_ukernel_x64c4__hvx, 64, 4, 1, 8, 1, 0)
+XNN_QS8_GIO_UKERNEL(xnn_arch_hvx, xnn_qs8_packw_gemm_gio_ukernel_x128c4__hvx, 128, 4, 1, 8, 1, 0)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
