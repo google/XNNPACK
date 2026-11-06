@@ -1085,6 +1085,12 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       continue;
     }
 
+    if (node->type == xnn_node_type_softmax &&
+        (node->flags & XNN_FLAG_SAFE_SOFTMAX)) {
+      xnn_log_warning("FP16 rewrite aborted: safe softmax requires FP32");
+      return false;
+    }
+
     if (!any_values_fp32(subgraph, node)) {
       xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32
                       " (%s) is not FP32",

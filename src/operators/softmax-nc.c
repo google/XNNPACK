@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -37,6 +38,11 @@ enum xnn_status xnn_create_softmax_nc_qu8(
     uint32_t flags,
     xnn_operator_t* softmax_op_out)
 {
+  if (flags & XNN_FLAG_SAFE_SOFTMAX) {
+    xnn_log_error("safe softmax is only supported for FP32");
+    return xnn_status_unsupported_parameter;
+  }
+
   xnn_operator_t softmax_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
@@ -319,6 +325,11 @@ enum xnn_status xnn_create_softmax_nc_f16(
     uint32_t flags,
     xnn_operator_t* softmax_op_out)
 {
+  if (flags & XNN_FLAG_SAFE_SOFTMAX) {
+    xnn_log_error("safe softmax is only supported for FP32");
+    return xnn_status_unsupported_parameter;
+  }
+
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
     xnn_init_f16_raddstoreexpminusmax_config();
   if (raddstoreexpminusmax_config == NULL) {
@@ -513,6 +524,7 @@ static enum xnn_status reshape_softmax_nc_floating_point(
   softmax_op->context.floating_point_softmax =
       (struct floating_point_softmax_context) {
     .n = n,
+    .safe_softmax = (softmax_op->flags & XNN_FLAG_SAFE_SOFTMAX) != 0,
     .x_stride = x_stride,
     .y_stride = y_stride,
     .rmax_ukernel = rmax,

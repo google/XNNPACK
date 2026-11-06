@@ -1894,6 +1894,19 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_floating_point_softmax(
   memcpy(&x_max, &context->rmax_init, sizeof(x_max));
   context->rmax_ukernel(n, x, &x_max, &context->rmax_params);
 
+  if (context->safe_softmax && x_max.as_float == -INFINITY) {
+    const float* input = (const float*)x;
+    unsigned any_other = 0;
+    for (size_t c = 0; c < n / sizeof(float); c++) {
+      // Inequality also detects NaNs that the maximum reduction may ignore.
+      any_other |= (unsigned)(input[c] != -INFINITY);
+    }
+    if (any_other == 0) {
+      memset(y, 0, n);
+      return;
+    }
+  }
+
   // Second pass: reduce-add & store exp(x-x_max)
   float y_sum;
   context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum,
