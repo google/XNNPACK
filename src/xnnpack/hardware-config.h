@@ -168,6 +168,9 @@ enum xnn_uarch {
   xnn_uarch_tilos_sawtooth,
   xnn_uarch_tupai_everest,
   xnn_uarch_tupai_sawtooth,
+
+  xnn_uarch_sifive_x280,
+  xnn_uarch_sifive_x390,
 };
 
 struct xnn_hardware_config {
