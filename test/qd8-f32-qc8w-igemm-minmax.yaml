@@ -303,6 +303,22 @@
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 
+# ARM SME2 / SME (packed LHS)
+- name: xnn_pqd8_f32_qc8w_igemm_minmax_ukernel_32x32c4__sme2
+  init: xnn_init_f32_minmax_scalar_params
+  pack-lh-fn: xnn_x8_pack_lh_ukernel__igemm_neonsme
+  pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+  cpp-check: XNN_ENABLE_KLEIDIAI
+- name: xnn_pqd8_f32_qc8w_igemm_minmax_ukernel_32x32c4__sme
+  init: xnn_init_f32_minmax_scalar_params
+  pack-lh-fn: xnn_x8_pack_lh_ukernel__igemm_neonsme
+  pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+  cpp-check: XNN_ENABLE_KLEIDIAI
+
 # AVX512SKX
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c8__avx512skx
   init: xnn_init_f32_minmax_scalar_params

@@ -243,6 +243,13 @@ class ConvolutionOperatorTester {
     return this->transient_indirection_buffer_;
   }
 
+  ConvolutionOperatorTester& inline_lhs_packing(bool inline_lhs_packing) {
+    this->inline_lhs_packing_ = inline_lhs_packing;
+    return *this;
+  }
+
+  bool inline_lhs_packing() const { return this->inline_lhs_packing_; }
+
   ConvolutionOperatorTester& kernel_height(uint32_t kernel_height) {
     assert(kernel_height >= 1);
     this->kernel_height_ = kernel_height;
@@ -1364,6 +1371,14 @@ class ConvolutionOperatorTester {
     }
   }
 
+  // Same as TestNHWCxQD8F32QC8W, but requests inline LHS packing, which uses
+  // the packed-LHS qd8 IGEMM microkernels when available.
+  void TestNHWCxQD8F32QC8WInlineLHS() const {
+    ConvolutionOperatorTester tester(*this);
+    tester.inline_lhs_packing(true);
+    tester.TestNHWCxQD8F32QC8W();
+  }
+
   void TestNHWCxQD8F32QC8W() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -1462,6 +1477,9 @@ class ConvolutionOperatorTester {
       }
       if (transient_indirection_buffer()) {
         flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+      }
+      if (inline_lhs_packing()) {
+        flags |= XNN_FLAG_INLINE_LHS_PACKING;
       }
       xnn_status status = xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
           padding_tf_same() ? 0 : padding_top(),
@@ -5636,6 +5654,7 @@ class ConvolutionOperatorTester {
   bool multithreaded_{false};
   bool use_weights_cache_{false};
   bool transient_indirection_buffer_{false};
+  bool inline_lhs_packing_{false};
 };
 
 #endif  // XNNPACK_TEST_OPERATORS_CONVOLUTION_OPERATOR_TESTER_H_

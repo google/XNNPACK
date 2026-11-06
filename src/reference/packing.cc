@@ -26,6 +26,10 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/unaligned.h"
 
+#if XNN_ARCH_ARM64
+#include <arm_neon.h>
+#endif  // XNN_ARCH_ARM64
+
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/kai_matmul_pack_rhs.h"
 #include "kai/ukernels/matmul/kai_matmul_pack_rhs_types.h"
@@ -4327,11 +4331,137 @@ void xnn_pack_qs8_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
 
   const size_t skr = sr * kr;
   const uint32_t izp = (int32_t)params->input_zero_point;
+#if XNN_ARCH_ARM64
+  if (kr == 4 && sr == 1) {
+    const size_t kc_blocks = round_up_po2(kc, 4) >> 2;
+    const size_t dst_stride = nr * 4;
+    do {
+      for (size_t nr_block_start = 0; nr_block_start < nc;
+           nr_block_start += nr) {
+        const size_t nr_block_size = min(nc - nr_block_start, nr);
+        unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
+        copy_bias(b, nr_block_start, nr_block_size, packed_b);
+        std::fill_n(packed_b + nr_block_size, nr - nr_block_size, 0);
+        int8_t* w_panel = reinterpret_cast<int8_t*>(
+            (uintptr_t)packed_weights + nr * sizeof(int32_t));
+        if (nr_block_size < nr) {
+          std::memset(w_panel, 0, ks * kc_blocks * dst_stride);
+        }
+
+        size_t no = 0;
+        for (; no + 4 <= nr_block_size; no += 4) {
+          int32x4_t vksum0 = vdupq_n_s32(0);
+          int32x4_t vksum1 = vdupq_n_s32(0);
+          int32x4_t vksum2 = vdupq_n_s32(0);
+          int32x4_t vksum3 = vdupq_n_s32(0);
+          int32_t s0 = 0;
+          int32_t s1 = 0;
+          int32_t s2 = 0;
+          int32_t s3 = 0;
+
+          for (size_t ki = 0; ki < ks; ki++) {
+            const int8_t* k0 = &k[((nr_block_start + no) * ks + ki) * kc];
+            const int8_t* k1 = k0 + ks * kc;
+            const int8_t* k2 = k1 + ks * kc;
+            const int8_t* k3 = k2 + ks * kc;
+            int8_t* dst = w_panel + (ki * kc_blocks * nr + no) * 4;
+
+            size_t c = 0;
+            for (; c + 16 <= kc; c += 16) {
+              const int8x16_t r0 = vld1q_s8(k0 + c);
+              const int8x16_t r1 = vld1q_s8(k1 + c);
+              const int8x16_t r2 = vld1q_s8(k2 + c);
+              const int8x16_t r3 = vld1q_s8(k3 + c);
+              vksum0 = vpadalq_s16(vksum0, vpaddlq_s8(r0));
+              vksum1 = vpadalq_s16(vksum1, vpaddlq_s8(r1));
+              vksum2 = vpadalq_s16(vksum2, vpaddlq_s8(r2));
+              vksum3 = vpadalq_s16(vksum3, vpaddlq_s8(r3));
+
+              const int32x4_t w0 = vreinterpretq_s32_s8(r0);
+              const int32x4_t w1 = vreinterpretq_s32_s8(r1);
+              const int32x4_t w2 = vreinterpretq_s32_s8(r2);
+              const int32x4_t w3 = vreinterpretq_s32_s8(r3);
+              const int64x2_t t0 = vreinterpretq_s64_s32(vtrn1q_s32(w0, w1));
+              const int64x2_t t1 = vreinterpretq_s64_s32(vtrn2q_s32(w0, w1));
+              const int64x2_t t2 = vreinterpretq_s64_s32(vtrn1q_s32(w2, w3));
+              const int64x2_t t3 = vreinterpretq_s64_s32(vtrn2q_s32(w2, w3));
+              vst1q_s8(dst + 0 * dst_stride,
+                       vreinterpretq_s8_s64(vtrn1q_s64(t0, t2)));
+              vst1q_s8(dst + 1 * dst_stride,
+                       vreinterpretq_s8_s64(vtrn1q_s64(t1, t3)));
+              vst1q_s8(dst + 2 * dst_stride,
+                       vreinterpretq_s8_s64(vtrn2q_s64(t0, t2)));
+              vst1q_s8(dst + 3 * dst_stride,
+                       vreinterpretq_s8_s64(vtrn2q_s64(t1, t3)));
+              dst += 4 * dst_stride;
+            }
+            for (; c < kc; c += 4) {
+              const size_t rem_c = std::min<size_t>(4, kc - c);
+              std::memset(dst, 0, 16);
+              for (size_t i = 0; i < rem_c; ++i) {
+                const int8_t v0 = k0[c + i];
+                const int8_t v1 = k1[c + i];
+                const int8_t v2 = k2[c + i];
+                const int8_t v3 = k3[c + i];
+                dst[0 + i] = v0;
+                dst[4 + i] = v1;
+                dst[8 + i] = v2;
+                dst[12 + i] = v3;
+                s0 += (int32_t)v0;
+                s1 += (int32_t)v1;
+                s2 += (int32_t)v2;
+                s3 += (int32_t)v3;
+              }
+              dst += dst_stride;
+            }
+          }
+          s0 += vaddvq_s32(vksum0);
+          s1 += vaddvq_s32(vksum1);
+          s2 += vaddvq_s32(vksum2);
+          s3 += vaddvq_s32(vksum3);
+          packed_b[no + 0] = packed_b[no + 0] - (uint32_t)s0 * izp;
+          packed_b[no + 1] = packed_b[no + 1] - (uint32_t)s1 * izp;
+          packed_b[no + 2] = packed_b[no + 2] - (uint32_t)s2 * izp;
+          packed_b[no + 3] = packed_b[no + 3] - (uint32_t)s3 * izp;
+        }
+        for (; no < nr_block_size; ++no) {
+          int32_t s = 0;
+          for (size_t ki = 0; ki < ks; ki++) {
+            const int8_t* k0 = &k[((nr_block_start + no) * ks + ki) * kc];
+            int8_t* dst = w_panel + (ki * kc_blocks * nr + no) * 4;
+            for (size_t c = 0; c < kc; c += 4) {
+              const size_t rem_c = std::min<size_t>(4, kc - c);
+              int8_t buf[4] = {0, 0, 0, 0};
+              for (size_t i = 0; i < rem_c; ++i) {
+                const int8_t v = k0[c + i];
+                buf[i] = v;
+                s += (int32_t)v;
+              }
+              std::memcpy(dst, buf, 4);
+              dst += dst_stride;
+            }
+          }
+          packed_b[no] = packed_b[no] - (uint32_t)s * izp;
+        }
+
+        packed_weights = reinterpret_cast<void*>(
+            (uintptr_t)w_panel + ks * kc_blocks * dst_stride + extra_bytes);
+      }
+      k += ks * kc * nc;
+      if XNN_UNPREDICTABLE (b != nullptr) {
+        b += nc;
+      }
+    } while (--g != 0);
+    return;
+  }
+#endif  // XNN_ARCH_ARM64
+
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
       copy_bias(b, nr_block_start, nr_block_size, packed_b);
+      std::fill_n(packed_b + nr_block_size, nr - nr_block_size, 0);
       packed_weights =
           (void*)((uintptr_t)packed_weights + nr * sizeof(int32_t));
 
@@ -4357,6 +4487,8 @@ void xnn_pack_qs8_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
             std::fill((int8_t*)packed_weights, end, INT8_C(0));
             packed_weights = end;
           }
+          std::fill_n((int8_t*)packed_weights, (nr - nr_block_size) * kr,
+                      INT8_C(0));
           packed_weights = (int8_t*)packed_weights + (nr - nr_block_size) * kr;
         }
       }

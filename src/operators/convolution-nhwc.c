@@ -1763,6 +1763,10 @@ static enum xnn_status compute_fingerprint_id(
       flags |= xnn_fingerprint_id_helper_vmulcaddc;
       break;
     case xnn_microkernel_type_igemm:
+      if (context->operator_type == xnn_operator_type_convolution_nhwc_qd8_f32_qc8w &&
+          (context->flags & XNN_FLAG_INLINE_LHS_PACKING)) {
+        flags |= xnn_fingerprint_id_helper_inline_lhs_packing;
+      }
       break;
     default:
       xnn_log_error(
@@ -1792,6 +1796,19 @@ static enum xnn_status select_gemm_config(
       context->gemm_config = xnn_init_qdu8_f16_qc8w_gemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_qd8_f32_qc8w:
+      if ((context->flags & XNN_FLAG_INLINE_LHS_PACKING) &&
+          !(context->flags & XNN_FLAG_DEPTHWISE_CONVOLUTION)) {
+        const struct xnn_gemm_config* pqd8_config =
+            xnn_init_pqd8_f32_qc8w_igemm_config();
+        const struct xnn_pack_lh_config* pack_lh_config =
+            xnn_init_x8_igemm_pack_lh_config();
+        if (pqd8_config != NULL && pack_lh_config != NULL &&
+            pack_lh_config->pack_lh_for_igemm_fn != NULL) {
+          context->gemm_config = pqd8_config;
+          break;
+        }
+      }
+      context->flags &= ~XNN_FLAG_INLINE_LHS_PACKING;
       context->gemm_config = xnn_init_qd8_f32_qc8w_gemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_qdu8_f32_qc8w:
@@ -2059,6 +2076,17 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
 
   if (fingerprint_id & xnn_fingerprint_id_helper_fp32_static_weights) {
     context.flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+  }
+
+  if (fingerprint_id & xnn_fingerprint_id_helper_inline_lhs_packing) {
+    const struct xnn_pack_lh_config* pack_lh_config =
+        xnn_init_x8_igemm_pack_lh_config();
+    if (xnn_init_pqd8_f32_qc8w_igemm_config() == NULL ||
+        pack_lh_config == NULL ||
+        pack_lh_config->pack_lh_for_igemm_fn == NULL) {
+      return xnn_status_unsupported_hardware;
+    }
+    context.flags |= XNN_FLAG_INLINE_LHS_PACKING;
   }
 
   if (fingerprint_id & xnn_fingerprint_id_helper_kai_dwconv_1vlx1b) {
@@ -3110,6 +3138,11 @@ static enum xnn_status reshape_igemm(
       (convolution_op->flags & XNN_FLAG_INLINE_LHS_PACKING) ||
       (igemm_ukernel.packed_lhs_function[XNN_UARCH_DEFAULT] != NULL);
   switch (convolution_op->type) {
+    case xnn_operator_type_convolution_nhwc_qd8_f32_qc8w:
+      if (convolution_op->flags & XNN_FLAG_INLINE_LHS_PACKING) {
+        packed_lh_config = xnn_init_x8_igemm_pack_lh_config();
+      }
+      break;
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
       if (inline_lhs_packing) {
         packed_lh_config = xnn_init_x8_igemm_pack_lh_config();
@@ -3213,8 +3246,11 @@ static enum xnn_status reshape_igemm(
       igemm_compute->type =
           xnn_parallelization_type_3d_tile_1d_dynamic_with_uarch_with_thread;
       igemm_compute->task_3d_tile_1d_dynamic_with_id_with_thread =
-          (pthreadpool_task_3d_tile_1d_dynamic_with_id_with_thread_t)
-              xnn_compute_hmp_inline_packed_igemm;
+          dynamic_quantization
+              ? (pthreadpool_task_3d_tile_1d_dynamic_with_id_with_thread_t)
+                    xnn_compute_hmp_dq_inline_packed_igemm
+              : (pthreadpool_task_3d_tile_1d_dynamic_with_id_with_thread_t)
+                    xnn_compute_hmp_inline_packed_igemm;
     } else {
       igemm_compute->type =
           xnn_parallelization_type_4d_tile_2d_dynamic_with_uarch;
@@ -3234,8 +3270,11 @@ static enum xnn_status reshape_igemm(
       igemm_compute->type =
           xnn_parallelization_type_3d_tile_1d_dynamic_with_thread;
       igemm_compute->task_3d_tile_1d_dynamic_with_id =
-          (pthreadpool_task_3d_tile_1d_dynamic_with_id_t)
-              xnn_compute_inline_packed_igemm;
+          dynamic_quantization
+              ? (pthreadpool_task_3d_tile_1d_dynamic_with_id_t)
+                    xnn_compute_dq_inline_packed_igemm
+              : (pthreadpool_task_3d_tile_1d_dynamic_with_id_t)
+                    xnn_compute_inline_packed_igemm;
     } else {
       igemm_compute->type = xnn_parallelization_type_4d_tile_2d_dynamic;
       if (dynamic_quantization) {

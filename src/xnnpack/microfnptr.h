@@ -1384,8 +1384,16 @@ struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 };
 
+typedef void (*xnn_dq_packed_lhs_igemm_ukernel_fn)(
+    size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,
+    const void* w, void* c, size_t cm_stride, const void* params,
+    const struct xnn_qd8_quantization_params* quantization_params);
+
 struct xnn_hmp_dqigemm_ukernel {
-  xnn_dqigemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+  union {
+    xnn_dqigemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+    xnn_dq_packed_lhs_igemm_ukernel_fn packed_lhs_function[XNN_MAX_UARCH_TYPES];
+  };
 };
 
 struct xnn_hmp_igemm_ukernel {
@@ -1403,8 +1411,8 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
   xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 };
 
-// Largest GEMM/IGEMM MR used in init.c is 32 (ARM64 KleidiAI / Hexagon HMX).
-#if (XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI) || \
+// Largest GEMM/IGEMM MR used in init.c is 32 (ARM64 SME / Hexagon HMX).
+#if (XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)) || \
     (XNN_ARCH_HEXAGON && XNN_ENABLE_HMX)
 #define XNN_MAX_MR 32
 #else

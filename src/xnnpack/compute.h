@@ -612,6 +612,10 @@ XNN_PRIVATE void xnn_compute_inline_packed_igemm(
     struct igemm_context* context, uint32_t thread_id, size_t batch_index,
     size_t group_index, size_t mr_block_start, size_t mr_block_size);
 
+XNN_PRIVATE void xnn_compute_dq_inline_packed_igemm(
+    struct igemm_context* context, uint32_t thread_id, size_t batch_index,
+    size_t group_index, size_t mr_block_start, size_t mr_block_size);
+
 XNN_PRIVATE void xnn_compute_hmp_dqigemm(
     struct igemm_context* context, uint32_t uarch_index, size_t batch_index,
     size_t group_index, size_t nr_block_start, size_t mr_block_start,
@@ -623,6 +627,11 @@ XNN_PRIVATE void xnn_compute_hmp_igemm(
     size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_inline_packed_igemm(
+    struct igemm_context* context, uint32_t uarch_index, size_t thread_id,
+    size_t batch_index, size_t group_index, size_t mr_block_start,
+    size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_hmp_dq_inline_packed_igemm(
     struct igemm_context* context, uint32_t uarch_index, size_t thread_id,
     size_t batch_index, size_t group_index, size_t mr_block_start,
     size_t mr_block_size);

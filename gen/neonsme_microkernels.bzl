@@ -12,6 +12,7 @@ PROD_NEONSME_MICROKERNEL_SRCS = [
     "src/pf32-gemm/pf32-gemm-1x32-minmax-neonsme.c",
     "src/pf32-gemm/pf32-gemm-32x32-minmax-neonsme.c",
     "src/pf32-igemm/pf32-igemm-32x32-minmax-neonsme.c",
+    "src/pqd8-f32-qc8w-igemm/pqd8-f32-qc8w-igemm-32x32c4-minmax-sme.c",
     "src/pqs8-f32-qc8w-igemm/pqs8-f32-qc8w-igemm-32x32c4-minmax-neonsme.c",
     "src/pqs8-qc8w-gemm/pqs8-qc8w-gemm-32x32c4-minmax-neonsme.c",
     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x64c4-neonsme.c",

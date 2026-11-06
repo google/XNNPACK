@@ -1105,6 +1105,8 @@ CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_PQS8_QS8_QC8W,
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F16_QC8W, TestNHWCxQD8F16QC8W)
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F32_QC8W, TestNHWCxQD8F32QC8W)
+CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F32_QC8W_INLINE_LHS,
+                         TestNHWCxQD8F32QC8WInlineLHS)
 
 // Installs counting hooks that track how many aligned allocations are still
 // live, so that a zero buffer the operator forgets to release is observable,
