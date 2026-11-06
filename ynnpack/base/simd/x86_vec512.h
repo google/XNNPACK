@@ -624,6 +624,9 @@ YNN_ALWAYS_INLINE f16x32 operator-(f16x32 a) {
 YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) {
   return s32x16{_mm512_mullo_epi32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x32 operator*(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_mullo_epi16(a.v, b.v)};
+}
 
 YNN_ALWAYS_INLINE s16x32 operator&(s16x32 a, s16x32 b) {
   return s16x32{_mm512_and_si512(a.v, b.v)};
@@ -1265,6 +1268,9 @@ YNN_ALWAYS_INLINE s16x32 cast(s8x32 a, int16_t) {
 }
 YNN_ALWAYS_INLINE s16x32 cast(u8x32 a, int16_t) {
   return s16x32{_mm512_cvtepu8_epi16(a.v)};
+}
+YNN_ALWAYS_INLINE s32x16 cast(s16x16 a, int32_t) {
+  return s32x16{_mm512_cvtepi16_epi32(a.v)};
 }
 
 YNN_ALWAYS_INLINE f32x16 cast(s32x16 x, float) {

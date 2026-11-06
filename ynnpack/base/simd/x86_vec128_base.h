@@ -915,6 +915,10 @@ YNN_ALWAYS_INLINE s32x4& operator*=(s32x4& a, s32x4 b) {
 YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) { return a *= b; }
 #endif  // YNN_ARCH_X86_SSE41
 
+YNN_ALWAYS_INLINE s16x8 operator*(s16x8 a, s16x8 b) {
+  return s16x8{_mm_mullo_epi16(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s16x8 add_sat(s16x8 a, s16x8 b) {
   return s16x8{_mm_adds_epi16(a.v, b.v)};
 }
