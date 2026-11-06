@@ -403,6 +403,7 @@ reshape_dynamic_fully_connected_nc(
   }
 
   if (batch_size == 0) {
+    *workspace_size = 0;
     dynamic_fully_connected_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
