@@ -4290,6 +4290,10 @@ DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme)
 DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme)
+DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x32c4__ace)
+DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x32c4__ace)
 
 DECLARE_QP8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qp8_f16_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2)
