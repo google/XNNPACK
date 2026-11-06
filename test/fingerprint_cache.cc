@@ -127,3 +127,20 @@ TEST_F(FingerprintCacheTest, ReserveAndWrite) {
   EXPECT_THAT(fingerprint->id, Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
   EXPECT_THAT(fingerprint->value, Not(Eq(0)));
 }
+
+TEST_F(FingerprintCacheTest, SetMoreFingerprintsThanTheVectorHolds) {
+  constexpr uint32_t kNumDistinctIds = 300;
+  for (uint32_t id = 1; id <= kNumDistinctIds; id++) {
+    xnn_set_fingerprint({id, id});
+  }
+
+  const xnn_fingerprint* first = xnn_get_fingerprint(1);
+  ASSERT_THAT(first, NotNull());
+  EXPECT_THAT(first->id, Eq(1u));
+  EXPECT_THAT(first->value, Eq(1u));
+
+  xnn_set_fingerprint({1, 4242});
+  const xnn_fingerprint* updated = xnn_get_fingerprint(1);
+  ASSERT_THAT(updated, NotNull());
+  EXPECT_THAT(updated->value, Eq(4242u));
+}
