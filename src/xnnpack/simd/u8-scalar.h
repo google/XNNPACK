@@ -19,7 +19,7 @@ typedef uint8_t xnn_simd_u8_t;
 #define xnn_simd_log2_size_u8 0
 #define xnn_simd_bytes_u8 (xnn_simd_size_u8 * sizeof(uint8_t))
 
-#define XNN_SIMD_CONST_u8(var, val) static const xnn_simd_u8_t var = val;
+#define XNN_SIMD_CONST_U8(var, val) static const xnn_simd_u8_t var = val;
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_u8_t xnn_add_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {

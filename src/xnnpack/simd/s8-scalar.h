@@ -34,9 +34,13 @@ static XNN_INLINE xnn_simd_s8_t xnn_max_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return a < b ? b : a;
 }
 
-static XNN_INLINE xnn_simd_s8_t xnn_reduce_min_s8(xnn_simd_s8_t a) { return a; }
+static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t a) { return a; }
 
-static XNN_INLINE xnn_simd_s8_t xnn_reduce_max_s8(xnn_simd_s8_t a) { return a; }
+static XNN_INLINE int8_t xnn_reduce_max_s8(xnn_simd_s8_t a) { return a; }
+
+static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
+  return a ^ b;
+}
 
 // Load/store operations.
 

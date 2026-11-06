@@ -60,7 +60,7 @@ static XNN_INLINE void xnn_store_s32(int32_t* ptr, xnn_simd_s32_t v) {
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
-  return vld1q_dup_s32(&v);
+  return vdupq_n_s32(v);
 }
 
 // Tail load/store operations.
@@ -110,7 +110,6 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
     vst1_lane_s32(output, v_low, 0);
   }
 }
-
 
 // Conversion operations.
 
