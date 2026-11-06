@@ -60,6 +60,9 @@ struct Interval {
       case xnn_datatype_fp16:
         return {xnnpack::NumericLimits<xnn_float16>::epsilon(),
                 xnnpack::NumericLimits<xnn_float16>::infinity()};
+      case xnn_datatype_bf16:
+        return {xnnpack::NumericLimits<xnn_bfloat16>::epsilon(),
+                xnnpack::NumericLimits<xnn_bfloat16>::infinity()};
       case xnn_datatype_fp32:
         return {std::numeric_limits<float>::epsilon(),
                 std::numeric_limits<float>::infinity()};
@@ -463,7 +466,7 @@ struct SquareRoot : public UnaryOpInfo {
         return {std::numeric_limits<float>::epsilon(),
                 std::numeric_limits<float>::max() / 4};
       case xnn_datatype_bf16:
-        return {std::numeric_limits<float>::epsilon(), 1.0e30f};
+        return {xnnpack::epsilon(datatype), 1.0e30f};
       default:
         return Interval::Positive(datatype);
     }
@@ -535,6 +538,8 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
         // numbers.
         return {std::numeric_limits<float>::epsilon(),
                 std::numeric_limits<float>::max() / 4};
+      case xnn_datatype_bf16:
+        return {xnnpack::epsilon(datatype), 1.0e30f};
       default:
         return Interval::Positive(datatype);
     }
