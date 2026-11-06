@@ -3007,6 +3007,20 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x128c4__hvx_prfm)
 
+#define DECLARE_PQD8_F32_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)    \
+  XNN_INTERNAL size_t fn_name##_get_mr(void);                                  \
+  XNN_INTERNAL size_t fn_name##_get_nr(void);                                  \
+  XNN_INTERNAL void fn_name(                                                   \
+      size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,      \
+      const void* w, float* c, size_t cm_stride,                               \
+      const struct xnn_f32_minmax_params* params,                              \
+      const struct xnn_qd8_quantization_params* quantization_params);
+
+DECLARE_PQD8_F32_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqd8_f32_qc8w_igemm_minmax_ukernel_32x32c4__sme)
+DECLARE_PQD8_F32_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqd8_f32_qc8w_igemm_minmax_ukernel_32x32c4__sme2)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

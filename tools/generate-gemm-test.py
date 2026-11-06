@@ -869,6 +869,7 @@ def generate_test_cases(
         "pf32",
         "pf16",
         "pqs8",
+        "pqd8",
         "bf16",
     }:
       if input_datatype is None:
@@ -943,7 +944,7 @@ def generate_test_cases(
     test_fun_name = "Test_PQS8QC4W"
   elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
-  elif input_datatype in {"pf32", "pf16", "pqs8"}:
+  elif input_datatype in {"pf32", "pf16", "pqs8", "pqd8"}:
     test_fun_name = "_".join(["Test", input_datatype.upper()])
   else:
     test_fun_name = "Test"
@@ -971,7 +972,7 @@ def generate_test_cases(
       "CPP_CHECK": cpp_check,
       "OUTPUT_DATATYPE": output_datatype,
       "ISA": isa,
-      "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
+      "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8", "pqd8"},
   }
 
   create_test_case = xngen.preprocess(GEMM_CREATE_TESTS_CODE, test_args)
@@ -1001,7 +1002,7 @@ def generate_test_cases(
           "NR_SCALE": nr_scale,
           "ARCH_FLAGS": arch_flags,
           "CPP_CHECK": cpp_check,
-          "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
+          "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8", "pqd8"},
       },
   )
   return create_test_case, test_case, benchmark

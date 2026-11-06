@@ -309,9 +309,18 @@ static inline struct xnn_hmp_dqgemm_bl_ukernel xnn_init_hmp_dqgemm_bl_ukernel(
 
 static inline struct xnn_hmp_dqigemm_ukernel xnn_init_hmp_dqigemm_ukernel(
     xnn_dqigemm_ukernel_fn function) {
-  struct xnn_hmp_dqigemm_ukernel ukernel = {{function}};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+  struct xnn_hmp_dqigemm_ukernel ukernel;
+  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
+  }
+  return ukernel;
+}
+
+static inline struct xnn_hmp_dqigemm_ukernel xnn_init_hmp_packed_dqigemm_ukernel(
+    xnn_dq_packed_lhs_igemm_ukernel_fn function) {
+  struct xnn_hmp_dqigemm_ukernel ukernel;
+  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+    ukernel.packed_lhs_function[i] = function;
   }
   return ukernel;
 }
@@ -400,6 +409,7 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf32_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqd8_f32_qc8w_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc2w_gemm_config();

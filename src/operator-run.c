@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/compute.h"
 #include "src/xnnpack/indirection.h"
@@ -861,6 +862,92 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_inline_packed_igemm(
 
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
+  }
+}
+
+void xnn_compute_dq_inline_packed_igemm(struct igemm_context* restrict context,
+                                        uint32_t thread_id, size_t batch_index,
+                                        size_t group_index,
+                                        size_t mr_block_start,
+                                        size_t mr_block_size) {
+  xnn_compute_hmp_dq_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                         batch_index, group_index,
+                                         mr_block_start, mr_block_size);
+}
+
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_dq_inline_packed_igemm(
+    struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t thread_id, size_t batch_index, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
+  const size_t mr = context->mr;
+  const size_t mr_packed = context->mr_packed;
+  const size_t kc = context->kc;
+  const size_t ks = context->ks;
+  const size_t cm_stride = context->cm_stride;
+  const size_t kc_elems =
+      kc >> context->packed_lh_config->log2_input_element_size;
+  const size_t a_offset = context->a_offset + batch_index * context->ba_stride +
+                          group_index * context->ga_stride;
+  const void* packed_w = (const void*)((uintptr_t)context->packed_w +
+                                       group_index * context->gw_stride);
+  const uintptr_t c = (uintptr_t)context->c + batch_index * context->bc_stride +
+                      group_index * context->gc_stride;
+  void* workspace =
+      (void*)((uintptr_t)context->workspace + context->workspace_offset +
+              thread_id * context->per_thread_workspace_size);
+
+  const void* stack_indirect_a[512];
+  const void** heap_indirect_a = NULL;
+  const size_t max_ptrs = round_up(mr, mr_packed) * ks;
+  if (batch_index > 0 && context->zero_size != 0 && max_ptrs > 512) {
+    heap_indirect_a =
+        (const void**)xnn_allocate_memory(max_ptrs * sizeof(void*));
+  }
+
+  while (mr_block_size > 0) {
+    const size_t mr_step = min(mr_block_size, mr);
+    const void** indirect_a_block =
+        (const void**)((uintptr_t)context->indirect_a +
+                       mr_block_start * ks * sizeof(void*));
+    const void* zero = context->zero;
+    if (batch_index > 0 && context->zero_size != 0) {
+      // The packer reads padding rows straight from `zero` and adds `a_offset`
+      // to every other pointer. Batch `batch_index` needs its own zero buffer
+      // (filled with its own zero point), but that buffer is a separate
+      // allocation that may alias a real (not yet offset) input pointer, so it
+      // cannot be used as the padding sentinel. Instead, pre-subtract
+      // `a_offset` from the substituted padding pointers and pass a NULL
+      // sentinel, so every pointer gets `a_offset` added back uniformly.
+      const uintptr_t batch_zero =
+          (uintptr_t)context->zero_buffers[batch_index] - a_offset;
+      const void** subst_a =
+          heap_indirect_a != NULL ? heap_indirect_a : stack_indirect_a;
+      // The packer strides the pointer table by `mr_packed` per kernel
+      // position, even for a partial tile.
+      const size_t num_ptrs = round_up(mr_step, mr_packed) * ks;
+      for (size_t i = 0; i < num_ptrs; ++i) {
+        const void* ptr = indirect_a_block[i];
+        subst_a[i] = (ptr == context->zero) ? (const void*)batch_zero : ptr;
+      }
+      indirect_a_block = subst_a;
+      zero = NULL;
+    }
+
+    context->packed_lh_config->pack_lh_for_igemm_fn(
+        mr_step, kc_elems, ks, mr_packed, context->kr, context->sr,
+        indirect_a_block, a_offset, zero, workspace);
+
+    context->dq_ukernel.packed_lhs_function[uarch_index](
+        mr_step, context->nc, kc_elems, ks, /*packed_lhs=*/workspace, packed_w,
+        (void*)(c + mr_block_start * cm_stride), cm_stride,
+        &context->params.f32, &context->quantization_params[batch_index]);
+
+    mr_block_size -= mr_step;
+    mr_block_start += mr_step;
+  }
+
+  if (heap_indirect_a != NULL) {
+    xnn_release_memory(heap_indirect_a);
   }
 }
 

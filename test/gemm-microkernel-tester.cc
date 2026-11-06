@@ -3849,6 +3849,172 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 }
+
+void GemmMicrokernelTester::Test_PQD8(
+    xnn_dq_packed_lhs_igemm_ukernel_fn packed_igemm,
+    xnn_init_f32_minmax_params_fn init_params,
+    xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+    xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+    xnn_pack_qs8_igemm_fn pack_rhs) const {
+  ASSERT_LE(m(), mr());
+  ASSERT_EQ(mr(), mr_packed());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
+                          std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
+                            std::ref(rng));
+  auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
+                             -std::numeric_limits<int8_t>::max(),
+                             std::numeric_limits<int8_t>::max()),
+                         std::ref(rng));
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
+
+  xnnpack::Buffer<float> input(mr() * k());
+  xnnpack::Buffer<int8_t> a((mr() - 1) * a_stride() + k(),
+                            xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
+      1 + XNN_EXTRA_QUANTIZATION_PARAMS);
+  xnnpack::Buffer<int8_t> b(n() * ks() * k());
+  xnnpack::Buffer<float> bias(n());
+  xnnpack::Buffer<float> kernel_scale(n());
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+      ks() * packed_n() * packed_k() +
+      packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
+  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<float> c_ref(m() * n(), 0);
+  // The junk rows are never used, but are read by the LHS packer for padded
+  // rows, so initialize them for msan.
+  xnnpack::Buffer<int8_t> junk(k(), 0, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<const int8_t*> im2col(mr() * ks());
+
+  std::generate(input.begin(), input.end(), std::ref(f32rng));
+  const auto minmax = std::minmax_element(input.begin(), input.end());
+  float inv_scale;
+  quantization_params[0] = xnn_f32_qd8_asymmetric_quantization_params(
+      *minmax.first, *minmax.second, &inv_scale);
+  for (size_t i = 0; i < mr(); ++i) {
+    for (size_t j = 0; j < k(); ++j) {
+      float scaled_input = input[i * k() + j] * inv_scale;
+      scaled_input = std::min<float>(
+          scaled_input, static_cast<float>(std::numeric_limits<int8_t>::max() -
+                                           quantization_params[0].zero_point));
+      scaled_input = std::max<float>(
+          scaled_input, static_cast<float>(std::numeric_limits<int8_t>::min() -
+                                           quantization_params[0].zero_point));
+      a[i * a_stride() + j] = static_cast<int8_t>(
+          std::lrintf(scaled_input) +
+          static_cast<long>(quantization_params[0].zero_point));
+    }
+  }
+  std::generate(b.begin(), b.end(), std::ref(w8rng));
+  std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+  std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
+
+  // Row sums are multiplied by the input zero point, which is only known at
+  // runtime, so pack with a zero point of 1.
+  const xnn_qs8_packing_params packing_params = {/*input_zero_point=*/1};
+  pack_rhs(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(), b.data(),
+           /*bias=*/nullptr, /*scale=*/nullptr, packed_w.data(),
+           2 * sizeof(float) * nr(), &packing_params);
+  // Fill in packed kernel scale.
+  xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
+      kernel_scale.data(),
+      (void*)((uintptr_t)packed_w.data() +
+              nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
+  // Fill in packed bias.
+  xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
+      bias.data(),
+      (void*)((uintptr_t)packed_w.data() +
+              nr() * (ks() * packed_k() * sizeof(int8_t) + 2 * sizeof(float))));
+
+  // The indirection buffer has a stride of `mr_packed` pointers per kernel
+  // position, matching what the IGEMM LHS packer expects.
+  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+    for (size_t m_index = 0; m_index < mr(); m_index++) {
+      im2col[ks_index * mr() + m_index] =
+          a.data() + a_stride() * m_index - a_offset();
+    }
+  }
+  std::shuffle(im2col.begin(), im2col.end(), rng);
+  // Padding rows point at a buffer filled with the input zero point, which
+  // the packer reads without applying `a_offset`.
+  const size_t k_stride = round_up_po2(k(), kr() * sr());
+  xnnpack::Buffer<int8_t> zero_points(
+      k_stride, static_cast<int8_t>(quantization_params[0].zero_point),
+      xnnpack::XnnExtraBytes);
+  const int8_t* zero_pointer =
+      (zero_index() != SIZE_MAX) ? zero_points.data() : nullptr;
+  if (zero_index() != SIZE_MAX) {
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      im2col[ks_index * mr() + zero_index()] = zero_pointer;
+    }
+  }
+  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+    for (size_t m_index = m(); m_index < mr(); m_index++) {
+      im2col[ks_index * mr() + m_index] = junk.data();
+    }
+  }
+
+  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      int32_t acc = 0;
+      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+        const int8_t* row = im2col[ks_index * mr() + m_index];
+        if (row == zero_pointer) {
+          continue;  // (zero_point - zero_point) * w == 0.
+        }
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          acc += (static_cast<int32_t>(row[k_index + a_offset()]) -
+                  quantization_params[0].zero_point) *
+                 static_cast<int32_t>(
+                     b[(n_index * ks() + ks_index) * k() + k_index]);
+        }
+      }
+      float value = static_cast<float>(acc) *
+                        quantization_params[0].inv_scale *
+                        kernel_scale[n_index] +
+                    bias[n_index];
+      c_ref[m_index * n() + n_index] = std::max(std::min(value, max()), min());
+    }
+  }
+
+  xnn_f32_minmax_params params;
+  init_params(&params, min(), max());
+
+  // Pack the LHS.
+  const size_t packed_lhs_size =
+      size_for_igemm_fn(m(), k(), ks(), mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_lhs(
+      packed_lhs_size);
+  pack_lh_for_igemm_fn(m(), k(), ks(), mr_packed(), kr(), sr(),
+                       (const void**)im2col.data(), a_offset() * sizeof(int8_t),
+                       zero_pointer, packed_lhs.data());
+
+  packed_igemm(m(), n(), k(), ks(), packed_lhs.data(), packed_w.data(),
+               c.data(), cm_stride() * sizeof(float), &params,
+               quantization_params.data());
+
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                            xnnpack::NumericLimits<float>::epsilon()) *
+      dynamic_quantization_ops;
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], tolerance)
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << c[i * cm_stride() + j]
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K x KS = " << m() << " x " << n() << " x " << k()
+          << " x " << ks();
+    }
+  }
+}
 #if XNN_ENABLE_KLEIDIAI
 #if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
 void GemmMicrokernelTester::Test_PF16(

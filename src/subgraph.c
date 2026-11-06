@@ -4319,6 +4319,21 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
         const enum xnn_datatype output_datatype = output_value->datatype;
 
         // Check if we can do anything special with this operation.
+        if (node->type == xnn_node_type_convolution_2d &&
+            !(node->flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) &&
+            input_datatype == xnn_datatype_qdint8 &&
+            kernel_datatype == xnn_datatype_qcint8 &&
+            output_datatype == xnn_datatype_fp32 &&
+            xnn_init_pqd8_f32_qc8w_igemm_config() != NULL &&
+            xnn_init_x8_igemm_pack_lh_config() != NULL &&
+            xnn_init_x8_igemm_pack_lh_config()->pack_lh_for_igemm_fn != NULL &&
+            !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
+          xnn_log_debug("Enabling inline LHS packing for qdint8 node #%u (%s).",
+                        node_id, xnn_node_type_to_string(node->type));
+          node->packed_input_datatype = xnn_datatype_qdint8;
+          node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+        }
+
         if (input_datatype == xnn_datatype_qint8 &&
             (kernel_datatype == xnn_datatype_qcint8 ||
              kernel_datatype == xnn_datatype_qint8) &&
@@ -4403,7 +4418,9 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
 
     // If the `qduint8` config is better than the `qdint8` config, use it
     // instead.
-    if (convert_gemm_to_qduint8(input_datatype, consumer->type,
+    if (!(consumer->type == xnn_node_type_convolution_2d &&
+          (consumer->flags & XNN_FLAG_INLINE_LHS_PACKING)) &&
+        convert_gemm_to_qduint8(input_datatype, consumer->type,
                                 consumer_weights_type)) {
       xnn_log_debug("Coercing type of output ID #%" PRIu32
                     " of %s operator from `%s` to `%s`.",
@@ -4941,7 +4958,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
       case xnn_node_type_convolution_2d:
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_fully_connected: {
-        if ((node->flags & XNN_FLAG_INLINE_LHS_PACKING) &&
+        if (node->type != xnn_node_type_convolution_2d &&
+            (node->flags & XNN_FLAG_INLINE_LHS_PACKING) &&
             node->packed_input_datatype == xnn_datatype_qdint8) {
           const enum xnn_datatype input_datatype =
               subgraph->values[node->inputs[0]].datatype;
@@ -4964,7 +4982,9 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
               &subgraph->nodes[output_value->first_consumer];
           const enum xnn_datatype consumer_weights_type =
               subgraph->values[consumer->inputs[1]].datatype;
-          if (convert_gemm_to_qduint8(input_datatype, consumer->type,
+          if (!(consumer->type == xnn_node_type_convolution_2d &&
+                (consumer->flags & XNN_FLAG_INLINE_LHS_PACKING)) &&
+              convert_gemm_to_qduint8(input_datatype, consumer->type,
                                       consumer_weights_type)) {
             output_value->datatype = xnn_datatype_qduint8;
           }

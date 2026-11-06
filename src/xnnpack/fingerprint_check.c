@@ -99,6 +99,7 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_convolution2d_nhwc_qdu8_f16_qc8w:
     case xnn_fingerprint_id_convolution2d_nhwc_qd8_f32_qc8w_vmulcaddc:
     case xnn_fingerprint_id_convolution2d_nhwc_qd8_f32_qc8w_dwconv:
+    case xnn_fingerprint_id_convolution2d_nhwc_qd8_f32_qc8w_inline_lhs_packing:
     case xnn_fingerprint_id_convolution2d_nhwc_qd8_f32_qc8w:
     case xnn_fingerprint_id_convolution2d_nhwc_qdu8_f32_qc8w_vmulcaddc:
     case xnn_fingerprint_id_convolution2d_nhwc_qdu8_f32_qc8w_dwconv:

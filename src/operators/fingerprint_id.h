@@ -165,6 +165,7 @@ enum xnn_fingerprint_id_helper {
   xnn_fingerprint_id_helper_vmulcaddc = (1 << 4),
   // KAI DWConv weights packed in one SME vector-length channel block.
   xnn_fingerprint_id_helper_kai_dwconv_1vlx1b = (1 << 5),
+  xnn_fingerprint_id_helper_inline_lhs_packing = (1 << 6),
   // The C preprocessor is obnoxious. For variadic arguments, there's no way to
   // differentiate between an empty argument list and one argument. This value
   // allows us to avoid bending around this issue when generating the

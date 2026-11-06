@@ -442,6 +442,23 @@ class GemmMicrokernelTester {
                  xnn_pack_qs8_igemm_fn pack_rhs,
                  xnn_qs8_requantize_fn requantize) const;
 
+  // Dynamically quantized (qd8) packed-LHS IGEMM with f32 output.
+  void Test_PQD8(xnn_dq_packed_lhs_igemm_ukernel_fn packed_igemm,
+                 xnn_init_f32_minmax_params_fn init_params,
+                 xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+                 xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+                 xnn_pack_qs8_igemm_fn pack_rhs) const;
+
+  // Overload accepting the strongly-typed microkernel signature.
+  template <typename Fn>
+  void Test_PQD8(Fn packed_igemm, xnn_init_f32_minmax_params_fn init_params,
+                 xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+                 xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+                 xnn_pack_qs8_igemm_fn pack_rhs) const {
+    Test_PQD8(reinterpret_cast<xnn_dq_packed_lhs_igemm_ukernel_fn>(packed_igemm),
+              init_params, pack_lh_for_igemm_fn, size_for_igemm_fn, pack_rhs);
+  }
+
  private:
   size_t mr_{1};
   size_t nr_{1};
