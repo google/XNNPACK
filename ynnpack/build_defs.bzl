@@ -89,6 +89,7 @@ _YNN_IMPLIED_ARCHS = {
     "x86_amxbf16": ["x86_avx512"],
     "x86_amxfp16": ["x86_avx512"],
     "x86_amxint8": ["x86_avx512"],
+    "x86_ace": ["x86_avx512", "x86_avx512vnni"],
     "x86_avx2": ["x86_avx"],
     "x86_fma3": ["x86_avx"],
     "x86_f16c": ["x86_avx"],
@@ -316,6 +317,11 @@ _YNN_PARAMS_FOR_ARCH = {
         "cond": "//ynnpack:ynn_enable_x86_amxint8",
         "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-int8"]),
         "arch_flag": "amxint8",
+    },
+    "x86_ace": {
+        "cond": "//ynnpack:ynn_enable_x86_ace",
+        "arch_copts": _copts_for_compiler(_AVX512_COPTS + ["-mavx512vnni", "-mgfni", "-mamx-tile"]),
+        "arch_flag": "ace",
     },
     "hexagon_hvx": {
         "cond": "//ynnpack:ynn_enable_hvx",

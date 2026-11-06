@@ -421,6 +421,15 @@ static void init_hardware_config(void) {
   const bool use_x86_avx512vnnigfni = XNN_ENABLE_AVX512VNNIGFNI && use_x86_avx512vnni && cpuinfo_has_x86_gfni();
   const bool use_x86_avx512amx = XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64 && use_x86_avx512vnnigfni && cpuinfo_has_x86_amx_int8();
   const bool use_x86_avx512amxfp16 = XNN_ENABLE_AVX512AMXFP16 && XNN_ARCH_X86_64 && use_x86_avx512vnnigfni && cpuinfo_has_x86_avx512fp16() && cpuinfo_has_x86_amx_fp16();
+#if XNN_ENABLE_ACE && XNN_ARCH_X86_64 && \
+    (defined(__clang__) || defined(__GNUC__))
+  // ACE microkernels use GCC/Clang inline asm; other compilers get stubs.
+  const bool use_x86_ace = use_x86_avx512vnnigfni &&
+                           cpuinfo_has_x86_avx10_2() &&
+                           cpuinfo_has_x86_amx_tile() && cpuinfo_has_x86_ace();
+#else
+  const bool use_x86_ace = false;
+#endif
   const bool use_x86_avx256skx = XNN_ENABLE_AVX256SKX && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
   const bool use_x86_avx256vnni = XNN_ENABLE_AVX256VNNI && use_x86_avx256skx && cpuinfo_has_x86_avx512vnni();
 
@@ -441,18 +450,20 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_x86_avx512bf16, XNN_ENABLE_AVX512BF16 && cpuinfo_has_x86_avx512bf16());
   set_arch_flag(xnn_arch_x86_avx512amx, use_x86_avx512amx);
   set_arch_flag(xnn_arch_x86_avx512amxfp16, use_x86_avx512amxfp16);
+  set_arch_flag(xnn_arch_x86_ace, use_x86_ace);
   set_arch_flag(xnn_arch_x86_avxvnni, XNN_ENABLE_AVXVNNI && cpuinfo_has_x86_avx2() && cpuinfo_has_x86_avxvnni() && cpuinfo_has_x86_gfni());
   set_arch_flag(xnn_arch_x86_avxvnniint8, XNN_ENABLE_AVXVNNIINT8 && cpuinfo_has_x86_avx2() && cpuinfo_has_x86_avx_vnni_int8() && cpuinfo_has_x86_gfni());
   set_arch_flag(xnn_arch_x86_avx256skx, use_x86_avx256skx);
   set_arch_flag(xnn_arch_x86_avx256vnni, use_x86_avx256vnni);
   set_arch_flag(xnn_arch_x86_avx256vnnigfni, XNN_ENABLE_AVX256VNNIGFNI && use_x86_avx256vnni && cpuinfo_has_x86_gfni());
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
-  if (use_x86_avx512amx || use_x86_avx512amxfp16) {
+  if (use_x86_avx512amx || use_x86_avx512amxfp16 || use_x86_ace) {
     size_t status = xnn_syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA, 0);
     if (status) {
       xnn_log_info("XFEATURE_XTILEDATA setup is failed, TMUL usage is not allowed");
       set_arch_flag(xnn_arch_x86_avx512amx, 0);
       set_arch_flag(xnn_arch_x86_avx512amxfp16, 0);
+      set_arch_flag(xnn_arch_x86_ace, 0);
     }
   }
 #endif

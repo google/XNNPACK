@@ -49,6 +49,7 @@ import("gen/neonsme2_microkernels.bzl")
 import("gen/neonsme_microkernels.bzl")
 import("gen/neonv8_microkernels.bzl")
 
+import("gen/ace_microkernels.bzl")
 import("gen/amd64_microkernels.bzl")
 import("gen/avx256skx_microkernels.bzl")
 import("gen/avx256vnni_microkernels.bzl")
@@ -111,6 +112,9 @@ declare_args() {
   xnnpack_enable_avx_vnni = target_cpu == "x64" || target_cpu == "x86"
   xnnpack_enable_avx_vnni_int8 = target_cpu == "x64" || target_cpu == "x86"
 
+  # Enables x86 ACE microkernels (disabled by default)
+  xnnpack_enable_ace = false
+
   # Experimental: import external kernels from KleidiAI
   xnnpack_enable_arm_kleidiai = false
 
@@ -155,9 +159,12 @@ assert(!xnnpack_enable_arm_i8mm || target_cpu == "arm64",
        "xnnpack_enable_arm_i8mm requires target_cpu='arm64'")
 assert(!xnnpack_enable_arm_i8mm || xnnpack_enable_arm_dotprod,
        "xnnpack_enable_arm_i8mm requires xnnpack_enable_arm_dotprod")
+assert(!xnnpack_enable_ace || (target_cpu == "x64" && !is_win),
+       "xnnpack_enable_ace requires target_cpu='x64' and !is_win")
 
 # Kernel source lists, picked by xnnpack_build_all_microkernels.
 if (xnnpack_build_all_microkernels) {
+  BUILT_ACE_MICROKERNEL_SRCS = ALL_ACE_MICROKERNEL_SRCS
   BUILT_ARMSIMD32_MICROKERNEL_SRCS = ALL_ARMSIMD32_MICROKERNEL_SRCS
   BUILT_AVX_MICROKERNEL_SRCS = ALL_AVX_MICROKERNEL_SRCS
   BUILT_AVX2_MICROKERNEL_SRCS = ALL_AVX2_MICROKERNEL_SRCS
@@ -203,6 +210,7 @@ if (xnnpack_build_all_microkernels) {
   BUILT_SSE41_MICROKERNEL_SRCS = ALL_SSE41_MICROKERNEL_SRCS
   BUILT_SSSE3_MICROKERNEL_SRCS = ALL_SSSE3_MICROKERNEL_SRCS
 } else {
+  BUILT_ACE_MICROKERNEL_SRCS = PROD_ACE_MICROKERNEL_SRCS
   BUILT_ARMSIMD32_MICROKERNEL_SRCS = PROD_ARMSIMD32_MICROKERNEL_SRCS
   BUILT_AVX_MICROKERNEL_SRCS = PROD_AVX_MICROKERNEL_SRCS
   BUILT_AVX2_MICROKERNEL_SRCS = PROD_AVX2_MICROKERNEL_SRCS
@@ -411,6 +419,12 @@ config("xnnpack_private_config") {
         "XNN_ENABLE_AVX512FP16=0",
         "XNN_ENABLE_AVX512BF16=0",
       ]
+    }
+
+    if (xnnpack_enable_ace) {
+      defines += [ "XNN_ENABLE_ACE=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_ACE=0" ]
     }
   }
 
@@ -1049,6 +1063,27 @@ if (current_cpu == "x64" || current_cpu == "x86") {
     ]
   }
 
+  xnnpack_source_set("ace_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = BUILT_ACE_MICROKERNEL_SRCS
+    sources += [ "src/xnnpack/ace.h" ]
+    cflags = [
+      "-mf16c",
+      "-mfma",
+      "-mavx512f",
+      "-mavx512cd",
+      "-mavx512bw",
+      "-mavx512dq",
+      "-mavx512vl",
+      "-mavx512vnni",
+      "-mgfni",
+      "-mamx-tile",
+    ]
+  }
+
   xnnpack_source_set("avx_microkernels") {
     deps = [
       ":microkernel_defs",
@@ -1229,6 +1264,9 @@ template("xnnpack_library") {
       }
       if (xnnpack_enable_avx512) {
         deps += [ ":avx512_microkernels" ]
+      }
+      if (xnnpack_enable_ace) {
+        deps += [ ":ace_microkernels" ]
       }
       if (xnnpack_enable_assembly && current_cpu == "x64") {
         sources += AMD64_ASM_MICROKERNEL_SRCS

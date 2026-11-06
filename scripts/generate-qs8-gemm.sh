@@ -2414,4 +2414,8 @@ tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=2  -D NR=128 -D DATATYPE=QD8_F32 -D P
 tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=1  -D NR=128 -D DATATYPE=QC4_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x128c4-minmax-hvx.c &
 tools/xngen src/qs8-gemm/c4-hvx.c.in -D MR=2  -D NR=128 -D DATATYPE=QC4_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x128c4-minmax-hvx.c &
 
+################################### x86 ACE ###################################
+tools/xngen src/qs8-gemm/c4-ace.c.in -D MR=1  -D NR=32 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x32c4-minmax-ace.c &
+tools/xngen src/qs8-gemm/c4-ace.c.in -D MR=16 -D NR=32 -D DATATYPE=QD8_F32 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x32c4-minmax-ace.c &
+
 wait

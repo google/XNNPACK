@@ -185,6 +185,7 @@ YNN_ADD_DOT_KERNELS(x86_uint8_int4_int32
 YNN_ADD_DOT_SRC(x86_amxbf16 x86_amxbf16.cc)
 YNN_ADD_DOT_SRC(x86_amxfp16 x86_amxfp16.cc)
 YNN_ADD_DOT_SRC(x86_amxint8 x86_amxint8.cc)
+YNN_ADD_DOT_SRC(x86_ace x86_ace.cc)
 
 # --- ARM kernels ---
 

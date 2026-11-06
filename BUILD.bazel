@@ -60,6 +60,7 @@ exports_files(["LICENSE"] + glob(["**/*.h"]))
 exports_files(["preamble.js.lds"])
 
 MICROKERNEL_DEPS = [
+    ":ace_h",
     ":assembly",
     ":common",
     ":intrinsics_polyfill",
@@ -141,6 +142,14 @@ xnnpack_cc_library(
     deps = [
         ":fingerprint_id",
         "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "ace_h",
+    hdrs = ["src/xnnpack/ace.h"],
+    deps = [
+        ":common",
     ],
 )
 
@@ -1488,6 +1497,30 @@ config_setting(
     define_values = {"xnn_enable_arm_sme_acle": "false"},
 )
 
+# Enables usage of x86 ACE microkernels.
+config_setting(
+    name = "xnn_enable_ace_explicit_true",
+    define_values = {"xnn_enable_ace": "true"},
+)
+
+# Disables usage of x86 ACE microkernels.
+config_setting(
+    name = "xnn_enable_ace_explicit_false",
+    define_values = {"xnn_enable_ace": "false"},
+)
+
+# Enables usage of x86 ACE microkernels via xnnpack_enable_ace.
+config_setting(
+    name = "xnnpack_enable_ace_explicit_true",
+    define_values = {"xnnpack_enable_ace": "true"},
+)
+
+# Disables usage of x86 ACE microkernels via xnnpack_enable_ace.
+config_setting(
+    name = "xnnpack_enable_ace_explicit_false",
+    define_values = {"xnnpack_enable_ace": "false"},
+)
+
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
 config_setting(
     name = "xnn_enable_wasm_revectorize_explicit_true",
@@ -1870,6 +1903,39 @@ alias(
         "//build_config:windows_lexan": ":xnn_enable_avx512amxfp16_explicit_true",
         "//conditions:default": ":avx512amxfp16_enabled_by_default",
     }),
+)
+
+selects.config_setting_group(
+    name = "ace_explicit_true",
+    match_any = [
+        ":xnn_enable_ace_explicit_true",
+        ":xnnpack_enable_ace_explicit_true",
+    ],
+)
+
+selects.config_setting_group(
+    name = "ace_explicit_false",
+    match_any = [
+        ":xnn_enable_ace_explicit_false",
+        ":xnnpack_enable_ace_explicit_false",
+    ],
+)
+
+alias(
+    name = "ace_flag_enabled",
+    actual = select({
+        ":ace_explicit_true": ":ace_explicit_true",
+        ":ace_explicit_false": "//build_config:always_false",
+        "//conditions:default": "//build_config:always_false",
+    }),
+)
+
+selects.config_setting_group(
+    name = "ace_enabled",
+    match_all = [
+        "//build_config:x86_64",
+        ":ace_flag_enabled",
+    ],
 )
 
 selects.config_setting_group(

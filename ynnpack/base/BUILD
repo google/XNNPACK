@@ -125,6 +125,9 @@ cc_library(
     local_defines = select({
         "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],
         "//conditions:default": [],
+    }) + select({
+        "//ynnpack:ynn_enable_x86_ace": ["YNN_ENABLE_X86_ACE"],
+        "//conditions:default": [],
     }),
     deps = [
         ":log",

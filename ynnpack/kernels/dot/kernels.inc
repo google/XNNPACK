@@ -39,6 +39,13 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_32x32x64_16x16x4_amxint8
                dot_flag::consistent_arithmetic, uint8_t, int8_t, int32_t,
                cost_models.x86_amx_uint8)
 #endif  // YNN_ARCH_X86_AMXINT8
+#ifdef YNN_ARCH_X86_ACE
+YNN_DOT_KERNEL(arch_flag::ace, dot_int8_int8_int32_16x32x4_1x16x4_ace,
+               16, 32, 4, 1, 16, 4,
+               dot_flag::transpose_a | dot_flag::consistent_arithmetic,
+               int8_t, int8_t, int32_t,
+               cost_models.x86_ace_int8)
+#endif  // YNN_ARCH_X86_ACE
 #endif  // YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 
 #ifdef YNN_ARCH_X86_AVX512VNNI
