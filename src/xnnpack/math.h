@@ -154,7 +154,14 @@ XNN_INLINE static int32_t math_asr_s32_rounding(int32_t x, int n) {
 XNN_INLINE static int32_t saturating_rounding_shift_left_s32(int32_t x,
                                                              int32_t shift) {
   if (shift >= 0) {
-    return saturating_cast_s64_s32((int64_t)x << shift);
+    if (shift >= 32) {
+      return x < 0 ? INT32_MIN : (x > 0 ? INT32_MAX : 0);
+    }
+    if (x < 0) {
+      const int64_t shifted = (-((int64_t)x)) << shift;
+      return shifted > INT32_MAX ? INT32_MIN : -(int32_t) shifted;
+    }
+    return saturating_cast_s64_s32(((int64_t)x) << shift);
   } else {
     return math_asr_s32_rounding(x, -shift);
   }
