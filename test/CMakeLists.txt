@@ -412,6 +412,7 @@ SET(MICROKERNEL_VUNARY_TESTS
     f16-vsqrt
     f16-vtanh
     f32-vabs
+    f32-vapproxgelu
     f32-vclamp
     f32-vcos
     f32-velu
