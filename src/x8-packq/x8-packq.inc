@@ -13,4 +13,8 @@ XNN_UKERNEL(xnn_arch_none, xnn_x8_packq_f32qp8_ukernel__scalar_u1, 1)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2, 2)
 #endif  // XNN_ENABLE_KLEIDIAI
 
+#if XNN_ENABLE_ACE && XNN_ARCH_X86_64
+XNN_UKERNEL(xnn_arch_x86_ace, xnn_x8_packq_f32qp8_ukernel__ace_u16, 16)
+#endif  // XNN_ENABLE_ACE && XNN_ARCH_X86_64
+
 

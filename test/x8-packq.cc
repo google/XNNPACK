@@ -214,4 +214,38 @@ TEST(x8_packq_sme2, kr_eq_4_mr_eq_32_m_gt_32) {
 }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
 
+#if XNN_ENABLE_ACE && XNN_ARCH_X86_64
+// Covers the 16-row TILEMOVCOL/TILEMOVROW transpose path (mr=16, kr=4, sr=1)
+// with mixed-sign inputs, including rounding ties and partial row blocks.
+TEST(x8_packq_ace, kr_eq_4_mr_eq_16) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_ace);
+  for (size_t m : {1, 2, 7, 15, 16, 17, 31, 32, 33, 52}) {
+    for (size_t k : kKr4Ks) {
+      xnnpack::PackQMicrokernelTester()
+          .m(m)
+          .k(k)
+          .mr(16)
+          .kr(4)
+          .input_offset(-0.5f * static_cast<float>(m * k))
+          .Test(xnn_x8_packq_f32qp8_ukernel__ace_u16);
+    }
+  }
+}
+
+TEST(x8_packq_ace, kr_eq_4_mr_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_ace);
+  for (size_t m : {1, 2, 5}) {
+    for (size_t k : kKr4Ks) {
+      xnnpack::PackQMicrokernelTester()
+          .m(m)
+          .k(k)
+          .mr(1)
+          .kr(4)
+          .input_offset(-0.5f * static_cast<float>(m * k))
+          .Test(xnn_x8_packq_f32qp8_ukernel__ace_u16);
+    }
+  }
+}
+#endif  // XNN_ENABLE_ACE && XNN_ARCH_X86_64
+
 }  // namespace

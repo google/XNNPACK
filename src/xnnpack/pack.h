@@ -669,6 +669,36 @@ XNN_INTERNAL size_t xnn_packed_size_kai_f16_conv_goki_w(size_t nc,  //
 );
 #endif  // XNN_ENABLE_KLEIDIAI
 
+#if XNN_ENABLE_ACE && !XNN_ENABLE_KLEIDIAI
+// Portable implementations of the KleidiAI qsi8cxp RHS packing layout used by
+// the x86 ACE qp8 GEMM microkernels.
+XNN_INTERNAL void xnn_pack_kai_qs8_weights_and_biases(
+    uint32_t flags,                                //
+    const struct xnn_gemm_config* gemm_config,     //
+    size_t input_channels,                         //
+    size_t output_channels,                        //
+    size_t groups,                                 //
+    size_t unused_block_size,                      //
+    size_t k_stride,                               //
+    const void* accumulator_init,                  //
+    const void* weights,                           //
+    xnn_init_scale_params_fn init_extra_data0_fn,  //
+    const void* extra_data0,                       //
+    size_t extra_data0_element_size,               //
+    xnn_init_scale_params_fn init_extra_data1_fn,  //
+    const void* extra_data1,                       //
+    size_t extra_data1_element_size,               //
+    void* packed_weights_ptr,                      //
+    const void* params);
+
+XNN_INTERNAL size_t xnn_packed_stride_kai_qs8_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config,  //
+    size_t k,                                   //
+    size_t unused_block_size,                   //
+    size_t k_stride,                            //
+    size_t extra_bytes);
+#endif  // XNN_ENABLE_ACE && !XNN_ENABLE_KLEIDIAI
+
 XNN_INTERNAL size_t xnn_packed_stride_qc2w_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride,
