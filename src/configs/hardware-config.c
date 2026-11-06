@@ -404,9 +404,14 @@ static void init_hardware_config(void) {
   // msan (understandably) does not support SVE/SME (b/494230133).
   set_arch_flag(xnn_arch_arm_sve, cpuinfo_has_arm_sve());
   set_arch_flag(xnn_arch_arm_sve2, cpuinfo_has_arm_sve2());
-  set_arch_flag(xnn_arch_arm_sme, cpuinfo_has_arm_sme());
-  set_arch_flag(xnn_arch_arm_sme2, cpuinfo_has_arm_sme2());
-  set_arch_flag(xnn_arch_arm_sme2p1, cpuinfo_has_arm_sme2p1());
+  // TODO(b/581442477): Remove once
+  // https://github.com/pytorch/cpuinfo/issues/442 is fixed and smelen is
+  // implemented for Windows ARM.
+  const bool use_arm_sme =
+      cpuinfo_has_arm_sme() && cpuinfo_get_max_arm_sme_length() > 0;
+  set_arch_flag(xnn_arch_arm_sme, use_arm_sme);
+  set_arch_flag(xnn_arch_arm_sme2, use_arm_sme && cpuinfo_has_arm_sme2());
+  set_arch_flag(xnn_arch_arm_sme2p1, use_arm_sme && cpuinfo_has_arm_sme2p1());
 #endif  // !XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 #endif
 

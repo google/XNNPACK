@@ -87,8 +87,13 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_neon_f8dot4()) result |= arch_flag::neonfp8dot4;
 #if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
     // msan (understandably) does not support SVE/SME (b/494230133).
-    if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
-    if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
+    // TODO(b/581442477): Remove once
+    // https://github.com/pytorch/cpuinfo/issues/442 is fixed and smelen is
+    // implemented for Windows ARM.
+    if (cpuinfo_has_arm_sme() && cpuinfo_get_max_arm_sme_length() > 0) {
+      result |= arch_flag::sme;
+      if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
+    }
     if (cpuinfo_has_arm_sve()) result |= arch_flag::sve;
 #endif  //  YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 #endif  // YNN_ARCH_ARM
