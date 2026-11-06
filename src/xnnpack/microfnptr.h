@@ -283,6 +283,12 @@ typedef void (*xnn_pf32_igemm_ukernel_fn)(
 
 // IGEMM: Indirect GEMM with Min+Max activation
 
+typedef void (*xnn_bf16_f32_igemm_minmax_ukernel_fn)(
+    size_t mr, size_t nr, size_t kc, size_t ks, const xnn_bfloat16** a,
+    const void* w, float* c, size_t cm_stride, size_t cn_stride,
+    size_t a_offset, const xnn_bfloat16* zero,
+    const struct xnn_f32_minmax_params* params);
+
 typedef void (*xnn_f16_igemm_minmax_ukernel_fn)(
     size_t mr, size_t nr, size_t kc, size_t ks, const xnn_float16** a,
     const xnn_float16* w, xnn_float16* c, size_t cm_stride, size_t cn_stride,
@@ -364,6 +370,12 @@ typedef void (*xnn_f16_dwconv_minmax_ukernel_fn)(
     const xnn_float16* weights, xnn_float16* output, intptr_t input_stride,
     size_t output_increment, size_t input_offset, size_t input_pixel_stride,
     const xnn_float16* zero, const struct xnn_f16_minmax_params* params);
+
+typedef void (*xnn_bf16_f32_dwconv_minmax_ukernel_fn)(
+    size_t channels, size_t output_width, const xnn_bfloat16** input,
+    const void* weights, float* output, intptr_t input_stride,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const xnn_bfloat16* zero, const struct xnn_f32_minmax_params* params);
 
 typedef void (*xnn_f32_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const float** input,

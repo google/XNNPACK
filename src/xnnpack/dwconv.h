@@ -37,6 +37,16 @@ extern "C" {
 #include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.inc"
 #undef XNN_UKERNEL
 
+#define XNN_UKERNEL(arch_flags, fn_name, c_block, adj_c_block, cr, kr,         \
+                    datatype, weights_type, params_type, init_fn)              \
+  XNN_INTERNAL void fn_name(                                                   \
+      size_t channels, size_t output_width, const datatype** input,            \
+      const weights_type* weights, float* output, intptr_t input_stride,       \
+      size_t output_increment, size_t input_offset, size_t input_pixel_stride, \
+      const datatype* zero, const params_type* params);
+#include "src/bf16-f32-dwconv/bf16-f32-dwconv-minmax.inc"
+#undef XNN_UKERNEL
+
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name)  \
   XNN_INTERNAL void fn_name(                                       \
       size_t input_height, size_t input_width, const float* input, \
