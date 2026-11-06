@@ -157,6 +157,63 @@ TEST_P(XnnTest, mr_kr_sr_mixed) {
 INSTANTIATE_TEST_SUITE_P(x8_packq, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
 
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME && XNN_ENABLE_ARM_SME_ACLE
+void TestSmeKr4(size_t m, size_t k, size_t mr) {
+  xnnpack::PackQMicrokernelTester()
+      .m(m)
+      .k(k)
+      .mr(mr)
+      .kr(4)
+      .Test(xnn_x8_packq_f32qp8_ukernel__sme);
+}
+
+TEST(x8_packq_sme, kr_eq_4_mr_eq_1_m_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  for (size_t k : kKr4Ks) {
+    TestSmeKr4(1, k, 1);
+  }
+}
+
+TEST(x8_packq_sme, kr_eq_4_mr_eq_1_m_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  for (size_t m : {2, 3, 7, 16}) {
+    for (size_t k : kKr4Ks) {
+      TestSmeKr4(m, k, 1);
+    }
+  }
+}
+
+TEST(x8_packq_sme, kr_eq_4_mr_eq_32_m_le_16) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  const size_t mr = Kr4Mr();
+  for (size_t m = 1; m <= mr / 2; m++) {
+    for (size_t k : kKr4Ks) {
+      TestSmeKr4(m, k, mr);
+    }
+  }
+}
+
+TEST(x8_packq_sme, kr_eq_4_mr_eq_32_m_gt_16) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  const size_t mr = Kr4Mr();
+  for (size_t m = mr / 2 + 1; m <= mr; m++) {
+    for (size_t k : kKr4Ks) {
+      TestSmeKr4(m, k, mr);
+    }
+  }
+}
+
+TEST(x8_packq_sme, kr_eq_4_mr_eq_32_m_gt_32) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  const size_t mr = Kr4Mr();
+  for (size_t m : {mr + 1, mr + 15, 2 * mr, 2 * mr + 1, 3 * mr + 4}) {
+    for (size_t k : kKr4Ks) {
+      TestSmeKr4(m, k, mr);
+    }
+  }
+}
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME && XNN_ENABLE_ARM_SME_ACLE
+
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
 void TestSme2Kr4(size_t m, size_t k, size_t mr) {
   xnnpack::PackQMicrokernelTester()

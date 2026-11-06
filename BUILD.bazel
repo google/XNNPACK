@@ -1791,6 +1791,22 @@ alias(
     }),
 )
 
+alias(
+    name = "arm_sme_acle_non_lexan_enabled",
+    actual = select({
+        "//build_config:windows_lexan": "//build_config:always_false",
+        "//conditions:default": ":arm_sme_acle_enabled",
+    }),
+)
+
+alias(
+    name = "arm_sme_acle_lexan_enabled",
+    actual = select({
+        "//build_config:windows_lexan": ":arm_sme_acle_enabled",
+        "//conditions:default": "//build_config:always_false",
+    }),
+)
+
 selects.config_setting_group(
     name = "avx512f_enabled_by_default",
     match_any = [

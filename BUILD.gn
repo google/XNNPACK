@@ -732,6 +732,7 @@ if (current_cpu == "arm64") {
 
   xnnpack_source_set("sme_microkernels") {
     deps = [
+      ":arm_sme_abi_stubs",
       ":microkernel_defs",
       ":microkernel_headers",
     ]
@@ -745,6 +746,10 @@ if (current_cpu == "arm64") {
       "-target-feature",
       "-Xclang",
       "+sme",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
     ]
   }
 
@@ -773,6 +778,10 @@ if (current_cpu == "arm64") {
       "-target-feature",
       "-Xclang",
       "+sme2",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
     ]
   }
 }
@@ -1232,6 +1241,10 @@ template("xnnpack_library") {
       }
       if (xnnpack_enable_arm_sme2) {
         deps += [ ":sme2_microkernels" ]
+      }
+      if (xnnpack_enable_arm_sme_acle &&
+          (xnnpack_enable_arm_sme || xnnpack_enable_arm_sme2)) {
+        deps += [ ":arm_sme_abi_stubs" ]
       }
     } else if (current_cpu == "arm") {
       deps += [

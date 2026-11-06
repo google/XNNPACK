@@ -42,6 +42,24 @@ static void init_qp8_pack_lh_config(void) {
   qp8_pack_lh_config.pack_lh_fn =
       (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__scalar_u1;
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME_ACLE && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2)
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void)hardware_config;
+#if XNN_ENABLE_ARM_SME
+  if (hardware_config->arch_flags & xnn_arch_arm_sme) {
+    qp8_pack_lh_config.pack_lh_fn =
+        (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__sme;
+  }
+#endif  // XNN_ENABLE_ARM_SME
+#if XNN_ENABLE_ARM_SME2
+  if (hardware_config->arch_flags & xnn_arch_arm_sme2) {
+    qp8_pack_lh_config.pack_lh_fn =
+        (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__sme2;
+  }
+#endif  // XNN_ENABLE_ARM_SME2
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME_ACLE && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2)
   qp8_pack_lh_config.size_fn =
       (xnn_pack_lh_size_fn)xnn_x8_packq_f32qp8_packed_size;
   qp8_pack_lh_config.offset_fn =
