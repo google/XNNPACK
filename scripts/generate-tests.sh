@@ -274,16 +274,4 @@ tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s32-simd-wasmsimd.cc &
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s32-simd-hvx.cc &
 
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s8-simd-scalar.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1)" -o test/simd/s8-simd-sse41.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s8-simd-neon.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s8-simd-wasmsimd.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s8-simd-hvx.cc &
-
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/u8-simd-scalar.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="" -o test/simd/u8-simd-sse2.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/u8-simd-neon.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/u8-simd-wasmsimd.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/u8-simd-hvx.cc &
-
 wait

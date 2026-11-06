@@ -460,9 +460,6 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       **kwargs: Other arguments to pass to the cc_test rule.
     """
 
-    # Set the default defines.
-    defines = defines or xnnpack_configurable_defines()
-
     cc_test(
         name = name,
         srcs = srcs,
@@ -484,7 +481,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             "//conditions:default": [],
         }) + linkopts,
         linkstatic = True,
-        defines = defines,
+        defines = xnnpack_configurable_defines() + defines,
         deps = [
             "@com_google_googletest//:gtest_main",
         ] + deps + select({
