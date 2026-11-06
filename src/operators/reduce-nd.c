@@ -77,7 +77,10 @@ static enum xnn_status create_reduce_nd(
     goto error;
   }
   reduce_op->num_compute_invocations = 1;
-  xnn_allocate_extra_params(reduce_op, /*num_extra_params=*/1);
+  status = xnn_allocate_extra_params(reduce_op, /*num_extra_params=*/1);
+  if (status != xnn_status_success) {
+    goto error;
+  }
 
   reduce_op->type = operator_type;
   reduce_op->flags = flags;

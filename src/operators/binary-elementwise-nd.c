@@ -251,11 +251,16 @@ enum xnn_status xnn_create_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
   op->num_compute_invocations = 1;
-  xnn_allocate_extra_params(op, /*num_extra_params=*/1);
-
   enum xnn_status status =
-      init_binary_elementwise_nd(op, type, datatype, a_quantization,
-                                 b_quantization, output_quantization, flags);
+      xnn_allocate_extra_params(op, /*num_extra_params=*/1);
+  if (status != xnn_status_success) {
+    xnn_delete_operator(op);
+    return status;
+  }
+
+  status = init_binary_elementwise_nd(
+      op, type, datatype, a_quantization, b_quantization, output_quantization,
+      flags);
   if (status != xnn_status_success) {
     xnn_delete_operator(op);
     return status;
@@ -629,10 +634,15 @@ enum xnn_status xnn_run_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
   op.num_compute_invocations = 1;
-  xnn_allocate_extra_params(&op, /*num_extra_params=*/1);
+  enum xnn_status status =
+      xnn_allocate_extra_params(&op, /*num_extra_params=*/1);
+  if (status != xnn_status_success) {
+    xnn_destroy_operator(&op);
+    return status;
+  }
   memset(op.extra_params, 0, sizeof(union xnn_params));
 
-  enum xnn_status status = init_binary_elementwise_nd(
+  status = init_binary_elementwise_nd(
       &op, type, datatype, input1_quantization, input2_quantization,
       output_quantization, flags);
   if (status != xnn_status_success) {
