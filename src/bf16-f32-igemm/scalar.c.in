@@ -1,0 +1,143 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR >= 1
+$assert NR in (2, 4)
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
+
+void xnn_bf16_f32_igemm_minmax_ukernel_${MR}x${NR}c2__scalar(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const xnn_bfloat16** restrict a,
+    const void* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const xnn_bfloat16* zero,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(xnn_bfloat16) == 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(xnn_bfloat16) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  float* c0 = c;
+  $for M in range(1, MR):
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
+  do {
+    const float* wb = (const float*) w;
+    $for N in range(NR):
+      float vacc0x${N} = wb[${N}];
+    $for M in range(1, MR):
+      $for N in range(NR):
+        float vacc${M}x${N} = vacc0x${N};
+    const uint16_t* wk = (const uint16_t*) (wb + ${NR});
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const uint16_t* restrict a${M} = (const uint16_t*) a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != (const uint16_t*) zero) {
+          a${M} = (const uint16_t*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      for (; k >= 2 * sizeof(xnn_bfloat16); k -= 2 * sizeof(xnn_bfloat16)) {
+        $for M in range(MR):
+          const float va${M}0 = math_cvt_fp32_bf16(a${M}[0]);
+          const float va${M}1 = math_cvt_fp32_bf16(a${M}[1]);
+          a${M} += 2;
+
+        $for N in range(NR):
+          const float vb${N}0 = math_cvt_fp32_bf16(wk[${2 * N}]);
+          const float vb${N}1 = math_cvt_fp32_bf16(wk[${2 * N + 1}]);
+        wk += ${2 * NR};
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} = math_muladd_f32(va${M}0, vb${N}0, vacc${M}x${N});
+            vacc${M}x${N} = math_muladd_f32(va${M}1, vb${N}1, vacc${M}x${N});
+      }
+      if XNN_UNLIKELY(k != 0) {
+        $for M in range(MR):
+          const float va${M}0 = math_cvt_fp32_bf16(a${M}[0]);
+
+        $for N in range(NR):
+          const float vb${N}0 = math_cvt_fp32_bf16(wk[${2 * N}]);
+        wk += ${2 * NR};
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} = math_muladd_f32(va${M}0, vb${N}0, vacc${M}x${N});
+      }
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+    w = (const void*) wk;
+
+    $for M in range(MR):
+      $for N in range(NR):
+        vacc${M}x${N} = math_min_f32(math_max_f32(vacc${M}x${N}, vmin), vmax);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        $for N in range(NR):
+          c${M}[${N}] = vacc${M}x${N};
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const xnn_bfloat16**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      $if NR == 4:
+        if (nc & 2) {
+          $for M in reversed(range(MR)):
+            c${M}[0] = vacc${M}x0;
+            c${M}[1] = vacc${M}x1;
+            vacc${M}x0 = vacc${M}x2;
+            c${M} += 2;
+        }
+      if (nc & 1) {
+        $for M in reversed(range(MR)):
+          c${M}[0] = vacc${M}x0;
+      }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}
