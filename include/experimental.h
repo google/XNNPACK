@@ -100,12 +100,18 @@ const char* xnn_fingerprint_id_to_string_u32(uint32_t fingerprint_id);
 /// @returns `xnn_status_success` if the configuration matches.
 enum xnn_status xnn_check_fingerprint(struct xnn_fingerprint fingerprint);
 
-/// Return the fingerprint corresponding to the given id or NULL if it wasn't
-/// set.
-const struct xnn_fingerprint* xnn_get_fingerprint(uint32_t id);
+/// Return the fingerprint corresponding to the given id.
+///
+/// @returns `true` if the fingerprint was set, in which case `fingerprint` is
+///          set to a copy of it.
+bool xnn_get_fingerprint(uint32_t id, struct xnn_fingerprint* fingerprint);
 
-/// Return the `idx`_th fingerprint or NULL if it wasn't set.
-const struct xnn_fingerprint* xnn_get_fingerprint_by_idx(uint32_t idx);
+/// Return the `idx`_th fingerprint.
+///
+/// @returns `true` if the fingerprint was set, in which case `fingerprint` is
+///          set to a copy of it.
+bool xnn_get_fingerprint_by_idx(uint32_t idx,
+                                struct xnn_fingerprint* fingerprint);
 
 /// Set the given fingerprint.
 void xnn_set_fingerprint(struct xnn_fingerprint fingerprint);
