@@ -225,6 +225,57 @@ static const ConvolutionTestCase kConvolutionTests[] = {
           .kernel_size(3, 3)
           .group_input_channels(15)
           .group_output_channels(17)}},
+    {"kernel_3x3_with_1_input_channel",
+     {ConvolutionOperatorTester()
+          .input_size(13, 12)
+          .padding(1)
+          .kernel_size(3, 3)
+          .group_input_channels(1)
+          .group_output_channels(17)}},
+    {"kernel_3x3_with_3_input_channels",
+     {ConvolutionOperatorTester()
+          .input_size(13, 12)
+          .padding(1)
+          .kernel_size(3, 3)
+          .group_input_channels(3)
+          .group_output_channels(17)}},
+    {"kernel_3x3_with_4_input_channels",
+     {ConvolutionOperatorTester()
+          .input_size(13, 12)
+          .padding(1)
+          .kernel_size(3, 3)
+          .group_input_channels(4)
+          .group_output_channels(17)}},
+    {"kernel_3x3s2_with_3_input_channels",
+     {ConvolutionOperatorTester()
+          .input_size(14, 13)
+          .padding(1)
+          .kernel_size(3, 3)
+          .subsampling(2)
+          .group_input_channels(3)
+          .group_output_channels(33)}},
+    {"kernel_7x7s2_with_3_input_channels",
+     {ConvolutionOperatorTester()
+          .input_size(20, 19)
+          .padding(3)
+          .kernel_size(7, 7)
+          .subsampling(2)
+          .group_input_channels(3)
+          .group_output_channels(19)}},
+    {"kernel_1x1_with_2_input_channels",
+     {ConvolutionOperatorTester()
+          .input_size(27, 37)
+          .kernel_size(1, 1)
+          .group_input_channels(2)
+          .group_output_channels(19)}},
+    {"grouped_3x3_with_2_input_channels",
+     {ConvolutionOperatorTester()
+          .input_size(13, 12)
+          .padding(1)
+          .kernel_size(3, 3)
+          .groups(2)
+          .group_input_channels(2)
+          .group_output_channels(17)}},
     {"kernel_3x3_with_batch",
      {ConvolutionOperatorTester()
           .batch_size(3)
