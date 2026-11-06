@@ -163,16 +163,16 @@ def xnnpack_simd_f16_archs():
     return ["scalar", "neonfp16arith", "avx512fp16", "wasmrelaxedsimd"]
 
 def xnnpack_simd_s16_archs():
-    return ["avx2", "avx512skx", "neon", "scalar", "sse41", "wasmsimd"]
+    return ["avx2", "avx512skx", "hvx", "neon", "scalar", "sse41", "wasmsimd"]
 
 def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "hvx", "wasmsimd"]
 
 def xnnpack_simd_s8_archs():
-    return ["scalar", "sse41", "neon", "hvx", "wasmsimd"]
+    return ["scalar", "sse41", "avx2", "avx512skx", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_simd_u8_archs():
-    return ["scalar", "sse2", "neon", "hvx", "wasmsimd"]
+    return ["scalar", "sse2", "avx2", "avx512skx", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_archs():
     return XNNPACK_PARAMS_FOR_ARCH.keys()
