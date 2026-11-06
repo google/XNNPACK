@@ -81,8 +81,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 
   XNN_ALIGN(64) struct __tile_config tile_data = {0};
   XNN_ALIGN(64) int32_t res[${NR // 16}][${MR} * 16];
-  $if MR > 1:
-    XNN_ALIGN(64) int32_t vintile[2][${MR} * 16];
 
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
   const size_t kremainder_colsb = round_up_po2(kremainder, 4 * sizeof(${XINT8_T}));
@@ -147,16 +145,16 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 
     size_t p = ks;
     do {
-      const ${XINT8_T}* restrict a0 = a[0];
-      if XNN_UNPREDICTABLE(a0 != zero) {
-        a0 = (const ${XINT8_T}*) ((uintptr_t) a0 + a_offset);
-      $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-        } else {
-          a0 = zero_data;
-      }
-
-      size_t k = kc;
       $if MR == 1:
+        const ${XINT8_T}* restrict a0 = a[0];
+        if XNN_UNPREDICTABLE(a0 != zero) {
+          a0 = (const ${XINT8_T}*) ((uintptr_t) a0 + a_offset);
+        $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+          } else {
+            a0 = zero_data;
+        }
+
+        size_t k = kc;
         a += 1;
         while (k >= 64 * sizeof(int8_t)) {
           _tile_loadd(4, a0, 64);
@@ -195,98 +193,62 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
           k -= kremainder * sizeof(int8_t);
         }
       $else:
-        if (mr == 1) {
-          a += ${MR};
-          while (k >= 64 * sizeof(int8_t)) {
-            _tile_loadd(4, a0, 64);
-            a0 += 64;
-            $for N in range(0, NR, 16):
-              $if N == 0:
+        const ${XINT8_T}* a_ptrs[${MR}];
+        for (size_t m = 0; m < mr; ++m) {
+          const ${XINT8_T}* restrict am = a[m];
+          if XNN_UNPREDICTABLE(am != zero) {
+            am = (const ${XINT8_T}*) ((uintptr_t) am + a_offset);
+          $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+            } else {
+              am = zero_data;
+          }
+          a_ptrs[m] = am;
+        }
+        a += ${MR};
+
+        size_t k = kc;
+        size_t k_offset = 0;
+        while (k >= 64 * sizeof(int8_t)) {
+          for (size_t m = 0; m < mr; ++m) {
+            const __m512i vin = _mm512_loadu_epi32(a_ptrs[m] + k_offset);
+            _mm512_store_epi32(&res[0][m * 16], vin);
+          }
+          k_offset += 64;
+          _tile_loadd(4, &res[0][0], 64);
+          $for N in range(0, NR, 16):
+            $if N == 0:
+              _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpbssd(${N // 16}, 4, 5);
+            $else:
+              if XNN_LIKELY(nc > ${N}) {
                 _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
                 _tile_dpbssd(${N // 16}, 4, 5);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpbssd(${N // 16}, 4, 5);
-                }
-            $if PREFETCH:
-              $for P in range(4096, 5120 + NR // 16 * 1024, 64):
-                xnn_prefetch_to_l1((const int8_t*) w + ${P});
+              }
+          $if PREFETCH:
+            $for P in range(4096, 5120 + NR // 16 * 1024, 64):
+              xnn_prefetch_to_l1((const int8_t*) w + ${P});
 
-            w = (const int8_t*) w + ${NR // 16 * 1024};
-            k -= 64 * sizeof(int8_t);
+          w = (const int8_t*) w + ${NR // 16 * 1024};
+          k -= 64 * sizeof(int8_t);
+        }
+        if XNN_UNLIKELY(k != 0) {
+          for (size_t m = 0; m < mr; ++m) {
+            const __m512i vin = _mm512_maskz_loadu_epi8(kremainder_mask, a_ptrs[m] + k_offset);
+            _mm512_store_epi32(&res[0][m * 16], vin);
           }
-          if XNN_UNLIKELY(k != 0) {
-            const __m512i vin0 = _mm512_maskz_loadu_epi8(kremainder_mask, a0);
-            _mm512_store_epi32(&vintile[0][0], vin0);
-            _tile_loadd(6, &vintile[0][0], 64);
-            $for N in range(0, NR, 16):
-              $if N == 0:
+          _tile_loadd(6, &res[0][0], 64);
+          $for N in range(0, NR, 16):
+            $if N == 0:
+              _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpbssd(${N // 16}, 6, 7);
+            $else:
+              if XNN_LIKELY(nc > ${N}) {
                 _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
                 _tile_dpbssd(${N // 16}, 6, 7);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpbssd(${N // 16}, 6, 7);
-                }
+              }
 
-            w = (const int8_t*) w + kremainder_colsb * ${NR};
-            k -= kremainder * sizeof(int8_t);
-          }
-        } else {
-          $for M in range(1, MR):
-            const ${XINT8_T}* restrict a${M} = a[${M}];
-            if XNN_UNPREDICTABLE(a${M} != zero) {
-              a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} + a_offset);
-            $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-              } else {
-                a${M} = zero_data;
-            }
-          a += ${MR};
-
-          size_t buf_idx = 0;
-          while (k >= 64 * sizeof(int8_t)) {
-            $for M in range(MR):
-              const __m512i vin${M} = _mm512_loadu_epi32(a${M});
-              a${M} += 64;
-              _mm512_store_epi32(&vintile[buf_idx][${M * 16}], vin${M});
-            _tile_loadd(4, &vintile[buf_idx][0], 64);
-            buf_idx ^= 1;
-            $for N in range(0, NR, 16):
-              $if N == 0:
-                _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                _tile_dpbssd(${N // 16}, 4, 5);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpbssd(${N // 16}, 4, 5);
-                }
-            $if PREFETCH:
-              $for P in range(4096, 5120 + NR // 16 * 1024, 64):
-                xnn_prefetch_to_l1((const int8_t*) w + ${P});
-
-            w = (const int8_t*) w + ${NR // 16 * 1024};
-            k -= 64 * sizeof(int8_t);
-          }
-          if XNN_UNLIKELY(k != 0) {
-            $for M in range(MR):
-              const __m512i vin${M} = _mm512_maskz_loadu_epi8(kremainder_mask, a${M});
-              a${M} += kremainder;
-              _mm512_store_epi32(&vintile[buf_idx][${M * 16}], vin${M});
-            _tile_loadd(6, &vintile[buf_idx][0], 64);
-            $for N in range(0, NR, 16):
-              $if N == 0:
-                _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                _tile_dpbssd(${N // 16}, 6, 7);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpbssd(${N // 16}, 6, 7);
-                }
-
-            w = (const int8_t*) w + kremainder_colsb * ${NR};
-            k -= kremainder * sizeof(int8_t);
-          }
+          w = (const int8_t*) w + kremainder_colsb * ${NR};
+          k -= kremainder * sizeof(int8_t);
         }
 
       p -= ${MR} * sizeof(void*);
