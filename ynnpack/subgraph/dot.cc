@@ -257,6 +257,85 @@ const std::array<size_t, 3>& get_dot_cache_budgets() {
   return budgets;
 }
 
+// Pack panels of `A` into a stack buffer with `k1` contiguous (and zero-padded
+// to a multiple of `tile_k`), and run `dot` one scheduled k-chunk at a time.
+template <typename CallKernel>
+YNN_NO_INLINE void run_dot_with_packed_a(
+    index_t m, index_t n, const std::array<size_t, 3>& k, index_t block_m,
+    index_t block_n, index_t tile_k, index_t a_stride_m,
+    const std::array<size_t, 3>& a_k_strides, const slinky::raw_buffer& a,
+    const std::array<size_t, 3>& b_k_strides, index_t b_stride_n,
+    const slinky::raw_buffer& b, index_t init_c_stride_m,
+    const slinky::raw_buffer& init_c, index_t c_stride_m, index_t c_stride_n,
+    const slinky::raw_buffer& c, const CallKernel& call_kernel,
+    dot_kernel_state* kernel_state) {
+  const std::array<size_t, 3> k_padded = {
+      align_up<size_t>(k[0], tile_k),
+      k[1],
+      k[2],
+  };
+
+  const std::array<size_t, 3> cache_budgets = get_dot_cache_budgets();
+  dot_loop loops_storage[std::size(cache_budgets) + 6];
+  auto loops = schedule_dot(cache_budgets, m, n, k_padded, block_m, block_n,
+                            a.elem_size, b.elem_size, loops_storage,
+                            /*pack_a=*/true);
+
+  const size_t panel_size =
+      packed_dot_panel_bytes(loops, dot_loop::pack_a, m, n, k_padded,
+                             a.elem_size * 8, tile_k, /*tile_p=*/1);
+  assert(panel_size <= dot_max_panel_bytes);
+  const uintptr_t raw_panel = reinterpret_cast<uintptr_t>(
+      YNN_ALLOCA(uint8_t, panel_size + YNN_ALLOCATION_ALIGNMENT));
+  void* panel = reinterpret_cast<void*>(
+      align_up<uintptr_t>(raw_panel, YNN_ALLOCATION_ALIGNMENT));
+
+  const size_t stride_k1 = k[0] == 1 ? a.elem_size : a_k_strides[0];
+  const size_t stride_m = m == 1 ? a.elem_size : a_stride_m;
+  dot_packer pack_a(stride_k1, stride_m, a.elem_size * 8, tile_k,
+                    /*tile_p=*/1, panel);
+
+  auto run = [&](void* c, const void* a_ptr, const void* b_ptr,
+                 const void* init_c) {
+    run_dot(loops, m, n, k, a_stride_m, a_k_strides, a_ptr, b_k_strides,
+            b_stride_n, b_ptr, init_c_stride_m, init_c, c_stride_m, c_stride_n,
+            c, call_kernel, kernel_state, &pack_a);
+  };
+  if ((c.rank | a.rank | b.rank | init_c.rank) == 0) {
+    run(c.base, a.base, b.base, init_c.base);
+  } else {
+    slinky::for_each_element(run, c, a, b, init_c);
+  }
+}
+
+template <typename CallKernel>
+YNN_NO_INLINE bool try_run_dot_with_packed_a(
+    index_t m, index_t n, index_t k1_extent, index_t k2, index_t k3,
+    index_t block_m, index_t block_n, size_t kernel_block_n, size_t tile_m,
+    index_t tile_k, index_t a_stride_m,
+    const std::array<size_t, 3>& a_k_strides, const slinky::raw_buffer& a,
+    const std::array<size_t, 3>& b_k_strides, index_t b_stride_n,
+    const slinky::raw_buffer& b, index_t init_c_stride_m,
+    const slinky::raw_buffer& init_c, index_t c_stride_m, index_t c_stride_n,
+    const slinky::raw_buffer& c, const CallKernel& call_kernel,
+    dot_kernel_state* kernel_state) {
+  const std::array<size_t, 3> k_extent = {
+      static_cast<size_t>(k1_extent),
+      static_cast<size_t>(k2),
+      static_cast<size_t>(k3),
+  };
+  if (!should_pack_a(get_dot_cache_budgets(), m, n, k_extent, block_m, block_n,
+                     kernel_block_n, tile_m, tile_k, a.elem_size, b.elem_size,
+                     a_stride_m, a_k_strides)) {
+    return false;
+  }
+  run_dot_with_packed_a(m, n, k_extent, block_m, block_n, tile_k, a_stride_m,
+                        a_k_strides, a, b_k_strides, b_stride_n, b,
+                        init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+                        call_kernel, kernel_state);
+  return true;
+}
+
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
@@ -445,9 +524,10 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
       a.slice(0, slinky::in_bounds{c_min_m});
     }
 
+    assert(r_k1.min() % tile_k == 0);
     const index_t k1_extent = r_k1.extent();
     const index_t k1 = k1_extent & ~(tile_k - 1);
-    const index_t k1_tail = k1_extent & (tile_k - 1);
+    index_t k1_tail = k1_extent & (tile_k - 1);
     const index_t k2 = r_k2.extent();
     const index_t k3 = r_k3.extent();
 
@@ -460,15 +540,17 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     // Find a kernel that is compatible with the packed data we have, and
     // matches whether A is transposed or not.
     std::optional<bool> require_transpose_a = std::make_optional(transposed_a);
-    if (a_stride_m == a_k_strides[0] * a_tile_k) {
-      // If the stride of m and k1 are the same (i.e. A is a vector of tile_k
-      // values), then we don't care if the kernel is transposed or not.
+    if (k1_tail == 0 && a_stride_m != 0 &&
+        a_stride_m == a_k_strides[0] * tile_k) {
+      // If each row of A is a single aligned block of `tile_k` values (and no
+      // tail padding is needed), transposed and non-transposed layouts are
+      // identical, so we don't care if the kernel is transposed or not.
       require_transpose_a = std::nullopt;
     }
     dot_shape shape;
     shape.m = m;
     shape.n = n;
-    shape.k1 = k1;
+    shape.k1 = align_up(k1_extent, tile_k);
     shape.k2 = k2;
     shape.k3 = k3;
     dot_packed_shape packed_shape;
@@ -495,89 +577,72 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
 
     dot_kernel_state kernel_state = {};
 
-    const std::array<size_t, 3> cache_budgets = get_dot_cache_budgets();
-
-    // `schedule_dot` emits at most 1 k-loop, 1 loop per cache level, and 2
-    // inner microkernel loops.
-    dot_loop loops_storage[std::size(cache_budgets) + 3];
+    const bool can_pack_a_panel =
+        !transposed_a && (kernel.flags & dot_flag::transpose_a) == 0;
 
     if (k1) {
-      auto loops = schedule_dot(cache_budgets, m, n, k, block_m, block_n,
-                                a.elem_size, b.elem_size, loops_storage);
-
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            run_dot(loops, m, n, k, a_stride_m, a_k_strides, a, b_k_strides,
-                    b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-                    c_stride_n, c, call_kernel, &kernel_state);
-          },
-          c, a, b, init_c);
+      // Below 384B/row (keeping a 32-row panel <= 12 KiB in L1), packing all
+      // of A once per m-block is cheaper than a second load/store pass over C.
+      constexpr index_t min_k_bytes_to_split_tail = 384;
+      const bool may_pack_a =
+          can_pack_a_panel && std::min(m, block_m) >= 4 &&
+          static_cast<size_t>(n) >= 2 * kernel.block_n && a_stride_m != 0 &&
+          (k1_tail != 0 ||
+           (kernel.tile_m == 1 &&
+            !(k2 == 1 && k3 == 1 &&
+              static_cast<size_t>(a_stride_m) <= dot_k_step_bytes &&
+              a_stride_m == static_cast<index_t>(k1_extent) * a.elem_size &&
+              a_k_strides[0] == static_cast<size_t>(a.elem_size))));
+      if (can_pack_a_panel && k1_tail != 0 &&
+          k1_extent * k2 * k3 * a.elem_size < min_k_bytes_to_split_tail) {
+        k[0] = k1_extent;
+        k1_tail = 0;
+        assert(type_element_count(type.a) == 1);
+        run_dot_with_packed_a(m, n, k, block_m, block_n, tile_k, a_stride_m,
+                              a_k_strides, a, b_k_strides, b_stride_n, b,
+                              init_c_stride_m, init_c, c_stride_m, c_stride_n,
+                              c, call_kernel, &kernel_state);
+      } else if (may_pack_a &&
+                 try_run_dot_with_packed_a(
+                     m, n, k1_extent, k2, k3, block_m, block_n, kernel.block_n,
+                     kernel.tile_m, tile_k, a_stride_m, a_k_strides, a,
+                     b_k_strides, b_stride_n, b, init_c_stride_m, init_c,
+                     c_stride_m, c_stride_n, c, call_kernel, &kernel_state)) {
+        k1_tail = 0;
+        assert(type_element_count(type.a) == 1);
+      } else {
+        const std::array<size_t, 3> cache_budgets = get_dot_cache_budgets();
+        dot_loop loops_storage[std::size(cache_budgets) + 6];
+        auto loops = schedule_dot(cache_budgets, m, n, k, block_m, block_n,
+                                  a.elem_size, b.elem_size, loops_storage);
+        slinky::for_each_element(
+            [=, &kernel_state](void* c, const void* a, const void* b,
+                               const void* init_c) {
+              run_dot(loops, m, n, k, a_stride_m, a_k_strides, a, b_k_strides,
+                      b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+                      c_stride_n, c, call_kernel, &kernel_state);
+            },
+            c, a, b, init_c);
+      }
     }
     if (k1_tail) {
+      assert(can_pack_a_panel);
+      assert(type_element_count(type.a) == 1);
+      if (k1 != 0) {
+        init_c_stride_m = c_stride_m;
+        init_c = c;
+        a.base = offset_bytes(a.base, a_k_strides[0] * k1);
+        b.base = offset_bytes(b.base, b_k_strides[0] * k1);
+      }
       std::array<size_t, 3> k_tail = {
           static_cast<size_t>(k1_tail),
           static_cast<size_t>(k2),
           static_cast<size_t>(k3),
       };
-      auto loops = schedule_dot(cache_budgets, m, n, k_tail, block_m, block_n,
-                                a.elem_size, b.elem_size, loops_storage);
-      // Dot kernels can't handle k1 not aligned to tile_k. We handle that
-      // here by making a padded copy of the unaligned elements and calling the
-      // kernel again.
-      //
-      // We do this padding+kernel call once for each value of k3, k2, which
-      // is pretty inefficient, but gives us an upper bound (tile_k * block_m)
-      // on the amount of memory we need to allocate for the padded area. If
-      // the performance of the tail case is an issue, we can improve this at
-      // the cost of a bit of complexity.
-      const index_t a_elem_size = a.elem_size;
-      const index_t a_padded_stride_m = a.elem_size * tile_k;
-      void* a_padded = YNN_ALLOCA(uint8_t, block_m* a_padded_stride_m);
-      memset(a_padded, 0, a_padded_stride_m * block_m);
-      auto call_kernel_tail =
-          [&](index_t m, index_t n, span<const size_t> k, const void* a,
-              size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
-              span<const size_t> b_k_strides, index_t init_c_stride_m,
-              const void* init_c, void* c, dot_kernel_state* state = nullptr) {
-            assert(m <= block_m);
-            assert(n <= block_n);
-            assert(k[0] < tile_k);
-            for (index_t K3 = 0; K3 < k3; ++K3) {
-              for (index_t K2 = 0; K2 < k2; ++K2) {
-                for (index_t i = 0; i < m; ++i) {
-                  memcpy(offset_bytes(a_padded, i * a_padded_stride_m),
-                         offset_bytes(a, i * a_stride_m + K3 * a_k_strides[2] +
-                                             K2 * a_k_strides[1]),
-                         k[0] * a_elem_size);
-                }
-                kernel.kernel(
-                    m, n, /*k3=*/1, /*k2=*/1, tile_k, a_padded_stride_m,
-                    /*a_stride_k3=*/0, /*a_stride_k2=*/0, a_padded,
-                    /*b_stride_k3=*/0,
-                    /*b_stride_k2=*/0, b_k_strides[0],
-                    offset_bytes(b, K3 * b_k_strides[2] + K2 * b_k_strides[1]),
-                    init_c_stride_m, init_c, c_stride_m, c, state);
-                init_c_stride_m = c_stride_m;
-                init_c = c;
-              }
-            }
-          };
-      slinky::for_each_element(
-          [=, &kernel_state](void* c, const void* a, const void* b,
-                             const void* init_c) {
-            index_t tail_init_c_stride_m = init_c_stride_m;
-            if (k1 != 0) {
-              init_c = c;
-              tail_init_c_stride_m = c_stride_m;
-            }
-            a = offset_bytes(a, a_k_strides[0] * k1);
-            b = offset_bytes(b, b_k_strides[0] * k1);
-            run_dot(loops, m, n, k_tail, a_stride_m, a_k_strides, a,
-                    b_k_strides, b_stride_n, b, tail_init_c_stride_m, init_c,
-                    c_stride_m, c_stride_n, c, call_kernel_tail, &kernel_state);
-          },
-          c, a, b, init_c);
+      run_dot_with_packed_a(m, n, k_tail, block_m, block_n, tile_k, a_stride_m,
+                            a_k_strides, a, b_k_strides, b_stride_n, b,
+                            init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+                            call_kernel, &kernel_state);
     }
 
     return 0;

@@ -354,7 +354,10 @@ cc_library(
     hdrs = ["schedule.h"],
     compatible_with = _COMPATIBLE_WITH,
     visibility = ["//ynnpack:__subpackages__"],
-    deps = ["//ynnpack/base"],
+    deps = [
+        ":pack",
+        "//ynnpack/base",
+    ],
 )
 
 cc_library(

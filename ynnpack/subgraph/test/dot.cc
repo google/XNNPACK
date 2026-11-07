@@ -884,6 +884,236 @@ void TestBroadcastAM(A, B, C) {
   }
 }
 
+template <typename A, typename B, typename C>
+void TestUnalignedK1(A, B, C) {
+  ReplicableRandomDevice rng;
+  const float max_abs_value = is_integral<C>::value ? 10.0f : 2.0f;
+  TestScheduler scheduler(3);
+
+  struct Case {
+    size_t m;
+    size_t n;
+    std::vector<size_t> k_dims;
+    bool broadcast_a_m = false;
+    bool dynamic_shape = false;
+  };
+  const std::vector<Case> cases = {
+      // Pure tail (k1 < tile_k, so aligned k1 == 0).
+      {7, 36, {1}},
+      {7, 36, {3}},
+      {7, 36, {7}},
+      // Single-pass folded body + tail (k1 > 0, k_bytes < 384).
+      {19, 68, {5}},
+      {19, 68, {65}},
+      {35, 300, {65}},
+      {19, 68, {133}},
+      // Two-pass body + tail (k_bytes >= 384), both within a single k-step and
+      // across multiple k-steps.
+      {19, 68, {689}},
+      {1, 16, {2115}},
+      {35, 68, {2115}},
+      // Multi-dimensional reduction (num_k_dims = 2 and 3), including large
+      // k2/k3 that require k-chunking to fit packed A panels on the stack.
+      {9, 36, {2, 3, 1}},
+      {9, 36, {2, 3, 19}},
+      {32, 36, {2048, 3}},
+      {32, 36, {48, 48, 3}},
+      {32, 68, {15, 131}},
+      {32, 68, {6, 179}},
+      {32, 36, {2048, 3}, /*broadcast_a_m=*/false, /*dynamic_shape=*/true},
+      // Broadcasted A along m (a_stride_m == 0) with unaligned k1.
+      {9, 36, {1}, /*broadcast_a_m=*/true},
+      {9, 36, {19}, /*broadcast_a_m=*/true},
+  };
+
+  for (const Case& tc : cases) {
+    const size_t num_k_dims = tc.k_dims.size();
+    const size_t n = align_up(tc.n, type_element_count(type_of<B>()));
+    const std::vector<size_t> batch_dims = {2};
+
+    std::vector<size_t> a_shape = {2, tc.broadcast_a_m ? 1 : tc.m};
+    a_shape.insert(a_shape.end(), tc.k_dims.begin(), tc.k_dims.end());
+
+    std::vector<size_t> b_shape = tc.k_dims;
+    b_shape.push_back(n);
+
+    const std::vector<size_t> output_shape = {2, tc.m, n};
+
+    Tensor<B> b(b_shape);
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+
+    // Use static B by default so B is packed (tile_k > 1 where supported) while
+    // A remains unpacked on architectures without transpose_a; also test fully
+    // dynamic shapes where Slinky outer k-splitting cannot run at create time.
+    SubgraphBuilder subgraph(4);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t c_id = 2;
+    const uint32_t output_id = 3;
+    if (tc.dynamic_shape) {
+      subgraph.AddInput(type_of<A>(), a_shape.size(), a_id)
+          .AddInput(type_of<B>(), b_shape.size(), b_id)
+          .AddInput(type_of<C>(), output_shape.size(), c_id)
+          .AddOutput(type_of<C>(), output_shape.size(), output_id)
+          .AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+    } else {
+      subgraph.AddInput(type_of<A>(), a_shape, a_id)
+          .AddTensor(b, b_id)
+          .AddInput(type_of<C>(), output_shape, c_id)
+          .AddOutput(type_of<C>(), output_shape, output_id)
+          .AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+    }
+
+    Runtime runtime(subgraph.GetSubgraph(), &scheduler);
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<A> a(a_shape);
+    Tensor<C> c_init(output_shape);
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+    fill_random(c_init.data(), c_init.size(), rng, -max_abs_value,
+                max_abs_value);
+
+    Tensor<C> expected(output_shape);
+    expected.assign(c_init);
+
+    Tensor<C> output(output_shape);
+    if (tc.dynamic_shape) {
+      runtime.ReshapeExternalTensor(a_shape, a.data(), a_id)
+          .ReshapeExternalTensor(b_shape, b.data(), b_id)
+          .ReshapeExternalTensor(output_shape, c_init.data(), c_id)
+          .ReshapeRuntime();
+      ASSERT_EQ(runtime.Status(), ynn_status_success);
+      runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
+    } else {
+      runtime.SetupExternalTensor(a.data(), a_id)
+          .SetupExternalTensor(c_init.data(), c_id)
+          .SetupExternalTensor(output.data(), output_id)
+          .ReshapeRuntime()
+          .InvokeRuntime();
+    }
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<A> a_ref = a;
+    if (tc.broadcast_a_m) {
+      broadcast_extent_1(a_ref);
+      std::vector<size_t> ref_extents = a_ref.extents();
+      ref_extents[1] = tc.m;
+      a_ref.set_shape(std::move(ref_extents), a_ref.strides());
+    }
+    VerifyDotResults(a_ref, b, output, expected, batch_dims, a_shape, b_shape,
+                     num_k_dims, max_abs_value);
+  }
+}
+
+template <typename A, typename B, typename C>
+void TestAlignedK1PackA(A, B, C) {
+  ReplicableRandomDevice rng;
+  const float max_abs_value = is_integral<C>::value ? 10.0f : 2.0f;
+  TestScheduler scheduler(3);
+
+  struct Case {
+    size_t m;
+    size_t n;
+    std::vector<size_t> k_dims;
+    bool static_b;
+    bool init_c;
+    bool use_scheduler;
+  };
+  const std::vector<Case> cases = {
+      {35,
+       512,
+       {64, 3},
+       /*static_b=*/true,
+       /*init_c=*/true,
+       /*use_scheduler=*/false},
+      {1024,
+       64,
+       {2048},
+       /*static_b=*/false,
+       /*init_c=*/true,
+       /*use_scheduler=*/false},
+      {64,
+       128,
+       {2048},
+       /*static_b=*/true,
+       /*init_c=*/false,
+       /*use_scheduler=*/true},
+      {31,
+       128,
+       {1536},
+       /*static_b=*/true,
+       /*init_c=*/true,
+       /*use_scheduler=*/true},
+  };
+
+  for (const Case& tc : cases) {
+    const size_t num_k_dims = tc.k_dims.size();
+    const size_t n = align_up(tc.n, type_element_count(type_of<B>()));
+    const std::vector<size_t> batch_dims = {2};
+
+    std::vector<size_t> a_shape = {2, tc.m};
+    a_shape.insert(a_shape.end(), tc.k_dims.begin(), tc.k_dims.end());
+
+    std::vector<size_t> b_shape = tc.k_dims;
+    b_shape.push_back(n);
+
+    const std::vector<size_t> output_shape = {2, tc.m, n};
+
+    Tensor<A> a(a_shape);
+    Tensor<B> b(b_shape);
+    Tensor<C> c_init(output_shape);
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+    if (tc.init_c) {
+      fill_random(c_init.data(), c_init.size(), rng, -max_abs_value,
+                  max_abs_value);
+    }
+
+    SubgraphBuilder subgraph(4);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t c_id = tc.init_c ? 2 : YNN_INVALID_VALUE_ID;
+    const uint32_t output_id = 3;
+    subgraph.AddInput(type_of<A>(), a_shape, a_id);
+    if (tc.static_b) {
+      subgraph.AddTensor(b, b_id);
+    } else {
+      subgraph.AddInput(type_of<B>(), b_shape, b_id);
+    }
+    if (tc.init_c) {
+      subgraph.AddInput(type_of<C>(), output_shape, c_id);
+    }
+    subgraph.AddOutput(type_of<C>(), output_shape, output_id)
+        .AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+
+    Runtime runtime(subgraph.GetSubgraph(),
+                    tc.use_scheduler ? &scheduler : nullptr);
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<C> expected(output_shape);
+    if (tc.init_c) {
+      expected.assign(c_init);
+    } else {
+      expected.fill(static_cast<C>(0));
+    }
+
+    Tensor<C> output(output_shape);
+    runtime.SetupExternalTensor(a.data(), a_id)
+        .SetupExternalTensor(output.data(), output_id);
+    if (tc.init_c) {
+      runtime.SetupExternalTensor(c_init.data(), c_id);
+    }
+    if (!tc.static_b) {
+      runtime.SetupExternalTensor(b.data(), b_id);
+    }
+    runtime.ReshapeRuntime().InvokeRuntime();
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    VerifyDotResults(a, b, output, expected, batch_dims, a_shape, b_shape,
+                     num_k_dims, max_abs_value);
+  }
+}
+
 class Dot : public testing::TestWithParam<multi_type> {};
 
 TEST_P(Dot, StaticB) {
@@ -913,6 +1143,18 @@ TEST_P(Dot, BroadcastExtent1) {
 TEST_P(Dot, BroadcastAM) {
   SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
     TestBroadcastAM(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, UnalignedK1) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestUnalignedK1(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, AlignedK1PackA) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestAlignedK1PackA(a_type, b_type, c_type);
   });
 }
 

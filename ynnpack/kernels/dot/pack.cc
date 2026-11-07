@@ -8,6 +8,7 @@
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/kernels/transpose/interleave.h"
 #include "ynnpack/kernels/transpose/transpose.h"
 
@@ -198,6 +199,35 @@ void packer::pack(size_t m, size_t n, const void* input,
   } else {
     YNN_UNREACHABLE;
   }
+}
+
+const void* dot_packer::pack(size_t p_extent, span<const size_t> ks,
+                             const void* src, span<const size_t> src_k_strides,
+                             size_t& packed_stride_p,
+                             size_t (&packed_k_strides)[3]) {
+  const size_t k1 = !ks.empty() ? ks[0] : 1;
+  const size_t k2 = ks.size() >= 2 ? ks[1] : 1;
+  const size_t k3 = ks.size() >= 3 ? ks[2] : 1;
+  const size_t block_stride = ceil_div(k1, tile_k) * ko_stride;
+  const size_t p_blocks = ceil_div(p_extent, tile_p);
+
+  packed_stride_p = block_stride / tile_p;
+  packed_k_strides[0] = ko_stride / tile_k;
+  packed_k_strides[1] = p_blocks * block_stride;
+  packed_k_strides[2] = k2 * packed_k_strides[1];
+
+  const size_t src_stride_k2 = src_k_strides.size() >= 2 ? src_k_strides[1] : 0;
+  const size_t src_stride_k3 = src_k_strides.size() >= 3 ? src_k_strides[2] : 0;
+  for (size_t i3 = 0; i3 < k3; ++i3) {
+    for (size_t i2 = 0; i2 < k2; ++i2) {
+      p.pack(k1, p_extent,
+             offset_bytes(src, i3 * src_stride_k3 + i2 * src_stride_k2),
+             block_stride,
+             offset_bytes(buffer,
+                          i3 * packed_k_strides[2] + i2 * packed_k_strides[1]));
+    }
+  }
+  return buffer;
 }
 
 }  // namespace ynn
