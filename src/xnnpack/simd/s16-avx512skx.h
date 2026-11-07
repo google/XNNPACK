@@ -18,7 +18,7 @@
 typedef __m512i xnn_simd_s16_t;
 #define xnn_simd_size_s16 32
 #define xnn_simd_log2_size_s16 5
-#define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16))
+#define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16_t))
 
 #define XNN_SIMD_CONST_S16(var, val) \
   const xnn_simd_s16_t var = _mm512_set1_epi16(val);
@@ -59,7 +59,7 @@ static XNN_INLINE void xnn_store_s16(int16_t* ptr, xnn_simd_s16_t v) {
   _mm512_storeu_si512(ptr, v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_s16_t(int16_t v) {
+static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return _mm512_set1_epi16(v);
 }
 

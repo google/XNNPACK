@@ -13,6 +13,9 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for f32 using AVX512F.
 typedef __m512 xnn_simd_f32_t;
@@ -227,8 +230,6 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   _mm512_mask_storeu_ps(output, vmask, v);
 }
 
-#include "src/xnnpack/math.h"
-
 typedef __m256i xnn_simd_f16_t;
 
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
@@ -249,19 +250,60 @@ static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
                                                    size_t num_elements) {
-  XNN_ALIGN(32) xnn_float16 padded[16] = {0};
-  memcpy(padded, input, num_elements * sizeof(xnn_float16));
-  return _mm256_loadu_si256((const __m256i*)padded);
+  assert(num_elements > 0);
+  assert(num_elements <= xnn_simd_size_f32);
+  if (num_elements == 16) {
+    return _mm256_loadu_si256((const __m256i*)input);
+  }
+  const uint16_t* p = (const uint16_t*)input + num_elements;
+  __m128i v_hi = _mm_setzero_si128();
+  if (num_elements & 1) {
+    p -= 1;
+    v_hi = _mm_cvtsi32_si128(*p);
+  }
+  if (num_elements & 2) {
+    p -= 2;
+    v_hi = _mm_slli_epi64(v_hi, 32);
+    v_hi = _mm_or_si128(v_hi, _mm_cvtsi32_si128(unaligned_load_s32(p)));
+  }
+  if (num_elements & 4) {
+    p -= 4;
+    v_hi = _mm_unpacklo_epi64(_mm_loadl_epi64((const __m128i*)p), v_hi);
+  }
+  if (num_elements & 8) {
+    return _mm256_inserti128_si256(
+        _mm256_castsi128_si256(_mm_loadu_si128((const __m128i*)input)), v_hi,
+        1);
+  }
+  return _mm256_zextsi128_si256(v_hi);
 }
 
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
                                           size_t num_elements) {
+  assert(num_elements > 0);
+  assert(num_elements <= xnn_simd_size_f32);
   if (num_elements == 16) {
     _mm256_storeu_si256((__m256i*)output, v);
-  } else {
-    XNN_ALIGN(32) xnn_float16 padded[16];
-    _mm256_storeu_si256((__m256i*)padded, v);
-    memcpy(output, padded, num_elements * sizeof(xnn_float16));
+    return;
+  }
+  __m128i v_low = _mm256_castsi256_si128(v);
+  if (num_elements & 8) {
+    _mm_storeu_si128((__m128i*)output, v_low);
+    v_low = _mm256_extracti128_si256(v, 1);
+    output += 8;
+  }
+  if (num_elements & 4) {
+    _mm_storel_epi64((__m128i*)output, v_low);
+    v_low = _mm_unpackhi_epi64(v_low, v_low);
+    output += 4;
+  }
+  if (num_elements & 2) {
+    unaligned_store_u32(output, (uint32_t)_mm_cvtsi128_si32(v_low));
+    v_low = _mm_srli_epi64(v_low, 32);
+    output += 2;
+  }
+  if (num_elements & 1) {
+    unaligned_store_u16(output, (uint16_t)_mm_extract_epi16(v_low, 0));
   }
 }
 
