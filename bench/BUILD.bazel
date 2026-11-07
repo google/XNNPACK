@@ -222,6 +222,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qp8_f32_qc2w_gemm_bench",
+    srcs = [
+        "qp8-f32-qc2w-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
     name = "qp8_f32_qc4w_gemm_bench",
     srcs = [
         "qp8-f32-qc4w-gemm.cc",

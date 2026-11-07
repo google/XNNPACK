@@ -1832,6 +1832,7 @@ if (!build_with_chromium && xnnpack_build_all_microkernels) {
     "bench/qd8-f32-qc4w-gemm.cc",
     "bench/qd8-f32-qc8w-gemm.cc",
     "bench/qp8-f32-qb4w-gemm.cc",
+    "bench/qp8-f32-qc2w-gemm.cc",
     "bench/qp8-f32-qc4w-gemm.cc",
     "bench/qp8-f32-qc8w-gemm.cc",
     "bench/qs8-dwconv.cc",
