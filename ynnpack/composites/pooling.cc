@@ -45,17 +45,10 @@ ynn_status define_average_pool_2d(ynn_subgraph_t subgraph, uint32_t input_id,
     // To handle this, we compute a pooled sum of 1s, padded by 0s.
     float one_val = 1.0f;
     const size_t ones_dims[] = {1, 1, 1, 1};
-    uint32_t ones_fp32_id = YNN_INVALID_VALUE_ID;
+    uint32_t ones_id = YNN_INVALID_VALUE_ID;
     YNN_RETURN_IF_ERROR(ynn_define_tensor(subgraph, ynn_type_fp32, 4, ones_dims,
                                           &one_val, YNN_VALUE_FLAG_COPY_DATA,
-                                          &ones_fp32_id));
-
-    uint32_t ones_id = ones_fp32_id;
-    if (type != ynn_type_fp32) {
-      ones_id = YNN_INVALID_VALUE_ID;
-      YNN_RETURN_IF_ERROR(
-          ynn_define_convert(subgraph, ones_fp32_id, type, &ones_id, 0));
-    }
+                                          &ones_id));
 
     uint32_t ones_broadcasted_id = YNN_INVALID_VALUE_ID;
     const int32_t xy[] = {1, 2};
@@ -64,8 +57,7 @@ ynn_status define_average_pool_2d(ynn_subgraph_t subgraph, uint32_t input_id,
 
     uint32_t ones_stencil_id = YNN_INVALID_VALUE_ID;
     uint32_t ones_padding_id = YNN_INVALID_VALUE_ID;
-    YNN_RETURN_IF_ERROR(
-        define_constant_of_type(subgraph, 0.0f, type, ones_padding_id));
+    YNN_RETURN_IF_ERROR(define_constant(subgraph, 0.0f, ones_padding_id));
 
     YNN_RETURN_IF_ERROR(ynn_define_stencil_copy(
         subgraph, /*num_stencils=*/2, stencil_axes, new_axes, stencil_dims,
@@ -78,8 +70,7 @@ ynn_status define_average_pool_2d(ynn_subgraph_t subgraph, uint32_t input_id,
                                           YNN_INVALID_VALUE_ID, &norm_id, 0));
   } else {
     float norm_val = static_cast<float>(filter_height * filter_width);
-    YNN_RETURN_IF_ERROR(
-        define_constant_of_type(subgraph, norm_val, type, norm_id));
+    YNN_RETURN_IF_ERROR(define_constant(subgraph, norm_val, norm_id));
   }
 
   uint32_t stencil_id = YNN_INVALID_VALUE_ID;
