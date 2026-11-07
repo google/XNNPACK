@@ -70,7 +70,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__neoni8mm(
 
       size_t k = bl;
       // 2x partial unrolled loop to load 8 bytes at a time.
-
       while (k >= 16 * sizeof(int8_t)) {
         // Load a 1x16 block of activations.
         // Row 1 does not exist and its half of each SMMLA operand is ignored, so load row 0
