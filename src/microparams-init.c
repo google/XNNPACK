@@ -549,6 +549,50 @@ size_t xnn_init_f32_scaleminmax_scalar_params(
   return sizeof(params->scalar);
 }
 
+size_t xnn_init_qs8_avgpool_minmax_scalar_params(
+  struct xnn_qs8_avgpool_minmax_params* params,
+  int32_t init_bias,
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+  assert(output_min < output_max);
+
+  params->scalar.init_bias = init_bias;
+  params->scalar.scale = scale;
+  params->scalar.output_max_less_zero_point =
+      (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->scalar.output_zero_point = (int16_t) output_zero_point;
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
+  return sizeof(params->scalar);
+}
+
+size_t xnn_init_qu8_avgpool_minmax_scalar_params(
+  struct xnn_qu8_avgpool_minmax_params* params,
+  int32_t init_bias,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+  assert(output_min < output_max);
+
+  params->scalar.init_bias = init_bias;
+  params->scalar.scale = scale;
+  params->scalar.output_max_less_zero_point =
+      (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->scalar.output_zero_point = (int16_t) (uint16_t) output_zero_point;
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
+  return sizeof(params->scalar);
+}
+
 size_t xnn_init_bf16_minmax_scalar_params(
   struct xnn_bf16_minmax_params* params,
   xnn_bfloat16 output_min,

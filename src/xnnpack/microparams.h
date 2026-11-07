@@ -77,6 +77,28 @@ struct xnn_f32_scaleminmax_params {
   } scalar;
 };
 
+struct xnn_qs8_avgpool_minmax_params {
+  struct {
+    int32_t init_bias;
+    float scale;
+    float output_max_less_zero_point;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } scalar;
+};
+
+struct xnn_qu8_avgpool_minmax_params {
+  struct {
+    int32_t init_bias;
+    float scale;
+    float output_max_less_zero_point;
+    int16_t output_zero_point;
+    uint8_t output_min;
+    uint8_t output_max;
+  } scalar;
+};
+
 // Min+Max: used by VCLAMP and GEMM/IGEMM/DWCONV/MAXPOOL/etc with MINMAX
 // activation.
 

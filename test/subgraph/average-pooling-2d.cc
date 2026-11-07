@@ -23,8 +23,9 @@
 namespace xnnpack {
 
 template <typename T>
-Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
-                            const StencilParams& kw) {
+Tensor<float> ReferenceImpl(Tensor<T> input,
+                            const xnn_quantization_params& input_quantization,
+                            const StencilParams& kh, const StencilParams& kw) {
   Tensor<float> output({input.extent(0), kh.output_extent(input.extent(1)),
                         kw.output_extent(input.extent(2)), input.extent(3)});
   output.fill(0.0f);
@@ -34,7 +35,8 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
   ones.fill(1.0f);
 
   // Pad the input and the ones
-  input = input.pad(0.0f, {0, kh.padding_min, kw.padding_min, 0},
+  input = input.pad(static_cast<T>(input_quantization.zero_point),
+                    {0, kh.padding_min, kw.padding_min, 0},
                     {0, kh.padding_max, kw.padding_max, 0});
   ones = ones.pad(0.0f, {kh.padding_min, kw.padding_min},
                   {kh.padding_max, kw.padding_max});
@@ -56,7 +58,8 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
         for (size_t c = 0; c < output.extent(3); ++c) {
           for (size_t dy = 0; dy < kh.size; ++dy) {
             for (size_t dx = 0; dx < kw.size; ++dx) {
-              output(n, y, x, c) += input(n, y, dy, x, dx, c);
+              output(n, y, x, c) +=
+                  dequantize(input(n, y, dy, x, dx, c), input_quantization);
             }
           }
         }
@@ -73,8 +76,11 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
 
 template <typename T>
 void TestImpl() {
+  const xnn_datatype datatype = xnn_datatype_of<T>();
   ReplicableRandomDevice rng;
   std::bernoulli_distribution bool_dist(0.5);
+  std::uniform_int_distribution<int32_t> i8_dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -94,10 +100,19 @@ void TestImpl() {
       kh.padding_min = kh.padding_max = 0;
     }
 
+    xnn_quantization_params input_quantization =
+        random_quantization(datatype, rng);
+    xnn_quantization_params output_quantization =
+        random_quantization(datatype, rng);
+    if (datatype == xnn_datatype_qint8) {
+      input_quantization.zero_point = i8_dist(rng);
+      output_quantization.zero_point = i8_dist(rng);
+    }
+
     // Define subgraph
     SubgraphTester subgraph(2);
-    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), 0)
-        .AddOutputTensor(4, xnn_datatype_of<T>(), 1)
+    subgraph.AddInputTensor(4, datatype, input_quantization, 0)
+        .AddOutputTensor(4, datatype, output_quantization, 1)
         .AddAveragePooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
                              kw.padding_min, kh.size, kw.size, kh.stride,
                              kw.stride, 0, 1, flags);
@@ -138,7 +153,7 @@ void TestImpl() {
       }
 
       Tensor<T> input(input_shape, XnnExtraBytes);
-      DatatypeGenerator<T> gen(-10.0f, 20.0f);
+      DatatypeGenerator<T> gen(-10.0f, 20.0f, input_quantization);
       input.generate([&]() { return gen(rng); });
 
       subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
@@ -154,19 +169,33 @@ void TestImpl() {
           .InvokeRuntime();
 
       // Verify results.
-      Tensor<float> expected = ReferenceImpl(input, kh, kw);
-      const float tolerance = 10.0f * xnnpack::epsilon(xnn_datatype_of<T>());
-      for (const auto& i : EnumerateIndices(output.extents())) {
-        ASSERT_NEAR(output(i), expected(i),
-                    tolerance * (1.0f + std::abs(expected(i))))
-            << "input_shape=" << index_to_string(input_shape)
-            << ", output_shape=" << index_to_string(output_shape)
-            << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+      Tensor<float> expected = ReferenceImpl(input, input_quantization, kh, kw);
+      if (xnn_datatype_is_quantized(datatype)) {
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(output(i), quantize<T>(expected(i), output_quantization),
+                      1)
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+        }
+      } else {
+        const float tolerance = 10.0f * xnnpack::epsilon(datatype);
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(output(i), expected(i),
+                      tolerance * (1.0f + std::abs(expected(i))))
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+        }
       }
     }
   }
 }
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(AveragePooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
+TEST(AveragePooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
+#endif
 TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
 

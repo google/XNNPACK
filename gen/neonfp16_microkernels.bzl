@@ -6,6 +6,7 @@
 #
 
 PROD_NEONFP16_MICROKERNEL_SRCS = [
+    "src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-neonfp16-u4.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-u16.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-neonfp16-rational-6-4-div.c",
     "src/f16-vcos/gen/f16-f32acc-vcos-neonfp16-poly-3.c",

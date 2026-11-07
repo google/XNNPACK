@@ -108,7 +108,9 @@ xnnpack_unit_test(
         "average-pooling-operator-tester.h",
     ],
     shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        "//:requantization",
+    ],
 )
 
 xnnpack_unit_test(

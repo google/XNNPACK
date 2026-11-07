@@ -7,8 +7,11 @@
 ##################################### SIMD #####################################
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=scalar -D SIMD_SIZE=1 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-scalar-u1.c &
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=sse2 -D SIMD_SIZE=16 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-sse2-u16.c &
+tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=avx2 -D SIMD_SIZE=32 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-avx2-u32.c &
+tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=avx512skx -D SIMD_SIZE=64 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-avx512skx-u64.c &
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=wasmsimd -D SIMD_SIZE=16 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-wasmsimd-u16.c &
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=neon -D SIMD_SIZE=16 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-neon-u16.c &
+tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=hvx -D SIMD_SIZE=128 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-hvx-u128.c &
 
 ################################ RISC-V Vector #################################
 tools/xngen src/f32-maxpool/rvv.c.in -D DATATYPE=u8 -D LMUL=2 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-rvv-u2v.c &

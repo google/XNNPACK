@@ -6,7 +6,9 @@
 #
 
 PROD_WASMSIMD_MICROKERNEL_SRCS = [
+    "src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-wasmsimd-u4.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-u16.c",
+    "src/f16-maxpool/gen/f16-maxpool-9p-minmax-wasmsimd-u8.c",
     "src/f16-vunary/gen/f16-vabs-wasmsimd-u16.c",
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-wasmsimd-c4.c",
     "src/f32-avgpool/gen/f32-avgpool-9p-minmax-wasmsimd-u4.c",
@@ -146,6 +148,7 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x16c2s2-minmax-wasmsimd-dot16x2.c",
     "src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x4c2s4-minmax-wasmsimd-dot16x2-ld128.c",
     "src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x16c2s2-minmax-wasmsimd-dot16x2.c",
+    "src/qs8-avgpool/gen/qs8-avgpool-9p-minmax-fp32-wasmsimd-u16.c",
     "src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-wasmsimd-mul16-add16.c",
     "src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-wasmsimd-mul16-add16.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-u32.c",
@@ -169,6 +172,7 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qs8-vlrelu/gen/qs8-vlrelu-wasmsimd-x86-u16.c",
     "src/qs8-vmul/gen/qs8-vmul-minmax-fp32-wasmsimd-mul32-ld64-u8.c",
     "src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-wasmsimd-mul32-ld64-u8.c",
+    "src/qu8-avgpool/gen/qu8-avgpool-9p-minmax-fp32-wasmsimd-u16.c",
     "src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-wasmsimd-mul16.c",
     "src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-wasmsimd-mul16.c",
     "src/qu8-f32-vcvt/gen/qu8-f32-vcvt-wasmsimd-u32.c",

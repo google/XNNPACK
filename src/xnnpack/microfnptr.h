@@ -473,6 +473,20 @@ typedef void (*xnn_f32_avgpool_ukernel_fn)(
     size_t input_increment, size_t output_increment,
     const struct xnn_f32_scaleminmax_params* params);
 
+typedef void (*xnn_qs8_avgpool_ukernel_fn)(
+    size_t output_pixels, size_t kernel_elements, size_t channels,
+    const int8_t** input, size_t input_offset, size_t input_pixel_stride,
+    const int8_t* zero, const float* multiplier, int8_t* output,
+    size_t input_increment, size_t output_increment,
+    const struct xnn_qs8_avgpool_minmax_params* params);
+
+typedef void (*xnn_qu8_avgpool_ukernel_fn)(
+    size_t output_pixels, size_t kernel_elements, size_t channels,
+    const uint8_t** input, size_t input_offset, size_t input_pixel_stride,
+    const uint8_t* zero, const float* multiplier, uint8_t* output,
+    size_t input_increment, size_t output_increment,
+    const struct xnn_qu8_avgpool_minmax_params* params);
+
 // MAXPOOL: MAX POOLing
 
 typedef void (*xnn_maxpool_ukernel_fn)(size_t output_pixels,
@@ -1301,6 +1315,16 @@ typedef size_t (*xnn_init_f32_scaleminmax_params_fn)(
 
 typedef void (*xnn_update_f32_scaleminmax_params_fn)(
     struct xnn_f32_scaleminmax_params* params, float scale);
+
+typedef size_t (*xnn_init_qs8_avgpool_minmax_params_fn)(
+    struct xnn_qs8_avgpool_minmax_params* params, int32_t init_bias,
+    float scale, int8_t output_zero_point, int8_t output_min,
+    int8_t output_max);
+
+typedef size_t (*xnn_init_qu8_avgpool_minmax_params_fn)(
+    struct xnn_qu8_avgpool_minmax_params* params, int32_t init_bias,
+    float scale, uint8_t output_zero_point, uint8_t output_min,
+    uint8_t output_max);
 
 typedef void (*xnn_init_scale_params_fn)(size_t channels, size_t channels_tile,
                                          size_t stride, const void* scale,

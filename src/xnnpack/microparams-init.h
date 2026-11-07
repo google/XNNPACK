@@ -140,6 +140,16 @@ XNN_INTERNAL size_t xnn_init_f32_scaleminmax_scalar_params(
 XNN_INTERNAL void xnn_update_f32_scaleminmax_scalar_params(
     struct xnn_f32_scaleminmax_params* params, float scale);
 
+XNN_INTERNAL size_t xnn_init_qs8_avgpool_minmax_scalar_params(
+    struct xnn_qs8_avgpool_minmax_params* params, int32_t init_bias,
+    float scale, int8_t output_zero_point, int8_t output_min,
+    int8_t output_max);
+
+XNN_INTERNAL size_t xnn_init_qu8_avgpool_minmax_scalar_params(
+    struct xnn_qu8_avgpool_minmax_params* params, int32_t init_bias,
+    float scale, uint8_t output_zero_point, uint8_t output_min,
+    uint8_t output_max);
+
 XNN_INTERNAL size_t xnn_init_s8_minmax_scalar_params(
     struct xnn_s8_minmax_params* params, int8_t output_min, int8_t output_max);
 

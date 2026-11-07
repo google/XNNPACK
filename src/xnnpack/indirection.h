@@ -137,19 +137,19 @@ typedef void (*xnn_indirection_init_pavgpool2d_fn)(
     size_t input_height, size_t input_width, size_t output_height,
     size_t output_width, size_t pooling_height, size_t pooling_width,
     size_t stride_height, size_t stride_width, size_t padding_top,
-    size_t padding_left, void* pixelwise_buffer);
+    size_t padding_left, float scale, void* pixelwise_buffer);
 
 XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f16(
     size_t input_height, size_t input_width, size_t output_height,
     size_t output_width, size_t pooling_height, size_t pooling_width,
     size_t stride_height, size_t stride_width, size_t padding_top,
-    size_t padding_left, xnn_float16* pixelwise_buffer);
+    size_t padding_left, float scale, xnn_float16* pixelwise_buffer);
 
 XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f32(
     size_t input_height, size_t input_width, size_t output_height,
     size_t output_width, size_t pooling_height, size_t pooling_width,
     size_t stride_height, size_t stride_width, size_t padding_top,
-    size_t padding_left, float* pixelwise_buffer);
+    size_t padding_left, float scale, float* pixelwise_buffer);
 
 #ifdef __cplusplus
 }  // extern "C"

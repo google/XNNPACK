@@ -3,10 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ARCH in ("scalar", "wasmrelaxedsimd")
+$assert ARCH in ("scalar", "wasmsimd", "wasmrelaxedsimd", "neonfp16", "avx512f", "hvx")
+$SIMD_ARCH = {
+$  "neonfp16": "neon",
+$}.get(ARCH, ARCH)
 $SIMD_SIZE = {
 $  "scalar": 1,
+$  "wasmsimd": 4,
 $  "wasmrelaxedsimd": 4,
+$  "neonfp16": 4,
+$  "avx512f": 16,
+$  "hvx": 32,
 $}[ARCH]
 #include <assert.h>
 #include <stddef.h>
@@ -15,16 +22,18 @@ $}[ARCH]
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/simd/f32-${ARCH}.h"
-$if ARCH == "wasmrelaxedsimd":
+#include "src/xnnpack/simd/f32-${SIMD_ARCH}.h"
+$if ARCH in ("wasmsimd", "wasmrelaxedsimd"):
   #undef XNN_SIMD_HAS_NATIVE_FMA
-#include "src/xnnpack/simd/f16-${ARCH}.h"
+  #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
+$elif ARCH == "scalar":
+  #include "src/xnnpack/simd/f16-${ARCH}.h"
 
 
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(
     const xnn_float16* input)
 {
-  $if ARCH == "wasmrelaxedsimd":
+  $if ARCH in ("wasmsimd", "wasmrelaxedsimd"):
     return xnn_cvt_f32_f16(wasm_v128_load64_zero(input));
   $else:
     return xnn_cvt_f32_f16(xnn_loadu_f16(input));

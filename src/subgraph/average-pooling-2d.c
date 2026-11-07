@@ -14,6 +14,7 @@
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
+#include "src/xnnpack/requantization.h"
 #include "src/xnnpack/subgraph-validation.h"
 #include "src/xnnpack/subgraph.h"
 #include <pthreadpool.h>
@@ -33,6 +34,9 @@ static enum xnn_status create_average_pooling_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const struct xnn_runtime_value *input_value = &values[input_id];
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+  const struct xnn_runtime_value *output_value = &values[output_id];
   switch (input_value->datatype) {
     case xnn_datatype_fp16:
       status = xnn_create_average_pooling2d_nhwc_f16(
@@ -64,6 +68,54 @@ static enum xnn_status create_average_pooling_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_datatype_qint8: {
+      const float output_scale = output_value->quantization.scale;
+      const int32_t output_zero_point = output_value->quantization.zero_point;
+      const int8_t output_min = xnn_qs8_quantize(node->activation.output_min, output_scale, output_zero_point);
+      const int8_t output_max = xnn_qs8_quantize(node->activation.output_max, output_scale, output_zero_point);
+      status = xnn_create_average_pooling2d_nhwc_qs8(
+        node->params.pooling_2d.padding_top,
+        node->params.pooling_2d.padding_right,
+        node->params.pooling_2d.padding_bottom,
+        node->params.pooling_2d.padding_left,
+        node->params.pooling_2d.pooling_height,
+        node->params.pooling_2d.pooling_width,
+        node->params.pooling_2d.stride_height,
+        node->params.pooling_2d.stride_width,
+        (int8_t) input_value->quantization.zero_point,
+        input_value->quantization.scale,
+        (int8_t) output_zero_point,
+        output_scale,
+        output_min,
+        output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+    }
+    case xnn_datatype_quint8: {
+      const float output_scale = output_value->quantization.scale;
+      const int32_t output_zero_point = output_value->quantization.zero_point;
+      const uint8_t output_min = xnn_qu8_quantize(node->activation.output_min, output_scale, output_zero_point);
+      const uint8_t output_max = xnn_qu8_quantize(node->activation.output_max, output_scale, output_zero_point);
+      status = xnn_create_average_pooling2d_nhwc_qu8(
+        node->params.pooling_2d.padding_top,
+        node->params.pooling_2d.padding_right,
+        node->params.pooling_2d.padding_bottom,
+        node->params.pooling_2d.padding_left,
+        node->params.pooling_2d.pooling_height,
+        node->params.pooling_2d.pooling_width,
+        node->params.pooling_2d.stride_height,
+        node->params.pooling_2d.stride_width,
+        (uint8_t) input_value->quantization.zero_point,
+        input_value->quantization.scale,
+        (uint8_t) output_zero_point,
+        output_scale,
+        output_min,
+        output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+    }
     default:
       XNN_UNREACHABLE;
   }
@@ -131,6 +183,28 @@ static enum xnn_status reshape_average_pooling_operator(
         &output_width,
         threadpool);
       break;
+    case xnn_operator_type_average_pooling_nhwc_qs8:
+      status = xnn_reshape_average_pooling2d_nhwc_qs8(
+        opdata->operator_objects[0],
+        batch_size,
+        input_height,
+        input_width,
+        /*channels=*/channel_dim, /*input_pixel_stride=*/channel_dim, /*output_pixel_stride=*/channel_dim,
+        &output_height,
+        &output_width,
+        threadpool);
+      break;
+    case xnn_operator_type_average_pooling_nhwc_qu8:
+      status = xnn_reshape_average_pooling2d_nhwc_qu8(
+        opdata->operator_objects[0],
+        batch_size,
+        input_height,
+        input_width,
+        /*channels=*/channel_dim, /*input_pixel_stride=*/channel_dim, /*output_pixel_stride=*/channel_dim,
+        &output_height,
+        &output_width,
+        threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -189,6 +263,16 @@ static enum xnn_status setup_average_pooling_operator(
         output_data);
     case xnn_operator_type_average_pooling_nhwc_f32:
       return xnn_setup_average_pooling2d_nhwc_f32(
+        opdata->operator_objects[0],
+        input_data,
+        output_data);
+    case xnn_operator_type_average_pooling_nhwc_qs8:
+      return xnn_setup_average_pooling2d_nhwc_qs8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data);
+    case xnn_operator_type_average_pooling_nhwc_qu8:
+      return xnn_setup_average_pooling2d_nhwc_qu8(
         opdata->operator_objects[0],
         input_data,
         output_data);
@@ -268,6 +352,8 @@ enum xnn_status xnn_define_average_pooling_2d(
   switch (input_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       break;
     default:
       xnn_log_error(
@@ -290,15 +376,32 @@ enum xnn_status xnn_define_average_pooling_2d(
 
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
-      break;
     case xnn_datatype_fp32:
       break;
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8: {
+      const float input_output_scale = input_value->quantization.scale / output_value->quantization.scale;
+      if (input_output_scale < 0x1.0p-32f || input_output_scale >= 256.0f) {
+        xnn_log_error(
+          "failed to define %s operator with %.7g input scale and %.7g output scale: input-to-output scale ratio (%.7g) must be in [2**-32, 256) range",
+          xnn_node_type_to_string(xnn_node_type_average_pooling_2d),
+          input_value->quantization.scale, output_value->quantization.scale, input_output_scale);
+        return xnn_status_unsupported_parameter;
+      }
+      break;
+    }
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
         xnn_node_type_to_string(xnn_node_type_average_pooling_2d), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_unsupported_parameter;
+  }
+
+  status = xnn_subgraph_check_datatype_matches(
+    xnn_node_type_average_pooling_2d, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

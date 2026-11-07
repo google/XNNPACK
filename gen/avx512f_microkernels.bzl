@@ -6,6 +6,7 @@
 #
 
 PROD_AVX512F_MICROKERNEL_SRCS = [
+    "src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-avx512f-u16.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-avx512f-rational-6-4-div.c",
     "src/f16-vcos/gen/f16-f32acc-vcos-avx512f-poly-3.c",
     "src/f16-vexp/gen/f16-f32acc-vexp-avx512f-poly-3.c",

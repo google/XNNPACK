@@ -6,7 +6,9 @@
 #
 
 PROD_HVX_MICROKERNEL_SRCS = [
+    "src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-hvx-u32.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u128.c",
+    "src/f16-maxpool/gen/f16-maxpool-9p-minmax-hvx-u64.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-hvx-rational-6-4-div.c",
     "src/f16-vcos/gen/f16-f32acc-vcos-hvx-poly-3.c",
     "src/f16-vexp/gen/f16-f32acc-vexp-hvx-poly-3.c",
@@ -88,6 +90,7 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x128c4-minmax-hvx.c",
     "src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x128c4-minmax-hvx.c",
     "src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x128c4-minmax-hvx.c",
+    "src/qs8-avgpool/gen/qs8-avgpool-9p-minmax-fp32-hvx-u32.c",
     "src/qs8-packw/gen/qs8-packw-x128c4-gemm-gio-hvx.c",
     "src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c",
     "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x128c4-minmax-fp32-hvx.c",
@@ -104,12 +107,15 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-hvx-u64.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c",
     "src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u128.c",
+    "src/qu8-avgpool/gen/qu8-avgpool-9p-minmax-fp32-hvx-u32.c",
+    "src/s8-maxpool/gen/s8-maxpool-9p-minmax-hvx-u128.c",
     "src/s8-rdminmax/gen/s8-rdmax-2p2x-hvx-u128.c",
     "src/s8-rdminmax/gen/s8-rdmin-2p2x-hvx-u128.c",
     "src/s8-rminmax/gen/s8-rmax-hvx-u256-acc2.c",
     "src/s8-rminmax/gen/s8-rmin-hvx-u256-acc2.c",
     "src/s8-rminmax/gen/s8-rminmax-hvx-u256-acc2.c",
     "src/s8-vclamp/gen/s8-vclamp-hvx.c",
+    "src/u8-maxpool/gen/u8-maxpool-9p-minmax-hvx-u128.c",
     "src/u8-rdminmax/gen/u8-rdmax-2p2x-hvx-u128.c",
     "src/u8-rdminmax/gen/u8-rdmin-2p2x-hvx-u128.c",
     "src/u8-rminmax/gen/u8-rmax-hvx-u256-acc2.c",

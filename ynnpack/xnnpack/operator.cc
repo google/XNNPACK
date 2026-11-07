@@ -174,6 +174,59 @@ xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   return xnn_status_deprecated;
 }
 
+xnn_status xnn_create_average_pooling2d_nhwc_qs8(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
+    uint32_t stride_width, int8_t input_zero_point, float input_scale,
+    int8_t output_zero_point, float output_scale, int8_t output_min,
+    int8_t output_max, uint32_t flags, xnn_operator_t* average_pooling_op_out) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_reshape_average_pooling2d_nhwc_qs8(
+    xnn_operator_t average_pooling_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t channels, size_t input_pixel_stride,
+    size_t output_pixel_stride, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_setup_average_pooling2d_nhwc_qs8(
+    xnn_operator_t average_pooling_op, const int8_t* input, int8_t* output) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_create_average_pooling2d_nhwc_qu8(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
+    uint32_t stride_width, uint8_t input_zero_point, float input_scale,
+    uint8_t output_zero_point, float output_scale, uint8_t output_min,
+    uint8_t output_max, uint32_t flags,
+    xnn_operator_t* average_pooling_op_out) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_reshape_average_pooling2d_nhwc_qu8(
+    xnn_operator_t average_pooling_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t channels, size_t input_pixel_stride,
+    size_t output_pixel_stride, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
+    xnn_operator_t average_pooling_op, const uint8_t* input, uint8_t* output) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
 xnn_status xnn_create_batch_matrix_multiply_nc_f16(
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op) {
   YNN_LOG_FATAL() << "operator API is not supported";
