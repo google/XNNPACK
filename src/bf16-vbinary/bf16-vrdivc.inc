@@ -13,3 +13,8 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_bf16_vrdivc_ukernel__aarch64_neon_u16, 16, fa
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_bf16_vrdivc_ukernel__avx512skx_u16, 16, false, xnn_bfloat16, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_bf16_vrdivc_ukernel__avx512skx_u32, 32, false, xnn_bfloat16, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX512BF16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512bf16, xnn_bf16_vrdivc_ukernel__avx512bf16_u16, 16, false, xnn_bfloat16, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_x86_avx512bf16, xnn_bf16_vrdivc_ukernel__avx512bf16_u32, 32, false, xnn_bfloat16, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
+#endif  // XNN_ENABLE_AVX512BF16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
