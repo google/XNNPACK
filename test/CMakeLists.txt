@@ -274,6 +274,25 @@ FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
 ENDFOREACH()
 
 SET(MICROKERNEL_VBINARY_UNIT_TESTS
+    bf16-vadd
+    bf16-vaddc
+    bf16-vdiv
+    bf16-vdivc
+    bf16-vmax
+    bf16-vmaxc
+    bf16-vmin
+    bf16-vminc
+    bf16-vmul
+    bf16-vmulc
+    bf16-vprelu
+    bf16-vpreluc
+    bf16-vrdivc
+    bf16-vrpreluc
+    bf16-vrsubc
+    bf16-vsqrdiff
+    bf16-vsqrdiffc
+    bf16-vsub
+    bf16-vsubc
     f16-vadd
     f16-vaddc
     f16-vdiv

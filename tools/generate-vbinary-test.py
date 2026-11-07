@@ -165,7 +165,9 @@ def main(args):
       )
   )
 
-  folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
+  folder = datatype + "-" + (
+      "vbinary" if datatype in ("bf16", "f16", "f32") else op
+  )
   tests += (
       f'#include "src/{folder}/{options.ukernel}.inc"\n'
   )

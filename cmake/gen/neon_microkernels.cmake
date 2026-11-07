@@ -14,6 +14,22 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/bf16-rminmax/gen/bf16-rmax-neon-u32-acc4.c
   src/bf16-rminmax/gen/bf16-rmin-neon-u32-acc4.c
   src/bf16-rminmax/gen/bf16-rminmax-neon-u32-acc4.c
+  src/bf16-vbinary/gen/bf16-vadd-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vaddc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vmax-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vmaxc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vmin-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vminc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vmul-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vmulc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vprelu-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vpreluc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vrpreluc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vrsubc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vsqrdiff-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vsqrdiffc-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vsub-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vsubc-neon-u16.c
   src/bf16-vunary/gen/bf16-vunary-neon.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u16.c
   src/f16-vunary/gen/f16-vabs-neon-u16.c
@@ -210,6 +226,22 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/bf16-rminmax/gen/bf16-rminmax-neon-u16-acc2.c
   src/bf16-rminmax/gen/bf16-rminmax-neon-u24-acc3.c
   src/bf16-rminmax/gen/bf16-rminmax-neon-u32-acc2.c
+  src/bf16-vbinary/gen/bf16-vadd-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vaddc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vmax-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vmaxc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vmin-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vminc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vmul-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vmulc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vprelu-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vpreluc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vrpreluc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vrsubc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vsqrdiff-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vsqrdiffc-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vsub-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vsubc-neon-u8.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u8.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u32.c

@@ -978,6 +978,10 @@ typedef void (*xnn_vbinary_ukernel_fn)(size_t batch, const void* input_x,
                                        const void* input_y, void* output,
                                        const void* params);
 
+typedef void (*xnn_bf16_vbinary_ukernel_fn)(
+    size_t batch, const xnn_bfloat16* input_x, const xnn_bfloat16* input_y,
+    xnn_bfloat16* output, const struct xnn_bf16_default_params* params);
+
 typedef void (*xnn_f16_vbinary_ukernel_fn)(
     size_t batch, const xnn_float16* input_x, const xnn_float16* input_y,
     xnn_float16* output, const struct xnn_f16_default_params* params);

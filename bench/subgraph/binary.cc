@@ -10,6 +10,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "bench/subgraph/benchmark.h"
@@ -68,8 +69,8 @@ xnn_subgraph_t Binary(int64_t op, size_t d0, size_t d1, size_t d2,
   }
 
   xnn_binary_params params;
-  params.output_min = -std::numeric_limits<T>::infinity();
-  params.output_max = std::numeric_limits<T>::infinity();
+  params.output_min = -std::numeric_limits<float>::infinity();
+  params.output_max = std::numeric_limits<float>::infinity();
   status =
       xnn_define_binary(subgraph.get(), static_cast<xnn_binary_operator>(op),
                         /*params=*/&params, input1_id, input2_id,
@@ -86,11 +87,11 @@ xnn_subgraph_t Binary(int64_t op, size_t d0, size_t d1, size_t d2,
 
 }  // namespace models
 
-static void FP32Binary(benchmark::State& state) {
+template <typename T>
+static void Binary(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
-    return models::Binary<float>(state.range(0), FLAGS_batch_size,
-                                 state.range(1), state.range(2), state.range(3),
-                                 state.range(4));
+    return models::Binary<T>(state.range(0), FLAGS_batch_size, state.range(1),
+                             state.range(2), state.range(3), state.range(4));
   });
 }
 
@@ -106,22 +107,28 @@ static void RegisterBenchmarks() {
         xnn_binary_prelu,    xnn_binary_atan2,
         xnn_binary_pow,
     };
+    static const std::pair<const char*, void (*)(benchmark::State&)>
+        datatypes[] = {{"FP32Binary/", Binary<float>},
+                       {"BF16Binary/", Binary<xnn_bfloat16>}};
 
     for (auto op : real_ops) {
       std::string op_name = xnn_binary_operator_to_string(op);
-      auto b =
-          benchmark::RegisterBenchmark("FP32Binary/" + op_name, FP32Binary);
-      b->Unit(benchmark::kMicrosecond)->MeasureProcessCPUTime()->UseRealTime();
-      b->ArgNames({"Op", "M", "N", "BroadcastA", "BroadcastB"});
+      for (const auto& [prefix, benchmark_fn] : datatypes) {
+        auto b = benchmark::RegisterBenchmark(prefix + op_name, benchmark_fn);
+        b->Unit(benchmark::kMicrosecond)
+            ->MeasureProcessCPUTime()
+            ->UseRealTime();
+        b->ArgNames({"Op", "M", "N", "BroadcastA", "BroadcastB"});
 
-      const std::pair<int, int> shapes[] = {{1, 256}, {1, 4096}, {256, 4096}};
+        const std::pair<int, int> shapes[] = {{1, 256}, {1, 4096}, {256, 4096}};
 
-      const std::pair<bool, bool> broadcasts[] = {
-          {false, false}, {true, false}, {false, true}};
+        const std::pair<bool, bool> broadcasts[] = {
+            {false, false}, {true, false}, {false, true}};
 
-      for (auto shape : shapes) {
-        for (auto bc : broadcasts) {
-          b->Args({op, shape.first, shape.second, bc.first, bc.second});
+        for (auto shape : shapes) {
+          for (auto bc : broadcasts) {
+            b->Args({op, shape.first, shape.second, bc.first, bc.second});
+          }
         }
       }
     }
