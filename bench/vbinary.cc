@@ -45,6 +45,16 @@ struct UniformDistribution<xnn_float16> {
 };
 
 template <>
+struct UniformDistribution<xnn_bfloat16> {
+  std::uniform_real_distribution<float> dist{-10.0f, 10.0f};
+
+  template <class Generator>
+  xnn_bfloat16 operator()(Generator& g) {
+    return static_cast<xnn_bfloat16>(dist(g));
+  }
+};
+
+template <>
 struct UniformDistribution<int8_t> {
   std::uniform_int_distribution<int> dist{std::numeric_limits<int8_t>::lowest(),
                                           std::numeric_limits<int8_t>::max()};
@@ -168,6 +178,25 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                               \
           benchmark::utils::BinaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
+#include "src/bf16-vbinary/bf16-vadd.inc"
+#include "src/bf16-vbinary/bf16-vaddc.inc"
+#include "src/bf16-vbinary/bf16-vdiv.inc"
+#include "src/bf16-vbinary/bf16-vdivc.inc"
+#include "src/bf16-vbinary/bf16-vmax.inc"
+#include "src/bf16-vbinary/bf16-vmaxc.inc"
+#include "src/bf16-vbinary/bf16-vmin.inc"
+#include "src/bf16-vbinary/bf16-vminc.inc"
+#include "src/bf16-vbinary/bf16-vmul.inc"
+#include "src/bf16-vbinary/bf16-vmulc.inc"
+#include "src/bf16-vbinary/bf16-vprelu.inc"
+#include "src/bf16-vbinary/bf16-vpreluc.inc"
+#include "src/bf16-vbinary/bf16-vrdivc.inc"
+#include "src/bf16-vbinary/bf16-vrpreluc.inc"
+#include "src/bf16-vbinary/bf16-vrsubc.inc"
+#include "src/bf16-vbinary/bf16-vsqrdiff.inc"
+#include "src/bf16-vbinary/bf16-vsqrdiffc.inc"
+#include "src/bf16-vbinary/bf16-vsub.inc"
+#include "src/bf16-vbinary/bf16-vsubc.inc"
 #include "src/f16-vbinary/f16-vadd.inc"
 #include "src/f16-vbinary/f16-vaddc.inc"
 #include "src/f16-vbinary/f16-vdiv.inc"

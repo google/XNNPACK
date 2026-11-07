@@ -6,6 +6,22 @@
 #
 
 PROD_NEONBF16_MICROKERNEL_SRCS = [
+    "src/bf16-vbinary/gen/bf16-vadd-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vmax-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vmaxc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vmin-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vminc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vmul-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vmulc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vprelu-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vpreluc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vrpreluc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vrsubc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vsqrdiff-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vsqrdiffc-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vsub-neonbf16-u16.c",
+    "src/bf16-vbinary/gen/bf16-vsubc-neonbf16-u16.c",
     "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u16.c",
 ]
 
@@ -24,6 +40,22 @@ NON_PROD_NEONBF16_MICROKERNEL_SRCS = [
     "src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonbf16-bfmlal.c",
     "src/bf16-gemm/gen/bf16-gemm-5x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
     "src/bf16-gemm/gen/bf16-gemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-vbinary/gen/bf16-vadd-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vmax-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vmaxc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vmin-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vminc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vmul-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vmulc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vprelu-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vpreluc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vrpreluc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vrsubc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vsqrdiff-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vsqrdiffc-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vsub-neonbf16-u8.c",
+    "src/bf16-vbinary/gen/bf16-vsubc-neonbf16-u8.c",
     "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u8.c",
 ]
 
