@@ -1950,6 +1950,20 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     return ynn_status_invalid_parameter;
   }
 
+  uint32_t add_c_id = YNN_INVALID_VALUE_ID;
+  if (input_c_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& a = subgraph->value(input_a_id);
+    const ynn_value& input_c = subgraph->value(input_c_id);
+    if (a.rank() != 1 && slinky::prove_true(a.extent(num_k_dims) == 1) &&
+        !slinky::prove_true(a.extent(num_k_dims) == input_c.extent(1))) {
+      // If `a` broadcasts in `m` and `c` has `m > 1`, compute `dot(a, b)` first
+      // and let `add` broadcast `m` instead of redundantly computing the
+      // broadcasted dot output.
+      add_c_id = input_c_id;
+      input_c_id = YNN_INVALID_VALUE_ID;
+    }
+  }
+
   // TODO: b/531861696 - This and other dot graph rewrites should be done in a
   // separate graph optimization pass.
   maybe_rewrite_input_a_to_uint8(*subgraph, input_a_id, input_b_id, input_c_id,
@@ -1958,15 +1972,20 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   const ynn_value& b = subgraph->value(input_b_id);
   const ynn_type c_type = deduce_output_type(a.type, b.type);
 
-  if (input_c_id != YNN_INVALID_VALUE_ID) {
-    const ynn_value& input_c = subgraph->value(input_c_id);
-    if (input_c.type != c_type) {
-      uint32_t input_c_converted_id = YNN_INVALID_VALUE_ID;
-      YNN_RETURN_IF_ERROR(ynn_define_convert(subgraph, input_c_id, c_type,
-                                             &input_c_converted_id, flags));
-      input_c_id = input_c_converted_id;
+  auto maybe_convert_c = [&](uint32_t& c_id) -> ynn_status {
+    if (c_id != YNN_INVALID_VALUE_ID) {
+      const ynn_value& input_c = subgraph->value(c_id);
+      if (input_c.type != c_type) {
+        uint32_t input_c_converted_id = YNN_INVALID_VALUE_ID;
+        YNN_RETURN_IF_ERROR(ynn_define_convert(subgraph, c_id, c_type,
+                                               &input_c_converted_id, flags));
+        c_id = input_c_converted_id;
+      }
     }
-  }
+    return ynn_status_success;
+  };
+  YNN_RETURN_IF_ERROR(maybe_convert_c(input_c_id));
+  YNN_RETURN_IF_ERROR(maybe_convert_c(add_c_id));
 
   uint32_t convert_to_id = YNN_INVALID_VALUE_ID;
   if (*output_id != YNN_INVALID_VALUE_ID) {
@@ -1982,8 +2001,17 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     }
   }
 
-  YNN_RETURN_IF_ERROR(define_dot(*subgraph, num_k_dims, input_a_id, input_b_id,
-                                 input_c_id, output_id, flags));
+  if (add_c_id != YNN_INVALID_VALUE_ID) {
+    uint32_t dot_output_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(define_dot(*subgraph, num_k_dims, input_a_id,
+                                   input_b_id, input_c_id, &dot_output_id,
+                                   flags));
+    YNN_RETURN_IF_ERROR(ynn_define_binary(
+        subgraph, ynn_binary_add, dot_output_id, add_c_id, output_id, 0));
+  } else {
+    YNN_RETURN_IF_ERROR(define_dot(*subgraph, num_k_dims, input_a_id,
+                                   input_b_id, input_c_id, output_id, flags));
+  }
 
   if (convert_to_id != YNN_INVALID_VALUE_ID) {
     // We decided above to compute the output into an intermediate tensor, and
