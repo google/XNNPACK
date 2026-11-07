@@ -48,6 +48,8 @@ tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=0 -D OP=RSUB    -D BATCH_TILE
 ################################# ARM NEON-BF16 ################################
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=ADD     -D BATCH_TILE=8  -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vadd-neonbf16-u8.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=ADD     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vadd-neonbf16-u16.c &
+tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=DIV     -D BATCH_TILE=8  -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vdiv-neonbf16-u8.c &
+tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=DIV     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vdiv-neonbf16-u16.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=MAX     -D BATCH_TILE=8  -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmax-neonbf16-u8.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=MAX     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmax-neonbf16-u16.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=MIN     -D BATCH_TILE=8  -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmin-neonbf16-u8.c &
@@ -63,6 +65,10 @@ tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=SUB     -D BATCH_TILE
 
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=ADD     -D BATCH_TILE=8  -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u8.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=ADD     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u16.c &
+tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=DIV     -D BATCH_TILE=8  -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vdivc-neonbf16-u8.c &
+tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=DIV     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vdivc-neonbf16-u16.c &
+tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=RDIV    -D BATCH_TILE=8  -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrdivc-neonbf16-u8.c &
+tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=RDIV    -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrdivc-neonbf16-u16.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=MAX     -D BATCH_TILE=8  -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vmaxc-neonbf16-u8.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=MAX     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vmaxc-neonbf16-u16.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=MIN     -D BATCH_TILE=8  -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vminc-neonbf16-u8.c &

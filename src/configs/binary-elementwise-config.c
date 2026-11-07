@@ -137,6 +137,14 @@ static void init_bf16_vdiv_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdiv_ukernel__neonbf16_u16);
+        bf16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdivc_ukernel__neonbf16_u16);
+        bf16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vrdivc_ukernel__neonbf16_u16);
+        bf16_vdiv_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdiv_ukernel__aarch64_neon_u16);
       bf16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdivc_ukernel__aarch64_neon_u16);

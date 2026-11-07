@@ -12,6 +12,8 @@
 SET(PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-vbinary/gen/bf16-vadd-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u16.c
+  src/bf16-vbinary/gen/bf16-vdiv-neonbf16-u16.c
+  src/bf16-vbinary/gen/bf16-vdivc-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vmax-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vmaxc-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vmin-neonbf16-u16.c
@@ -20,6 +22,7 @@ SET(PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-vbinary/gen/bf16-vmulc-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vprelu-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vpreluc-neonbf16-u16.c
+  src/bf16-vbinary/gen/bf16-vrdivc-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vrpreluc-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vrsubc-neonbf16-u16.c
   src/bf16-vbinary/gen/bf16-vsqrdiff-neonbf16-u16.c
@@ -45,6 +48,8 @@ SET(NON_PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-vbinary/gen/bf16-vadd-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u8.c
+  src/bf16-vbinary/gen/bf16-vdiv-neonbf16-u8.c
+  src/bf16-vbinary/gen/bf16-vdivc-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vmax-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vmaxc-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vmin-neonbf16-u8.c
@@ -53,6 +58,7 @@ SET(NON_PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-vbinary/gen/bf16-vmulc-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vprelu-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vpreluc-neonbf16-u8.c
+  src/bf16-vbinary/gen/bf16-vrdivc-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vrpreluc-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vrsubc-neonbf16-u8.c
   src/bf16-vbinary/gen/bf16-vsqrdiff-neonbf16-u8.c

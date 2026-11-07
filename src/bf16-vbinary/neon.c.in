@@ -8,7 +8,6 @@ $assert BATCH_TILE >= 8
 $SIMD_TILE = BATCH_TILE // 4
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert BROADCAST or OP not in ["RDIV", "RSUB", "RPRELU"]
-$assert not NEONBF16 or OP not in ["DIV", "RDIV"]
 #include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
@@ -18,6 +17,8 @@ $assert not NEONBF16 or OP not in ["DIV", "RDIV"]
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vbinary.h"
 
+$if NEONBF16 and OP in ["DIV", "RDIV"]:
+  #if XNN_ARCH_ARM64
 
 static inline void load_bf16x8_as_f32(
     const uint16_t* input, float32x4_t* lo, float32x4_t* hi) {
@@ -177,3 +178,5 @@ void xnn_bf16_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     }
   }
 }
+$if NEONBF16 and OP in ["DIV", "RDIV"]:
+  #endif  // XNN_ARCH_ARM64
