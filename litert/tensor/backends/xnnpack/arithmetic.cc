@@ -55,6 +55,10 @@ struct UnaryIOIds {
 absl::StatusOr<uint32_t> DynamicallyQuantizeInput(
     XnnpackBuildContext& ctx, uint32_t input_id,
     const graph::TensorInformation& input_info) {
+  if (auto it = ctx.qdint8_cache().find(input_id);
+      it != ctx.qdint8_cache().end()) {
+    return it->second;
+  }
   uint32_t qd_id = XNN_INVALID_VALUE_ID;
   std::vector<size_t> dims(input_info.shape.begin(), input_info.shape.end());
   LRT_TENSOR_RETURN_IF_ERROR(xnn_define_dynamically_quantized_tensor_value(
@@ -65,6 +69,7 @@ absl::StatusOr<uint32_t> DynamicallyQuantizeInput(
       ctx.subgraph(), xnn_unary_convert, /*params=*/nullptr, input_id, qd_id,
       /*flags=*/0))
       << "Could not define convert node for dynamic quantization.";
+  ctx.qdint8_cache()[input_id] = qd_id;
   return qd_id;
 }
 
