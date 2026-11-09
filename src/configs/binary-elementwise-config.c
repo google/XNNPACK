@@ -95,6 +95,14 @@ static void init_bf16_vadd_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vadd_ukernel__neonbf16_u16);
+        bf16_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vaddc_ukernel__neonbf16_u16);
+        bf16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vaddc_ukernel__neonbf16_u16);
+        bf16_vadd_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vadd_ukernel__neon_u16);
       bf16_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vaddc_ukernel__neon_u16);
@@ -110,6 +118,14 @@ static void init_bf16_vdiv_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdiv_ukernel__neonbf16_u16);
+        bf16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdivc_ukernel__neonbf16_u16);
+        bf16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vrdivc_ukernel__neonbf16_u16);
+        bf16_vdiv_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdiv_ukernel__aarch64_neon_u16);
       bf16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vdivc_ukernel__aarch64_neon_u16);
@@ -125,6 +141,14 @@ static void init_bf16_vmax_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vmax_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmax_ukernel__neonbf16_u16);
+        bf16_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmaxc_ukernel__neonbf16_u16);
+        bf16_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmaxc_ukernel__neonbf16_u16);
+        bf16_vmax_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vmax_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmax_ukernel__neon_u16);
       bf16_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmaxc_ukernel__neon_u16);
@@ -140,6 +164,14 @@ static void init_bf16_vmin_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vmin_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmin_ukernel__neonbf16_u16);
+        bf16_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vminc_ukernel__neonbf16_u16);
+        bf16_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vminc_ukernel__neonbf16_u16);
+        bf16_vmin_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vmin_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmin_ukernel__neon_u16);
       bf16_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vminc_ukernel__neon_u16);
@@ -155,6 +187,14 @@ static void init_bf16_vmul_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmul_ukernel__neonbf16_u16);
+        bf16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmulc_ukernel__neonbf16_u16);
+        bf16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmulc_ukernel__neonbf16_u16);
+        bf16_vmul_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmul_ukernel__neon_u16);
       bf16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vmulc_ukernel__neon_u16);
@@ -170,6 +210,14 @@ static void init_bf16_vprelu_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vprelu_ukernel__neonbf16_u16);
+        bf16_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vpreluc_ukernel__neonbf16_u16);
+        bf16_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vrpreluc_ukernel__neonbf16_u16);
+        bf16_vprelu_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vprelu_ukernel__neon_u16);
       bf16_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vpreluc_ukernel__neon_u16);
@@ -185,6 +233,14 @@ static void init_bf16_vsub_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsub_ukernel__neonbf16_u16);
+        bf16_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsubc_ukernel__neonbf16_u16);
+        bf16_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vrsubc_ukernel__neonbf16_u16);
+        bf16_vsub_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsub_ukernel__neon_u16);
       bf16_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsubc_ukernel__neon_u16);
@@ -200,6 +256,14 @@ static void init_bf16_vsqrdiff_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   #if XNN_ARCH_ARM64
+    #if XNN_ENABLE_ARM_BF16
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_bf16) {
+        bf16_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsqrdiff_ukernel__neonbf16_u16);
+        bf16_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsqrdiffc_ukernel__neonbf16_u16);
+        bf16_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsqrdiffc_ukernel__neonbf16_u16);
+        bf16_vsqrdiff_config.element_tile = 16;
+      } else
+    #endif
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       bf16_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsqrdiff_ukernel__neon_u16);
       bf16_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_bf16_vsqrdiffc_ukernel__neon_u16);
