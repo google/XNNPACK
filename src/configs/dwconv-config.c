@@ -630,6 +630,34 @@ static void init_f32_dwconv_config(void) {
 }
 
 static void init_bf16_f32_dwconv_config(void) {
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512SKX
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512skx) {
+        bf16_f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_3p16c__avx512skx);
+        bf16_f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[0].channel_tile = 16;
+        bf16_f32_dwconv_config[0].primary_tile = 3;
+
+        bf16_f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_4p16c__avx512skx);
+        bf16_f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[1].channel_tile = 16;
+        bf16_f32_dwconv_config[1].primary_tile = 4;
+
+        bf16_f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_9p16c__avx512skx);
+        bf16_f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[2].channel_tile = 16;
+        bf16_f32_dwconv_config[2].primary_tile = 9;
+
+        bf16_f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_bf16_f32_dwconv_minmax_ukernel_25p16c__avx512skx_acc2);
+        bf16_f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+        bf16_f32_dwconv_config[3].channel_tile = 16;
+        bf16_f32_dwconv_config[3].primary_tile = 25;
+      }
+    #endif
+  #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 }
 
 static void init_qs8_qc8w_dwconv_config(void) {
