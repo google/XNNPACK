@@ -86,4 +86,45 @@ tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=SUB     -D BATCH_TILE
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=RSUB    -D BATCH_TILE=8  -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrsubc-neonbf16-u8.c &
 tools/xngen src/bf16-vbinary/neon.c.in -D NEONBF16=1 -D OP=RSUB    -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrsubc-neonbf16-u16.c &
 
+################################## x86 AVX512SKX ##############################
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=ADD     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vadd-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=ADD     -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vadd-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=DIV     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vdiv-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=DIV     -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vdiv-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MAX     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmax-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MAX     -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmax-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MIN     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmin-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MIN     -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmin-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MUL     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmul-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MUL     -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vmul-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=PRELU   -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vprelu-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=PRELU   -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vprelu-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SQRDIFF -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vsqrdiff-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SQRDIFF -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vsqrdiff-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SUB     -D BATCH_TILE=16 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vsub-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SUB     -D BATCH_TILE=32 -D BROADCAST=0 -o src/bf16-vbinary/gen/bf16-vsub-avx512skx-u32.c &
+
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=ADD     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vaddc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=ADD     -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vaddc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=DIV     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vdivc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=DIV     -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vdivc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=RDIV    -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrdivc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=RDIV    -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrdivc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MAX     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vmaxc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MAX     -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vmaxc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MIN     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vminc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MIN     -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vminc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MUL     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vmulc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=MUL     -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vmulc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=PRELU   -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vpreluc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=PRELU   -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vpreluc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=RPRELU  -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrpreluc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=RPRELU  -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrpreluc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SQRDIFF -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vsqrdiffc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SQRDIFF -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vsqrdiffc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SUB     -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vsubc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=SUB     -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vsubc-avx512skx-u32.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=RSUB    -D BATCH_TILE=16 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrsubc-avx512skx-u16.c &
+tools/xngen src/bf16-vbinary/avx512skx.c.in -D OP=RSUB    -D BATCH_TILE=32 -D BROADCAST=1 -o src/bf16-vbinary/gen/bf16-vrsubc-avx512skx-u32.c &
+
 wait

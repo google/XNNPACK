@@ -232,6 +232,8 @@ TEST_F(Bf16ToFp32FallbackTest, NativeUnaryOpsStayBf16) {
 TEST_F(Bf16ToFp32FallbackTest, NativeBinaryOpsStayBf16) {
 #if XNN_ARCH_ARM64
   mock_config_.arch_flags |= xnn_arch_arm_neon;
+#elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512SKX
+  mock_config_.arch_flags |= xnn_arch_x86_avx512skx;
 #else
   GTEST_SKIP();
 #endif
