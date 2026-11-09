@@ -259,6 +259,18 @@ std::vector<GemmTestParams> CreateTests1(
           .cm_stride(xnnpack::NextPrime(nr + 1))
           .b_zero_point(8)
       , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "k_large_64",
+      tester.clone()
+          .m(mr).n(nr).k(64)
+          .b_zero_point(8)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "k_large_128",
+      tester.clone()
+          .m(mr).n(nr).k(128)
+          .b_zero_point(8)
+      , test_func, arch_flags));
 
   return gemm_tests;
 }

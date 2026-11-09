@@ -83,6 +83,7 @@ SET(MICROKERNEL_BENCHMARKS
     qd8-f32-qc2w-gemm
     qd8-f16-qc2w-gemm
     qd8-f32-qc8w-gemm
+    qp8-f32-qc2w-gemm
     qp8-f32-qc4w-gemm
     qp8-f32-qc8w-gemm
     qp8-f32-qb4w-gemm
