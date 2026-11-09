@@ -5,6 +5,7 @@
 #   Generator: tools/update-microkernels.py
 #
 
+# buildifier: disable=module-docstring
 PROD_NEONSME2_MICROKERNEL_SRCS = [
     "src/f32-dwconv/f32-dwconv-9pvc-minmax-neonsme2.c",
     "src/pf16-f16-f16-igemm/pf16-f16-f16-igemm-32x32c2-minmax-neonsme2.c",
@@ -39,6 +40,10 @@ NON_PROD_NEONSME2_MICROKERNEL_SRCS = [
     "src/pf16-gemm/pf16-gemm-32x32c2-minmax-sme2.c",
     "src/pf32-gemm/pf32-gemm-1x32-minmax-sme2.c",
     "src/pf32-gemm/pf32-gemm-32x32-minmax-sme2.c",
+    "src/pf32-qc4w-gemm/pf32-qc4w-gemm-1x32-minmax-sme2.c",
+    "src/pf32-qc4w-gemm/pf32-qc4w-gemm-32x32-minmax-sme2.c",
+    "src/pf32-qc8w-gemm/pf32-qc8w-gemm-1x32-minmax-sme2.c",
+    "src/pf32-qc8w-gemm/pf32-qc8w-gemm-32x32-minmax-sme2.c",
     "src/pqs8-qc4w-gemm/pqs8-qc4w-gemm-1x64c4-minmax-neonsme2.c",
     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-1x32c4-minmax-sme2.c",
     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-32x32c4-minmax-sme2.c",

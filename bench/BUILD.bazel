@@ -190,6 +190,8 @@ xnnpack_cxx_library(
     "f16_gemm",
     "f32_qc4w_gemm",
     "f32_qc8w_gemm",
+    "pf32_qc4w_gemm_minmax",
+    "pf32_qc8w_gemm_minmax",
 ]]
 
 [xnnpack_benchmark(

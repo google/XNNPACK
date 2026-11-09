@@ -413,11 +413,15 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
-    # Pass `-march=armv8.2-a+sme+fp16` / `-march=armv8.2-a+sme2+fp16` (without
-    # `+sve` or `+sve2`) only when `arm_sme_acle_enabled` is set. Adding
+    # KleidiAI-only builds (`!arm_sme_acle_enabled`) contain no SME or SVE code
+    # in these translation units—they only marshal arguments into KleidiAI's
+    # separately compiled assembly—and therefore use no `-march` override.
+    #
+    # When `arm_sme_acle_enabled` is set, pass `-march=armv8.2-a+sme+fp16` /
+    # `-march=armv8.2-a+sme2+fp16` (without `+sve` or `+sve2`). Adding
     # `+sve+sve2` would allow the auto-vectorizer to emit SVE into non-streaming
-    # code, which faults with SIGILL on CPUs implementing FEAT_SME2 without
-    # FEAT_SVE (e.g. Apple Silicon).
+    # code, which faults with SIGILL on CPUs implementing FEAT_SME/FEAT_SME2
+    # without FEAT_SVE (e.g. Apple Silicon).
     "neonsme": _create_params(
         cond = "//:arm_sme_enabled",
         copts = xnnpack_select_if(

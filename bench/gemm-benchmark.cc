@@ -1829,6 +1829,211 @@ void GEMMBenchmark(benchmark::State& state,
 #endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
 void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf32_qc8w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_minmax_params_fn init_minmax_params,
+                   xnn_pack_f32_qs8w_gemm_fn pack,
+                   xnn_x32_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t kc = state.range(2);
+  const size_t mr_value = mr;
+  const size_t mr_packed_value = mr_packed;
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
+                          std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.0f),
+                            std::ref(rng));
+  auto s8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(),
+                                             std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
+  std::generate(a.begin(), a.end(), std::ref(f32rng));
+  xnnpack::Buffer<int8_t> k(nc * kc);
+  std::generate(k.begin(), k.end(), std::ref(s8rng));
+  xnnpack::Buffer<float> b(nc);
+  std::generate(b.begin(), b.end(), std::ref(f32rng));
+  xnnpack::Buffer<float> scale(nc);
+  std::generate(scale.begin(), scale.end(), std::ref(scalerng));
+
+  const size_t packed_w_stride =
+      nr * sizeof(float) + nr * kc * sizeof(int8_t) + nr * sizeof(float);
+  const size_t packed_w_size =
+      packed_w_stride * benchmark::utils::DivideRoundUp<size_t>(nc, nr);
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              packed_w_size + sizeof(float) * c_elements);
+
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size *
+                                                      num_buffers);
+  pack(/*g=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
+       /*scale=*/nullptr, w.data(), /*extra_bytes=*/nr * sizeof(float),
+       /*params=*/nullptr);
+  xnn_init_qs8_qc8w_scale_fp32_params(
+      nc, nr, packed_w_stride, scale.data(),
+      w.data() + nr * (sizeof(float) + kc * sizeof(int8_t)));
+  for (size_t i = 1; i < num_buffers; i++) {
+    std::copy(w.begin(), w.begin() + packed_w_size,
+              w.begin() + i * packed_w_size);
+  }
+
+  const size_t input_packed_size = pack_lh_size(mc, kc, mr_packed, kr, sr);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
+      input_packed_size);
+  pack_lh(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0, a.data(),
+          /*lhs_stride=*/kc * sizeof(float), input_packed.data());
+
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
+
+  xnn_f32_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, -std::numeric_limits<float>::infinity(),
+                     std::numeric_limits<float>::infinity());
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(input_packed.data(), input_packed.size());
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (size_t m = 0; m < mc; m += mr_value) {
+      const size_t mb = min(mc - m, mr_value);
+      gemm(mb, nc, kc * sizeof(float),
+           input_packed.data() +
+               pack_lh_offset(m, kc, mr_packed_value, kr, sr),
+           w.data() + packed_w_size * buffer_index,
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
+           sizeof(float), &minmax_params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
+}
+
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf32_qc4w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
+                   xnn_pack_f32_qc4w_gemm_fn pack,
+                   xnn_x32_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t kc = state.range(2);
+  const size_t k_stride = (kc + 1) / 2;
+  const size_t mr_value = mr;
+  const size_t mr_packed_value = mr_packed;
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
+                          std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.0f),
+                            std::ref(rng));
+  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
+                             0, std::numeric_limits<uint8_t>::max()),
+                         std::ref(rng));
+
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
+  std::generate(a.begin(), a.end(), std::ref(f32rng));
+  xnnpack::Buffer<uint8_t> k(nc * k_stride);
+  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::Buffer<float> b(nc);
+  std::generate(b.begin(), b.end(), std::ref(f32rng));
+  xnnpack::Buffer<float> scale(nc);
+  std::generate(scale.begin(), scale.end(), std::ref(scalerng));
+
+  const size_t packed_w_stride =
+      nr * sizeof(float) + nr * k_stride + nr * sizeof(float);
+  const size_t packed_w_size =
+      packed_w_stride * benchmark::utils::DivideRoundUp<size_t>(nc, nr);
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              packed_w_size + sizeof(float) * c_elements);
+
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size *
+                                                       num_buffers);
+  pack(/*g=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
+       /*scale=*/nullptr, w.data(), /*extra_bytes=*/nr * sizeof(float),
+       /*params=*/nullptr);
+  xnn_init_qs8_qc8w_scale_fp32_params(
+      nc, nr, packed_w_stride, scale.data(),
+      w.data() + nr * (sizeof(float) + k_stride));
+  for (size_t i = 1; i < num_buffers; i++) {
+    std::copy(w.begin(), w.begin() + packed_w_size,
+              w.begin() + i * packed_w_size);
+  }
+
+  const size_t input_packed_size = pack_lh_size(mc, kc, mr_packed, kr, sr);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
+      input_packed_size);
+  pack_lh(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0, a.data(),
+          /*lhs_stride=*/kc * sizeof(float), input_packed.data());
+
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
+
+  xnn_f32_qc4w_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, -std::numeric_limits<float>::infinity(),
+                     std::numeric_limits<float>::infinity(),
+                     /*kernel_zero_point=*/8);
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(input_packed.data(), input_packed.size());
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (size_t m = 0; m < mc; m += mr_value) {
+      const size_t mb = min(mc - m, mr_value);
+      gemm(mb, nc, kc * sizeof(float),
+           input_packed.data() +
+               pack_lh_offset(m, kc, mr_packed_value, kr, sr),
+           w.data() + packed_w_size * buffer_index,
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
+           sizeof(float), &minmax_params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
+}
+
+void GEMMBenchmark(benchmark::State& state,
                    xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_qb4w_minmax_params_fn init_params,
                    xnn_pack_weights_and_biases_fn pack_weights,

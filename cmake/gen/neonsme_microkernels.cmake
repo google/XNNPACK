@@ -30,6 +30,11 @@ SET(PROD_NEONSME_MICROKERNEL_SRCS
   src/x32-pack-lh/x32-packlh-igemm-neonsme.c
   src/x32-pack-lh/x32-packlh-neonsme.c)
 
-SET(NON_PROD_NEONSME_MICROKERNEL_SRCS)
+SET(NON_PROD_NEONSME_MICROKERNEL_SRCS
+  src/pf32-qc4w-gemm/pf32-qc4w-gemm-1x32-minmax-sme.c
+  src/pf32-qc4w-gemm/pf32-qc4w-gemm-32x32-minmax-sme.c
+  src/pf32-qc8w-gemm/pf32-qc8w-gemm-1x32-minmax-sme.c
+  src/pf32-qc8w-gemm/pf32-qc8w-gemm-32x32-minmax-sme.c
+  src/x32-pack-lh/x32-packlh-sme.c)
 
 SET(ALL_NEONSME_MICROKERNEL_SRCS ${PROD_NEONSME_MICROKERNEL_SRCS} ${NON_PROD_NEONSME_MICROKERNEL_SRCS})

@@ -216,6 +216,28 @@ typedef void (*xnn_pf32_gemm_minmax_ukernel_fn)(
     size_t cn_stride,  //
     const struct xnn_f32_minmax_params* params);
 
+typedef void (*xnn_pf32_qc8w_gemm_minmax_ukernel_fn)(
+    size_t mr,         //
+    size_t nc,         //
+    size_t kc,         //
+    const void* a,     //
+    const void* w,     //
+    float* c,          //
+    size_t cm_stride,  //
+    size_t cn_stride,  //
+    const struct xnn_f32_minmax_params* params);
+
+typedef void (*xnn_pf32_qc4w_gemm_minmax_ukernel_fn)(
+    size_t mr,         //
+    size_t nc,         //
+    size_t kc,         //
+    const void* a,     //
+    const void* w,     //
+    float* c,          //
+    size_t cm_stride,  //
+    size_t cn_stride,  //
+    const struct xnn_f32_qc4w_minmax_params* params);
+
 typedef void (*xnn_pf16_gemm_minmax_ukernel_fn)(
     size_t mr,         //
     size_t nc,         //

@@ -399,7 +399,7 @@ def main(args):
             f'\n"""Microkernel filenames lists for {key}."""\n'
             if key in ('hmx', 'sve2')
             else '\n# buildifier: disable=module-docstring'
-            if key == 'ace'
+            if key in ('ace', 'neonsme', 'neonsme2')
             else ''
         ))
         prod_c_vars = write_grouped_microkernels_bzl(
