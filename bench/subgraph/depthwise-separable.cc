@@ -15,6 +15,8 @@
 
 #include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
@@ -24,18 +26,21 @@
 
 namespace models {
 
-struct FP32DepthwiseSeparableWeights {
-  std::vector<float> w0;
+template <typename T>
+struct DepthwiseSeparableWeights {
+  std::vector<T> w0;
   std::vector<float> w1;
-  std::vector<float> w2;
+  std::vector<T> w2;
   std::vector<float> w3;
 };
 
 // Depthwise convolution with kernel size kw x kw, followed by a 1x1 conv with
 // ci -> co channels. This is a common pattern in imaging models.
-xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
-                                      size_t co, uint32_t op_flags,
-                                      FP32DepthwiseSeparableWeights& weights) {
+template <typename T>
+xnn_subgraph_t DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
+                                  size_t co, uint32_t op_flags,
+                                  DepthwiseSeparableWeights<T>& weights) {
+  const xnn_datatype datatype = xnn_datatype_of<T>();
   xnn_status status;
   auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/2, 0);
   if (!subgraph) {
@@ -48,7 +53,7 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
   uint32_t v0 = 0;
   std::array<size_t, 4> v0_dims = {{1, h, w, ci}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, v0_dims.size(), v0_dims.data(),
+      subgraph.get(), datatype, v0_dims.size(), v0_dims.data(),
       /*data=*/nullptr, v0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
@@ -58,7 +63,7 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
   uint32_t v1 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v1_dims = {{1, h - 2, w - 2, ci}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, v1_dims.size(), v1_dims.data(),
+      subgraph.get(), datatype, v1_dims.size(), v1_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v1" << std::endl;
@@ -68,23 +73,22 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
   uint32_t v2 = 1;
   std::array<size_t, 4> v2_dims = {{1, h - 2, w - 2, co}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, v2_dims.size(), v2_dims.data(),
+      subgraph.get(), datatype, v2_dims.size(), v2_dims.data(),
       /*data=*/nullptr, v2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v2" << std::endl;
     return nullptr;
   }
 
-  weights.w0 =
-      std::vector<float>(kw * kw * ci + XNN_EXTRA_BYTES / sizeof(float));
+  weights.w0 = std::vector<T>(kw * kw * ci + XNN_EXTRA_BYTES / sizeof(T));
   weights.w1 = std::vector<float>(ci + XNN_EXTRA_BYTES / sizeof(float));
-  weights.w2 = std::vector<float>(co * ci + XNN_EXTRA_BYTES / sizeof(float));
+  weights.w2 = std::vector<T>(co * ci + XNN_EXTRA_BYTES / sizeof(T));
   weights.w3 = std::vector<float>(co + XNN_EXTRA_BYTES / sizeof(float));
 
   uint32_t w0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w0_dims = {{1, kw, kw, ci}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, w0_dims.size(), w0_dims.data(),
+      subgraph.get(), datatype, w0_dims.size(), w0_dims.data(),
       /*data=*/weights.w0.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w0" << std::endl;
@@ -104,7 +108,7 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
   uint32_t w2 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w2_dims = {{co, 1, 1, ci}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, w2_dims.size(), w2_dims.data(),
+      subgraph.get(), datatype, w2_dims.size(), w2_dims.data(),
       /*data=*/weights.w2.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w2" << std::endl;
@@ -123,9 +127,11 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
 
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
                           std::ref(rng));
-  std::generate(weights.w0.begin(), weights.w0.end(), std::ref(f32rng));
+  std::generate(weights.w0.begin(), weights.w0.end(),
+                [&]() { return static_cast<T>(f32rng()); });
   std::generate(weights.w1.begin(), weights.w1.end(), std::ref(f32rng));
-  std::generate(weights.w2.begin(), weights.w2.end(), std::ref(f32rng));
+  std::generate(weights.w2.begin(), weights.w2.end(),
+                [&]() { return static_cast<T>(f32rng()); });
   std::generate(weights.w3.begin(), weights.w3.end(), std::ref(f32rng));
 
   status = xnn_define_depthwise_convolution_2d(
@@ -166,17 +172,26 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
 
 }  // namespace models
 
-static void FP32DepthwiseSeparable(benchmark::State& state) {
-  models::FP32DepthwiseSeparableWeights weights;
+template <typename T>
+static void DepthwiseSeparable(benchmark::State& state) {
+  models::DepthwiseSeparableWeights<T> weights;
   xnnpack::RunBenchmark(state, [&state, &weights]() {
     uint32_t op_flags = 0;
     if (state.range(5)) {
       op_flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
     }
-    return models::FP32DepthwiseSeparable(state.range(0), state.range(1),
-                                  state.range(2), state.range(3),
-                                  state.range(4), op_flags, weights);
+    return models::DepthwiseSeparable<T>(state.range(0), state.range(1),
+                                         state.range(2), state.range(3),
+                                         state.range(4), op_flags, weights);
   });
+}
+
+static void FP32DepthwiseSeparable(benchmark::State& state) {
+  DepthwiseSeparable<float>(state);
+}
+
+static void BF16DepthwiseSeparable(benchmark::State& state) {
+  DepthwiseSeparable<xnn_bfloat16>(state);
 }
 
 static void DepthwiseSeparableArguments(benchmark::Benchmark* b) {
@@ -198,6 +213,12 @@ static void DepthwiseSeparableArguments(benchmark::Benchmark* b) {
 }
 
 BENCHMARK(FP32DepthwiseSeparable)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(DepthwiseSeparableArguments);
+
+BENCHMARK(BF16DepthwiseSeparable)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
