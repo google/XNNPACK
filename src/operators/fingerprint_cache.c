@@ -56,6 +56,7 @@ enum xnn_status xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
   uint32_t i = 0;
   enum xnn_status status = xnn_status_success;
   xnn_mutex_lock(&mutex);
+  assert(fingerprint_vector_size <= XNN_FINGERPRINT_MAX_COUNT);
   for (; i < fingerprint_vector_size; ++i) {
     if (fingerprint_vector[i].id == fingerprint.id) {
       fingerprint_vector[i] = fingerprint;
