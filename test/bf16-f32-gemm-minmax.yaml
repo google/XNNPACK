@@ -31,6 +31,28 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 
+# ARM NEON BF16
+- name: xnn_bf16_f32_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128
+  pack: xnn_pack_bf16_f32_gemm_goi_w
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_bf16_f32_gemm_minmax_ukernel_4x8c2__neonbf16_bfdot_lane_ld128
+  pack: xnn_pack_bf16_f32_gemm_goi_w
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_bf16_f32_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128
+  pack: xnn_pack_bf16_f32_gemm_goi_w
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__neonbf16_bfdot_lane_ld128
+  pack: xnn_pack_bf16_f32_gemm_goi_w
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__neonbf16_bfdot_lane_ld128
+  pack: xnn_pack_bf16_f32_gemm_goi_w
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+
 # x86_64 AVX512BF16
 - name: xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512bf16_broadcast
   pack: xnn_pack_bf16_f32_gemm_goi_w

@@ -14,6 +14,8 @@ SET(PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p8c-minmax-neonbf16.c
   src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p8c-minmax-neonbf16.c
   src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p8c-minmax-neonbf16-acc2.c
+  src/bf16-f32-gemm/gen/bf16-f32-gemm-1x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-f32-gemm/gen/bf16-f32-gemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-f32-igemm/gen/bf16-f32-igemm-1x8c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-f32-igemm/gen/bf16-f32-igemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u16.c)
@@ -23,6 +25,9 @@ SET(NON_PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-f32-dwconv/gen/bf16-f32-dwconv-4p16c-minmax-neonbf16.c
   src/bf16-f32-dwconv/gen/bf16-f32-dwconv-9p16c-minmax-neonbf16.c
   src/bf16-f32-dwconv/gen/bf16-f32-dwconv-25p16c-minmax-neonbf16-acc2.c
+  src/bf16-f32-gemm/gen/bf16-f32-gemm-1x16c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-f32-gemm/gen/bf16-f32-gemm-4x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-f32-gemm/gen/bf16-f32-gemm-4x16c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-f32-igemm/gen/bf16-f32-igemm-1x16c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-f32-igemm/gen/bf16-f32-igemm-4x8c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-f32-igemm/gen/bf16-f32-igemm-4x16c2-minmax-neonbf16-bfdot-lane-ld128.c
