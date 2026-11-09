@@ -1059,6 +1059,28 @@ TEST_P(XnnTest, few_output_pixels_with_step_0) {
   }
 }
 
+TEST_P(XnnTest, multipass_large_channels) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t kPoolingElements[] = {
+      GetParam().primary_tile + 1,
+      2 * GetParam().primary_tile,
+      2 * GetParam().primary_tile + 1,
+  };
+  const size_t kChannels[] = {256, 257, 265, 272, 513};
+  for (size_t pooling_elements : kPoolingElements) {
+    for (size_t channels : kChannels) {
+      Tester(GetParam())
+          .output_pixels(2)
+          .pooling_elements(pooling_elements)
+          .channels(channels)
+          .input_offset(GetParam().channel_tile * 2 + 1)
+          .zero_index_mod2(0)
+          .iterations(1)
+          .Test(GetParam().kernel);
+    }
+  }
+}
+
 INSTANTIATE_TEST_SUITE_P(avgpool_minmax, XnnTest,
                          testing::ValuesIn(xnn_test_params), GetTestName);
 

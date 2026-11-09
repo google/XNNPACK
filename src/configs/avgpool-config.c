@@ -37,15 +37,23 @@ static void init_f16_avgpool_config(void) {
   f16_avgpool_config.primary_tile = 9;
   f16_avgpool_config.channel_tile = 1;
 
-  #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
-      f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8);
+    #if XNN_ENABLE_ARM_FP16_VECTOR
+      if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
+        f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8);
+        f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
+        f16_avgpool_config.primary_tile = 9;
+        f16_avgpool_config.channel_tile = 8;
+      } else
+    #endif
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16) {
+      f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_f32acc_avgpool_minmax_ukernel_9p__neonfp16_u4);
       f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_avgpool_config.primary_tile = 9;
-      f16_avgpool_config.channel_tile = 8;
+      f16_avgpool_config.channel_tile = 4;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -69,6 +77,16 @@ static void init_f16_avgpool_config(void) {
       f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_avgpool_config.primary_tile = 9;
       f16_avgpool_config.channel_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
+    }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    if (hardware_config->arch_flags & xnn_arch_hvx) {
+      f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_f32acc_avgpool_minmax_ukernel_9p__hvx_u32);
+      f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
+      f16_avgpool_config.primary_tile = 9;
+      f16_avgpool_config.channel_tile = 32;
     }
   #elif XNN_ARCH_WASMRELAXEDSIMDFP16
     f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_avgpool_minmax_ukernel_9p__wasmrelaxedsimdfp16_u8);

@@ -13,6 +13,7 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-hvx-u128.c
   src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-hvx-u128.c
   src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-hvx-u128.c
+  src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-hvx-u32.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-hvx-u128.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-hvx-u128.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-hvx-u128.c
