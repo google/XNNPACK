@@ -27,6 +27,30 @@ extern "C" {
                             const struct xnn_f32_minmax_params* params);
 
 DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_1x16c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_1x32c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_4x16c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_4x32c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_5x16c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_5x32c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_6x16c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_6x32c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_7x16c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_7x32c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_8x16c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_8x32c2__avx512bf16_broadcast)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_bf16_f32_igemm_minmax_ukernel_1x4c2__scalar)
 DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_bf16_f32_igemm_minmax_ukernel_4x4c2__scalar)
