@@ -38,6 +38,7 @@ static const int default_config = 0;
 static const int consistent_config = 1;
 
 static struct xnn_gemm_config bf16_f32_gemm_config = {0};
+static struct xnn_gemm_config bf16_f32_igemm_config = {0};
 static struct xnn_gemm_config f16_gemm_config = {0};
 static struct xnn_gemm_config f32_gemm_config[2] = {0};
 static struct xnn_gemm_config f32_igemm_config = {0};
@@ -78,6 +79,7 @@ static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
 
 XNN_INIT_ONCE_GUARD(bf16_f32_gemm);
+XNN_INIT_ONCE_GUARD(bf16_f32_igemm);
 XNN_INIT_ONCE_GUARD(f16_gemm);
 XNN_INIT_ONCE_GUARD(f32_igemm);
 XNN_INIT_ONCE_GUARD(f32_gemm);
@@ -534,6 +536,15 @@ static void init_bf16_f32_gemm_config(void) {
   }
   assert(bf16_f32_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_X86_64
+}
+
+static void init_bf16_f32_igemm_config(void) {
+  // Common parameters.
+  bf16_f32_igemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_BFLOAT16;
+  bf16_f32_igemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_BFLOAT16;
+  bf16_f32_igemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_BFLOAT16 + 3;
+  bf16_f32_igemm_config.bias_element_size = sizeof(float);
+  assert(bf16_f32_igemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_pf32_gemm_config(void) {
@@ -7109,6 +7120,17 @@ const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
   }
   XNN_INIT_ONCE(bf16_f32_gemm);
   return bf16_f32_gemm_config.mr ? &bf16_f32_gemm_config : NULL;
+}
+
+// Unlike most configs, this one is returned even when there are no igemm
+// micro-kernels (`mr == 0`) so that depthwise bf16 convolutions can still use
+// the bf16_f32 dwconv micro-kernels.
+const struct xnn_gemm_config* xnn_init_bf16_f32_igemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(bf16_f32_igemm);
+  return &bf16_f32_igemm_config;
 }
 
 const struct xnn_gemm_config* xnn_init_pf32_gemm_config() {
