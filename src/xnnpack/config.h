@@ -40,6 +40,22 @@ XNN_INTERNAL const struct xnn_pack_lh_config*
 xnn_init_x16_igemm_pack_lh_config();
 
 XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vadd_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vdiv_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vmax_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vmin_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vprelu_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vsub_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
+xnn_init_bf16_vsqrdiff_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config*
 xnn_init_f16_vadd_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config*
 xnn_init_f16_vdiv_config();
