@@ -6,6 +6,8 @@
 #
 
 PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-1x8-minmax-aarch64-neonfma-lane-ld64.c",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/bf16-f32-igemm/gen/bf16-f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/bf16-f32-igemm/gen/bf16-f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c",
@@ -36,6 +38,9 @@ PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-1x16-minmax-aarch64-neonfma-lane-ld64.c",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-4x8-minmax-aarch64-neonfma-lane-ld64.c",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-4x16-minmax-aarch64-neonfma-lane-ld64.c",
     "src/bf16-f32-igemm/gen/bf16-f32-igemm-1x16-minmax-aarch64-neonfma-lane-ld64.c",
     "src/bf16-f32-igemm/gen/bf16-f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/bf16-f32-igemm/gen/bf16-f32-igemm-4x16-minmax-aarch64-neonfma-lane-ld64.c",
