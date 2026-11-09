@@ -1,0 +1,14 @@
+# Copyright 2026 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_bf16_f32_igemm_minmax_ukernel_1x4c2__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_bf16_f32_conv_goki_w
+  k-block: 2
+- name: xnn_bf16_f32_igemm_minmax_ukernel_4x4c2__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_bf16_f32_conv_goki_w
+  k-block: 2
