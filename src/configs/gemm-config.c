@@ -530,8 +530,17 @@ static void init_bf16_f32_gemm_config(void) {
       bf16_f32_gemm_config.mr = 6;
       bf16_f32_gemm_config.nr = 8;
       bf16_f32_gemm_config.log2_kr = 1;
-    }
+    } else
   #endif  // XNN_ENABLE_ARM_BF16
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fma) {
+    bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64);
+    bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld64);
+    bf16_f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    bf16_f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_bf16_f32_gemm_goi_w;
+    bf16_f32_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_bf16_f32_gemm_gio_w;
+    bf16_f32_gemm_config.mr = 6;
+    bf16_f32_gemm_config.nr = 8;
+  }
 #elif XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
@@ -7120,7 +7129,7 @@ const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
 
 const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_bf16_compatible_config(hardware_config)) {
+  if (hardware_config == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(bf16_f32_gemm);
