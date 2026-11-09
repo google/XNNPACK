@@ -1366,6 +1366,7 @@ IBILINEAR_TESTS = [
 ]
 
 DWCONV_TESTS = [
+  "bf16_f32_dwconv_minmax",
   "f16_dwconv_minmax",
   "f32_dwconv_minmax",
   "f32_dwconv",
@@ -1404,6 +1405,7 @@ PACKW_TESTS = [
 GEMM_MICROKERNEL_TESTS = [
   "test/bf16-gemm-minmax.cc",
   "test/bf16-f32-gemm-minmax.cc",
+  "test/bf16-f32-igemm-minmax.cc",
   "test/f16-f32acc-gemm-minmax.cc",
   "test/f16-gemm-minmax.cc",
   "test/pf16-gemm-minmax.cc",
