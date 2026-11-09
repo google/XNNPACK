@@ -422,3 +422,12 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
 
 }  // namespace utils
 }  // namespace benchmark
+
+extern "C" {
+int BenchmarkArgBottleneck(int& argc, char**& argv) {
+  int status = benchmark::utils::ProcessArgs(argc, argv);
+  if (status != 0) return status;
+  benchmark::utils::ApplyDeferredArgs();
+  return 0;
+}
+}

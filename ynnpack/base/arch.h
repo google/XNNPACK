@@ -36,6 +36,7 @@ enum {
   amxbf16 = 1 << 15,
   amxfp16 = 1 << 16,
   amxint8 = 1 << 17,
+  ace = 1 << 18,
 
   avx2_fma3 = avx2 | fma3,
   sse2_fma = sse2,

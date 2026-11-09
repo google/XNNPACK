@@ -34,6 +34,7 @@ parser.add_argument(
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 _ISA_LIST = frozenset({
+    'ace',
     'armsimd32',
     'avx',
     'avx2',
@@ -56,6 +57,7 @@ _ISA_LIST = frozenset({
     'fp16arith',
     'hexagon',
     'hvx',
+    'hmx',
     'neon',
     'neonbf16',
     'neondot',
@@ -71,6 +73,7 @@ _ISA_LIST = frozenset({
     'rvv',
     'rvvfp16arith',
     'scalar',
+    'sme',
     'sme2',
     'sse',
     'sse2',
@@ -88,6 +91,7 @@ _ISA_LIST = frozenset({
 })
 
 _ISA_MAP = {
+    'sme': 'neonsme',
     'sme2': 'neonsme2',
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
@@ -391,7 +395,13 @@ def main(args):
 # Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 #
-''' + (f'\n"""Microkernel filenames lists for {key}."""\n' if key == 'sve2' else ''))
+''' + (
+            f'\n"""Microkernel filenames lists for {key}."""\n'
+            if key in ('hmx', 'sve2')
+            else '\n# buildifier: disable=module-docstring'
+            if key in ('ace', 'neonsme', 'neonsme2')
+            else ''
+        ))
         prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,
             key,
@@ -525,8 +535,9 @@ def all_srcs_for_arch(arch):
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
       with io.StringIO() as arch_microkernels_cmake:
+        copyright_year = 2026 if key in ('ace', 'hmx') else 2022
         arch_microkernels_cmake.write(f"""\
-# Copyright 2022 Google LLC
+# Copyright {copyright_year} Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.

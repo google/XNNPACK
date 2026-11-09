@@ -236,6 +236,18 @@ TEST(get_dot_kernel, uint8_int2_int32_avxvnni) {
       "dot_uint8_int2_int32_1x32x16_1x8x16_avxvnni");
 }
 
+#if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) && defined(YNN_ARCH_X86_ACE)
+TEST(get_dot_kernel, int8_int8_int32_ace) {
+  dot_type int8_int8 = {ynn_type_int8, ynn_type_int8, ynn_type_int32};
+  const uint64_t arch_flags_ace =
+      arch_flags_avx512 | arch_flag::avx512vnni | arch_flag::ace;
+
+  EXPECT_EQ(get_dot_kernel_name(int8_int8, {m, n, k}, arch_flags_ace),
+            "dot_int8_int8_int32_16x32x4_1x16x4_ace");
+}
+#endif  // !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) &&
+        // defined(YNN_ARCH_X86_ACE)
+
 TEST(dot_kernel_state, destructor) {
   static bool destroyed = false;
   destroyed = false;

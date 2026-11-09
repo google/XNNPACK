@@ -767,6 +767,9 @@ YNN_ALWAYS_INLINE u8x32 operator-(u8x32 a, u8x32 b) {
 YNN_ALWAYS_INLINE s32x8 operator*(s32x8 a, s32x8 b) {
   return s32x8{_mm256_mullo_epi32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x16 operator*(s16x16 a, s16x16 b) {
+  return s16x16{_mm256_mullo_epi16(a.v, b.v)};
+}
 
 YNN_ALWAYS_INLINE s16x16 add_sat(s16x16 a, s16x16 b) {
   return s16x16{_mm256_adds_epi16(a.v, b.v)};
@@ -1485,6 +1488,16 @@ YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
 #endif  // YNN_ARCH_X86_AVX2
 
 #ifdef YNN_ARCH_X86_AVX2
+YNN_ALWAYS_INLINE s16x16 cast(s8x16 a, int16_t) {
+  return s16x16{_mm256_cvtepi8_epi16(a.v)};
+}
+YNN_ALWAYS_INLINE s16x16 cast(u8x16 a, int16_t) {
+  return s16x16{_mm256_cvtepu8_epi16(a.v)};
+}
+YNN_ALWAYS_INLINE s32x8 cast(s16x8 a, int32_t) {
+  return s32x8{_mm256_cvtepi16_epi32(a.v)};
+}
+
 YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
     std::integral_constant<size_t, 128>, u8x32 x0, u8x32 x1) {
   return {u8x32{_mm256_permute2x128_si256(x0.v, x1.v, 32)},

@@ -545,6 +545,10 @@ ynn_cc_library(
             "x86_amxint8.cc",
             "x86_amx.h",
         ],
+        "x86_ace": [
+            "x86_ace.cc",
+            "x86_amx.h",
+        ],
         "wasm_simd128": [
             "wasm_simd128_fp32.cc",
             "wasm_simd128_fp64.cc",

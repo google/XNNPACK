@@ -69,7 +69,6 @@ void xnn_f16_igemm_minmax_ukernel_16x16c2__avx512amxfp16_prfm(
 
   XNN_ALIGN(64) struct __tile_config tile_data = {0};
   XNN_ALIGN(64) float res[1][16 * 16];
-  XNN_ALIGN(64) int32_t vintile[2][16 * 16];
 
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
   const size_t kremainder_colsb = round_up_po2(kremainder, 2 * sizeof(xnn_float16));
@@ -109,290 +108,75 @@ void xnn_f16_igemm_minmax_ukernel_16x16c2__avx512amxfp16_prfm(
 
     size_t p = ks;
     do {
-      const xnn_float16* restrict a0 = a[0];
-      assert(a0 != NULL);
-      if XNN_UNPREDICTABLE(a0 != zero) {
-        a0 = (const xnn_float16*) ((uintptr_t) a0 + a_offset);
+      const xnn_float16* a_ptrs[16];
+      for (size_t m = 0; m < mr; ++m) {
+        const xnn_float16* restrict am = a[m];
+        assert(am != NULL);
+        if XNN_UNPREDICTABLE(am != zero) {
+          am = (const xnn_float16*) ((uintptr_t) am + a_offset);
+        }
+        a_ptrs[m] = am;
       }
+      a += 16;
 
       size_t k = kc;
-      if (mr == 1) {
-        a += 16;
-        while (k >= 32 * sizeof(xnn_float16)) {
-          _tile_loadd(4, a0, 64);
-          a0 += 32;
-          _tile_loadd(5, (const int8_t*) w + 0, 64);
-          _tile_dpfp16ps(0, 4, 5);
-          xnn_prefetch_to_l1((const int8_t*) w + 4096);
-          xnn_prefetch_to_l1((const int8_t*) w + 4160);
-          xnn_prefetch_to_l1((const int8_t*) w + 4224);
-          xnn_prefetch_to_l1((const int8_t*) w + 4288);
-          xnn_prefetch_to_l1((const int8_t*) w + 4352);
-          xnn_prefetch_to_l1((const int8_t*) w + 4416);
-          xnn_prefetch_to_l1((const int8_t*) w + 4480);
-          xnn_prefetch_to_l1((const int8_t*) w + 4544);
-          xnn_prefetch_to_l1((const int8_t*) w + 4608);
-          xnn_prefetch_to_l1((const int8_t*) w + 4672);
-          xnn_prefetch_to_l1((const int8_t*) w + 4736);
-          xnn_prefetch_to_l1((const int8_t*) w + 4800);
-          xnn_prefetch_to_l1((const int8_t*) w + 4864);
-          xnn_prefetch_to_l1((const int8_t*) w + 4928);
-          xnn_prefetch_to_l1((const int8_t*) w + 4992);
-          xnn_prefetch_to_l1((const int8_t*) w + 5056);
-          xnn_prefetch_to_l1((const int8_t*) w + 5120);
-          xnn_prefetch_to_l1((const int8_t*) w + 5184);
-          xnn_prefetch_to_l1((const int8_t*) w + 5248);
-          xnn_prefetch_to_l1((const int8_t*) w + 5312);
-          xnn_prefetch_to_l1((const int8_t*) w + 5376);
-          xnn_prefetch_to_l1((const int8_t*) w + 5440);
-          xnn_prefetch_to_l1((const int8_t*) w + 5504);
-          xnn_prefetch_to_l1((const int8_t*) w + 5568);
-          xnn_prefetch_to_l1((const int8_t*) w + 5632);
-          xnn_prefetch_to_l1((const int8_t*) w + 5696);
-          xnn_prefetch_to_l1((const int8_t*) w + 5760);
-          xnn_prefetch_to_l1((const int8_t*) w + 5824);
-          xnn_prefetch_to_l1((const int8_t*) w + 5888);
-          xnn_prefetch_to_l1((const int8_t*) w + 5952);
-          xnn_prefetch_to_l1((const int8_t*) w + 6016);
-          xnn_prefetch_to_l1((const int8_t*) w + 6080);
+      size_t k_offset = 0;
+      while (k >= 32 * sizeof(xnn_float16)) {
+        for (size_t m = 0; m < mr; ++m) {
+          const __m512i vin = _mm512_loadu_epi32((const uint8_t*) a_ptrs[m] + k_offset);
+          _mm512_store_epi32(&res[0][m * 16], vin);
+        }
+        k_offset += 64;
+        _tile_loadd(4, &res[0][0], 64);
+        _tile_loadd(5, (const int8_t*) w + 0, 64);
+        _tile_dpfp16ps(0, 4, 5);
+        xnn_prefetch_to_l1((const int8_t*) w + 4096);
+        xnn_prefetch_to_l1((const int8_t*) w + 4160);
+        xnn_prefetch_to_l1((const int8_t*) w + 4224);
+        xnn_prefetch_to_l1((const int8_t*) w + 4288);
+        xnn_prefetch_to_l1((const int8_t*) w + 4352);
+        xnn_prefetch_to_l1((const int8_t*) w + 4416);
+        xnn_prefetch_to_l1((const int8_t*) w + 4480);
+        xnn_prefetch_to_l1((const int8_t*) w + 4544);
+        xnn_prefetch_to_l1((const int8_t*) w + 4608);
+        xnn_prefetch_to_l1((const int8_t*) w + 4672);
+        xnn_prefetch_to_l1((const int8_t*) w + 4736);
+        xnn_prefetch_to_l1((const int8_t*) w + 4800);
+        xnn_prefetch_to_l1((const int8_t*) w + 4864);
+        xnn_prefetch_to_l1((const int8_t*) w + 4928);
+        xnn_prefetch_to_l1((const int8_t*) w + 4992);
+        xnn_prefetch_to_l1((const int8_t*) w + 5056);
+        xnn_prefetch_to_l1((const int8_t*) w + 5120);
+        xnn_prefetch_to_l1((const int8_t*) w + 5184);
+        xnn_prefetch_to_l1((const int8_t*) w + 5248);
+        xnn_prefetch_to_l1((const int8_t*) w + 5312);
+        xnn_prefetch_to_l1((const int8_t*) w + 5376);
+        xnn_prefetch_to_l1((const int8_t*) w + 5440);
+        xnn_prefetch_to_l1((const int8_t*) w + 5504);
+        xnn_prefetch_to_l1((const int8_t*) w + 5568);
+        xnn_prefetch_to_l1((const int8_t*) w + 5632);
+        xnn_prefetch_to_l1((const int8_t*) w + 5696);
+        xnn_prefetch_to_l1((const int8_t*) w + 5760);
+        xnn_prefetch_to_l1((const int8_t*) w + 5824);
+        xnn_prefetch_to_l1((const int8_t*) w + 5888);
+        xnn_prefetch_to_l1((const int8_t*) w + 5952);
+        xnn_prefetch_to_l1((const int8_t*) w + 6016);
+        xnn_prefetch_to_l1((const int8_t*) w + 6080);
 
-          w = (const xnn_float16*) ((const int8_t*) w + 1024);
-          k -= 32 * sizeof(xnn_float16);
+        w = (const xnn_float16*) ((const int8_t*) w + 1024);
+        k -= 32 * sizeof(xnn_float16);
+      }
+      if XNN_UNLIKELY(k != 0) {
+        for (size_t m = 0; m < mr; ++m) {
+          const __m512i vin = _mm512_maskz_loadu_epi16(kremainder_mask, (const uint8_t*) a_ptrs[m] + k_offset);
+          _mm512_store_epi32(&res[0][m * 16], vin);
         }
-        if XNN_UNLIKELY(k != 0) {
-          const __m512i vin0 = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
-          _mm512_store_epi32(&vintile[0][0], vin0);
-          _tile_loadd(6, &vintile[0][0], 64);
-          _tile_loadd(7, (const int8_t*) w + 0, 64);
-          _tile_dpfp16ps(0, 6, 7);
+        _tile_loadd(6, &res[0][0], 64);
+        _tile_loadd(7, (const int8_t*) w + 0, 64);
+        _tile_dpfp16ps(0, 6, 7);
 
-          w = (const xnn_float16*) ((const int8_t*) w + kremainder_colsb * 16);
-          k -= kremainder;
-        }
-      } else {
-        const xnn_float16* restrict a1 = a[1];
-        assert(a1 != NULL);
-        if XNN_UNPREDICTABLE(a1 != zero) {
-          a1 = (const xnn_float16*) ((uintptr_t) a1 + a_offset);
-        }
-        const xnn_float16* restrict a2 = a[2];
-        assert(a2 != NULL);
-        if XNN_UNPREDICTABLE(a2 != zero) {
-          a2 = (const xnn_float16*) ((uintptr_t) a2 + a_offset);
-        }
-        const xnn_float16* restrict a3 = a[3];
-        assert(a3 != NULL);
-        if XNN_UNPREDICTABLE(a3 != zero) {
-          a3 = (const xnn_float16*) ((uintptr_t) a3 + a_offset);
-        }
-        const xnn_float16* restrict a4 = a[4];
-        assert(a4 != NULL);
-        if XNN_UNPREDICTABLE(a4 != zero) {
-          a4 = (const xnn_float16*) ((uintptr_t) a4 + a_offset);
-        }
-        const xnn_float16* restrict a5 = a[5];
-        assert(a5 != NULL);
-        if XNN_UNPREDICTABLE(a5 != zero) {
-          a5 = (const xnn_float16*) ((uintptr_t) a5 + a_offset);
-        }
-        const xnn_float16* restrict a6 = a[6];
-        assert(a6 != NULL);
-        if XNN_UNPREDICTABLE(a6 != zero) {
-          a6 = (const xnn_float16*) ((uintptr_t) a6 + a_offset);
-        }
-        const xnn_float16* restrict a7 = a[7];
-        assert(a7 != NULL);
-        if XNN_UNPREDICTABLE(a7 != zero) {
-          a7 = (const xnn_float16*) ((uintptr_t) a7 + a_offset);
-        }
-        const xnn_float16* restrict a8 = a[8];
-        assert(a8 != NULL);
-        if XNN_UNPREDICTABLE(a8 != zero) {
-          a8 = (const xnn_float16*) ((uintptr_t) a8 + a_offset);
-        }
-        const xnn_float16* restrict a9 = a[9];
-        assert(a9 != NULL);
-        if XNN_UNPREDICTABLE(a9 != zero) {
-          a9 = (const xnn_float16*) ((uintptr_t) a9 + a_offset);
-        }
-        const xnn_float16* restrict a10 = a[10];
-        assert(a10 != NULL);
-        if XNN_UNPREDICTABLE(a10 != zero) {
-          a10 = (const xnn_float16*) ((uintptr_t) a10 + a_offset);
-        }
-        const xnn_float16* restrict a11 = a[11];
-        assert(a11 != NULL);
-        if XNN_UNPREDICTABLE(a11 != zero) {
-          a11 = (const xnn_float16*) ((uintptr_t) a11 + a_offset);
-        }
-        const xnn_float16* restrict a12 = a[12];
-        assert(a12 != NULL);
-        if XNN_UNPREDICTABLE(a12 != zero) {
-          a12 = (const xnn_float16*) ((uintptr_t) a12 + a_offset);
-        }
-        const xnn_float16* restrict a13 = a[13];
-        assert(a13 != NULL);
-        if XNN_UNPREDICTABLE(a13 != zero) {
-          a13 = (const xnn_float16*) ((uintptr_t) a13 + a_offset);
-        }
-        const xnn_float16* restrict a14 = a[14];
-        assert(a14 != NULL);
-        if XNN_UNPREDICTABLE(a14 != zero) {
-          a14 = (const xnn_float16*) ((uintptr_t) a14 + a_offset);
-        }
-        const xnn_float16* restrict a15 = a[15];
-        assert(a15 != NULL);
-        if XNN_UNPREDICTABLE(a15 != zero) {
-          a15 = (const xnn_float16*) ((uintptr_t) a15 + a_offset);
-        }
-        a += 16;
-
-        size_t buf_idx = 0;
-        while (k >= 32 * sizeof(xnn_float16)) {
-          const __m512i vin0 = _mm512_loadu_epi32(a0);
-          a0 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][0], vin0);
-          const __m512i vin1 = _mm512_loadu_epi32(a1);
-          a1 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][16], vin1);
-          const __m512i vin2 = _mm512_loadu_epi32(a2);
-          a2 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][32], vin2);
-          const __m512i vin3 = _mm512_loadu_epi32(a3);
-          a3 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][48], vin3);
-          const __m512i vin4 = _mm512_loadu_epi32(a4);
-          a4 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][64], vin4);
-          const __m512i vin5 = _mm512_loadu_epi32(a5);
-          a5 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][80], vin5);
-          const __m512i vin6 = _mm512_loadu_epi32(a6);
-          a6 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][96], vin6);
-          const __m512i vin7 = _mm512_loadu_epi32(a7);
-          a7 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][112], vin7);
-          const __m512i vin8 = _mm512_loadu_epi32(a8);
-          a8 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][128], vin8);
-          const __m512i vin9 = _mm512_loadu_epi32(a9);
-          a9 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][144], vin9);
-          const __m512i vin10 = _mm512_loadu_epi32(a10);
-          a10 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][160], vin10);
-          const __m512i vin11 = _mm512_loadu_epi32(a11);
-          a11 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][176], vin11);
-          const __m512i vin12 = _mm512_loadu_epi32(a12);
-          a12 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][192], vin12);
-          const __m512i vin13 = _mm512_loadu_epi32(a13);
-          a13 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][208], vin13);
-          const __m512i vin14 = _mm512_loadu_epi32(a14);
-          a14 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][224], vin14);
-          const __m512i vin15 = _mm512_loadu_epi32(a15);
-          a15 += 32;
-          _mm512_store_epi32(&vintile[buf_idx][240], vin15);
-          _tile_loadd(4, &vintile[buf_idx][0], 64);
-          buf_idx ^= 1;
-          _tile_loadd(5, (const int8_t*) w + 0, 64);
-          _tile_dpfp16ps(0, 4, 5);
-          xnn_prefetch_to_l1((const int8_t*) w + 4096);
-          xnn_prefetch_to_l1((const int8_t*) w + 4160);
-          xnn_prefetch_to_l1((const int8_t*) w + 4224);
-          xnn_prefetch_to_l1((const int8_t*) w + 4288);
-          xnn_prefetch_to_l1((const int8_t*) w + 4352);
-          xnn_prefetch_to_l1((const int8_t*) w + 4416);
-          xnn_prefetch_to_l1((const int8_t*) w + 4480);
-          xnn_prefetch_to_l1((const int8_t*) w + 4544);
-          xnn_prefetch_to_l1((const int8_t*) w + 4608);
-          xnn_prefetch_to_l1((const int8_t*) w + 4672);
-          xnn_prefetch_to_l1((const int8_t*) w + 4736);
-          xnn_prefetch_to_l1((const int8_t*) w + 4800);
-          xnn_prefetch_to_l1((const int8_t*) w + 4864);
-          xnn_prefetch_to_l1((const int8_t*) w + 4928);
-          xnn_prefetch_to_l1((const int8_t*) w + 4992);
-          xnn_prefetch_to_l1((const int8_t*) w + 5056);
-          xnn_prefetch_to_l1((const int8_t*) w + 5120);
-          xnn_prefetch_to_l1((const int8_t*) w + 5184);
-          xnn_prefetch_to_l1((const int8_t*) w + 5248);
-          xnn_prefetch_to_l1((const int8_t*) w + 5312);
-          xnn_prefetch_to_l1((const int8_t*) w + 5376);
-          xnn_prefetch_to_l1((const int8_t*) w + 5440);
-          xnn_prefetch_to_l1((const int8_t*) w + 5504);
-          xnn_prefetch_to_l1((const int8_t*) w + 5568);
-          xnn_prefetch_to_l1((const int8_t*) w + 5632);
-          xnn_prefetch_to_l1((const int8_t*) w + 5696);
-          xnn_prefetch_to_l1((const int8_t*) w + 5760);
-          xnn_prefetch_to_l1((const int8_t*) w + 5824);
-          xnn_prefetch_to_l1((const int8_t*) w + 5888);
-          xnn_prefetch_to_l1((const int8_t*) w + 5952);
-          xnn_prefetch_to_l1((const int8_t*) w + 6016);
-          xnn_prefetch_to_l1((const int8_t*) w + 6080);
-
-          w = (const xnn_float16*) ((const int8_t*) w + 1024);
-          k -= 32 * sizeof(xnn_float16);
-        }
-        if XNN_UNLIKELY(k != 0) {
-          const __m512i vin0 = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
-          a0 = (const xnn_float16*) ((uintptr_t) a0 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][0], vin0);
-          const __m512i vin1 = _mm512_maskz_loadu_epi16(kremainder_mask, a1);
-          a1 = (const xnn_float16*) ((uintptr_t) a1 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][16], vin1);
-          const __m512i vin2 = _mm512_maskz_loadu_epi16(kremainder_mask, a2);
-          a2 = (const xnn_float16*) ((uintptr_t) a2 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][32], vin2);
-          const __m512i vin3 = _mm512_maskz_loadu_epi16(kremainder_mask, a3);
-          a3 = (const xnn_float16*) ((uintptr_t) a3 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][48], vin3);
-          const __m512i vin4 = _mm512_maskz_loadu_epi16(kremainder_mask, a4);
-          a4 = (const xnn_float16*) ((uintptr_t) a4 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][64], vin4);
-          const __m512i vin5 = _mm512_maskz_loadu_epi16(kremainder_mask, a5);
-          a5 = (const xnn_float16*) ((uintptr_t) a5 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][80], vin5);
-          const __m512i vin6 = _mm512_maskz_loadu_epi16(kremainder_mask, a6);
-          a6 = (const xnn_float16*) ((uintptr_t) a6 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][96], vin6);
-          const __m512i vin7 = _mm512_maskz_loadu_epi16(kremainder_mask, a7);
-          a7 = (const xnn_float16*) ((uintptr_t) a7 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][112], vin7);
-          const __m512i vin8 = _mm512_maskz_loadu_epi16(kremainder_mask, a8);
-          a8 = (const xnn_float16*) ((uintptr_t) a8 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][128], vin8);
-          const __m512i vin9 = _mm512_maskz_loadu_epi16(kremainder_mask, a9);
-          a9 = (const xnn_float16*) ((uintptr_t) a9 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][144], vin9);
-          const __m512i vin10 = _mm512_maskz_loadu_epi16(kremainder_mask, a10);
-          a10 = (const xnn_float16*) ((uintptr_t) a10 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][160], vin10);
-          const __m512i vin11 = _mm512_maskz_loadu_epi16(kremainder_mask, a11);
-          a11 = (const xnn_float16*) ((uintptr_t) a11 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][176], vin11);
-          const __m512i vin12 = _mm512_maskz_loadu_epi16(kremainder_mask, a12);
-          a12 = (const xnn_float16*) ((uintptr_t) a12 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][192], vin12);
-          const __m512i vin13 = _mm512_maskz_loadu_epi16(kremainder_mask, a13);
-          a13 = (const xnn_float16*) ((uintptr_t) a13 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][208], vin13);
-          const __m512i vin14 = _mm512_maskz_loadu_epi16(kremainder_mask, a14);
-          a14 = (const xnn_float16*) ((uintptr_t) a14 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][224], vin14);
-          const __m512i vin15 = _mm512_maskz_loadu_epi16(kremainder_mask, a15);
-          a15 = (const xnn_float16*) ((uintptr_t) a15 + kremainder);
-          _mm512_store_epi32(&vintile[buf_idx][240], vin15);
-          _tile_loadd(6, &vintile[buf_idx][0], 64);
-          _tile_loadd(7, (const int8_t*) w + 0, 64);
-          _tile_dpfp16ps(0, 6, 7);
-
-          w = (const xnn_float16*) ((const int8_t*) w + kremainder_colsb * 16);
-          k -= kremainder;
-        }
+        w = (const xnn_float16*) ((const int8_t*) w + kremainder_colsb * 16);
+        k -= kremainder;
       }
 
       p -= 16 * sizeof(void*);

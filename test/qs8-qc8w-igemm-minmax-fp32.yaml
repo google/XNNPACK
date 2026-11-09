@@ -8,10 +8,6 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 64
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x16c4__avx512amx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 64
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x16c4__avx512amx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
@@ -1748,6 +1744,38 @@
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x128c4__hvx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x128c4__hvx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x128c4__hvx_prfm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4

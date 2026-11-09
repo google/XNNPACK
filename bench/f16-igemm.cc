@@ -20,6 +20,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 

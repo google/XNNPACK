@@ -318,6 +318,32 @@ define_build_option(
     default_all = [":ynn_enable_x86_amx"],
 )
 
+config_setting(
+    name = "xnnpack_enable_ace_true",
+    define_values = {"xnnpack_enable_ace": "true"},
+)
+
+config_setting(
+    name = "xnn_enable_ace_true",
+    define_values = {"xnn_enable_ace": "true"},
+)
+
+selects.config_setting_group(
+    name = "ace_flag_enabled",
+    match_any = [
+        ":xnnpack_enable_ace_true",
+        ":xnn_enable_ace_true",
+    ],
+)
+
+define_build_option(
+    name = "ynn_enable_x86_ace",
+    default_all = [
+        ":ynn_enable_x86_amx",
+        ":ace_flag_enabled",
+    ],
+)
+
 define_build_option(
     name = "ynn_enable_hvx",
     default_all = [":hexagon"],

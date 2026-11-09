@@ -60,6 +60,7 @@ enum xnn_arch_flags {
   xnn_arch_x86_avx512vnnigfni = 1 << 19,
   xnn_arch_x86_avx512amx = 1 << 20,
   xnn_arch_x86_avx512amxfp16 = 1 << 21,
+  xnn_arch_x86_ace = 1 << 22,
 #elif XNN_ARCH_RISCV
   xnn_arch_riscv_vector = 1 << 0,
   xnn_arch_riscv_vector_fp16_arith = 1 << 1,
@@ -78,6 +79,7 @@ enum xnn_arch_flags {
 #endif // XNN_ARCH_WASMRELAXEDSIMD
 #elif XNN_ARCH_HEXAGON
   xnn_arch_hvx = 1 << 0,
+  xnn_arch_hmx = 1 << 1,
 #endif
 };
 
@@ -167,6 +169,9 @@ enum xnn_uarch {
   xnn_uarch_tilos_sawtooth,
   xnn_uarch_tupai_everest,
   xnn_uarch_tupai_sawtooth,
+
+  xnn_uarch_sifive_x280,
+  xnn_uarch_sifive_x390,
 };
 
 struct xnn_hardware_config {
@@ -231,6 +236,9 @@ static inline bool xnn_is_f16_compatible_config(
   return (hardware_config->arch_flags & xnn_arch_x86_f16c) && (hardware_config->arch_flags & xnn_arch_x86_avx);
 #elif (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR)
   return hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith;
+#elif (XNN_ARCH_HEXAGON && XNN_ENABLE_HMX && XNN_ENABLE_HVX)
+  return (hardware_config->arch_flags & xnn_arch_hmx) &&
+         (hardware_config->arch_flags & xnn_arch_hvx);
 #else
   return false;
 #endif

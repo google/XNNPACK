@@ -19,6 +19,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
@@ -2475,17 +2476,6 @@ namespace {
   }
 
   BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx)
-
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/7, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_x86_avx512amx);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx)
 
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,
@@ -5384,6 +5374,20 @@ static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf(benchmark::Stat
 }
 
 BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf)
+
+#if XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/32, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_32x64c4__hmx)
+#endif  // XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+
 
 }  // namespace
 

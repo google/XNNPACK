@@ -223,7 +223,7 @@ void TestStaticB(A, B, C) {
     std::vector<size_t> b_shape(num_k_dims + 1);
     std::generate(b_shape.begin(), b_shape.end(),
                   [&]() { return dim_dist(rng); });
-    for (int d = 1; d < num_k_dims; ++d) {
+    for (size_t d = 0; d + 1 < num_k_dims; ++d) {
       b_shape[d] = k23_dim_dist(rng);
     }
 
@@ -350,12 +350,12 @@ DotShapes RandomDotShapes(Rng& rng, size_t num_k_dims, size_t a_rank,
   DotShapes shapes = {batch_dims, batch_dims, batch_dims, batch_dims};
 
   // Add the dot dimensions (m, k..., n)
-  std::vector<size_t> dot_dims(num_k_dims + 2);
-  std::generate(dot_dims.begin(), dot_dims.end(),
-                [&]() { return dim_dist(rng); });
-  for (int d = 1; d < num_k_dims; ++d) {
+  std::vector<size_t> dot_dims =
+      random_shape(rng, num_k_dims + 2, 1, max_output_dim);
+  for (size_t d = 0; d + 1 < num_k_dims; ++d) {
     dot_dims[1 + d] = k23_dim_dist(rng);
   }
+  dot_dims[num_k_dims] = dim_dist(rng);
 
   // Align the shape as required by the type of B.
   dot_dims = align_logical_shape<B>(dot_dims);
@@ -752,6 +752,138 @@ void TestBroadcastExtent1(A, B, C) {
   }
 }
 
+template <typename A, typename B, typename C>
+void TestBroadcastAM(A, B, C) {
+  ReplicableRandomDevice rng;
+  const float max_abs_value = 10.0f;
+  TestScheduler scheduler(3);
+
+  struct BatchCase {
+    std::vector<size_t> a_batches;
+    std::vector<size_t> b_batches;
+    std::vector<size_t> out_batches;
+  };
+  const std::vector<BatchCase> batch_cases = {
+      {{}, {}, {}},
+      {{2, 1}, {1, 3}, {2, 3}},
+      {{}, {2, 3}, {2, 3}},
+  };
+  for (const BatchCase& batch_case : batch_cases) {
+    for (size_t k : {size_t{1}, size_t{16}}) {
+      for (const std::vector<size_t>& k_dims :
+           std::vector<std::vector<size_t>>{{k}, {3, k}}) {
+        const size_t num_k_dims = k_dims.size();
+        for (bool static_b : {false, true}) {
+          for (int transpose_mode : {0, 1, 2}) {
+            if (transpose_mode != 0 && type_element_count(type_of<A>()) != 1) {
+              continue;
+            }
+            if (transpose_mode == 2 && (num_k_dims < 2 || k == 1)) {
+              continue;
+            }
+            for (bool init_c : {false, true}) {
+              const size_t m = init_c ? 35 : 1;
+              const size_t n = 32;
+
+              std::vector<size_t> a_shape = batch_case.a_batches;
+              a_shape.push_back(1);
+              a_shape.insert(a_shape.end(), k_dims.begin(), k_dims.end());
+
+              std::vector<size_t> b_shape = batch_case.b_batches;
+              b_shape.insert(b_shape.end(), k_dims.begin(), k_dims.end());
+              b_shape.push_back(n);
+
+              std::vector<size_t> output_shape = batch_case.out_batches;
+              output_shape.push_back(m);
+              output_shape.push_back(n);
+
+              const size_t a_rank = a_shape.size();
+              std::vector<int32_t> a_perm = iota(0, a_rank);
+              if (transpose_mode == 1) {
+                std::swap(a_perm[batch_case.a_batches.size()],
+                          a_perm[a_rank - 1]);
+              } else if (transpose_mode == 2) {
+                std::swap(a_perm[a_rank - 2], a_perm[a_rank - 1]);
+              }
+              const std::vector<size_t> a_input_shape =
+                  permute(a_perm, a_shape);
+
+              Tensor<A> a(a_input_shape);
+              Tensor<B> b(b_shape);
+              Tensor<C> c_init(output_shape);
+              fill_random(a.data(), a.size(), rng, -max_abs_value,
+                          max_abs_value);
+              fill_random(b.data(), b.size(), rng, -max_abs_value,
+                          max_abs_value);
+              if (init_c) {
+                fill_random(c_init.data(), c_init.size(), rng, -max_abs_value,
+                            max_abs_value);
+              }
+
+              SubgraphBuilder subgraph(4);
+              const uint32_t a_id = 0;
+              const uint32_t b_id = 1;
+              const uint32_t c_id = init_c ? 2 : YNN_INVALID_VALUE_ID;
+              const uint32_t output_id = 3;
+              subgraph.AddInput(type_of<A>(), a_input_shape, a_id);
+              uint32_t dot_a_id = a_id;
+              if (transpose_mode != 0) {
+                dot_a_id = YNN_INVALID_VALUE_ID;
+                subgraph.AddTensor(type_of<A>(), a_rank, dot_a_id);
+                subgraph.AddTranspose(a_perm, a_id, dot_a_id);
+              }
+              if (static_b) {
+                subgraph.AddTensor(b, b_id);
+              } else {
+                subgraph.AddInput(type_of<B>(), b_shape, b_id);
+              }
+              if (init_c) {
+                subgraph.AddInput(type_of<C>(), output_shape, c_id);
+              }
+              subgraph.AddOutput(type_of<C>(), output_shape, output_id)
+                  .AddDot(num_k_dims, dot_a_id, b_id, c_id, output_id);
+
+              Runtime runtime(subgraph.GetSubgraph(), &scheduler);
+              ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+              Tensor<C> expected(output_shape);
+              if (init_c) {
+                expected.assign(c_init);
+              } else {
+                expected.fill(static_cast<C>(0));
+              }
+
+              Tensor<C> output(output_shape);
+              runtime.SetupExternalTensor(a.data(), a_id)
+                  .SetupExternalTensor(output.data(), output_id);
+              if (init_c) {
+                runtime.SetupExternalTensor(c_init.data(), c_id);
+              }
+              if (!static_b) {
+                runtime.SetupExternalTensor(b.data(), b_id);
+              }
+              runtime.ReshapeRuntime().InvokeRuntime();
+              ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+              Tensor<A> a_logical =
+                  transpose_mode != 0 ? a.transpose(a_perm).deep_copy() : a;
+              std::vector<size_t> full_a_shape = batch_case.out_batches;
+              full_a_shape.push_back(m);
+              full_a_shape.insert(full_a_shape.end(), k_dims.begin(),
+                                  k_dims.end());
+              Tensor<A> a_ref = a_logical.broadcast_like(full_a_shape);
+
+              VerifyDotResults(a_ref, b, output, expected,
+                               batch_case.out_batches, a_shape, b_shape,
+                               num_k_dims, max_abs_value);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 class Dot : public testing::TestWithParam<multi_type> {};
 
 TEST_P(Dot, StaticB) {
@@ -775,6 +907,12 @@ TEST_P(Dot, StaticShapeDynamicB) {
 TEST_P(Dot, BroadcastExtent1) {
   SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
     TestBroadcastExtent1(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, BroadcastAM) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestBroadcastAM(a_type, b_type, c_type);
   });
 }
 

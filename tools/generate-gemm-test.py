@@ -643,6 +643,54 @@ std::vector<GemmTestParams> CreateTests(
                 .m(mr).n(nr).k(128)
                 .b_zero_point(0)
             , test_func, arch_flags));
+      $if INPUT_DATATYPE == "qp8" and WEIGHTS_DATATYPE == "qc2w":
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_64",
+            tester.clone()
+                .m(mr).n(nr).k(64)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_128",
+            tester.clone()
+                .m(mr).n(nr).k(128)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pf32" and WEIGHTS_DATATYPE in ["qc8w", "qc4w"]:
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_256",
+            tester.clone()
+                .m(mr).n(nr).k(256)
+                $if WEIGHTS_DATATYPE == "qc4w":
+                  .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "large_weights_m",
+            tester.clone()
+                .m(mr).n(nr * 8).k(1024)
+                $if WEIGHTS_DATATYPE == "qc4w":
+                  .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "large_weights",
+            tester.clone()
+                .m(1).n(4096).k(1024)
+                $if WEIGHTS_DATATYPE == "qc4w":
+                  .b_zero_point(8)
+            , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pf32" and WEIGHTS_DATATYPE == "qc4w":
+        gemm_tests.push_back(GemmTestParams(
+            "kernel_zero_point_0",
+            tester.clone()
+                .m(mr).n(nr).b_zero_point(0)
+            , test_func, arch_flags)
+            .loop_k(1, k_block * 3, k_block + 1));
+        gemm_tests.push_back(GemmTestParams(
+            "kernel_zero_point_15",
+            tester.clone()
+                .m(mr).n(nr).b_zero_point(15)
+            , test_func, arch_flags)
+            .loop_k(1, k_block * 3, k_block + 1));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",
@@ -691,6 +739,42 @@ std::vector<GemmTestParams> CreateTests(
             $if WEIGHTS_DATATYPE in ['qb4w']:
               .bl(32)
         , test_func, arch_flags));
+  $if ISA == 'hmx':
+    // Partial and multiple 32-deep HMX K tiles, including odd K and the
+    // 64-element LHS transfer tail.
+    gemm_tests.push_back(GemmTestParams(
+        "k_tiles",
+        tester.clone()
+            .m(mr).n(nr)
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
+        , test_func, arch_flags)
+        .loop_k(1, 72, 5));
+    gemm_tests.push_back(GemmTestParams(
+        "k_tiles_subtile_m",
+        tester.clone()
+            .n(nr)
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
+        , test_func, arch_flags)
+        .loop_k(31, 65, 11, LoopStepType::Linear)
+        .loop_m(1, mr, 7));
+    // K around and beyond one VTCM-resident chunk (1024) exercises the full
+    // 64 KB HMX operand size and the chunked K path.
+    gemm_tests.push_back(GemmTestParams(
+        "k_large",
+        tester.clone()
+            .m(mr).n(nr)
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
+        , test_func, arch_flags)
+        .loop_k(1023, 1025, 2, LoopStepType::Linear));
   return gemm_tests;
 }
 """
@@ -905,6 +989,10 @@ def generate_test_cases(
     test_fun_name = "Test_QP8F32QC2W"
   elif input_datatype == "pqs8" and weights_datatype == "qc4w":
     test_fun_name = "Test_PQS8QC4W"
+  elif input_datatype == "pf32" and weights_datatype == "qc8w":
+    test_fun_name = "Test_PF32_QC8W"
+  elif input_datatype == "pf32" and weights_datatype == "qc4w":
+    test_fun_name = "Test_PF32_QC4W"
   elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
   elif input_datatype in {"pf32", "pf16", "pqs8"}:
@@ -934,6 +1022,7 @@ def generate_test_cases(
       "next_prime": next_prime,
       "CPP_CHECK": cpp_check,
       "OUTPUT_DATATYPE": output_datatype,
+      "ISA": isa,
       "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
   }
 
@@ -1143,9 +1232,14 @@ namespace {{
       # Store or reuse the `CreateTests` function?
       create_tests_hash = hash(create_tests)
       create_tests_idx = idx_from_create_tests_hash[create_tests_hash]
+      create_tests_fn = (
+          "CreateHmxGemmTests"
+          if isa == "hmx"
+          else f"CreateTests{create_tests_idx}"
+      )
       if create_tests_idx not in create_tests_from_idx:
         create_tests_from_idx[create_tests_idx] = create_tests.replace(
-            "CreateTests(", f"CreateTests{create_tests_idx}("
+            "CreateTests(", f"{create_tests_fn}("
         )
         if isa in {"rvv", "rvvfp16arith"}:
           create_tests_from_idx[create_tests_idx] = (
@@ -1154,7 +1248,7 @@ namespace {{
               )
           )
       test_case = test_case.replace(
-          "CreateTests(", f"CreateTests{create_tests_idx}("
+          "CreateTests(", f"{create_tests_fn}("
       )
 
       # Hash the name of each microkernel and figure out which output file to

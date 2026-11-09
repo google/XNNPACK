@@ -26,6 +26,8 @@ tools/generate-gemm-test.py --spec test/f32-qc8w-gemm.yaml        --output-test 
 tools/generate-gemm-test.py --spec test/f32-qc8w-gemm-minmax.yaml --output-test test/f32-qc8w-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/pf32-gemm-minmax.yaml     --output-test test/pf32-gemm-minmax.cc --output-bench bench/pf32-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/pf32-qc8w-gemm-minmax.yaml --output-test test/pf32-qc8w-gemm-minmax.cc --output-bench bench/pf32-qc8w-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/pf32-qc4w-gemm-minmax.yaml --output-test test/pf32-qc4w-gemm-minmax.cc --output-bench bench/pf32-qc4w-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/pf16-gemm-minmax.yaml     --output-test test/pf16-gemm-minmax.cc --output-bench bench/pf16-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/pqs8-qc8w-gemm-minmax.yaml     --output-test test/pqs8-qc8w-gemm-minmax.cc --output-bench bench/pqs8-qc8w-gemm-minmax.cc &
@@ -44,7 +46,7 @@ tools/generate-gemm-test.py --spec test/qd8-f32-qb4w-gemm-minmax.yaml --output-t
 tools/generate-gemm-test.py --spec test/qd8-f32-qc2w-gemm-minmax.yaml --output-test test/qd8-f32-qc2w-gemm-minmax.cc --output-bench bench/qd8-f32-qc2w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qd8-f16-qc2w-gemm-minmax.yaml --output-test test/qd8-f16-qc2w-gemm-minmax.cc --output-bench bench/qd8-f16-qc2w-gemm.cc &
 
-tools/generate-gemm-test.py --spec test/qp8-f32-qc2w-gemm-minmax.yaml --output-test test/qp8-f32-qc2w-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/qp8-f32-qc2w-gemm-minmax.yaml --output-test test/qp8-f32-qc2w-gemm-minmax.cc --output-bench bench/qp8-f32-qc2w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qc4w-gemm-minmax.yaml --output-test test/qp8-f32-qc4w-gemm-minmax.cc --output-bench bench/qp8-f32-qc4w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qc8w-gemm-minmax.yaml --output-test test/qp8-f32-qc8w-gemm-minmax.cc --output-bench bench/qp8-f32-qc8w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qb4w-gemm-minmax.yaml --output-test test/qp8-f32-qb4w-gemm-minmax.cc --output-bench bench/qp8-f32-qb4w-gemm.cc &
@@ -273,17 +275,5 @@ tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 ||
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512f)" -o test/simd/s32-simd-avx512f.cc &
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s32-simd-wasmsimd.cc &
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s32-simd-hvx.cc &
-
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s8-simd-scalar.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1)" -o test/simd/s8-simd-sse41.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s8-simd-neon.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s8-simd-wasmsimd.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s8-simd-hvx.cc &
-
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/u8-simd-scalar.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="" -o test/simd/u8-simd-sse2.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/u8-simd-neon.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/u8-simd-wasmsimd.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/u8-simd-hvx.cc &
 
 wait

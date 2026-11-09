@@ -465,4 +465,77 @@ INSTANTIATE_TEST_SUITE_P(UnaryTestQint8ToQcint8, Convert,
                          [](const auto& info) { return info.param.Name(); });
 #endif
 
+#ifndef XNNPACK_USE_YNNPACK
+// Defines an internal {2, 3} value of the given datatype.
+uint32_t DefineTensor(SubgraphTester& tester, xnn_datatype datatype) {
+  static const float channelwise_scale[3] = {1.0f, 1.0f, 1.0f};
+  uint32_t id = XNN_INVALID_VALUE_ID;
+  switch (datatype) {
+    case xnn_datatype_qcint4:
+    case xnn_datatype_qcint8:
+      tester.AddInternalChannelwiseQuantizedTensor(
+          {2, 3}, /*channel_dim=*/1, datatype, /*zero_point=*/0,
+          channelwise_scale, /*channelwise_zero_points=*/nullptr, &id);
+      break;
+    default:
+      tester.AddInternalDynamicTensor({2, 3}, datatype,
+                                      {/*zero_point=*/0, /*scale=*/1.0f}, &id);
+      break;
+  }
+  return id;
+}
+
+// Returns the status of defining a unary node from an `input_datatype` value
+// to an `output_datatype` value.
+xnn_status DefineUnary(xnn_unary_operator op, xnn_datatype input_datatype,
+                       xnn_datatype output_datatype) {
+  SubgraphTester tester(/*external_value_ids=*/0);
+  const uint32_t input_id = DefineTensor(tester, input_datatype);
+  const uint32_t output_id = DefineTensor(tester, output_datatype);
+  xnn_unary_params params = {};
+  return xnn_define_unary(tester.Subgraph(), op, &params, input_id, output_id,
+                          /*flags=*/0);
+}
+
+TEST(UnaryDefine, InvalidOperator) {
+  EXPECT_EQ(
+      DefineUnary(xnn_unary_invalid, xnn_datatype_fp32, xnn_datatype_fp32),
+      xnn_status_invalid_parameter);
+  EXPECT_EQ(DefineUnary(static_cast<xnn_unary_operator>(xnn_unary_sign + 1),
+                        xnn_datatype_fp32, xnn_datatype_fp32),
+            xnn_status_invalid_parameter);
+}
+
+TEST(UnaryDefine, MismatchingDatatypes) {
+  EXPECT_EQ(DefineUnary(xnn_unary_abs, xnn_datatype_fp32, xnn_datatype_int32),
+            xnn_status_invalid_parameter);
+}
+
+TEST(UnaryDefine, UnsupportedDatatype) {
+  EXPECT_EQ(
+      DefineUnary(xnn_unary_bitwise_not, xnn_datatype_fp32, xnn_datatype_fp32),
+      xnn_status_unsupported_parameter);
+  EXPECT_EQ(DefineUnary(xnn_unary_sine, xnn_datatype_int32, xnn_datatype_int32),
+            xnn_status_unsupported_parameter);
+}
+
+TEST(UnaryDefine, UnsupportedConvert) {
+  EXPECT_EQ(
+      DefineUnary(xnn_unary_convert, xnn_datatype_qcint4, xnn_datatype_fp32),
+      xnn_status_unsupported_parameter);
+  EXPECT_EQ(
+      DefineUnary(xnn_unary_convert, xnn_datatype_qcint8, xnn_datatype_fp32),
+      xnn_status_unsupported_parameter);
+}
+
+TEST(UnaryDefine, SupportedConvert) {
+  EXPECT_EQ(
+      DefineUnary(xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_int32),
+      xnn_status_success);
+  EXPECT_EQ(
+      DefineUnary(xnn_unary_convert, xnn_datatype_qint8, xnn_datatype_qcint8),
+      xnn_status_success);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack

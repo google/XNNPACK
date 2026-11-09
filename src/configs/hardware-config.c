@@ -33,6 +33,7 @@
 #endif  // XNN_ENABLE_CPUINFO
 #if XNN_ARCH_HEXAGON
 // TODO - use CPUINFO
+#include <HAP_compute_res.h>
 #include <qurt.h>
 #include "HAP_farf.h"
 #include "HAP_power.h"  // NOLINT - part of the hexagon SDK
@@ -207,40 +208,128 @@ extern long syscall(long number, ...);
 
 /* Constants for kernels where headers might be missing */
 #ifndef __NR_riscv_hwprobe
-    #define __NR_riscv_hwprobe 258
+  #define __NR_riscv_hwprobe 258
+#endif
+
+#ifndef RISCV_HWPROBE_KEY_MVENDORID
+  #define RISCV_HWPROBE_KEY_MVENDORID 0
+#endif
+
+#ifndef RISCV_HWPROBE_KEY_MARCHID
+  #define RISCV_HWPROBE_KEY_MARCHID 1
+#endif
+
+#ifndef RISCV_HWPROBE_KEY_MIMPID
+  #define RISCV_HWPROBE_KEY_MIMPID 2
 #endif
 
 #ifndef RISCV_HWPROBE_KEY_IMA_EXT_0
-    #define RISCV_HWPROBE_KEY_IMA_EXT_0 4
+  #define RISCV_HWPROBE_KEY_IMA_EXT_0 4
+#endif
+
+#ifndef RISCV_HWPROBE_EXT_ZFH
+  #define RISCV_HWPROBE_EXT_ZFH (1ULL << 27)
 #endif
 
 #ifndef RISCV_HWPROBE_EXT_ZVFH
-    /* Bit 30 represents the Zvfh (Vector Float16) extension */
-    #define RISCV_HWPROBE_EXT_ZVFH (1ULL << 30)
+  /* Bit 30 represents the Zvfh (Vector Float16) extension */
+  #define RISCV_HWPROBE_EXT_ZVFH (1ULL << 30)
 #endif
 
 struct riscv_hwprobe {
-    long long key;
-    unsigned long long value;
+  int64_t key;
+  uint64_t value;
 };
 
-/**
- * Returns true if the hardware supports RISC-V Vector FP16 (Zvfh).
- * Fails gracefully on kernels older than 6.4 (including older Android).
- */
-static bool supports_rvv_fp16() {
-    struct riscv_hwprobe pair;
-    pair.key = RISCV_HWPROBE_KEY_IMA_EXT_0;
-    pair.value = 0;
+enum riscv_chipset_vendor {
+  riscv_chipset_vendor_unknown = 0,
+  riscv_chipset_vendor_sifive = 0x489,
+};
 
-    /* Perform the syscall. If the kernel doesn't support it, it returns -1. */
-    if (syscall(__NR_riscv_hwprobe, &pair, 1, 0, NULL, 0) == 0) {
-        /* Check if the Zvfh bit is set in the returned value */
-        return (pair.value & RISCV_HWPROBE_EXT_ZVFH) != 0;
+static enum xnn_uarch riscv_decode_vendor_uarch(
+    uint32_t vendor_id,
+    uint32_t arch_id,
+    uint32_t imp_id) {
+  switch (vendor_id) {
+    case riscv_chipset_vendor_sifive:
+      switch (arch_id & 0x7FFFFFFFU) {
+        case 0x00000907:
+        case 0x00FFFB07:
+          return xnn_uarch_sifive_x280;
+        case 0x00001007:
+        case 0x00FFFC07:
+          return xnn_uarch_sifive_x390;
+        default:
+          if (imp_id == 0x07230908) {
+            return xnn_uarch_sifive_x280;
+          }
+          break;
+      }
+      break;
+    default:
+      break;
+  }
+  return xnn_uarch_unknown;
+}
+
+static bool riscv_uarch_to_fp16(enum xnn_uarch uarch) {
+  switch (uarch) {
+    case xnn_uarch_sifive_x280:
+    case xnn_uarch_sifive_x390:
+      return true;
+    default:
+      return false;
+  }
+}
+
+static void riscv_decode_hwprobe(
+    enum xnn_uarch* uarch,
+    bool* supports_fp16) {
+  struct riscv_hwprobe pairs[] = {
+    {.key = RISCV_HWPROBE_KEY_MVENDORID},
+    {.key = RISCV_HWPROBE_KEY_MARCHID},
+    {.key = RISCV_HWPROBE_KEY_MIMPID},
+    {.key = RISCV_HWPROBE_KEY_IMA_EXT_0},
+  };
+  const size_t pairs_count = sizeof(pairs) / sizeof(struct riscv_hwprobe);
+
+  *uarch = xnn_uarch_unknown;
+  *supports_fp16 = false;
+
+  if (syscall(__NR_riscv_hwprobe, pairs, pairs_count, 0, NULL, 0) != 0) {
+    return;
+  }
+
+  uint32_t vendor_id = 0;
+  uint32_t arch_id = 0;
+  uint32_t imp_id = 0;
+  uint64_t ima_ext_0 = 0;
+  for (size_t pair = 0; pair < pairs_count; pair++) {
+    switch (pairs[pair].key) {
+      case RISCV_HWPROBE_KEY_MVENDORID:
+        vendor_id = (uint32_t) pairs[pair].value;
+        break;
+      case RISCV_HWPROBE_KEY_MARCHID:
+        arch_id = (uint32_t) pairs[pair].value;
+        break;
+      case RISCV_HWPROBE_KEY_MIMPID:
+        imp_id = (uint32_t) pairs[pair].value;
+        break;
+      case RISCV_HWPROBE_KEY_IMA_EXT_0:
+        ima_ext_0 = pairs[pair].value;
+        break;
+      default:
+        break;
     }
+  }
+  xnn_log_debug(
+      "riscv_hwprobe: vendor_id=0x%" PRIx32 ", arch_id=0x%" PRIx32
+      ", imp_id=0x%" PRIx32 ", ima_ext_0=0x%" PRIx64,
+      vendor_id, arch_id, imp_id, ima_ext_0);
 
-    /* Fallback: System call not supported or failed */
-    return false;
+  *uarch = riscv_decode_vendor_uarch(vendor_id, arch_id, imp_id);
+  *supports_fp16 =
+      ((ima_ext_0 & RISCV_HWPROBE_EXT_ZVFH) != 0) || riscv_uarch_to_fp16(*uarch);
 }
 #endif  // XNN_ARCH_RISCV
 
@@ -264,6 +353,9 @@ static void init_hardware_config(void) {
     return;
   }
   hardware_config.arch_flags = 0;
+  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
+    hardware_config.uarch[i] = xnn_uarch_unknown;
+  }
 #if (XNN_ARCH_ARM64 || XNN_ARCH_ARM) && XNN_ENABLE_CPUINFO
 #if XNN_PLATFORM_WINDOWS
   SYSTEM_INFO system_info;
@@ -312,9 +404,14 @@ static void init_hardware_config(void) {
   // msan (understandably) does not support SVE/SME (b/494230133).
   set_arch_flag(xnn_arch_arm_sve, cpuinfo_has_arm_sve());
   set_arch_flag(xnn_arch_arm_sve2, cpuinfo_has_arm_sve2());
-  set_arch_flag(xnn_arch_arm_sme, cpuinfo_has_arm_sme());
-  set_arch_flag(xnn_arch_arm_sme2, cpuinfo_has_arm_sme2());
-  set_arch_flag(xnn_arch_arm_sme2p1, cpuinfo_has_arm_sme2p1());
+  // TODO(b/581442477): Remove once
+  // https://github.com/pytorch/cpuinfo/issues/442 is fixed and smelen is
+  // implemented for Windows ARM.
+  const bool use_arm_sme =
+      cpuinfo_has_arm_sme() && cpuinfo_get_max_arm_sme_length() > 0;
+  set_arch_flag(xnn_arch_arm_sme, use_arm_sme);
+  set_arch_flag(xnn_arch_arm_sme2, use_arm_sme && cpuinfo_has_arm_sme2());
+  set_arch_flag(xnn_arch_arm_sme2p1, use_arm_sme && cpuinfo_has_arm_sme2p1());
 #endif  // !XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 #endif
 
@@ -324,6 +421,15 @@ static void init_hardware_config(void) {
   const bool use_x86_avx512vnnigfni = XNN_ENABLE_AVX512VNNIGFNI && use_x86_avx512vnni && cpuinfo_has_x86_gfni();
   const bool use_x86_avx512amx = XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64 && use_x86_avx512vnnigfni && cpuinfo_has_x86_amx_int8();
   const bool use_x86_avx512amxfp16 = XNN_ENABLE_AVX512AMXFP16 && XNN_ARCH_X86_64 && use_x86_avx512vnnigfni && cpuinfo_has_x86_avx512fp16() && cpuinfo_has_x86_amx_fp16();
+#if XNN_ENABLE_ACE && XNN_ARCH_X86_64 && \
+    (defined(__clang__) || defined(__GNUC__))
+  // ACE microkernels use GCC/Clang inline asm; other compilers get stubs.
+  const bool use_x86_ace = use_x86_avx512vnnigfni &&
+                           cpuinfo_has_x86_avx10_2() &&
+                           cpuinfo_has_x86_amx_tile() && cpuinfo_has_x86_ace();
+#else
+  const bool use_x86_ace = false;
+#endif
   const bool use_x86_avx256skx = XNN_ENABLE_AVX256SKX && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
   const bool use_x86_avx256vnni = XNN_ENABLE_AVX256VNNI && use_x86_avx256skx && cpuinfo_has_x86_avx512vnni();
 
@@ -344,18 +450,20 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_x86_avx512bf16, XNN_ENABLE_AVX512BF16 && cpuinfo_has_x86_avx512bf16());
   set_arch_flag(xnn_arch_x86_avx512amx, use_x86_avx512amx);
   set_arch_flag(xnn_arch_x86_avx512amxfp16, use_x86_avx512amxfp16);
+  set_arch_flag(xnn_arch_x86_ace, use_x86_ace);
   set_arch_flag(xnn_arch_x86_avxvnni, XNN_ENABLE_AVXVNNI && cpuinfo_has_x86_avx2() && cpuinfo_has_x86_avxvnni() && cpuinfo_has_x86_gfni());
   set_arch_flag(xnn_arch_x86_avxvnniint8, XNN_ENABLE_AVXVNNIINT8 && cpuinfo_has_x86_avx2() && cpuinfo_has_x86_avx_vnni_int8() && cpuinfo_has_x86_gfni());
   set_arch_flag(xnn_arch_x86_avx256skx, use_x86_avx256skx);
   set_arch_flag(xnn_arch_x86_avx256vnni, use_x86_avx256vnni);
   set_arch_flag(xnn_arch_x86_avx256vnnigfni, XNN_ENABLE_AVX256VNNIGFNI && use_x86_avx256vnni && cpuinfo_has_x86_gfni());
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
-  if (use_x86_avx512amx || use_x86_avx512amxfp16) {
+  if (use_x86_avx512amx || use_x86_avx512amxfp16 || use_x86_ace) {
     size_t status = xnn_syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA, 0);
     if (status) {
       xnn_log_info("XFEATURE_XTILEDATA setup is failed, TMUL usage is not allowed");
       set_arch_flag(xnn_arch_x86_avx512amx, 0);
       set_arch_flag(xnn_arch_x86_avx512amxfp16, 0);
+      set_arch_flag(xnn_arch_x86_ace, 0);
     }
   }
 #endif
@@ -389,6 +497,34 @@ static void init_hardware_config(void) {
     set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
   }
 
+#if XNN_ENABLE_HMX
+  // HMX FP16 is supported on Hexagon V73+ (Snapdragon 8 Gen 2 and newer) when
+  // the HMX hardware unit is present, can be powered on, and can be locked in
+  // the current protection domain.
+  if (arch_version >= 0x73) {
+    int power_ctx = 0;
+    HAP_power_request_t request = {0};
+    request.type = HAP_power_set_HMX;
+    request.hmx.power_up = 1;
+    if (HAP_power_set(&power_ctx, &request) == AEE_SUCCESS) {
+      compute_res_attr_t compute_res;
+      HAP_compute_res_attr_init(&compute_res);
+      HAP_compute_res_attr_set_hmx_param(&compute_res, 1);
+      unsigned int context_id = HAP_compute_res_acquire(&compute_res, 10000);
+      if (context_id != 0) {
+        if (HAP_compute_res_hmx_lock(context_id) == 0) {
+          set_arch_flag(xnn_arch_hmx, true);
+          HAP_compute_res_hmx_unlock(context_id);
+        }
+        HAP_compute_res_release(context_id);
+      }
+      request.hmx.power_up = 0;
+      HAP_power_set(&power_ctx, &request);
+    }
+    HAP_power_destroy(&power_ctx);
+  }
+#endif  // XNN_ENABLE_HMX
+
   unsigned int max_hthreads = 1;
   qurt_sysenv_max_hthreads_t hardware_threads = {0};
   if (qurt_sysenv_get_max_hw_threads(&hardware_threads) == QURT_EOK) {
@@ -411,7 +547,11 @@ static void init_hardware_config(void) {
     const bool use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
     set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
 
-    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, XNN_ENABLE_RISCV_FP16_VECTOR && supports_rvv_fp16());
+    enum xnn_uarch uarch = xnn_uarch_unknown;
+    bool supports_fp16 = false;
+    riscv_decode_hwprobe(&uarch, &supports_fp16);
+    hardware_config.uarch[0] = uarch;
+    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, XNN_ENABLE_RISCV_FP16_VECTOR && use_riscv_vector && supports_fp16);
 
     if (use_riscv_vector) {
       register uint32_t vlenb __asm__ ("t0");
@@ -576,15 +716,14 @@ static void init_hardware_config(void) {
       xnn_log_info("cpu_get_uarch(%i): 0x%x", i, cpuinfo_get_uarch(i)->uarch);
     }
 #endif  // XNN_MAX_UARCH_TYPES > 1
+#if !XNN_ARCH_RISCV
     for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
       const struct cpuinfo_uarch_info* uarch = cpuinfo_get_uarch(i);
       hardware_config.uarch[i] = uarch ? cpuinfo_to_xnn_uarch(uarch->uarch) : xnn_uarch_unknown;
     }
+#endif  // !XNN_ARCH_RISCV
 #else
   xnn_log_warning("Unable to determine L1/L2 data cache properties.");
-  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
-    hardware_config.uarch[i] = xnn_uarch_unknown;
-  }
 #endif  // XNN_ENABLE_CPUINFO
 }
 

@@ -542,3 +542,49 @@ TEST(REDUCE_NORMALIZATION_TEST, normalize_1D_reduce_all) {
 TEST(REDUCE_NORMALIZATION_TEST, normalize_1D_reduce_none) {
   ReduceNormalizationTester().shape({2}).expected_shape({2}).Test();
 }
+
+TEST(REDUCE_NORMALIZATION_TEST, normalize_3D_unit_dims_reduce_middle) {
+  ReduceNormalizationTester()
+      .shape({1, 5, 1})
+      .axes({1})
+      .expected_shape({5})
+      .expected_axes({0})
+      .Test();
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, normalize_3D_middle_unit_dim_reduce_outer) {
+  ReduceNormalizationTester()
+      .shape({2, 1, 5})
+      .axes({0, 2})
+      .expected_shape({2 * 5})
+      .expected_axes({0})
+      .Test();
+}
+
+TEST(REDUCE_NORMALIZATION_TEST,
+     normalize_4D_reduced_unit_dim_merge_non_reduced) {
+  ReduceNormalizationTester()
+      .shape({2, 3, 1, 5})
+      .axes({0, 2})
+      .expected_shape({2, 3 * 5})
+      .expected_axes({0})
+      .Test();
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, normalize_3D_all_unit_dims_reduce_multiple) {
+  ReduceNormalizationTester()
+      .shape({1, 1, 1})
+      .axes({0, 2})
+      .expected_shape({1})
+      .expected_axes({0})
+      .Test();
+}
+
+TEST(REDUCE_NORMALIZATION_TEST, normalize_2D_zero_dim_preserved) {
+  ReduceNormalizationTester()
+      .shape({0, 5})
+      .axes({1})
+      .expected_shape({0, 5})
+      .expected_axes({1})
+      .Test();
+}

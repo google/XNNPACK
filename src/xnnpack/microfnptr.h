@@ -216,6 +216,28 @@ typedef void (*xnn_pf32_gemm_minmax_ukernel_fn)(
     size_t cn_stride,  //
     const struct xnn_f32_minmax_params* params);
 
+typedef void (*xnn_pf32_qc8w_gemm_minmax_ukernel_fn)(
+    size_t mr,         //
+    size_t nc,         //
+    size_t kc,         //
+    const void* a,     //
+    const void* w,     //
+    float* c,          //
+    size_t cm_stride,  //
+    size_t cn_stride,  //
+    const struct xnn_f32_minmax_params* params);
+
+typedef void (*xnn_pf32_qc4w_gemm_minmax_ukernel_fn)(
+    size_t mr,         //
+    size_t nc,         //
+    size_t kc,         //
+    const void* a,     //
+    const void* w,     //
+    float* c,          //
+    size_t cm_stride,  //
+    size_t cn_stride,  //
+    const struct xnn_f32_qc4w_minmax_params* params);
+
 typedef void (*xnn_pf16_gemm_minmax_ukernel_fn)(
     size_t mr,         //
     size_t nc,         //
@@ -1403,8 +1425,9 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
   xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 };
 
-// Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+// Largest GEMM/IGEMM MR used in init.c is 32 (ARM64 KleidiAI / Hexagon HMX).
+#if (XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI) || \
+    (XNN_ARCH_HEXAGON && XNN_ENABLE_HMX)
 #define XNN_MAX_MR 32
 #else
 #define XNN_MAX_MR 16

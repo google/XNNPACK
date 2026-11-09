@@ -1863,8 +1863,6 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x16c4__avx512amx)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x16c4__avx512amx_prfm)
@@ -1882,6 +1880,11 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx_prfm)
+
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__ace)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x32c4__ace)
 
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni)
@@ -2767,8 +2770,6 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__avx512amx)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x16c4__avx512amx)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x16c4__avx512amx)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm)
@@ -2989,6 +2990,23 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x128c4__hvx)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x128c4__hvx)
+
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x128c4__hvx_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x128c4__hvx_prfm)
 
 #ifdef __cplusplus
 }  // extern "C"

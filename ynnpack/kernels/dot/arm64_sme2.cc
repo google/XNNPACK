@@ -20,6 +20,29 @@ namespace ynn {
 
 namespace {
 
+// In the 8-bit view of ZA, horizontal slices of 4 consecutive rows each,
+// correspond to a single row from each of the 32-bit tiles 0, 1, 2 and 3. This
+// lets a single ZA load/store operate on 4 rows at once, each moving a single
+// row of the 4 32-bit tiles.
+YNN_ALWAYS_INLINE void load_za32_rows(size_t M, svcount_t pn, const void* C_in,
+                                      size_t C_in_stride_m) YNN_SME_HELPER {
+  for (size_t m = 0; m < M; ++m) {
+    const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
+    svwrite_hor_za8_u8_vg4(
+        /*tile=*/0, /*slice=*/4 * m,
+        svld1_u8_x4(pn, static_cast<const uint8_t*>(C_in_m)));
+  }
+}
+
+YNN_ALWAYS_INLINE void store_za32_rows(size_t M, svcount_t pn, void* C_out,
+                                       size_t C_out_stride_m) YNN_SME_HELPER {
+  for (size_t m = 0; m < M; ++m) {
+    void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
+    svst1_u8_x4(pn, static_cast<uint8_t*>(C_out_m),
+                svread_hor_za8_u8_vg4(/*tile=*/0, /*slice=*/4 * m));
+  }
+}
+
 template <typename TAB, typename TC>
 __arm_new("za") __arm_locally_streaming void sme2_dot(
     size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
@@ -43,31 +66,21 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
 
   ptrdiff_t n = N;
   while (n >= svl * 4) {
+    // (All-true) masks for the column dimension outputs.
+    svbool_t n_mask_ab = svptrue(TAB{});
+    svcount_t n_count_ab = svctrue(TAB{});
+    svcount_t n_count_c = svptrue_c8();
+
     if (C_in) {
       // Load the output to initialize the tile accumulator.
       // TODO: To improve numerical precision and better match the other
       // kernels, it would be best to initialize this to zero (`svzero_za()`)
       // the tile instead of loading the initial accumulator, and add this
       // later.
-      svbool_t n_mask = svptrue(TC{});
-      for (size_t m = 0; m < M; ++m) {
-        const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
-        svld1_hor_za32(/*tile=*/0, /*slice=*/m, n_mask,
-                       offset_bytes(C_in_m, 0 * svl * sizeof(TC)));
-        svld1_hor_za32(/*tile=*/1, /*slice=*/m, n_mask,
-                       offset_bytes(C_in_m, 1 * svl * sizeof(TC)));
-        svld1_hor_za32(/*tile=*/2, /*slice=*/m, n_mask,
-                       offset_bytes(C_in_m, 2 * svl * sizeof(TC)));
-        svld1_hor_za32(/*tile=*/3, /*slice=*/m, n_mask,
-                       offset_bytes(C_in_m, 3 * svl * sizeof(TC)));
-      }
+      load_za32_rows(M, n_count_c, C_in, C_in_stride_m);
     } else {
       svzero_za();
     }
-
-    // (All-true) masks for the row and column dimension outputs.
-    svbool_t n_mask_ab = svptrue(TAB{});
-    svcount_t n_count_ab = svctrue(TAB{});
 
     const void* B_k3 = B;
     const void* A_k3 = A;
@@ -102,18 +115,7 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
     } while (k3 > 0);
 
     // Store the accumulated result back to the output.
-    svbool_t n_mask = svptrue(TC{});
-    for (size_t m = 0; m < M; ++m) {
-      void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
-      svst1_hor_za32(/*tile=*/0, /*slice=*/m, n_mask,
-                     offset_bytes(C_out_m, 0 * svl * sizeof(TC)));
-      svst1_hor_za32(/*tile=*/1, /*slice=*/m, n_mask,
-                     offset_bytes(C_out_m, 1 * svl * sizeof(TC)));
-      svst1_hor_za32(/*tile=*/2, /*slice=*/m, n_mask,
-                     offset_bytes(C_out_m, 2 * svl * sizeof(TC)));
-      svst1_hor_za32(/*tile=*/3, /*slice=*/m, n_mask,
-                     offset_bytes(C_out_m, 3 * svl * sizeof(TC)));
-    }
+    store_za32_rows(M, n_count_c, C_out, C_out_stride_m);
     C_in = C_in ? offset_bytes(C_in, svl * sizeof(TC) * 4) : nullptr;
     C_out = offset_bytes(C_out, svl * sizeof(TC) * 4);
     B = offset_bytes(B, svl * sizeof(TC) * 4);

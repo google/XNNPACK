@@ -598,11 +598,6 @@
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 64
   planes: 2
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512amx
-  init: xnn_init_f32_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
-  k-block: 64
-  planes: 2
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w

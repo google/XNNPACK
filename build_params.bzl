@@ -413,26 +413,39 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
-    # These translation units contain no SME or SVE code of their own: they only
-    # marshal arguments and forward into KleidiAI's hand-written streaming-mode
-    # assembly, which is built separately with its own flags. They therefore
-    # need no `-march` override.
+    # KleidiAI-only builds (`!arm_sme_acle_enabled`) contain no SME or SVE code
+    # in these translation units—they only marshal arguments into KleidiAI's
+    # separately compiled assembly—and therefore use no `-march` override.
     #
-    # Do not add one back. A `-march=...+sve+sve2` here also licenses the
-    # auto-vectorizer to emit SVE into ordinary non-streaming code, which is
-    # illegal on hardware implementing FEAT_SME2 without FEAT_SVE (e.g. Apple
-    # A18) and faults with SIGILL.
+    # When `arm_sme_acle_enabled` is set, pass `-march=armv8.2-a+sme+fp16` /
+    # `-march=armv8.2-a+sme2+fp16` (without `+sve` or `+sve2`). Adding
+    # `+sve+sve2` would allow the auto-vectorizer to emit SVE into non-streaming
+    # code, which faults with SIGILL on CPUs implementing FEAT_SME/FEAT_SME2
+    # without FEAT_SVE (e.g. Apple Silicon).
     "neonsme": _create_params(
         cond = "//:arm_sme_enabled",
-        extra_deps = xnnpack_if_kleidiai_enabled([
+        copts = xnnpack_select_if(
+            "//:arm_sme_acle_non_lexan_enabled",
+            ["-march=armv8.2-a+sme+fp16"],
+        ) + xnnpack_select_if(
+            "//:arm_sme_acle_lexan_enabled",
+            ["/clang:-march=armv8.2-a+sme+fp16"],
+        ),
+        extra_deps = xnnpack_select_if(
+            "//:arm_sme_acle_enabled",
+            ["//:arm_sme_abi_stubs"],
+        ) + xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
     "neonsme2": _create_params(
         cond = "//:arm_sme2_enabled",
         copts = xnnpack_select_if(
-            "//:arm_sme_acle_enabled",
-            ["-march=armv8.2-a+sme2"],
+            "//:arm_sme_acle_non_lexan_enabled",
+            ["-march=armv8.2-a+sme2+fp16"],
+        ) + xnnpack_select_if(
+            "//:arm_sme_acle_lexan_enabled",
+            ["/clang:-march=armv8.2-a+sme2+fp16"],
         ),
         extra_deps = xnnpack_select_if(
             "//:arm_sme_acle_enabled",
@@ -762,6 +775,26 @@ XNNPACK_PARAMS_FOR_ARCH = {
         mingw_copts = ["-fno-asynchronous-unwind-tables"],
         msys_copts = ["-fno-asynchronous-unwind-tables"],
     ),
+    "ace": _create_params(
+        cond = "//:ace_enabled",
+        copts = _x86_align_stack(64),
+        gcc_x86_copts = [
+            "-mf16c",
+            "-mfma",
+            "-mavx512f",
+            "-mavx512cd",
+            "-mavx512bw",
+            "-mavx512dq",
+            "-mavx512vl",
+            "-mavx512vnni",
+            "-mgfni",
+            "-mamx-tile",
+        ],
+        msvc_x86_32_copts = ["/arch:AVX512"],
+        msvc_x86_64_copts = ["/arch:AVX512"],
+        mingw_copts = ["-fno-asynchronous-unwind-tables"],
+        msys_copts = ["-fno-asynchronous-unwind-tables"],
+    ),
     "avx512fp16": _create_params(
         cond = "//:avx512fp16_enabled",
         copts = _x86_align_stack(64),
@@ -837,6 +870,14 @@ XNNPACK_PARAMS_FOR_ARCH = {
         cond = "//:hvx_enabled",
         copts = [
             "-mhvx-ieee-fp",
+        ],
+        extra_deps = [],  # Extra deps for hexagon.
+    ),
+    "hmx": _create_params(
+        cond = "//:hmx_enabled",
+        copts = [
+            "-mhvx-ieee-fp",
+            "-mhmx",
         ],
         extra_deps = [],  # Extra deps for hexagon.
     ),

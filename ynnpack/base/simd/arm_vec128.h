@@ -1205,6 +1205,9 @@ YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
 YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) {
   return s32x4{vmulq_s32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x8 operator*(s16x8 a, s16x8 b) {
+  return s16x8{vmulq_s16(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE u8x16 operator*(u8x16 a, u8x16 b) {
   return u8x16{vmulq_u8(a.v, b.v)};
 }

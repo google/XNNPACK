@@ -19,6 +19,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
@@ -1473,6 +1474,31 @@ namespace {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
+#if XNN_ENABLE_ACE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_1x32c4__ace(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x32c4__ace,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_ace);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_1x32c4__ace)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__ace(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__ace,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/16, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_ace);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__ace)
+#endif  // XNN_ENABLE_ACE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 #if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,
@@ -1550,17 +1576,6 @@ namespace {
   }
 
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512amx)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512amx(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512amx,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/7, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_x86_avx512amx);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512amx)
 
   static void qd8_f32_qc8w_gemm_minmax_ukernel_16x16c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,

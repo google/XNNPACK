@@ -27,18 +27,14 @@
 #endif  // BENCHMARK_NAMED
 
 #if defined(BENCHMARK_ARGS_BOTTLENECK)
-#define XNN_BENCHMARK_MAIN()                            \
-  extern "C" {                                          \
-  int BenchmarkArgBottleneck(int& argc, char**& argv) { \
-    return benchmark::utils::ProcessArgs(argc, argv);   \
-  }                                                     \
-  }
+#define XNN_BENCHMARK_MAIN()
 #elif defined(__hexagon__)
 #define XNN_BENCHMARK_MAIN()                                            \
   int __attribute__((weak)) main(int argc, char** argv) {               \
     ::benchmark::Initialize(&argc, argv);                               \
     int status = benchmark::utils::ProcessArgs(argc, argv);             \
     if (status != 0) return status;                                     \
+    benchmark::utils::ApplyDeferredArgs();                              \
     if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
     ::benchmark::RunSpecifiedBenchmarks();                              \
   }

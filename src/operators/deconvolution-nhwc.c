@@ -329,48 +329,26 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
   }
   const size_t aligned_total_weights_size = round_up_po2(
       packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = xnn_get_pointer_to_write_weights(
-      deconvolution_op, aligned_total_weights_size);
-  if (weights_ptr == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator packed weights",
-                  aligned_total_weights_size,
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
+
+  struct xnn_weights_cache_look_up_key cache_key;
+  cache_key.seed = groups ^ group_input_channels ^ group_output_channels ^
+                   kernel_size ^ nr ^ kr ^ sr ^ ukernel_type;
+  cache_key.kernel = kernel;
+  cache_key.bias = bias;
+  cache_key.fingerprint_id = context->fingerprint_id;
+  size_t cache_offset = XNN_CACHE_NOT_FOUND;
+  if (use_weights_cache(deconvolution_op)) {
+    cache_offset =
+        xnn_weights_cache_look_up(deconvolution_op->weights_cache, &cache_key);
   }
-  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-                aligned_total_weights_size,
-                xnn_operator_type_to_string(operator_type));
-  if (extra_weights_bytes > 0) {
-    // TODO(b/402602597): We shouldn't need this initialization.
-    memset(weights_ptr, 0, aligned_total_weights_size);
-  }
-  switch (ukernel_type) {
-    case xnn_microkernel_type_igemm:
-      pack_conv_goki_w(groups, group_output_channels, kernel_size,
-                       group_input_channels, nr, kr, sr, kernel, bias,
-                       /*scale=*/scale_params, weights_ptr,
-                       nr * extra_weights_bytes, packing_params);
-      break;
-    case xnn_microkernel_type_subconv2d:
-      pack_deconv_goki_w(
-          groups, group_output_channels, kernel_height, kernel_width,
-          group_input_channels, stride_height, stride_width, nr, kr, sr, kernel,
-          bias, /*scale=*/scale_params, weights_ptr, nr * extra_weights_bytes,
-          deconvolution_op->convolution_op->subconvolution_buffer,
-          packing_params);
-      // We assume that the first subconvolution param weights point to the
-      // start of the weights, this is used to check if the weights cache has
-      // moved.
-      assert(deconvolution_op->convolution_op->subconvolution_buffer->weights ==
-             weights_ptr);
-      break;
-    default:
-      XNN_UNREACHABLE;
-  }
+  const bool weights_already_cached = cache_offset != XNN_CACHE_NOT_FOUND;
 
   if (ukernel_type == xnn_microkernel_type_subconv2d) {
     struct subconvolution_params* subconvolution_params =
         deconvolution_op->convolution_op->subconvolution_buffer;
+    // On a cache hit, the weights are offsets from the start of the packed
+    // weights until reshape rebases them onto the cached weights.
+    uintptr_t subkernel_weights_offset = 0;
     for (size_t offset_y = 0; offset_y < stride_height; offset_y++) {
       for (size_t offset_x = 0; offset_x < stride_width; offset_x++) {
         const size_t subkernel_height =
@@ -387,150 +365,197 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
         subconvolution_params->w_stride =
             extra_weights_bytes + bias_element_size +
             ((k_stride * subkernel_size) << log2_filter_element_size);
+        if (weights_already_cached) {
+          subconvolution_params->weights = (void*)subkernel_weights_offset;
+          subkernel_weights_offset +=
+              n_stride * subconvolution_params->w_stride;
+        }
         subconvolution_params++;
-      }
-    }
-
-    if (kernel_scale_params != NULL) {
-      assert(init_kernel_scale_params != NULL);
-
-      const float* kernel_scale_params_ptr = kernel_scale_params;
-      for (uint32_t group = 0; group < groups; group++) {
-        struct subconvolution_params* subconvolution_params =
-            deconvolution_op->convolution_op->subconvolution_buffer;
-        for (size_t sh = 0; sh < stride_height; sh++) {
-          for (size_t sw = 0; sw < stride_width; sw++) {
-            void* group_weights =
-                (void*)((uintptr_t)subconvolution_params->weights +
-                        group * packed_group_weights_size +
-                        bias_element_size * gemm_config->nr);
-            const size_t subkernel_height =
-                divide_round_up(kernel_height - sh, stride_height);
-            const size_t subkernel_width =
-                divide_round_up(kernel_width - sw, stride_width);
-            size_t subkernel_size;
-            if (!xnn_safe_mul(subkernel_height, subkernel_width,
-                               &subkernel_size)) {
-              return xnn_status_invalid_parameter;
-            }
-            group_weights =
-                (void*)((uintptr_t)group_weights +
-                        gemm_config->nr * ((subkernel_size * k_stride
-                                            << log2_filter_element_size)));
-            const size_t weights_stride =
-                (subkernel_size * k_stride << log2_filter_element_size) +
-                bias_element_size + extra_weights_bytes;
-            init_kernel_scale_params(group_output_channels, gemm_config->nr,
-                                     gemm_config->nr * weights_stride,
-                                     kernel_scale_params_ptr, group_weights);
-            subconvolution_params++;
-          }
-        }
-        kernel_scale_params_ptr += group_output_channels;
-      }
-    }
-
-    if (scale_params != NULL) {
-      assert(init_scale_params != NULL);
-
-      const float* scale_params_ptr = scale_params;
-      for (uint32_t group = 0; group < groups; group++) {
-        struct subconvolution_params* subconvolution_params =
-            deconvolution_op->convolution_op->subconvolution_buffer;
-        for (size_t sh = 0; sh < stride_height; sh++) {
-          for (size_t sw = 0; sw < stride_width; sw++) {
-            void* group_weights =
-                (void*)((uintptr_t)subconvolution_params->weights +
-                        group * packed_group_weights_size +
-                        bias_element_size * gemm_config->nr);
-            const size_t subkernel_height =
-                divide_round_up(kernel_height - sh, stride_height);
-            const size_t subkernel_width =
-                divide_round_up(kernel_width - sw, stride_width);
-            size_t subkernel_size;
-            if (!xnn_safe_mul(subkernel_height, subkernel_width,
-                               &subkernel_size)) {
-              return xnn_status_invalid_parameter;
-            }
-            group_weights =
-                (void*)((uintptr_t)group_weights +
-                        gemm_config->nr * ((subkernel_size * k_stride
-                                            << log2_filter_element_size)));
-            if (kernel_scale_params != NULL) {
-              group_weights = (void*)((uintptr_t)group_weights +
-                                      gemm_config->nr * sizeof(float));
-            }
-            const size_t weights_stride =
-                (subkernel_size * k_stride << log2_filter_element_size) +
-                bias_element_size + extra_weights_bytes;
-            init_scale_params(group_output_channels, gemm_config->nr,
-                              gemm_config->nr * weights_stride,
-                              scale_params_ptr, group_weights);
-            subconvolution_params++;
-          }
-        }
-        scale_params_ptr += group_output_channels;
-      }
-    }
-  } else {
-    if (kernel_scale_params != NULL) {
-      assert(init_kernel_scale_params != NULL);
-
-      void* group_weights =
-          (void*)((uintptr_t)weights_ptr +
-                  gemm_config->nr *
-                      ((kernel_size * k_stride << log2_filter_element_size) +
-                       bias_element_size));
-      const size_t weights_stride =
-          (kernel_size * k_stride << log2_filter_element_size) +
-          bias_element_size + extra_weights_bytes;
-      for (uint32_t group = 0; group < groups; group++) {
-        init_kernel_scale_params(group_output_channels, gemm_config->nr,
-                                 gemm_config->nr * weights_stride,
-                                 kernel_scale_params, group_weights);
-        kernel_scale_params += group_output_channels;
-        group_weights =
-            (void*)((uintptr_t)group_weights + n_stride * weights_stride);
-      }
-    }
-
-    if (scale_params != NULL) {
-      assert(init_scale_params != NULL);
-
-      void* group_weights =
-          (void*)((uintptr_t)weights_ptr +
-                  gemm_config->nr *
-                      ((kernel_size * k_stride << log2_filter_element_size) +
-                       bias_element_size));
-      if (kernel_scale_params != NULL) {
-        group_weights =
-            (void*)((uintptr_t)group_weights + gemm_config->nr * sizeof(float));
-      }
-      const size_t weights_stride =
-          (kernel_size * k_stride << log2_filter_element_size) +
-          bias_element_size + extra_weights_bytes;
-      for (uint32_t group = 0; group < groups; group++) {
-        init_scale_params(group_output_channels, gemm_config->nr,
-                          gemm_config->nr * weights_stride, scale_params,
-                          group_weights);
-        scale_params += group_output_channels;
-        group_weights =
-            (void*)((uintptr_t)group_weights + n_stride * weights_stride);
       }
     }
   }
 
-  if (use_weights_cache(deconvolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = groups ^ group_input_channels ^ group_output_channels ^
-                     kernel_size ^ nr ^ kr ^ sr ^ ukernel_type;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
-    cache_key.fingerprint_id = context->fingerprint_id;
-    deconvolution_op->packed_weights.offset =
-        xnn_look_up_or_insert_weights_cache(deconvolution_op->weights_cache,
-                                            &cache_key, weights_ptr,
-                                            aligned_total_weights_size);
+  if (weights_already_cached) {
+    deconvolution_op->packed_weights.offset = cache_offset;
+  } else {
+    void* weights_ptr = xnn_get_pointer_to_write_weights(
+        deconvolution_op, aligned_total_weights_size);
+    if (weights_ptr == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator packed weights",
+          aligned_total_weights_size,
+          xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+    xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+                  aligned_total_weights_size,
+                  xnn_operator_type_to_string(operator_type));
+    if (extra_weights_bytes > 0) {
+      // TODO(b/402602597): We shouldn't need this initialization.
+      memset(weights_ptr, 0, aligned_total_weights_size);
+    }
+    switch (ukernel_type) {
+      case xnn_microkernel_type_igemm:
+        pack_conv_goki_w(groups, group_output_channels, kernel_size,
+                         group_input_channels, nr, kr, sr, kernel, bias,
+                         /*scale=*/scale_params, weights_ptr,
+                         nr * extra_weights_bytes, packing_params);
+        break;
+      case xnn_microkernel_type_subconv2d:
+        pack_deconv_goki_w(
+            groups, group_output_channels, kernel_height, kernel_width,
+            group_input_channels, stride_height, stride_width, nr, kr, sr,
+            kernel, bias, /*scale=*/scale_params, weights_ptr,
+            nr * extra_weights_bytes,
+            deconvolution_op->convolution_op->subconvolution_buffer,
+            packing_params);
+        // We assume that the first subconvolution param weights point to the
+        // start of the weights, this is used to check if the weights cache has
+        // moved.
+        assert(
+            deconvolution_op->convolution_op->subconvolution_buffer->weights ==
+            weights_ptr);
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+
+    if (ukernel_type == xnn_microkernel_type_subconv2d) {
+      if (kernel_scale_params != NULL) {
+        assert(init_kernel_scale_params != NULL);
+
+        const float* kernel_scale_params_ptr = kernel_scale_params;
+        for (uint32_t group = 0; group < groups; group++) {
+          struct subconvolution_params* subconvolution_params =
+              deconvolution_op->convolution_op->subconvolution_buffer;
+          for (size_t sh = 0; sh < stride_height; sh++) {
+            for (size_t sw = 0; sw < stride_width; sw++) {
+              void* group_weights =
+                  (void*)((uintptr_t)subconvolution_params->weights +
+                          group * packed_group_weights_size +
+                          bias_element_size * gemm_config->nr);
+              const size_t subkernel_height =
+                  divide_round_up(kernel_height - sh, stride_height);
+              const size_t subkernel_width =
+                  divide_round_up(kernel_width - sw, stride_width);
+              size_t subkernel_size;
+              if (!xnn_safe_mul(subkernel_height, subkernel_width,
+                                &subkernel_size)) {
+                return xnn_status_invalid_parameter;
+              }
+              group_weights =
+                  (void*)((uintptr_t)group_weights +
+                          gemm_config->nr * ((subkernel_size * k_stride
+                                              << log2_filter_element_size)));
+              const size_t weights_stride =
+                  (subkernel_size * k_stride << log2_filter_element_size) +
+                  bias_element_size + extra_weights_bytes;
+              init_kernel_scale_params(group_output_channels, gemm_config->nr,
+                                       gemm_config->nr * weights_stride,
+                                       kernel_scale_params_ptr, group_weights);
+              subconvolution_params++;
+            }
+          }
+          kernel_scale_params_ptr += group_output_channels;
+        }
+      }
+
+      if (scale_params != NULL) {
+        assert(init_scale_params != NULL);
+
+        const float* scale_params_ptr = scale_params;
+        for (uint32_t group = 0; group < groups; group++) {
+          struct subconvolution_params* subconvolution_params =
+              deconvolution_op->convolution_op->subconvolution_buffer;
+          for (size_t sh = 0; sh < stride_height; sh++) {
+            for (size_t sw = 0; sw < stride_width; sw++) {
+              void* group_weights =
+                  (void*)((uintptr_t)subconvolution_params->weights +
+                          group * packed_group_weights_size +
+                          bias_element_size * gemm_config->nr);
+              const size_t subkernel_height =
+                  divide_round_up(kernel_height - sh, stride_height);
+              const size_t subkernel_width =
+                  divide_round_up(kernel_width - sw, stride_width);
+              size_t subkernel_size;
+              if (!xnn_safe_mul(subkernel_height, subkernel_width,
+                                &subkernel_size)) {
+                return xnn_status_invalid_parameter;
+              }
+              group_weights =
+                  (void*)((uintptr_t)group_weights +
+                          gemm_config->nr * ((subkernel_size * k_stride
+                                              << log2_filter_element_size)));
+              if (kernel_scale_params != NULL) {
+                group_weights = (void*)((uintptr_t)group_weights +
+                                        gemm_config->nr * sizeof(float));
+              }
+              const size_t weights_stride =
+                  (subkernel_size * k_stride << log2_filter_element_size) +
+                  bias_element_size + extra_weights_bytes;
+              init_scale_params(group_output_channels, gemm_config->nr,
+                                gemm_config->nr * weights_stride,
+                                scale_params_ptr, group_weights);
+              subconvolution_params++;
+            }
+          }
+          scale_params_ptr += group_output_channels;
+        }
+      }
+    } else {
+      if (kernel_scale_params != NULL) {
+        assert(init_kernel_scale_params != NULL);
+
+        void* group_weights =
+            (void*)((uintptr_t)weights_ptr +
+                    gemm_config->nr *
+                        ((kernel_size * k_stride << log2_filter_element_size) +
+                         bias_element_size));
+        const size_t weights_stride =
+            (kernel_size * k_stride << log2_filter_element_size) +
+            bias_element_size + extra_weights_bytes;
+        for (uint32_t group = 0; group < groups; group++) {
+          init_kernel_scale_params(group_output_channels, gemm_config->nr,
+                                   gemm_config->nr * weights_stride,
+                                   kernel_scale_params, group_weights);
+          kernel_scale_params += group_output_channels;
+          group_weights =
+              (void*)((uintptr_t)group_weights + n_stride * weights_stride);
+        }
+      }
+
+      if (scale_params != NULL) {
+        assert(init_scale_params != NULL);
+
+        void* group_weights =
+            (void*)((uintptr_t)weights_ptr +
+                    gemm_config->nr *
+                        ((kernel_size * k_stride << log2_filter_element_size) +
+                         bias_element_size));
+        if (kernel_scale_params != NULL) {
+          group_weights = (void*)((uintptr_t)group_weights +
+                                  gemm_config->nr * sizeof(float));
+        }
+        const size_t weights_stride =
+            (kernel_size * k_stride << log2_filter_element_size) +
+            bias_element_size + extra_weights_bytes;
+        for (uint32_t group = 0; group < groups; group++) {
+          init_scale_params(group_output_channels, gemm_config->nr,
+                            gemm_config->nr * weights_stride, scale_params,
+                            group_weights);
+          scale_params += group_output_channels;
+          group_weights =
+              (void*)((uintptr_t)group_weights + n_stride * weights_stride);
+        }
+      }
+    }
+
+    if (use_weights_cache(deconvolution_op)) {
+      deconvolution_op->packed_weights.offset =
+          xnn_look_up_or_insert_weights_cache(deconvolution_op->weights_cache,
+                                              &cache_key, weights_ptr,
+                                              aligned_total_weights_size);
+    }
   }
 
   const size_t zero_size =

@@ -36,7 +36,7 @@ static XNN_INLINE xnn_simd_u8_t xnn_min_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return Q6_Vub_vmin_VubVub(a, b);
 }
 
-static XNN_INLINE float xnn_reduce_max_u8(xnn_simd_u8_t v) {
+static XNN_INLINE uint8_t xnn_reduce_max_u8(xnn_simd_u8_t v) {
   v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 64));
   v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 32));
   v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 16));
@@ -47,7 +47,7 @@ static XNN_INLINE float xnn_reduce_max_u8(xnn_simd_u8_t v) {
   return *((uint8_t*)&v);
 }
 
-static XNN_INLINE float xnn_reduce_min_u8(xnn_simd_u8_t v) {
+static XNN_INLINE uint8_t xnn_reduce_min_u8(xnn_simd_u8_t v) {
   v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 64));
   v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 32));
   v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 16));

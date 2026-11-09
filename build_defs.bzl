@@ -156,6 +156,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVX512AMXFP16=1"],
         ["XNN_ENABLE_AVX512AMXFP16=0"],
     ) + xnnpack_select_if(
+        "//:ace_enabled",
+        ["XNN_ENABLE_ACE=1"],
+        ["XNN_ENABLE_ACE=0"],
+    ) + xnnpack_select_if(
         "//:avx512fp16_enabled",
         ["XNN_ENABLE_AVX512FP16=1"],
         ["XNN_ENABLE_AVX512FP16=0"],
@@ -171,6 +175,10 @@ def xnnpack_configurable_defines():
         "//:hvx_enabled",
         ["XNN_ENABLE_HVX=1"],
         ["XNN_ENABLE_HVX=0"],
+    ) + xnnpack_select_if(
+        "//:hmx_enabled",
+        ["XNN_ENABLE_HMX=1"],
+        ["XNN_ENABLE_HMX=0"],
     ) + xnnpack_kleidiai_defines() + xnnpack_select_if(
         "//:arm_sme_enabled",
         ["XNN_ENABLE_ARM_SME=1"],
@@ -456,9 +464,6 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       **kwargs: Other arguments to pass to the cc_test rule.
     """
 
-    # Set the default defines.
-    defines = defines or xnnpack_configurable_defines()
-
     cc_test(
         name = name,
         srcs = srcs,
@@ -480,7 +485,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             "//conditions:default": [],
         }) + linkopts,
         linkstatic = True,
-        defines = defines,
+        defines = xnnpack_configurable_defines() + defines,
         deps = [
             "@com_google_googletest//:gtest_main",
         ] + deps + select({

@@ -58,6 +58,15 @@ struct multiply_add {
   int32_t operator()(int32_t a, int32_t b, int32_t c) const {
     return narrow(widen(a) * widen(b) + widen(c));
   }
+  int32_t operator()(int8_t a, int8_t b, int32_t c) const {
+    return static_cast<int32_t>(a) * static_cast<int32_t>(b) + c;
+  }
+  float operator()(bfloat16 a, bfloat16 b, float c) const {
+    return static_cast<float>(a) * static_cast<float>(b) + c;
+  }
+  float operator()(half a, half b, float c) const {
+    return static_cast<float>(a) * static_cast<float>(b) + c;
+  }
 
   double tolerance(double a, double b, double c, ynn_type type) const {
     // This might differ due to using fused multiply-add instructions.
@@ -118,7 +127,6 @@ struct dequantize {
     return epsilon(type);
   }
 };
-
 
 // Check that `op(a, b, c)` == x, within tolerances described by `op`.
 template <typename A, typename B, typename C, typename X, typename OpInfo>

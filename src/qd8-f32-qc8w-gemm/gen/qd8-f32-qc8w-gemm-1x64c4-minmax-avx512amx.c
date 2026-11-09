@@ -65,8 +65,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
   XNN_ALIGN(64) struct __tile_config tile_data = {0};
   XNN_ALIGN(64) int32_t res[4][1 * 16];
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+  const size_t kremainder_colsb = round_up_po2(kremainder, 4 * sizeof(int8_t));
+  const __mmask64 kremainder_mask = _cvtu64_mask64((UINT64_C(1) << (kc & 63)) - 1);
 
   tile_data.palette_id = 1;
   tile_data.rows[0] = 1;              // tmm0 = res[0]
@@ -74,17 +75,17 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
   tile_data.rows[2] = 1;              // tmm2 = res[2]
   tile_data.rows[3] = 1;              // tmm3 = res[3]
   tile_data.rows[4] = 1;              // tmm4 = input
-  tile_data.rows[5] = 16;              // tmm5 = weights
+  tile_data.rows[5] = 16;                    // tmm5 = weights
   tile_data.rows[6] = 1;              // tmm6 = input remainder
-  tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
-  tile_data.colsb[0] = 64;          // tmm0 = res[0]
-  tile_data.colsb[1] = 64;          // tmm1 = res[1]
-  tile_data.colsb[2] = 64;          // tmm2 = res[2]
-  tile_data.colsb[3] = 64;          // tmm3 = res[3]
-  tile_data.colsb[4] = 64;          // tmm4 = input
-  tile_data.colsb[5] = 64;          // tmm5 = weights
-  tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
-  tile_data.colsb[7] = 64;          // tmm7 = weights remainder
+  tile_data.rows[7] = kremainder_colsb >> 2; // tmm7 = weights remainder
+  tile_data.colsb[0] = 64;                   // tmm0 = res[0]
+  tile_data.colsb[1] = 64;                   // tmm1 = res[1]
+  tile_data.colsb[2] = 64;                   // tmm2 = res[2]
+  tile_data.colsb[3] = 64;                   // tmm3 = res[3]
+  tile_data.colsb[4] = 64;                   // tmm4 = input
+  tile_data.colsb[5] = 64;                   // tmm5 = weights
+  tile_data.colsb[6] = kremainder_colsb;     // tmm6 = input remainder
+  tile_data.colsb[7] = 64;                   // tmm7 = weights remainder
   _tile_loadconfig(&tile_data);
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
@@ -129,8 +130,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
     }
 
     if XNN_UNLIKELY(k != 0) {
-      _tile_loadd(6, a, 64);
+      const __m512i vin0 = _mm512_maskz_loadu_epi8(kremainder_mask, a);
       a += kremainder;
+      _mm512_store_epi32(&res[0][0], vin0);
+      _tile_loadd(6, &res[0][0], 64);
       _tile_loadd(7, (const int8_t*) w + 0, 256);
       _tile_dpbssd(0, 6, 7);
       if XNN_LIKELY(nc > 16) {
@@ -146,7 +149,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
         _tile_dpbssd(3, 6, 7);
       }
 
-      w = (const int8_t*) w + kremainder * 64;
+      w = (const int8_t*) w + kremainder_colsb * 64;
       k -= kremainder * sizeof(int8_t);
     }
 

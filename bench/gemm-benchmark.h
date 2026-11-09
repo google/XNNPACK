@@ -146,6 +146,15 @@ void GEMMBenchmark(benchmark::State& state,
                    uint64_t arch_flags = 0);
 
 void GEMMBenchmark(benchmark::State& state,
+                   xnn_qp8_f32_qc2w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_minmax_params_fn init_minmax_params,
+                   xnn_pack_weights_and_biases_fn pack_weights,
+                   xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags = 0);
+
+void GEMMBenchmark(benchmark::State& state,
                    xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
@@ -200,6 +209,13 @@ void IGEMMBenchmark(benchmark::State& state,
                     xnn_pack_f16_igemm_fn pack, size_t mr,
                     size_t nr, size_t kr, size_t sr, uint64_t arch_flags = 0);
 
+typedef void (*xnn_x32_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
+                                           size_t kr, size_t sr,
+                                           size_t m_idx_start,
+                                           const float* lhs,
+                                           size_t lhs_stride,
+                                           void* lhs_packed);
+
 #if XNN_ENABLE_KLEIDIAI
 typedef void (*xnn_pqs8_qc8w_gemm_minmax_ukernel_fn)(
     size_t, size_t, size_t, const void*, const void*, void*, size_t, size_t,
@@ -213,13 +229,6 @@ void GEMMBenchmark(benchmark::State& state,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
-
-typedef void (*xnn_x32_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
-                                           size_t kr, size_t sr,
-                                           size_t m_idx_start,
-                                           const float* lhs,
-                                           size_t lhs_stride,
-                                           void* lhs_packed);
 
 typedef void (*xnn_x16_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
                                            size_t kr, size_t sr,
@@ -261,5 +270,27 @@ void GEMMBenchmark(benchmark::State& state,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
 #endif  // XNN_ENABLE_KLEIDIAI
+
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf32_qc8w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_minmax_params_fn init_minmax_params,
+                   xnn_pack_f32_qs8w_gemm_fn pack,
+                   xnn_x32_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags = 0);
+
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf32_qc4w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
+                   xnn_pack_f32_qc4w_gemm_fn pack,
+                   xnn_x32_pack_lh_ukernel_fn pack_lh,
+                   xnn_pack_lh_size_fn pack_lh_size,
+                   xnn_pack_lh_offset_fn pack_lh_offset,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags = 0);
 
 #endif  // XNNPACK_BENCH_GEMM_BENCHMARK_H_

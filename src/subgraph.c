@@ -1873,11 +1873,20 @@ static uint32_t is_pure_unary_elementwise(xnn_subgraph_t subgraph,
       const struct xnn_value* input_0 = &subgraph->values[input_0_id];
       const struct xnn_value* input_1 = &subgraph->values[input_1_id];
       assert(node->num_inputs == 2);
+      // A single-element static operand only makes this node a unary function
+      // of the other operand if it does not broadcast that operand to a higher
+      // rank. Otherwise the fused LUT node would be rewired to the lower-rank
+      // input and `resize_unary_elementwise_output_tensor` would shrink the
+      // rank of the output at reshape time, which downstream operators (e.g.
+      // convolution, which accepts rank-3 inputs) do not expect. This mirrors
+      // the rank guard in `optimize_common_subgraphs_min_max_to_clamp`.
       if (is_broadcasted_static(input_0) &&
-          !xnn_value_is_static(input_1->allocation_type)) {
+          !xnn_value_is_static(input_1->allocation_type) &&
+          input_0->shape.num_dims <= input_1->shape.num_dims) {
         return input_1_id;
       } else if (is_broadcasted_static(input_1) &&
-                 !xnn_value_is_static(input_0->allocation_type)) {
+                 !xnn_value_is_static(input_0->allocation_type) &&
+                 input_1->shape.num_dims <= input_0->shape.num_dims) {
         return input_0_id;
       } else if (set_contains(unary_values, num_unary_values, input_0_id) &&
                  set_contains(unary_values, num_unary_values, input_1_id)) {

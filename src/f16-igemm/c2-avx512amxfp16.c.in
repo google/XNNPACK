@@ -72,8 +72,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}c2__avx512amxfp16${"_p
 
   XNN_ALIGN(64) struct __tile_config tile_data = {0};
   XNN_ALIGN(64) float res[${NR // 16}][${MR} * 16];
-  $if MR > 1:
-    XNN_ALIGN(64) int32_t vintile[2][${MR} * 16];
 
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
   const size_t kremainder_colsb = round_up_po2(kremainder, 2 * sizeof(xnn_float16));
@@ -124,14 +122,14 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}c2__avx512amxfp16${"_p
 
     size_t p = ks;
     do {
-      const xnn_float16* restrict a0 = a[0];
-      assert(a0 != NULL);
-      if XNN_UNPREDICTABLE(a0 != zero) {
-        a0 = (const xnn_float16*) ((uintptr_t) a0 + a_offset);
-      }
-
-      size_t k = kc;
       $if MR == 1:
+        const xnn_float16* restrict a0 = a[0];
+        assert(a0 != NULL);
+        if XNN_UNPREDICTABLE(a0 != zero) {
+          a0 = (const xnn_float16*) ((uintptr_t) a0 + a_offset);
+        }
+
+        size_t k = kc;
         a += 1;
         while (k >= 32 * sizeof(xnn_float16)) {
           _tile_loadd(4, a0, 64);
@@ -170,96 +168,60 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}c2__avx512amxfp16${"_p
           k -= kremainder;
         }
       $else:
-        if (mr == 1) {
-          a += ${MR};
-          while (k >= 32 * sizeof(xnn_float16)) {
-            _tile_loadd(4, a0, 64);
-            a0 += 32;
-            $for N in range(0, NR, 16):
-              $if N == 0:
+        const xnn_float16* a_ptrs[${MR}];
+        for (size_t m = 0; m < mr; ++m) {
+          const xnn_float16* restrict am = a[m];
+          assert(am != NULL);
+          if XNN_UNPREDICTABLE(am != zero) {
+            am = (const xnn_float16*) ((uintptr_t) am + a_offset);
+          }
+          a_ptrs[m] = am;
+        }
+        a += ${MR};
+
+        size_t k = kc;
+        size_t k_offset = 0;
+        while (k >= 32 * sizeof(xnn_float16)) {
+          for (size_t m = 0; m < mr; ++m) {
+            const __m512i vin = _mm512_loadu_epi32((const uint8_t*) a_ptrs[m] + k_offset);
+            _mm512_store_epi32(&res[0][m * 16], vin);
+          }
+          k_offset += 64;
+          _tile_loadd(4, &res[0][0], 64);
+          $for N in range(0, NR, 16):
+            $if N == 0:
+              _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpfp16ps(${N // 16}, 4, 5);
+            $else:
+              if XNN_LIKELY(nc > ${N}) {
                 _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
                 _tile_dpfp16ps(${N // 16}, 4, 5);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpfp16ps(${N // 16}, 4, 5);
-                }
-            $if PREFETCH:
-              $for P in range(4096, 5120 + NR // 16 * 1024, 64):
-                xnn_prefetch_to_l1((const int8_t*) w + ${P});
+              }
+          $if PREFETCH:
+            $for P in range(4096, 5120 + NR // 16 * 1024, 64):
+              xnn_prefetch_to_l1((const int8_t*) w + ${P});
 
-            w = (const xnn_float16*) ((const int8_t*) w + ${NR // 16 * 1024});
-            k -= 32 * sizeof(xnn_float16);
+          w = (const xnn_float16*) ((const int8_t*) w + ${NR // 16 * 1024});
+          k -= 32 * sizeof(xnn_float16);
+        }
+        if XNN_UNLIKELY(k != 0) {
+          for (size_t m = 0; m < mr; ++m) {
+            const __m512i vin = _mm512_maskz_loadu_epi16(kremainder_mask, (const uint8_t*) a_ptrs[m] + k_offset);
+            _mm512_store_epi32(&res[0][m * 16], vin);
           }
-          if XNN_UNLIKELY(k != 0) {
-            const __m512i vin0 = _mm512_maskz_loadu_epi16(kremainder_mask, a0);
-            _mm512_store_epi32(&vintile[0][0], vin0);
-            _tile_loadd(6, &vintile[0][0], 64);
-            $for N in range(0, NR, 16):
-              $if N == 0:
+          _tile_loadd(6, &res[0][0], 64);
+          $for N in range(0, NR, 16):
+            $if N == 0:
+              _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpfp16ps(${N // 16}, 6, 7);
+            $else:
+              if XNN_LIKELY(nc > ${N}) {
                 _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
                 _tile_dpfp16ps(${N // 16}, 6, 7);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpfp16ps(${N // 16}, 6, 7);
-                }
+              }
 
-            w = (const xnn_float16*) ((const int8_t*) w + kremainder_colsb * ${NR});
-            k -= kremainder;
-          }
-        } else {
-          $for M in range(1, MR):
-            const xnn_float16* restrict a${M} = a[${M}];
-            assert(a${M} != NULL);
-            if XNN_UNPREDICTABLE(a${M} != zero) {
-              a${M} = (const xnn_float16*) ((uintptr_t) a${M} + a_offset);
-            }
-          a += ${MR};
-
-          size_t buf_idx = 0;
-          while (k >= 32 * sizeof(xnn_float16)) {
-            $for M in range(MR):
-              const __m512i vin${M} = _mm512_loadu_epi32(a${M});
-              a${M} += 32;
-              _mm512_store_epi32(&vintile[buf_idx][${M * 16}], vin${M});
-            _tile_loadd(4, &vintile[buf_idx][0], 64);
-            buf_idx ^= 1;
-            $for N in range(0, NR, 16):
-              $if N == 0:
-                _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                _tile_dpfp16ps(${N // 16}, 4, 5);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpfp16ps(${N // 16}, 4, 5);
-                }
-            $if PREFETCH:
-              $for P in range(4096, 5120 + NR // 16 * 1024, 64):
-                xnn_prefetch_to_l1((const int8_t*) w + ${P});
-
-            w = (const xnn_float16*) ((const int8_t*) w + ${NR // 16 * 1024});
-            k -= 32 * sizeof(xnn_float16);
-          }
-          if XNN_UNLIKELY(k != 0) {
-            $for M in range(MR):
-              const __m512i vin${M} = _mm512_maskz_loadu_epi16(kremainder_mask, a${M});
-              a${M} = (const xnn_float16*) ((uintptr_t) a${M} + kremainder);
-              _mm512_store_epi32(&vintile[buf_idx][${M * 16}], vin${M});
-            _tile_loadd(6, &vintile[buf_idx][0], 64);
-            $for N in range(0, NR, 16):
-              $if N == 0:
-                _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                _tile_dpfp16ps(${N // 16}, 6, 7);
-              $else:
-                if XNN_LIKELY(nc > ${N}) {
-                  _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
-                  _tile_dpfp16ps(${N // 16}, 6, 7);
-                }
-
-            w = (const xnn_float16*) ((const int8_t*) w + kremainder_colsb * ${NR});
-            k -= kremainder;
-          }
+          w = (const xnn_float16*) ((const int8_t*) w + kremainder_colsb * ${NR});
+          k -= kremainder;
         }
 
       p -= ${MR} * sizeof(void*);

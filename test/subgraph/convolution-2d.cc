@@ -276,7 +276,8 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
         // YNNPACK doesn't have this rewrite.
         #ifndef XNNPACK_USE_YNNPACK
         if (kw.size == 1 && kh.size == 1 && kw.stride == 1 && kh.stride == 1 &&
-            kw.padding() == 0 && kh.padding() == 0 && params.groups == 1) {
+            kw.padding() == 0 && kh.padding() == 0 && params.groups == 1 &&
+            params.group_input_channels + params.group_output_channels > 2) {
           // 1x1 conv gets rewritten to fully connected, which
           // dynamically quantizes at a finer granularity.
           input_batches.resize(3);

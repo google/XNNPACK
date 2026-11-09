@@ -58,9 +58,10 @@ void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
     }
 
     packq(batch * dim_m, dim_k, mr, kr, sr,
-          /*m_idx_start=*/buffer_index * dim_m,
+          /*m_idx_start=*/0,
           input.data() + buffer_index * batch * dim_m * dim_k,
-          dim_k * sizeof(float), packed_weights.data());
+          dim_k * sizeof(float),
+          packed_weights.data() + buffer_index * packed_size);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
