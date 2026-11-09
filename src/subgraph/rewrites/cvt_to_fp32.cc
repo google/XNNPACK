@@ -354,6 +354,22 @@ bool IsNativeBf16Convolution(const xnn_subgraph_t subgraph,
   return igemm_config != nullptr && igemm_config->mr != 0;
 }
 
+bool IsNativeBf16FullyConnected(const xnn_subgraph_t subgraph,
+                                const xnn_node& node) {
+  if (!PreferNativeBf16Gemm()) {
+    return false;
+  }
+  const xnn_value& input = subgraph->values[node.inputs[0]];
+  const xnn_value& filter = subgraph->values[node.inputs[1]];
+  if (input.datatype != xnn_datatype_bf16 ||
+      filter.datatype != xnn_datatype_bf16 ||
+      !xnn_value_is_static(filter.allocation_type) ||
+      (node.flags & XNN_FLAG_INLINE_LHS_PACKING)) {
+    return false;
+  }
+  return xnn_init_bf16_f32_gemm_config() != nullptr;
+}
+
 // Is this op supported when bf16 hardware is missing (allow-list).
 //
 // bf16 has very few native microkernels, so most ops fall back to fp32. The
@@ -397,6 +413,9 @@ OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
           default:
             break;
         }
+      }
+      if (IsNativeBf16FullyConnected(subgraph, node)) {
+        return OpAction::kFp32Outputs;
       }
       break;
     }
