@@ -349,6 +349,12 @@ TEST(DepthwiseConvolution2DF16F32, test) {
   TestImpl<xnn_float16, float, float>();
 }
 TEST(DepthwiseConvolution2DF32, test) { TestImpl<float, float, float>(); }
+TEST(DepthwiseConvolution2DBF16, test) {
+  TestImpl<xnn_bfloat16, xnn_bfloat16, float>();
+}
+TEST(DepthwiseConvolution2DBF16BF16BF16, test) {
+  TestImpl<xnn_bfloat16, xnn_bfloat16, xnn_bfloat16>();
+}
 
 TEST(DepthwiseConvolution2D, reshape_rejects_input_channel_mismatch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
