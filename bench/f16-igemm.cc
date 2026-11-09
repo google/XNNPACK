@@ -119,7 +119,7 @@ namespace {
 #endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 
-#if XNN_ENABLE_AVX512AMXFP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_AVX512AMXFP16 && XNN_ARCH_X86_64
   static void f16_igemm_minmax_ukernel_1x16c2__avx512amxfp16(benchmark::State& state) {
     IGEMMBenchmark(state,
       xnn_f16_igemm_minmax_ukernel_1x16c2__avx512amxfp16,
@@ -218,7 +218,7 @@ namespace {
   }
 
   BENCHMARK_CONV(f16_igemm_minmax_ukernel_16x64c2__avx512amxfp16_prfm)
-#endif  // XNN_ENABLE_AVX512AMXFP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#endif  // XNN_ENABLE_AVX512AMXFP16 && XNN_ARCH_X86_64
 
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

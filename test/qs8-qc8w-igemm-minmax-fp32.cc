@@ -745,7 +745,7 @@ std::vector<GemmTestParams> CreateTests2(
 }  // namespace
 
 
-#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC8W_IGEMM_MINMAX_FP32_16X16C4__AVX512AMX, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -865,7 +865,7 @@ std::vector<GemmTestParams> CreateTests2(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#endif  // XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
