@@ -336,6 +336,104 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 
+#if XNN_ARCH_ARM64
+  INSTANTIATE_TEST_SUITE_P(
+      BF16_F32_IGEMM_MINMAX_1X8__AARCH64_NEONFMA_LANE_LD64, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_bf16_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_bf16_f32_conv_goki_w);
+          },
+          xnn_arch_arm_neon_fma)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      BF16_F32_IGEMM_MINMAX_4X8__AARCH64_NEONFMA_LANE_LD64, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_bf16_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_bf16_f32_conv_goki_w);
+          },
+          xnn_arch_arm_neon_fma)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      BF16_F32_IGEMM_MINMAX_6X8__AARCH64_NEONFMA_LANE_LD64, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_bf16_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld64,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_bf16_f32_conv_goki_w);
+          },
+          xnn_arch_arm_neon_fma)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      BF16_F32_IGEMM_MINMAX_1X16__AARCH64_NEONFMA_LANE_LD64, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_bf16_f32_igemm_minmax_ukernel_1x16__aarch64_neonfma_lane_ld64,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_bf16_f32_conv_goki_w);
+          },
+          xnn_arch_arm_neon_fma)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      BF16_F32_IGEMM_MINMAX_4X16__AARCH64_NEONFMA_LANE_LD64, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_bf16_f32_igemm_minmax_ukernel_4x16__aarch64_neonfma_lane_ld64,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_bf16_f32_conv_goki_w);
+          },
+          xnn_arch_arm_neon_fma)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ARCH_ARM64
+
+
 #if XNN_ENABLE_AVX512BF16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       BF16_F32_IGEMM_MINMAX_1X16C2__AVX512BF16_BROADCAST, GemmTest,

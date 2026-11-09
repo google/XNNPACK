@@ -6,6 +6,8 @@
 #
 
 PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
+    "src/bf16-f32-igemm/gen/bf16-f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld64.c",
+    "src/bf16-f32-igemm/gen/bf16-f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-3x4.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-2x4-acc2.c",
@@ -34,6 +36,9 @@ PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
+    "src/bf16-f32-igemm/gen/bf16-f32-igemm-1x16-minmax-aarch64-neonfma-lane-ld64.c",
+    "src/bf16-f32-igemm/gen/bf16-f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld64.c",
+    "src/bf16-f32-igemm/gen/bf16-f32-igemm-4x16-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-aarch64-neonfma-2x1.c",
