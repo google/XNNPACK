@@ -121,6 +121,7 @@ cc_library(
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:source_location",
+        "@abseil-cpp//absl/types:span",
     ],
 )
 
@@ -133,8 +134,11 @@ cc_test(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:source_location",
+        "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
