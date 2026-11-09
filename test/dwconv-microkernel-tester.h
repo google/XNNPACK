@@ -168,6 +168,9 @@ class DWConvMicrokernelTester {
   void Test(xnn_f16_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f16_minmax_params_fn init_params) const;
 
+  void Test(xnn_bf16_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
+            xnn_init_f32_minmax_params_fn init_params) const;
+
   void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
             const void* = nullptr) const;
 
