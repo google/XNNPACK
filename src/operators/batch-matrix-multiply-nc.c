@@ -1202,11 +1202,16 @@ reshape_batch_matrix_multiply_nc(
                   xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_out_of_memory;
   }
+  const uint32_t nr_tile =
+      (mr == 1 && batch_matrix_multiply_op->gemm_config != NULL &&
+       batch_matrix_multiply_op->gemm_config->nr_gemv != 0)
+          ? batch_matrix_multiply_op->gemm_config->nr_gemv
+          : nr;
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/batch_size_c, m, n,
       /*m_stride=*/m_stride,
       /*n_stride=*/batch_matrix_multiply_op->weights_stride,
-      /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr_tile, num_threads);
 
   // If we are packing the LHS, provide a per-thread workspace to do so inline.
   size_t workspace_offset = 0;
@@ -1254,6 +1259,8 @@ reshape_batch_matrix_multiply_nc(
             "and k=%zu since it is a no-op for GEMV.",
             xnn_operator_type_to_string(batch_matrix_multiply_op->type),
             batch_size_c, m, n, k);
+        inline_lhs_packing =
+            should_inline_lhs_packing && num_threads <= batch_size_c;
       } else if (batch_size_a < batch_size_c || !should_inline_lhs_packing ||
                  num_threads * mr > round_up(batch_size_a, mr)) {
         xnn_log_debug(
