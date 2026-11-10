@@ -218,14 +218,16 @@ absl::Status XnnpackBuildContext::DefineTensorValue(const graph::Tensor& tensor,
           info.name, ": blockwise scale count (", bwq.scales.size(),
           ") is smaller than block_count (", expected_block_count, ")"));
     }
-    graph_->fp16_buffers().emplace_back(bwq.scales.begin(), bwq.scales.end());
-    const void* scale_ptr = graph_->fp16_buffers().back().data();
+    std::shared_ptr<const std::vector<bf16_t>> bf16_scales =
+        bwq.GetOrCreateBf16Scales();
+    const void* scale_ptr = bf16_scales->data();
+    graph_->bf16_scale_refs().push_back(std::move(bf16_scales));
     int32_t zero_point = bwq.zero_points.empty() ? 0 : bwq.zero_points[0];
     LRT_TENSOR_RETURN_IF_ERROR(xnn_define_blockwise_quantized_tensor_value_v2(
         sg, GetXnnpackType(value), zero_point, scale_ptr, dims.size(),
         bwq.quantized_dimension, bwq.block_size,
         dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
-        value.flags, xnn_datatype_fp16, &value.id))
+        value.flags, xnn_datatype_bf16, &value.id))
         << "Could not define a new blockwise quantized tensor value.";
   } else {
     return absl::UnimplementedError("Unsupported quantization type.");
