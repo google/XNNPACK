@@ -20,11 +20,14 @@ namespace ynn {
 using simd::f32x4;
 using simd::f32x8;
 using simd::s16x8;
+using simd::s32x4;
 using simd::s8x16;
 using simd::u8x16;
 
 MIN_MAX_K1_KERNEL(min_max_k1_fp32_simd128, f32x4, f32x4, float, 4);
 MIN_MAX_KN_KERNEL(min_max_kn_fp32_simd128, f32x4, f32x4, float, 4);
+MIN_MAX_K1_KERNEL(min_max_k1_int32_simd128, s32x4, s32x4, int32_t, 4);
+MIN_MAX_KN_KERNEL(min_max_kn_int32_simd128, s32x4, s32x4, int32_t, 4);
 MIN_MAX_K1_KERNEL(min_max_k1_uint8_simd128, u8x16, u8x16, uint8_t, 16);
 MIN_MAX_KN_KERNEL(min_max_kn_uint8_simd128, u8x16, u8x16, uint8_t, 16);
 MIN_MAX_K1_KERNEL(min_max_k1_int8_simd128, s8x16, s8x16, int8_t, 16);
@@ -32,6 +35,8 @@ MIN_MAX_KN_KERNEL(min_max_kn_int8_simd128, s8x16, s8x16, int8_t, 16);
 
 MIN_MAX_K1_KERNEL(min_k1_fp32_simd128, f32x4, dummy_t, float, 4);
 MIN_MAX_KN_KERNEL(min_kn_fp32_simd128, f32x4, dummy_t, float, 4);
+MIN_MAX_K1_KERNEL(min_k1_int32_simd128, s32x4, dummy_t, int32_t, 4);
+MIN_MAX_KN_KERNEL(min_kn_int32_simd128, s32x4, dummy_t, int32_t, 4);
 MIN_MAX_K1_KERNEL(min_k1_uint8_simd128, u8x16, dummy_t, uint8_t, 16);
 MIN_MAX_KN_KERNEL(min_kn_uint8_simd128, u8x16, dummy_t, uint8_t, 16);
 MIN_MAX_K1_KERNEL(min_k1_int8_simd128, s8x16, dummy_t, int8_t, 16);
@@ -39,6 +44,8 @@ MIN_MAX_KN_KERNEL(min_kn_int8_simd128, s8x16, dummy_t, int8_t, 16);
 
 MIN_MAX_K1_KERNEL(max_k1_fp32_simd128, dummy_t, f32x4, float, 4);
 MIN_MAX_KN_KERNEL(max_kn_fp32_simd128, dummy_t, f32x4, float, 4);
+MIN_MAX_K1_KERNEL(max_k1_int32_simd128, dummy_t, s32x4, int32_t, 4);
+MIN_MAX_KN_KERNEL(max_kn_int32_simd128, dummy_t, s32x4, int32_t, 4);
 MIN_MAX_K1_KERNEL(max_k1_uint8_simd128, dummy_t, u8x16, uint8_t, 16);
 MIN_MAX_KN_KERNEL(max_kn_uint8_simd128, dummy_t, u8x16, uint8_t, 16);
 MIN_MAX_K1_KERNEL(max_k1_int8_simd128, dummy_t, s8x16, int8_t, 16);

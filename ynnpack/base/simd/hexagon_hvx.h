@@ -481,6 +481,9 @@ YNN_ALWAYS_INLINE f32x32 min(f32x32 a, f32x32 b) {
 YNN_ALWAYS_INLINE f16x64 min(f16x64 a, f16x64 b) {
   return f16x64{Q6_Vhf_vmin_VhfVhf(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s32x32 min(s32x32 a, s32x32 b) {
+  return s32x32{Q6_Vw_vmin_VwVw(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE s16x64 min(s16x64 a, s16x64 b) {
   return s16x64{Q6_Vh_vmin_VhVh(a.v, b.v)};
 }
@@ -496,6 +499,9 @@ YNN_ALWAYS_INLINE f32x32 max(f32x32 a, f32x32 b) {
 }
 YNN_ALWAYS_INLINE f16x64 max(f16x64 a, f16x64 b) {
   return f16x64{Q6_Vhf_vmax_VhfVhf(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x32 max(s32x32 a, s32x32 b) {
+  return s32x32{Q6_Vw_vmax_VwVw(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x64 max(s16x64 a, s16x64 b) {
   return s16x64{Q6_Vh_vmax_VhVh(a.v, b.v)};

@@ -77,16 +77,22 @@ using simd::u8x16;
 
 using xf8x16 = sign_magnitude<s8x16>;
 
+MIN_MAX_K1_KERNEL(min_max_k1_int32_sse41, s32x4, s32x4, int32_t, 4);
+MIN_MAX_KN_KERNEL(min_max_kn_int32_sse41, s32x4, s32x4, int32_t, 4);
 MIN_MAX_K1_KERNEL(min_max_k1_int8_sse41, s8x16, s8x16, int8_t, 16);
 MIN_MAX_KN_KERNEL(min_max_kn_int8_sse41, s8x16, s8x16, int8_t, 16);
 MIN_MAX_K1_KERNEL(min_max_k1_xf8_sse41, xf8x16, xf8x16, int8_t, 16);
 MIN_MAX_KN_KERNEL(min_max_kn_xf8_sse41, xf8x16, xf8x16, int8_t, 16);
 
+MIN_MAX_K1_KERNEL(min_k1_int32_sse41, s32x4, dummy_t, int32_t, 4);
+MIN_MAX_KN_KERNEL(min_kn_int32_sse41, s32x4, dummy_t, int32_t, 4);
 MIN_MAX_K1_KERNEL(min_k1_int8_sse41, s8x16, dummy_t, int8_t, 16);
 MIN_MAX_KN_KERNEL(min_kn_int8_sse41, s8x16, dummy_t, int8_t, 16);
 MIN_MAX_K1_KERNEL(min_k1_xf8_sse41, xf8x16, dummy_t, int8_t, 16);
 MIN_MAX_KN_KERNEL(min_kn_xf8_sse41, xf8x16, dummy_t, int8_t, 16);
 
+MIN_MAX_K1_KERNEL(max_k1_int32_sse41, dummy_t, s32x4, int32_t, 4);
+MIN_MAX_KN_KERNEL(max_kn_int32_sse41, dummy_t, s32x4, int32_t, 4);
 MIN_MAX_K1_KERNEL(max_k1_int8_sse41, dummy_t, s8x16, int8_t, 16);
 MIN_MAX_KN_KERNEL(max_kn_int8_sse41, dummy_t, s8x16, int8_t, 16);
 MIN_MAX_K1_KERNEL(max_k1_xf8_sse41, dummy_t, xf8x16, int8_t, 16);

@@ -312,7 +312,7 @@ multi_type min_max_types[] = {
 #endif
     multi_type::fp32,     multi_type::fp16,     multi_type::bf16,
     multi_type::fp8_e5m2, multi_type::fp8_e4m3, multi_type::int8,
-    multi_type::uint8,
+    multi_type::uint8,    multi_type::int32,
 };
 
 INSTANTIATE_TEST_SUITE_P(

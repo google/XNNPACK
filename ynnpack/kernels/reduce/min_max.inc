@@ -24,6 +24,8 @@ YNN_REDUCE_KERNEL(arch_flag::neon, min_max_k1_int8_neon, reduce_dim::k1, int8_t,
 YNN_REDUCE_KERNEL(arch_flag::neon, min_max_kn_int8_neon, reduce_dim::kn, int8_t, int8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::neon, min_max_k1_uint8_neon, reduce_dim::k1, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::neon, min_max_kn_uint8_neon, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::neon, min_max_k1_int32_neon, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::neon, min_max_kn_int32_neon, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 #endif
 
 #ifdef YNN_ARCH_HEXAGON_HVX
@@ -41,6 +43,8 @@ YNN_REDUCE_KERNEL(arch_flag::hvx, min_max_k1_int8_hvx, reduce_dim::k1, int8_t, i
 YNN_REDUCE_KERNEL(arch_flag::hvx, min_max_kn_int8_hvx, reduce_dim::kn, int8_t, int8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::hvx, min_max_k1_uint8_hvx, reduce_dim::k1, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::hvx, min_max_kn_uint8_hvx, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::hvx, min_max_k1_int32_hvx, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::hvx, min_max_kn_int32_hvx, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 #endif  // YNN_ARCH_HEXAGON_HVX
 
 #ifdef YNN_ARCH_WASM_SIMD128
@@ -50,6 +54,8 @@ YNN_REDUCE_KERNEL(arch_flag::simd128, min_max_k1_int8_simd128, reduce_dim::k1, i
 YNN_REDUCE_KERNEL(arch_flag::simd128, min_max_kn_int8_simd128, reduce_dim::kn, int8_t, int8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::simd128, min_max_k1_uint8_simd128, reduce_dim::k1, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::simd128, min_max_kn_uint8_simd128, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::simd128, min_max_k1_int32_simd128, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::simd128, min_max_kn_int32_simd128, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 #endif  // YNN_ARCH_WASM_SIMD128
 
 #ifdef YNN_ARCH_X86_AVX512
@@ -65,6 +71,8 @@ YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_k1_int8_avx512, reduce_dim::k1, int
 YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_kn_int8_avx512, reduce_dim::kn, int8_t, int8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_k1_uint8_avx512, reduce_dim::k1, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_kn_uint8_avx512, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_k1_int32_avx512, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_kn_int32_avx512, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_k1_fp32_avx512, reduce_dim::k1, float, float, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::avx512, min_max_kn_fp32_avx512, reduce_dim::kn, float, float, reduce_flag::no_nan)
 #ifdef YNN_ENABLE_FP64
@@ -85,6 +93,8 @@ YNN_REDUCE_KERNEL(arch_flag::avx2, min_max_k1_int8_avx2, reduce_dim::k1, int8_t,
 YNN_REDUCE_KERNEL(arch_flag::avx2, min_max_kn_int8_avx2, reduce_dim::kn, int8_t, int8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::avx2, min_max_k1_uint8_avx2, reduce_dim::k1, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::avx2, min_max_kn_uint8_avx2, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::avx2, min_max_k1_int32_avx2, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::avx2, min_max_kn_int32_avx2, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
 YNN_REDUCE_KERNEL(arch_flag::avx, min_max_k1_fp32_avx, reduce_dim::k1, float, float, reduce_flag::no_nan)
@@ -95,6 +105,8 @@ YNN_REDUCE_KERNEL(arch_flag::avx, min_max_kn_fp64_avx, reduce_dim::kn, double, d
 #endif  // YNN_ENABLE_FP64
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_SSE41
+YNN_REDUCE_KERNEL(arch_flag::sse41, min_max_k1_int32_sse41, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::sse41, min_max_kn_int32_sse41, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::sse41, min_max_k1_xf8_sse41, reduce_dim::k1, fp8_e5m2, fp8_e5m2, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::sse41, min_max_kn_xf8_sse41, reduce_dim::kn, fp8_e5m2, fp8_e5m2, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::sse41, min_max_k1_xf8_sse41, reduce_dim::k1, fp8_e4m3, fp8_e4m3, reduce_flag::no_nan)
@@ -125,6 +137,8 @@ YNN_REDUCE_KERNEL(arch_flag::none, min_max_k1_int8, reduce_dim::k1, int8_t, int8
 YNN_REDUCE_KERNEL(arch_flag::none, min_max_kn_int8, reduce_dim::kn, int8_t, int8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::none, min_max_k1_uint8, reduce_dim::k1, uint8_t, uint8_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::none, min_max_kn_uint8, reduce_dim::kn, uint8_t, uint8_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::none, min_max_k1_int32, reduce_dim::k1, int32_t, int32_t, reduce_flag::none)
+YNN_REDUCE_KERNEL(arch_flag::none, min_max_kn_int32, reduce_dim::kn, int32_t, int32_t, reduce_flag::none)
 YNN_REDUCE_KERNEL(arch_flag::none, min_max_k1_xf8, reduce_dim::k1, fp8_e5m2, fp8_e5m2, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::none, min_max_kn_xf8, reduce_dim::kn, fp8_e5m2, fp8_e5m2, reduce_flag::no_nan)
 YNN_REDUCE_KERNEL(arch_flag::none, min_max_k1_xf8, reduce_dim::k1, fp8_e4m3, fp8_e4m3, reduce_flag::no_nan)
