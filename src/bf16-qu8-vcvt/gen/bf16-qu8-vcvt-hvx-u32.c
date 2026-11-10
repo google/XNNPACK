@@ -29,8 +29,14 @@ void xnn_bf16_qu8_vcvt_ukernel__hvx_u32(
   // Don't let the scale be 0, which can happen for large scales, and should
   // not happen because this value is a reciprocal.
   const HVX_Vector vscale = xnn_set1_f32(math_max_f32(FLT_MIN, xnn_bfloat16_to_float(params->scalar.scale)));
+#if __HVX_ARCH__ >= 81
   const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
+#else
+  // Vqf32 has 23 magnitude bits and truncates on add, so bias by 1.5 * 2^22 + 0.5.
+  const HVX_Vector vmagic_bias = xnn_set1_f32(6291456.5f);
+  const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(INT32_C(0x25600000) - (int32_t) params->scalar.output_zero_point);
+#endif
   XNN_FORCE_REALIZATION(vmagic_bias);
   for (; batch >= 32 * sizeof(xnn_bfloat16); batch -= 32 * sizeof(xnn_bfloat16)) {
     HVX_Vector vx = Q6_V_lo_W(Q6_Ww_vunpackoor_WwVh(Q6_W_vzero(), *((const HVX_UVector*) input)));
@@ -38,7 +44,11 @@ void xnn_bf16_qu8_vcvt_ukernel__hvx_u32(
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
+#if __HVX_ARCH__ >= 81
     const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(vx, vmagic_bias_less_zero_point);
+#else
+    const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx, 1), vmagic_bias_less_zero_point);
+#endif
 
     const HVX_Vector vacc_h = Q6_Vh_vpack_VwVw_sat(vacc, vacc);
 
@@ -52,7 +62,11 @@ void xnn_bf16_qu8_vcvt_ukernel__hvx_u32(
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
+#if __HVX_ARCH__ >= 81
     const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(vx, vmagic_bias_less_zero_point);
+#else
+    const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx, 1), vmagic_bias_less_zero_point);
+#endif
 
     const HVX_Vector vacc_h = Q6_Vh_vpack_VwVw_sat(vacc, vacc);
 
