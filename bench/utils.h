@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <vector>
 
 #include "include/experimental.h"
 #include "src/xnnpack/common.h"
@@ -110,14 +111,24 @@ static void ReduceDiscontiguousParameters(benchmark::Benchmark* b) {
   b->Args({32768, 5});
 }
 
+inline void CmdlineElementwiseParameters(benchmark::Benchmark* benchmark) {
+  benchmark->ArgName("N");
+  if (FLAGS_shapes.empty()) {
+    benchmark->Arg(8 * 1024);
+    benchmark->Arg(64 * 1024);
+  } else {
+    for (int64_t n : FLAGS_shapes) {
+      benchmark->Arg(n);
+    }
+  }
+}
+
 // Set number of elements for a unary elementwise microkernel.
 // Use a consistent number of elements to allow comparisons between different
 // data types and architectures.
 template <class InType, class OutType>
 void UnaryElementwiseParameters(benchmark::Benchmark* benchmark) {
-  benchmark->ArgName("N");
-  benchmark->Arg(8 * 1024);
-  benchmark->Arg(64 * 1024);
+  DeferArgs(benchmark, CmdlineElementwiseParameters);
 }
 
 // Set number of elements for a binary elementwise microkernel.
@@ -125,9 +136,7 @@ void UnaryElementwiseParameters(benchmark::Benchmark* benchmark) {
 // data types and architectures.
 template <class InType, class OutType>
 void BinaryElementwiseParameters(benchmark::Benchmark* benchmark) {
-  benchmark->ArgName("N");
-  benchmark->Arg(8 * 1024);
-  benchmark->Arg(64 * 1024);
+  DeferArgs(benchmark, CmdlineElementwiseParameters);
 }
 
 // Check if the architecture flags are supported.
