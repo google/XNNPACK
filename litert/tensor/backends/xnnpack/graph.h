@@ -53,6 +53,7 @@ class XnnpackGraph : public NnpackGraph {
 
   xnn_subgraph_t GetSubgraph() const { return subgraph_.get(); }
   xnn_subgraph_t ReleaseSubgraph() { return subgraph_.release(); }
+  void DeleteSubgraph() { subgraph_.reset(); }
 
  private:
   UniquePtr subgraph_;

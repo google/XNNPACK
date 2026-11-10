@@ -218,15 +218,62 @@ absl::Status XnnpackBuildContext::DefineTensorValue(const graph::Tensor& tensor,
           info.name, ": blockwise scale count (", bwq.scales.size(),
           ") is smaller than block_count (", expected_block_count, ")"));
     }
-    graph_->fp16_buffers().emplace_back(bwq.scales.begin(), bwq.scales.end());
-    const void* scale_ptr = graph_->fp16_buffers().back().data();
-    int32_t zero_point = bwq.zero_points.empty() ? 0 : bwq.zero_points[0];
-    LRT_TENSOR_RETURN_IF_ERROR(xnn_define_blockwise_quantized_tensor_value_v2(
-        sg, GetXnnpackType(value), zero_point, scale_ptr, dims.size(),
-        bwq.quantized_dimension, bwq.block_size,
-        dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
-        value.flags, xnn_datatype_fp16, &value.id))
-        << "Could not define a new blockwise quantized tensor value.";
+    if (info.type == Type::kI8) {
+      if (dims.size() != 2 || value.data.data() == nullptr) {
+        return absl::InvalidArgumentError(absl::StrCat(
+            info.name,
+            ": blockwise INT8 tensor requires a 2D constant weight buffer"));
+      }
+      LRT_TENSOR_ASSIGN_OR_RETURN(
+          auto fallback,
+          bwq.GetOrCreateCpuSymmetricFallback(
+              Type::kI8, static_cast<int>(dims[0]), static_cast<int>(dims[1]),
+              value.data.data(), value.data.size()));
+      const float* scales_ptr = fallback->scales.data();
+      const void* sym_ptr = fallback->data->data();
+      graph_->cpu_fallback_refs().push_back(std::move(fallback));
+      LRT_TENSOR_RETURN_IF_ERROR(
+          xnn_define_channelwise_quantized_tensor_value_v3(
+              sg, xnn_datatype_qcint8, /*zero_point=*/0, scales_ptr,
+              dims.size(), /*channel_dim=*/0, dims.data(), sym_ptr, external_id,
+              value.flags, &value.id, /*channelwise_zero_point=*/nullptr))
+          << "Could not define channelwise fallback tensor for blockwise INT8.";
+    } else if (info.type == Type::kI4 &&
+               (bwq.HasCachedCpuSymmetricFallback() ||
+                bwq.HasNonZeroFloatZeroPoints() ||
+                bwq.zero_points.size() > 1)) {
+      if (dims.size() != 2 || value.data.data() == nullptr) {
+        return absl::InvalidArgumentError(absl::StrCat(
+            info.name,
+            ": affine blockwise INT4 tensor requires a 2D constant weight "
+            "buffer"));
+      }
+      LRT_TENSOR_ASSIGN_OR_RETURN(
+          auto fallback,
+          bwq.GetOrCreateCpuSymmetricFallback(
+              Type::kI4, static_cast<int>(dims[0]), static_cast<int>(dims[1]),
+              value.data.data(), value.data.size()));
+      const void* scale_ptr = fallback->bf16_scales->data();
+      const void* sym_ptr = fallback->data->data();
+      graph_->cpu_fallback_refs().push_back(std::move(fallback));
+      LRT_TENSOR_RETURN_IF_ERROR(xnn_define_blockwise_quantized_tensor_value_v2(
+          sg, xnn_datatype_qbint4, /*zero_point=*/0, scale_ptr, dims.size(),
+          bwq.quantized_dimension, bwq.block_size, dims.data(), sym_ptr,
+          external_id, value.flags, xnn_datatype_bf16, &value.id))
+          << "Could not define symmetric blockwise INT4 fallback tensor.";
+    } else {
+      std::shared_ptr<const std::vector<bf16_t>> bf16_scales =
+          bwq.GetOrCreateBf16Scales();
+      const void* scale_ptr = bf16_scales->data();
+      graph_->bf16_scale_refs().push_back(std::move(bf16_scales));
+      int32_t zero_point = bwq.zero_points.empty() ? 0 : bwq.zero_points[0];
+      LRT_TENSOR_RETURN_IF_ERROR(xnn_define_blockwise_quantized_tensor_value_v2(
+          sg, GetXnnpackType(value), zero_point, scale_ptr, dims.size(),
+          bwq.quantized_dimension, bwq.block_size,
+          dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
+          value.flags, xnn_datatype_bf16, &value.id))
+          << "Could not define a new blockwise quantized tensor value.";
+    }
   } else {
     return absl::UnimplementedError("Unsupported quantization type.");
   }
