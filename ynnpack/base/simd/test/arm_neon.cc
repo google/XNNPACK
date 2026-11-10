@@ -207,9 +207,9 @@ TEST_UNARY(arm_neon, exp, f32, 4, std::exp, 1);
 TEST_UNARY(arm_neon, expm1, bf16, 8, std::expm1, 2);
 TEST_UNARY(arm_neon, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(arm_neon, log, bf16, 8, std::log, 1);
-TEST_UNARY(arm_neon, log, f32, 4, std::log, 2);
+TEST_UNARY(arm_neon, log, f32, 4, std::log, 1);
 TEST_UNARY(arm_neon, log1p, bf16, 8, std::log1p, 1);
-TEST_UNARY(arm_neon, log1p, f32, 4, std::log1p, 3);
+TEST_UNARY(arm_neon, log1p, f32, 4, std::log1p, 2);
 TEST_UNARY(arm_neon, erf, bf16, 8, std::erf, 1);
 TEST_UNARY(arm_neon, erf, f32, 4, std::erf, 2);
 #ifdef YNN_ARCH_ARM64

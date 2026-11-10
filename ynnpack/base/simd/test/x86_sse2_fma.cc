@@ -21,8 +21,8 @@ TEST_FMA(x86_sse2_fma, f32, 4);
 
 TEST_UNARY(x86_sse2_fma, exp, f32, 4, std::exp, 1);
 TEST_UNARY(x86_sse2_fma, expm1, f32, 4, std::expm1, 2);
-TEST_UNARY(x86_sse2_fma, log, f32, 4, std::log, 2);
-TEST_UNARY(x86_sse2_fma, log1p, f32, 4, std::log1p, 3);
+TEST_UNARY(x86_sse2_fma, log, f32, 4, std::log, 1);
+TEST_UNARY(x86_sse2_fma, log1p, f32, 4, std::log1p, 2);
 TEST_UNARY(x86_sse2_fma, erf, f32, 4, std::erf, 2);
 TEST_UNARY(x86_sse2_fma, tanh, f32, 4, std::tanh, 2);
 TEST_UNARY(x86_sse2_fma, sin, f32, 4, std::sin, 2);
