@@ -30,6 +30,7 @@
 #include "ynnpack/kernels/dot/pack.h"
 #include "ynnpack/kernels/dot/schedule.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/runtime.h"
@@ -147,28 +148,15 @@ bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
   }
   input_a_id = uint8_a_id;
 
-  const ynn_value& b_val = subgraph.value(input_b_id);
-  int32_t reduce_axes[max_tensor_rank];
-  for (size_t i = 0; i < num_k_dims; ++i) {
-    reduce_axes[i] = b_val.rank() - 1 - num_k_dims + i;
-  }
-
-  uint32_t sum_b_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_reduce(&subgraph, ynn_reduce_sum, num_k_dims, reduce_axes,
-                             input_b_id, YNN_INVALID_VALUE_ID, &sum_b_id, 0);
-  if (status != ynn_status_success) {
-    YNN_LOG_ERROR() << "Failed to define reduce sum for B in uint8 rewrite";
-    return false;
-  }
-
-  // 3. Expand sum_b to add a 1 dimension for M: sum_b_expanded =
-  // expand_dims(sum_b, axis)
+  // Compute sum(b) as dot(1, b), which is much faster than a reduction over
+  // the (non-innermost) k dimensions of b. The result has a broadcast m
+  // dimension.
+  uint32_t one_id = subgraph.get_scalar_value_id<uint8_t>(1);
   uint32_t sum_b_expanded_id = YNN_INVALID_VALUE_ID;
-  int32_t expand_axis = b_val.rank() - num_k_dims - 1;
-  status = ynn_define_static_expand_dims(&subgraph, 1, &expand_axis, sum_b_id,
-                                         &sum_b_expanded_id, 0);
+  status = ynn_define_dot(&subgraph, num_k_dims, one_id, input_b_id,
+                          YNN_INVALID_VALUE_ID, &sum_b_expanded_id, 0);
   if (status != ynn_status_success) {
-    YNN_LOG_ERROR() << "Failed to expand dims of sum_b in uint8 rewrite";
+    YNN_LOG_ERROR() << "Failed to define sum of B in uint8 rewrite";
     return false;
   }
 
@@ -1468,6 +1456,20 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
+  if (subgraph.value(input_a_id).rank() == 0) {
+    // We could support broadcasting `a` more generally. For now, broadcast a
+    // scalar `a` to [1, k...], where k... are the k dimensions of `b`.
+    ynn_value& broadcast_a =
+        subgraph.new_internal_value(subgraph.value(input_a_id).type);
+    broadcast_a.extents.resize(num_k_dims + 1);
+    for (size_t d = 0; d < num_k_dims; ++d) {
+      broadcast_a.extents[d] = subgraph.value(input_b_id).extent(d + 1);
+    }
+    ynn_node broadcast;
+    define_static_broadcast(subgraph, broadcast, input_a_id, broadcast_a.id);
+    subgraph.add_node(std::move(broadcast));
+    input_a_id = broadcast_a.id;
+  }
   const bool b_transposed =
       always_alias_transpose(subgraph, input_b_id, 0, 1) == ynn_status_success;
 
