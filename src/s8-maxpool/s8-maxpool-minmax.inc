@@ -21,4 +21,8 @@ XNN_UKERNEL(xnn_arch_none, xnn_s8_maxpool_minmax_ukernel_9p__wasmsimd_u16, 16, 9
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_s8_maxpool_minmax_ukernel_9p__rvv_u2v, (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)), 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+XNN_UKERNEL(xnn_arch_hvx, xnn_s8_maxpool_minmax_ukernel_9p__hvx_u128, 128, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 XNN_UKERNEL(xnn_arch_none, xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1, 1, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
