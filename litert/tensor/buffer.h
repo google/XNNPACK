@@ -460,8 +460,8 @@ class OwningCpuBuffer : public Buffer {
 
   template <Type type>
   static std::shared_ptr<OwningCpuBuffer> Allocate(std::vector<int32_t> shape) {
-    return Allocate<type>(
-        std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>()));
+    return Allocate<type>(std::accumulate(shape.begin(), shape.end(), size_t{1},
+                                          std::multiplies<>()));
   }
 
   static std::shared_ptr<OwningCpuBuffer> AllocateAs(Type type, size_t count) {
