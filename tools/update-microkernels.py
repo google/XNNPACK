@@ -91,8 +91,6 @@ _ISA_LIST = frozenset({
 })
 
 _ISA_MAP = {
-    'sme': 'neonsme',
-    'sme2': 'neonsme2',
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',
@@ -399,7 +397,7 @@ def main(args):
             f'\n"""Microkernel filenames lists for {key}."""\n'
             if key in ('hmx', 'sve2')
             else '\n# buildifier: disable=module-docstring'
-            if key in ('ace', 'neonsme', 'neonsme2')
+            if key in ('ace', 'neonsme', 'neonsme2', 'sme', 'sme2')
             else ''
         ))
         prod_c_vars = write_grouped_microkernels_bzl(
@@ -535,7 +533,7 @@ def all_srcs_for_arch(arch):
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
       with io.StringIO() as arch_microkernels_cmake:
-        copyright_year = 2026 if key in ('ace', 'hmx') else 2022
+        copyright_year = 2026 if key in ('ace', 'hmx', 'sme2') else 2022
         arch_microkernels_cmake.write(f"""\
 # Copyright {copyright_year} Google LLC
 #

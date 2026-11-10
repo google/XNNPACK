@@ -413,17 +413,32 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
-    # KleidiAI-only builds (`!arm_sme_acle_enabled`) contain no SME or SVE code
-    # in these translation units—they only marshal arguments into KleidiAI's
-    # separately compiled assembly—and therefore use no `-march` override.
-    #
-    # When `arm_sme_acle_enabled` is set, pass `-march=armv8.2-a+sme+fp16` /
-    # `-march=armv8.2-a+sme2+fp16` (without `+sve` or `+sve2`). Adding
-    # `+sve+sve2` would allow the auto-vectorizer to emit SVE into non-streaming
-    # code, which faults with SIGILL on CPUs implementing FEAT_SME/FEAT_SME2
-    # without FEAT_SVE (e.g. Apple Silicon).
+    # KleidiAI wrapper translation units contain no SME or SVE intrinsics—they
+    # only marshal arguments into KleidiAI's separately compiled assembly—and
+    # therefore use no `-march` override.
     "neonsme": _create_params(
         cond = "//:arm_sme_enabled",
+        extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//kai/ukernels/matmul:matmul",
+        ]),
+    ),
+    "neonsme2": _create_params(
+        cond = "//:arm_sme2_enabled",
+        extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//:common",
+            "@KleidiAI//kai/ukernels/dwconv:dwconv",
+            "@KleidiAI//kai/ukernels/dwconv:interface",
+            "@KleidiAI//kai/ukernels/matmul:matmul",
+        ]),
+    ),
+    # ARM SME ACLE microkernels (disabled by default; enabled via
+    # `--define=xnn_enable_arm_sme_acle=true`). Pass
+    # `-march=armv8.2-a+sme+fp16` / `-march=armv8.2-a+sme2+fp16` without `+sve`
+    # or `+sve2`, since adding `+sve+sve2` would allow the auto-vectorizer to
+    # emit SVE into non-streaming code, faulting with SIGILL on CPUs
+    # implementing FEAT_SME/FEAT_SME2 without FEAT_SVE (e.g. Apple Silicon).
+    "sme": _create_params(
+        cond = "//:arm_sme_acle_sme_enabled",
         copts = xnnpack_select_if(
             "//:arm_sme_acle_non_lexan_enabled",
             ["-march=armv8.2-a+sme+fp16"],
@@ -431,15 +446,12 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "//:arm_sme_acle_lexan_enabled",
             ["/clang:-march=armv8.2-a+sme+fp16"],
         ),
-        extra_deps = xnnpack_select_if(
-            "//:arm_sme_acle_enabled",
-            ["//:arm_sme_abi_stubs"],
-        ) + xnnpack_if_kleidiai_enabled([
-            "@KleidiAI//kai/ukernels/matmul:matmul",
-        ]),
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
     ),
-    "neonsme2": _create_params(
-        cond = "//:arm_sme2_enabled",
+    "sme2": _create_params(
+        cond = "//:arm_sme_acle_sme2_enabled",
         copts = xnnpack_select_if(
             "//:arm_sme_acle_non_lexan_enabled",
             ["-march=armv8.2-a+sme2+fp16"],
@@ -447,15 +459,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "//:arm_sme_acle_lexan_enabled",
             ["/clang:-march=armv8.2-a+sme2+fp16"],
         ),
-        extra_deps = xnnpack_select_if(
-            "//:arm_sme_acle_enabled",
-            ["//:arm_sme_abi_stubs"],
-        ) + xnnpack_if_kleidiai_enabled([
-            "@KleidiAI//:common",
-            "@KleidiAI//kai/ukernels/dwconv:dwconv",
-            "@KleidiAI//kai/ukernels/dwconv:interface",
-            "@KleidiAI//kai/ukernels/matmul:matmul",
-        ]),
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
     ),
     "aarch32": _create_params(
         cond = "//build_config:aarch32",

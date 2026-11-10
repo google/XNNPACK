@@ -3020,6 +3020,47 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_32x64c4__hmx)
 
+#define DECLARE_PF32_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                   \
+  XNN_INTERNAL size_t fn_name##_get_mr();                                     \
+  XNN_INTERNAL size_t fn_name##_get_nr();                                     \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,       \
+                            const void* lhs_packed, const void* rhs_packed,   \
+                            float* dst, size_t dst_stride_row,                \
+                            const struct xnn_f32_minmax_params* params);
+
+#define DECLARE_PQS8_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)       \
+  XNN_INTERNAL size_t fn_name##_get_mr();                                     \
+  XNN_INTERNAL size_t fn_name##_get_nr();                                     \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,       \
+                            const void* packed_lhs, const void* w, int8_t* c, \
+                            size_t cm_stride, const void* params);
+
+#define DECLARE_PF16_F16_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)  \
+  XNN_INTERNAL size_t fn_name##_get_mr();                               \
+  XNN_INTERNAL size_t fn_name##_get_nr();                               \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks, \
+                            const void* packed_lhs, const void* w,      \
+                            xnn_float16* c, size_t cm_stride,           \
+                            const struct xnn_f16_minmax_params* params);
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+DECLARE_PF32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2)
+DECLARE_PQS8_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2)
+DECLARE_PF16_F16_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2)
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+
+#if XNN_ENABLE_ARM_SME && XNN_ENABLE_KLEIDIAI
+DECLARE_PF32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_igemm_minmax_ukernel_32x32__neonsme)
+DECLARE_PQS8_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme)
+DECLARE_PF16_F16_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme)
+#endif  // XNN_ENABLE_ARM_SME && XNN_ENABLE_KLEIDIAI
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
