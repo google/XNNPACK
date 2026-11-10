@@ -20,3 +20,7 @@ XNN_UKERNEL(xnn_arch_arm_sme, xnn_x8_packq_f32qp8_ukernel__sme, 1)
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_packq_f32qp8_ukernel__sme2, 1)
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
+
+#if XNN_ENABLE_ACE && XNN_ARCH_X86_64
+XNN_UKERNEL(xnn_arch_x86_ace, xnn_x8_packq_f32qp8_ukernel__ace_u16, 16)
+#endif  // XNN_ENABLE_ACE && XNN_ARCH_X86_64

@@ -41,6 +41,15 @@ static void init_qp8_pack_lh_config(void) {
 #else
   qp8_pack_lh_config.pack_lh_fn =
       (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__scalar_u1;
+#if XNN_ARCH_X86_64 && XNN_ENABLE_ACE
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_x86_ace) {
+    qp8_pack_lh_config.pack_lh_fn =
+        (xnn_pack_lh_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__ace_u16;
+  }
+#endif  // XNN_ARCH_X86_64 && XNN_ENABLE_ACE
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME_ACLE && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2)
   const struct xnn_hardware_config* hardware_config =
