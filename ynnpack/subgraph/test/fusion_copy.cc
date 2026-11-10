@@ -451,11 +451,14 @@ TEST(fusion, static_broadcast_1_to_1) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  // The no-op broadcast should not become a non-empty static_broadcast.
+  // The no-op broadcast should not become a broadcast that changes the shape.
   for (const auto& node : subgraph.nodes) {
-    if (node.is_valid()) {
-      if (const auto* b = std::get_if<ynn_node::static_broadcast>(&node.op)) {
-        EXPECT_TRUE(b->new_dims.empty());
+    if (node.is_valid() &&
+        std::holds_alternative<ynn_node::static_broadcast>(node.op)) {
+      const ynn_value& input = subgraph.value(node.inputs[0]);
+      const ynn_value& output = subgraph.value(node.outputs[0]);
+      for (size_t d = 0; d < output.extents.size(); ++d) {
+        EXPECT_TRUE(slinky::prove_true(input.extent(d) == output.extent(d)));
       }
     }
   }

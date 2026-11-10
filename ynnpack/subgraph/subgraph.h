@@ -415,17 +415,13 @@ struct ynn_node {
       return a.groups < b.groups;
     }
   };
+  // Broadcasts the input to the shape of the output value.
   struct static_broadcast {
-    // Extents of the new dimensions after a broadcast. '0' is replaced with the
-    // original extent of the input.
-    std::vector<size_t> new_dims;
-    friend bool operator==(const static_broadcast& a,
-                           const static_broadcast& b) {
-      return a.new_dims == b.new_dims;
+    friend bool operator==(const static_broadcast&, const static_broadcast&) {
+      return true;
     }
-    friend bool operator<(const static_broadcast& a,
-                          const static_broadcast& b) {
-      return a.new_dims < b.new_dims;
+    friend bool operator<(const static_broadcast&, const static_broadcast&) {
+      return false;
     }
   };
   struct static_pad {

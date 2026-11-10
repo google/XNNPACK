@@ -734,18 +734,28 @@ bool is_broadcast_noop(const ynn_subgraph& subgraph, const ynn_node& node,
   return false;
 }
 
-// Get the axes that `node` broadcasts, if any.
-ynn::axes_set get_broadcast_axes(const ynn_node& node) {
-  if (const auto* broadcast =
-          std::get_if<ynn_node::static_broadcast>(&node.op)) {
-    ynn::axes_set axes;
-    assert(broadcast->new_dims.size() <= axes.size());
-    for (size_t i = 0; i < broadcast->new_dims.size(); ++i) {
-      if (broadcast->new_dims[i] != 0) {
-        axes[i] = true;
-      }
+// Returns the dimensions in which the output of a static_broadcast `node`
+// differs from its input.
+ynn::axes_set get_static_broadcast_axes(const ynn_subgraph& subgraph,
+                                        const ynn_node& node) {
+  const ynn_value& input = subgraph.value(node.inputs[0]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  ynn::axes_set axes;
+  for (size_t d = 0; d < output.extents.size(); ++d) {
+    if (d < input.rank() &&
+        slinky::prove_true(input.extent(d) == output.extent(d))) {
+      continue;
     }
-    return axes;
+    axes[d] = true;
+  }
+  return axes;
+}
+
+// Get the axes that `node` broadcasts, if any.
+ynn::axes_set get_broadcast_axes(const ynn_subgraph& subgraph,
+                                 const ynn_node& node) {
+  if (std::holds_alternative<ynn_node::static_broadcast>(node.op)) {
+    return get_static_broadcast_axes(subgraph, node);
   } else if (const auto* broadcast_like =
                  std::get_if<ynn_node::broadcast_like>(&node.op)) {
     return broadcast_like->axes;
@@ -758,7 +768,7 @@ ynn::axes_set get_broadcast_axes(const ynn_node& node) {
 // Rewrite f(broadcast(x)) -> broadcast(f(x)) when possible.
 bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
                               subgraph_analysis& analysis) {
-  const ynn::axes_set axes = get_broadcast_axes(broadcast);
+  const ynn::axes_set axes = get_broadcast_axes(subgraph, broadcast);
   if (!axes.any()) return false;
 
   const ynn_value& input = subgraph.value(broadcast.inputs[0]);
@@ -802,11 +812,11 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
     }
   }
 
-  if (auto* b = std::get_if<ynn_node::static_broadcast>(&broadcast.op)) {
-    b->new_dims = permute(perm, b->new_dims, size_t{0});
-  } else if (auto* b = std::get_if<ynn_node::broadcast_like>(&broadcast.op)) {
+  if (auto* b = std::get_if<ynn_node::broadcast_like>(&broadcast.op)) {
     b->axes = permute(perm, b->axes);
   }
+  // A static_broadcast learns its shape from its output value, which is the
+  // original output of the consumer after this rewrite.
 
   ynn_value& broadcast_output = subgraph.value(broadcast.outputs[0]);
   broadcast_output.type = consumer_output.type;
@@ -946,15 +956,17 @@ bool remove_static_broadcast_from_elementwise(ynn_subgraph& subgraph,
     ynn_node* producer = analysis.producer_of(input_id);
     if (!producer) continue;
 
-    ynn_node::static_broadcast* broadcast =
-        std::get_if<ynn_node::static_broadcast>(&producer->op);
-    if (broadcast == nullptr) continue;
+    if (!std::holds_alternative<ynn_node::static_broadcast>(producer->op)) {
+      continue;
+    }
 
     if (!can_implicitly_broadcast(node, input_id)) continue;
 
     const ynn_value& broadcasted = subgraph.value(producer->inputs[0]);
+    const ynn_value& broadcast = subgraph.value(producer->outputs[0]);
+    const ynn::axes_set axes = get_static_broadcast_axes(subgraph, *producer);
     auto broadcast_needed = [&](size_t d) {
-      if (!broadcast->new_dims[d]) {
+      if (!axes[d]) {
         // This dimension is not broadcasted, we can drop this dimension.
         return false;
       }
@@ -972,12 +984,12 @@ bool remove_static_broadcast_from_elementwise(ynn_subgraph& subgraph,
 
         const ynn_value& input = subgraph.value(id);
         return d < input.extents.size() &&
-               slinky::prove_true(input.extent(d) == broadcast->new_dims[d]);
+               slinky::prove_true(input.extent(d) == broadcast.extent(d));
       };
       return !std::any_of(node.inputs.begin(), node.inputs.end(),
                           implicitly_broadcasts);
     };
-    if (!any_n(broadcast->new_dims.size(), broadcast_needed)) {
+    if (!any_n(broadcast.rank(), broadcast_needed)) {
       YNN_LOG_DEBUG() << "Removing static_broadcast from elementwise input.";
       analysis.replace_input_id(node, input_id, producer->inputs[0]);
       change = true;
@@ -2098,9 +2110,9 @@ bool rewrite_transpose_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   ynn_node* broadcast_node = analysis.producer_of(node.inputs[0]);
   if (!broadcast_node) return false;
 
-  ynn_node::static_broadcast* broadcast =
-      std::get_if<ynn_node::static_broadcast>(&broadcast_node->op);
-  if (broadcast == nullptr) return false;
+  if (!std::holds_alternative<ynn_node::static_broadcast>(broadcast_node->op)) {
+    return false;
+  }
 
   // Only do this rewrite if we won't break other consumers of the broadcast.
   if (analysis.consumers[broadcast_node->outputs[0]].size() != 1 ||
@@ -2111,20 +2123,8 @@ bool rewrite_transpose_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t x_id = broadcast_node->inputs[0];
   uint32_t z_id = node.outputs[0];
 
-  const size_t rank_y = broadcast->new_dims.size();
   std::vector<int32_t> perm = transpose->permutation;
   bool alias = transpose->alias;
-
-  const ynn_value& z = subgraph.value(z_id);
-  std::vector<size_t> new_dims(z.rank());
-  for (size_t i = 0; i < new_dims.size(); ++i) {
-    int32_t src_dim_in_y = perm[i];
-    if (src_dim_in_y < rank_y) {
-      new_dims[i] = broadcast->new_dims[src_dim_in_y];
-    } else {
-      new_dims[i] = 0;
-    }
-  }
 
   YNN_LOG_DEBUG() << "Rewriting transpose(static_broadcast(x)) to "
                      "static_broadcast(transpose(x))";
@@ -2139,10 +2139,10 @@ bool rewrite_transpose_broadcast(ynn_subgraph& subgraph, ynn_node& node,
                                  x_id, &y_prime_id, alias);
   });
 
-  // Redefine T (node) to be B' (new_broadcast)
+  // Redefine T (node) to be B' (new_broadcast), which broadcasts to the shape
+  // of z.
   analysis.update_node(node, [&]() {
-    ynn::define_static_broadcast(subgraph, node, std::move(new_dims),
-                                 y_prime_id, &z_id);
+    ynn::define_static_broadcast(subgraph, node, y_prime_id, z_id);
   });
 
   return true;

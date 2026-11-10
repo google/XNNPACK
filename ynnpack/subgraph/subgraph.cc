@@ -1316,9 +1316,7 @@ void print(std::ostream& os, const ynn_node::reshape& op) {
   os << "groups=" << op.groups;
 }
 
-void print(std::ostream& os, const ynn_node::static_broadcast& op) {
-  os << "new_dims=" << op.new_dims;
-}
+void print(std::ostream& os, const ynn_node::static_broadcast& op) {}
 
 void print(std::ostream& os, const ynn_node::static_pad& op) {
   os << "paddings=" << op.paddings;
