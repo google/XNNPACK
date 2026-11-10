@@ -37,9 +37,11 @@ limitations under the License.
 // that tensor is also kept alive. In turn that means that we can then serialize
 // a model from its outputs.
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -53,6 +55,7 @@ limitations under the License.
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
 #include "absl/types/source_location.h"
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
@@ -108,16 +111,57 @@ struct PerChannelAffineQuantization : Quantization {
 };
 
 // Holds blockwise quantization parameters for a tensor.
+// Dequantization formula for element `i` in block `b`:
+//   w = scales[b] * (q_signed[i] - ZeroPointAt(b))
+// where `ZeroPointAt(b)` reads `float_zero_points` when non-empty (exact
+// floating-point zero-point for GGML `Q4_1` / `Q4_K`), otherwise `zero_points`.
 struct BlockwiseQuantization : Quantization {
+  struct CpuSymmetricFallback {
+    Type type = Type::kUnknown;
+    int rows = 0;
+    int cols = 0;
+    std::shared_ptr<OwningCpuBuffer> data;
+    std::vector<float> scales;
+    std::shared_ptr<const std::vector<bf16_t>> bf16_scales;
+  };
+
+  struct LazySpec {
+    size_t num_blocks = 0;
+    bool may_have_float_zero_points = false;
+    std::function<void(std::vector<float>*, std::vector<float>*)>
+        materialize_fn;
+  };
+
   BlockwiseQuantization() = default;
 
   BlockwiseQuantization(std::vector<float> scales,
                         std::vector<int64_t> zero_points, int block_size,
-                        int quantized_dimension = 0)
+                        int quantized_dimension = 0,
+                        std::vector<float> float_zero_points = {})
       : scales(std::move(scales)),
         zero_points(std::move(zero_points)),
         block_size(block_size),
-        quantized_dimension(quantized_dimension) {}
+        quantized_dimension(quantized_dimension),
+        float_zero_points(std::move(float_zero_points)) {}
+
+  static std::shared_ptr<BlockwiseQuantization> CreateLazy(
+      int block_size, int quantized_dimension, size_t num_blocks,
+      bool may_have_float_zero_points,
+      std::function<void(std::vector<float>*, std::vector<float>*)>
+          materialize_fn,
+      bool pre_sanitized = false) {
+    auto bq = std::make_shared<BlockwiseQuantization>();
+    bq->block_size = block_size;
+    bq->quantized_dimension = quantized_dimension;
+    bq->pre_sanitized_ = pre_sanitized;
+    auto spec = std::make_shared<LazySpec>();
+    spec->num_blocks = num_blocks;
+    spec->may_have_float_zero_points = may_have_float_zero_points;
+    spec->materialize_fn = std::move(materialize_fn);
+    bq->lazy_.spec = std::move(spec);
+    bq->lazy_.materialized.store(false, std::memory_order_release);
+    return bq;
+  }
 
   internal::TypeId GetTypeId() const override {
     return internal::TypeId::Get<BlockwiseQuantization>();
@@ -126,10 +170,256 @@ struct BlockwiseQuantization : Quantization {
     return id == internal::TypeId::Get<BlockwiseQuantization>();
   }
 
+  bool IsMaterialized() const {
+    return lazy_.materialized.load(std::memory_order_acquire);
+  }
+
+  size_t NumBlocks() const {
+    if (!IsMaterialized() && lazy_.spec != nullptr) {
+      return lazy_.spec->num_blocks;
+    }
+    return scales.size();
+  }
+
+  bool MayHaveFloatZeroPoints() const {
+    if (!IsMaterialized() && lazy_.spec != nullptr) {
+      return lazy_.spec->may_have_float_zero_points;
+    }
+    return HasNonZeroFloatZeroPoints();
+  }
+
+  bool IsPreSanitized() const { return pre_sanitized_; }
+  void SetPreSanitized(bool v) { pre_sanitized_ = v; }
+
+  void EnsureMaterialized() const {
+    if (lazy_.materialized.load(std::memory_order_acquire)) {
+      return;
+    }
+    absl::MutexLock lock(&lazy_.mu);
+    if (lazy_.materialized.load(std::memory_order_relaxed)) {
+      return;
+    }
+    if (lazy_.spec != nullptr && lazy_.spec->materialize_fn) {
+      std::vector<float> new_scales;
+      std::vector<float> new_float_zps;
+      lazy_.spec->materialize_fn(&new_scales, &new_float_zps);
+      auto* self = const_cast<BlockwiseQuantization*>(this);
+      self->scales = std::move(new_scales);
+      self->float_zero_points = std::move(new_float_zps);
+    }
+    lazy_.materialized.store(true, std::memory_order_release);
+  }
+
+  void SetMaterializedParams(std::vector<float> new_scales,
+                             std::vector<float> new_float_zero_points = {}) {
+    absl::MutexLock lock(&lazy_.mu);
+    if (!lazy_.materialized.load(std::memory_order_relaxed)) {
+      scales = std::move(new_scales);
+      float_zero_points = std::move(new_float_zero_points);
+      lazy_.materialized.store(true, std::memory_order_release);
+    }
+  }
+
+  void ReleaseMaterializedData() {
+    {
+      absl::MutexLock lock(&bf16_cache_.mu);
+      bf16_cache_.scales.reset();
+      bf16_cache_.cpu_fallback.reset();
+    }
+    absl::MutexLock lock(&lazy_.mu);
+    if (lazy_.spec != nullptr) {
+      std::vector<float>().swap(scales);
+      std::vector<float>().swap(float_zero_points);
+      lazy_.materialized.store(false, std::memory_order_release);
+    }
+  }
+
+  float ZeroPointAt(size_t idx) const {
+    EnsureMaterialized();
+    if (!float_zero_points.empty()) {
+      return float_zero_points.size() == 1 ? float_zero_points[0]
+                                           : (idx < float_zero_points.size()
+                                                  ? float_zero_points[idx]
+                                                  : 0.0f);
+    }
+    if (!zero_points.empty()) {
+      return static_cast<float>(
+          zero_points.size() == 1
+              ? zero_points[0]
+              : (idx < zero_points.size() ? zero_points[idx] : int64_t{0}));
+    }
+    return 0.0f;
+  }
+
+  bool HasNonZeroFloatZeroPoints() const {
+    EnsureMaterialized();
+    for (float zp : float_zero_points) {
+      if (zp != 0.0f) return true;
+    }
+    return false;
+  }
+
+  bool HasNonZeroZeroPoints() const {
+    if (HasNonZeroFloatZeroPoints()) return true;
+    for (int64_t zp : zero_points) {
+      if (zp != 0) return true;
+    }
+    return false;
+  }
+
+  // Returns a thread-safe cached BF16 representation of `scales` so multi-pass
+  // backends (such as XNNPACK prepack + prefill + decode) do not re-allocate or
+  // re-convert hundreds of millions of blockwise scales on every pass.
+  std::shared_ptr<const std::vector<bf16_t>> GetOrCreateBf16Scales() const {
+    EnsureMaterialized();
+    {
+      absl::MutexLock lock(&bf16_cache_.mu);
+      if (bf16_cache_.scales != nullptr &&
+          bf16_cache_.scales->size() == scales.size()) {
+        return bf16_cache_.scales;
+      }
+    }
+    auto built = std::make_shared<std::vector<bf16_t>>(scales.size());
+    bf16_t* dst = built->data();
+    const float* src = scales.data();
+    const size_t n = scales.size();
+    for (size_t i = 0; i < n; ++i) {
+      dst[i] = bf16_t(src[i]);
+    }
+    absl::MutexLock lock(&bf16_cache_.mu);
+    if (bf16_cache_.scales == nullptr ||
+        bf16_cache_.scales->size() != scales.size()) {
+      bf16_cache_.scales = std::move(built);
+    }
+    return bf16_cache_.scales;
+  }
+
+  // Returns a thread-safe cached symmetric quantized representation for CPU
+  // backends (`XNNPACK`) that do not natively execute blockwise INT8 (`Q8_0`)
+  // or affine blockwise INT4 (`Q4_1` / `Q4_K`):
+  //   * `Type::kI8` -> per-channel symmetric `qcint8` (`[rows]` scales).
+  //   * `Type::kI4` -> block-32 symmetric `qbint4` (`[rows * blocks_per_row]`
+  //     scales + `bf16_scales`).
+  absl::StatusOr<std::shared_ptr<const CpuSymmetricFallback>>
+  GetOrCreateCpuSymmetricFallback(Type type, int rows, int cols,
+                                  const void* raw_data,
+                                  size_t raw_bytes) const;
+
+  bool HasCachedCpuSymmetricFallback() const {
+    absl::MutexLock lock(&bf16_cache_.mu);
+    return bf16_cache_.cpu_fallback != nullptr;
+  }
+
+  void InvalidateBf16ScalesCache() {
+    absl::MutexLock lock(&bf16_cache_.mu);
+    bf16_cache_.scales.reset();
+    bf16_cache_.cpu_fallback.reset();
+  }
+
   std::vector<float> scales;
   std::vector<int64_t> zero_points;
   int block_size;
   int quantized_dimension;
+  std::vector<float> float_zero_points;
+
+ private:
+  struct LazyMaterializer {
+    LazyMaterializer() = default;
+    LazyMaterializer(const LazyMaterializer& other) {
+      absl::MutexLock lock(&other.mu);
+      spec = other.spec;
+      materialized.store(other.materialized.load(std::memory_order_relaxed),
+                         std::memory_order_relaxed);
+    }
+    LazyMaterializer& operator=(const LazyMaterializer& other) {
+      if (this == &other) return *this;
+      std::shared_ptr<const LazySpec> spec_copy;
+      bool mat_copy = true;
+      {
+        absl::MutexLock lock(&other.mu);
+        spec_copy = other.spec;
+        mat_copy = other.materialized.load(std::memory_order_relaxed);
+      }
+      absl::MutexLock lock(&mu);
+      spec = std::move(spec_copy);
+      materialized.store(mat_copy, std::memory_order_release);
+      return *this;
+    }
+    LazyMaterializer(LazyMaterializer&& other) noexcept {
+      absl::MutexLock lock(&other.mu);
+      spec = std::move(other.spec);
+      materialized.store(other.materialized.load(std::memory_order_relaxed),
+                         std::memory_order_relaxed);
+    }
+    LazyMaterializer& operator=(LazyMaterializer&& other) noexcept {
+      if (this == &other) return *this;
+      std::shared_ptr<const LazySpec> spec_moved;
+      bool mat_moved = true;
+      {
+        absl::MutexLock lock(&other.mu);
+        spec_moved = std::move(other.spec);
+        mat_moved = other.materialized.load(std::memory_order_relaxed);
+      }
+      absl::MutexLock lock(&mu);
+      spec = std::move(spec_moved);
+      materialized.store(mat_moved, std::memory_order_release);
+      return *this;
+    }
+
+    mutable absl::Mutex mu;
+    std::shared_ptr<const LazySpec> spec;
+    mutable std::atomic<bool> materialized{true};
+  };
+
+  struct CachedBf16Scales {
+    CachedBf16Scales() = default;
+    CachedBf16Scales(const CachedBf16Scales& other) {
+      absl::MutexLock lock(&other.mu);
+      scales = other.scales;
+      cpu_fallback = other.cpu_fallback;
+    }
+    CachedBf16Scales& operator=(const CachedBf16Scales& other) {
+      if (this == &other) return *this;
+      std::shared_ptr<const std::vector<bf16_t>> copy;
+      std::shared_ptr<const CpuSymmetricFallback> fallback_copy;
+      {
+        absl::MutexLock lock(&other.mu);
+        copy = other.scales;
+        fallback_copy = other.cpu_fallback;
+      }
+      absl::MutexLock lock(&mu);
+      scales = std::move(copy);
+      cpu_fallback = std::move(fallback_copy);
+      return *this;
+    }
+    CachedBf16Scales(CachedBf16Scales&& other) noexcept {
+      absl::MutexLock lock(&other.mu);
+      scales = std::move(other.scales);
+      cpu_fallback = std::move(other.cpu_fallback);
+    }
+    CachedBf16Scales& operator=(CachedBf16Scales&& other) noexcept {
+      if (this == &other) return *this;
+      std::shared_ptr<const std::vector<bf16_t>> moved;
+      std::shared_ptr<const CpuSymmetricFallback> fallback_moved;
+      {
+        absl::MutexLock lock(&other.mu);
+        moved = std::move(other.scales);
+        fallback_moved = std::move(other.cpu_fallback);
+      }
+      absl::MutexLock lock(&mu);
+      scales = std::move(moved);
+      cpu_fallback = std::move(fallback_moved);
+      return *this;
+    }
+
+    mutable absl::Mutex mu;
+    std::shared_ptr<const std::vector<bf16_t>> scales;
+    std::shared_ptr<const CpuSymmetricFallback> cpu_fallback;
+  };
+
+  bool pre_sanitized_ = false;
+  mutable LazyMaterializer lazy_;
+  mutable CachedBf16Scales bf16_cache_;
 };
 
 using Shape = std::vector<int32_t>;

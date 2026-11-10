@@ -44,11 +44,15 @@ absl::Status XnnpackRunner::CreateRuntime() {
                             /*flags=*/0, &raw_runtime),
       "xnn_create_runtime_v4"));
   runtime_.reset(raw_runtime);
-  // Blockwise FP16 scale buffers are only consumed when packing weights during
-  // `xnn_create_runtime_v4`; release them now so multi-signature runtimes do
-  // not hold duplicate host copies per pass.
+  // `xnn_create_runtime_v4` copies `subgraph->values` into `runtime->values`,
+  // and blockwise FP16/BF16 scale buffers are only consumed when packing
+  // weights during `xnn_create_runtime_v4`; release them now so multi-signature
+  // runtimes do not retain subgraph descriptors or temporary scale copies.
+  xnn_graph.DeleteSubgraph();
   xnn_graph.fp16_buffers().clear();
   xnn_graph.fp16_buffers().shrink_to_fit();
+  xnn_graph.bf16_scale_refs().clear();
+  xnn_graph.bf16_scale_refs().shrink_to_fit();
   return absl::OkStatus();
 }
 
