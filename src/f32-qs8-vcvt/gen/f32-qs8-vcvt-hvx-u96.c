@@ -17,7 +17,7 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u96(
     size_t batch,
     const float* input,
     int8_t* output,
-    const struct xnn_f32_qs8_cvt_params* restrict params)
+    const struct xnn_f32_qs8_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -68,7 +68,7 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u96(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_Vector vx = xnn_loadu_f32(input);
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
@@ -78,9 +78,6 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u96(
 
     HVX_Vector vy = Q6_Vb_vpack_VhVh_sat(vacc_h, vacc_h);
 
-    // Since the output data type is int8_t,
-    // we simply determine the number of elements using batch >> 2
-    // without multiplying by sizeof(int8_t).
     Q6_V_vstu_variable(output, batch >> 2, vy);
   }
 }

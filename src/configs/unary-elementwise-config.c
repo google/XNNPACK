@@ -192,10 +192,24 @@ static void init_bf16_to_f32_cvt_config(void) {
       bf16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__scalar_u2);
       bf16_to_f32_cvt_config.element_tile = 2;
     }
-  #else
-    bf16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__scalar_u2);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    bf16_to_f32_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__hvx_u128);
+    bf16_to_f32_cvt_config.element_tile = 128;
+  } else {
+    bf16_to_f32_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__scalar_u2);
     bf16_to_f32_cvt_config.element_tile = 2;
-  #endif
+  }
+#else
+  bf16_to_f32_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__scalar_u2);
+  bf16_to_f32_cvt_config.element_tile = 2;
+#endif
 }
 
 static void init_bf16_rsqrt_config(void) {
@@ -1398,11 +1412,30 @@ static void init_bf16_to_qs8_cvt_config(void) {
       bf16_to_qs8_cvt_config.element_tile = 4;
       bf16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qs8_cvt_scalar_params;
     }
-  #else
-    bf16_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__scalar_imagic_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    bf16_to_qs8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__hvx_u128);
+    bf16_to_qs8_cvt_config.element_tile = 128;
+    bf16_to_qs8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_bf16_qs8_cvt_scalar_params;
+  } else {
+    bf16_to_qs8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__scalar_imagic_u4);
     bf16_to_qs8_cvt_config.element_tile = 4;
-    bf16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qs8_cvt_scalar_params;
-  #endif
+    bf16_to_qs8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_bf16_qs8_cvt_scalar_params;
+  }
+#else
+  bf16_to_qs8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__scalar_imagic_u4);
+  bf16_to_qs8_cvt_config.element_tile = 4;
+  bf16_to_qs8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_bf16_qs8_cvt_scalar_params;
+#endif
 }
 
 static void init_bf16_to_qu8_cvt_config(void) {
@@ -1440,11 +1473,30 @@ static void init_bf16_to_qu8_cvt_config(void) {
       bf16_to_qu8_cvt_config.element_tile = 4;
       bf16_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qu8_cvt_scalar_params;
     }
-  #else
-    bf16_to_qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_qu8_vcvt_ukernel__scalar_imagic_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    bf16_to_qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_bf16_qu8_vcvt_ukernel__hvx_u128);
+    bf16_to_qu8_cvt_config.element_tile = 128;
+    bf16_to_qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_bf16_qu8_cvt_scalar_params;
+  } else {
+    bf16_to_qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_bf16_qu8_vcvt_ukernel__scalar_imagic_u4);
     bf16_to_qu8_cvt_config.element_tile = 4;
-    bf16_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qu8_cvt_scalar_params;
-  #endif
+    bf16_to_qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_bf16_qu8_cvt_scalar_params;
+  }
+#else
+  bf16_to_qu8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_bf16_qu8_vcvt_ukernel__scalar_imagic_u4);
+  bf16_to_qu8_cvt_config.element_tile = 4;
+  bf16_to_qu8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_bf16_qu8_cvt_scalar_params;
+#endif
 }
 
 static void init_f16_to_f32_cvt_config(void) {
@@ -1585,11 +1637,30 @@ static void init_f16_to_qu8_cvt_config(void) {
       f16_to_qu8_cvt_config.element_tile = 4;
       f16_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_qu8_cvt_scalar_params;
     }
-  #else
-    f16_to_qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    f16_to_qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f16_qu8_vcvt_ukernel__hvx_u128);
+    f16_to_qu8_cvt_config.element_tile = 128;
+    f16_to_qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_f16_qu8_cvt_scalar_params;
+  } else {
+    f16_to_qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u4);
     f16_to_qu8_cvt_config.element_tile = 4;
-    f16_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_qu8_cvt_scalar_params;
-  #endif
+    f16_to_qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_f16_qu8_cvt_scalar_params;
+  }
+#else
+  f16_to_qu8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u4);
+  f16_to_qu8_cvt_config.element_tile = 4;
+  f16_to_qu8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_f16_qu8_cvt_scalar_params;
+#endif
 }
 
 static void init_f16_to_qs8_cvt_config(void) {
@@ -1658,11 +1729,30 @@ static void init_f16_to_qs8_cvt_config(void) {
       f16_to_qs8_cvt_config.element_tile = 4;
       f16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_qs8_cvt_scalar_params;
     }
-  #else
-    f16_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    f16_to_qs8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f16_qs8_vcvt_ukernel__hvx_u128);
+    f16_to_qs8_cvt_config.element_tile = 128;
+    f16_to_qs8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_f16_qs8_cvt_scalar_params;
+  } else {
+    f16_to_qs8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4);
     f16_to_qs8_cvt_config.element_tile = 4;
-    f16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_qs8_cvt_scalar_params;
-  #endif
+    f16_to_qs8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_f16_qs8_cvt_scalar_params;
+  }
+#else
+  f16_to_qs8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4);
+  f16_to_qs8_cvt_config.element_tile = 4;
+  f16_to_qs8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_f16_qs8_cvt_scalar_params;
+#endif
 }
 
 static void init_f32_abs_config(void) {
@@ -3503,10 +3593,24 @@ static void init_f32_to_bf16_cvt_config(void) {
       f32_to_bf16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__scalar_u2);
       f32_to_bf16_cvt_config.element_tile = 2;
     }
-  #else
-    f32_to_bf16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__scalar_u2);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    f32_to_bf16_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__hvx_u128);
+    f32_to_bf16_cvt_config.element_tile = 128;
+  } else {
+    f32_to_bf16_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__scalar_u2);
     f32_to_bf16_cvt_config.element_tile = 2;
-  #endif
+  }
+#else
+  f32_to_bf16_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__scalar_u2);
+  f32_to_bf16_cvt_config.element_tile = 2;
+#endif
 }
 
 static void init_f32_to_qp8_cvt_config(void) {
@@ -3682,11 +3786,30 @@ static void init_f32_to_qu8_cvt_config(void) {
     f32_to_qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__rvv_u2v);
     f32_to_qu8_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(float);
     f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
-  #else
-    f32_to_qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    f32_to_qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__hvx_u256);
+    f32_to_qu8_cvt_config.element_tile = 256;
+    f32_to_qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_f32_qu8_cvt_scalar_params;
+  } else {
+    f32_to_qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4);
     f32_to_qu8_cvt_config.element_tile = 4;
-    f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
-  #endif
+    f32_to_qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_f32_qu8_cvt_scalar_params;
+  }
+#else
+  f32_to_qu8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4);
+  f32_to_qu8_cvt_config.element_tile = 4;
+  f32_to_qu8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_f32_qu8_cvt_scalar_params;
+#endif
 }
 
 static void init_qs8_cvt_config(void) {
@@ -3773,11 +3896,30 @@ static void init_qs8_cvt_config(void) {
       qs8_cvt_config.element_tile = 4;
       qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     }
-  #else
-    qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_vcvt_ukernel__scalar_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    qs8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qs8_vcvt_ukernel__hvx_u128);
+    qs8_cvt_config.element_tile = 128;
+    qs8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qs8_cvt_scalar_params;
+  } else {
+    qs8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qs8_vcvt_ukernel__scalar_u4);
     qs8_cvt_config.element_tile = 4;
-    qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
-  #endif
+    qs8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qs8_cvt_scalar_params;
+  }
+#else
+  qs8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_qs8_vcvt_ukernel__scalar_u4);
+  qs8_cvt_config.element_tile = 4;
+  qs8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_qs8_cvt_scalar_params;
+#endif
 }
 
 static void init_qs8_lrelu_config(void) {
@@ -3908,7 +4050,18 @@ static void init_qs8_to_f16_cvt_config(void) {
       qs8_to_f16_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(int8_t);
       qs8_to_f16_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f16_cvt_scalar_params;
     }
-  #endif
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    qs8_to_f16_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qs8_f16_vcvt_ukernel__hvx_u128);
+    qs8_to_f16_cvt_config.element_tile = 128;
+    qs8_to_f16_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qs8_f16_cvt_scalar_params;
+  }
+#endif
 }
 
 static void init_qs8_to_f32_cvt_config(void) {
@@ -3982,11 +4135,30 @@ static void init_qs8_to_f32_cvt_config(void) {
     qs8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__rvv_u2v);
     qs8_to_f32_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(int8_t);
     qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
-  #else
-    qs8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__scalar_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    qs8_to_f32_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__hvx_u128);
+    qs8_to_f32_cvt_config.element_tile = 128;
+    qs8_to_f32_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qs8_f32_cvt_scalar_params;
+  } else {
+    qs8_to_f32_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__scalar_u4);
     qs8_to_f32_cvt_config.element_tile = 4;
-    qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
-  #endif
+    qs8_to_f32_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qs8_f32_cvt_scalar_params;
+  }
+#else
+  qs8_to_f32_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_qs8_f32_vcvt_ukernel__scalar_u4);
+  qs8_to_f32_cvt_config.element_tile = 4;
+  qs8_to_f32_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_qs8_f32_cvt_scalar_params;
+#endif
 }
 
 static void init_qu8_cvt_config(void) {
@@ -4071,11 +4243,30 @@ static void init_qu8_cvt_config(void) {
       qu8_cvt_config.element_tile = 4;
       qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     }
-  #else
-    qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__scalar_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__hvx_u128);
+    qu8_cvt_config.element_tile = 128;
+    qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qu8_cvt_scalar_params;
+  } else {
+    qu8_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__scalar_u4);
     qu8_cvt_config.element_tile = 4;
-    qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
-  #endif
+    qu8_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qu8_cvt_scalar_params;
+  }
+#else
+  qu8_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__scalar_u4);
+  qu8_cvt_config.element_tile = 4;
+  qu8_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_qu8_cvt_scalar_params;
+#endif
 }
 
 static void init_qu8_lrelu_config(void) {
@@ -4248,11 +4439,30 @@ static void init_qu8_to_f32_cvt_config(void) {
     qu8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__rvv_u2v);
     qu8_to_f32_cvt_config.element_tile = 2 * hardware_config->vlenb / sizeof(uint8_t);
     qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
-  #else
-    qu8_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__scalar_u4);
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_hvx) {
+    qu8_to_f32_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__hvx_u128);
+    qu8_to_f32_cvt_config.element_tile = 128;
+    qu8_to_f32_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qu8_f32_cvt_scalar_params;
+  } else {
+    qu8_to_f32_cvt_config.ukernel =
+        XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__scalar_u4);
     qu8_to_f32_cvt_config.element_tile = 4;
-    qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
-  #endif
+    qu8_to_f32_cvt_config.init =
+        (xnn_init_unary_uparams_fn)xnn_init_qu8_f32_cvt_scalar_params;
+  }
+#else
+  qu8_to_f32_cvt_config.ukernel =
+      XNN_INIT_UNARY_UKERNEL(xnn_qu8_f32_vcvt_ukernel__scalar_u4);
+  qu8_to_f32_cvt_config.element_tile = 4;
+  qu8_to_f32_cvt_config.init =
+      (xnn_init_unary_uparams_fn)xnn_init_qu8_f32_cvt_scalar_params;
+#endif
 }
 
 static void init_s8_clamp_config(void) {
