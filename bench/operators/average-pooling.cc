@@ -18,6 +18,7 @@
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
@@ -114,6 +115,92 @@ static void xnnpack_average_pooling_f32(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * batch_size *
           (input_height * input_width + output_height * output_width) *
           channels * sizeof(float),
+      benchmark::Counter::kIsRate);
+}
+
+static void xnnpack_average_pooling_f16(benchmark::State& state,
+                                        const char* net) {
+  const size_t batch_size = state.range(0);
+  const size_t input_height = state.range(1);
+  const size_t input_width = state.range(2);
+  const size_t pooling_size = state.range(3);
+  const size_t padding_size = state.range(4);
+  const size_t stride = state.range(5);
+  const size_t channels = state.range(6);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng =
+      std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
+
+  const size_t output_height =
+      (2 * padding_size + input_height - pooling_size) / stride + 1;
+  const size_t output_width =
+      (2 * padding_size + input_width - pooling_size) / stride + 1;
+
+  xnnpack::Buffer<xnn_float16> input(
+      batch_size * input_height * input_width * channels,
+      xnnpack::XnnExtraBytes);
+  std::generate(input.begin(), input.end(), std::ref(f32rng));
+  xnnpack::Buffer<xnn_float16> output(batch_size * output_height *
+                                      output_width * channels);
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t pooling_op = nullptr;
+  status = xnn_create_average_pooling2d_nhwc_f16(
+      padding_size, padding_size, padding_size, padding_size, pooling_size,
+      pooling_size, stride, stride, -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), 0 /* flags */, &pooling_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create Average Pooling operator");
+    return;
+  }
+
+  status = xnn_reshape_average_pooling2d_nhwc_f16(
+      pooling_op, batch_size, input_height, input_width, channels,
+      /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+      /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Average Pooling operator");
+    return;
+  }
+
+  status = xnn_setup_average_pooling2d_nhwc_f16(pooling_op, input.data(),
+                                                output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup Average Pooling operator");
+    return;
+  }
+
+  for (auto _ : state) {
+    status = xnn_run_operator(pooling_op, /*threadpool=*/nullptr);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to run Average Pooling operator");
+      return;
+    }
+  }
+
+  status = xnn_delete_operator(pooling_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete Average Pooling operator");
+    return;
+  }
+  pooling_op = nullptr;
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * batch_size *
+          (input_height * input_width + output_height * output_width) *
+          channels * sizeof(xnn_float16),
       benchmark::Counter::kIsRate);
 }
 
@@ -335,6 +422,30 @@ BENCHMARK_CAPTURE(xnnpack_average_pooling_f32, shufflenet_v1_g4,
     ->Apply(ShuffleNetV1G4)
     ->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_average_pooling_f32, shufflenet_v1_g8,
+                  "ShuffleNet v1 (8 groups)")
+    ->Apply(ShuffleNetV1G8)
+    ->UseRealTime();
+
+BENCHMARK_CAPTURE(xnnpack_average_pooling_f16, imagenet, "ImageNet")
+    ->Apply(ImageNet)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_f16, shufflenet_v1_g1,
+                  "ShuffleNet v1 (1 group)")
+    ->Apply(ShuffleNetV1G1)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_f16, shufflenet_v1_g2,
+                  "ShuffleNet v1 (2 groups)")
+    ->Apply(ShuffleNetV1G2)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_f16, shufflenet_v1_g3,
+                  "ShuffleNet v1 (3 groups)")
+    ->Apply(ShuffleNetV1G3)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_f16, shufflenet_v1_g4,
+                  "ShuffleNet v1 (4 groups)")
+    ->Apply(ShuffleNetV1G4)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_f16, shufflenet_v1_g8,
                   "ShuffleNet v1 (8 groups)")
     ->Apply(ShuffleNetV1G8)
     ->UseRealTime();
