@@ -1015,6 +1015,7 @@ void xnn_indirection_init_pavgpool2d_f16(
   size_t stride_width,
   size_t padding_top,
   size_t padding_left,
+  float scale,
   xnn_float16* pixelwise_buffer)
 {
   for (size_t output_y = 0; output_y < output_height; output_y++) {
@@ -1025,7 +1026,7 @@ void xnn_indirection_init_pavgpool2d_f16(
       const size_t input_x_start = doz(output_x * stride_width, padding_left);
       const size_t input_x_end = min(doz(output_x * stride_width + pooling_width, padding_left), input_width);
       const uint32_t input_x_range = (uint32_t) (input_x_end - input_x_start);
-      *pixelwise_buffer++ = xnn_float16_from_float(1.0f / ((float) (int32_t) (input_y_range * input_x_range)));
+      *pixelwise_buffer++ = xnn_float16_from_float(scale / ((float) (int32_t) (input_y_range * input_x_range)));
     }
   }
 }
@@ -1041,6 +1042,7 @@ void xnn_indirection_init_pavgpool2d_f32(
   size_t stride_width,
   size_t padding_top,
   size_t padding_left,
+  float scale,
   float* pixelwise_buffer)
 {
   for (size_t output_y = 0; output_y < output_height; output_y++) {
@@ -1051,7 +1053,7 @@ void xnn_indirection_init_pavgpool2d_f32(
       const size_t input_x_start = doz(output_x * stride_width, padding_left);
       const size_t input_x_end = min(doz(output_x * stride_width + pooling_width, padding_left), input_width);
       const uint32_t input_x_range = (uint32_t) (input_x_end - input_x_start);
-      *pixelwise_buffer++ = 1.0f / ((float) (int32_t) (input_y_range * input_x_range));
+      *pixelwise_buffer++ = scale / ((float) (int32_t) (input_y_range * input_x_range));
     }
   }
 }

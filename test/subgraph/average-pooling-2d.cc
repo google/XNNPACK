@@ -192,10 +192,8 @@ void TestImpl() {
   }
 }
 
-#ifdef XNNPACK_USE_YNNPACK
 TEST(AveragePooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
 TEST(AveragePooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
-#endif
 TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
 
@@ -239,6 +237,57 @@ TEST(AveragePooling2D, DefineRejectsZeroPoolingSize) {
                 std::numeric_limits<float>::infinity(), /*input_id=*/0,
                 /*output_id=*/1, /*flags=*/0),
             xnn_status_invalid_parameter);
+}
+
+TEST(AveragePooling2D, DefineRejectsUnderflowQuantizedScaleForKernelArea) {
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    const int32_t zero_point = datatype == xnn_datatype_quint8 ? 128 : 0;
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(4, datatype, {zero_point, 0x1.0p-32f}, 0)
+        .AddOutputTensor(4, datatype, {zero_point, 1.0f}, 1);
+    EXPECT_EQ(xnn_define_average_pooling_2d(
+                  subgraph.Subgraph(), /*input_padding_top=*/0,
+                  /*input_padding_right=*/0, /*input_padding_bottom=*/0,
+                  /*input_padding_left=*/0, /*pooling_height=*/3,
+                  /*pooling_width=*/3, /*stride_height=*/1, /*stride_width=*/1,
+                  -std::numeric_limits<float>::infinity(),
+                  std::numeric_limits<float>::infinity(), /*input_id=*/0,
+                  /*output_id=*/1, /*flags=*/0),
+              xnn_status_unsupported_parameter);
+  }
+}
+
+TEST(AveragePooling2D, QuantizedCollapsedOutputRange) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    const int32_t zero_point = datatype == xnn_datatype_quint8 ? 128 : 0;
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor({1, 4, 4, 17}, datatype, {zero_point, 1.0f}, 0)
+        .AddOutputTensor({1, 2, 2, 17}, datatype, {zero_point, 1.0f}, 1);
+    ASSERT_EQ(xnn_status_success,
+              xnn_define_average_pooling_2d(
+                  subgraph.Subgraph(), /*input_padding_top=*/0,
+                  /*input_padding_right=*/0, /*input_padding_bottom=*/0,
+                  /*input_padding_left=*/0, /*pooling_height=*/3,
+                  /*pooling_width=*/3, /*stride_height=*/1, /*stride_width=*/1,
+                  /*output_min=*/0.0f, /*output_max=*/0.1f, /*input_id=*/0,
+                  /*output_id=*/1, /*flags=*/0));
+    ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+    subgraph.ReshapeRuntime();
+    std::vector<uint8_t> input(4 * 4 * 17 + XNN_EXTRA_BYTES, 200);
+    std::vector<uint8_t> output(2 * 2 * 17, 42);
+    subgraph.SetupExternalTensor(input.data(), 0)
+        .SetupExternalTensor(output.data(), 1)
+        .SetupRuntime()
+        .InvokeRuntime();
+    for (uint8_t v : output) {
+      if (datatype == xnn_datatype_qint8) {
+        EXPECT_EQ(static_cast<int8_t>(v), 0);
+      } else {
+        EXPECT_EQ(v, 128);
+      }
+    }
+  }
 }
 
 TEST(AveragePooling2D, ReshapeOverflowInputElements) {
