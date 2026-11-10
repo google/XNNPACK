@@ -329,10 +329,9 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
            get_zero_point_id(subgraph, bias_id) != YNN_INVALID_VALUE_ID)) {
         uint32_t dequantized_bias_id = YNN_INVALID_VALUE_ID;
         status = ynn_define_dequantize(
-            subgraph->ynn, bias_id,
-            get_zero_point_id(subgraph, bias_id),
-            get_scale_id(subgraph, bias_id),
-            ynn_type_fp32, &dequantized_bias_id, /*flags=*/0);
+            subgraph->ynn, bias_id, get_zero_point_id(subgraph, bias_id),
+            get_scale_id(subgraph, bias_id), ynn_type_fp32,
+            &dequantized_bias_id, /*flags=*/0);
         if (status != ynn_status_success) return status;
         bias_id = dequantized_bias_id;
       } else {
@@ -699,21 +698,12 @@ ynn_status define_xnn_stencil(
       input_padding_left || same_padding) {
     // The padding should just be the zero point of the input, converted to the
     // same type as the input.
-    if (get_zero_point_id(subgraph, input_id) == YNN_INVALID_VALUE_ID) {
-      ynn_status status = define_scalar_value_like(subgraph, input_id,
-                                                   padding_value, &padding_id);
-      if (status != ynn_status_success) {
-        return status;
-      }
-    } else {
-      assert(padding_value == 0.0f);
-
-      ynn_status status =
-          define_scalar_value_like(subgraph, input_id, 0.0f, &padding_id);
-      if (status != ynn_status_success) {
-        return status;
-      }
-
+    ynn_status status = define_scalar_value_like(subgraph, input_id,
+                                                 padding_value, &padding_id);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    if (get_zero_point_id(subgraph, input_id) != YNN_INVALID_VALUE_ID) {
       // Assume this is a dynamically quantized convolution, and broadcast
       // the non-batch dimensions.
       uint32_t padding_broadcast_id = YNN_INVALID_VALUE_ID;
