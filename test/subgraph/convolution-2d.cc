@@ -419,6 +419,46 @@ TEST(Convolution2D, reshape_rejects_input_channel_mismatch) {
 }
 
 #ifndef XNNPACK_USE_YNNPACK
+TEST(Convolution2D, reshape_rejects_rank_3_input) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  ConvolutionParams params;
+  params.padding = {0, 0, 0, 0};
+  params.kernel = {3, 3};
+  params.subsampling = {1, 1};
+  params.dilation = {1, 1};
+  params.groups = 1;
+  params.group_input_channels = 4;
+  params.group_output_channels = 8;
+
+  const uint32_t input_id = 0;
+  const uint32_t filter_id = 1;
+  const uint32_t bias_id = 2;
+  const uint32_t output_id = 3;
+
+  Tensor<float> filter(std::vector<size_t>{8, 3, 3, 4});
+  filter.fill(0.0f);
+  Tensor<float> bias(std::vector<size_t>{8});
+  bias.fill(0.0f);
+
+  SubgraphTester subgraph(4);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, input_id)
+      .AddStaticTensor(filter.extents(), filter_id, filter.base())
+      .AddStaticTensor(bias.extents(), bias_id, bias.base())
+      .AddOutputTensor(4, xnn_datatype_fp32, output_id)
+      .AddConvolution2D(params, input_id, filter_id, bias_id, output_id);
+  if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  std::vector<float> input(1 * 8 * 4);
+  subgraph.ReshapeExternalTensor({1, 8, 4}, input.data(), input_id)
+      .ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
+#ifndef XNNPACK_USE_YNNPACK
 TEST(Convolution2D, ReshapeOverflowInputElements) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
