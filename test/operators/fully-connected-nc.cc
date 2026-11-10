@@ -2651,7 +2651,8 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, weights_cache_unit_batch) {
       .TestQP8F32QC2W();
 }
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) && \
+    XNN_ENABLE_ARM_SME2
 TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, config_registers_all_batch_kernels) {
   TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
   const struct xnn_gemm_config* gemm_config =
@@ -2662,7 +2663,8 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, config_registers_all_batch_kernels) {
   EXPECT_NE(nullptr,
             gemm_config->minmax.qp8gemm[gemm_config->mr - 1].function[0]);
 }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) &&
+        // XNN_ENABLE_ARM_SME2
 
 TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, transpose_weights_unsupported) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));

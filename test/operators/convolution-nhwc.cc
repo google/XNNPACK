@@ -1257,7 +1257,8 @@ TEST(CONVOLUTION_NHWC, fp32_static_bias_size_overflow) {
           nullptr, &convolution_op));
   EXPECT_EQ(nullptr, convolution_op);
 }
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) && \
+    XNN_ENABLE_ARM_SME2
 TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
   if (xnn_init_kai_f32_dwconv_config() == nullptr) {
@@ -1287,7 +1288,8 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
           /*expected_workspace_size=*/SIZE_MAX,
           /*expected_microkernel_type=*/xnn_microkernel_type_dwconv);
 }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) &&
+        // XNN_ENABLE_ARM_SME2
 
 TEST(CONVOLUTION_NHWC_F32, unioutput_1x1) {
   ConvolutionOperatorTester()

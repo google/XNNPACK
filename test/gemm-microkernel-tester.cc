@@ -770,9 +770,15 @@ void GemmMicrokernelTester::Test_QP8F32QC2W(
   const size_t input_packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k32, mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+  xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(
+      m(), k32, mr_packed(), kr(), sr(), /*m_idx_start=*/0, input_f32.data(),
+      /*lhs_stride=*/k32 * sizeof(float), input_qp8.data());
+#else
   xnn_x8_packq_f32qp8_ukernel__scalar_u1(
       m(), k32, mr_packed(), kr(), sr(), /*m_idx_start=*/0, input_f32.data(),
       /*lhs_stride=*/k32 * sizeof(float), input_qp8.data());
+#endif
 
   std::generate(b.begin(), b.end(), std::ref(w8rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -2858,10 +2864,16 @@ void GemmMicrokernelTester::Test(
   const size_t input_packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k2, mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+  xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(
+      m(), k2, mr_packed(), kr(), sr(), /*m_idx_start=*/0, input_f32.data(),
+      /*lhs_stride=*/k2 * sizeof(float), input_qp8.data());
+#else
   xnn_x8_packq_f32qp8_ukernel__scalar_u1(m(), k2, mr_packed(), kr(), sr(),
                                          /*m_idx_start=*/0, input_f32.data(),
                                          /*lhs_stride=*/k2 * sizeof(float),
                                          input_qp8.data());
+#endif
 
   std::generate(b.begin(), b.end(), std::ref(w8rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -2981,10 +2993,16 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
   const size_t input_packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+  xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(
+      m(), k(), mr_packed(), kr(), sr(), /*m_idx_start=*/0, input_f32.data(),
+      /*lhs_stride=*/k() * sizeof(float), input_qp8.data());
+#else
   xnn_x8_packq_f32qp8_ukernel__scalar_u1(m(), k(), mr_packed(), kr(), sr(),
                                          /*m_idx_start=*/0, input_f32.data(),
                                          /*lhs_stride=*/k() * sizeof(float),
                                          input_qp8.data());
+#endif
 
   std::generate(b.begin(), b.end(), std::ref(w8rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -4114,7 +4132,7 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 }
-#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
 void GemmMicrokernelTester::Test_PF16(
     xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
@@ -4330,7 +4348,11 @@ void GemmMicrokernelTester::Test(
   const size_t input_packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k2, mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+  xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(
+#else
   xnn_x8_packq_f32qp8_ukernel__scalar_u1(
+#endif
       m(), k2, mr_packed(), kr(), sr(),
       /*m_idx_start=*/0, reinterpret_cast<const float*>(input_f32.data()),
       /*lhs_stride=*/k2 * sizeof(float), input_qp8.data());

@@ -575,7 +575,10 @@ xnnpack_cxx_library(
         "//src/configs:config_hdrs",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
-    ]),
+    ]) + xnnpack_select_if(
+        ":arm_sme_acle_enabled",
+        [":arm_sme_abi_stubs"],
+    ),
 )
 
 py_binary(
@@ -858,6 +861,11 @@ xnnpack_cc_library(
     srcs = [
         "src/arm-sme-abi-stubs.c",
     ],
+    target_compatible_with = xnnpack_select_if(
+        ":arm_sme_acle_enabled",
+        [],
+        ["@platforms//:incompatible"],
+    ),
     deps = [":common"],
 )
 
@@ -1497,6 +1505,18 @@ config_setting(
     define_values = {"xnn_enable_arm_sme_acle": "false"},
 )
 
+# Enables usage of ARM SME ACLE kernels via xnnpack_enable_arm_sme_acle.
+config_setting(
+    name = "xnnpack_enable_arm_sme_acle_explicit_true",
+    define_values = {"xnnpack_enable_arm_sme_acle": "true"},
+)
+
+# Disables usage of ARM SME ACLE kernels via xnnpack_enable_arm_sme_acle.
+config_setting(
+    name = "xnnpack_enable_arm_sme_acle_explicit_false",
+    define_values = {"xnnpack_enable_arm_sme_acle": "false"},
+)
+
 # Enables usage of x86 ACE microkernels.
 config_setting(
     name = "xnn_enable_ace_explicit_true",
@@ -1774,21 +1794,52 @@ alias(
 )
 
 selects.config_setting_group(
-    name = "arm_sme_acle_enabled_by_default",
+    name = "arm_sme_acle_explicit_true",
     match_any = [
-        "//build_config:aarch64",
+        ":xnn_enable_arm_sme_acle_explicit_true",
+        ":xnnpack_enable_arm_sme_acle_explicit_true",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_explicit_false",
+    match_any = [
+        ":xnn_enable_arm_sme_acle_explicit_false",
+        ":xnnpack_enable_arm_sme_acle_explicit_false",
     ],
 )
 
 alias(
-    name = "arm_sme_acle_enabled",
+    name = "arm_sme_acle_flag_enabled",
     actual = select({
-        ":xnn_enable_arm_sme_acle_explicit_true": ":xnn_enable_arm_sme_acle_explicit_true",
-        ":xnn_enable_arm_sme_acle_explicit_false": ":xnn_enable_arm_sme_acle_explicit_true",
-        "//build_config:gcc": ":xnn_enable_arm_sme_acle_explicit_true",
-        "//build_config:windows_arm64": ":xnn_enable_arm_sme_acle_explicit_true",
-        "//conditions:default": ":arm_sme_acle_enabled_by_default",
+        ":arm_sme_acle_explicit_true": ":arm_sme_acle_explicit_true",
+        ":arm_sme_acle_explicit_false": "//build_config:always_false",
+        "//conditions:default": "//build_config:always_false",
     }),
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_enabled",
+    match_all = [
+        "//build_config:aarch64",
+        ":arm_sme_acle_flag_enabled",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_sme_enabled",
+    match_all = [
+        ":arm_sme_enabled",
+        ":arm_sme_acle_enabled",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_sme2_enabled",
+    match_all = [
+        ":arm_sme2_enabled",
+        ":arm_sme_acle_enabled",
+    ],
 )
 
 alias(

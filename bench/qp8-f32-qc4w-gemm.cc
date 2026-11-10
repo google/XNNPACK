@@ -142,7 +142,7 @@ namespace {
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2,
@@ -222,12 +222,12 @@ namespace {
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2)
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme,
@@ -307,12 +307,12 @@ namespace {
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme)
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x32c4__sme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x32c4__sme2,
@@ -392,7 +392,7 @@ namespace {
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_32x32c4__sme2)
-  #endif  // XNN_ENABLE_KLEIDIAI
+  #endif  // XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE && XNN_ARCH_ARM64
 
 

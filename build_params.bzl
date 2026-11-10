@@ -457,6 +457,38 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),
+    # ARM SME ACLE microkernels (disabled by default; enabled via
+    # `--define=xnnpack_enable_arm_sme_acle=true`). Pass
+    # `-march=armv8.2-a+sme+fp16` / `-march=armv8.2-a+sme2+fp16` without `+sve`
+    # or `+sve2`, since adding `+sve+sve2` would allow the auto-vectorizer to
+    # emit SVE into non-streaming code, faulting with SIGILL on CPUs
+    # implementing FEAT_SME/FEAT_SME2 without FEAT_SVE (e.g. Apple Silicon).
+    "sme": _create_params(
+        cond = "//:arm_sme_acle_sme_enabled",
+        copts = xnnpack_select_if(
+            "//:arm_sme_acle_non_lexan_enabled",
+            ["-march=armv8.2-a+sme+fp16"],
+        ) + xnnpack_select_if(
+            "//:arm_sme_acle_lexan_enabled",
+            ["/clang:-march=armv8.2-a+sme+fp16"],
+        ),
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
+    ),
+    "sme2": _create_params(
+        cond = "//:arm_sme_acle_sme2_enabled",
+        copts = xnnpack_select_if(
+            "//:arm_sme_acle_non_lexan_enabled",
+            ["-march=armv8.2-a+sme2+fp16"],
+        ) + xnnpack_select_if(
+            "//:arm_sme_acle_lexan_enabled",
+            ["/clang:-march=armv8.2-a+sme2+fp16"],
+        ),
+        extra_deps = [
+            "//:arm_sme_abi_stubs",
+        ],
+    ),
     "aarch32": _create_params(
         cond = "//build_config:aarch32",
         copts = [

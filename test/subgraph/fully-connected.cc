@@ -1122,7 +1122,8 @@ TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && !defined(XNNPACK_USE_YNNPACK)
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) && \
+    !defined(XNNPACK_USE_YNNPACK)
 TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_inline) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
@@ -1349,7 +1350,8 @@ TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_no_inline) {
 
   xnn_delete_subgraph(subgraph);
 }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && !defined(XNNPACK_USE_YNNPACK)
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE) &&
+        // !defined(XNNPACK_USE_YNNPACK)
 
 #ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
