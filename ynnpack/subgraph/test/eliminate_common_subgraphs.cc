@@ -316,4 +316,31 @@ TEST(eliminate_common_subgraphs, no_merge_different_params) {
   EXPECT_THAT(ProducerOf(output_id, subgraph), InputsAre(t1_id, t2_id));
 }
 
+TEST(eliminate_common_subgraphs, no_merge_dot_symmetric_b) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t c_id = 2;
+  const uint32_t output_id = 3;
+  uint32_t t1_id = YNN_INVALID_VALUE_ID;
+  uint32_t t2_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(4);
+  builder.AddInput(ynn_type_int8, {4, 16}, a_id)
+      .AddInput(ynn_type_int8, {16, 8}, b_id)
+      .AddInput(ynn_type_int32, {4, 8}, c_id)
+      .AddOutput(ynn_type_int32, {4, 8}, output_id)
+      .AddTensor(ynn_type_int32, {4, 8}, t1_id)
+      .AddTensor(ynn_type_int32, {4, 8}, t2_id);
+
+  builder.AddDot(1, a_id, b_id, c_id, t1_id, /*flags=*/0);
+  builder.AddDot(1, a_id, b_id, c_id, t2_id, YNN_NODE_FLAG_SYMMETRIC_B);
+  builder.AddBinary(ynn_binary_add, t1_id, t2_id, output_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.eliminate_common_subgraphs();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(output_id, subgraph), InputsAre(t1_id, t2_id));
+}
+
 }  // namespace ynn

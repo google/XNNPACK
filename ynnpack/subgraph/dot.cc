@@ -719,7 +719,13 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
   ynn_node node;
   node.inputs = {input_b_id};
   node.outputs = {packed_b_id};
-  node.op = ynn_node::pack_b{transpose};
+  node.op = ynn_node::pack_b{
+      transpose,
+      num_k_dims,
+      static_cast<size_t>(kernel.tile_k),
+      static_cast<size_t>(kernel.tile_n),
+      static_cast<size_t>(kernel.max_block_n),
+  };
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::pack_b& op = std::get<ynn_node::pack_b>(node.op);
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
@@ -1591,7 +1597,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   ynn_node node;
   node.inputs = {input_a_id, input_b_id, input_c_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::dot{num_k_dims};
+  node.op = ynn_node::dot{num_k_dims, symmetric_b};
 
   // Propagate shape.
   int c_rank;
