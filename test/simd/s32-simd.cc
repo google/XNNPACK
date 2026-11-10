@@ -1,44 +1,73 @@
-// clang-format off
-// Auto-generated file. Do not edit!
-//   Template: test/simd/s32-simd.cc.in
-//   Generator: tools/xngen
-//
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 // This header needs to go first for the arch test macros.
 #include "src/xnnpack/common.h"
 
-#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#if defined(XNN_SIMD_SCALAR)
+#include "src/xnnpack/simd/s32-scalar.h"
+#elif defined(XNN_SIMD_SSE41) && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#include "src/xnnpack/simd/s32-sse41.h"
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_x86_sse4_1
+#elif defined(XNN_SIMD_AVX2) && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#include "src/xnnpack/simd/s32-avx2.h"
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_x86_avx2
+#elif defined(XNN_SIMD_AVX512F) && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+// Scope AVX-512 target attributes to the SIMD header and test bodies so the
+// test fixture SetUp() (which checks ISA support) can run on older CPUs.
+#define XNN_SIMD_USES_AVX512F_TARGET 1
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f"))), \
+                             apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f")
+#endif
+#include "src/xnnpack/simd/s32-avx512f.h"
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_x86_avx512f
+#elif defined(XNN_SIMD_NEON) && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#include "src/xnnpack/simd/s32-neon.h"
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_arm_neon
+#elif defined(XNN_SIMD_WASMSIMD) && \
+    (XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD)
+#include "src/xnnpack/simd/s32-wasmsimd.h"
+#elif defined(XNN_SIMD_HVX) && (XNN_ENABLE_HVX && XNN_ARCH_HEXAGON)
+#include "src/xnnpack/simd/s32-hvx.h"
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_hvx
+#endif
+
+#ifdef xnn_simd_size_s32
 
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#if defined(XNN_SIMD_HVX)
 #include <cstring>
+#endif
 #include <limits>
 #include <random>
 #include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
-
-
-#include "src/xnnpack/simd/s32-hvx.h"
-
-
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
 
-class S32SimdHVXTest : public ::testing::Test {
+class S32SimdTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
+#ifdef XNN_SIMD_TEST_ARCH_FLAGS
+    TEST_REQUIRES_ARCH_FLAGS(XNN_SIMD_TEST_ARCH_FLAGS);
+#endif  // XNN_SIMD_TEST_ARCH_FLAGS
     inputs_.resize(3 * xnn_simd_size_s32);
     output_.resize(xnn_simd_size_s32);
     std::uniform_int_distribution<int> s32dist(-10000, 10000);
@@ -51,8 +80,17 @@ class S32SimdHVXTest : public ::testing::Test {
   std::vector<int32_t> output_;
 };
 
+#if defined(XNN_SIMD_USES_AVX512F_TARGET)
+#if defined(__clang__)
+#pragma clang attribute push(__attribute__((target("avx512f"))), \
+                             apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f")
+#endif
+#endif  // defined(XNN_SIMD_USES_AVX512F_TARGET)
 
-TEST_F(S32SimdHVXTest, Mul) {
+TEST_F(S32SimdTest, Mul) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
   const xnn_simd_s32_t res = xnn_mul_s32(a, b);
@@ -62,7 +100,7 @@ TEST_F(S32SimdHVXTest, Mul) {
   }
 }
 
-TEST_F(S32SimdHVXTest, Sub) {
+TEST_F(S32SimdTest, Sub) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
   const xnn_simd_s32_t res = xnn_sub_s32(a, b);
@@ -72,7 +110,7 @@ TEST_F(S32SimdHVXTest, Sub) {
   }
 }
 
-TEST_F(S32SimdHVXTest, Min) {
+TEST_F(S32SimdTest, Min) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
   const xnn_simd_s32_t res = xnn_min_s32(a, b);
@@ -82,7 +120,7 @@ TEST_F(S32SimdHVXTest, Min) {
   }
 }
 
-TEST_F(S32SimdHVXTest, Max) {
+TEST_F(S32SimdTest, Max) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
   const xnn_simd_s32_t res = xnn_max_s32(a, b);
@@ -92,10 +130,10 @@ TEST_F(S32SimdHVXTest, Max) {
   }
 }
 
-TEST_F(S32SimdHVXTest, StoreTail) {
+TEST_F(S32SimdTest, StoreTail) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s32;
-      num_elements++) {
+       num_elements++) {
     xnn_store_tail_s32(output_.data(), a, num_elements);
     for (size_t k = 0; k < num_elements; k++) {
       ASSERT_EQ(output_[k], inputs_[k]);
@@ -106,7 +144,8 @@ TEST_F(S32SimdHVXTest, StoreTail) {
   }
 }
 
-TEST_F(S32SimdHVXTest, CvtF32S32) {
+#if defined(XNN_SIMD_HVX)
+TEST_F(S32SimdTest, CvtF32S32) {
   std::vector<int32_t> values = {
       0, 1, -1, 2, -2, 255, -256, 65535, 65536, -65537,
       (1 << 24) - 1, 1 << 24, (1 << 24) + 1, (1 << 24) + 3, -(1 << 24) - 1,
@@ -129,6 +168,16 @@ TEST_F(S32SimdHVXTest, CvtF32S32) {
     }
   }
 }
+#endif  // defined(XNN_SIMD_HVX)
+
+#if defined(XNN_SIMD_USES_AVX512F_TARGET)
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+#endif  // defined(XNN_SIMD_USES_AVX512F_TARGET)
+
 }  // namespace xnnpack
 
-#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // xnn_simd_size_s32
