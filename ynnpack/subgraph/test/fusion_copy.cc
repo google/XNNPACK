@@ -1411,4 +1411,60 @@ TEST(fusion, pack_b_transpose_int2) {
   }
 }
 
+TEST(fusion, pack_b_deep_constant_chain) {
+  // Depth-6 constant chain (`is_constant` depth > 5) with M = 1.
+  {
+    const uint32_t a_id = 0;
+    const uint32_t out_id = 1;
+    uint32_t cur_id = YNN_INVALID_VALUE_ID;
+    std::vector<float> b_data(64 * 64, 1.0f);
+    SubgraphBuilder builder(2);
+    builder.AddInput(ynn_type_fp32, {1, 64}, a_id)
+        .AddOutput(ynn_type_fp32, {1, 64}, out_id)
+        .AddTensor(ynn_type_fp32, {64, 64}, cur_id, b_data.data());
+    for (int i = 0; i < 6; ++i) {
+      uint32_t next_id = YNN_INVALID_VALUE_ID;
+      builder.AddTensor(ynn_type_fp32, {64, 64}, next_id)
+          .AddUnary(ynn_unary_negate, cur_id, next_id);
+      cur_id = next_id;
+    }
+    builder.AddDot(1, a_id, cur_id, YNN_INVALID_VALUE_ID, out_id);
+
+    const ynn_subgraph& subgraph = *builder.GetSubgraph();
+    const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph), IsPackB());
+  }
+
+  // Gather of depth-4 constant chain (`is_constant_or_gather_of_constant`
+  // depth > 3) with M = 1.
+  {
+    const uint32_t a_id = 0;
+    const uint32_t index_id = 1;
+    const uint32_t out_id = 2;
+    uint32_t cur_id = YNN_INVALID_VALUE_ID;
+    uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+    std::vector<float> b_data(8 * 64 * 64, 1.0f);
+    SubgraphBuilder builder(3);
+    builder.AddInput(ynn_type_fp32, {1, 1, 64}, a_id)
+        .AddInput(ynn_type_int32, {1, 1, 1}, index_id)
+        .AddOutput(ynn_type_fp32, {1, 1, 64}, out_id)
+        .AddTensor(ynn_type_fp32, {8, 64, 64}, cur_id, b_data.data())
+        .AddTensor(ynn_type_fp32, {1, 64, 64}, gathered_id);
+    for (int i = 0; i < 4; ++i) {
+      uint32_t next_id = YNN_INVALID_VALUE_ID;
+      builder.AddTensor(ynn_type_fp32, {8, 64, 64}, next_id)
+          .AddUnary(ynn_unary_negate, cur_id, next_id);
+      cur_id = next_id;
+    }
+    builder.AddGather({0}, 3, cur_id, index_id, gathered_id)
+        .AddDot(1, a_id, gathered_id, YNN_INVALID_VALUE_ID, out_id);
+
+    const ynn_subgraph& subgraph = *builder.GetSubgraph();
+    const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph), IsPackB());
+  }
+}
+
 }  // namespace ynn
