@@ -1,0 +1,167 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$SIMD_SIZE = 16
+$assert CHANNEL_TILE % SIMD_SIZE == 0
+$assert KERNEL_TILE >= 2
+$assert ACCUMULATORS >= 1
+#include <assert.h>
+#include <immintrin.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
+
+
+static XNN_INLINE __m512 load_bf16_as_f32(const uint16_t* ptr) {
+  return _mm512_castsi512_ps(_mm512_slli_epi32(
+      _mm512_cvtepu16_epi32(_mm256_loadu_si256((const __m256i*) ptr)), 16));
+}
+
+static XNN_INLINE __m512 maskz_load_bf16_as_f32(__mmask16 mask,
+                                                const uint16_t* ptr) {
+  return _mm512_castsi512_ps(_mm512_slli_epi32(
+      _mm512_cvtepu16_epi32(_mm256_maskz_loadu_epi16(mask, ptr)), 16));
+}
+
+// Packed weights layout, per block of ${CHANNEL_TILE} channels:
+//   float bias[${CHANNEL_TILE}];
+//   uint16_t kernel[${KERNEL_TILE}][${CHANNEL_TILE}];  // bf16
+void xnn_bf16_f32_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__avx512skx${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const xnn_bfloat16** input,
+    const void* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const xnn_bfloat16* zero,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+  do {
+    $for K in range(KERNEL_TILE):
+      const uint16_t* i${K} = (const uint16_t*) input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != (const uint16_t*) zero) {
+        i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const xnn_bfloat16**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* wb = (const float*) weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      const uint16_t* wk = (const uint16_t*) (wb + ${CHANNEL_TILE});
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        __m512 vacc${C}p0 = _mm512_loadu_ps(wb + ${C});
+
+      $for K in range(KERNEL_TILE):
+
+        $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+          const __m512 vi${K}x${C} = load_bf16_as_f32(i${K} + ${C});
+        i${K} += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+          const __m512 vk${K}x${C} = load_bf16_as_f32(wk + ${K * CHANNEL_TILE + C});
+        $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+          $if 1 <= K < ACCUMULATORS:
+            __m512 vacc${C}p${K} = _mm512_mul_ps(vi${K}x${C}, vk${K}x${C});
+          $else:
+            vacc${C}p${K % ACCUMULATORS} = _mm512_fmadd_ps(vi${K}x${C}, vk${K}x${C}, vacc${C}p${K % ACCUMULATORS});
+
+      wb = (const float*) (wk + ${KERNEL_TILE * CHANNEL_TILE});
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+                vacc${C}p${A} = _mm512_add_ps(vacc${C}p${A}, vacc${C}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        __m512 vacc${C} = _mm512_max_ps(vmin, vacc${C}p0);
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        vacc${C} = _mm512_min_ps(vmax, vacc${C});
+
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        _mm512_storeu_ps(output + ${C}, vacc${C});
+      output += ${CHANNEL_TILE};
+    }
+    if XNN_UNLIKELY(c != 0) {
+      const uint16_t* wk = (const uint16_t*) (wb + ${CHANNEL_TILE});
+      $if CHANNEL_TILE > SIMD_SIZE:
+        for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
+          __m512 vacc0p0 = _mm512_loadu_ps(wb);
+          $for K in range(KERNEL_TILE):
+
+            const __m512 vi${K}x0 = load_bf16_as_f32(i${K});
+            i${K} += ${SIMD_SIZE};
+
+            const __m512 vk${K}x0 = load_bf16_as_f32(wk + ${K * CHANNEL_TILE});
+            $if 1 <= K < ACCUMULATORS:
+              __m512 vacc0p${K} = _mm512_mul_ps(vi${K}x0, vk${K}x0);
+            $else:
+              vacc0p${K % ACCUMULATORS} = _mm512_fmadd_ps(vi${K}x0, vk${K}x0, vacc0p${K % ACCUMULATORS});
+
+          wb += ${SIMD_SIZE};
+          wk += ${SIMD_SIZE};
+
+          $if ACCUMULATORS > 1:
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  vacc0p${A} = _mm512_add_ps(vacc0p${A}, vacc0p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          __m512 vacc0 = _mm512_max_ps(vmin, vacc0p0);
+          vacc0 = _mm512_min_ps(vmax, vacc0);
+
+          _mm512_storeu_ps(output, vacc0);
+          output += ${SIMD_SIZE};
+        }
+      if XNN_LIKELY(c != 0) {
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - 1));
+        __m512 vacc0p0 = _mm512_maskz_loadu_ps(vmask, wb);
+        $for K in range(KERNEL_TILE):
+
+          const __m512 vi${K}x0 = maskz_load_bf16_as_f32(vmask, i${K});
+          const __m512 vk${K}x0 = maskz_load_bf16_as_f32(vmask, wk + ${K * CHANNEL_TILE});
+          $if 1 <= K < ACCUMULATORS:
+            __m512 vacc0p${K} = _mm512_mul_ps(vi${K}x0, vk${K}x0);
+          $else:
+            vacc0p${K % ACCUMULATORS} = _mm512_fmadd_ps(vi${K}x0, vk${K}x0, vacc0p${K % ACCUMULATORS});
+
+        $if ACCUMULATORS > 1:
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0p${A} = _mm512_add_ps(vacc0p${A}, vacc0p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        __m512 vacc0 = _mm512_max_ps(vmin, vacc0p0);
+        vacc0 = _mm512_min_ps(vmax, vacc0);
+
+        _mm512_mask_storeu_ps(output, vmask, vacc0);
+        output += c;
+      }
+    }
+
+    input_offset += input_pixel_stride;
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}
