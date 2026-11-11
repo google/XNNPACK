@@ -72,7 +72,9 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_x86_amx_tile() && can_use_amx_tile()) {
       if (cpuinfo_has_x86_amx_bf16()) result |= arch_flag::amxbf16;
       if (cpuinfo_has_x86_amx_fp16()) result |= arch_flag::amxfp16;
-      if (cpuinfo_has_x86_amx_int8()) result |= arch_flag::amxint8;
+      if (cpuinfo_has_x86_amx_int8() && cpuinfo_has_x86_gfni()) {
+        result |= arch_flag::amxint8;
+      }
 #ifdef YNN_ENABLE_X86_ACE
       if (cpuinfo_has_x86_avx10_2() && cpuinfo_has_x86_ace()) {
         result |= arch_flag::ace;
