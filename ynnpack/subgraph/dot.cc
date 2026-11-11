@@ -1053,18 +1053,22 @@ constexpr index_t step_k = 1024;
 //   L1).
 //
 // Sizing rationale:
-// - We set `k_threshold` so that k-splitting only triggers when a single
-//   input slice along k reaches `proxy_cache_for_k`.
+// - When `m <= step_m`, there is only a single `m` tile, so B is not reused
+//   across `m` tiles and `schedule_dot` already tiles `k` within each task.
+//   Avoid splitting `k` so we don't force serial threadpool dispatches, spill
+//   the accumulator, or prevent loop fusion of consumers into `dot`.
+// - Otherwise, we set `k_threshold` so that k-splitting only triggers when a
+//   single input slice along k reaches `proxy_cache_for_k`.
 // - We use half of `proxy_cache_for_k` to set the split size so that both A
 //   and B fit in L1.
 // - A proxy L1 cache size is used to maintain a consistent splitting behavior
 //   across different machines.
-index_t choose_split_k(index_t k, size_t a_elem_size) {
+index_t choose_split_k(index_t m, index_t k, size_t a_elem_size) {
   assert(a_elem_size > 0);
   constexpr index_t proxy_cache_for_k = 32 * 1024;
   const index_t k_threshold = proxy_cache_for_k / a_elem_size;
   const index_t k_split_size = k_threshold / 2;
-  index_t split_k = k >= k_threshold ? k_split_size : k;
+  index_t split_k = (m > step_m && k >= k_threshold) ? k_split_size : k;
   split_k = align_up<index_t>(split_k, step_k);
   return std::min<index_t>(split_k, max_multiplier_k * step_k);
 }
@@ -1143,7 +1147,7 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
     if (!grow(split_m, split_n)) break;
   }
 
-  index_t split_k = choose_split_k(k, a_elem_size);
+  index_t split_k = choose_split_k(m, k, a_elem_size);
 
   // Make the tasks bigger if they are too small to be worth running in
   // parallel.

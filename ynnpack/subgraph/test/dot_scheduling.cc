@@ -67,11 +67,9 @@ void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
 
   EXPECT_FALSE(trace_events.empty());
   EXPECT_EQ(trace_events.front(), "pipeline");
-  bool found_pack = false;
   bool found_dot = false;
   std::string first_loop;
   for (const std::string& event : trace_events) {
-    if (contains(event, "pack_b")) found_pack = true;
     if (contains(event, "dot")) found_dot = true;
     if (first_loop.empty() &&
         (contains(event, "loop k") || contains(event, "loop d")) &&
@@ -79,7 +77,6 @@ void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
       first_loop = event;
     }
   }
-  EXPECT_TRUE(found_pack);
   EXPECT_TRUE(found_dot);
   if (expect_split_k) {
     EXPECT_THAT(first_loop, testing::HasSubstr("loop k"));
@@ -102,6 +99,13 @@ TEST(DotSchedulingTest, NarrowTypeNoSplitK) {
 
 TEST(DotSchedulingTest, NarrowTypeLargeSplitK) {
   VerifyDotLoopOrder<bfloat16, bfloat16>({300, 16384}, {16384, 400}, true);
+}
+
+TEST(DotSchedulingTest, SmallMNoSplitK) {
+  VerifyDotLoopOrder<float, float>({1, 8192}, {8192, 400}, false);
+  VerifyDotLoopOrder<float, float>({16, 8192}, {8192, 400}, false);
+  VerifyDotLoopOrder<float, float>({64, 8192}, {8192, 400}, true);
+  VerifyDotLoopOrder<bfloat16, bfloat16>({1, 16384}, {16384, 400}, false);
 }
 
 }  // namespace
