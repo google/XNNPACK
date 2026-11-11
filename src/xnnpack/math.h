@@ -185,6 +185,14 @@ XNN_INLINE static int32_t math_min_s32(int32_t a, int32_t b) {
   return XNN_UNPREDICTABLE(a < b) ? a : b;
 }
 
+XNN_INLINE static int64_t math_max_s64(int64_t a, int64_t b) {
+  return XNN_UNPREDICTABLE(a > b) ? a : b;
+}
+
+XNN_INLINE static int64_t math_min_s64(int64_t a, int64_t b) {
+  return XNN_UNPREDICTABLE(a < b) ? a : b;
+}
+
 XNN_INLINE static int32_t math_max_s32(int32_t a, int32_t b) {
   return XNN_UNPREDICTABLE(a > b) ? a : b;
 }
