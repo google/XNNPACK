@@ -1451,7 +1451,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   if (!get_dequantize_dot_kernel(output.type)) {
     return false;
   }
-  uint32_t offset_id = subgraph.get_scalar_value_id(output.type, 0.0f);
+  uint32_t offset_id = subgraph.get_scalar_value_id(ynn_type_fp32, 0.0f);
 
   analysis.replace_input(*dot_node, 2, YNN_INVALID_VALUE_ID);
   analysis.update_node(node, [&]() {
@@ -1491,6 +1491,9 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
     }
 
     uint32_t new_offset_id = node.inputs[1 - i];
+    if (subgraph.value(new_offset_id).type != ynn_type_fp32) {
+      continue;
+    }
 
     YNN_LOG_DEBUG()
         << "Rewriting add(dequantize_dot(..., 0), x) to dequantize_dot(..., x)";

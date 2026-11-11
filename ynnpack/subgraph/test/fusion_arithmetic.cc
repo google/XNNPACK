@@ -1470,4 +1470,86 @@ TEST(fusion, rsqrt_transpose_ternary_multiply_fusion) {
   EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 6.0f, 1e-6f);
 }
 
+TEST(fusion, dequantize_dot_bf16_offset_type) {
+  {
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t a_offset_id = 2;
+    const uint32_t b_offset_id = 3;
+    const uint32_t c_id = 4;
+    const uint32_t d_id = 5;
+    const uint32_t out_id = 6;
+    SubgraphBuilder builder(7);
+
+    uint32_t sm_id = YNN_INVALID_VALUE_ID;
+    uint32_t dot_output_id = YNN_INVALID_VALUE_ID;
+    uint32_t zero_id = builder.DefineScalar(0);
+
+    builder.AddInput(ynn_type_uint8, 2, a_id)
+        .AddInput(ynn_type_int8, 2, b_id)
+        .AddInput(ynn_type_int32, 1, a_offset_id)
+        .AddInput(ynn_type_int32, 1, b_offset_id)
+        .AddInput(ynn_type_fp32, 1, c_id)
+        .AddInput(ynn_type_fp32, 1, d_id)
+        .AddOutput(ynn_type_bf16, 2, out_id)
+        .AddTensor(ynn_type_int32, 1, sm_id)
+        .AddTensor(ynn_type_int32, 2, dot_output_id);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+    ynn_node sm_node;
+    ynn::define_ternary(
+        subgraph, sm_node, zero_id, a_offset_id, b_offset_id, sm_id,
+        ternary_op::subtract_multiply,
+        get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_int32,
+                           ynn_type_int32, ynn_type_int32, ynn_type_int32));
+    subgraph.add_node(std::move(sm_node));
+
+    builder.AddDot(1, a_id, b_id, sm_id, dot_output_id);
+
+    ynn_node mul_node;
+    ynn::define_ternary(subgraph, mul_node, dot_output_id, c_id, d_id, out_id,
+                        ternary_op::multiply, nullptr);
+    subgraph.add_node(std::move(mul_node));
+
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
+
+    const ynn_node& dequant_node = ProducerOf(out_id, subgraph);
+    ASSERT_THAT(dequant_node, AllOf(IsDequantizeDot(), HasInputCount(6)));
+    EXPECT_EQ(subgraph.value(dequant_node.inputs[5]).type, ynn_type_fp32);
+    EXPECT_EQ(subgraph.value(dequant_node.inputs[5]).data->elem_size,
+              sizeof(float));
+  }
+  {
+    SubgraphBuilder builder(7);
+    uint32_t dequant_out_id = YNN_INVALID_VALUE_ID;
+    uint32_t zero_id = builder.DefineScalar(0.0f);
+    builder.AddInput(ynn_type_int32, 2, 0)
+        .AddInput(ynn_type_int32, 1, 1)
+        .AddInput(ynn_type_int32, 1, 2)
+        .AddInput(ynn_type_fp32, 1, 3)
+        .AddInput(ynn_type_fp32, 1, 4)
+        .AddInput(ynn_type_bf16, 1, 5)
+        .AddOutput(ynn_type_bf16, 2, 6)
+        .AddTensor(ynn_type_bf16, 2, dequant_out_id);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+    ynn_node rescale_node;
+    ynn::define_dequantize_dot(subgraph, rescale_node, ynn_type_bf16, 0, 1, 2,
+                               3, 4, zero_id, dequant_out_id,
+                               ynn::dequantize_dot_params{});
+    subgraph.add_node(std::move(rescale_node));
+
+    ynn_node add_node;
+    ynn::define_binary(subgraph, add_node, dequant_out_id, 5, 6, ynn_binary_add,
+                       nullptr);
+    subgraph.add_node(std::move(add_node));
+
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
+
+    EXPECT_THAT(ProducerOf(6, subgraph), IsBinary(ynn_binary_add));
+  }
+}
+
 }  // namespace ynn
