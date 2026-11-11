@@ -356,3 +356,65 @@ TEST(BatchMatMulTest, invalid_output_range_is_reported) {
   EXPECT_EQ(status, xnn_status_invalid_parameter);
   EXPECT_EQ(batch_matrix_multiply_op, nullptr);
 }
+
+TEST(BatchMatMulTest, const_weights_aligned_size_overflow_fails) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const int8_t dummy_b = 0;
+  const float scale_b[32] = {1.0f};
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  xnn_status status =
+      xnn_create_batch_matrix_multiply_nc_f32_qc8w_const_weights(
+          /*batch_size_b=*/1, /*k=*/(SIZE_MAX / 32) - 8, /*n=*/32, &dummy_b,
+          scale_b, /*flags=*/0, &batch_matrix_multiply_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP() << "f32_qc8w GEMM is unavailable on this target";
+  }
+  EXPECT_EQ(status, xnn_status_out_of_memory);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+
+  status = xnn_create_batch_matrix_multiply_nc_f32_qc8w_const_weights(
+      /*batch_size_b=*/1, /*k=*/(SIZE_MAX / 8) - 8, /*n=*/8, &dummy_b,
+      scale_b, /*flags=*/0, &batch_matrix_multiply_op);
+  EXPECT_EQ(status, xnn_status_out_of_memory);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+}
+
+TEST(BatchMatMulTest, const_weights_stride_overflow_fails) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const float dummy_b = 0.0f;
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  xnn_status status = xnn_create_batch_matrix_multiply_nc_f32_const_weights(
+      /*batch_size_b=*/1, /*k=*/(SIZE_MAX >> 2) + 1, /*n=*/1, &dummy_b,
+      /*flags=*/0, &batch_matrix_multiply_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(status, xnn_status_out_of_memory);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+
+  status = xnn_create_batch_matrix_multiply_nc_f32_const_weights(
+      /*batch_size_b=*/1, /*k=*/1, /*n=*/SIZE_MAX, &dummy_b,
+      /*flags=*/0, &batch_matrix_multiply_op);
+  EXPECT_EQ(status, xnn_status_out_of_memory);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+}
+
+TEST(BatchMatMulTest, reshape_weights_stride_overflow_fails) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_batch_matrix_multiply_nc_f32(
+                0, &batch_matrix_multiply_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      batch_matrix_multiply_op, xnn_delete_operator);
+
+  const size_t batch_dims[1] = {1};
+  size_t workspace_size = 0;
+  EXPECT_EQ(
+      xnn_status_out_of_memory,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          batch_matrix_multiply_op, 1, batch_dims, batch_dims, /*m=*/1,
+          /*k=*/(SIZE_MAX >> 2) + 1, /*n=*/1, &workspace_size, nullptr));
+}

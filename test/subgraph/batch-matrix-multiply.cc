@@ -949,6 +949,58 @@ TEST(BatchMatrixMultiply, ReshapeOverflowOutputSize) {
   EXPECT_TRUE(reshape_status == xnn_status_out_of_memory ||
               reshape_status == xnn_status_invalid_parameter);
 }
+
+TEST(BatchMatrixMultiply, CreateRuntimeConstWeightsAlignedSizeOverflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_a_id = XNN_INVALID_VALUE_ID;
+  const size_t input_a_dims[3] = {1, 4, 1};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, input_a_dims, nullptr,
+          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_a_id));
+
+  uint32_t input_b_id = XNN_INVALID_VALUE_ID;
+  const size_t input_b_dims[3] = {SIZE_MAX / 72, 1, 8};
+  const int8_t dummy_b_data = 0;
+  float scale_b[8];
+  std::fill(std::begin(scale_b), std::end(scale_b), 1.0f);
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_channelwise_quantized_tensor_value(
+          subgraph, xnn_datatype_qcint8, scale_b, 3, /*channel_dim=*/2,
+          input_b_dims, &dummy_b_data, /*external_id=*/1, /*flags=*/0,
+          &input_b_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  const size_t output_dims[3] = {1, 4, 8};
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 3, output_dims, nullptr,
+          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_batch_matrix_multiply(
+          subgraph, input_a_id, input_b_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  const xnn_status status =
+      xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0, &runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(xnn_status_out_of_memory, status);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
