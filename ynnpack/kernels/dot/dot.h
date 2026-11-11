@@ -157,15 +157,15 @@ struct dot_kernel {
   float estimate_cost(size_t m, size_t n, size_t k) const;
 };
 
-// If we don't know the shape of a dot, just assume it's big.
-inline constexpr size_t unknown_dot_extent = 2048;
-
+// The shape of a dot. An extent that is not known where the shape is built
+// (e.g. a dimension that is still symbolic while the graph is constructed) is
+// `nullopt`, and `get_dot_kernel` decides what to assume about it.
 struct dot_shape {
-  size_t m = unknown_dot_extent;
-  size_t n = unknown_dot_extent;
-  size_t k1 = unknown_dot_extent;
-  size_t k2 = unknown_dot_extent;
-  size_t k3 = unknown_dot_extent;
+  std::optional<size_t> m;
+  std::optional<size_t> n;
+  std::optional<size_t> k1;
+  std::optional<size_t> k2;
+  std::optional<size_t> k3;
 };
 
 
