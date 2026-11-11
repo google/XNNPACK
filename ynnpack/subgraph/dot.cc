@@ -1401,6 +1401,16 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // the fly as if B were dynamic).
     return true;
   }
+  bool b_outer_transposed = false;
+  if (const ynn_node* producer = subgraph.get_producer(b.id)) {
+    if (const auto* transpose_op =
+            std::get_if<ynn_node::static_transpose>(&producer->op)) {
+      if (transpose_op->permutation.size() >= 2 &&
+          transpose_op->permutation[1] != 1) {
+        b_outer_transposed = true;
+      }
+    }
+  }
 
   const int block_m = unpacked_kernel.block_m;
   slinky::expr a_batch = 1;
@@ -1433,7 +1443,27 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   // loads of unpacked data are strided.
   const int b_elem_size = type_size_bytes(b.type);
   const int block_n = unpacked_kernel.block_n;
-  if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
+  if (kernel.tile_k == 1 &&
+      (block_n * b_elem_size) % YNN_CACHE_LINE_SIZE == 0 &&
+      !b_outer_transposed) {
+    if (slinky::prove_true(b.extent(0) <= block_n &&
+                           b.extent(0) % kernel.tile_n == 0)) {
+      return false;
+    }
+    slinky::expr b_matrix_bytes = b_elem_size;
+    for (size_t i = 0; i < num_k_dims + 1; ++i) {
+      if (b.extent(i).defined()) b_matrix_bytes *= b.extent(i);
+    }
+    const std::array<size_t, 3>& cache_budgets = get_dot_cache_budgets();
+    const slinky::index_t cache_budget =
+        std::max<size_t>(cache_budgets[1], cache_budgets[2] / 4);
+    const slinky::index_t effective_budget =
+        cache_budget ? cache_budget : 128 * 1024;
+    if (slinky::prove_true(b.extent(0) % kernel.tile_n == 0) &&
+        slinky::prove_true(b_matrix_bytes <= effective_budget)) {
+      max_unpacked_blocks = std::max(max_unpacked_blocks, 64);
+    }
+  } else if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
     slinky::expr b_bytes = b_batch * b_elem_size;
     for (size_t i = 0; i < num_k_dims + 1; ++i) {
       if (b.extent(i).defined()) b_bytes *= b.extent(i);
@@ -1866,7 +1896,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // TODO: b/555814090 - More sophisticated automatic scheduling would help.
     const bool n_outer =
         rank >= 2 && !input_b.is_static() &&
-        (!input_a.is_internal() || !slinky::prove_true(n < m));
+        (!input_a.is_internal() ||
+         (input_b.is_internal() && !slinky::prove_true(n < m)));
     if (is_split_k) {
       if (n_outer) {
         loop_order.push_back(num_k_dims + 1);  // m (innermost)

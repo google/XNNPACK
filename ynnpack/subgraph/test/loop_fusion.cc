@@ -448,5 +448,55 @@ TEST_F(LoopFusionTest, TransposedInputANotRecomputedAcrossN) {
   }
 }
 
+TEST_F(LoopFusionTest, TransposedInputAUnpackedBNotRecomputedAcrossN) {
+  const size_t M = 256, K = 32, N = 1024;
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t a_t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), {K, M}, a_id)
+      .AddInput(type_of<float>(), {K, N}, b_id)
+      .AddOutput(type_of<float>(), {M, N}, out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), a_t_id)
+      .AddTranspose({1, 0}, a_id, a_t_id)
+      .AddDot(1, a_t_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  TestScheduler scheduler(3);
+  Runtime runtime(subgraph.GetSubgraph(), &scheduler,
+                  YNN_FLAG_ENABLE_SLINKY_TRACE);
+
+  std::atomic<size_t> transpose_calls = 0;
+  runtime.get()->eval_config.trace_begin =
+      [&](const char* name) -> slinky::index_t {
+    if (name != nullptr) {
+      const std::string_view name_view = name;
+      if (name_view == "transpose" || name_view == "transpose_a") {
+        ++transpose_calls;
+      }
+    }
+    return 0;
+  };
+
+  Tensor<float> a({K, M});
+  Tensor<float> b({K, N});
+  Tensor<float> out({M, N});
+  a.fill(1.0f);
+  b.fill(1.0f);
+  runtime.ReshapeExternalTensor({K, M}, a.data(), a_id)
+      .ReshapeExternalTensor({K, N}, b.data(), b_id)
+      .ReshapeRuntime()
+      .SetupExternalTensor(out.data(), out_id)
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_GT(transpose_calls, 0);
+  EXPECT_LE(transpose_calls, M / 16);
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(out({i, j}), K) << i << " " << j;
+    }
+  }
+}
+
 }  // namespace
 }  // namespace ynn
