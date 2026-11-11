@@ -19,6 +19,10 @@ extern "C" {
 // The most dimensions that can appear in a value.
 #define YNN_MAX_TENSOR_RANK 8
 
+// Indicates that a rank parameter should be inferred from the operation inputs
+// or pre-defined output tensor.
+#define YNN_UNKNOWN_RANK SIZE_MAX
+
 // This flag indicates that YNNPACK should attempt to produce numerically
 // consistent results from a specific build of YNNPACK. This causes YNNPACK to
 // avoid using faster codepaths that are numerically inconsistent with any
@@ -390,7 +394,15 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
 //
 // where the `index` tensor replaces the gathered axis.
 //
-// `output_rank` specifies the rank of the output tensor.
+// `output_rank` specifies the rank of the output tensor, or `YNN_UNKNOWN_RANK`
+// to infer it from `*output_id` (if it is an external/static tensor with a
+// defined rank) or from `input_id` and `index_id`. When inferring from inputs,
+// `YNN_UNKNOWN_RANK` assumes `num_axes == 1` omits the size-1 coordinate
+// dimension and preserves ungathered dimensions of `input_id` (dropping
+// trailing ungathered size-1 dimensions if `num_axes > 1` requires a lower
+// rank); pass an explicit `output_rank` or pre-defined external `*output_id`
+// when keeping an explicit size-1 coordinate dimension for `num_axes == 1` or
+// dropping leading ungathered size-1 dimensions.
 enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
                                   const int32_t* axes, size_t output_rank,
                                   uint32_t input_id, uint32_t index_id,
