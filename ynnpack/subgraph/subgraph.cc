@@ -479,12 +479,11 @@ bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
   }
 }
 
-// When caching folded constants, we need a cache key. The cache key is the tree
-// of producers of the value, serialized in post-order (the producers of a
-// node's inputs come before the node itself, in the order of the inputs). This
-// is unambiguous because each node records how many inputs it has, and which of
-// them are produced values. The following 3 structs define the 3 kinds of
-// inputs a producer may have.
+// When caching folded constants, we need a cache key. To avoid the need to have
+// arbitrary producer graphs as cache keys, we only cache values that have a
+// single chain of producers, where each producer consumes either constants or
+// at most one other produced value. The following 3 structs define the 3 kinds
+// of inputs a producer may have.
 struct input_pointer {
   ynn_type ynn_type_val = ynn_type_invalid;
   std::array<slinky::index_t, ynn::max_tensor_rank> extents;
@@ -531,17 +530,12 @@ struct op_key {
   decltype(ynn_node::op) op;
   using input_key = std::variant<input_pointer, input_value, input_producer>;
   std::vector<input_key> inputs;
-  // Some ops have behavior that depends on the shape of their outputs (e.g.
-  // `static_broadcast`, `pack_b`), so the shape of the outputs is part of the
-  // key. Undefined (broadcast) extents are 1.
-  std::vector<std::vector<slinky::index_t>> outputs;
 
   bool operator==(const op_key& other) const {
-    return op == other.op && inputs == other.inputs && outputs == other.outputs;
+    return op == other.op && inputs == other.inputs;
   }
   bool operator<(const op_key& other) const {
-    return std::tie(op, inputs, outputs) <
-           std::tie(other.op, other.inputs, other.outputs);
+    return std::tie(op, inputs) < std::tie(other.op, other.inputs);
   }
 };
 
@@ -558,28 +552,20 @@ struct cache_key {
   }
 };
 
-// Appends the producers of `v_id` to `producers` in post-order.
-bool build_producers(const ynn_subgraph& subgraph, uint32_t v_id,
-                     std::vector<op_key>& producers) {
+bool build_chain(const ynn_subgraph& subgraph, uint32_t v_id,
+                 std::vector<op_key>& chain, size_t& output_index) {
   const ynn_node* producer = subgraph.get_producer(v_id);
   if (!producer) return false;
+
+  std::optional<size_t> idx = index_of(producer->outputs, v_id);
+  if (!idx) return false;
+  output_index = *idx;
 
   op_key op_key;
   op_key.op = producer->op;
 
-  for (uint32_t output_id : producer->outputs) {
-    std::vector<slinky::index_t>& extents = op_key.outputs.emplace_back();
-    if (output_id == YNN_INVALID_VALUE_ID) continue;
-    for (const slinky::expr& extent : subgraph.value(output_id).extents) {
-      if (!extent.defined()) {
-        extents.push_back(1);
-      } else {
-        // Constant values should not have symbolic shapes.
-        assert(slinky::as_constant(extent));
-        extents.push_back(*slinky::as_constant(extent));
-      }
-    }
-  }
+  uint32_t chain_input_id = YNN_INVALID_VALUE_ID;
+  int chain_inputs_count = 0;
 
   for (uint32_t input_id : producer->inputs) {
     if (input_id == YNN_INVALID_VALUE_ID) {
@@ -615,26 +601,31 @@ bool build_producers(const ynn_subgraph& subgraph, uint32_t v_id,
 
       op_key.inputs.push_back(input_producer{*output_index});
 
-      if (!build_producers(subgraph, input_id, producers)) {
-        return false;
-      }
+      chain_input_id = input_id;
+      chain_inputs_count++;
     }
   }
 
-  producers.push_back(std::move(op_key));
-  return true;
+  if (chain_inputs_count > 1) {
+    // We only support caching values with one non-static input.
+    return false;
+  }
+
+  chain.push_back(op_key);
+
+  size_t dummy_output_index;
+  return chain_inputs_count == 0 ||
+         build_chain(subgraph, chain_input_id, chain, dummy_output_index);
 }
 
 bool build_cache_key(const ynn_subgraph& subgraph, uint32_t v_id,
                      cache_key& key) {
-  const ynn_node* producer = subgraph.get_producer(v_id);
-  if (!producer) return false;
-  std::optional<size_t> output_index = index_of(producer->outputs, v_id);
-  if (!output_index) return false;
-  key.output_index = *output_index;
-
   key.producers.clear();
-  return build_producers(subgraph, v_id, key.producers);
+  if (!build_chain(subgraph, v_id, key.producers, key.output_index)) {
+    return false;
+  }
+  std::reverse(key.producers.begin(), key.producers.end());
+  return true;
 }
 
 using constant_cache_map =
@@ -1162,12 +1153,12 @@ ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
     return status;
   }
 
-  status = eliminate_common_subgraphs();
+  status = fold_constants(threadpool);
   if (status != ynn_status_success) {
     return status;
   }
 
-  status = fold_constants(threadpool);
+  status = eliminate_common_subgraphs();
   if (status != ynn_status_success) {
     return status;
   }
