@@ -549,33 +549,59 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[3].primary_tile = 25;
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    size_t lmul = 8;
+    size_t lmul = 4;
     const int element_size = 4; // size of float
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
 
-    f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p8vc__rvv);
-    f32_dwconv_config[0].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_3p8vc__rvv);
+    f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p4vc__rvv);
+    f32_dwconv_config[0].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_3p4vc__rvv);
     f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv_config[0].channel_tile = hardware_config->vlenb / element_size * lmul;
     f32_dwconv_config[0].primary_tile = 3;
 
-    f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_4p8vc__rvv);
-    f32_dwconv_config[1].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_4p8vc__rvv);
+    f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_4p4vc__rvv);
+    f32_dwconv_config[1].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_4p4vc__rvv);
     f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv_config[1].channel_tile = hardware_config->vlenb / element_size * lmul;
     f32_dwconv_config[1].primary_tile = 4;
 
-    f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_9p8vc__rvv);
-    f32_dwconv_config[2].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_9p8vc__rvv);
+    f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_9p4vc__rvv);
+    f32_dwconv_config[2].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_9p4vc__rvv);
     f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv_config[2].channel_tile = hardware_config->vlenb / element_size * lmul;
     f32_dwconv_config[2].primary_tile = 9;
 
-    f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_25p8vc__rvv);
-    f32_dwconv_config[3].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_25p8vc__rvv);
+    f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_25p4vc__rvv);
+    f32_dwconv_config[3].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_25p4vc__rvv);
     f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv_config[3].channel_tile = hardware_config->vlenb / element_size * lmul;
     f32_dwconv_config[3].primary_tile = 25;
+
+    lmul = 8;
+
+    f32_dwconv_config[4].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p8vc__rvv);
+    f32_dwconv_config[4].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_3p8vc__rvv);
+    f32_dwconv_config[4].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[4].channel_tile = hardware_config->vlenb / element_size * lmul;
+    f32_dwconv_config[4].primary_tile = 3;
+
+    f32_dwconv_config[5].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_4p8vc__rvv);
+    f32_dwconv_config[5].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_4p8vc__rvv);
+    f32_dwconv_config[5].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[5].channel_tile = hardware_config->vlenb / element_size * lmul;
+    f32_dwconv_config[5].primary_tile = 4;
+
+    f32_dwconv_config[6].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_9p8vc__rvv);
+    f32_dwconv_config[6].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_9p8vc__rvv);
+    f32_dwconv_config[6].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[6].channel_tile = hardware_config->vlenb / element_size * lmul;
+    f32_dwconv_config[6].primary_tile = 9;
+
+    f32_dwconv_config[7].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_25p8vc__rvv);
+    f32_dwconv_config[7].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_25p8vc__rvv);
+    f32_dwconv_config[7].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[7].channel_tile = hardware_config->vlenb / element_size * lmul;
+    f32_dwconv_config[7].primary_tile = 25;
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
