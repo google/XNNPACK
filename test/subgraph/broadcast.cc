@@ -128,3 +128,83 @@ INSTANTIATE_TEST_SUITE_P(Broadcast, BroadcastF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Broadcast, BroadcastF32, rank_params);
 
 }  // namespace xnnpack
+
+#include "src/xnnpack/subgraph-validation.h"
+
+TEST(SubgraphValidationTest, NullInputPointers) {
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_input_type_dense(
+                xnn_node_type_unary_elementwise, 0, nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_nth_input_type_dense(
+                xnn_node_type_unary_elementwise, 0, nullptr, 1));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_output_type_dense(
+                xnn_node_type_unary_elementwise, 0, nullptr));
+}
+
+TEST(SubgraphValidationTest, NullDatatypeMatches) {
+  struct xnn_value val;
+  memset(&val, 0, sizeof(val));
+  val.type = xnn_value_type_dense_tensor;
+  val.datatype = xnn_datatype_fp32;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_datatype_matches(
+                xnn_node_type_unary_elementwise, 0, nullptr, 1, &val));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_datatype_matches(
+                xnn_node_type_unary_elementwise, 0, &val, 1, nullptr));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_datatype_matches_two_inputs(
+                xnn_node_type_binary_elementwise, 0, nullptr, 1, &val, 2,
+                &val));
+}
+
+TEST(SubgraphValidationTest, NullQuantizationMatches) {
+  struct xnn_value val;
+  memset(&val, 0, sizeof(val));
+  val.type = xnn_value_type_dense_tensor;
+  val.datatype = xnn_datatype_qint8;
+  val.quantization.scale = 1.0f;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_quantization_parameter_matches(
+                xnn_node_type_unary_elementwise, 0, nullptr, 1, &val));
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_quantization_parameter_matches(
+                xnn_node_type_unary_elementwise, 0, &val, 1, nullptr));
+}
+
+TEST(SubgraphValidationTest, InvalidQuantizationScale) {
+  struct xnn_value in;
+  memset(&in, 0, sizeof(in));
+  in.type = xnn_value_type_dense_tensor;
+  in.datatype = xnn_datatype_qint8;
+  in.quantization.scale = 0.0f;
+
+  struct xnn_value out;
+  memset(&out, 0, sizeof(out));
+  out.type = xnn_value_type_dense_tensor;
+  out.datatype = xnn_datatype_qint8;
+  out.quantization.scale = 1.0f;
+
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_quantization_parameter_matches(
+                xnn_node_type_unary_elementwise, 0, &in, 1, &out));
+}
+
+TEST(SubgraphValidationTest, BatchDimsMatchNullOrExcess) {
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_batch_dims_match(
+                xnn_node_type_batch_matrix_multiply, 0, nullptr, 1, nullptr,
+                1));
+
+  struct xnn_value val;
+  memset(&val, 0, sizeof(val));
+  val.type = xnn_value_type_dense_tensor;
+  val.datatype = xnn_datatype_fp32;
+  val.shape.num_dims = 2;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_subgraph_check_batch_dims_match(
+                xnn_node_type_batch_matrix_multiply, 0, &val, 1, &val,
+                XNN_MAX_TENSOR_DIMS + 1));
+}
