@@ -357,6 +357,42 @@ TEST(BatchMatMulTest, invalid_output_range_is_reported) {
   EXPECT_EQ(batch_matrix_multiply_op, nullptr);
 }
 
+TEST(BatchMatMulTest, invalid_output_range_clears_operator) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_operator_t batch_matrix_multiply_op =
+      reinterpret_cast<xnn_operator_t>(uintptr_t{1});
+  const xnn_status status = xnn_create_batch_matrix_multiply_nc_qs8(
+      /*input_zero_point=*/0, /*output_zero_point=*/0, /*output_min=*/100,
+      /*output_max=*/-100, /*scale_b=*/nullptr, /*flags=*/0,
+      &batch_matrix_multiply_op);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP() << "qs8/qc8w GEMM is unavailable on this target";
+  }
+  EXPECT_EQ(status, xnn_status_invalid_parameter);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+}
+
+TEST(BatchMatMulTest, const_weights_overflow_clears_operator) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const float weights[] = {1.0f};
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32_const_weights(
+      /*batch_size_b=*/SIZE_MAX, /*k=*/1, /*n=*/1, weights, /*flags=*/0,
+      &batch_matrix_multiply_op);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP() << "f32 GEMM is unavailable on this target";
+  }
+  EXPECT_EQ(status, xnn_status_out_of_memory);
+  EXPECT_EQ(batch_matrix_multiply_op, nullptr);
+  if (batch_matrix_multiply_op != nullptr) {
+    xnn_delete_operator(batch_matrix_multiply_op);
+  }
+}
+
 TEST(BatchMatMulTest, const_weights_aligned_size_overflow_fails) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
