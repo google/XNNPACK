@@ -21,6 +21,7 @@
 static struct xnn_dwconv_config f16_dwconv_config[XNN_MAX_F16_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config f32_dwconv_config[XNN_MAX_F32_DWCONV_UKERNELS] = {0};
 static struct xnn_kai_dwconv_config kai_f32_dwconv_config = {0};
+static struct xnn_dwconv_config bf16_f32_dwconv_config[XNN_MAX_BF16_F32_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config qs8_qc8w_dwconv_config[XNN_MAX_QC8_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config qs8_dwconv_config[XNN_MAX_QS8_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config qu8_dwconv_config[XNN_MAX_QU8_DWCONV_UKERNELS] = {0};
@@ -28,6 +29,7 @@ static struct xnn_dwconv_config qu8_dwconv_config[XNN_MAX_QU8_DWCONV_UKERNELS] =
 XNN_INIT_ONCE_GUARD(f16_dwconv);
 XNN_INIT_ONCE_GUARD(f32_dwconv);
 XNN_INIT_ONCE_GUARD(kai_f32_dwconv);
+XNN_INIT_ONCE_GUARD(bf16_f32_dwconv);
 XNN_INIT_ONCE_GUARD(qs8_qc8w_dwconv);
 XNN_INIT_ONCE_GUARD(qs8_dwconv);
 XNN_INIT_ONCE_GUARD(qu8_dwconv);
@@ -627,6 +629,9 @@ static void init_f32_dwconv_config(void) {
   #endif
 }
 
+static void init_bf16_f32_dwconv_config(void) {
+}
+
 static void init_qs8_qc8w_dwconv_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1107,6 +1112,16 @@ const struct xnn_kai_dwconv_config* xnn_init_kai_f32_dwconv_config() {
   }
   XNN_INIT_ONCE(kai_f32_dwconv);
   return kai_f32_dwconv_config.init != NULL ? &kai_f32_dwconv_config : NULL;
+}
+
+const struct xnn_dwconv_config* xnn_init_bf16_f32_dwconv_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(bf16_f32_dwconv);
+  return bf16_f32_dwconv_config[0].minmax != NULL ? bf16_f32_dwconv_config
+                                                  : NULL;
 }
 
 const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
