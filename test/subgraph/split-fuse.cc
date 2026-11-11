@@ -232,6 +232,96 @@ TEST(SplitDims, RejectsAxisOutOfRange) {
   subgraph.ReshapeExternalTensor(input_shape, input.data(), 0).ReshapeRuntime();
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
+
+TEST(SplitDims, RejectsNullSplits) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+
+  const size_t dims[] = {2, 3};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &input_id));
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                                    &output_id));
+
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_split_dim(subgraph, /*axis=*/0, /*num_splits=*/2,
+                                 nullptr, input_id, output_id, /*flags=*/0));
+
+  xnn_delete_subgraph(subgraph);
+}
+
+TEST(SplitDims, RejectsMultipleZeroSplits) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+
+  const size_t dims[] = {2, 3};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &input_id));
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                                    &output_id));
+
+  const size_t splits[] = {0, 0};
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_define_split_dim(subgraph, /*axis=*/0, /*num_splits=*/2,
+                                 splits, input_id, output_id, /*flags=*/0));
+
+  xnn_delete_subgraph(subgraph);
+}
+
+TEST(SplitDims, RejectsMismatchedSplitsWithoutZero) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> input_shape = {12, 4};
+  Tensor<float> input(input_shape, XnnExtraBytes);
+  Tensor<float> output({2, 3, 4});
+
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(input_shape, input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.shape(), output.data(), /*external_id=*/1)
+      .AddSplitDim(/*axis=*/0, /*splits=*/{2, 3}, /*input_id=*/0,
+                   /*output_id=*/1);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  subgraph.ReshapeExternalTensor(input_shape, input.data(), 0)
+      .ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+
+TEST(SplitDims, RejectsOverflowingSplitsAtReshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::vector<size_t> input_shape = {4, 4};
+  Tensor<float> input(input_shape, XnnExtraBytes);
+  Tensor<float> output({4, 4, 4});
+
+  SubgraphTester subgraph(2);
+  const size_t huge = static_cast<size_t>(1) << 32;
+  subgraph.AddInputTensor(input_shape, input.data(), /*external_id=*/0)
+      .AddOutputTensor(output.shape(), output.data(), /*external_id=*/1)
+      .AddSplitDim(/*axis=*/0, /*splits=*/{huge, huge}, /*input_id=*/0,
+                   /*output_id=*/1);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  subgraph.ReshapeExternalTensor(input_shape, input.data(), 0)
+      .ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FuseAndSplitQS8, test) { FuseAndSplit<quantized<int8_t>>(); }
