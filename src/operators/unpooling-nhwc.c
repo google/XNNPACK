@@ -190,6 +190,13 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   unpooling_op->convolution_op->output_width = xnn_compute_unpooling_output_dimension(
     input_width, unpooling_op->convolution_op->padding_left + unpooling_op->convolution_op->padding_right,
     unpooling_op->convolution_op->kernel_width);
+  if (unpooling_op->convolution_op->output_height == SIZE_MAX ||
+      unpooling_op->convolution_op->output_width == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: output dimension overflows size_t",
+        xnn_operator_type_to_string_v2(unpooling_op));
+    return xnn_status_out_of_memory;
+  }
 
   if (output_height_out != NULL) {
     *output_height_out = unpooling_op->convolution_op->output_height;

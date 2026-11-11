@@ -38,6 +38,7 @@ XNN_INTERNAL size_t xnn_compute_convolution_output_dimension(
     size_t padded_input_dimension, size_t kernel_dimension,
     size_t dilation_dimension, size_t subsampling_dimension);
 
+/// Returns SIZE_MAX if the output dimension computation overflows size_t.
 XNN_INTERNAL size_t xnn_compute_deconvolution_output_dimension(
     size_t input_dimension, size_t output_padding_dimension,
     size_t adjustment_dimension, size_t kernel_dimension,
