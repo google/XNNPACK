@@ -114,6 +114,15 @@ enum xnn_status xnn_define_global_average_pooling_1d(
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
 
+  if (input_value->shape.num_dims < 2) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 2",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_1d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
 
   reduction_axes[0] = input_value->shape.num_dims - 2;
@@ -149,6 +158,15 @@ enum xnn_status xnn_define_global_average_pooling_2d(
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 3) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 3",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
 
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
 
@@ -186,6 +204,15 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 2) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 2",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_1d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   reduction_axes[0] = input_value->shape.num_dims - 2;
 
@@ -220,6 +247,15 @@ enum xnn_status xnn_define_global_sum_pooling_2d(
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 3) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 3",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_2d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   reduction_axes[0] = input_value->shape.num_dims - 3;
   reduction_axes[1] = input_value->shape.num_dims - 2;
