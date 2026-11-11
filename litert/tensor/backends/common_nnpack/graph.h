@@ -78,6 +78,25 @@ class NnpackGraph {
     return fp16_buffers_;
   }
 
+  std::vector<std::shared_ptr<const std::vector<bf16_t>>>& bf16_scale_refs() {
+    return bf16_scale_refs_;
+  }
+  const std::vector<std::shared_ptr<const std::vector<bf16_t>>>&
+  bf16_scale_refs() const {
+    return bf16_scale_refs_;
+  }
+
+  std::vector<
+      std::shared_ptr<const BlockwiseQuantization::CpuSymmetricFallback>>&
+  cpu_fallback_refs() {
+    return cpu_fallback_refs_;
+  }
+  const std::vector<
+      std::shared_ptr<const BlockwiseQuantization::CpuSymmetricFallback>>&
+  cpu_fallback_refs() const {
+    return cpu_fallback_refs_;
+  }
+
   std::vector<std::vector<char>>& constant_buffers() {
     return constant_buffers_;
   }
@@ -100,6 +119,10 @@ class NnpackGraph {
   absl::flat_hash_set<graph::Tensor> external_outputs_;
   std::vector<std::vector<float>> dequantized_buffers_;
   std::vector<std::vector<fp16_t>> fp16_buffers_;
+  std::vector<std::shared_ptr<const std::vector<bf16_t>>> bf16_scale_refs_;
+  std::vector<
+      std::shared_ptr<const BlockwiseQuantization::CpuSymmetricFallback>>
+      cpu_fallback_refs_;
   std::vector<std::vector<char>> constant_buffers_;
   std::vector<std::shared_ptr<Buffer>> keep_alive_buffers_;
 };
