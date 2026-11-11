@@ -4,8 +4,17 @@
 # LICENSE file in the root directory of this source tree.
 
 # Arm KleidiAI kernels
+- name: xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_kai_f16_6x32_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_f16_6x32_weights_and_biases
+  cpp-check: XNN_ENABLE_KLEIDIAI
+  k-block: 1
+  mr-packed: 6
 - name: xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2
   init: xnn_init_f16_minmax_scalar_params
+  pack-lh-fn: (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2
+  pack-lh-size-fn: xnn_x16_pack_lh_size__neonsme2
   pack: xnn_pack_kai_f16_weights_and_biases
   packed-stride: xnn_packed_stride_kai_f16_weights_and_biases
   cpp-check: XNN_ENABLE_KLEIDIAI
@@ -13,6 +22,8 @@
   mr-packed: 1
 - name: xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2
   init: xnn_init_f16_minmax_scalar_params
+  pack-lh-fn: (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2
+  pack-lh-size-fn: xnn_x16_pack_lh_size__neonsme2
   pack: xnn_pack_kai_f16_weights_and_biases
   packed-stride: xnn_packed_stride_kai_f16_weights_and_biases
   cpp-check: XNN_ENABLE_KLEIDIAI
@@ -20,6 +31,8 @@
   mr-packed: 32
 - name: xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme
   init: xnn_init_f16_minmax_scalar_params
+  pack-lh-fn: (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme
+  pack-lh-size-fn: xnn_x16_pack_lh_size__neonsme
   pack: xnn_pack_kai_f16_weights_and_biases
   packed-stride: xnn_packed_stride_kai_f16_weights_and_biases
   cpp-check: XNN_ENABLE_KLEIDIAI
@@ -27,6 +40,8 @@
   mr-packed: 1
 - name: xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme
   init: xnn_init_f16_minmax_scalar_params
+  pack-lh-fn: (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme
+  pack-lh-size-fn: xnn_x16_pack_lh_size__neonsme
   pack: xnn_pack_kai_f16_weights_and_biases
   packed-stride: xnn_packed_stride_kai_f16_weights_and_biases
   cpp-check: XNN_ENABLE_KLEIDIAI

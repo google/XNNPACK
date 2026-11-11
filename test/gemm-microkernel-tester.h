@@ -421,8 +421,8 @@ class GemmMicrokernelTester {
 
   void Test_PF16(xnn_pf16_gemm_minmax_ukernel_fn gemm,
                  xnn_init_f16_minmax_params_fn init_minmax_params,
-                 xnn_x16_pack_lh_ukernel_fn pack_lh_fn,
-                 xnn_pack_lh_size_fn pack_lh_size_fn,
+                 xnn_pack_lh_ukernel_fn pack_lh,
+                 xnn_pack_lh_size_fn packed_lh_size,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 

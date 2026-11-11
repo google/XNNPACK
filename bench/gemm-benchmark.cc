@@ -1593,7 +1593,7 @@ void GEMMBenchmark(benchmark::State& state,
 }
 #endif  //   XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
-#if XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
+#if XNN_ENABLE_KLEIDIAI
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f16_minmax_params_fn init_minmax_params,
@@ -1644,12 +1644,14 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(
       packed_w_size * num_buffers, /*extra_bytes=*/{0}, "w");
 
-  // Pack the left-hand operand.
-  const size_t input_packed_size = pack_lh_size(mc, kc, mr_packed, kr, sr);
+  const size_t input_packed_size =
+      pack_lh == nullptr ? 0 : pack_lh_size(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size, /*extra_bytes=*/{0}, "input_packed");
-  pack_lh(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0, a.data(),
-          /*lhs_stride=*/kc * sizeof(xnn_float16), input_packed.data());
+  if (pack_lh != nullptr) {
+    pack_lh(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0, a.data(),
+            /*lhs_stride=*/kc * sizeof(xnn_float16), input_packed.data());
+  }
 
   // RHS packing
   pack_weights(/*flags=*/0, &gemm_config, kc, nc,
@@ -1686,11 +1688,15 @@ void GEMMBenchmark(benchmark::State& state,
 
     for (uint32_t m = 0; m < mc; m += mr) {
       const uint32_t mb = min(mc - m, mr);
-      gemm(mb, nc, kc * sizeof(xnn_float16),
-           input_packed.data() + pack_lh_offset(m, kc, mr_packed, kr, sr),
-           w.data() + packed_w_size * buffer_index,
-           &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
-           sizeof(xnn_float16), &minmax_params);
+      const void* input =
+          pack_lh == nullptr
+              ? static_cast<const void*>(a.data() + m * kc)
+              : input_packed.data() +
+                    pack_lh_offset(m, kc, mr_packed, kr, sr);
+      gemm(mb, nc, kc * sizeof(xnn_float16), input,
+            w.data() + packed_w_size * buffer_index,
+            &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
+            sizeof(xnn_float16), &minmax_params);
     }
   }
 
@@ -1703,6 +1709,9 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
+#endif  // XNN_ENABLE_KLEIDIAI
+
+#if XNN_ENABLE_KLEIDIAI
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
@@ -1712,20 +1721,28 @@ void GEMMBenchmark(benchmark::State& state,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags) {
-  // `__neonsme` and `__neonsme2` both wrap KleidiAI's
-  // `kai_run_lhs_pack_x16p2vlx2_x16_sme`; use whichever one is compiled in.
+  if ((arch_flags & (xnn_arch_arm_sme2 | xnn_arch_arm_sme)) == 0) {
+    GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
+                  /*pack_lh=*/nullptr, /*pack_lh_size=*/nullptr,
+                  /*pack_lh_offset=*/nullptr, mr, nr, kr, sr, mr_packed,
+                  arch_flags);
+    return;
+  }
+
 #if XNN_ENABLE_ARM_SME
   GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
                 xnn_x16_pack_lh_ukernel__neonsme, xnn_x16_pack_lh_size__neonsme,
                 xnn_x16_pack_lh_offset__neonsme, mr, nr, kr, sr, mr_packed,
                 arch_flags);
-#else
+#elif XNN_ENABLE_ARM_SME2
   GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
                 xnn_x16_pack_lh_ukernel__neonsme2,
                 xnn_x16_pack_lh_size__neonsme2,
                 xnn_x16_pack_lh_offset__neonsme2, mr, nr, kr, sr, mr_packed,
                 arch_flags);
-#endif  // XNN_ENABLE_ARM_SME
+#else
+  state.SkipWithError("SME PF16 benchmark requested but not compiled");
+#endif
 }
 
 void GEMMBenchmark(benchmark::State& state,
