@@ -85,11 +85,8 @@ void TestImpl() {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
-    // TODO(b/406664150): Test kernels bigger than 5.
-    StencilParams kw =
-        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
-    StencilParams kh =
-        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
+    StencilParams kw = random_stencil_params(rng, /*max_dilation=*/1);
+    StencilParams kh = random_stencil_params(rng, /*max_dilation=*/1);
 
     const bool same_padding = bool_dist(rng);
 
@@ -135,14 +132,6 @@ void TestImpl() {
       if (same_padding) {
         kh.compute_tf_same_padding(input_shape[1]);
         kw.compute_tf_same_padding(input_shape[2]);
-      }
-
-      if (input_shape[1] <= kh.padding() || input_shape[2] <= kw.padding()) {
-        // TODO(b/406664150): This is a hack around a horrible long-standing bug
-        // where xnn_indirection_init_dwconv2d_compressed produces incorrect
-        // results if the input is smaller than the padded area. If we hit this
-        // case, just try again.
-        break;
       }
 
       // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
@@ -196,6 +185,44 @@ TEST(AveragePooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
 TEST(AveragePooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
 TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
+
+TEST(AveragePooling2D, PaddingExceedsInputHeight) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor({1, 3, 4, 32}, xnn_datatype_fp32, 0)
+      .AddOutputTensor({1, 3, 4, 32}, xnn_datatype_fp32, 1)
+      .AddAveragePooling2D(/*input_padding_top=*/1, /*input_padding_right=*/0,
+                           /*input_padding_bottom=*/5, /*input_padding_left=*/0,
+                           /*pooling_height=*/7, /*pooling_width=*/1,
+                           /*stride_height=*/1, /*stride_width=*/1,
+                           /*input_id=*/0, /*output_id=*/1);
+  const xnn_status status = subgraph.CreateRuntime();
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  subgraph.ReshapeRuntime();
+  Tensor<float> input({1, 3, 4, 32}, XnnExtraBytes);
+  for (size_t y = 0; y < 3; ++y) {
+    for (size_t x = 0; x < 4; ++x) {
+      for (size_t c = 0; c < 32; ++c) {
+        input(0, y, x, c) = static_cast<float>(y + 1);
+      }
+    }
+  }
+  Tensor<float> output({1, 3, 4, 32});
+  subgraph.SetupExternalTensor(input.base(), 0)
+      .SetupExternalTensor(output.base(), 1)
+      .SetupRuntime()
+      .InvokeRuntime();
+  for (size_t x = 0; x < 4; ++x) {
+    for (size_t c = 0; c < 32; ++c) {
+      EXPECT_FLOAT_EQ(output(0, 0, x, c), 2.0f);
+      EXPECT_FLOAT_EQ(output(0, 1, x, c), 2.0f);
+      EXPECT_FLOAT_EQ(output(0, 2, x, c), 2.5f);
+    }
+  }
+}
 
 #ifndef XNNPACK_USE_YNNPACK
 static xnn_status DefineAveragePooling2D(xnn_subgraph_t subgraph) {

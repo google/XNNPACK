@@ -727,8 +727,16 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     return xnn_status_out_of_memory;
   }
 
-  const size_t indirect_top_height = divide_round_up(average_pooling_op->convolution_op->padding_top, average_pooling_op->convolution_op->stride_height);
-  const size_t indirect_bot_height = divide_round_up(average_pooling_op->convolution_op->padding_bottom, average_pooling_op->convolution_op->stride_height);
+  size_t indirect_top_height = divide_round_up(average_pooling_op->convolution_op->padding_top, average_pooling_op->convolution_op->stride_height);
+  size_t indirect_bot_height = divide_round_up(average_pooling_op->convolution_op->padding_bottom, average_pooling_op->convolution_op->stride_height);
+  size_t indirection_buffer_output_height = output_height;
+  if (indirect_bot_height < output_height &&
+      indirect_top_height < output_height - indirect_bot_height - 1) {
+    indirection_buffer_output_height = indirect_top_height + indirect_bot_height + 1;
+  } else {
+    indirect_top_height = output_height;
+    indirect_bot_height = 0;
+  }
 
   size_t input_pixel_stride_in_bytes = 0;
   if (!xnn_safe_mul(average_pooling_op->input_pixel_stride,
@@ -742,7 +750,6 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
   }
 
   if (input_size_changed) {
-    const size_t indirection_buffer_output_height = (indirect_top_height + indirect_bot_height + 1);
     size_t indirection_buffer_elements = 0;
     size_t indirection_buffer_size = 0;
     if (!xnn_safe_mul(indirection_buffer_output_height, step_height,

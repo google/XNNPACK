@@ -253,6 +253,8 @@ void xnn_indirection_init_dwconv2d_compressed(
   size_t primary_tile)
 {
   assert(output_y_end <= output_height);
+  assert(indirect_bot_height <= output_y_end);
+  assert(indirect_top_height <= output_y_end - indirect_bot_height);
 
   // For the last few rows of indirection buffer, output_y is not the same as indirection_y due to compression of the
   // middle rows. So we track the y offset of indirection buffer separately.
@@ -283,7 +285,7 @@ void xnn_indirection_init_dwconv2d_compressed(
       } else {
         for (size_t output_x = 0; output_x < output_width; output_x++) {
           for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
-            const size_t index = output_y * step_height + (output_x * step_width + kernel_x) * kernel_height + kernel_y;
+            const size_t index = indirection_y * step_height + (output_x * step_width + kernel_x) * kernel_height + kernel_y;
             indirection_buffer[index] = zero_buffer;
           }
         }
