@@ -122,8 +122,15 @@ class VUnaryMicrokernelTester {
           if (std::isnan(static_cast<float>(y_ref[i]))) {
             ASSERT_TRUE(std::isnan(static_cast<float>(y[i])));
           } else {
+            // The output-relative tolerance alone is ill-posed where the
+            // reference value underflows to zero, so also admit the
+            // input-scaled error that approximation operators exhibit.
             ASSERT_NEAR(y[i], y_ref[i],
-                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                        std::max(test_info.Tolerance(
+                                     y_ref[i], xnn_datatype_of<Out>()),
+                                 test_info.InputTolerance(
+                                     static_cast<float>(x[i]),
+                                     xnn_datatype_of<Out>())))
                 << "at " << i << " / " << batch_size() << ", x[" << i
                 << "] = " << std::scientific << (float)x[i];
           }
@@ -183,8 +190,15 @@ class VUnaryMicrokernelTester {
           if (std::isnan(static_cast<float>(y_ref[i]))) {
             ASSERT_TRUE(std::isnan(static_cast<float>(x[i])));
           } else {
-            ASSERT_NEAR(x[i], y_ref[i],
-                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+            // Admit the input-scaled error as well: see the comment in
+            // Test() above. The in-place kernel has already overwritten x[i],
+            // so the pre-kernel input comes from x_orig.
+            ASSERT_NEAR(
+                x[i], y_ref[i],
+                std::max(
+                    test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()),
+                    test_info.InputTolerance(static_cast<float>(x_orig[i]),
+                                             xnn_datatype_of<Out>())))
                 << "at " << i << " / " << batch_size() << ", x[" << i
                 << "] = " << std::scientific << (float)x_orig[i];
           }
@@ -231,10 +245,14 @@ class VUnaryMicrokernelTester {
             (UKernelParamsType*)&uparams);
     for (size_t i = 0; i < outputs.size(); i++) {
       if (std::isfinite(static_cast<float>(expected[i]))) {
-        ASSERT_NEAR(static_cast<float>(expected[i]),
-                    static_cast<float>(outputs[i]),
-                    tolerance_ulp * std::abs(static_cast<float>(expected[i])) *
-                        std::numeric_limits<float>::epsilon())
+        // Approximation error scales with the magnitude of the input, not of
+        // the output, so a purely output-relative tolerance collapses to zero
+        // wherever the expected value is zero and rejects any non-zero result.
+        ASSERT_NEAR(
+            static_cast<float>(expected[i]), static_cast<float>(outputs[i]),
+            tolerance_ulp * std::numeric_limits<float>::epsilon() *
+                (std::abs(static_cast<float>(expected[i])) +
+                 std::abs(static_cast<float>(inputs[i]))))
             << "for input " << static_cast<float>(inputs[i]);
       } else {
         EXPECT_EQ(std::fpclassify(static_cast<float>(expected[i])),
