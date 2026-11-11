@@ -1275,6 +1275,59 @@ float packed_bf16(xnn_bfloat16 a, xnn_bfloat16 b) {
   return result.f;
 }
 
+// The four existing cases here cover nr odd with kc even, or kc odd with nr
+// even. None has both odd, which is the combination that leaves the running
+// offset between nr blocks 2 mod 4 and makes the bias store misaligned. This
+// case also uses nc > nr so the nr_block_start loop iterates more than once.
+TEST(PACK_BF16_F32_GEMM_GIO_W, kc_and_nr_both_odd) {
+  const size_t g = 1;
+  const size_t nc = 3;
+  const size_t kc = 3;
+  const size_t nr = 1;
+  const size_t kr = 1;
+  const size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
+  std::vector<xnn_bfloat16> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  const size_t packed_count =
+      g * round_up(nc, nr) +
+      g * round_up(nc, nr) * round_up_po2(kc, kr * sr) / 2 + 8 * nr;
+  xnnpack::Buffer<float> packed_weights(packed_count);
+  xnn_pack_bf16_f32_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, /*k_stride=*/nc, k.data(), b.data(),
+      /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0,
+      /*params=*/nullptr);
+
+  // Each nr block starts with its bias, written as float. The block stride in
+  // bytes is nr floats of bias followed by the bf16 weights, which is not a
+  // whole number of floats when nr and kc are odd. Read the bias with memcpy so
+  // the check itself does not depend on the alignment under test.
+  const size_t block_stride_bytes =
+      nr * sizeof(float) +
+      round_up_po2(kc, kr * sr) * nr * sizeof(xnn_bfloat16);
+  const uint8_t* bytes =
+      reinterpret_cast<const uint8_t*>(packed_weights.data());
+  for (size_t block = 0; block < nc; block += nr) {
+    float bias_value = -1.0f;
+    memcpy(&bias_value, bytes + block * block_stride_bytes, sizeof(float));
+    EXPECT_EQ(bias_value, b[block]) << "at block " << block;
+  }
+
+  // Same again with a null bias, which takes the fill path instead of copy.
+  std::fill(packed_weights.begin(), packed_weights.end(), 1.0f);
+  xnn_pack_bf16_f32_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, /*k_stride=*/nc, k.data(), /*b=*/nullptr,
+      /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0,
+      /*params=*/nullptr);
+  for (size_t block = 0; block < nc; block += nr) {
+    float bias_value = -1.0f;
+    memcpy(&bias_value, bytes + block * block_stride_bytes, sizeof(float));
+    EXPECT_EQ(bias_value, 0.0f) << "at zero-bias block " << block;
+  }
+}
+
 TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1) {
   size_t g = 1;
   size_t nc = 2;
