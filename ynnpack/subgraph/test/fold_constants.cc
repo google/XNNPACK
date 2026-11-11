@@ -13,6 +13,7 @@
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
@@ -414,6 +415,40 @@ TEST(fold_constants, static_transpose) {
     EXPECT_FALSE(subgraph->value(transposed_id).is_static());
     EXPECT_THAT(subgraph, HasValidNodeCount(2));
   }
+}
+
+TEST(fold_constants, symbolic_output_shape) {
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t constant_id = 2;
+  uint32_t broadcast_id = YNN_INVALID_VALUE_ID;
+  uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), 2, input_id)
+      .AddOutput(type_of<float>(), 4, output_id)
+      .AddScalar(1.0f, constant_id)
+      .AddTensor(type_of<float>(), 2, broadcast_id)
+      .AddTensor(type_of<float>(), 4, transposed_id);
+
+  builder.AddStaticBroadcast({1, 1}, constant_id, broadcast_id);
+
+  ynn_subgraph_t subgraph = builder.GetSubgraph();
+  subgraph->value(broadcast_id).extents[0] =
+      subgraph->value(input_id).extent(0);
+
+  ynn_node transpose;
+  define_transpose_a(*subgraph, transpose, /*tile_m=*/4, /*tile_k=*/4,
+                     /*m_dim=*/1, broadcast_id, transposed_id);
+  subgraph->add_node(std::move(transpose));
+
+  builder.AddCopy(transposed_id, output_id);
+
+  subgraph->fold_constants(nullptr);
+
+  EXPECT_FALSE(subgraph->value(broadcast_id).is_static());
+  EXPECT_FALSE(subgraph->value(transposed_id).is_static());
+  EXPECT_THAT(subgraph, HasValidNodeCount(3));
 }
 
 }  // namespace ynn

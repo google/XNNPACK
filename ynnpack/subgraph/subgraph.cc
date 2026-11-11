@@ -414,6 +414,13 @@ std::optional<size_t> index_of(const C& container, const T& value) {
   return static_cast<size_t>(std::distance(container.begin(), it));
 }
 
+bool has_constant_shape(const ynn_value& value) {
+  return std::all_of(value.extents.begin(), value.extents.end(),
+                     [](const slinky::expr& e) {
+                       return !e.defined() || slinky::as_constant(e);
+                     });
+}
+
 size_t static_size_of_value(const ynn_value& value) {
   size_t n = 1;
   for (size_t i = 0; i < value.extents.size(); ++i) {
@@ -734,6 +741,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   for (uint32_t i = 0; i < values.size(); ++i) {
     if (values[i].is_static()) {
       assert(!values[i].is_external_output());
+      assert(has_constant_shape(values[i]));
       value_is_static[i] = true;
     }
   }
@@ -750,9 +758,11 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     }
 
     if (std::any_of(node.outputs.begin(), node.outputs.end(), [&](uint32_t i) {
-          return i != YNN_INVALID_VALUE_ID && values[i].is_external_output();
+          return i != YNN_INVALID_VALUE_ID && (values[i].is_external_output() ||
+                                               !has_constant_shape(values[i]));
         })) {
-      // This op has an external output, so it is not constant folded.
+      // This op has an external output or symbolic shape, so it cannot be
+      // constant folded.
       continue;
     }
 

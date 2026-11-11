@@ -898,50 +898,63 @@ void TestScalarA(A, B, C) {
 
   for (bool static_a : {false, true}) {
     for (bool static_b : {false, true}) {
-      Tensor<A> a(std::vector<size_t>{});
-      Tensor<B> b(b_shape);
-      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
-      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+      for (bool dynamic_shape : {false, true}) {
+        if (static_b && dynamic_shape) continue;
+        Tensor<A> a(std::vector<size_t>{});
+        Tensor<B> b(b_shape);
+        fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+        fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
-      SubgraphBuilder subgraph(3);
-      const uint32_t a_id = 0;
-      const uint32_t b_id = 1;
-      const uint32_t output_id = 2;
-      if (static_a) {
-        subgraph.AddTensor(a, a_id);
-      } else {
-        subgraph.AddInput(type_of<A>(), {}, a_id);
-      }
-      if (static_b) {
-        subgraph.AddTensor(b, b_id);
-      } else {
-        subgraph.AddInput(type_of<B>(), b_shape, b_id);
-      }
-      subgraph.AddOutput(type_of<C>(), output_shape, output_id)
-          .AddDot(/*num_k_dims=*/1, a_id, b_id, YNN_INVALID_VALUE_ID,
-                  output_id);
+        SubgraphBuilder subgraph(3);
+        const uint32_t a_id = 0;
+        const uint32_t b_id = 1;
+        const uint32_t output_id = 2;
+        if (static_a) {
+          subgraph.AddTensor(a, a_id);
+        } else {
+          subgraph.AddInput(type_of<A>(), {}, a_id);
+        }
+        if (static_b) {
+          subgraph.AddTensor(b, b_id);
+        } else if (dynamic_shape) {
+          subgraph.AddInput(type_of<B>(), b_shape.size(), b_id);
+        } else {
+          subgraph.AddInput(type_of<B>(), b_shape, b_id);
+        }
+        subgraph
+            .AddOutput(type_of<C>(),
+                       dynamic_shape ? TensorShape(output_shape.size())
+                                     : TensorShape(output_shape),
+                       output_id)
+            .AddDot(/*num_k_dims=*/1, a_id, b_id, YNN_INVALID_VALUE_ID,
+                    output_id);
 
-      Runtime runtime(subgraph.GetSubgraph());
-      ASSERT_EQ(runtime.Status(), ynn_status_success);
+        Runtime runtime(subgraph.GetSubgraph());
+        ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-      Tensor<C> output(output_shape);
-      if (!static_a) {
-        runtime.SetupExternalTensor(a.data(), a_id);
-      }
-      if (!static_b) {
-        runtime.SetupExternalTensor(b.data(), b_id);
-      }
-      runtime.SetupExternalTensor(output.data(), output_id)
-          .ReshapeRuntime()
-          .InvokeRuntime();
-      ASSERT_EQ(runtime.Status(), ynn_status_success);
+        Tensor<C> output(output_shape);
+        if (!static_a) {
+          runtime.SetupExternalTensor(a.data(), a_id);
+        }
+        if (!static_b) {
+          if (dynamic_shape) {
+            runtime.ReshapeExternalTensor(b_shape, b.data(), b_id);
+          } else {
+            runtime.SetupExternalTensor(b.data(), b_id);
+          }
+        }
+        runtime.SetupExternalTensor(output.data(), output_id)
+            .ReshapeRuntime()
+            .InvokeRuntime();
+        ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-      Tensor<A> a_ref = a.broadcast_like({1, k});
-      Tensor<C> expected(output_shape);
-      expected.fill(static_cast<C>(0));
-      VerifyDotResults(a_ref, b, output, expected, /*batch_dims=*/{},
-                       /*a_shape=*/{}, b_shape, /*num_k_dims=*/1,
-                       max_abs_value);
+        Tensor<A> a_ref = a.broadcast_like({1, k});
+        Tensor<C> expected(output_shape);
+        expected.fill(static_cast<C>(0));
+        VerifyDotResults(a_ref, b, output, expected, /*batch_dims=*/{},
+                         /*a_shape=*/{}, b_shape, /*num_k_dims=*/1,
+                         max_abs_value);
+      }
     }
   }
 }
