@@ -297,6 +297,9 @@ namespace {{
   if parts[1] == "qc8w":
     folder = datatype + "-qc8w-dwconv"
     parts.pop(1)
+  elif parts[1] == "f32" and parts[2] == "dwconv":
+    folder = datatype + "-f32-dwconv"
+    parts.pop(1)
   activation = "minmax" if "minmax" in parts else "linear"
   requantization = (
       "fp32" if "fp32" in parts else "rndnu" if "rndnu" in parts else None
