@@ -700,6 +700,87 @@ TEST(FullyConnectedQS8QC4W, packs_lhs_for_sme2) {
   }
 }
 
+TEST(FullyConnectedQS8QC4W, unit_batch_and_prefill_multithreaded) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (xnn_init_pqs8_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "PQS8 QC4W is not available";
+  }
+
+  constexpr size_t k = 64;
+  constexpr size_t n = 531;  // Spans multiple 256-column GEMV tiles + tail.
+  ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> i8dist(-128, 127);
+  std::uniform_int_distribution<int32_t> u8dist(0, 255);
+
+  std::vector<uint8_t> filter(n * k / 2);
+  std::generate(filter.begin(), filter.end(),
+                [&]() { return static_cast<uint8_t>(u8dist(rng)); });
+  std::vector<float> filter_scale(n, 1.0f / 64.0f);
+
+  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool(
+      pthreadpool_create(4), pthreadpool_destroy);
+
+  for (const int32_t kernel_zero_point : {0, 8}) {
+    SCOPED_TRACE(testing::Message()
+                 << "kernel_zero_point=" << kernel_zero_point);
+    auto build = [&](SubgraphTester& tester) {
+      tester
+          .AddInputTensor({1, k}, xnn_datatype_qint8, {0, 0.5f},
+                          /*external_id=*/0)
+          .AddStaticChannelwiseQuantizedTensor(
+              {n, k}, /*channel_dim=*/0, xnn_datatype_qcint4,
+              filter_scale.data(), /*external_id=*/1, /*flags=*/0,
+              filter.data())
+          .AddOutputTensor({1, n}, xnn_datatype_qint8, {0, 0.5f},
+                           /*external_id=*/2)
+          .AddFullyConnected(/*input_id=*/0, /*filter_id=*/1,
+                             /*bias_id=*/XNN_INVALID_VALUE_ID,
+                             /*output_id=*/2);
+      tester.MutableValue(1)->quantization.zero_point = kernel_zero_point;
+    };
+
+    SubgraphTester ref_tester(3);
+    build(ref_tester);
+    ASSERT_EQ(xnn_status_success,
+              ref_tester.CreateRuntime(/*threadpool=*/nullptr,
+                                       XNN_FLAG_NO_INLINED_LHS_PACKING));
+
+    SubgraphTester mt_tester(3);
+    build(mt_tester);
+    ASSERT_EQ(xnn_status_success,
+              mt_tester.CreateRuntime(
+                  auto_threadpool.get(),
+                  xnn_test_runtime_flags() & ~XNN_FLAG_NO_INLINED_LHS_PACKING));
+    ASSERT_EQ(mt_tester.NumNodes(), 1);
+    EXPECT_EQ(mt_tester.Node(0)->packed_input_datatype, xnn_datatype_pqint8);
+
+    // Reshape between m=1 (GEMV decode) and m=35 (2D-tile prefill) sharing the
+    // same packed RHS weights.
+    for (const size_t m : {size_t{1}, size_t{35}}) {
+      SCOPED_TRACE(testing::Message() << "m=" << m);
+      std::vector<int8_t> input(m * k + XNN_EXTRA_BYTES);
+      std::generate(input.begin(), input.end(),
+                    [&]() { return static_cast<int8_t>(i8dist(rng)); });
+      std::vector<int8_t> ref_out(m * n, 0);
+      std::vector<int8_t> mt_out(m * n, -1);
+
+      ref_tester.ReshapeExternalTensor({m, k}, input.data(), 0)
+          .ReshapeRuntime();
+      mt_tester.ReshapeExternalTensor({m, k}, input.data(), 0).ReshapeRuntime();
+
+      ref_tester.SetupExternalTensor(ref_out.data(), 2).SetupRuntime();
+      mt_tester.SetupExternalTensor(mt_out.data(), 2).SetupRuntime();
+
+      ASSERT_EQ(xnn_status_success, ref_tester.InvokeRuntime());
+      ASSERT_EQ(xnn_status_success, mt_tester.InvokeRuntime());
+
+      for (size_t i = 0; i < m * n; ++i) {
+        ASSERT_NEAR(mt_out[i], ref_out[i], 1) << "index=" << i;
+      }
+    }
+  }
+}
+
 TEST(FullyConnectedQS8QC4W, unsupported_zero_point_uses_unpacked_lhs) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
   if (xnn_init_pqs8_qc4w_gemm_config() == nullptr) {

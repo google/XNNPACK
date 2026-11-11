@@ -32,7 +32,7 @@ size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_mr(void) {
 size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_nr(void) {
 #if XNN_ENABLE_KLEIDIAI
   const struct kai_matmul_uker_api api =
-      kai_matmul_clamp_qai8_qai8_qsi4cxp8vsx4sf32bi32_1x64vs_sme2_dot();
+      kai_matmul_clamp_qai8_qai8p8vsx4_qsi4cxp8vsx4sf32bi32_8vsx8vs_sme2_mopa();
   return api.get_step(NULL).n;
 #else
   assert(

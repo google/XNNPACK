@@ -208,6 +208,7 @@ struct xnn_gemm_config {
   uint8_t log2_sr;
   uint8_t planes;     // number of 4 bit planes (1 for legacy, 2 for unzip)
   uint32_t mr_packed;  // `mr` value used for packed left-hand operands.
+  uint32_t nr_gemv;    // `n` tile step for `mr == 1` GEMV microkernels.
   enum xnn_arch_flags arch;
   uint8_t log2_input_element_size;
   uint8_t log2_filter_element_size;
