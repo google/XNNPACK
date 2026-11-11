@@ -643,25 +643,13 @@ auto make_pack_impl(int elem_count, bool transpose) {
   };
 }
 
-// L1 and L2 act as simultaneous upper bounds on the tile working set: L2
-// prevents spilling to L3/DRAM on smaller-L2 CPUs, while a multiple of L1
-// prevents L1 thrashing and preserves enough parallel tiles on large-L2
-// (1-2 MiB) CPUs.
-// Constants:
-//   - L2/4 (x86) or L2/8 (ARM) leaves L2 headroom for the other operand,
-//   accumulator, and set-associativity conflicts;
-//   - L1*4 on x86 (128-192 KiB) feeds wider AVX-512/AMX panels;
-//   - L1*2 on ARM (64-128 KiB) accounts for larger 64 KiB L1s and narrower
-//   NEON/SVE kernels across cores.
+// L1 and L2 act as simultaneous upper bounds on the tile working set: L2/4
+// leaves L2 headroom for the other operand, accumulator, and set-associativity
+// conflicts on smaller-L2 CPUs, while L1*4 prevents L1 thrashing and preserves
+// enough parallel tiles on large-L2 (1-2 MiB) CPUs.
 size_t get_dot_l1_l2_budget() {
   const std::array<size_t, 3> cache_sizes = get_cache_sizes();
-  const size_t l1_cache_size = cache_sizes[0];
-  const size_t l2_cache_size = cache_sizes[1];
-#ifdef YNN_ARCH_ARM
-  return std::min(l1_cache_size * 2, l2_cache_size / 8);
-#else
-  return std::min(l1_cache_size * 4, l2_cache_size / 4);
-#endif
+  return std::min(cache_sizes[0] * 4, cache_sizes[1] / 4);
 }
 
 }  // namespace
@@ -1090,8 +1078,41 @@ constexpr float task_output_bytes_per_second = 16e9f;
 
 std::tuple<index_t, index_t, index_t> choose_split_factors(
     index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
-    size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac) {
+    size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac,
+    bool a_is_produced) {
   assert(block_n > 0);
+
+  index_t split_k = choose_split_k(m, k, a_elem_size);
+  const index_t task_k = std::min(k, split_k);
+
+  const double a_bytes_total = static_cast<double>(m) * task_k * a_elem_size;
+  const double b_bytes_total =
+      (static_cast<double>(n) * task_k * b_elem_bits) / 8.0;
+  const float operand_seconds = static_cast<float>(
+      (a_bytes_total + b_bytes_total) / task_bytes_per_second);
+  const float dot_seconds =
+      static_cast<float>(m) * n * task_k * seconds_per_mac + operand_seconds;
+
+  // If A is produced in this pipeline (neither an external input nor a
+  // constant), each task computes its rows of A and reads them back alongside
+  // B and C. Cap this working set at twice the L1/L2 budget when A's O(m*k)
+  // traffic is a meaningful share of total dot time, and relax the cap
+  // proportionally once GEMM compute and B traffic dominate A.
+  uint64_t max_produced_task_bytes = 0;
+  if (a_is_produced) {
+    max_produced_task_bytes = 2 * get_dot_l1_l2_budget();
+    const double a_seconds = a_bytes_total / task_bytes_per_second;
+    const double l2_reload_seconds =
+        a_seconds * (b_bytes_total / get_cache_sizes()[1]);
+    const double total_dot_seconds = dot_seconds + l2_reload_seconds;
+    constexpr double min_dot_to_a_ratio = 12.0;
+    if (a_seconds > 0.0 && total_dot_seconds > min_dot_to_a_ratio * a_seconds) {
+      const double scale = total_dot_seconds / (min_dot_to_a_ratio * a_seconds);
+      constexpr double max_task_bytes = 1024.0 * 1024.0 * 1024.0;
+      max_produced_task_bytes = static_cast<uint64_t>(
+          std::min<double>(max_task_bytes, max_produced_task_bytes * scale));
+    }
+  }
 
   // If k gets big, we're going to tile k anyways. It could be faster to
   // parallelize more finely, but it will waste CPU cycles due to more memory
@@ -1119,12 +1140,24 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   const index_t aspect_ratio = 4;
 
   // Make the tile bigger, doubling the dimension that keeps it closest to
-  // `aspect_ratio`. Returns false if the tile already covers the whole dot.
-  auto grow = [&](index_t& split_m, index_t& split_n) {
-    if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
+  // `aspect_ratio`. Returns false if the tile cannot grow further.
+  auto grow = [&](bool limit_produced_a, index_t& split_m, index_t& split_n) {
+    bool can_grow_m = split_m < m;
+    if (can_grow_m && limit_produced_a) {
+      const index_t next_m = split_m * 2;
+      const uint64_t a_bytes =
+          static_cast<uint64_t>(next_m) * task_k * a_elem_size;
+      const uint64_t b_bytes =
+          (static_cast<uint64_t>(split_n) * task_k * b_elem_bits) / 8;
+      const uint64_t c_bytes =
+          static_cast<uint64_t>(next_m) * split_n * c_elem_size;
+      can_grow_m = a_bytes + b_bytes + c_bytes <= max_produced_task_bytes;
+    }
+    const bool can_grow_n = split_n < n;
+    if ((aspect_ratio * split_n <= split_m || !can_grow_m) && can_grow_n) {
       split_n *= 2;
-    } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
-               split_m < m) {
+    } else if ((split_m <= aspect_ratio * split_n || !can_grow_n) &&
+               can_grow_m) {
       split_m *= 2;
     } else {
       return false;
@@ -1144,22 +1177,15 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
       }
     }
     // We want to make the tile bigger, figure out which dimension to grow.
-    if (!grow(split_m, split_n)) break;
+    if (!grow(a_is_produced, split_m, split_n)) break;
   }
-
-  index_t split_k = choose_split_k(m, k, a_elem_size);
 
   // Make the tasks bigger if they are too small to be worth running in
   // parallel.
-  const float task_k = std::min(k, split_k);
-  const float operand_seconds = (m * a_elem_size + n * b_elem_bits / 8.0f) *
-                                task_k / task_bytes_per_second;
-  const float dot_seconds =
-      static_cast<float>(m) * n * task_k * seconds_per_mac + operand_seconds;
   while (true) {
     index_t next_m = split_m;
     index_t next_n = split_n;
-    if (!grow(next_m, next_n)) break;
+    if (!grow(/*limit_produced_a=*/false, next_m, next_n)) break;
     const index_t tasks =
         ceil_div(m, std::min(m, split_m)) * ceil_div(n, std::min(n, split_n));
     const float area =
@@ -1211,7 +1237,7 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
     slinky::expr block_n, size_t a_elem_size, size_t b_elem_bits,
-    size_t c_elem_size, float seconds_per_mac) {
+    size_t c_elem_size, float seconds_per_mac, bool a_is_produced) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
@@ -1220,7 +1246,7 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     index_t block_n = evaluate(op->args[3], ctx);
     auto [split_n, split_m, split_k] =
         choose_split_factors(m, n, k, block_n, a_elem_size, b_elem_bits,
-                             c_elem_size, seconds_per_mac);
+                             c_elem_size, seconds_per_mac, a_is_produced);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
     index_t mult_m = std::max<index_t>(1, split_m / step_m);
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
@@ -1828,7 +1854,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     auto [split_n, split_m, split_k] = choose_split_factors(
         runtime, m, n, k, block_n, type_size_bytes(input_a.type),
         type_size_bits(input_b.type), type_size_bytes(output.type),
-        seconds_per_mac);
+        seconds_per_mac, input_a.is_internal());
 
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);

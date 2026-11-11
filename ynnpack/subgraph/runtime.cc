@@ -76,8 +76,8 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
-    ynn::span<const slinky::expr> given_splits,
-    ynn::span<const int> loop_order) {
+    ynn::span<const slinky::expr> given_splits, ynn::span<const int> loop_order,
+    ynn::span<const slinky::expr> alignments) {
   const int rank = dims.size();
   if (rank <= 0) {
     // Nothing to schedule here.
@@ -85,7 +85,7 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   }
 
   std::vector<slinky::expr> splits = make_split_factors(
-      globals, extents, element_cost, given_splits, loop_order);
+      globals, extents, element_cost, given_splits, loop_order, alignments);
 
   return make_schedule(dims, extents, splits, loop_order);
 }

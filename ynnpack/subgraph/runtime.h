@@ -79,7 +79,8 @@ struct ynn_runtime {
       ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
       const slinky::expr& element_cost,
       ynn::span<const slinky::expr> given_splits = {},
-      ynn::span<const int> loop_order = {});
+      ynn::span<const int> loop_order = {},
+      ynn::span<const slinky::expr> alignments = {});
 
   slinky::buffer_expr_ptr null_buffer();
 

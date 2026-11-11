@@ -16,6 +16,7 @@
 
 #include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
@@ -228,30 +229,39 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
                              {{output.buffer, output_dims}}, attrs);
 
       // Find the longest identity prefix of `op.permutation` (dimensions
-      // 0..k-1 that are not transposed) and omit loop splits from 0 through the
-      // output dimension `m_dim` that holds the innermost remaining input
-      // dimension (plus any contiguous inner dimensions when
-      // `elem_count == 1`). This keeps the inner transposed tile intact while
-      // parallelizing outer batch dimensions.
-      int k = 0;
-      while (k < rank && op.permutation[k] == k) {
-        ++k;
+      // 0..k_dim-1 that are not transposed) and the output dimension `m_dim`
+      // holding the innermost remaining input dimension, then align `k_dim`
+      // and `m_dim` to cache-line tiles while parallelizing outer dimensions.
+      int k_dim = 0;
+      while (k_dim < rank && op.permutation[k_dim] == k_dim) {
+        ++k_dim;
       }
       int m_dim = rank;
-      for (int d = k; d < rank; ++d) {
+      for (int d = k_dim; d < rank; ++d) {
         if (op.permutation[d] < static_cast<int32_t>(input.rank()) &&
             (m_dim == rank || op.permutation[d] < op.permutation[m_dim])) {
           m_dim = d;
         }
       }
-      int pin_end = (k < rank && m_dim < rank) ? (m_dim + 1) : rank;
-      while (elem_count == 1 && pin_end < rank &&
-             op.permutation[pin_end] == op.permutation[pin_end - 1] + 1) {
-        ++pin_end;
+      std::vector<slinky::expr> given_splits;
+      std::vector<slinky::expr> alignments;
+      if (k_dim < rank && m_dim < rank) {
+        // Align both transposed dimensions to a cache-line tile so splits
+        // never become too narrow while keeping slice sizes cache-friendly.
+        const size_t elem_bits =
+            std::max<size_t>(1, type_size_bits(output.type));
+        const slinky::index_t tile =
+            std::max<size_t>(16, (YNN_CACHE_LINE_SIZE * 8) / elem_bits);
+        alignments.resize(m_dim + 1);
+        alignments[k_dim] = slinky::min(output.physical_extent(k_dim), tile);
+        alignments[m_dim] = slinky::min(output.physical_extent(m_dim), tile);
+      } else {
+        given_splits.resize(rank);
       }
-      std::vector<slinky::expr> given_splits(pin_end);
-      sched = runtime.make_schedule(output_dims, output.physical_extents(),
-                                    output.buffer->elem_size(), given_splits);
+      sched =
+          runtime.make_schedule(output_dims, output.physical_extents(),
+                                output.buffer->elem_size() * 2, given_splits,
+                                /*loop_order=*/{}, alignments);
     }
 
     f.user_data() = sched.get();
