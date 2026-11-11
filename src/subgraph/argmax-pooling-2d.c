@@ -192,8 +192,7 @@ enum xnn_status xnn_define_argmax_pooling_2d(
     return status;
   }
 
-  const uint32_t pooling_size = pooling_height * pooling_width;
-  if (pooling_size == 0) {
+  if (pooling_height == 0 || pooling_width == 0) {
     xnn_log_error("failed to define %s operator with %" PRIu32 "x%" PRIu32
                   " pooling size: pooling size dimensions must be non-zero",
                   xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
