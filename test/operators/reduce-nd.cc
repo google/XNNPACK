@@ -621,3 +621,69 @@ std::vector<TestParam> GenerateTests() {
 
 INSTANTIATE_TEST_SUITE_P(ND, ReduceNDTest, testing::ValuesIn(GenerateTests()),
                          TestParam::GetName);
+
+TEST(REDUCE_ND, null_operator_out) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_reduce_nd(
+          xnn_reduce_sum, xnn_datatype_fp32, nullptr, nullptr, 0, nullptr));
+}
+
+TEST(REDUCE_ND, null_reshape_pointers) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t reduce_op = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_reduce_nd(
+          xnn_reduce_sum, xnn_datatype_fp32, nullptr, nullptr, 0, &reduce_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      reduce_op, xnn_delete_operator);
+
+  const int64_t axes[1] = {0};
+  const size_t shape[1] = {4};
+  size_t workspace_size = 0;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_reduce_nd(
+          reduce_op, 1, nullptr, 1, shape, &workspace_size, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_reduce_nd(
+          reduce_op, 1, axes, 1, nullptr, &workspace_size, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_reduce_nd(
+          reduce_op, 0, axes, 1, shape, &workspace_size, nullptr));
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_reduce_nd(
+          reduce_op, 1, axes, 0, shape, &workspace_size, nullptr));
+}
+
+TEST(REDUCE_ND, invalid_reduction_axis) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t reduce_op = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_reduce_nd(
+          xnn_reduce_sum, xnn_datatype_fp32, nullptr, nullptr, 0, &reduce_op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      reduce_op, xnn_delete_operator);
+
+  const size_t shape[2] = {2, 3};
+  size_t workspace_size = 0;
+  const int64_t neg_overflow_axis[1] = {-3};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_reduce_nd(
+          reduce_op, 1, neg_overflow_axis, 2, shape, &workspace_size,
+          nullptr));
+
+  const int64_t pos_overflow_axis[1] = {2};
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_reshape_reduce_nd(
+          reduce_op, 1, pos_overflow_axis, 2, shape, &workspace_size,
+          nullptr));
+}
