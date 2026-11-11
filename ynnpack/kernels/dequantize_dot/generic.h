@@ -17,11 +17,15 @@
 
 namespace ynn {
 
-// If stride is 0, make a broadcasted copy of length N, and change `ptr` to
-// point to the broadcasted copy.
+// If `n > 1` and `stride` is 0, make a broadcasted copy of length `N`, and
+// change `ptr` to point to the broadcasted copy. When `n <= 1`, `stride` is
+// intentionally unused.
 template <size_t N, typename T>
 struct broadcast_to_load {
-  broadcast_to_load(const T*& ptr, size_t stride) {
+  broadcast_to_load(size_t n, const T*& ptr, size_t stride) {
+    if (n <= 1) {
+      return;
+    }
     if (stride == 0) {
       simd::store(data, simd::broadcast<N>(*ptr));
       ptr = data;
@@ -44,13 +48,14 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
                            const float* b_scale, size_t stride_output_m,
                            Output* output, const dequantize_dot_params*) {
   assert(m > 0);
-  assert(stride_b_offset_n == 0 || stride_b_offset_n == sizeof(int32_t));
+  assert(n <= 1 || stride_b_offset_n == 0 ||
+         stride_b_offset_n == sizeof(int32_t));
   // TODO(b/383769559): This broadcasts for the unrolling too, which shouldn't
   // be necessary.
   broadcast_to_load<Vectorize * Unroll, float> b_scale_broadcast(
-      b_scale, stride_b_scale_n);
+      n, b_scale, stride_b_scale_n);
   broadcast_to_load<Vectorize * Unroll, float> offset_broadcast(
-      offset, stride_offset_n);
+      n, offset, stride_offset_n);
 
   while (true) {
     const int32_t* dot_m = dot;
@@ -65,7 +70,7 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
     size_t j = n;
 
     auto run_row = [&](auto body) {
-      while (j >= Vectorize * Unroll) {
+      while (j > 1 && j >= Vectorize * Unroll) {
         constexpr std::integral_constant<size_t, Vectorize * Unroll> N = {};
         body(N, N);
 
@@ -76,7 +81,7 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
         offset_m = offset_bytes(offset_m, N * stride_offset_n);
         output_m = offset_bytes(output_m, N * sizeof(Output));
       }
-      while (j >= Vectorize) {
+      while (j > 1 && j >= Vectorize) {
         constexpr std::integral_constant<size_t, Vectorize> N = {};
         body(N, N);
 
@@ -93,7 +98,7 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
       }
     };
 
-    if (stride_b_offset_n == 0) {
+    if (n == 1 || stride_b_offset_n == 0) {
       const int32_t ab_offset_m = a_offset_m * (*b_offset);
       // Process n elements, with a constant upper bound of N.
       auto body = [&](auto n, auto N) {
