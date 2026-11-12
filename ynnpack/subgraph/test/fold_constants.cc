@@ -451,4 +451,70 @@ TEST(fold_constants, symbolic_output_shape) {
   EXPECT_THAT(subgraph, HasValidNodeCount(3));
 }
 
+TEST(fold_constants, cache_distinguishes_output_type) {
+  constexpr float constant_values[] = {1.5f, -2.5f, 3.0f, 4.0f};
+
+  uint32_t half_const_id = 1;
+  uint32_t half_folded_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder half_builder(2);
+  half_builder.AddOutput(type_of<half>(), {4}, 0)
+      .AddTensor(type_of<float>(), {4}, half_const_id, &constant_values)
+      .AddTensor(type_of<half>(), {4}, half_folded_id);
+  half_builder.AddConvert(half_const_id, type_of<half>(), half_folded_id)
+      .AddCopy(half_folded_id, 0);
+  half_builder.GetSubgraph()->fold_constants(nullptr);
+
+  uint32_t int_const_id = 1;
+  uint32_t int_folded_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder int_builder(2);
+  int_builder.AddOutput(type_of<int32_t>(), {4}, 0)
+      .AddTensor(type_of<float>(), {4}, int_const_id, &constant_values)
+      .AddTensor(type_of<int32_t>(), {4}, int_folded_id);
+  int_builder.AddConvert(int_const_id, type_of<int32_t>(), int_folded_id)
+      .AddCopy(int_folded_id, 0);
+  int_builder.GetSubgraph()->fold_constants(nullptr);
+
+  const ynn_value& half_val = half_builder.GetSubgraph()->value(half_folded_id);
+  const ynn_value& int_val = int_builder.GetSubgraph()->value(int_folded_id);
+  ASSERT_TRUE(half_val.is_static());
+  ASSERT_TRUE(int_val.is_static());
+  EXPECT_EQ(half_val.type, ynn_type_fp16);
+  EXPECT_EQ(int_val.type, ynn_type_int32);
+  EXPECT_EQ(half_val.data->elem_size, sizeof(half));
+  EXPECT_EQ(int_val.data->elem_size, sizeof(int32_t));
+  EXPECT_THAT(ValuesIn<int32_t>(int_val), ElementsAre(2, -2, 3, 4));
+}
+
+TEST(fold_constants, cache_distinguishes_output_shape) {
+  uint32_t folded_1d_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder_1d(1);
+  uint32_t begin_1d = builder_1d.DefineScalar(int32_t{0});
+  uint32_t stride_1d = builder_1d.DefineScalar(int32_t{1});
+  builder_1d.AddOutput(type_of<int32_t>(), {4}, 0)
+      .AddTensor(type_of<int32_t>(), {4}, folded_1d_id)
+      .AddIota(type_of<int32_t>(), {4}, begin_1d, stride_1d, folded_1d_id)
+      .AddCopy(folded_1d_id, 0);
+  builder_1d.GetSubgraph()->fold_constants(nullptr);
+
+  uint32_t folded_2d_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder_2d(1);
+  uint32_t begin_2d = builder_2d.DefineScalar(int32_t{0});
+  uint32_t stride_2d = builder_2d.DefineScalar(int32_t{1});
+  builder_2d.AddOutput(type_of<int32_t>(), {2, 4}, 0)
+      .AddTensor(type_of<int32_t>(), {2, 4}, folded_2d_id)
+      .AddIota(type_of<int32_t>(), {2, 4}, begin_2d, stride_2d, folded_2d_id)
+      .AddCopy(folded_2d_id, 0);
+  builder_2d.GetSubgraph()->fold_constants(nullptr);
+
+  const ynn_value& val_1d = builder_1d.GetSubgraph()->value(folded_1d_id);
+  const ynn_value& val_2d = builder_2d.GetSubgraph()->value(folded_2d_id);
+  ASSERT_TRUE(val_1d.is_static());
+  ASSERT_TRUE(val_2d.is_static());
+  EXPECT_EQ(val_1d.data->rank, 1);
+  EXPECT_EQ(val_2d.data->rank, 2);
+  EXPECT_THAT(ValuesIn<int32_t>(val_1d), ElementsAre(0, 1, 2, 3));
+  EXPECT_THAT(ValuesIn<int32_t>(val_2d),
+              ElementsAre(0, 1, 2, 3, 1, 2, 3, 4));
+}
+
 }  // namespace ynn

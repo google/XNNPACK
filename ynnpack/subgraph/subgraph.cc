@@ -534,14 +534,27 @@ struct input_producer {
   }
 };
 
+struct output_key {
+  ynn_type type;
+  std::vector<slinky::index_t> extents;
+
+  bool operator==(const output_key& other) const {
+    return type == other.type && extents == other.extents;
+  }
+  bool operator<(const output_key& other) const {
+    return std::tie(type, extents) < std::tie(other.type, other.extents);
+  }
+};
+
 struct op_key {
   decltype(ynn_node::op) op;
   using input_key = std::variant<input_pointer, input_value, input_producer>;
   std::vector<input_key> inputs;
-  // Some ops have behavior that depends on the shape of their outputs (e.g.
-  // `static_broadcast`, `pack_b`), so the shape of the outputs is part of the
-  // key. Undefined (broadcast) extents are 1.
-  std::vector<std::vector<slinky::index_t>> outputs;
+  // Some ops have behavior that depends on the type and shape of their outputs
+  // (e.g. `convert`, `static_broadcast`, `pack_b`), so the output type and
+  // shape are part of the key. Undefined (broadcast) extents are 1, and
+  // symbolic extents (such as `pack_b`'s `block_n`) are -1.
+  std::vector<output_key> outputs;
 
   bool operator==(const op_key& other) const {
     return op == other.op && inputs == other.inputs && outputs == other.outputs;
@@ -573,17 +586,20 @@ bool build_producers(const ynn_subgraph& subgraph, uint32_t v_id,
 
   op_key op_key;
   op_key.op = producer->op;
-
   for (uint32_t output_id : producer->outputs) {
-    std::vector<slinky::index_t>& extents = op_key.outputs.emplace_back();
-    if (output_id == YNN_INVALID_VALUE_ID) continue;
-    for (const slinky::expr& extent : subgraph.value(output_id).extents) {
+    output_key& out_key = op_key.outputs.emplace_back();
+    if (output_id == YNN_INVALID_VALUE_ID) {
+      out_key.type = ynn_type_invalid;
+      continue;
+    }
+    const ynn_value& out = subgraph.value(output_id);
+    out_key.type = out.type;
+    out_key.extents.reserve(out.extents.size());
+    for (const slinky::expr& extent : out.extents) {
       if (!extent.defined()) {
-        extents.push_back(1);
+        out_key.extents.push_back(1);
       } else {
-        // Constant values should not have symbolic shapes.
-        assert(slinky::as_constant(extent));
-        extents.push_back(*slinky::as_constant(extent));
+        out_key.extents.push_back(slinky::as_constant(extent).value_or(-1));
       }
     }
   }
