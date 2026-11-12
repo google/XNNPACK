@@ -19,9 +19,12 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "include/xnnpack.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
@@ -29,6 +32,7 @@ limitations under the License.
 #include "litert/tensor/backends/common_nnpack/conversion.h"
 #include "litert/tensor/backends/common_nnpack/graph.h"
 #include "litert/tensor/backends/xnnpack/graph.h"
+#include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/internal/type_id.h"
@@ -65,6 +69,17 @@ class XnnpackBuildContext : public NnpackBuildContext {
     return static_cast<XnnpackGraph&>(*graph_).GetSubgraph();
   }
 
+  void SetWarmFcBuffers(absl::flat_hash_set<const Buffer*> warm_fc_buffers,
+                        size_t max_warm_rows, size_t max_warm_blocks) {
+    warm_fc_buffers_ = std::move(warm_fc_buffers);
+    warm_max_rows_ = max_warm_rows;
+    warm_max_blocks_ = max_warm_blocks;
+  }
+
+  absl::flat_hash_map<uint32_t, uint32_t>& qdint8_cache() {
+    return qdint8_cache_;
+  }
+
  protected:
   absl::Status EnsureInitialized() override;
   std::unique_ptr<NnpackGraph> CreateEmptyGraph() override;
@@ -76,10 +91,25 @@ class XnnpackBuildContext : public NnpackBuildContext {
                                     absl::Span<const size_t> shape,
                                     const void* data, uint32_t* id) override;
   absl::Status LowerOp(const graph::Operation& op) override;
+
+ private:
+  absl::flat_hash_set<const Buffer*> warm_fc_buffers_;
+  absl::flat_hash_map<uint32_t, uint32_t> qdint8_cache_;
+  size_t warm_max_rows_ = 0;
+  size_t warm_max_blocks_ = 0;
+  const float* warm_dummy_f32_scales_ = nullptr;
+  const void* warm_dummy_bf16_scales_ = nullptr;
 };
 
 // Builds an XNNPACK graph from the given outputs.
 absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
+    std::vector<TensorHandle> outputs);
+
+// Builds an XNNPACK graph assuming a warm `xnn_weights_cache_t`: constant 2D
+// `FullyConnected` weight tensors with FP32/FP16 activations are defined with
+// synthetic non-null pointers and dummy positive scales without locking or
+// materializing lazy buffers.
+absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraphWithWarmFcCache(
     std::vector<TensorHandle> outputs);
 
 }  // namespace litert::tensor

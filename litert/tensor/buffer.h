@@ -120,6 +120,11 @@ class Buffer {
  public:
   virtual ~Buffer() = default;
 
+  template <typename T>
+  static internal::TypeId TypeIdOf() {
+    return internal::TypeId::Get<T>();
+  }
+
   // Returns the type identifier of the buffer.
   //
   // This should generally be implemented as:
@@ -167,6 +172,54 @@ class Buffer {
   virtual LockedBufferSpan<std::byte> LockMutable() {
     return LockedBufferSpan<std::byte>::Empty();
   }
+
+  // Returns false when backed by an unmaterialized lazy source (such as an
+  // mmap-backed GGUF matrix or a deferred fused weight concatenation).
+  virtual bool IsMaterialized() const { return true; }
+
+  // Returns true when `HashDeterministicContent` hashes an immutable raw
+  // representation identically whether or not the buffer is materialized.
+  virtual bool HasDeterministicRawHash() const { return false; }
+
+  // Mixes deterministic raw content bytes into `state` via `mix_fn` without
+  // materializing unpacked CPU buffers.
+  virtual void HashDeterministicContent(
+      void (* /*mix_fn*/)(uint64_t*, const std::byte*, size_t),
+      uint64_t* /*state*/) const {}
+
+  // Decodes a single 2-D row directly into `out` as FP32 without materializing
+  // the full matrix when supported by the underlying buffer.
+  virtual bool TryReadRowAsFp32(int /*row*/, absl::Span<float> /*out*/) const {
+    return false;
+  }
+
+  // Unpacks a lazy quantized matrix directly into caller-provided buffers
+  // (`dst`, `scales_dst`, and optional `float_zps_dst`) without allocating an
+  // intermediate `OwningCpuBuffer`.
+  virtual bool TryUnpackQuantizedInto(
+      absl::Span<std::byte> /*dst*/, absl::Span<float> /*scales_dst*/,
+      absl::Span<float> /*float_zps_dst*/) const {
+    return false;
+  }
+
+  // Releases materialized host memory when the buffer can be re-materialized on
+  // demand or is no longer required on CPU after backend upload/packing.
+  virtual void ReleaseMaterializedData() {}
+
+  // Releases only the materialized raw weight matrix payload while keeping any
+  // associated BlockwiseQuantization scales/zero-points materialized until
+  // operator lowering completes.
+  virtual void ReleaseMaterializedPayloadOnly() {}
+
+  // Returns true when the buffer owns its storage or deterministically
+  // materializes from an immutable backing store, making it safe to key by
+  // `weak_ptr<Buffer>` in `ConcatMemoCache`.
+  virtual bool SupportsConcatMemoization() const { return false; }
+
+  // Cold-page eviction hooks (`MADV_DONTNEED` / `MADV_FREE`) for materialized
+  // CPU buffers after backend packing.
+  virtual bool SupportsColdPageEviction() const { return false; }
+  virtual void EvictColdPages(void (* /*evict_fn*/)(void*, size_t)) {}
 
   // Tries to cast the buffer to the given type T.
   template <typename T>
@@ -329,6 +382,28 @@ struct IsConstAbslSpan : std::false_type {};
 template <class T>
 struct IsConstAbslSpan<absl::Span<const T>> : std::true_type {};
 
+inline bool& InOuterParallelPrepackWorker() {
+  thread_local bool in_worker = false;
+  return in_worker;
+}
+
+class ScopedOuterParallelPrepackWorker {
+ public:
+  ScopedOuterParallelPrepackWorker() : prev_(InOuterParallelPrepackWorker()) {
+    InOuterParallelPrepackWorker() = true;
+  }
+  ScopedOuterParallelPrepackWorker(const ScopedOuterParallelPrepackWorker&) =
+      delete;
+  ScopedOuterParallelPrepackWorker& operator=(
+      const ScopedOuterParallelPrepackWorker&) = delete;
+  ~ScopedOuterParallelPrepackWorker() {
+    InOuterParallelPrepackWorker() = prev_;
+  }
+
+ private:
+  bool prev_;
+};
+
 }  // namespace internal
 
 // Manages tensor data.
@@ -388,6 +463,18 @@ class OwningCpuBuffer : public Buffer {
   // object that allows reading and writing the data.
   LockedBufferSpan<std::byte> LockMutable() override {
     return {data(), [d = data_](std::byte*) mutable { d.reset(); }, size()};
+  }
+
+  bool SupportsConcatMemoization() const override { return true; }
+
+  bool SupportsColdPageEviction() const override {
+    return data_ != nullptr && bytes_ > 0;
+  }
+
+  void EvictColdPages(void (*evict_fn)(void*, size_t)) override {
+    if (data_ != nullptr && bytes_ > 0 && evict_fn != nullptr) {
+      evict_fn(data_.get(), bytes_);
+    }
   }
 
   template <class T, class = std::enable_if_t<std::is_const_v<T>>>
@@ -460,8 +547,8 @@ class OwningCpuBuffer : public Buffer {
 
   template <Type type>
   static std::shared_ptr<OwningCpuBuffer> Allocate(std::vector<int32_t> shape) {
-    return Allocate<type>(
-        std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>()));
+    return Allocate<type>(std::accumulate(shape.begin(), shape.end(), size_t{1},
+                                          std::multiplies<>()));
   }
 
   static std::shared_ptr<OwningCpuBuffer> AllocateAs(Type type, size_t count) {
