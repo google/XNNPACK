@@ -106,23 +106,19 @@ class Aarch32(arm_template.Arm):
     self.quantization_params()
 
   def jump_to_label(self, label):
-    return f'b {label}\n'
+    self.asm_string += f'b {label}\n'
 
   def read_a_registers(self):
     return
 
   def do_loop(self, k: int, iterations: int, no_interleaved_instructions: bool):
-    """One unrolled iteration of the inner loop.
+    """Appends assembly instructions for one unrolled inner loop iteration.
 
     Args:
       k: iteration number.
       iterations: total number of iterations.
       no_interleaved_instructions: Do not interleaved instructions for the next
         loop iteration. Usually used for the last loop iteration.
-
-    Returns:
-       A string containing the assembly instructions for one unrolled iteration
-       of the inner loop.
     """
     second_half = k + 1 > iterations - self.m
     last_iter = k == iterations - 1
@@ -180,11 +176,7 @@ class Aarch32(arm_template.Arm):
     raise NotImplementedError
 
   def inner_loop_in_order(self):
-    """An inner loop for in-order cores.
-
-    Returns:
-       A string containing the assembly instructions for the entire inner loop.
-    """
+    """Appends assembly instructions for an in-order core inner loop."""
     self.asm_string += f"""\n# Are there at least {self.k_unroll()} bytes?
       subs r0, r0, #8
       blo .Lfinal_iteration\n"""
@@ -217,13 +209,9 @@ class Aarch32(arm_template.Arm):
     self.asm_string += '\n'
 
   def load_strides(self):
-    """Load a & cm_strides parameters.
+    """Appends assembly instructions to load `a` and `cm_stride` parameters.
 
     The offsets come from the aarch32 calling convention.
-
-    Returns:
-       A string containing the assembly instructions to load a & cm_stride into
-       general purpose registers.
     """
     self.asm_string += '# Load a and cm stride registers.\n'
     a_stride_reg = self.astride_register()
@@ -270,7 +258,7 @@ class Aarch32(arm_template.Arm):
   def initialize_k_register(self):
     self.asm_string += f'subs {self.k_register()}, {self.kc_register()}, #8\n'
 
-  def epilogue(self) -> str:
+  def epilogue(self) -> None:
     self.asm_string += """
 .Lreturn:
       # Restore callee saved q4-q7 registers.
@@ -286,17 +274,13 @@ class Aarch32(arm_template.Arm):
 END_FUNCTION {function_name}""".format(function_name=self.function_name())
 
   def inner_loop_epilogue(self):
-    """Remainder handling for the inner loop.
+    """Appends assembly instructions for inner loop remainder handling.
 
     Process up to k_unroll - 1 channels. This is placed at the very end of the
     function for control flow reasons. Instructions for the following channel
     may not be interleaved as we do not know how many channels must be
     processed. The epilogue iteration is identical except that it does not load
     the As and Bs for the next iteration and checks k after each mlal batch.
-
-    Returns:
-       A string containing the assembly instructions for the inner loop
-       epilogue.
     """
     k_register = self.k_register()
     self.asm_string += '\n.Lepilogue:\n'
@@ -315,15 +299,11 @@ END_FUNCTION {function_name}""".format(function_name=self.function_name())
     self.asm_string += 'b .Linner_loop_end\n'
 
   def epilogue_iteration(self, k: int, iterations: int):
-    """Process one channel of the loop epilogue.
+    """Appends assembly instructions for one channel of the loop epilogue.
 
     Args:
       k: iteration number.
       iterations: total number of iterations.
-
-    Returns:
-       A string containing the assembly instructions for one iteration of the
-       inner loop epilogue.
     """
     self.asm_string += ''
     for l in self.weights_asm()['loop']:
