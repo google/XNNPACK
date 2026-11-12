@@ -42,6 +42,9 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_u24(
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
+  #if XNN_ARCH_ARM64
+    const uint16x8_t vzero = vdupq_n_u16(0);
+  #endif
   for (; batch >= 24 * sizeof(uint16_t); batch -= 24 * sizeof(uint16_t)) {
     const uint16x8_t vh0 = vld1q_u16(i); i += 8;
     const uint16x8_t vh1 = vld1q_u16(i); i += 8;
@@ -78,24 +81,54 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_u24(
     const uint16x8_t vmask2 = vcgtq_u16(vnonsign2, vdenorm_cutoff);
 
     const uint32x4_t vxmask0 = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_low_u16(vmask0))));
-    const uint32x4_t vf0 = vorrq_u32(vshll_n_u16(vget_low_u16(vsign0), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask0, vnorm0, vdenorm0)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf0 = vorrq_u32(vreinterpretq_u32_u16(vzip1q_u16(vzero, vsign0)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask0, vnorm0, vdenorm0)));
+    #else
+      const uint32x4_t vf0 = vorrq_u32(vshll_n_u16(vget_low_u16(vsign0), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask0, vnorm0, vdenorm0)));
+    #endif
     const uint32x4_t vxmask2 = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_low_u16(vmask1))));
-    const uint32x4_t vf2 = vorrq_u32(vshll_n_u16(vget_low_u16(vsign1), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask2, vnorm2, vdenorm2)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf2 = vorrq_u32(vreinterpretq_u32_u16(vzip1q_u16(vzero, vsign1)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask2, vnorm2, vdenorm2)));
+    #else
+      const uint32x4_t vf2 = vorrq_u32(vshll_n_u16(vget_low_u16(vsign1), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask2, vnorm2, vdenorm2)));
+    #endif
     const uint32x4_t vxmask4 = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_low_u16(vmask2))));
-    const uint32x4_t vf4 = vorrq_u32(vshll_n_u16(vget_low_u16(vsign2), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask4, vnorm4, vdenorm4)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf4 = vorrq_u32(vreinterpretq_u32_u16(vzip1q_u16(vzero, vsign2)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask4, vnorm4, vdenorm4)));
+    #else
+      const uint32x4_t vf4 = vorrq_u32(vshll_n_u16(vget_low_u16(vsign2), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask4, vnorm4, vdenorm4)));
+    #endif
 
     const uint32x4_t vxmask1 = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_high_u16(vmask0))));
-    const uint32x4_t vf1 = vorrq_u32(vshll_n_u16(vget_high_u16(vsign0), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask1, vnorm1, vdenorm1)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf1 = vorrq_u32(vreinterpretq_u32_u16(vzip2q_u16(vzero, vsign0)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask1, vnorm1, vdenorm1)));
+    #else
+      const uint32x4_t vf1 = vorrq_u32(vshll_n_u16(vget_high_u16(vsign0), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask1, vnorm1, vdenorm1)));
+    #endif
     const uint32x4_t vxmask3 = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_high_u16(vmask1))));
-    const uint32x4_t vf3 = vorrq_u32(vshll_n_u16(vget_high_u16(vsign1), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask3, vnorm3, vdenorm3)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf3 = vorrq_u32(vreinterpretq_u32_u16(vzip2q_u16(vzero, vsign1)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask3, vnorm3, vdenorm3)));
+    #else
+      const uint32x4_t vf3 = vorrq_u32(vshll_n_u16(vget_high_u16(vsign1), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask3, vnorm3, vdenorm3)));
+    #endif
     const uint32x4_t vxmask5 = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_high_u16(vmask2))));
-    const uint32x4_t vf5 = vorrq_u32(vshll_n_u16(vget_high_u16(vsign2), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask5, vnorm5, vdenorm5)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf5 = vorrq_u32(vreinterpretq_u32_u16(vzip2q_u16(vzero, vsign2)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask5, vnorm5, vdenorm5)));
+    #else
+      const uint32x4_t vf5 = vorrq_u32(vshll_n_u16(vget_high_u16(vsign2), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask5, vnorm5, vdenorm5)));
+    #endif
 
     vst1q_f32(output, vreinterpretq_f32_u32(vf0)); output += 4;
     vst1q_f32(output, vreinterpretq_f32_u32(vf1)); output += 4;
@@ -121,12 +154,22 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_u24(
     const uint16x8_t vmask = vcgtq_u16(vnonsign, vdenorm_cutoff);
 
     const uint32x4_t vxmask_lo = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_low_u16(vmask))));
-    const uint32x4_t vf_lo = vorrq_u32(vshll_n_u16(vget_low_u16(vsign), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf_lo = vorrq_u32(vreinterpretq_u32_u16(vzip1q_u16(vzero, vsign)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
+    #else
+      const uint32x4_t vf_lo = vorrq_u32(vshll_n_u16(vget_low_u16(vsign), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
+    #endif
 
     const uint32x4_t vxmask_hi = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_high_u16(vmask))));
-    const uint32x4_t vf_hi = vorrq_u32(vshll_n_u16(vget_high_u16(vsign), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask_hi, vnorm_hi, vdenorm_hi)));
+    #if XNN_ARCH_ARM64
+      const uint32x4_t vf_hi = vorrq_u32(vreinterpretq_u32_u16(vzip2q_u16(vzero, vsign)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask_hi, vnorm_hi, vdenorm_hi)));
+    #else
+      const uint32x4_t vf_hi = vorrq_u32(vshll_n_u16(vget_high_u16(vsign), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask_hi, vnorm_hi, vdenorm_hi)));
+    #endif
 
     vst1q_f32(output, vreinterpretq_f32_u32(vf_lo)); output += 4;
     vst1q_f32(output, vreinterpretq_f32_u32(vf_hi)); output += 4;
@@ -148,15 +191,25 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_u24(
     const uint16x8_t vmask = vcgtq_u16(vnonsign, vdenorm_cutoff);
 
     const uint32x4_t vxmask_lo = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_low_u16(vmask))));
-    uint32x4_t vf = vorrq_u32(vshll_n_u16(vget_low_u16(vsign), 16),
-      vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
+    #if XNN_ARCH_ARM64
+      uint32x4_t vf = vorrq_u32(vreinterpretq_u32_u16(vzip1q_u16(vzero, vsign)),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
+    #else
+      uint32x4_t vf = vorrq_u32(vshll_n_u16(vget_low_u16(vsign), 16),
+        vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
+    #endif
 
     if (batch & (4 * sizeof(uint16_t))) {
       vst1q_f32(output, vreinterpretq_f32_u32(vf)); output += 4;
 
       const uint32x4_t vxmask_hi = vreinterpretq_u32_s32(vmovl_s16(vreinterpret_s16_u16(vget_high_u16(vmask))));
-      vf = vorrq_u32(vshll_n_u16(vget_high_u16(vsign), 16),
-        vreinterpretq_u32_f32(vbslq_f32(vxmask_hi, vnorm_hi, vdenorm_hi)));
+      #if XNN_ARCH_ARM64
+        vf = vorrq_u32(vreinterpretq_u32_u16(vzip2q_u16(vzero, vsign)),
+          vreinterpretq_u32_f32(vbslq_f32(vxmask_hi, vnorm_hi, vdenorm_hi)));
+      #else
+        vf = vorrq_u32(vshll_n_u16(vget_high_u16(vsign), 16),
+          vreinterpretq_u32_f32(vbslq_f32(vxmask_hi, vnorm_hi, vdenorm_hi)));
+      #endif
     }
     uint32x2_t vf_lo = vget_low_u32(vf);
     if (batch & (2 * sizeof(uint16_t))) {
