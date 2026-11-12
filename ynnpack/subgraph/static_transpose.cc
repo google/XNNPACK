@@ -77,22 +77,39 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
       sliced_elem_count = 1;
     }
 
-    const transpose_fn kernel =
-        get_tiled_transpose(elem_size * 8 / sliced_elem_count);
-    assert(kernel);
-
     // Find the contiguous dimension in the input, which is the dimension we
     // need to handle with the kernel.
     size_t input_dim0 = sliced_input.rank;
-    for (size_t d = 1; d < permutation.size(); ++d) {
-      if (is_contiguous(sliced_input.dim(d), elem_size)) {
-        if (d < permutation.size() &&
-            (input_dim0 >= permutation.size() ||
-             permutation[d] < permutation[input_dim0])) {
+    if (sliced_elem_count == 1 && sliced_output.dim(0).stride() == elem_size) {
+      for (size_t d = 1; d < sliced_input.rank; ++d) {
+        const slinky::dim& input_d = sliced_input.dim(d);
+        if (input_d.stride() == elem_size &&
+            input_d.extent() >= sliced_input.dim(input_dim0).extent()) {
           input_dim0 = d;
         }
       }
+    } else if (sliced_elem_count != 1 && permutation[0] != 0) {
+      // Neither optimize_dims nor the fold loop ran, so sliced_input still
+      // matches permutation; only the dimension corresponding to input dim 0
+      // has elem_count-packed coordinates.
+      for (size_t d = 1; d < sliced_input.rank; ++d) {
+        if (permutation[d] == 0) {
+          input_dim0 = d;
+          break;
+        }
+      }
     }
+    if ((sliced_elem_count == 1 || permutation[0] == 0) &&
+        input_dim0 >= sliced_input.rank) {
+      sliced_input.elem_size = elem_size;
+      sliced_output.elem_size = elem_size;
+      slinky::copy(sliced_input, sliced_output);
+      return 0;
+    }
+
+    const transpose_fn kernel =
+        get_tiled_transpose(elem_size * 8 / sliced_elem_count);
+    assert(kernel);
 
     const slinky::dim& output_m = sliced_output.dim(input_dim0);
     const slinky::dim& output_n = sliced_output.dim(0);
@@ -253,8 +270,10 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
         const slinky::index_t tile =
             std::max<size_t>(16, (YNN_CACHE_LINE_SIZE * 8) / elem_bits);
         alignments.resize(m_dim + 1);
-        alignments[k_dim] = slinky::min(output.physical_extent(k_dim), tile);
-        alignments[m_dim] = slinky::min(output.physical_extent(m_dim), tile);
+        alignments[k_dim] =
+            slinky::max(1, slinky::min(output.physical_extent(k_dim), tile));
+        alignments[m_dim] =
+            slinky::max(1, slinky::min(output.physical_extent(m_dim), tile));
       } else {
         given_splits.resize(rank);
       }

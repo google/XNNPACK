@@ -76,3 +76,19 @@ cc_test(
         "//ynnpack/subgraph/test:subgraph_builder",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "transpose_split_tail_and_unit_dim",
+    srcs = ["transpose_split_tail_and_unit_dim.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/subgraph/test:scheduler",
+        "//ynnpack/subgraph/test:subgraph_builder",
+    ] + ynn_test_deps(),
+)
