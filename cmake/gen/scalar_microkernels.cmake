@@ -25,6 +25,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u1.c
   src/f16-rdminmax/gen/f16-rdmax-2p2x-scalar-u2.c
   src/f16-rdminmax/gen/f16-rdmin-2p2x-scalar-u2.c
   src/f16-rminmax/gen/f16-rmax-scalar-u2-acc2.c
@@ -320,6 +321,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u1.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u2.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u3.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u2-acc2.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u4-acc4.c
   src/f16-rminmax/gen/f16-rmax-scalar-u1.c
   src/f16-rminmax/gen/f16-rmax-scalar-u3-acc3.c
   src/f16-rminmax/gen/f16-rmax-scalar-u4-acc2.c
