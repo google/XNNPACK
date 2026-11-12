@@ -13,6 +13,7 @@
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include <benchmark/benchmark.h>
@@ -26,6 +27,7 @@ using s8 = int8_t;
 using s16 = int16_t;
 using f16 = half;
 using bf16 = bfloat16;
+using f8_e5m2 = fp8_e5m2;
 using f32 = float;
 using s32 = int32_t;
 using f64 = double;
@@ -138,7 +140,7 @@ template <typename scalar, size_t N, typename Fn>
 static void BM_unary(benchmark::State& state, Fn fn) {
   using vector = vec<scalar, N>;
 
-  vector a{1};
+  vector a{static_cast<scalar>(1.0f)};
 
   benchmark::DoNotOptimize(a);
   for (auto _ : state) {
@@ -155,6 +157,9 @@ static void BM_unary(benchmark::State& state, Fn fn) {
 #define BENCH_CAST(arch, from, to, N)                                     \
   void BM_cast_##from##x##N##_##to##_##arch(benchmark::State& state) {    \
     BM_unary<from, N>(state, [](vec<from, N> a) { return cast<to>(a); }); \
+    state.counters["Bytes"] = benchmark::Counter(                         \
+        state.iterations() * N * (sizeof(from) + sizeof(to)),             \
+        benchmark::Counter::kIsRate);                                     \
   }                                                                       \
   BENCHMARK(BM_cast_##from##x##N##_##to##_##arch);
 

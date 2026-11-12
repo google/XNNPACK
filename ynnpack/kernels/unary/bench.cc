@@ -10,6 +10,7 @@
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
@@ -137,6 +138,7 @@ BENCHMARK_REFERENCE(sign, int32_t);
 BENCHMARK_REFERENCE_CONVERT_FROM(float);
 BENCHMARK_REFERENCE_CONVERT_FROM(half);
 BENCHMARK_REFERENCE_CONVERT_FROM(bfloat16);
+BENCHMARK_REFERENCE_CONVERT_FROM(fp8_e5m2);
 BENCHMARK_REFERENCE_CONVERT_FROM(int8_t);
 BENCHMARK_REFERENCE_CONVERT_FROM(uint8_t);
 BENCHMARK_REFERENCE_CONVERT_FROM(int32_t);
