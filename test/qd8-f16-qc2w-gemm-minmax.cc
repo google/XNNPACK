@@ -807,7 +807,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avx2_madd,
@@ -826,7 +826,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/2, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x8c8__avx2_madd,
@@ -845,7 +845,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/3, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_3x8c8__avx2_madd,
@@ -864,7 +864,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/4, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x8c8__avx2_madd,
@@ -883,7 +883,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/5, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x8c8__avx2_madd,
@@ -902,7 +902,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/6, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avx2_madd,
@@ -921,7 +921,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/7, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x8c8__avx2_madd,
@@ -940,7 +940,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x8c8__avx2_madd,
@@ -962,7 +962,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avxvnni,
@@ -981,7 +981,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/2, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x8c8__avxvnni,
@@ -1000,7 +1000,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/3, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_3x8c8__avxvnni,
@@ -1019,7 +1019,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/4, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x8c8__avxvnni,
@@ -1038,7 +1038,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/5, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x8c8__avxvnni,
@@ -1057,7 +1057,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/6, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avxvnni,
@@ -1076,7 +1076,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/7, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x8c8__avxvnni,
@@ -1095,7 +1095,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/32,
           /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/true,
+          /*unsigned_inputs=*/false,
           /*planes=*/4,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x8c8__avxvnni,

@@ -257,6 +257,18 @@ static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd_kzp2(__m256i i32,
   return _mm256_dpbusd_offset_epi32_madd(i32, u8, u2, 2);
 }
 
+// AVXVNNI replacement using vpmaddubsw for unsigned 2-bit with zero point 0.
+// Either u8 is uint8 and s8 is [0, 3], or u8 is [0, 3] and s8 is int8: in both
+// cases pairwise sums fit in [-768, 1530] and cannot saturate int16.
+static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd_kzp0(__m256i i32,
+                                                           const __m256i u8,
+                                                           const __m256i s8) {
+  const __m256i vminus_one = _mm256_set1_epi16(-1);
+  const __m256i i12 = _mm256_maddubs_epi16(u8, s8);
+  const __m256i v = _mm256_madd_epi16(i12, vminus_one);
+  return _mm256_sub_epi32(i32, v);
+}
+
 #endif  // __AVX2__
 
 #if defined(__SSSE3__) || defined(_M_X64) || \
@@ -287,6 +299,16 @@ static XNN_INTRINSIC __m128i _mm_dpbusd_epi32_madd_kzp2(__m128i i32,
   const __m128i i2 = _mm_sub_epi8(u2, vzero_point);  // convert uint2 to int2
   const __m128i i10 = _mm_maddubs_epi16(u8, i2);     // u8 * i2 = i10
   const __m128i v = _mm_madd_epi16(i10, vminus_one);  // convert 16 bits to 32 bits
+  return _mm_sub_epi32(i32, v);
+}
+
+// SSE VNNI replacement for unsigned 2-bit with zero point 0.
+static XNN_INTRINSIC __m128i _mm_dpbusd_epi32_madd_kzp0(__m128i i32,
+                                                        const __m128i u8,
+                                                        const __m128i s8) {
+  const __m128i vminus_one = _mm_set1_epi16(-1);
+  const __m128i i12 = _mm_maddubs_epi16(u8, s8);
+  const __m128i v = _mm_madd_epi16(i12, vminus_one);
   return _mm_sub_epi32(i32, v);
 }
 

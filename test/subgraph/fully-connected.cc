@@ -829,6 +829,172 @@ TEST(FullyConnectedQD8F32QC2W, unproduced_dynamically_quantized_input) {
                 /*threadpool=*/nullptr,
                 xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING));
 }
+
+TEST(FullyConnectedQD8F32QC2W, shared_convert_with_qc4w_and_unaligned_k) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  ReplicableRandomDevice rng;
+  auto input_gen = MakeDatatypeGenerator(float());
+  auto filter_qc4w_gen = MakeDatatypeGenerator(qcint4());
+  auto filter_qc2w_gen = MakeDatatypeGenerator(qcint2());
+  DatatypeGenerator<float> bias_gen =
+      MakeDatatypeGenerator(float(), -max_abs_bias<float>(),
+                            max_abs_bias<float>());
+  std::uniform_real_distribution<float> scale_dist(0.01f, 1.0f);
+  std::uniform_real_distribution<float> zero_point_dist(-1.5f, -0.5f);
+
+  constexpr size_t m = 3;
+  constexpr size_t input_channels = 36;
+  constexpr size_t output_channels = 19;
+  const std::vector<size_t> input_shape = {m, input_channels};
+  const std::vector<size_t> output_shape = {m, output_channels};
+
+  Tensor<float> input(input_shape, XnnExtraBytes);
+  input.generate([&]() { return input_gen(rng); });
+  for (size_t row = 0; row < m; ++row) {
+    FakeDynamicQuantize(input.slice_leading({row}), xnn_datatype_qdint8);
+  }
+
+  Tensor<qcint4> filter_qc4w({output_channels, input_channels / 2},
+                             XnnExtraBytes);
+  filter_qc4w.generate([&]() { return filter_qc4w_gen(rng); });
+  Tensor<float> scale_qc4w({output_channels, 1});
+  scale_qc4w.generate([&]() { return scale_dist(rng); });
+  broadcast_extent_1(scale_qc4w);
+  Tensor<float> bias_qc4w({output_channels}, XnnExtraBytes);
+  bias_qc4w.generate([&]() { return bias_gen(rng); });
+
+  Tensor<qcint2> filter_qc2w({output_channels, input_channels / 4},
+                             XnnExtraBytes);
+  filter_qc2w.generate([&]() { return filter_qc2w_gen(rng); });
+  Tensor<float> scale_qc2w({output_channels, 1});
+  scale_qc2w.generate([&]() { return scale_dist(rng); });
+  broadcast_extent_1(scale_qc2w);
+  std::vector<float> zero_point_qc2w(output_channels);
+  std::generate(zero_point_qc2w.begin(), zero_point_qc2w.end(),
+                [&]() { return zero_point_dist(rng); });
+  Tensor<float> bias_qc2w({output_channels}, XnnExtraBytes);
+  bias_qc2w.generate([&]() { return bias_gen(rng); });
+
+  const xnn_quantization_params unquantized{0, 1.0f};
+  Tensor<float> bias_scale({output_channels});
+  bias_scale.fill(1.0f);
+
+  const int32_t qc4w_zero_point =
+      random_quantization(datatype_of<qcint4>(), rng, 0.01f, 1.0f).zero_point;
+  const int32_t qc2w_zero_point =
+      random_quantization(datatype_of<qcint2>(), rng, 0.01f, 1.0f).zero_point;
+
+  Tensor<float> expected_qc4w = ReferenceImpl(
+      input, filter_qc4w, bias_qc4w, unquantized,
+      /*channelwise_filter_zero_point=*/nullptr, qc4w_zero_point, scale_qc4w,
+      no_blockwise, /*bias_zero_point=*/0, bias_scale, /*flags=*/0);
+  Tensor<float> expected_qc2w = ReferenceImpl(
+      input, filter_qc2w, bias_qc2w, unquantized, zero_point_qc2w.data(),
+      qc2w_zero_point, scale_qc2w, no_blockwise, /*bias_zero_point=*/0,
+      bias_scale, /*flags=*/0);
+
+  const float max_a = MaxDatatype(float());
+  const float max_bias = max_abs_bias<float>();
+  const float tol_qc4w =
+      xnnpack::epsilon(xnn_datatype_fp32) *
+          (input_channels * max_a * MaxDatatype(qcint4()) + max_bias) * 4.0f +
+      std::numeric_limits<float>::min();
+  const float tol_qc2w =
+      xnnpack::epsilon(xnn_datatype_fp32) *
+          (input_channels * max_a * (MaxDatatype(qcint2()) + 1.5f) + max_bias) *
+          4.0f +
+      std::numeric_limits<float>::min();
+
+  const uint32_t base_flags = xnn_test_runtime_flags();
+  for (const bool qc4w_first : {true, false}) {
+    for (const uint32_t runtime_flags :
+         {base_flags & ~XNN_FLAG_NO_INLINED_LHS_PACKING,
+          base_flags | XNN_FLAG_NO_INLINED_LHS_PACKING}) {
+      SCOPED_TRACE(testing::Message()
+                   << "qc4w_first=" << qc4w_first << ", runtime_flags="
+                   << runtime_flags_to_string(runtime_flags));
+
+      SubgraphTester subgraph(7);
+      constexpr uint32_t input_id = 0;
+      constexpr uint32_t filter_qc4w_id = 1;
+      constexpr uint32_t bias_qc4w_id = 2;
+      constexpr uint32_t output_qc4w_id = 3;
+      constexpr uint32_t filter_qc2w_id = 4;
+      constexpr uint32_t bias_qc2w_id = 5;
+      constexpr uint32_t output_qc2w_id = 6;
+
+      uint32_t qd_input_id = XNN_INVALID_VALUE_ID;
+      subgraph
+          .AddInputTensor(input_shape, xnn_datatype_fp32, unquantized, input_id)
+          .AddInternalDynamicallyQuantizedTensor(
+              input_shape, xnn_datatype_qdint8, /*num_nonbatch_dims=*/1,
+              &qd_input_id)
+          .AddConvert(input_id, qd_input_id);
+
+      const std::vector<size_t> filter_dims = {output_channels, input_channels};
+      subgraph.AddStaticChannelwiseQuantizedTensor(
+          filter_dims, /*channel_dim=*/0, xnn_datatype_qcint4,
+          scale_qc4w.data(), filter_qc4w_id, /*flags=*/0, filter_qc4w.base());
+      subgraph.AddStaticTensor(bias_qc4w.extents(), bias_qc4w_id,
+                               bias_qc4w.base(), unquantized);
+      subgraph.AddOutputTensor(output_shape, xnn_datatype_fp32, unquantized,
+                               output_qc4w_id);
+
+      uint32_t defined_qc2w_id = XNN_INVALID_VALUE_ID;
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_define_channelwise_quantized_tensor_value_v3(
+              subgraph.Subgraph(), xnn_datatype_qcint2, qc2w_zero_point,
+              scale_qc2w.data(), filter_dims.size(), /*channel_dim=*/0,
+              filter_dims.data(), filter_qc2w.base(), filter_qc2w_id,
+              /*flags=*/0, &defined_qc2w_id, zero_point_qc2w.data()));
+      ASSERT_EQ(defined_qc2w_id, filter_qc2w_id);
+      subgraph.AddStaticTensor(bias_qc2w.extents(), bias_qc2w_id,
+                               bias_qc2w.base(), unquantized);
+      subgraph.AddOutputTensor(output_shape, xnn_datatype_fp32, unquantized,
+                               output_qc2w_id);
+
+      if (qc4w_first) {
+        subgraph
+            .AddFullyConnected(qd_input_id, filter_qc4w_id, bias_qc4w_id,
+                               output_qc4w_id)
+            .AddFullyConnected(qd_input_id, filter_qc2w_id, bias_qc2w_id,
+                               output_qc2w_id);
+      } else {
+        subgraph
+            .AddFullyConnected(qd_input_id, filter_qc2w_id, bias_qc2w_id,
+                               output_qc2w_id)
+            .AddFullyConnected(qd_input_id, filter_qc4w_id, bias_qc4w_id,
+                               output_qc4w_id);
+      }
+
+      const xnn_status status = subgraph.CreateRuntime(nullptr, runtime_flags);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+        return;
+      }
+      ASSERT_EQ(xnn_status_success, status);
+
+      Tensor<float> output_qc4w(output_shape);
+      Tensor<float> output_qc2w(output_shape);
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), input_id)
+          .ReshapeRuntime();
+      ASSERT_EQ(xnn_status_success,
+                subgraph.SetupExternalTensor(output_qc4w.base(), output_qc4w_id)
+                    .SetupExternalTensor(output_qc2w.base(), output_qc2w_id)
+                    .SetupRuntime()
+                    .InvokeRuntime());
+
+      for (const auto& i : EnumerateIndices(output_shape)) {
+        ASSERT_NEAR(output_qc4w(i), expected_qc4w(i), tol_qc4w)
+            << "qc4w i=" << index_to_string(i);
+        ASSERT_NEAR(output_qc2w(i), expected_qc2w(i), tol_qc2w)
+            << "qc2w i=" << index_to_string(i);
+      }
+    }
+  }
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
