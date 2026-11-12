@@ -263,25 +263,20 @@ void xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_2x8c8__avx2(
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, vmax);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, vmax);
-    // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs), then pack to 16-bit.
+    // Round fp32 to bf16 (round-to-nearest-even), then pack to 16-bit.
     const __m256i vbias = _mm256_set1_epi32(0x7FFF);
     const __m256i vone = _mm256_set1_epi32(1);
-    const __m256i vabs_mask = _mm256_set1_epi32(0x7FFFFFFF);
-    const __m256i vexp_mask = _mm256_set1_epi32(0x7F800000);
-    const __m256i vquiet = _mm256_set1_epi32(0x00400000);
     __m256i vbfacc0x01234567 = _mm256_castps_si256(vout0x01234567);
-    vbfacc0x01234567 = _mm256_blendv_epi8(
-        _mm256_add_epi32(_mm256_add_epi32(vbfacc0x01234567, vbias), _mm256_and_si256(_mm256_srli_epi32(vbfacc0x01234567, 16), vone)),
-        _mm256_or_si256(vbfacc0x01234567, vquiet),
-        _mm256_cmpgt_epi32(_mm256_and_si256(vbfacc0x01234567, vabs_mask), vexp_mask));
+    vbfacc0x01234567 = _mm256_add_epi32(
+        _mm256_add_epi32(vbfacc0x01234567, vbias),
+        _mm256_and_si256(_mm256_srli_epi32(vbfacc0x01234567, 16), vone));
     vbfacc0x01234567 = _mm256_srli_epi32(vbfacc0x01234567, 16);
     const __m256i vbfpacked0x01234567 = _mm256_permute4x64_epi64(_mm256_packus_epi32(vbfacc0x01234567, vbfacc0x01234567), _MM_SHUFFLE(3, 1, 2, 0));
     __m128i vfp16out0x01234567 = _mm256_castsi256_si128(vbfpacked0x01234567);
     __m256i vbfacc1x01234567 = _mm256_castps_si256(vout1x01234567);
-    vbfacc1x01234567 = _mm256_blendv_epi8(
-        _mm256_add_epi32(_mm256_add_epi32(vbfacc1x01234567, vbias), _mm256_and_si256(_mm256_srli_epi32(vbfacc1x01234567, 16), vone)),
-        _mm256_or_si256(vbfacc1x01234567, vquiet),
-        _mm256_cmpgt_epi32(_mm256_and_si256(vbfacc1x01234567, vabs_mask), vexp_mask));
+    vbfacc1x01234567 = _mm256_add_epi32(
+        _mm256_add_epi32(vbfacc1x01234567, vbias),
+        _mm256_and_si256(_mm256_srli_epi32(vbfacc1x01234567, 16), vone));
     vbfacc1x01234567 = _mm256_srli_epi32(vbfacc1x01234567, 16);
     const __m256i vbfpacked1x01234567 = _mm256_permute4x64_epi64(_mm256_packus_epi32(vbfacc1x01234567, vbfacc1x01234567), _MM_SHUFFLE(3, 1, 2, 0));
     __m128i vfp16out1x01234567 = _mm256_castsi256_si128(vbfpacked1x01234567);
