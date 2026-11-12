@@ -122,7 +122,7 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
       }
 
       auto func = slinky::func::make_copy(std::move(func_input), {padded, dims},
-                                          std::move(func_padding));
+                                          std::move(func_padding), padded_copy);
       runtime.funcs.push_back(std::move(func));
 
       input_buffer = padded;

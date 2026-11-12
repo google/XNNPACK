@@ -130,6 +130,12 @@ slinky::box_expr make_broadcast_bounds(
     std::vector<slinky::var> dims, const std::vector<slinky::expr>& src_extents,
     const std::vector<slinky::expr>& dst_extents, bool no_broadcast = false);
 
+// Copies `src` to `dst` with `pad`, respecting the bounds of each dimension
+// regardless of stride (so `dim::broadcast()` dimensions with bounds [0, 0]
+// and stride 0 are still padded).
+void padded_copy(const slinky::raw_buffer& src, const slinky::raw_buffer& dst,
+                 const slinky::raw_buffer& pad);
+
 // Computes a split factor for each dimension by distributing a cache-sized
 // tile area between the dimensions, visited in `loop_order` (dimensions
 // earlier in the order get the first claim on the area). `alignments` is a
