@@ -517,4 +517,38 @@ TEST(fold_constants, cache_distinguishes_output_shape) {
               ElementsAre(0, 1, 2, 3, 1, 2, 3, 4));
 }
 
+TEST(fold_constants, cache_distinguishes_pack_b_params) {
+  constexpr size_t K2 = 4;
+  constexpr size_t K1 = 16;
+  constexpr size_t N = 16;
+  constexpr size_t M = 4;
+  std::vector<int8_t> b_data(K2 * K1 * N, 1);
+
+  SubgraphBuilder builder1(2);
+  uint32_t b1_id = YNN_INVALID_VALUE_ID;
+  builder1.AddInput(type_of<int8_t>(), {K2, M, K1}, 0)
+      .AddOutput(type_of<int32_t>(), {K2, M, N}, 1)
+      .AddTensor(type_of<int8_t>(), {K2, K1, N}, b1_id, b_data.data())
+      .AddDot(/*num_k_dims=*/1, 0, b1_id, YNN_INVALID_VALUE_ID, 1);
+  ynn_subgraph_t sg1 = builder1.GetSubgraph();
+  ASSERT_EQ(sg1->fold_constants(nullptr), ynn_status_success);
+
+  SubgraphBuilder builder2(2);
+  uint32_t b2_id = YNN_INVALID_VALUE_ID;
+  builder2.AddInput(type_of<int8_t>(), {M, K2, K1}, 0)
+      .AddOutput(type_of<int32_t>(), {M, N}, 1)
+      .AddTensor(type_of<int8_t>(), {K2, K1, N}, b2_id, b_data.data())
+      .AddDot(/*num_k_dims=*/2, 0, b2_id, YNN_INVALID_VALUE_ID, 1);
+  ynn_subgraph_t sg2 = builder2.GetSubgraph();
+  ASSERT_EQ(sg2->fold_constants(nullptr), ynn_status_success);
+
+  const ynn_node& dot1 = ProducerOf(1, *sg1);
+  const ynn_node& dot2 = ProducerOf(1, *sg2);
+  const ynn_value& packed_b1 = sg1->value(dot1.inputs[1]);
+  const ynn_value& packed_b2 = sg2->value(dot2.inputs[1]);
+  ASSERT_TRUE(packed_b1.is_static());
+  ASSERT_TRUE(packed_b2.is_static());
+  EXPECT_NE(packed_b1.data.get(), packed_b2.data.get());
+}
+
 }  // namespace ynn

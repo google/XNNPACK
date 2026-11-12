@@ -521,11 +521,13 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
+    bool symmetric_b = false;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims;
+      return a.num_k_dims == b.num_k_dims && a.symmetric_b == b.symmetric_b;
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return a.num_k_dims < b.num_k_dims;
+      return std::tie(a.num_k_dims, a.symmetric_b) <
+             std::tie(b.num_k_dims, b.symmetric_b);
     }
   };
   struct iota {
@@ -542,11 +544,20 @@ struct ynn_node {
     // For `transpose = false`, the first two dimensions of the input are n, k1.
     // For `transpose = true`, the first two dimensions of the input are k1, n.
     bool transpose = false;
+    size_t num_k_dims = 0;
+    size_t tile_k = 0;
+    size_t tile_n = 0;
+    size_t max_block_n = 0;
     friend bool operator==(const pack_b& a, const pack_b& b) {
-      return a.transpose == b.transpose;
+      return a.transpose == b.transpose && a.num_k_dims == b.num_k_dims &&
+             a.tile_k == b.tile_k && a.tile_n == b.tile_n &&
+             a.max_block_n == b.max_block_n;
     }
     friend bool operator<(const pack_b& a, const pack_b& b) {
-      return a.transpose < b.transpose;
+      return std::tie(a.transpose, a.num_k_dims, a.tile_k, a.tile_n,
+                      a.max_block_n) < std::tie(b.transpose, b.num_k_dims,
+                                                b.tile_k, b.tile_n,
+                                                b.max_block_n);
     }
   };
   struct transpose_a {
