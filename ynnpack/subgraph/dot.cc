@@ -1591,7 +1591,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   ynn_node node;
   node.inputs = {input_a_id, input_b_id, input_c_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::dot{num_k_dims};
+  node.op = ynn_node::dot{num_k_dims, symmetric_b};
 
   // Propagate shape.
   int c_rank;

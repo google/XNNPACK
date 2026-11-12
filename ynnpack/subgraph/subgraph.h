@@ -521,11 +521,13 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
+    bool symmetric_b = false;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims;
+      return a.num_k_dims == b.num_k_dims && a.symmetric_b == b.symmetric_b;
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return a.num_k_dims < b.num_k_dims;
+      return std::tie(a.num_k_dims, a.symmetric_b) <
+             std::tie(b.num_k_dims, b.symmetric_b);
     }
   };
   struct iota {
