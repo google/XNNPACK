@@ -2743,6 +2743,15 @@ bool rewrite_requantize_quantize(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+bool rewrite_dot_commute(ynn_subgraph& subgraph, ynn_node& node,
+                         subgraph_analysis& analysis) {
+  if (!rewrite_dot_commute_transposed_b(subgraph, node)) {
+    return false;
+  }
+  analysis.invalidate();
+  return true;
+}
+
 }  // namespace
 
 }  // namespace ynn
@@ -2789,6 +2798,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_transpose(*this, node, analysis) ||
+                ynn::rewrite_dot_commute(*this, node, analysis) ||
                 ynn::rewrite_fast_math(*this, node, analysis) ||
                 ynn::rewrite_requantize_quantize(*this, node, analysis) ||
                 changed;

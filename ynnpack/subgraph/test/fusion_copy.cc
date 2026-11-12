@@ -3,12 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
 #include <cstdint>
 #include <variant>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
+#include "ynnpack/base/bfloat16.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
@@ -17,6 +20,29 @@
 namespace ynn {
 
 using ::testing::AllOf;
+
+namespace {
+
+bool HasTransposedAFp32DotKernel() {
+#ifdef YNN_ARCH_ARM
+  if (is_arch_supported(arch_flag::sme) || is_arch_supported(arch_flag::sme2)) {
+    return true;
+  }
+#endif
+  return false;
+}
+
+bool HasUnalignedBFp32DotKernel() {
+#if defined(YNN_ARCH_X86)
+  return is_arch_supported(arch_flag::sse2);
+#elif defined(YNN_ARCH_ARM) && defined(__aarch64__)
+  return is_arch_supported(arch_flag::neon) && !HasTransposedAFp32DotKernel();
+#else
+  return false;
+#endif
+}
+
+}  // namespace
 
 TEST(fusion, broadcast_of_static) {
   // rewrite a + broadcast(b) -> a + b if b is static.
@@ -1023,17 +1049,17 @@ TEST(fusion, pack_b_transpose_2d) {
 }
 
 TEST(fusion, pack_b_transpose_small_m) {
-  // Even when m is small (m=1), if b is transposed, packing b should still
-  // be selected so the transpose is absorbed into pack_b.
+  // When m > 1 (m=4), transposed B should still pack so the transpose is
+  // absorbed into pack_b without introducing a non-aliased output transpose.
   const uint32_t a_id = 0;
   const uint32_t b_id = 1;
   const uint32_t out_id = 2;
   uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
   SubgraphBuilder builder(3);
 
-  builder.AddInput(ynn_type_fp32, {1, 64}, a_id)
+  builder.AddInput(ynn_type_fp32, {4, 64}, a_id)
       .AddInput(ynn_type_fp32, {64, 64}, b_id)
-      .AddOutput(ynn_type_fp32, {1, 64}, out_id)
+      .AddOutput(ynn_type_fp32, {4, 64}, out_id)
       .AddTensor(ynn_type_fp32, {64, 64}, transposed_b_id);
 
   builder.AddTranspose({1, 0}, b_id, transposed_b_id)
@@ -1050,11 +1076,11 @@ TEST(fusion, pack_b_transpose_small_m) {
   EXPECT_THAT(pack_b_node, AllOf(IsPackB(true), InputsAre(b_id)));
 
   Runtime runtime(builder.GetSubgraph());
-  std::vector<float> a_data(1 * 64, 1.0f);
+  std::vector<float> a_data(4 * 64, 1.0f);
   std::vector<float> b_data(64 * 64, 2.0f);
-  std::vector<float> out_data(1 * 64, 0.0f);
+  std::vector<float> out_data(4 * 64, 0.0f);
 
-  runtime.ReshapeExternalTensor(TensorShape({1, 64}), a_data.data(), a_id)
+  runtime.ReshapeExternalTensor(TensorShape({4, 64}), a_data.data(), a_id)
       .ReshapeExternalTensor(TensorShape({64, 64}), b_data.data(), b_id);
   runtime.ReshapeRuntime();
   ASSERT_EQ(runtime.Status(), ynn_status_success);
@@ -1065,6 +1091,444 @@ TEST(fusion, pack_b_transpose_small_m) {
   for (float v : out_data) {
     EXPECT_FLOAT_EQ(v, 128.0f);
   }
+}
+
+TEST(fusion, commute_transposed_b_m1) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {1, 64}, a_id)
+      .AddInput(ynn_type_fp32, {128, 64}, b_id)
+      .AddOutput(ynn_type_fp32, {1, 128}, out_id)
+      .AddTensor(ynn_type_fp32, {64, 128}, transposed_b_id);
+
+  builder.AddTranspose({1, 0}, b_id, transposed_b_id)
+      .AddDot(1, a_id, transposed_b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& out_node = ProducerOf(out_id, subgraph);
+  if (!HasTransposedAFp32DotKernel()) {
+    const ynn_node& dot_node =
+        std::holds_alternative<ynn_node::dot>(out_node.op)
+            ? out_node
+            : ProducerOf(out_node.inputs[0], subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    EXPECT_EQ(dot_node.inputs[0], b_id);
+  } else {
+    ASSERT_THAT(out_node, IsDot());
+    EXPECT_THAT(ProducerOf(out_node.inputs[1], subgraph),
+                AllOf(IsPackB(true), InputsAre(b_id)));
+  }
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> a_data(1 * 64);
+  std::vector<float> b_data(128 * 64);
+  for (size_t i = 0; i < a_data.size(); ++i) {
+    a_data[i] = static_cast<float>((i % 7) + 1) * 0.25f;
+  }
+  for (size_t i = 0; i < b_data.size(); ++i) {
+    b_data[i] = static_cast<float>(static_cast<int>(i % 11) - 5) * 0.5f;
+  }
+  std::vector<float> out_data(1 * 128, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({1, 64}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({128, 64}), b_data.data(), b_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t c = 0; c < 128; ++c) {
+    float expected = 0.0f;
+    for (size_t k = 0; k < 64; ++k) {
+      expected += a_data[k] * b_data[c * 64 + k];
+    }
+    EXPECT_NEAR(out_data[c], expected, 1e-4f);
+  }
+}
+
+TEST(fusion, commute_transposed_b_permuted_heads) {
+  // Sequence-major K [B=1, S=64, H=2, D=32] transposed via {0, 2, 3, 1} to
+  // [1, 2, 32, 64] for decode Q [1, 2, 1, 32] @ K^T -> [1, 2, 1, 64].
+  const uint32_t q_id = 0;
+  const uint32_t k_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t k_t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {1, 2, 1, 32}, q_id)
+      .AddInput(ynn_type_fp32, {1, 64, 2, 32}, k_id)
+      .AddOutput(ynn_type_fp32, {1, 2, 1, 64}, out_id)
+      .AddTensor(ynn_type_fp32, {1, 2, 32, 64}, k_t_id);
+
+  builder.AddTranspose({0, 2, 3, 1}, k_id, k_t_id)
+      .AddDot(1, q_id, k_t_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& out_node = ProducerOf(out_id, subgraph);
+  if (!HasTransposedAFp32DotKernel()) {
+    const ynn_node& dot_node =
+        std::holds_alternative<ynn_node::dot>(out_node.op)
+            ? out_node
+            : ProducerOf(out_node.inputs[0], subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    const ynn_node& k_view_node = ProducerOf(dot_node.inputs[0], subgraph);
+    EXPECT_THAT(k_view_node, InputsAre(k_id));
+    const auto* transpose_op =
+        std::get_if<ynn_node::static_transpose>(&k_view_node.op);
+    ASSERT_NE(transpose_op, nullptr);
+    EXPECT_TRUE(transpose_op->alias);
+  } else {
+    ASSERT_THAT(out_node, IsDot());
+    const ynn_node& pack_b_node = ProducerOf(out_node.inputs[1], subgraph);
+    EXPECT_THAT(pack_b_node, IsPackB(true));
+    const ynn_node& k_view_node = ProducerOf(pack_b_node.inputs[0], subgraph);
+    EXPECT_THAT(k_view_node, InputsAre(k_id));
+    const auto* transpose_op =
+        std::get_if<ynn_node::static_transpose>(&k_view_node.op);
+    ASSERT_NE(transpose_op, nullptr);
+    EXPECT_TRUE(transpose_op->alias);
+  }
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> q_data(1 * 2 * 1 * 32);
+  std::vector<float> k_data(1 * 64 * 2 * 32);
+  for (size_t i = 0; i < q_data.size(); ++i) {
+    q_data[i] = static_cast<float>((i % 5) + 1) * 0.5f;
+  }
+  for (size_t i = 0; i < k_data.size(); ++i) {
+    k_data[i] = static_cast<float>(static_cast<int>(i % 9) - 4) * 0.25f;
+  }
+  std::vector<float> out_data(1 * 2 * 1 * 64, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({1, 2, 1, 32}), q_data.data(), q_id)
+      .ReshapeExternalTensor(TensorShape({1, 64, 2, 32}), k_data.data(), k_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t h = 0; h < 2; ++h) {
+    for (size_t s = 0; s < 64; ++s) {
+      float expected = 0.0f;
+      for (size_t d = 0; d < 32; ++d) {
+        expected += q_data[h * 32 + d] * k_data[(s * 2 + h) * 32 + d];
+      }
+      EXPECT_NEAR(out_data[h * 64 + s], expected, 1e-4f);
+    }
+  }
+}
+
+TEST(fusion, skip_pack_b_dynamic_tile_k_1) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {128, 128}, a_id)
+      .AddInput(ynn_type_fp32, {128, 128}, b_id)
+      .AddOutput(ynn_type_fp32, {128, 128}, out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  if (HasUnalignedBFp32DotKernel()) {
+    EXPECT_EQ(dot_node.inputs[1], b_id);
+  } else {
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+                AllOf(IsPackB(false), InputsAre(b_id)));
+  }
+}
+
+TEST(fusion, skip_pack_b_cache_resident_medium_m) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  // M=256 exceeds the default 10 M-block unpacked limit, but 128x128 fp32 B
+  // (64 KiB) fits within the per-core L2 cache budget (<= 64 M-blocks).
+  builder.AddInput(ynn_type_fp32, {256, 128}, a_id)
+      .AddInput(ynn_type_fp32, {128, 128}, b_id)
+      .AddOutput(ynn_type_fp32, {256, 128}, out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  if (HasUnalignedBFp32DotKernel()) {
+    EXPECT_EQ(dot_node.inputs[1], b_id);
+  } else {
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+                AllOf(IsPackB(false), InputsAre(b_id)));
+  }
+}
+
+TEST(fusion, commute_transposed_b_scalar_c) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+  const uint32_t c_id = builder.DefineScalar<float>(1.5f);
+  builder.AddInput(ynn_type_fp32, {1, 64}, a_id)
+      .AddInput(ynn_type_fp32, {128, 64}, b_id)
+      .AddOutput(ynn_type_fp32, {1, 128}, out_id)
+      .AddTensor(ynn_type_fp32, {64, 128}, transposed_b_id);
+  builder.AddTranspose({1, 0}, b_id, transposed_b_id)
+      .AddDot(1, a_id, transposed_b_id, c_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& out_node = ProducerOf(out_id, subgraph);
+  if (!HasTransposedAFp32DotKernel()) {
+    const ynn_node& dot_node =
+        std::holds_alternative<ynn_node::dot>(out_node.op)
+            ? out_node
+            : ProducerOf(out_node.inputs[0], subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    EXPECT_EQ(dot_node.inputs[0], b_id);
+  } else {
+    ASSERT_THAT(out_node, IsDot());
+  }
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> a_data(1 * 64);
+  std::vector<float> b_data(128 * 64);
+  for (size_t i = 0; i < a_data.size(); ++i) {
+    a_data[i] = static_cast<float>((i % 7) + 1) * 0.25f;
+  }
+  for (size_t i = 0; i < b_data.size(); ++i) {
+    b_data[i] = static_cast<float>(static_cast<int>(i % 11) - 5) * 0.5f;
+  }
+  std::vector<float> out_data(1 * 128, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({1, 64}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({128, 64}), b_data.data(), b_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t c = 0; c < 128; ++c) {
+    float expected = 1.5f;
+    for (size_t k = 0; k < 64; ++k) {
+      expected += a_data[k] * b_data[c * 64 + k];
+    }
+    EXPECT_NEAR(out_data[c], expected, 1e-4f);
+  }
+}
+
+TEST(fusion, commute_transposed_b_rejects_static_b) {
+  const uint32_t a_id = 0;
+  const uint32_t out_id = 1;
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
+  std::vector<float> static_b(128 * 64, 1.0f);
+  SubgraphBuilder builder(2);
+  builder.AddInput(ynn_type_fp32, {1, 64}, a_id)
+      .AddOutput(ynn_type_fp32, {1, 128}, out_id)
+      .AddTensor(ynn_type_fp32, {128, 64}, b_id, static_b.data())
+      .AddTensor(ynn_type_fp32, {64, 128}, transposed_b_id)
+      .AddTranspose({1, 0}, b_id, transposed_b_id)
+      .AddDot(1, a_id, transposed_b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+              AllOf(IsPackB(true), InputsAre(b_id)));
+}
+
+TEST(fusion, commute_transposed_b_rejects_non_scalar_c) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t c_id = 2;
+  const uint32_t out_id = 3;
+  uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(4);
+  builder.AddInput(ynn_type_fp32, {1, 64}, a_id)
+      .AddInput(ynn_type_fp32, {128, 64}, b_id)
+      .AddInput(ynn_type_fp32, {1, 128}, c_id)
+      .AddOutput(ynn_type_fp32, {1, 128}, out_id)
+      .AddTensor(ynn_type_fp32, {64, 128}, transposed_b_id)
+      .AddTranspose({1, 0}, b_id, transposed_b_id)
+      .AddDot(1, a_id, transposed_b_id, c_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+              AllOf(IsPackB(true), InputsAre(b_id)));
+}
+
+TEST(fusion, commute_transposed_b_bf16_m1) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_bf16, {1, 72}, a_id)
+      .AddInput(ynn_type_bf16, {128, 72}, b_id)
+      .AddOutput(ynn_type_fp32, {1, 128}, out_id)
+      .AddTensor(ynn_type_bf16, {72, 128}, transposed_b_id)
+      .AddTranspose({1, 0}, b_id, transposed_b_id)
+      .AddDot(1, a_id, transposed_b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+#ifdef YNN_ARCH_X86
+  if (is_arch_supported(arch_flag::avx2_fma3)) {
+    const ynn_node& out_node = ProducerOf(out_id, subgraph);
+    const ynn_node& dot_node =
+        std::holds_alternative<ynn_node::dot>(out_node.op)
+            ? out_node
+            : ProducerOf(out_node.inputs[0], subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    EXPECT_EQ(dot_node.inputs[0], b_id);
+  }
+#endif
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<bfloat16> a_data(1 * 72);
+  std::vector<bfloat16> b_data(128 * 72);
+  for (size_t i = 0; i < a_data.size(); ++i) {
+    a_data[i] = bfloat16(static_cast<float>((i % 7) + 1) * 0.25f);
+  }
+  for (size_t i = 0; i < b_data.size(); ++i) {
+    b_data[i] =
+        bfloat16(static_cast<float>(static_cast<int>(i % 11) - 5) * 0.5f);
+  }
+  std::vector<float> out_data(1 * 128, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({1, 72}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({128, 72}), b_data.data(), b_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t c = 0; c < 128; ++c) {
+    float expected = 0.0f;
+    for (size_t k = 0; k < 72; ++k) {
+      expected += static_cast<float>(a_data[k]) *
+                  static_cast<float>(b_data[c * 72 + k]);
+    }
+    EXPECT_NEAR(out_data[c], expected, 1e-3f);
+  }
+}
+
+TEST(fusion, commute_transposed_b_consistent_arithmetic_skips_wide_n) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t transposed_b_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3, YNN_FLAG_CONSISTENT_ARITHMETIC);
+
+  builder.AddInput(ynn_type_bf16, {1, 64}, a_id)
+      .AddInput(ynn_type_bf16, {128, 64}, b_id)
+      .AddOutput(ynn_type_fp32, {1, 128}, out_id)
+      .AddTensor(ynn_type_bf16, {64, 128}, transposed_b_id)
+      .AddTranspose({1, 0}, b_id, transposed_b_id)
+      .AddDot(1, a_id, transposed_b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+#ifdef YNN_ARCH_X86
+  if (is_arch_supported(arch_flag::avx2_fma3)) {
+    const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+    ASSERT_THAT(dot_node, IsDot());
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+                AllOf(IsPackB(true), InputsAre(b_id)));
+  }
+#endif
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<bfloat16> a_data(1 * 64);
+  std::vector<bfloat16> b_data(128 * 64);
+  for (size_t i = 0; i < a_data.size(); ++i) {
+    a_data[i] = bfloat16(static_cast<float>((i % 7) + 1) * 0.25f);
+  }
+  for (size_t i = 0; i < b_data.size(); ++i) {
+    b_data[i] =
+        bfloat16(static_cast<float>(static_cast<int>(i % 11) - 5) * 0.5f);
+  }
+  std::vector<float> out_data(1 * 128, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({1, 64}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({128, 64}), b_data.data(), b_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t c = 0; c < 128; ++c) {
+    float expected = 0.0f;
+    for (size_t k = 0; k < 64; ++k) {
+      expected += static_cast<float>(a_data[k]) *
+                  static_cast<float>(b_data[c * 64 + k]);
+    }
+    EXPECT_NEAR(out_data[c], expected, 1e-3f);
+  }
+}
+
+TEST(fusion, pack_b_outer_transposed_retains_packing) {
+  // Sequence-major V [B=1, S=64, H=2, D=64] transposed via {0, 2, 1, 3}
+  // (swapping outer dimensions S and H) with M=64 (> default 10 M-blocks)
+  // retains pack_b so strided cross-head loads are packed once.
+  const uint32_t a_id = 0;
+  const uint32_t v_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t v_t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+  builder.AddInput(ynn_type_fp32, {1, 2, 64, 64}, a_id)
+      .AddInput(ynn_type_fp32, {1, 64, 2, 64}, v_id)
+      .AddOutput(ynn_type_fp32, {1, 2, 64, 64}, out_id)
+      .AddTensor(ynn_type_fp32, {1, 2, 64, 64}, v_t_id)
+      .AddTranspose({0, 2, 1, 3}, v_id, v_t_id)
+      .AddDot(1, a_id, v_t_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph), IsPackB(false));
 }
 
 TEST(fusion, pack_b_transpose_higher_dims) {

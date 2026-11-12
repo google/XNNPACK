@@ -76,6 +76,8 @@ struct dot_cost_models {
 #ifdef YNN_ARCH_X86_AVX2_FMA3
   dot_cost_model x86_avx2_fma3_bf16_bf16_fp32;
   dot_cost_model x86_avx2_fma3_bf16_bf16_fp32_k1;
+  dot_cost_model x86_avx2_fma3_bf16_bf16_fp32_k16 = {
+      1.00e-09f, 3.80e-11f, 1.50e-10f, 8.00e-10f};
   dot_cost_model x86_avx2_fma3_fp32_k8;
   dot_cost_model x86_avx2_fma3_fp32_k2;
 #endif  // YNN_ARCH_X86_AVX2_FMA3

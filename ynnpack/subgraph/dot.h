@@ -28,6 +28,10 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
                        uint32_t input_b_id, bool transpose = false);
 
+// Rewrites `A @ B^T` into `(B @ A^T)^T` when `M == 1` and `B` is dynamic so
+// `B` is streamed in-place instead of packed. Returns true if applied.
+bool rewrite_dot_commute_transposed_b(ynn_subgraph& subgraph, ynn_node& node);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_SUBGRAPH_DOT_H_
