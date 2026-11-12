@@ -36,6 +36,54 @@ $else:
 
 $CTYPE = {"f32": "float", "f16": "xnn_float16", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE]
 $CTYPE_IMPL = {"f32": "float", "f16": "xnn_float16", "s16": "int16_t", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE_IMPL]
+$if DATATYPE in ["s8", "u8"] and ARCH == "avx2":
+  $MM_MAX = {"s8": "_mm_max_epi8", "u8": "_mm_max_epu8"}[DATATYPE]
+  $MM_MIN = {"s8": "_mm_min_epi8", "u8": "_mm_min_epu8"}[DATATYPE]
+  static XNN_INLINE __m128i xnn_load_tail16_${DATATYPE}(const ${CTYPE_IMPL}* input) XNN_OOB_READS {
+    return _mm_loadu_si128((const __m128i*) input);
+  }
+  static XNN_INLINE void xnn_maxpool_tail16_${DATATYPE}(
+      const ${CTYPE_IMPL}* i0, const ${CTYPE_IMPL}* i1, const ${CTYPE_IMPL}* i2,
+      const ${CTYPE_IMPL}* i3, const ${CTYPE_IMPL}* i4, const ${CTYPE_IMPL}* i5,
+      const ${CTYPE_IMPL}* i6, const ${CTYPE_IMPL}* i7, const ${CTYPE_IMPL}* i8,
+      ${CTYPE_IMPL}* o, size_t c, xnn_simd_${DATATYPE_IMPL}_t vmin,
+      xnn_simd_${DATATYPE_IMPL}_t vmax, int accum) {
+    assert(c > 0 && c <= 16);
+    const __m128i vi0 = xnn_load_tail16_${DATATYPE}(i0);
+    const __m128i vi1 = xnn_load_tail16_${DATATYPE}(i1);
+    const __m128i vi2 = xnn_load_tail16_${DATATYPE}(i2);
+    const __m128i vi3 = xnn_load_tail16_${DATATYPE}(i3);
+    const __m128i vi4 = xnn_load_tail16_${DATATYPE}(i4);
+    const __m128i vi5 = xnn_load_tail16_${DATATYPE}(i5);
+    const __m128i vi6 = xnn_load_tail16_${DATATYPE}(i6);
+    const __m128i vi7 = xnn_load_tail16_${DATATYPE}(i7);
+    const __m128i vi8 = xnn_load_tail16_${DATATYPE}(i8);
+    const __m128i xmin = _mm256_castsi256_si128(vmin);
+    const __m128i xmax = _mm256_castsi256_si128(vmax);
+    const __m128i vmax018 = ${MM_MAX}(${MM_MAX}(vi0, vi1), vi8);
+    const __m128i vmax23 = ${MM_MAX}(vi2, vi3);
+    const __m128i vmax45 = ${MM_MAX}(vi4, vi5);
+    const __m128i vmax67 = ${MM_MAX}(vi6, vi7);
+    const __m128i vmax2345 = ${MM_MAX}(vmax23, vmax45);
+    const __m128i vmax01678 = ${MM_MAX}(vmax018, vmax67);
+    __m128i vacc = ${MM_MAX}(vmax2345, vmax01678);
+    if (accum) {
+      if (c == 16) {
+        vacc = ${MM_MAX}(_mm_loadu_si128((const __m128i*) o), vacc);
+      } else {
+        const xnn_simd_${DATATYPE_IMPL}_t vprev = xnn_load_tail_safe_${DATATYPE_IMPL}(o, c);
+        vacc = ${MM_MAX}(_mm256_castsi256_si128(vprev), vacc);
+      }
+    } else {
+      vacc = ${MM_MAX}(vacc, xmin);
+    }
+    vacc = ${MM_MIN}(vacc, xmax);
+    if (c == 16) {
+      _mm_storeu_si128((__m128i*) o, vacc);
+    } else {
+      xnn_store_tail_${DATATYPE_IMPL}(o, _mm256_castsi128_si256(vacc), c);
+    }
+  }
 void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
     size_t output_pixels,
     size_t kernel_elements,
@@ -101,7 +149,28 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
 
       xnn_storeu_${DATATYPE_IMPL}(o, vacc); o += ${SIMD_SIZE};
     }
-    $if SIMD_SIZE > 1:
+    $if DATATYPE in ["s8", "u8"] and ARCH == "avx2":
+      if (c > 16) {
+        $for K in range(9):
+          const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
+
+        const xnn_simd_${DATATYPE_IMPL}_t vmax018 = xnn_max_${DATATYPE_IMPL}(xnn_max_${DATATYPE_IMPL}(vi0, vi1), vi8);
+        const xnn_simd_${DATATYPE_IMPL}_t vmax23 = xnn_max_${DATATYPE_IMPL}(vi2, vi3);
+        const xnn_simd_${DATATYPE_IMPL}_t vmax45 = xnn_max_${DATATYPE_IMPL}(vi4, vi5);
+        const xnn_simd_${DATATYPE_IMPL}_t vmax67 = xnn_max_${DATATYPE_IMPL}(vi6, vi7);
+
+        const xnn_simd_${DATATYPE_IMPL}_t vmax2345 = xnn_max_${DATATYPE_IMPL}(vmax23, vmax45);
+        const xnn_simd_${DATATYPE_IMPL}_t vmax01678 = xnn_max_${DATATYPE_IMPL}(vmax018, vmax67);
+        xnn_simd_${DATATYPE_IMPL}_t vacc = xnn_max_${DATATYPE_IMPL}(vmax2345, vmax01678);
+
+        vacc = xnn_max_${DATATYPE_IMPL}(vacc, vmin);
+        vacc = xnn_min_${DATATYPE_IMPL}(vacc, vmax);
+
+        xnn_store_tail_${DATATYPE_IMPL}(o, vacc, c);
+      } else if (c > 0) {
+        xnn_maxpool_tail16_${DATATYPE}(i0, i1, i2, i3, i4, i5, i6, i7, i8, o, c, vmin, vmax, /*accum=*/0);
+      }
+    $elif SIMD_SIZE > 1:
       if (c > 0) {
         $for K in range(9):
           const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
@@ -156,7 +225,30 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
 
         xnn_storeu_${DATATYPE_IMPL}(o, vacc); o += ${SIMD_SIZE};
       }
-      $if SIMD_SIZE > 1:
+      $if DATATYPE in ["s8", "u8"] and ARCH == "avx2":
+        if (c > 16) {
+          $for K in range(9):
+            const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
+          const xnn_simd_${DATATYPE_IMPL}_t vprev = xnn_load_tail_safe_impl(o, c);
+
+          const xnn_simd_${DATATYPE_IMPL}_t vmax018 = xnn_max_${DATATYPE_IMPL}(xnn_max_${DATATYPE_IMPL}(vi0, vi1), vi8);
+          const xnn_simd_${DATATYPE_IMPL}_t vmax23 = xnn_max_${DATATYPE_IMPL}(vi2, vi3);
+          const xnn_simd_${DATATYPE_IMPL}_t vmax45 = xnn_max_${DATATYPE_IMPL}(vi4, vi5);
+          const xnn_simd_${DATATYPE_IMPL}_t vmax67 = xnn_max_${DATATYPE_IMPL}(vi6, vi7);
+
+          const xnn_simd_${DATATYPE_IMPL}_t vmax2345 = xnn_max_${DATATYPE_IMPL}(vmax23, vmax45);
+          const xnn_simd_${DATATYPE_IMPL}_t vmax01678 = xnn_max_${DATATYPE_IMPL}(vmax018, vmax67);
+          const xnn_simd_${DATATYPE_IMPL}_t vmax012345678 = xnn_max_${DATATYPE_IMPL}(vmax2345, vmax01678);
+
+          xnn_simd_${DATATYPE_IMPL}_t vacc = xnn_max_${DATATYPE_IMPL}(vprev, vmax012345678);
+
+          vacc = xnn_min_${DATATYPE_IMPL}(vacc, vmax);
+
+          xnn_store_tail_${DATATYPE_IMPL}(o, vacc, c);
+        } else if (c > 0) {
+          xnn_maxpool_tail16_${DATATYPE}(i0, i1, i2, i3, i4, i5, i6, i7, i8, o, c, vmin, vmax, /*accum=*/1);
+        }
+      $elif SIMD_SIZE > 1:
         if (c > 0) {
           $for K in range(9):
             const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);

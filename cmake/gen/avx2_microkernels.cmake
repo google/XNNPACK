@@ -96,7 +96,9 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-vprelu/gen/qu8-vprelu-avx2-u16.c
   src/qu8-vpreluc/gen/qu8-vpreluc-avx2-u16.c
   src/qu8-vrpreluc/gen/qu8-vrpreluc-avx2-u16.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-avx2-u32.c
   src/s8-vclamp/s8-vclamp-avx2-u128.c
+  src/u8-maxpool/gen/u8-maxpool-9p-minmax-avx2-u32.c
   src/u8-vclamp/u8-vclamp-avx2-u128.c
   src/x8-lut/gen/x8-lut-avx2-u128.c
   src/x8-packw/gen/x8-packw-x16-gemm-goi-avx2-u16.c
