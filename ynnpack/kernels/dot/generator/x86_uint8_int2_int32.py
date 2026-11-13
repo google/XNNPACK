@@ -91,6 +91,53 @@ __m{self.bits}i a_{i}_{k+1} = {mm}_shuffle_epi8(a_{i}_{k+0}, shuf_a1);
 a_{i}_{k+0} = {mm}_shuffle_epi8(a_{i}_{k+0}, shuf_a0);
 """
 
+  def generate_block(self, a_tail=False, b_tail=False):
+    m_tiles = self.block_shape[0] // self.tile_shape[0]
+    n_tiles = self.block_shape[1] // self.tile_shape[1]
+    k_tiles = self.block_shape[2] // self.tile_shape[2]
+    num_regs = 32 if self.bits == 512 else 16
+    num_c = m_tiles * n_tiles
+    is_vnni = "vnni" in self.arch
+    c_block_regs = 0 if is_vnni else num_c
+    if (
+        n_tiles == 1
+        or (not is_vnni and k_tiles == 1)
+        or num_c + c_block_regs + 4 * (m_tiles + n_tiles) * k_tiles <= num_regs
+    ):
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    # On AVX-512, stream B across j only when pinned A + C + c_block fit in the
+    # 32 ZMM registers (streaming A puts YNN_OPTIMIZATION_BARRIER on the inner
+    # loop critical path). On AVX2/AVXVNNI, stream when VNNI leaves scratch
+    # room for streaming tiles, or when non-VNNI k_tiles > 1 has m_tiles >= 3.
+    if self.bits == 512:
+      if m_tiles > n_tiles or num_c + c_block_regs + 4 * m_tiles > num_regs:
+        return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    elif is_vnni:
+      if num_c + 4 * min(m_tiles, n_tiles) > num_regs - 2:
+        return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    elif m_tiles < 3:
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    load_a = self.load_a_tile_tail if a_tail else self.load_a_tile
+    load_b = self.load_b_tile_tail if b_tail else self.load_b_tile
+    result = ""
+    for k in range(0, self.block_shape[2], self.tile_shape[2]):
+      if m_tiles > n_tiles:
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += load_b(k, j)
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += load_a(i, k)
+          for j in range(0, self.block_shape[1], self.tile_shape[1]):
+            result += self.product(i, j, k)
+      else:
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += load_a(i, k)
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += load_b(k, j)
+          for i in range(0, self.block_shape[0], self.tile_shape[0]):
+            result += self.product(i, j, k)
+    result += "\n"
+    return result
+
   def product(self, i, j, k):
     mm = self._mm()
     a_ik0 = f"a_{i}_{k+0}"

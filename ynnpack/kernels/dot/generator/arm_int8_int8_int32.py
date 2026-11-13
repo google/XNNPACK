@@ -149,6 +149,35 @@ YNN_INTRINSIC int32_t unaligned_load_int8x4(const int8_t* ptr) {
 {c_ij} = vdotq_lane_s32({c_ij}, {b_kj}, a_{i}_{(k//8)*8}, {(k//4)%2});
 """
 
+  def generate_block(self, a_tail=False, b_tail=False):
+    m_tiles = self.block_shape[0] // self.tile_shape[0]
+    n_tiles = self.block_shape[1] // self.tile_shape[1]
+    k_tiles = self.block_shape[2] // self.tile_shape[2]
+    a_regs = m_tiles * ((self.block_shape[2] + 7) // 8)
+    # `dot_base.generate_block` for NEON streams B across j (holding `k_tiles`
+    # B vectors live per j, or `2 * k_tiles` when LLVM pairs adjacent j loads
+    # into `ldp`). Only switch to k-outer, j-inner when that exceeds the 32
+    # NEON registers (e.g., 10x8x8: 20 C + 10 A + 4 B = 34 > 32 -> spills;
+    # k-outer needs 20 C + 10 A + 2 B = 32 -> zero spills).
+    b_regs = min(n_tiles, 2) * k_tiles
+    if m_tiles * n_tiles + a_regs + b_regs <= 32:
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    result = ""
+    load_a = self.load_a_tile_tail if a_tail else self.load_a_tile
+    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        result += load_a(i, k)
+    result += "\n"
+
+    load_b = self.load_b_tile_tail if b_tail else self.load_b_tile
+    for k in range(0, self.block_shape[2], self.tile_shape[2]):
+      for j in range(0, self.block_shape[1], self.tile_shape[1]):
+        result += load_b(k, j)
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += self.product(i, j, k)
+    result += "\n"
+    return result
+
 
 class arm64_neoni8mm_int8_int8_int32(arm_int8_int8_int32):
   def __init__(self):
