@@ -131,18 +131,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x16c8__neoni8mm(
     // Inner accumulation loop along the 16 columns.
     size_t k = kc;
     // 2x partial unrolled loop to load 8 bytes at a time.
-
-    uint64x2x2_t va01x0123456789ABCDEF;
-    va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-    va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-    uint64x2x2_t va23x0123456789ABCDEF;
-    va23x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-    va23x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-
     while (k >= 16 * sizeof(int8_t)) {
       // Load a 5x16 block of activations.
-      va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
-      va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a2, va23x0123456789ABCDEF, 0); a2 += 16;
+      uint64x2x2_t va01x0123456789ABCDEF = vld2q_dup_u64((const void*) a0); a0 += 16;
+      uint64x2x2_t va23x0123456789ABCDEF = vld2q_dup_u64((const void*) a2); a2 += 16;
       va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
       va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a3, va23x0123456789ABCDEF, 1); a3 += 16;
       // Row 5 does not exist and its half of each SMMLA operand is ignored, so load row 4
