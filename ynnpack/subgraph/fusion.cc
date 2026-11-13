@@ -26,7 +26,7 @@
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/copy.h"
-#include "ynnpack/subgraph/dot.h"
+#include "ynnpack/subgraph/dot_pack.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/fusion_lut.h"
 #include "ynnpack/subgraph/fusion_types.h"
@@ -2339,6 +2339,56 @@ bool rewrite_pack_b_transpose(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite transpose_a(static_transpose(x)) to use an aliased transpose when
+// static_transpose only swaps (or preserves) dim 0 and m_dim.
+bool rewrite_transpose_a_transpose(ynn_subgraph& subgraph, ynn_node& node,
+                                   subgraph_analysis& analysis) {
+  const auto* transpose_a_op = std::get_if<ynn_node::transpose_a>(&node.op);
+  if (!transpose_a_op) return false;
+
+  const uint32_t input_id = node.inputs[0];
+  if (type_element_count(subgraph.value(input_id).type) != 1) {
+    // We can't alias a transpose of sub-byte types.
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(input_id);
+  if (!producer) return false;
+
+  auto* transpose_op = std::get_if<ynn_node::static_transpose>(&producer->op);
+  if (!transpose_op || transpose_op->alias) return false;
+
+  const int m_dim = transpose_a_op->m_dim;
+  const auto& perm = transpose_op->permutation;
+  if (m_dim <= 0 || static_cast<size_t>(m_dim) >= perm.size()) return false;
+
+  const int p0 = perm[0];
+  const int pm = perm[m_dim];
+  if (!((p0 == 0 && pm == m_dim) || (p0 == m_dim && pm == 0))) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Aliasing static_transpose feeding transpose_a";
+  if (analysis.consumers[input_id].size() == 1 &&
+      !subgraph.value(input_id).is_external_output()) {
+    transpose_op->alias = true;
+    return true;
+  }
+
+  std::vector<int32_t> new_perm = perm;
+  const uint32_t x_id = producer->inputs[0];
+  uint32_t aliased_id = YNN_INVALID_VALUE_ID;
+  ynn_node new_node;
+  define_static_transpose(subgraph, new_node, std::move(new_perm), x_id,
+                          &aliased_id, /*alias=*/true);
+  subgraph.add_node(std::move(new_node));
+  node.inputs[0] = aliased_id;
+
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
 // Rewrites sum(a * b) to dot(a, b).
 // dot(a, b) is sum(a(., k1, k2, k3, i, ...) * b(j, k1, k2, k3, ., ...)) where .
 // indicates a new dimension. This rewrite looks for sums that can be transposed
@@ -2686,6 +2736,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_transpose(*this, node, analysis) ||
+                ynn::rewrite_transpose_a_transpose(*this, node, analysis) ||
                 ynn::rewrite_fast_math(*this, node, analysis) ||
                 ynn::rewrite_requantize_quantize(*this, node, analysis) ||
                 changed;

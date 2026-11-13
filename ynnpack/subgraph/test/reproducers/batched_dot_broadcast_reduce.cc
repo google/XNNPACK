@@ -169,17 +169,16 @@ void TestBatchedDotBroadcastReduce(BroadcastKind kind, const Shape& shape,
   subgraph.AddDot(/*num_k_dims=*/1, a_id, b_id, YNN_INVALID_VALUE_ID, ab_id)
       .AddReduce(ynn_reduce_sum, {2}, ab_id, init_id, out_id);
 
-  // Whether B is packed depends on the kernels and cost models available on
-  // the target, except for a transposed B, which is always packed.
-  const bool b_packed = IsBPacked(*subgraph.GetSubgraph(), ab_id);
-  ::testing::Test::RecordProperty("b_packed", b_packed ? "true" : "false");
-  if (kind == BroadcastKind::kScalarTransposed) {
-    ASSERT_TRUE(b_packed);
-  }
-
   TestScheduler scheduler(threads);
   Runtime runtime(subgraph.GetSubgraph(), &scheduler);
   ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  // Whether B is packed depends on the kernels and cost models available on
+  // the target. For `kScalarTransposed`, fusion commutes the transpose past the
+  // scalar broadcast and eliminates it before `optimize_dots`, so B only packs
+  // when profitable.
+  const bool b_packed = IsBPacked(*subgraph.GetSubgraph(), ab_id);
+  ::testing::Test::RecordProperty("b_packed", b_packed ? "true" : "false");
 
   Tensor<T> a(a_shape);
   for (size_t i = 0; i < batch; ++i) {

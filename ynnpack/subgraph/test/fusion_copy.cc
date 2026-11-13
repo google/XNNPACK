@@ -3,7 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -874,6 +876,7 @@ TEST(fusion, pack_b_gather) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -934,6 +937,7 @@ TEST(fusion, pack_b_gather_multiple_consumers) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -997,6 +1001,7 @@ TEST(fusion, pack_b_transpose_2d) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1042,6 +1047,7 @@ TEST(fusion, pack_b_transpose_small_m) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1093,6 +1099,7 @@ TEST(fusion, pack_b_transpose_higher_dims) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1153,6 +1160,7 @@ TEST(fusion, pack_b_transpose_permuted_k) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1211,6 +1219,7 @@ TEST(fusion, pack_b_double_transpose) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1259,6 +1268,7 @@ TEST(fusion, pack_b_transpose_shared_consumer) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1315,6 +1325,7 @@ TEST(fusion, pack_b_transpose_subbyte) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1375,6 +1386,7 @@ TEST(fusion, pack_b_transpose_int2) {
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
@@ -1410,6 +1422,143 @@ TEST(fusion, pack_b_transpose_int2) {
       EXPECT_EQ(out_data[i * 64 + j], expected);
     }
   }
+}
+
+TEST(fusion, transpose_a_transpose_single_consumer) {
+  const uint32_t x_id = 0;
+  const uint32_t z_id = 1;
+  uint32_t t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(2);
+
+  builder.AddInput(ynn_type_fp32, {64, 32}, x_id)
+      .AddOutput(ynn_type_fp32, {16, 16, 1, 4}, z_id)
+      .AddTensor(ynn_type_fp32, {32, 64}, t_id);
+  builder.AddTranspose({1, 0}, x_id, t_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node transpose_node;
+  transpose_node.op = ynn_node::transpose_a{
+      .tile_m = 4,
+      .tile_k = 4,
+      .m_dim = 1,
+  };
+  transpose_node.inputs = {t_id};
+  transpose_node.outputs = {z_id};
+  subgraph.add_node(std::move(transpose_node));
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& transpose_a_node = ProducerOf(z_id, subgraph);
+  ASSERT_THAT(transpose_a_node,
+              AllOf(IsTransposeA(/*tile_m=*/4, /*tile_k=*/4, /*m_dim=*/1),
+                    InputsAre(t_id)));
+  const ynn_node& static_transpose_node = ProducerOf(t_id, subgraph);
+  ASSERT_THAT(static_transpose_node,
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)),
+                    InputsAre(x_id)));
+  EXPECT_TRUE(
+      std::get<ynn_node::static_transpose>(static_transpose_node.op).alias);
+}
+
+TEST(fusion, transpose_a_transpose_shared_consumer) {
+  const uint32_t x_id = 0;
+  const uint32_t z_id = 1;
+  const uint32_t abs_out_id = 2;
+  uint32_t t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {64, 32}, x_id)
+      .AddOutput(ynn_type_fp32, {16, 16, 1, 4}, z_id)
+      .AddOutput(ynn_type_fp32, {32, 64}, abs_out_id)
+      .AddTensor(ynn_type_fp32, {32, 64}, t_id);
+  builder.AddTranspose({1, 0}, x_id, t_id)
+      .AddUnary(ynn_unary_abs, t_id, abs_out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node transpose_node;
+  transpose_node.op = ynn_node::transpose_a{
+      .tile_m = 4,
+      .tile_k = 4,
+      .m_dim = 1,
+  };
+  transpose_node.inputs = {t_id};
+  transpose_node.outputs = {z_id};
+  subgraph.add_node(std::move(transpose_node));
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // `transpose_a` gets a cloned aliased transpose, while `abs` keeps the
+  // non-aliased transpose.
+  const ynn_node& transpose_a_node = ProducerOf(z_id, subgraph);
+  ASSERT_THAT(transpose_a_node,
+              IsTransposeA(/*tile_m=*/4, /*tile_k=*/4, /*m_dim=*/1));
+  EXPECT_NE(transpose_a_node.inputs[0], t_id);
+  const ynn_node& aliased_transpose =
+      ProducerOf(transpose_a_node.inputs[0], subgraph);
+  ASSERT_THAT(aliased_transpose,
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)),
+                    InputsAre(x_id)));
+  EXPECT_TRUE(std::get<ynn_node::static_transpose>(aliased_transpose.op).alias);
+
+  const ynn_node& orig_transpose = ProducerOf(t_id, subgraph);
+  ASSERT_THAT(orig_transpose,
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)),
+                    InputsAre(x_id)));
+  EXPECT_FALSE(std::get<ynn_node::static_transpose>(orig_transpose.op).alias);
+}
+
+TEST(fusion, optimize_dots_defers_packing_and_is_idempotent) {
+  const uint32_t a_id = 0;
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  const uint32_t out_id = 1;
+  std::vector<float> b_data(64 * 64, 1.0f);
+  SubgraphBuilder builder(2);
+
+  builder.AddInput(ynn_type_fp32, {64, 64}, a_id)
+      .AddTensor(ynn_type_fp32, {64, 64}, b_id, b_data.data())
+      .AddOutput(ynn_type_fp32, {64, 64}, out_id);
+  builder.AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  // Before optimize_dots(), dot keeps canonical inputs without pack_b.
+  const ynn_node& dot_before = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_before,
+              AllOf(IsDot(), InputsAre(a_id, b_id, YNN_INVALID_VALUE_ID)));
+  EXPECT_FALSE(std::get<ynn_node::dot>(dot_before.op).optimized);
+
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
+  const ynn_node& dot_after = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_after, IsDot());
+  EXPECT_TRUE(std::get<ynn_node::dot>(dot_after.op).optimized);
+  EXPECT_TRUE(std::get<ynn_node::dot>(dot_after.op).packed_b);
+  const uint32_t packed_b_id = dot_after.inputs[1];
+  EXPECT_THAT(ProducerOf(packed_b_id, subgraph),
+              AllOf(IsPackB(/*transpose=*/false), InputsAre(b_id)));
+
+  // Calling optimize_dots() again is a no-op.
+  const size_t node_count = subgraph.nodes.size();
+  ASSERT_EQ(subgraph.optimize_dots(), ynn_status_success);
+  EXPECT_EQ(subgraph.nodes.size(), node_count);
+  EXPECT_EQ(ProducerOf(out_id, subgraph).inputs[1], packed_b_id);
+}
+
+TEST(fusion, dot_requires_optimize_before_runtime) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {16, 16}, a_id)
+      .AddInput(ynn_type_fp32, {16, 16}, b_id)
+      .AddOutput(ynn_type_fp32, {16, 16}, out_id);
+  builder.AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  Runtime runtime(builder.GetSubgraph(), /*scheduler=*/nullptr, /*flags=*/0,
+                  /*optimize=*/false);
+  EXPECT_EQ(runtime.Status(), ynn_status_invalid_parameter);
 }
 
 }  // namespace ynn

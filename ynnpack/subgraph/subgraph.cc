@@ -1195,6 +1195,16 @@ ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
     return status;
   }
 
+  status = optimize_dots();
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  status = fusion();
+  if (status != ynn_status_success) {
+    return status;
+  }
+
   status = eliminate_common_subgraphs();
   if (status != ynn_status_success) {
     return status;
@@ -1391,6 +1401,12 @@ void print(std::ostream& os, const ynn_node::stencil_copy& op) {
 
 void print(std::ostream& os, const ynn_node::dot& op) {
   os << "num_k_dims=" << op.num_k_dims;
+  if (op.packed_b) {
+    os << " packed_b";
+  }
+  if (op.transposed_a) {
+    os << " transposed_a";
+  }
 }
 
 void print(std::ostream& os, const ynn_node::iota& op) {}
