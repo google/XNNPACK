@@ -13,7 +13,7 @@
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
-#include "ynnpack/subgraph/dot.h"
+#include "ynnpack/subgraph/dot_pack.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"

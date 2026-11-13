@@ -21,6 +21,8 @@ ADD_LIBRARY(ynnpack_subgraph STATIC
   concatenate.cc
   copy.cc
   dot.cc
+  dot_pack.cc
+  dot_schedule.cc
   dynamic_quantization.cc
   elementwise.cc
   even_split.cc
