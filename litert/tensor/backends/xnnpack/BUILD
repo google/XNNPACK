@@ -134,6 +134,7 @@ cc_test(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/backends/testing:numerical_test_suite",
+        "//litert/tensor/internal:graph",
         "//litert/tensor/runners/xnnpack:runner",
         "//litert/tensor/utils:macros",
         "//litert/tensor/utils:matchers",
