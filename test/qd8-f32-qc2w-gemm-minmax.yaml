@@ -485,3 +485,26 @@
   k-block: 32
   planes: 4
 
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x64c4__avx512vnnigfni_prfm
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+
+# AVX512AMX
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x64c4__avx512amx
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 64
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_16x64c4__avx512amx
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 64
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 64
+  planes: 4
+

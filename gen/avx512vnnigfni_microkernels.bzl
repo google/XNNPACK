@@ -7,10 +7,12 @@
 
 PROD_AVX512VNNIGFNI_MICROKERNEL_SRCS = [
     "src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x16c8-minmax-avx512vnnigfni-prfm.c",
+    "src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x64c4-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-8x16c8-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16c8-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-14x16c8-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x16c8-minmax-avx512vnnigfni-prfm.c",
+    "src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x64c4-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-8x16c8-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c8-minmax-avx512vnnigfni-prfm.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-14x16c8-minmax-avx512vnnigfni-prfm.c",
