@@ -51,9 +51,9 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")
 archive_override(
     module_name = "googletest",
-    sha256 = "6e8db0498a4fdcaa0b03bc4d554d7af8d0a84f49e8d8ba3e5509a6419fa066a5",
-    strip_prefix = "googletest-8eff9e336692fc95961e096564f1044c600b881d",
-    urls = ["https://github.com/google/googletest/archive/8eff9e336692fc95961e096564f1044c600b881d.zip"],
+    sha256 = "cb57ef75411eda7c738a2b424ef3f33034f2693a828601dcb97e949705edf3e3",
+    strip_prefix = "googletest-845e54d32d86ee1bb872ebb5b1c755e6e3a94c34",
+    urls = ["https://github.com/google/googletest/archive/845e54d32d86ee1bb872ebb5b1c755e6e3a94c34.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -91,10 +91,10 @@ http_archive(
     name = "cpuinfo",
     patch_args = ["-p1"],
     patches = ["//:cpuinfo_windows_arm64_msvc.patch"],
-    sha256 = "1cffb88e4b6cbb59eb67253cc0b1365e8d907afabd90b012299df780961d3b11",
-    strip_prefix = "cpuinfo-731932997e55e84900e6f95aefb6edd167b0edcc",
+    sha256 = "60f758240032413a31d288e7c76e8a3a81e869c8d6ce05869ad799b33e7b0a63",
+    strip_prefix = "cpuinfo-783a616b2197d7e48d6507210d1d0009fbf1f590",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/731932997e55e84900e6f95aefb6edd167b0edcc.zip",
+        "https://github.com/pytorch/cpuinfo/archive/783a616b2197d7e48d6507210d1d0009fbf1f590.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
@@ -123,9 +123,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "53f6e08c00a0aeaf5563806d58587e0508a0c18039cb6bbccdede06ce2da3446",
-    strip_prefix = "slinky-fba43def0e0836533d16a0500996cd76e27ca0ca",
+    sha256 = "066d6f62a2a6d8eeff6ea75c88aa1d3dc63b754342083e139534133416e9a979",
+    strip_prefix = "slinky-713283a0e7c9968e15b33df80feba7337cb19de1",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/fba43def0e0836533d16a0500996cd76e27ca0ca.zip",
+        "https://github.com/dsharlet/slinky/archive/713283a0e7c9968e15b33df80feba7337cb19de1.zip",
     ],
 )
