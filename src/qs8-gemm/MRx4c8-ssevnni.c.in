@@ -112,8 +112,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
     const __m128i voutput_min = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_min);
   $if DATATYPE in ["QC2_F32", "QC2_F16"]:
     const __m128i vmask = _mm_set1_epi8(0x03);
+    $if MR == 1:
+      const __m128i vmask4 = _mm_set1_epi8(0x0C);
     const __m128i vminus_one = _mm_set1_epi16(-1);
     XNN_FORCE_REALIZATION(vmask);
+    // -(kzp + 2) * row_sum + kzp * kc * zero_point is evaluated as
+    // -2 * row_sum + kzp * (kc * zero_point - row_sum).
+    $for M in range(MR):
+      const float neg_two_row_sum${M} = -2.0f * row_sum[${M}];
+      const float kzp_scale${M} = (float) original_kc * quantization_params[${M}].zero_point - row_sum[${M}];
   $elif DATATYPE == "QS8_QC2":
     const __m128i vmask = _mm_set1_epi8(0x03);
   $elif DATATYPE in ["QC4_F32", "QS8_QC4"]:
@@ -165,7 +172,77 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
       w = (const int32_t*) w + 4;
 
     size_t k = kc;
-    $if DATATYPE in ["QC2_F32", "QC2_F16"]:
+    $if DATATYPE in ["QC2_F32", "QC2_F16"] and MR == 1:
+      // Planes 0 and 2 use the weights in bits [1:0] (scale 1) and planes 1 and
+      // 3 use the weights in bits [3:2] (scale 4), so one shift by 4 unpacks all
+      // 4 planes. The scale 4 sums take at most 8 products of magnitude 3072
+      // per 128 bytes of k, so they stay within 24576 and cannot overflow int16.
+      do {
+        __m128i vsum0x01 = _mm_setzero_si128();
+        __m128i vsum0x23 = _mm_setzero_si128();
+        __m128i vsum4x0x01 = _mm_setzero_si128();
+        __m128i vsum4x0x23 = _mm_setzero_si128();
+        size_t kb = min(k, 128 * sizeof(int8_t));
+        k -= kb;
+        for (; kb >= 32 * sizeof(int8_t); kb -= 32 * sizeof(int8_t)) {
+          const __m128i vbb01234567 = _mm_load_si128((const __m128i*) w);
+          const __m128i vbb89ABCDEF = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+          w = (const int8_t*) w + 32;
+          $if PREFETCH:
+            xnn_prefetch_to_l1((const int8_t*) w + 896);
+
+          const __m128i vbs01234567 = _mm_srli_epi32(vbb01234567, 4);
+          const __m128i vbs89ABCDEF = _mm_srli_epi32(vbb89ABCDEF, 4);
+          const __m128i vb01234567x0 = _mm_and_si128(vbb01234567, vmask);
+          const __m128i vb89ABCDEFx0 = _mm_and_si128(vbb89ABCDEF, vmask);
+          const __m128i vb01234567x1 = _mm_and_si128(vbb01234567, vmask4);
+          const __m128i vb89ABCDEFx1 = _mm_and_si128(vbb89ABCDEF, vmask4);
+          const __m128i vb01234567x2 = _mm_and_si128(vbs01234567, vmask);
+          const __m128i vb89ABCDEFx2 = _mm_and_si128(vbs89ABCDEF, vmask);
+          const __m128i vb01234567x3 = _mm_and_si128(vbs01234567, vmask4);
+          const __m128i vb89ABCDEFx3 = _mm_and_si128(vbs89ABCDEF, vmask4);
+
+          const __m128i va0x0 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0));
+          const __m128i va0x1 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8));
+          const __m128i va0x2 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0 + 16));
+          const __m128i va0x3 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0 + 24));
+          a0 += 32;
+
+          vsum0x01 = _mm_add_epi16(vsum0x01, _mm_maddubs_epi16(vb01234567x0, va0x0));
+          vsum0x23 = _mm_add_epi16(vsum0x23, _mm_maddubs_epi16(vb89ABCDEFx0, va0x0));
+          vsum4x0x01 = _mm_add_epi16(vsum4x0x01, _mm_maddubs_epi16(vb01234567x1, va0x1));
+          vsum4x0x23 = _mm_add_epi16(vsum4x0x23, _mm_maddubs_epi16(vb89ABCDEFx1, va0x1));
+          vsum0x01 = _mm_add_epi16(vsum0x01, _mm_maddubs_epi16(vb01234567x2, va0x2));
+          vsum0x23 = _mm_add_epi16(vsum0x23, _mm_maddubs_epi16(vb89ABCDEFx2, va0x2));
+          vsum4x0x01 = _mm_add_epi16(vsum4x0x01, _mm_maddubs_epi16(vb01234567x3, va0x3));
+          vsum4x0x23 = _mm_add_epi16(vsum4x0x23, _mm_maddubs_epi16(vb89ABCDEFx3, va0x3));
+        }
+        if (kb != 0) {
+          const __m128i vbb01234567 = _mm_load_si128((const __m128i*) w);
+          const __m128i vbb89ABCDEF = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+          w = (const int8_t*) w + 32;
+
+          const __m128i va0x0 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0));
+          vsum0x01 = _mm_add_epi16(vsum0x01, _mm_maddubs_epi16(_mm_and_si128(vbb01234567, vmask), va0x0));
+          vsum0x23 = _mm_add_epi16(vsum0x23, _mm_maddubs_epi16(_mm_and_si128(vbb89ABCDEF, vmask), va0x0));
+          if (kb > 8 * sizeof(int8_t)) {
+            const __m128i va0x1 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8));
+            vsum4x0x01 = _mm_add_epi16(vsum4x0x01, _mm_maddubs_epi16(_mm_and_si128(vbb01234567, vmask4), va0x1));
+            vsum4x0x23 = _mm_add_epi16(vsum4x0x23, _mm_maddubs_epi16(_mm_and_si128(vbb89ABCDEF, vmask4), va0x1));
+            if (kb > 16 * sizeof(int8_t)) {
+              const __m128i va0x2 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a0 + 16));
+              vsum0x01 = _mm_add_epi16(vsum0x01, _mm_maddubs_epi16(_mm_and_si128(_mm_srli_epi32(vbb01234567, 4), vmask), va0x2));
+              vsum0x23 = _mm_add_epi16(vsum0x23, _mm_maddubs_epi16(_mm_and_si128(_mm_srli_epi32(vbb89ABCDEF, 4), vmask), va0x2));
+            }
+          }
+          a0 += kb;
+        }
+        vsum0x01 = _mm_add_epi16(vsum0x01, _mm_srai_epi16(vsum4x0x01, 2));
+        vsum0x23 = _mm_add_epi16(vsum0x23, _mm_srai_epi16(vsum4x0x23, 2));
+        vacc0x01 = _mm_sub_epi32(vacc0x01, _mm_madd_epi16(vsum0x01, vminus_one));
+        vacc0x23 = _mm_sub_epi32(vacc0x23, _mm_madd_epi16(vsum0x23, vminus_one));
+      } while (k != 0);
+    $elif DATATYPE in ["QC2_F32", "QC2_F16"]:
       while (k >= 32 * sizeof(int8_t)) {
         const __m128i vbb01234567 = _mm_load_si128((const __m128i*) w);
         const __m128i vbb89ABCDEF = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
@@ -491,17 +568,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
     $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32", "QC2_F16"]:
       $if DATATYPE in ["QC2_F32", "QC2_F16"]:
         const __m128 rh_zero_points_0123 = _mm_load_ps((const float*) (ksum + 4));
-        const __m128 biased_rh_zero_points_0123 = _mm_add_ps(rh_zero_points_0123, _mm_set1_ps(2.0f));
 
-        // Subtract out the scaled left-hand row sums.
+        // Subtract out the left-hand row sums scaled by the weight bias of 2.
         $for M in range(MR):
-          const __m128 lh_row_sum_${M} = _mm_set1_ps(row_sum[${M}]);
-          vout${M}x0123 = _mm_sub_ps(vout${M}x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_${M}));
-        // Add the product of left/right-hand zero points and `original_kc`.
+          vout${M}x0123 = _mm_add_ps(vout${M}x0123, _mm_set1_ps(neg_two_row_sum${M}));
+        // Add the right-hand zero points scaled by the left-hand zero points
+        // and `original_kc` less the left-hand row sums.
         $for M in range(MR):
-          const __m128 vscaled_lh_zero_point_${M} = _mm_set1_ps((float) original_kc * quantization_params[${M}].zero_point);
-        $for M in range(MR):
-          vout${M}x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, vscaled_lh_zero_point_${M}), vout${M}x0123);
+          vout${M}x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, _mm_set1_ps(kzp_scale${M})), vout${M}x0123);
       $for M in range(MR):
         vout${M}x0123 = _mm_mul_ps(vout${M}x0123, _mm_set1_ps(quantization_params[${M}].inv_scale));
 

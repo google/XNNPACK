@@ -80,44 +80,45 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avxvnni(
     c5 = c4;
   }
 
-  const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) quantization_params[0].zero_point);
-  const __m256i vinput_zero_point1 = _mm256_set1_epi32((int) quantization_params[1].zero_point);
-  const __m256i vinput_zero_point2 = _mm256_set1_epi32((int) quantization_params[2].zero_point);
-  const __m256i vinput_zero_point3 = _mm256_set1_epi32((int) quantization_params[3].zero_point);
-  const __m256i vinput_zero_point4 = _mm256_set1_epi32((int) quantization_params[4].zero_point);
-  const __m256i vinput_zero_point5 = _mm256_set1_epi32((int) quantization_params[5].zero_point);
   const __m256 voutput_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
   const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_gf2p8affine_epi64_epi8(_mm256_setzero_si256(), _mm256_setzero_si256(), 0x03);
+  // -(kzp + 2) * row_sum + kzp * kc * zero_point is evaluated as
+  // -2 * row_sum + kzp * (kc * zero_point - row_sum).
+  const float neg_two_row_sum0 = -2.0f * row_sum[0];
+  const float kzp_scale0 = (float) original_kc * quantization_params[0].zero_point - row_sum[0];
+  const float neg_two_row_sum1 = -2.0f * row_sum[1];
+  const float kzp_scale1 = (float) original_kc * quantization_params[1].zero_point - row_sum[1];
+  const float neg_two_row_sum2 = -2.0f * row_sum[2];
+  const float kzp_scale2 = (float) original_kc * quantization_params[2].zero_point - row_sum[2];
+  const float neg_two_row_sum3 = -2.0f * row_sum[3];
+  const float kzp_scale3 = (float) original_kc * quantization_params[3].zero_point - row_sum[3];
+  const float neg_two_row_sum4 = -2.0f * row_sum[4];
+  const float kzp_scale4 = (float) original_kc * quantization_params[4].zero_point - row_sum[4];
+  const float neg_two_row_sum5 = -2.0f * row_sum[5];
+  const float kzp_scale5 = (float) original_kc * quantization_params[5].zero_point - row_sum[5];
   const __m256i vshr2 = _mm256_set1_epi64x(0x0408000000000000);
   const __m256i vshr4 = _mm256_set1_epi64x(0x1020000000000000);
   const __m256i vshr6 = _mm256_set1_epi64x(0x4080000000000000);
   do {
-    const __m256i vksum01234567 = _mm256_load_si256(w);
-    __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
+    const int32_t* ksum = (const int32_t*) w;
     __m256i vacc0x0123 = _mm256_setzero_si256();
     __m256i vacc0x4567 = _mm256_setzero_si256();
-    __m256i vsum1x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point1);
     __m256i vacc1x0123 = _mm256_setzero_si256();
     __m256i vacc1x4567 = _mm256_setzero_si256();
-    __m256i vsum2x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point2);
     __m256i vacc2x0123 = _mm256_setzero_si256();
     __m256i vacc2x4567 = _mm256_setzero_si256();
-    __m256i vsum3x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point3);
     __m256i vacc3x0123 = _mm256_setzero_si256();
     __m256i vacc3x4567 = _mm256_setzero_si256();
-    __m256i vsum4x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point4);
     __m256i vacc4x0123 = _mm256_setzero_si256();
     __m256i vacc4x4567 = _mm256_setzero_si256();
-    __m256i vsum5x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point5);
     __m256i vacc5x0123 = _mm256_setzero_si256();
     __m256i vacc5x4567 = _mm256_setzero_si256();
     w = (const int32_t*) w + 8;
     // TODO: move kernel zero point after weights
-    const void* kzp = w;
-    w = (const float*)w + 8;
+    w = (const float*) w + 8;
 
     size_t k = kc;
     while (k >= 32 * sizeof(int8_t)) {
@@ -345,22 +346,23 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avxvnni(
     // Add adjacent pairs
     const __m256i vsum0x02134657 = _mm256_hadd_epi32(vacc0x0123, vacc0x4567);
     __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-    vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, vsum0x01234567);
     const __m256i vsum1x02134657 = _mm256_hadd_epi32(vacc1x0123, vacc1x4567);
     __m256i vacc1x01234567 = _mm256_permute4x64_epi64(vsum1x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-    vacc1x01234567 = _mm256_add_epi32(vacc1x01234567, vsum1x01234567);
     const __m256i vsum2x02134657 = _mm256_hadd_epi32(vacc2x0123, vacc2x4567);
     __m256i vacc2x01234567 = _mm256_permute4x64_epi64(vsum2x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-    vacc2x01234567 = _mm256_add_epi32(vacc2x01234567, vsum2x01234567);
     const __m256i vsum3x02134657 = _mm256_hadd_epi32(vacc3x0123, vacc3x4567);
     __m256i vacc3x01234567 = _mm256_permute4x64_epi64(vsum3x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-    vacc3x01234567 = _mm256_add_epi32(vacc3x01234567, vsum3x01234567);
     const __m256i vsum4x02134657 = _mm256_hadd_epi32(vacc4x0123, vacc4x4567);
     __m256i vacc4x01234567 = _mm256_permute4x64_epi64(vsum4x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-    vacc4x01234567 = _mm256_add_epi32(vacc4x01234567, vsum4x01234567);
     const __m256i vsum5x02134657 = _mm256_hadd_epi32(vacc5x0123, vacc5x4567);
     __m256i vacc5x01234567 = _mm256_permute4x64_epi64(vsum5x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-    vacc5x01234567 = _mm256_add_epi32(vacc5x01234567, vsum5x01234567);
+    const __m256i vksum01234567 = _mm256_load_si256((const __m256i*) ksum);
+    vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, _mm256_mullo_epi32(vksum01234567, _mm256_set1_epi32((int) quantization_params[0].zero_point)));
+    vacc1x01234567 = _mm256_add_epi32(vacc1x01234567, _mm256_mullo_epi32(vksum01234567, _mm256_set1_epi32((int) quantization_params[1].zero_point)));
+    vacc2x01234567 = _mm256_add_epi32(vacc2x01234567, _mm256_mullo_epi32(vksum01234567, _mm256_set1_epi32((int) quantization_params[2].zero_point)));
+    vacc3x01234567 = _mm256_add_epi32(vacc3x01234567, _mm256_mullo_epi32(vksum01234567, _mm256_set1_epi32((int) quantization_params[3].zero_point)));
+    vacc4x01234567 = _mm256_add_epi32(vacc4x01234567, _mm256_mullo_epi32(vksum01234567, _mm256_set1_epi32((int) quantization_params[4].zero_point)));
+    vacc5x01234567 = _mm256_add_epi32(vacc5x01234567, _mm256_mullo_epi32(vksum01234567, _mm256_set1_epi32((int) quantization_params[5].zero_point)));
 
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
@@ -369,37 +371,23 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avxvnni(
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
     __m256 vout5x01234567 = _mm256_cvtepi32_ps(vacc5x01234567);
 
-    const __m256 rh_zero_points_01234567 = _mm256_load_ps((const float*) kzp);
-    kzp = (const float*)kzp + 8;
-    const __m256 biased_rh_zero_points_01234567 = _mm256_add_ps(rh_zero_points_01234567, _mm256_set1_ps(2.0f));
+    const __m256 rh_zero_points_01234567 = _mm256_load_ps((const float*) (ksum + 8));
 
-    // Subtract out the scaled left-hand row sums.
-    const __m256 lh_row_sum_0 = _mm256_set1_ps(row_sum[0]);
-    vout0x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_0, vout0x01234567);
-    const __m256 lh_row_sum_1 = _mm256_set1_ps(row_sum[1]);
-    vout1x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_1, vout1x01234567);
-    const __m256 lh_row_sum_2 = _mm256_set1_ps(row_sum[2]);
-    vout2x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_2, vout2x01234567);
-    const __m256 lh_row_sum_3 = _mm256_set1_ps(row_sum[3]);
-    vout3x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_3, vout3x01234567);
-    const __m256 lh_row_sum_4 = _mm256_set1_ps(row_sum[4]);
-    vout4x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_4, vout4x01234567);
-    const __m256 lh_row_sum_5 = _mm256_set1_ps(row_sum[5]);
-    vout5x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_5, vout5x01234567);
-    // Add the product of left/right-hand zero points and `kc`.
-    // TODO: use kc
-    const __m256 vscaled_lh_zero_point_0 = _mm256_set1_ps((float)original_kc * quantization_params[0].zero_point);
-    const __m256 vscaled_lh_zero_point_1 = _mm256_set1_ps((float)original_kc * quantization_params[1].zero_point);
-    const __m256 vscaled_lh_zero_point_2 = _mm256_set1_ps((float)original_kc * quantization_params[2].zero_point);
-    const __m256 vscaled_lh_zero_point_3 = _mm256_set1_ps((float)original_kc * quantization_params[3].zero_point);
-    const __m256 vscaled_lh_zero_point_4 = _mm256_set1_ps((float)original_kc * quantization_params[4].zero_point);
-    const __m256 vscaled_lh_zero_point_5 = _mm256_set1_ps((float)original_kc * quantization_params[5].zero_point);
-    vout0x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_0, vout0x01234567);
-    vout1x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_1, vout1x01234567);
-    vout2x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_2, vout2x01234567);
-    vout3x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_3, vout3x01234567);
-    vout4x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_4, vout4x01234567);
-    vout5x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_5, vout5x01234567);
+    // Subtract out the left-hand row sums scaled by the weight bias of 2.
+    vout0x01234567 = _mm256_add_ps(vout0x01234567, _mm256_set1_ps(neg_two_row_sum0));
+    vout1x01234567 = _mm256_add_ps(vout1x01234567, _mm256_set1_ps(neg_two_row_sum1));
+    vout2x01234567 = _mm256_add_ps(vout2x01234567, _mm256_set1_ps(neg_two_row_sum2));
+    vout3x01234567 = _mm256_add_ps(vout3x01234567, _mm256_set1_ps(neg_two_row_sum3));
+    vout4x01234567 = _mm256_add_ps(vout4x01234567, _mm256_set1_ps(neg_two_row_sum4));
+    vout5x01234567 = _mm256_add_ps(vout5x01234567, _mm256_set1_ps(neg_two_row_sum5));
+    // Add the right-hand zero points scaled by the left-hand zero points
+    // and `original_kc` less the left-hand row sums.
+    vout0x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_set1_ps(kzp_scale0), vout0x01234567);
+    vout1x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_set1_ps(kzp_scale1), vout1x01234567);
+    vout2x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_set1_ps(kzp_scale2), vout2x01234567);
+    vout3x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_set1_ps(kzp_scale3), vout3x01234567);
+    vout4x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_set1_ps(kzp_scale4), vout4x01234567);
+    vout5x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_set1_ps(kzp_scale5), vout5x01234567);
     vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
     vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
     vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));

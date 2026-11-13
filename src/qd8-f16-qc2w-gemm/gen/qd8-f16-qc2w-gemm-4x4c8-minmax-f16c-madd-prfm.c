@@ -72,6 +72,16 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x4c8__f16c_madd_prfm(
   const __m128i vmask = _mm_set1_epi8(0x03);
   const __m128i vminus_one = _mm_set1_epi16(-1);
   XNN_FORCE_REALIZATION(vmask);
+  // -(kzp + 2) * row_sum + kzp * kc * zero_point is evaluated as
+  // -2 * row_sum + kzp * (kc * zero_point - row_sum).
+  const float neg_two_row_sum0 = -2.0f * row_sum[0];
+  const float kzp_scale0 = (float) original_kc * quantization_params[0].zero_point - row_sum[0];
+  const float neg_two_row_sum1 = -2.0f * row_sum[1];
+  const float kzp_scale1 = (float) original_kc * quantization_params[1].zero_point - row_sum[1];
+  const float neg_two_row_sum2 = -2.0f * row_sum[2];
+  const float kzp_scale2 = (float) original_kc * quantization_params[2].zero_point - row_sum[2];
+  const float neg_two_row_sum3 = -2.0f * row_sum[3];
+  const float kzp_scale3 = (float) original_kc * quantization_params[3].zero_point - row_sum[3];
   do {
     const int32_t* ksum = (const int32_t*) w;
     w = (const int32_t*) w + 8;
@@ -378,26 +388,18 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x4c8__f16c_madd_prfm(
     __m128 vout3x0123 = _mm_cvtepi32_ps(vacc3x0123);
 
     const __m128 rh_zero_points_0123 = _mm_load_ps((const float*) (ksum + 4));
-    const __m128 biased_rh_zero_points_0123 = _mm_add_ps(rh_zero_points_0123, _mm_set1_ps(2.0f));
 
-    // Subtract out the scaled left-hand row sums.
-    const __m128 lh_row_sum_0 = _mm_set1_ps(row_sum[0]);
-    vout0x0123 = _mm_sub_ps(vout0x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_0));
-    const __m128 lh_row_sum_1 = _mm_set1_ps(row_sum[1]);
-    vout1x0123 = _mm_sub_ps(vout1x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_1));
-    const __m128 lh_row_sum_2 = _mm_set1_ps(row_sum[2]);
-    vout2x0123 = _mm_sub_ps(vout2x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_2));
-    const __m128 lh_row_sum_3 = _mm_set1_ps(row_sum[3]);
-    vout3x0123 = _mm_sub_ps(vout3x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_3));
-    // Add the product of left/right-hand zero points and `original_kc`.
-    const __m128 vscaled_lh_zero_point_0 = _mm_set1_ps((float) original_kc * quantization_params[0].zero_point);
-    const __m128 vscaled_lh_zero_point_1 = _mm_set1_ps((float) original_kc * quantization_params[1].zero_point);
-    const __m128 vscaled_lh_zero_point_2 = _mm_set1_ps((float) original_kc * quantization_params[2].zero_point);
-    const __m128 vscaled_lh_zero_point_3 = _mm_set1_ps((float) original_kc * quantization_params[3].zero_point);
-    vout0x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, vscaled_lh_zero_point_0), vout0x0123);
-    vout1x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, vscaled_lh_zero_point_1), vout1x0123);
-    vout2x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, vscaled_lh_zero_point_2), vout2x0123);
-    vout3x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, vscaled_lh_zero_point_3), vout3x0123);
+    // Subtract out the left-hand row sums scaled by the weight bias of 2.
+    vout0x0123 = _mm_add_ps(vout0x0123, _mm_set1_ps(neg_two_row_sum0));
+    vout1x0123 = _mm_add_ps(vout1x0123, _mm_set1_ps(neg_two_row_sum1));
+    vout2x0123 = _mm_add_ps(vout2x0123, _mm_set1_ps(neg_two_row_sum2));
+    vout3x0123 = _mm_add_ps(vout3x0123, _mm_set1_ps(neg_two_row_sum3));
+    // Add the right-hand zero points scaled by the left-hand zero points
+    // and `original_kc` less the left-hand row sums.
+    vout0x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, _mm_set1_ps(kzp_scale0)), vout0x0123);
+    vout1x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, _mm_set1_ps(kzp_scale1)), vout1x0123);
+    vout2x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, _mm_set1_ps(kzp_scale2)), vout2x0123);
+    vout3x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, _mm_set1_ps(kzp_scale3)), vout3x0123);
     vout0x0123 = _mm_mul_ps(vout0x0123, _mm_set1_ps(quantization_params[0].inv_scale));
     vout1x0123 = _mm_mul_ps(vout1x0123, _mm_set1_ps(quantization_params[1].inv_scale));
     vout2x0123 = _mm_mul_ps(vout2x0123, _mm_set1_ps(quantization_params[2].inv_scale));
