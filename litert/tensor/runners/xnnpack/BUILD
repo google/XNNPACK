@@ -31,10 +31,13 @@ cc_library(
         "//litert/tensor/backends/xnnpack:utils",
         "//litert/tensor/runners/common_nnpack:runner",
         "//litert/tensor/utils:macros",
+        "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:span",
         "@pthreadpool",
     ],
@@ -52,6 +55,24 @@ cc_test(
         "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/runners/common_nnpack:runner_test_suite",
         "@abseil-cpp//absl/status",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
+
+cc_test(
+    name = "runner_profiling_test",
+    srcs = ["runner_profiling_test.cc"],
+    env = {"LRT_XNN_PROFILE": "1"},
+    deps = [
+        ":runner",
+        "//litert/tensor",
+        "//litert/tensor:arithmetic",
+        "//litert/tensor:buffer",
+        "//litert/tensor:datatypes",
+        "//litert/tensor/backends/xnnpack:arithmetic",
+        "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/base:log_severity",
+        "@abseil-cpp//absl/log:scoped_mock_log",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
