@@ -84,7 +84,7 @@ struct ynn_runtime {
 
   slinky::buffer_expr_ptr null_buffer();
 
-  void schedule();
+  slinky::loop_nest schedule();
 
   ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
               slinky::thread_pool* threadpool, uint32_t flags);

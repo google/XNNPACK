@@ -166,10 +166,6 @@ struct scheduling_split {
 };
 
 struct scheduling_info {
-  // This value is large enough to always be outside of any reasonable number
-  // of loops.
-  static constexpr slinky::index_t root = 1000;
-
   // A set of loop splits for a given function.
   std::vector<scheduling_split> loop_splits;
 
