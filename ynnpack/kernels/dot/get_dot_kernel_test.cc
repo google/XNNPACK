@@ -174,6 +174,22 @@ TEST(get_dot_kernel, small_n) {
   EXPECT_EQ(fp32_x8(arch_flags_avx), "dot_fp32_8x8x1_1x8x1_avx");
   EXPECT_EQ(fp32_x8(arch_flags_fma3), "dot_fp32_8x8x1_1x8x1_fma3");
   EXPECT_EQ(fp32_x8(arch_flags_avx512), "dot_fp32_6x8x4_1x4x4_avx512");
+
+  dot_type bf16 = {ynn_type_bf16, ynn_type_bf16, ynn_type_fp32};
+  auto bf16_x1 = [=](uint64_t arch_flags) {
+    return get_dot_kernel_name(bf16, {m, 1, k}, arch_flags);
+  };
+  auto bf16_x2 = [=](uint64_t arch_flags) {
+    return get_dot_kernel_name(bf16, {m, 2, k}, arch_flags);
+  };
+  EXPECT_EQ(bf16_x1(arch_flags_avx2_fma3),
+            "dot_bf16_bf16_fp32_8x1x16_1x1x16_avx2_fma3");
+  EXPECT_EQ(bf16_x1(arch_flags_avx512),
+            "dot_bf16_bf16_fp32_8x1x16_1x1x16_avx2_fma3");
+  EXPECT_EQ(bf16_x2(arch_flags_avx2_fma3),
+            "dot_bf16_bf16_fp32_8x1x16_1x1x16_avx2_fma3");
+  EXPECT_EQ(bf16_x2(arch_flags_avx512),
+            "dot_bf16_bf16_fp32_8x1x16_1x1x16_avx2_fma3");
 }
 
 TEST(get_dot_kernel, large) {

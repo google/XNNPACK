@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -1401,6 +1402,22 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // the fly as if B were dynamic).
     return true;
   }
+  bool b_outer_transposed = false;
+  if (const ynn_node* producer = subgraph.get_producer(b.id)) {
+    if (const auto* transpose_op =
+            std::get_if<ynn_node::static_transpose>(&producer->op)) {
+      if (!transpose_op->alias && num_k_dims == 1 &&
+          transpose_op->permutation.size() >= 2 &&
+          transpose_op->permutation[1] == 0) {
+        // Packing B absorbs this transpose via rewrite_pack_b_transpose.
+        return true;
+      }
+      if (transpose_op->permutation.size() >= 2 &&
+          transpose_op->permutation[1] != 1) {
+        b_outer_transposed = true;
+      }
+    }
+  }
 
   const int block_m = unpacked_kernel.block_m;
   slinky::expr a_batch = 1;
@@ -1433,7 +1450,27 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   // loads of unpacked data are strided.
   const int b_elem_size = type_size_bytes(b.type);
   const int block_n = unpacked_kernel.block_n;
-  if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
+  if (kernel.tile_k == 1 &&
+      (block_n * b_elem_size) % YNN_CACHE_LINE_SIZE == 0 &&
+      !b_outer_transposed) {
+    if (slinky::prove_true(b.extent(0) <= block_n &&
+                           b.extent(0) % kernel.tile_n == 0)) {
+      return false;
+    }
+    slinky::expr b_matrix_bytes = b_elem_size;
+    for (size_t i = 0; i < num_k_dims + 1; ++i) {
+      if (b.extent(i).defined()) b_matrix_bytes *= b.extent(i);
+    }
+    const std::array<size_t, 3>& cache_budgets = get_dot_cache_budgets();
+    const slinky::index_t cache_budget =
+        std::max<size_t>(cache_budgets[1], cache_budgets[2] / 4);
+    const slinky::index_t effective_budget =
+        cache_budget ? cache_budget : 128 * 1024;
+    if (slinky::prove_true(b.extent(0) % kernel.tile_n == 0) &&
+        slinky::prove_true(b_matrix_bytes <= effective_budget)) {
+      max_unpacked_blocks = std::max(max_unpacked_blocks, 64);
+    }
+  } else if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
     slinky::expr b_bytes = b_batch * b_elem_size;
     for (size_t i = 0; i < num_k_dims + 1; ++i) {
       if (b.extent(i).defined()) b_bytes *= b.extent(i);
@@ -1866,7 +1903,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // TODO: b/555814090 - More sophisticated automatic scheduling would help.
     const bool n_outer =
         rank >= 2 && !input_b.is_static() &&
-        (!input_a.is_internal() || !slinky::prove_true(n < m));
+        (!input_a.is_internal() ||
+         (input_b.is_internal() && !slinky::prove_true(n < m)));
     if (is_split_k) {
       if (n_outer) {
         loop_order.push_back(num_k_dims + 1);  // m (innermost)
@@ -1958,6 +1996,127 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 }
 
 }  // namespace
+
+bool rewrite_dot_commute_transposed_b(ynn_subgraph& subgraph, ynn_node& node) {
+  const auto* dot_op = std::get_if<ynn_node::dot>(&node.op);
+  if (!dot_op || dot_op->num_k_dims != 1) {
+    return false;
+  }
+  const uint32_t input_a_id = node.inputs[0];
+  const uint32_t packed_b_id = node.inputs[1];
+  const uint32_t input_c_id = node.inputs[2];
+  if (input_c_id != YNN_INVALID_VALUE_ID &&
+      subgraph.value(input_c_id).rank() != 0) {
+    return false;
+  }
+  const ynn_node* pack_b_node = subgraph.get_producer(packed_b_id);
+  if (!pack_b_node) return false;
+  const auto* pack_b_op = std::get_if<ynn_node::pack_b>(&pack_b_node->op);
+  if (!pack_b_op || !pack_b_op->transpose) {
+    return false;
+  }
+  const uint32_t b_orig_id = pack_b_node->inputs[0];
+  if (is_constant_or_gather_of_constant(subgraph, b_orig_id)) {
+    return false;
+  }
+  if (const ynn_node* b_orig_prod = subgraph.get_producer(b_orig_id)) {
+    if (std::holds_alternative<ynn_node::static_broadcast>(b_orig_prod->op)) {
+      return false;
+    }
+    if (const auto* transpose_op =
+            std::get_if<ynn_node::static_transpose>(&b_orig_prod->op)) {
+      if (!transpose_op->alias) return false;
+    }
+  }
+
+  const ynn_value& a = subgraph.value(input_a_id);
+  const ynn_value& b_orig = subgraph.value(b_orig_id);
+  if (a.type != b_orig.type || !type_is_floating_point(a.type) ||
+      type_element_count(a.type) != 1 || a.rank() < 2 ||
+      a.rank() != b_orig.rank()) {
+    return false;
+  }
+  for (size_t d = 2; d < a.rank(); ++d) {
+    if (!slinky::prove_true(a.extent(d) == b_orig.extent(d)) &&
+        !slinky::is_constant(a.extent(d), 1)) {
+      return false;
+    }
+  }
+
+  const slinky::expr m = a.extent(1);
+  const slinky::expr n = b_orig.extent(1);
+  if (!(slinky::prove_true(m == 1) && !slinky::prove_true(n <= 1))) {
+    return false;
+  }
+
+  const ynn_type c_type = deduce_output_type(a.type, b_orig.type);
+  const dot_type type = {a.type, b_orig.type, c_type};
+  const bool consistent_arithmetic =
+      (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
+  const uint32_t kernel_flags =
+      consistent_arithmetic ? dot_flag::consistent_arithmetic : 0;
+  const dot_cost_models& cost_models = get_dot_cost_models();
+
+  constexpr size_t kMaxCostModelM = 480;
+  constexpr size_t kMaxCostModelN = 384;
+  constexpr size_t kMaxCostModelK = 256;
+  dot_shape commuted_shape;
+  commuted_shape.m = std::min<size_t>(
+      slinky::as_constant(n).value_or(unknown_dot_extent), kMaxCostModelM);
+  commuted_shape.n = 1;
+  commuted_shape.k1 = std::min<size_t>(
+      slinky::as_constant(b_orig.extent(0)).value_or(unknown_dot_extent),
+      kMaxCostModelK);
+  commuted_shape.k2 = 1;
+  commuted_shape.k3 = 1;
+  const dot_kernel commuted_kernel =
+      get_dot_kernel(type, cost_models, commuted_shape, {}, kernel_flags);
+  if (!commuted_kernel.kernel ||
+      (commuted_kernel.flags & dot_flag::transpose_a) != 0) {
+    return false;
+  }
+  if (commuted_kernel.tile_n > 4) {
+    dot_shape uncommuted_shape = commuted_shape;
+    uncommuted_shape.m = 1;
+    uncommuted_shape.n = std::min<size_t>(
+        slinky::as_constant(n).value_or(unknown_dot_extent), kMaxCostModelN);
+    const dot_kernel uncommuted_kernel =
+        get_dot_kernel(type, cost_models, uncommuted_shape, {}, kernel_flags);
+    if (uncommuted_kernel.kernel &&
+        commuted_kernel.cost > uncommuted_kernel.cost * 4.0f) {
+      return false;
+    }
+  }
+
+  // Rewrite A @ B^T -> (B @ A^T)^T so dynamic B is streamed in-place as LHS
+  // instead of packing all of B on every invocation.
+  const size_t rank = a.rank();
+  std::vector<int32_t> swap_01(rank);
+  std::iota(swap_01.begin(), swap_01.end(), 0);
+  std::swap(swap_01[0], swap_01[1]);
+
+  uint32_t a_t_id = YNN_INVALID_VALUE_ID;
+  ynn_node a_t_node;
+  define_static_transpose(subgraph, a_t_node, swap_01, input_a_id, &a_t_id,
+                          /*alias=*/false);
+  if (a_t_id != input_a_id) subgraph.add_node(std::move(a_t_node));
+
+  uint32_t output_id = node.outputs[0];
+  uint32_t dot_t_id = YNN_INVALID_VALUE_ID;
+  if (define_dot(subgraph, /*num_k_dims=*/1, b_orig_id, a_t_id, input_c_id,
+                 &dot_t_id, /*flags=*/0) != ynn_status_success) {
+    return false;
+  }
+
+  node.invalidate();
+  ynn_node out_t_node;
+  define_static_transpose(subgraph, out_t_node, std::move(swap_01), dot_t_id,
+                          &output_id, /*alias=*/false);
+  subgraph.add_node(std::move(out_t_node));
+
+  subgraph.topological_sort();
+  return true;
+}
 
 extern "C" {
 

@@ -85,6 +85,7 @@ py_library(
 ) for name in [
     "x86_bf16_bf16_fp32",
     "x86_bf16_bf16_fp32_k1",
+    "x86_bf16_bf16_fp32_k16",
     "x86_fp16_fp16_fp32",
     "x86_fp32",
     "x86_fp32_k2",
