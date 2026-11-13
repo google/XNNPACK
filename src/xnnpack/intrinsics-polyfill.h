@@ -204,6 +204,18 @@ static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_madd(__m512i i32,
   return _mm512_sub_epi32(i32, v);
 }
 
+// VNNI replacement using vpmaddubsw for unsigned 2-bit with zero point 0.
+// Either u8 is uint8 and s8 is [0, 3], or u8 is [0, 3] and s8 is int8: in both
+// cases pairwise sums fit in [-768, 1530] and cannot saturate int16.
+static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_madd_kzp0(__m512i i32,
+                                                           const __m512i u8,
+                                                           const __m512i s8) {
+  const __m512i vminus_one = _mm512_set1_epi16(-1);
+  const __m512i i12 = _mm512_maddubs_epi16(u8, s8);
+  const __m512i v = _mm512_madd_epi16(i12, vminus_one);
+  return _mm512_sub_epi32(i32, v);
+}
+
 #if defined(__AVX512BF16__)
 #if defined(__GNUC__) || defined(__clang__)
 #define _mm512_cvtneps_pbh(a) ((__m256i) (_mm512_cvtneps_pbh)(a))

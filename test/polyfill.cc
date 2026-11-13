@@ -76,6 +76,53 @@ TEST(polyfill, _mm512_dpbusd_epi32_madd) {
 #endif
 }
 
+TEST(polyfill, _mm512_dpbusd_epi32_madd_kzp0) {
+#if defined(__AVX512BW__)
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512skx);
+
+  for (uint32_t u8_val = 0; u8_val < 256; ++u8_val) {
+    for (uint32_t u2_val = 0; u2_val < 4; ++u2_val) {
+      __m512i vacc = _mm512_set1_epi32(100);
+      __m512i vu8 = _mm512_set1_epi8(static_cast<uint8_t>(u8_val));
+      __m512i vu2 = _mm512_set1_epi8(static_cast<uint8_t>(u2_val));
+
+      __m512i vres = _mm512_dpbusd_epi32_madd_kzp0(vacc, vu8, vu2);
+
+      int32_t res[16];
+      _mm512_storeu_si512(reinterpret_cast<__m512i*>(res), vres);
+
+      int32_t expected = 100 + 4 * (static_cast<int32_t>(u8_val) *
+                                    static_cast<int32_t>(u2_val));
+      for (int i = 0; i < 16; ++i) {
+        ASSERT_EQ(res[i], expected)
+            << "u8=" << u8_val << ", u2=" << u2_val << ", index=" << i;
+      }
+    }
+  }
+
+  for (uint32_t u2_val = 0; u2_val < 4; ++u2_val) {
+    for (int32_t s8_val = -128; s8_val < 128; ++s8_val) {
+      __m512i vacc = _mm512_set1_epi32(100);
+      __m512i vu2 = _mm512_set1_epi8(static_cast<uint8_t>(u2_val));
+      __m512i vs8 = _mm512_set1_epi8(static_cast<int8_t>(s8_val));
+
+      __m512i vres = _mm512_dpbusd_epi32_madd_kzp0(vacc, vu2, vs8);
+
+      int32_t res[16];
+      _mm512_storeu_si512(reinterpret_cast<__m512i*>(res), vres);
+
+      int32_t expected = 100 + 4 * (static_cast<int32_t>(u2_val) * s8_val);
+      for (int i = 0; i < 16; ++i) {
+        ASSERT_EQ(res[i], expected)
+            << "u2=" << u2_val << ", s8=" << s8_val << ", index=" << i;
+      }
+    }
+  }
+#else
+  GTEST_SKIP();
+#endif
+}
+
 TEST(polyfill, _mm256_dpbusd_offset_epi32_madd) {
 #if defined(__AVX2__)
   TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
