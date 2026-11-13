@@ -1727,6 +1727,7 @@ void GEMMBenchmark(benchmark::State& state,
                 arch_flags);
 #endif  // XNN_ENABLE_ARM_SME
 }
+#endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
@@ -1740,9 +1741,23 @@ void GEMMBenchmark(benchmark::State& state,
     return;
   }
 
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  if (pack_lh_config == nullptr) {
+    state.SkipWithError("no x8_pack_lh_config");
+    return;
+  }
+
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
+#if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  const size_t kc =
+      (pack_weights == xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2)
+          ? round_up_po2(state.range(2), 2)
+          : state.range(2);
+#else
   const size_t kc = state.range(2);
+#endif
 
   xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
@@ -1750,10 +1765,16 @@ void GEMMBenchmark(benchmark::State& state,
 
   xnnpack::Buffer<int8_t> a(mc * kc, xnnpack::XnnExtraBytes);
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
-  xnnpack::Buffer<int8_t> k(nc * kc);
+  xnnpack::Buffer<int8_t> k(nc * round_up_po2(kc, 2));
   xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
+
+  const size_t a_packed_size =
+      pack_lh_config->size_fn(mc, kc, mr_packed, kr, sr);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> a_packed(a_packed_size);
+  pack_lh_config->pack_lh_fn(mc, kc, mr_packed, kr, sr, /*m_idx_start=*/0,
+                             a.data(), kc * sizeof(int8_t), a_packed.data());
 
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
@@ -1779,18 +1800,22 @@ void GEMMBenchmark(benchmark::State& state,
 
   // RHS packing
   xnnpack::Buffer<float> kernel_scale(nc, 1.0f);
-  const xnn_qs8_packing_params packing_params = {127};
+  const xnn_qs8_qc4w_packing_params packing_params = {127, 8};
   pack_weights(/*flags=*/0, &gemm_config, kc, nc,
                /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/kc,
-               /*accumulator_init=*/nullptr,
+               /*accumulator_init=*/b.data(),
                /*weights=*/k.data(),
                /*int_extra_data0_fn=*/nullptr,
-               /*extra_data0=*/b.data(),
-               /*extra_data0_size=*/sizeof(int32_t),
+               /*extra_data0=*/kernel_scale.data(),
+               /*extra_data0_size=*/sizeof(float),
                /*init_extra_data1_fn=*/nullptr,
                /*extra_data1=*/kernel_scale.data(),
                /*extra_data1_size=*/sizeof(float),
                /*packed_weights_ptr=*/w.data(), &packing_params);
+  for (size_t i = 1; i < num_buffers; ++i) {
+    std::copy(w.begin(), w.begin() + packed_w_size,
+              w.begin() + i * packed_w_size);
+  }
 
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
@@ -1804,13 +1829,16 @@ void GEMMBenchmark(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(int8_t));
+    benchmark::utils::PrefetchToL1(a_packed.data(),
+                                   a_packed.size() * sizeof(int8_t));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
     for (uint32_t m = 0; m < mc; m += mr) {
       const uint32_t mb = min(mc - m, mr);
-      gemm(mb, nc, kc * sizeof(int8_t), a.data() + m * kc,
+      const size_t a_offset =
+          pack_lh_config->offset_fn(m, kc, mr_packed, kr, sr);
+      gemm(mb, nc, kc * sizeof(int8_t), a_packed.data() + a_offset,
            w.data() + packed_w_size * buffer_index,
            c.data() + (buffer_index * mc + m) * nc, nc * sizeof(int8_t),
            sizeof(int8_t), &quantization_params);
@@ -1826,7 +1854,6 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
-#endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf32_qc8w_gemm_minmax_ukernel_fn gemm,

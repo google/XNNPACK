@@ -75,6 +75,8 @@ SET(MICROKERNEL_BENCHMARKS
     pf32-gemm-minmax
     pf32-qc4w-gemm-minmax
     pf32-qc8w-gemm-minmax
+    pqs8-qc4w-gemm-minmax
+    pqs8-qc8w-gemm-minmax
     qb4-packw
     qd8-bf16-qb4w-gemm
     qd8-f16-qb4w-gemm

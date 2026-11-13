@@ -1233,7 +1233,11 @@ namespace {{
       create_tests_hash = hash(create_tests)
       create_tests_idx = idx_from_create_tests_hash[create_tests_hash]
       create_tests_fn = (
-          "CreateHmxGemmTests"
+          (
+              "CreateHmxPackedGemmTests"
+              if (pack_lh_fn or name.startswith("xnn_p"))
+              else "CreateHmxGemmTests"
+          )
           if isa == "hmx"
           else f"CreateTests{create_tests_idx}"
       )

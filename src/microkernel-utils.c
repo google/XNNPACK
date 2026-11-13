@@ -38,8 +38,14 @@ bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config *gemm_config,
       xnn_init_hardware_config();
 
   // Select which cache we want the tiles to fit in.
-  const size_t cache_bytes = hardware_config->l2_data_cache_bytes;
-  const size_t cache_line_size = hardware_config->l2_data_cache_line_size;
+  size_t cache_bytes = hardware_config->l2_data_cache_bytes;
+  size_t cache_line_size = hardware_config->l2_data_cache_line_size;
+#if XNN_ARCH_HEXAGON
+  if (!cache_bytes) {
+    cache_bytes = 1024 * 1024;
+    cache_line_size = 128;
+  }
+#endif  // XNN_ARCH_HEXAGON
 
   // If we don't have any information on the cache size, then all bets are off.
   if (!cache_bytes) {

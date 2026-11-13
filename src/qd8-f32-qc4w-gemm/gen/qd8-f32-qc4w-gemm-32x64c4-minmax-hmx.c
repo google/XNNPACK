@@ -552,11 +552,20 @@ static void xnn_copy_wgt_to_hmx_1x(HVX_Vector* restrict dst_wgt0,
                                    HVX_Vector* restrict dst_wgt1,
                                    const void* w_weights, size_t num_rows,
                                    size_t total_vecs) {
-  const HVX_UVector* w_vec = (const HVX_UVector*) w_weights;
-  for (size_t r = 0; r < num_rows; ++r) {
-    dst_wgt0[r] = w_vec[0];
-    dst_wgt1[r] = w_vec[1];
-    w_vec += 2;
+  if XNN_LIKELY(((uintptr_t) w_weights & 127u) == 0u) {
+    const HVX_Vector* restrict w_vec = (const HVX_Vector*) w_weights;
+    for (size_t r = 0; r < num_rows; ++r) {
+      dst_wgt0[r] = w_vec[0];
+      dst_wgt1[r] = w_vec[1];
+      w_vec += 2;
+    }
+  } else {
+    const HVX_UVector* restrict w_vec = (const HVX_UVector*) w_weights;
+    for (size_t r = 0; r < num_rows; ++r) {
+      dst_wgt0[r] = w_vec[0];
+      dst_wgt1[r] = w_vec[1];
+      w_vec += 2;
+    }
   }
   const HVX_Vector vzero = Q6_V_vzero();
   for (size_t r = num_rows; r < total_vecs; ++r) {
@@ -748,7 +757,8 @@ static XNN_INLINE void xnn_dequantize_and_store_row_qd8(
 
 // HVX fallback used if HMX/VTCM cannot be acquired.
 static void xnn_qd8_f32_qc4w_gemm_minmax_hvx_fallback(
-    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+    size_t mr, size_t nc, size_t kc,
+    const int8_t* restrict a, size_t a_stride,
     const void* restrict w, float* restrict c, size_t cm_stride,
     size_t cn_stride,
     const struct xnn_f32_qc4w_minmax_params* restrict params,
@@ -887,8 +897,9 @@ static XNN_INLINE void xnn_hmx_exec_panel_n(
 static void xnn_qd8_f32_qc4w_gemm_minmax_32x64c4__hmx_impl(
     struct xnn_hmx_worker_slot* slot, const xnn_hmx_crm_mutex_t* crm_mutex,
     bool hmx_already_held, size_t mr, size_t nc, size_t kc,
-    const int8_t* restrict a, size_t a_stride, const void* restrict w,
-    float* restrict c, size_t cm_stride, size_t cn_stride,
+    const int8_t* restrict a, size_t a_stride,
+    const void* restrict w, float* restrict c, size_t cm_stride,
+    size_t cn_stride,
     const struct xnn_f32_qc4w_minmax_params* restrict params,
     const struct xnn_qd8_quantization_params* restrict quantization_params) {
   const size_t k_chunk_max = xnn_hmx_ctx.max_k_chunk;
@@ -920,7 +931,6 @@ static void xnn_qd8_f32_qc4w_gemm_minmax_32x64c4__hmx_impl(
     bool cur_used_dma = xnn_dma_submit_wgt_2d(
         &slot->dma_descs[0][0], &slot->dma_descs[0][1], cur_wgt0, cur_wgt1,
         (const uint8_t*) w + 256, num_rows);
-
     xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
                                       /*k_offset=*/0, kc);
     xnn_hvx_vtcm_fence((HVX_Vector*) &vtcm_act0[num_k_tiles * 2048 - 128]);
@@ -1057,7 +1067,8 @@ static void xnn_qd8_f32_qc4w_gemm_minmax_32x64c4__hmx_impl(
           next_used_dma = xnn_dma_submit_wgt_2d(
               &slot->dma_descs[next_buf][0], &slot->dma_descs[next_buf][1],
               next_base, next_base + first_half_vecs,
-              (const uint8_t*) w + 768, first_chunk_rows);
+              (const uint8_t*) w + 768,
+              first_chunk_rows);
         }
 
         const uint8_t* chunk_act0 = vtcm_act0;
