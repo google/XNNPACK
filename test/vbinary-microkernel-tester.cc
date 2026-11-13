@@ -29,6 +29,99 @@
 #include "src/xnnpack/requantization.h"
 #include "test/replicable_random_device.h"
 
+void VBinaryMicrokernelTester::Test(xnn_bf16_vbinary_ukernel_fn vbinary,
+                                    OpType op_type,
+                                    xnn_init_bf16_default_params_fn) const {
+  xnnpack::ReplicableRandomDevice rng;
+  // Every bf16 bit pattern except NaN, so subnormal inputs are covered.
+  auto bf16dist = [&]() {
+    xnn_bfloat16 x;
+    do {
+      x.value = static_cast<uint16_t>(rng());
+    } while (std::isnan(static_cast<float>(x)));
+    return x;
+  };
+  // Zeros, subnormals, ties, the largest finite values and infinities.
+  static const uint16_t kEdgeCases[] = {
+      0x0000, 0x8000, 0x0001, 0x007F, 0x8040, 0x0080, 0x8080, 0x0081,
+      0x3F00, 0x3F01, 0x3F7F, 0x3F80, 0x3F81, 0x3F83, 0xBFC0, 0x4000,
+      0x7F7F, 0xFF7F, 0x7F80, 0xFF80};
+  const size_t num_edge_cases = sizeof(kEdgeCases) / sizeof(kEdgeCases[0]);
+  // The sign of a zero result of max/min depends on the instruction set.
+  const bool zero_sign_unspecified =
+      op_type == OpType::Max || op_type == OpType::Min;
+  // The prelu kernels select on the sign bit, so -0 takes the negative branch.
+  auto reference = [&](float x, float y) {
+    switch (op_type) {
+      case OpType::Prelu:
+        return std::signbit(x) ? x * y : x;
+      case OpType::RPrelu:
+        return std::signbit(y) ? y * x : y;
+      default:
+        return compute_float(op_type, x, y);
+    }
+  };
+
+  const size_t stride_b = broadcast_b() ? 0 : 1;
+  xnnpack::Buffer<xnn_bfloat16> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<xnn_bfloat16> b(broadcast_b() ? 1 : batch_size(),
+                                  xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<xnn_bfloat16> y(
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
+  xnnpack::Buffer<xnn_bfloat16> y_ref(batch_size());
+  auto run_and_check = [&](const xnn_bfloat16* a_data,
+                           const xnn_bfloat16* b_data) {
+    // The kernels compute in fp32 and round to nearest even once.
+    for (size_t i = 0; i < batch_size(); i++) {
+      y_ref[i] = xnn_bfloat16(reference(a_data[i], b_data[i * stride_b]));
+    }
+    vbinary(batch_size() * sizeof(xnn_bfloat16), a_data, b_data, y.data(),
+            nullptr);
+    for (size_t i = 0; i < batch_size(); i++) {
+      const float ref = y_ref[i];
+      if (std::isnan(ref)) {
+        ASSERT_TRUE(std::isnan(static_cast<float>(y[i])))
+            << "at " << i << " / " << batch_size();
+      } else if (zero_sign_unspecified && ref == 0.0f) {
+        ASSERT_EQ(static_cast<float>(y[i]), 0.0f)
+            << "at " << i << " / " << batch_size();
+      } else {
+        ASSERT_EQ(y[i].value, y_ref[i].value)
+            << "at " << i << " / " << batch_size() << ", y=" << float(y[i])
+            << ", y_ref=" << ref;
+      }
+    }
+  };
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), bf16dist);
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), bf16dist);
+    }
+    if (inplace_a() || inplace_b()) {
+      std::generate(y.begin(), y.end(), bf16dist);
+    }
+    run_and_check(inplace_a() ? y.data() : a.data(),
+                  inplace_b() ? y.data() : b.data());
+  }
+
+  // Run every pair of edge cases through the kernel.
+  if (!inplace_a() && !inplace_b()) {
+    for (size_t shift = 0; shift < num_edge_cases; shift++) {
+      for (size_t i = 0; i < batch_size(); i++) {
+        a[i].value = kEdgeCases[i % num_edge_cases];
+      }
+      for (size_t i = 0; i < b.size(); i++) {
+        b[i].value = kEdgeCases[(i + shift) % num_edge_cases];
+      }
+      run_and_check(a.data(), b.data());
+    }
+  }
+}
+
 void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
                                     OpType op_type,
                                     xnn_init_f16_default_params_fn) const {

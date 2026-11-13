@@ -10,6 +10,9 @@
 
 
 SET(PROD_NEON_AARCH64_MICROKERNEL_SRCS
+  src/bf16-vbinary/gen/bf16-vdiv-aarch64-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vdivc-aarch64-neon-u16.c
+  src/bf16-vbinary/gen/bf16-vrdivc-aarch64-neon-u16.c
   src/f32-vbinary/gen/f32-vdiv-aarch64-neon-u8.c
   src/f32-vbinary/gen/f32-vdivc-aarch64-neon-u8.c
   src/f32-vbinary/gen/f32-vrdivc-aarch64-neon-u8.c
@@ -21,6 +24,9 @@ SET(PROD_NEON_AARCH64_MICROKERNEL_SRCS
   src/x32-transposec/x32-transposec-4x4-aarch64-neon-tbl128.c)
 
 SET(NON_PROD_NEON_AARCH64_MICROKERNEL_SRCS
+  src/bf16-vbinary/gen/bf16-vdiv-aarch64-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vdivc-aarch64-neon-u8.c
+  src/bf16-vbinary/gen/bf16-vrdivc-aarch64-neon-u8.c
   src/f32-vbinary/gen/f32-vdiv-aarch64-neon-u4.c
   src/f32-vbinary/gen/f32-vdivc-aarch64-neon-u4.c
   src/f32-vbinary/gen/f32-vrdivc-aarch64-neon-u4.c

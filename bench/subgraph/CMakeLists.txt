@@ -30,6 +30,7 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   SET(SUBGRAPH_BENCHMARKS
       attention
+      binary
       depthwise-separable
       elementwise
       fully-connected
