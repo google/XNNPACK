@@ -9,6 +9,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
@@ -17,6 +18,22 @@
 namespace ynn {
 
 using ::testing::AllOf;
+
+namespace {
+
+bool HasUnalignedBFp32DotKernel() {
+#if defined(YNN_ARCH_X86)
+  return is_arch_supported(arch_flag::sse2);
+#elif defined(YNN_ARCH_ARM) && defined(__aarch64__)
+  return is_arch_supported(arch_flag::neon) &&
+         !is_arch_supported(arch_flag::sme) &&
+         !is_arch_supported(arch_flag::sme2);
+#else
+  return false;
+#endif
+}
+
+}  // namespace
 
 TEST(fusion, broadcast_of_static) {
   // rewrite a + broadcast(b) -> a + b if b is static.
@@ -1065,6 +1082,83 @@ TEST(fusion, pack_b_transpose_small_m) {
   for (float v : out_data) {
     EXPECT_FLOAT_EQ(v, 128.0f);
   }
+}
+
+TEST(fusion, skip_pack_b_dynamic_tile_k_1) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {128, 128}, a_id)
+      .AddInput(ynn_type_fp32, {128, 128}, b_id)
+      .AddOutput(ynn_type_fp32, {128, 128}, out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  if (HasUnalignedBFp32DotKernel()) {
+    EXPECT_EQ(dot_node.inputs[1], b_id);
+  } else {
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+                AllOf(IsPackB(false), InputsAre(b_id)));
+  }
+}
+
+TEST(fusion, skip_pack_b_cache_resident_medium_m) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  // M=256 exceeds the default 10 M-block unpacked limit, but 128x128 fp32 B
+  // (64 KiB) fits within the per-core L2 cache budget (<= 64 M-blocks).
+  builder.AddInput(ynn_type_fp32, {256, 128}, a_id)
+      .AddInput(ynn_type_fp32, {128, 128}, b_id)
+      .AddOutput(ynn_type_fp32, {256, 128}, out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  if (HasUnalignedBFp32DotKernel()) {
+    EXPECT_EQ(dot_node.inputs[1], b_id);
+  } else {
+    EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph),
+                AllOf(IsPackB(false), InputsAre(b_id)));
+  }
+}
+
+TEST(fusion, pack_b_outer_transposed_retains_packing) {
+  // Sequence-major V [B=1, S=64, H=2, D=64] transposed via {0, 2, 1, 3}
+  // (swapping outer dimensions S and H) with M=64 (> default 10 M-blocks)
+  // retains pack_b so strided cross-head loads are packed once.
+  const uint32_t a_id = 0;
+  const uint32_t v_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t v_t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(3);
+  builder.AddInput(ynn_type_fp32, {1, 2, 64, 64}, a_id)
+      .AddInput(ynn_type_fp32, {1, 64, 2, 64}, v_id)
+      .AddOutput(ynn_type_fp32, {1, 2, 64, 64}, out_id)
+      .AddTensor(ynn_type_fp32, {1, 2, 64, 64}, v_t_id)
+      .AddTranspose({0, 2, 1, 3}, v_id, v_t_id)
+      .AddDot(1, a_id, v_t_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  EXPECT_THAT(ProducerOf(dot_node.inputs[1], subgraph), IsPackB(false));
 }
 
 TEST(fusion, pack_b_transpose_higher_dims) {
