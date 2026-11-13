@@ -8,7 +8,6 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")  # buildifier: disable=out-of-order-load
-load("@rules_python//python:py_binary.bzl", "py_binary")
 load(
     ":build_defs.bzl",
     "xnnpack_cc_library",
@@ -578,17 +577,6 @@ xnnpack_cxx_library(
     ]),
 )
 
-py_binary(
-    name = "generate_build_identifier_py",
-    srcs = ["scripts/generate-build-identifier.py"],
-    main = "scripts/generate-build-identifier.py",
-    tags = ["notap"],  # This should only be built as part of the related genrule.
-    target_compatible_with = select({
-        "//build_config:emscripten": ["@platforms//:incompatible"],
-        "//conditions:default": [],
-    }),
-)
-
 # This target gathers the transitive sources from its deps and adds them to the
 # srcs attribute.
 xnnpack_transitive_source_list(
@@ -599,27 +587,15 @@ xnnpack_transitive_source_list(
 
 # Windows builds fail on the generate_build_identifier genrule because the
 # command line is too long when expanding the source file paths to feed to the
-# Python generation script. To work around this, we write those files to a
-# single file that we.
-#
-# This is what the below command does. It ONLY exposes the list file as an output.
-#
-# See the next genrule comment for the rest of the explanation.
+# generator. To work around this, we write those files to a single list file.
 xnnpack_source_list_file(
     name = "build_identifier_ukernel_srcs_list",
     srcs = [":build_identifier_ukernel_srcs"],
 )
 
-# When the python script gets executed, the files it has access to are limited
-# to what is explicitely requested in the `srcs` attribute. We add the "list"
-# and the source paths to the sources to make them available to the Python
-# script and only expand the list file path to keep the command line short
-# enough to avoid having Windows break down.
-#
-# I have not found a way to transitively pull the source files from the "list"
-# target and make them available from the Python script without adding them to
-# the `srcs` attribute (making them expanded in the "$(SRCS)" variable), thus
-# the repetition.
+# Avoid py_binary here: depending on rules_python pulls Python/Go/host
+# toolchains into every C++ build (including mobile/Android) and inflates Bazel
+# JVM heap and clean-build time.
 genrule(
     name = "generate_build_identifier",
     srcs = [
@@ -627,8 +603,47 @@ genrule(
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],
-    cmd = "$(location generate_build_identifier_py) --output $@ --input_file_list $(location :build_identifier_ukernel_srcs_list)",
-    tools = [":generate_build_identifier_py"],
+    cmd = """
+      set -eu
+      HEX=$$(LC_ALL=C sort "$(execpath :build_identifier_ukernel_srcs_list)" | tr '\\n' '\\0' | xargs -0 cat | (sha256sum 2>/dev/null || shasum -a 256) | awk '{print tolower($$1)}')
+      {
+        echo "// clang-format off"
+        echo "// Copyright 2024 Google LLC"
+        echo "//"
+        echo "// This source code is licensed under the BSD-style license found in the"
+        echo "// LICENSE file in the root directory of this source tree."
+        echo ""
+        echo "// Auto-generated file. Do not edit!"
+        echo "//   Generator: generate_build_identifier"
+        echo "//"
+        echo "// The following inputs were used to generate this file."
+        LC_ALL=C sort "$(execpath :build_identifier_ukernel_srcs_list)" | sed 's|^|// - |'
+        echo ""
+        echo "#include <stdbool.h>"
+        echo "#include <stdint.h>"
+        echo "#include <stddef.h>"
+        echo "#include <string.h>"
+        echo ""
+        echo "static const uint8_t xnn_build_identifier[] = {"
+        echo "$$HEX" | awk '{ for (i = 1; i <= 64; i += 2) { v = (index("0123456789abcdef", substr($$1, i, 1)) - 1) * 16 + (index("0123456789abcdef", substr($$1, i + 1, 1)) - 1); sep = (i < 63) ? "," : ""; if (((i - 1) / 2) % 8 == 0) printf "  "; printf "%3d%s", v, sep; if (((i - 1) / 2) % 8 == 7) printf "\\n"; else printf " "; } }'
+        echo "};"
+        echo ""
+        echo "size_t xnn_experimental_get_build_identifier_size() {"
+        echo "  return sizeof(xnn_build_identifier);"
+        echo "}"
+        echo ""
+        echo "const void* xnn_experimental_get_build_identifier_data() {"
+        echo "  return xnn_build_identifier;"
+        echo "}"
+        echo ""
+        echo "bool xnn_experimental_check_build_identifier(const void* data, const size_t size) {"
+        echo "  if (size != xnn_experimental_get_build_identifier_size()) {"
+        echo "    return false;"
+        echo "  }"
+        echo "  return !memcmp(data, xnn_build_identifier, size);"
+        echo "}"
+      } > "$@"
+    """,
 )
 
 xnnpack_cc_library(
