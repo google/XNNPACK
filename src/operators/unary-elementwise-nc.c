@@ -644,7 +644,7 @@ static enum xnn_status create_unary_elementwise_nc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     return xnn_status_out_of_memory;
   }
-  const int num_compute_invocations = 2;
+  const int num_compute_invocations = 4;
   unary_elementwise_op->compute = xnn_allocate_zero_memory(num_compute_invocations * sizeof(struct compute_parameters));
   if (unary_elementwise_op->compute == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
@@ -1153,6 +1153,66 @@ enum xnn_status reshape_convert_nc_f32_qx8(
   }
 
   memcpy(&convert_op->context.f32_qd8_convert.params, &convert_op->params.f32_default, sizeof(convert_op->params.f32_default));
+
+  // With fewer rows than threads (e.g. a single NHWC image quantized per
+  // batch), split each row into chunks: parallel min/max, per-row params, then
+  // parallel conversion. Min/max and integer row sums are order-independent,
+  // so the result is identical to the serial path.
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  const size_t row_bytes = convert_op->context.f32_qd8_convert.n;
+  const size_t min_chunk_bytes = get_tile_size(convert_op);
+  size_t num_chunks = 1;
+  if (num_threads > 1 && batch_size < num_threads &&
+      convert_op->num_compute_invocations >= 4) {
+    num_chunks = min(min(XNN_QD8_CONVERT_MAX_CHUNKS / batch_size,
+                         4 * num_threads),
+                     row_bytes / min_chunk_bytes);
+  }
+  if (num_chunks > 1) {
+    const size_t chunk_size = round_up(divide_round_up(row_bytes, num_chunks),
+                                       64 * sizeof(float));
+    num_chunks = divide_round_up(row_bytes, chunk_size);
+    convert_op->context.f32_qd8_convert.chunk_size = chunk_size;
+    convert_op->context.f32_qd8_convert.num_chunks = num_chunks;
+
+    convert_op->compute[0].type = xnn_parallelization_type_2d;
+    convert_op->compute[0].task_2d =
+        (pthreadpool_task_2d_t)xnn_compute_f32_qx8_convert_minmax_chunk;
+    convert_op->compute[0].range[0] = batch_size;
+    convert_op->compute[0].range[1] = num_chunks;
+
+    convert_op->compute[1].type = xnn_parallelization_type_1d;
+    switch (expected_type) {
+      case xnn_operator_type_convert_nc_f32_qd8:
+        convert_op->compute[1].task_1d =
+            (pthreadpool_task_1d_t)xnn_compute_f32_qd8_convert_params;
+        break;
+      case xnn_operator_type_convert_nc_f32_qdu8:
+        convert_op->compute[1].task_1d =
+            (pthreadpool_task_1d_t)xnn_compute_f32_qdu8_convert_params;
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+    convert_op->compute[1].range[0] = batch_size;
+
+    convert_op->compute[2].type = xnn_parallelization_type_2d;
+    convert_op->compute[2].task_2d =
+        (pthreadpool_task_2d_t)xnn_compute_f32_qx8_convert_chunk;
+    convert_op->compute[2].range[0] = batch_size;
+    convert_op->compute[2].range[1] = num_chunks;
+
+    convert_op->compute[3].type = xnn_parallelization_type_1d;
+    convert_op->compute[3].task_1d =
+        (pthreadpool_task_1d_t)xnn_compute_f32_qx8_convert_finalize;
+    convert_op->compute[3].range[0] = 1;
+
+    convert_op->state = xnn_run_state_needs_setup;
+    return xnn_status_success;
+  }
+  if (convert_op->num_compute_invocations > 2) {
+    convert_op->compute[2].type = xnn_parallelization_type_invalid;
+  }
 
   convert_op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
   switch (expected_type) {
