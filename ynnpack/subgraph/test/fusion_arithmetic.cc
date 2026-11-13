@@ -477,7 +477,7 @@ TEST(fusion, dequantize_dot) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(10)));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(9)));
   EXPECT_THAT(ProducerOf(x_id, subgraph),
               AllOf(IsDequantizeDot(), HasInputCount(6)));
 }
