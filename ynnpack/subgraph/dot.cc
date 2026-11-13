@@ -1336,7 +1336,7 @@ ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id,
   return ynn_status_unsupported_parameter;
 }
 
-bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
+bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 8) {
   if (id == YNN_INVALID_VALUE_ID) {
     return false;
   }
@@ -1363,7 +1363,7 @@ bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
 }
 
 bool is_constant_or_gather_of_constant(const ynn_subgraph& subgraph,
-                                       uint32_t id, int depth = 3) {
+                                       uint32_t id, int depth = 8) {
   if (is_constant(subgraph, id, depth)) {
     return true;
   }
