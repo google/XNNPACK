@@ -65,9 +65,8 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_fully_connected_nc_qu8_qu8_qu8:
       return xnn_fingerprint_fully_connected_nc(fingerprint_id);
     case xnn_fingerprint_id_test_f16_f32_qc8w_nr2:
-      xnn_set_fingerprint(
+      return xnn_set_fingerprint(
           (struct xnn_fingerprint){.id = fingerprint_id, .value = 0xbadbeef});
-      return xnn_status_success;
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw:
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw_fp32_static_weights:
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv:

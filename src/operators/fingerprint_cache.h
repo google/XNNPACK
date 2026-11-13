@@ -29,12 +29,12 @@ struct fingerprint_context {
 struct fingerprint_context create_fingerprint_context(
     enum xnn_fingerprint_id fingerprint_id);
 
-// Releases the fingerprinting resources.
+// Releases the fingerprinting resources and returns the cache insertion status.
 //
 // If the context status is uninitialized, a new fingerprinting entry is created
 // for the context's `fingerprint_id` and the value computed by
 // `fingerprint_cache_get_fingerprint(&context->cache)`.
-void finalize_fingerprint_context(struct fingerprint_context* context);
+enum xnn_status finalize_fingerprint_context(struct fingerprint_context* context);
 
 // Retrieves the fingerprint value from a fingerprinting cache that was created
 // by `create_fingerprint_context`.

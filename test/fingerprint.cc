@@ -53,6 +53,38 @@ TEST_P(FingerprintTest, ComputeFingerprint) {
   EXPECT_THAT(fingerprint->value, Not(0));
 }
 
+struct FingerprintCapacityTest : testing::Test {
+  void SetUp() override {
+    xnn_initialize(nullptr);
+    xnn_clear_fingerprints();
+  }
+
+  void TearDown() override {
+    xnn_clear_fingerprints();
+    xnn_deinitialize();
+  }
+};
+
+TEST_F(FingerprintCapacityTest, ReportsFullCacheThroughCheckAndOperator) {
+  constexpr uint32_t kCapacity = 256;
+  const uint32_t test_id = xnn_fingerprint_id_test_f16_f32_qc8w_nr2;
+  const enum xnn_fingerprint_id operator_id =
+      xnn_fingerprint_id_fully_connected_nc_f32_f32_f32;
+  for (uint32_t id = 0, inserted = 0; inserted < kCapacity; ++id) {
+    if (id != test_id && id != operator_id) {
+      ASSERT_EQ(xnn_set_fingerprint({id, id + 1}), xnn_status_success);
+      ++inserted;
+    }
+  }
+
+  EXPECT_EQ(xnn_check_fingerprint({test_id, 0xbadbeef}),
+            xnn_status_invalid_state);
+  EXPECT_EQ(xnn_fingerprint_fully_connected_nc(operator_id),
+            xnn_status_invalid_state);
+  EXPECT_EQ(xnn_get_fingerprint(test_id), nullptr);
+  EXPECT_EQ(xnn_get_fingerprint(operator_id), nullptr);
+}
+
 std::vector<xnn_fingerprint_id> kFingerprintIds = {
 #define XNN_FINGERPRINT_ID(operator, in, out, ...) \
   XNN_FINGERPRINT_ID_NAME(operator, in, out, __VA_ARGS__),

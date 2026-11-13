@@ -1940,8 +1940,11 @@ enum xnn_status xnn_fingerprint_fully_connected_nc(
     status = fingerprint_context.status;
   }
 error:
-  finalize_fingerprint_context(&fingerprint_context);
-  return status;
+  {
+    const enum xnn_status finalize_status =
+        finalize_fingerprint_context(&fingerprint_context);
+    return status == xnn_status_success ? finalize_status : status;
+  }
 }
 
 enum xnn_status xnn_create_fully_connected_nc_f16(
