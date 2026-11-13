@@ -65,32 +65,115 @@ __m{bits} b_{k+0}_{j} = {cast}({self._mm()}_slli_epi32({b_kj}, 16));
 __m{bits} b_{k+1}_{j} = {cast}({self._mm()}_and_si{bits}({b_kj}, {mask}));
 """
 
+  def load_a_tile_k1(self, i, k):
+    bits = self.bits
+    ptr = self.a_ptr(i, k)
+    cast = f"{self._mm()}_castsi{bits}_ps"
+    a_ik = f"{self._mm()}_set1_epi16(*{ptr})"
+    return (
+        f"__m{bits} a_{i}_{k} = {cast}({self._mm()}_slli_epi32({a_ik}, 16));\n"
+    )
+
+  def load_b_tile_hi(self, k, j):
+    bits = self.bits
+    ptr = self.b_ptr(k, j, f"__m{bits}i")
+    mask = f"{self._mm()}_set1_epi32(0xffff0000)"
+    cast = f"{self._mm()}_castsi{bits}_ps"
+    b_kj = f"{self._mm(bits)}_load_si{bits}({ptr})"
+    return (
+        f"__m{bits} b_{k+1}_{j} = {cast}({self._mm()}_and_si{bits}({b_kj},"
+        f" {mask}));\n"
+    )
+
+  def load_b_tile_lo(self, k, j):
+    bits = self.bits
+    ptr = self.b_ptr(k, j, f"__m{bits}i")
+    cast = f"{self._mm()}_castsi{bits}_ps"
+    b_kj = f"{self._mm(bits)}_load_si{bits}({ptr})"
+    return (
+        f"__m{bits} b_{k+0}_{j} = {cast}({self._mm()}_slli_epi32({b_kj},"
+        " 16));\n"
+    )
+
+  def product_k1(self, i, j, k):
+    raise NotImplementedError()
+
+  def product(self, i, j, k):
+    # This "backwards" reduction order (1 first, then 0) is used to match the
+    # behavior of dpbf16ps, which is documented to do the reduction in this
+    # order, enabling all of these kernels to be numerically consistent.
+    return self.product_k1(i, j, k + 1) + self.product_k1(i, j, k + 0)
+
+  def generate_block(self, a_tail=False, b_tail=False):
+    result = ""
+    load_a = self.load_a_tile_tail if a_tail else self.load_a_tile
+    load_b = self.load_b_tile_tail if b_tail else self.load_b_tile
+    m_tiles = self.block_shape[0] // self.tile_shape[0]
+    n_tiles = self.block_shape[1] // self.tile_shape[1]
+    num_regs = 32 if self.bits == 512 else 16
+    # Single-pass needs m_tiles * n_tiles (C) + 2 * min(m_tiles, n_tiles)
+    # (resident A or B) + 2 (streamed tile) + 1 (mask/zero). When that exceeds
+    # the register file, split k + 1 and k + 0 into two sequential passes
+    # (k + 1 before k + 0 to preserve dpbf16ps reduction order).
+    use_two_pass = (
+        self.arch != "avx512bf16"
+        and m_tiles * n_tiles + 2 * min(m_tiles, n_tiles) + 3 > num_regs
+    )
+    if use_two_pass:
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += self.load_b_tile_hi(k, j)
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += self.load_a_tile_k1(i, k + 1)
+          for j in range(0, self.block_shape[1], self.tile_shape[1]):
+            result += self.product_k1(i, j, k + 1)
+        result += "\n"
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += self.load_b_tile_lo(k, j)
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += self.load_a_tile_k1(i, k + 0)
+          for j in range(0, self.block_shape[1], self.tile_shape[1]):
+            result += self.product_k1(i, j, k + 0)
+        result += "\n"
+    elif m_tiles < n_tiles:
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += load_a(i, k)
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += load_b(k, j)
+          for i in range(0, self.block_shape[0], self.tile_shape[0]):
+            result += self.product(i, j, k)
+        result += "\n"
+    else:
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += load_b(k, j)
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += load_a(i, k)
+          for j in range(0, self.block_shape[1], self.tile_shape[1]):
+            result += self.product(i, j, k)
+        result += "\n"
+    return result
+
 
 class x86_avx2_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx):
   def __init__(self, arch="avx2", bits=256, tile_shape=(1, 8, 2)):
     super().__init__(arch, bits, tile_shape)
 
-  def product(self, i, j, k):
+  def product_k1(self, i, j, k):
     add = f"{self._mm()}_add_ps"
     mul = f"{self._mm()}_mul_ps"
-    # This "backwards" reduction order (1 first, then 0) is used to match the
-    # behavior of dpbf16ps, which is documented to do the reduction in this
-    # order, enabling all of these kernels to be numerically consistent.
-    return f"""
-c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+1}, b_{k+1}_{j}));
-c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+0}, b_{k+0}_{j}));
-"""
+    return f"c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k}, b_{k}_{j}));\n"
 
 
 class x86_avx2_fma3_bf16_bf16_fp32(x86_avx2_bf16_bf16_fp32):
   def __init__(self, arch="avx2_fma3", bits=256, tile_shape=(1, 8, 2)):
     super().__init__(arch, bits, tile_shape)
 
-  def product(self, i, j, k):
-    return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+1}, b_{k+1}_{j}, c_{i}_{j});
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
-"""
+  def product_k1(self, i, j, k):
+    return (
+        f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
+    )
 
 
 class x86_avx512_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
@@ -98,11 +181,10 @@ class x86_avx512_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
   def __init__(self, arch="avx512", bits=512, tile_shape=(1, 16, 2)):
     super().__init__(arch, bits, tile_shape)
 
-  def product(self, i, j, k):
-    return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+1}, b_{k+1}_{j}, c_{i}_{j});
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
-"""
+  def product_k1(self, i, j, k):
+    return (
+        f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
+    )
 
 
 class x86_avx512bf16_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
