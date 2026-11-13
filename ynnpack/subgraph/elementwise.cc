@@ -135,9 +135,9 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     using slinky::index_t;
 
     index_t n_extent = 1;
-    // These are intentionally left uninitialized, if the extent is 1 they
-    // should be unused.
-    index_t b_offset_n_stride, b_scale_n_stride, offset_n_stride;
+    index_t b_offset_n_stride = 0;
+    index_t b_scale_n_stride = 0;
+    index_t offset_n_stride = 0;
     if (same_bounds(output.dim(0), dot.dim(0)) &&
         is_contiguous(dot, 0, dot.elem_size) && is_broadcast(a_offset, 0) &&
         is_broadcast(a_scale, 0)) {
@@ -155,9 +155,10 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     }
 
     index_t m_extent = 1;
-    // These are intentionally left uninitialized, if the extent is 1 they
-    // should be unused.
-    index_t m_stride, dot_m_stride, a_offset_m_stride, a_scale_m_stride;
+    index_t m_stride = 0;
+    index_t dot_m_stride = 0;
+    index_t a_offset_m_stride = 0;
+    index_t a_scale_m_stride = 0;
     if (is_broadcast(b_offset, 0) && is_broadcast(b_scale, 0) &&
         is_broadcast(offset, 0)) {
       const slinky::dim& m = slice_dim0(output);
