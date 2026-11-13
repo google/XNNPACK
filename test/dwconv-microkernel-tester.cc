@@ -744,3 +744,124 @@ void DWConvMicrokernelTester::Test(
     }
   }
 }
+
+void DWConvMicrokernelTester::Test(
+    xnn_kai_f32_dwconv_minmax_ukernel_fn dwconv_minmax) const {
+  assert(kernel_tile() == 9);
+  assert(height() + 2 > padding_top() + padding_bottom());
+  assert(width() + 2 > padding_left() + padding_right());
+
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_real_distribution<float> f32dist;
+
+  const size_t output_height = height();
+  const size_t output_width = width();
+  const size_t input_height =
+      output_height + 2 - padding_top() - padding_bottom();
+  const size_t input_width =
+      output_width + 2 - padding_left() - padding_right();
+
+  xnnpack::Buffer<float> input(input_height * input_width * channels(),
+                               xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> kernel(channels() * 9);
+  xnnpack::Buffer<float> bias(channels());
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      10 * packed_channels());
+  xnnpack::Buffer<float> output(
+      (output_height * output_width - 1) * output_stride() + channels());
+  xnnpack::Buffer<float> output_ref(output_height * output_width * channels());
+
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
+  std::fill(output.begin(), output.end(), NAN);
+
+  xnn_pack_kai_f32_dwconv_ghw_w(/*primary_tile=*/9, 3, 3, channels(),
+                                channel_tile(), kernel.data(), bias.data(),
+                                /*scale=*/nullptr, packed_weights.data(),
+                                /*per_tile_extra_bytes=*/0, /*params=*/nullptr);
+
+  for (size_t oy = 0; oy < output_height; oy++) {
+    for (size_t ox = 0; ox < output_width; ox++) {
+      for (size_t c = 0; c < channels(); c++) {
+        float acc = bias[c];
+        for (size_t ky = 0; ky < 3; ky++) {
+          if (oy + ky < padding_top()) {
+            continue;
+          }
+          const size_t iy = oy + ky - padding_top();
+          if (iy >= input_height) {
+            continue;
+          }
+          for (size_t kx = 0; kx < 3; kx++) {
+            if (ox + kx < padding_left()) {
+              continue;
+            }
+            const size_t ix = ox + kx - padding_left();
+            if (ix >= input_width) {
+              continue;
+            }
+            acc += input[(iy * input_width + ix) * channels() + c] *
+                   kernel[(c * 3 + ky) * 3 + kx];
+          }
+        }
+        output_ref[(oy * output_width + ox) * channels() + c] = acc;
+      }
+    }
+  }
+
+  const float accumulated_min =
+      *std::min_element(output_ref.cbegin(), output_ref.cend());
+  const float accumulated_max =
+      *std::max_element(output_ref.cbegin(), output_ref.cend());
+  const float accumulated_range = accumulated_max - accumulated_min;
+  const float output_min =
+      accumulated_min + accumulated_range / 255.0f * static_cast<float>(qmin());
+  const float output_max =
+      accumulated_max -
+      accumulated_range / 255.0f * static_cast<float>(255 - qmax());
+
+  for (float& output_val : output_ref) {
+    output_val = std::max(std::min(output_val, output_max), output_min);
+  }
+
+  const size_t input_pixel_stride = channels() * sizeof(float);
+  const size_t input_height_stride = input_width * input_pixel_stride;
+  const size_t output_pixel_stride = output_stride() * sizeof(float);
+  const size_t output_height_stride = output_width * output_pixel_stride;
+
+  for (size_t y = 0; y < output_height; y += output_height_tile()) {
+    const size_t input_y = std::min(
+        y < padding_top() ? size_t{0} : y - padding_top(), input_height);
+    const size_t pad_top = y < padding_top() ? padding_top() - y : 0;
+    const size_t valid_input_rows =
+        input_y < input_height ? input_height - input_y : 0;
+    const size_t valid_output_rows =
+        std::min<size_t>(output_height_tile(), output_height - y);
+    dwconv_minmax(input.data() + input_y * input_width * channels(),
+                  packed_weights.data(),
+                  output.data() + y * output_width * output_stride(),
+                  input_height_stride, input_pixel_stride, output_height_stride,
+                  output_pixel_stride, valid_input_rows, valid_output_rows,
+                  padding_left(), pad_top, /*padding_value=*/0.0f, output_min,
+                  output_max);
+  }
+
+  for (size_t oy = 0; oy < output_height; oy++) {
+    for (size_t ox = 0; ox < output_width; ox++) {
+      for (size_t c = 0; c < channels(); c++) {
+        const float actual =
+            output[(oy * output_width + ox) * output_stride() + c];
+        const float expected =
+            output_ref[(oy * output_width + ox) * channels() + c];
+        ASSERT_GE(actual, output_min)
+            << "y = " << oy << ", x = " << ox << ", channel = " << c;
+        ASSERT_LE(actual, output_max)
+            << "y = " << oy << ", x = " << ox << ", channel = " << c;
+        ASSERT_NEAR(expected, actual, std::abs(expected) * 1.0e-5f)
+            << "y = " << oy << ", x = " << ox << ", channel = " << c;
+      }
+    }
+  }
+}

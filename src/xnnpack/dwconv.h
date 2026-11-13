@@ -20,6 +20,22 @@
 extern "C" {
 #endif
 
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+XNN_INTERNAL size_t
+xnn_f32_dwconv_minmax_ukernel_9p1vc__sme2_get_channel_tile(void);
+XNN_INTERNAL size_t
+xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2_get_channel_tile(void);
+XNN_INTERNAL size_t
+xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2_get_output_height_tile(void);
+XNN_INTERNAL void xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2(
+    const void* input, const void* packed_weights, void* output,
+    size_t input_height_stride, size_t input_pixel_stride,
+    size_t output_height_stride, size_t output_pixel_stride,
+    size_t valid_input_rows, size_t valid_output_rows,
+    size_t input_padding_left, size_t input_padding_top, float padding_value,
+    float output_min, float output_max);
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+
 #define XNN_UKERNEL(arch_flags, fn_name, c_block, adj_c_block, cr, kr,         \
                     datatype, weights_type, params_type, init_fn)              \
   XNN_INTERNAL void fn_name(                                                   \
