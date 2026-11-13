@@ -60,7 +60,9 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u32.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-f16c-rational-5-4-div.c
   src/f16-vunary/gen/f16-vsqr-f16c-u16.c
-  src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-u16.c)
+  src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-u16.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x4c8-minmax-f16c-madd-prfm.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-4x4c8-minmax-f16c-madd-prfm.c)
 
 SET(NON_PROD_F16C_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-f16c.c

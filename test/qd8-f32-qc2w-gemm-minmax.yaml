@@ -218,27 +218,19 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x4c8__ssse3_madd
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_3x4c8__ssse3_madd
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x4c8__ssse3_madd
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_5x4c8__ssse3_madd
+
+# AVX MADD
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__avx_madd_prfm
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x4c8__ssse3_madd
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x4c8__avx_madd_prfm
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
