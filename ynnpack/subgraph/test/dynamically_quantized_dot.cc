@@ -8,8 +8,14 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#if defined(YNN_ARCH_X86)
+#include "ynnpack/kernels/dot/cost_model/golden_cove.h"
+#include "ynnpack/kernels/dot/cost_model/redwood_cove.h"
+#endif
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
@@ -176,6 +182,23 @@ INSTANTIATE_TEST_SUITE_P(RhsType, DynamicallyQuantizedDot,
                          [](const testing::TestParamInfo<ynn_type>& info) {
                            return to_string(info.param);
                          });
+
+#if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) && defined(YNN_ARCH_X86_AMXINT8)
+TEST(PreferUint8Dot, AmxInt8) {
+  const uint64_t arch_flags_amxint8 =
+      arch_flag::sse2 | arch_flag::avx | arch_flag::avx2 | arch_flag::fma3 |
+      arch_flag::avx512 | arch_flag::avx512vnni | arch_flag::amxint8;
+  for (const dot_cost_models* cost_models : {&golden_cove, &redwood_cove}) {
+    EXPECT_TRUE(
+        prefer_uint8_dot(ynn_type_int4, *cost_models, arch_flags_amxint8));
+    EXPECT_TRUE(
+        prefer_uint8_dot(ynn_type_int2, *cost_models, arch_flags_amxint8));
+    EXPECT_FALSE(
+        prefer_uint8_dot(ynn_type_int8, *cost_models, arch_flags_amxint8));
+  }
+}
+#endif  // !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) &&
+        // defined(YNN_ARCH_X86_AMXINT8)
 
 }  // namespace
 }  // namespace ynn

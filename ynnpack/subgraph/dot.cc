@@ -51,33 +51,80 @@ using slinky::index_t;
 
 namespace ynn {
 
-bool prefer_uint8_dot(ynn_type b_type) {
-  if (!type_is_integral(b_type)) {
-    return false;
-  }
+namespace {
 
-  const dot_cost_models& cost_models = get_dot_cost_models();
+enum class uint8_dot_preference {
+  none,
+  small_m,
+  always,
+};
+
+struct uint8_dot_preference_info {
+  uint8_dot_preference preference = uint8_dot_preference::none;
+  dot_packed_shape int8_packed_shape = {};
+  dot_packed_shape uint8_packed_shape = {};
+};
+
+uint8_dot_preference_info get_uint8_dot_preference(
+    ynn_type b_type, const dot_cost_models& cost_models, uint64_t arch_flags) {
+  if (!type_is_integral(b_type)) {
+    return {};
+  }
 
   // Get the kernels we would use for both int8 and uint8.
-  dot_kernel int8 =
-      get_dot_kernel({ynn_type_int8, b_type, ynn_type_int32}, cost_models);
-  dot_kernel uint8 =
-      get_dot_kernel({ynn_type_uint8, b_type, ynn_type_int32}, cost_models);
+  dot_kernel int8 = get_dot_kernel(
+      {ynn_type_int8, b_type, ynn_type_int32}, cost_models, {}, {},
+      /*required_flags=*/0, /*transpose_a=*/std::nullopt, arch_flags);
+  dot_kernel uint8 = get_dot_kernel(
+      {ynn_type_uint8, b_type, ynn_type_int32}, cost_models, {}, {},
+      /*required_flags=*/0, /*transpose_a=*/std::nullopt, arch_flags);
   if (!uint8.kernel || !uint8.cost_model) {
-    return false;
+    return {};
   }
   if (!int8.kernel || !int8.cost_model) {
-    return true;
+    return {uint8_dot_preference::always, {}, {uint8.block_n, uint8.tile_k}};
   }
 
   // Find a size that is a common multiple of both kernels.
   const size_t m = int8.block_m * uint8.block_m;
   const size_t n = int8.block_n * uint8.block_n;
   const size_t k = int8.block_k * uint8.block_k;
-  // Estimate the cost of both kernels.
   const float uint8_cost = uint8.estimate_cost(m, n, k);
   const float int8_cost = int8.estimate_cost(m, n, k);
-  return uint8_cost < int8_cost;
+  const dot_packed_shape int8_packed_shape = {int8.block_n, int8.tile_k};
+  const dot_packed_shape uint8_packed_shape = {uint8.block_n, uint8.tile_k};
+  if (uint8_cost != int8_cost) {
+    return {uint8_cost < int8_cost ? uint8_dot_preference::always
+                                   : uint8_dot_preference::none,
+            int8_packed_shape, uint8_packed_shape};
+  }
+
+  // Break ties using m = 1 kernels compatible with the large-m packed layout
+  // (e.g. AMX int4 vs AVX512VNNI uint8 int4).
+  dot_shape small_m;
+  small_m.m = 1;
+  dot_kernel int8_small = get_dot_kernel(
+      {ynn_type_int8, b_type, ynn_type_int32}, cost_models, small_m,
+      int8_packed_shape, /*required_flags=*/0, /*transpose_a=*/std::nullopt,
+      arch_flags);
+  dot_kernel uint8_small = get_dot_kernel(
+      {ynn_type_uint8, b_type, ynn_type_int32}, cost_models, small_m,
+      uint8_packed_shape, /*required_flags=*/0, /*transpose_a=*/std::nullopt,
+      arch_flags);
+  if (uint8_small.kernel && uint8_small.cost_model && int8_small.kernel &&
+      int8_small.cost_model && uint8_small.cost * 1.5f < int8_small.cost) {
+    return {uint8_dot_preference::small_m, int8_packed_shape,
+            uint8_packed_shape};
+  }
+  return {};
+}
+
+}  // namespace
+
+bool prefer_uint8_dot(ynn_type b_type, const dot_cost_models& cost_models,
+                      uint64_t arch_flags) {
+  return get_uint8_dot_preference(b_type, cost_models, arch_flags).preference !=
+         uint8_dot_preference::none;
 }
 
 namespace {
@@ -194,6 +241,69 @@ bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
   return true;
 }
 
+void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
+                        const ynn_value& b);
+bool is_constant_or_gather_of_constant(const ynn_subgraph& subgraph,
+                                       uint32_t id, int depth = 3);
+
+bool should_requantize_input_a_to_uint8(
+    const ynn_subgraph& subgraph, const ynn_value& a, const ynn_value& b,
+    size_t num_k_dims, const uint8_dot_preference_info& pref,
+    const dot_cost_models& cost_models, uint64_t arch_flags) {
+  if (pref.preference == uint8_dot_preference::always) {
+    return true;
+  }
+  if (pref.preference == uint8_dot_preference::none) {
+    return false;
+  }
+
+  // Only small-m wins over int8 (e.g. AMX int4). Avoid paying the runtime
+  // requantize_to_uint8 (+ dot(1, b) when b is dynamic) cost when this dot will
+  // dispatch the same large-m kernel anyway.
+  const bool static_b = is_constant_or_gather_of_constant(subgraph, b.id);
+  const std::optional<index_t> const_m =
+      slinky::as_constant(a.extent(num_k_dims));
+  if (!const_m.has_value()) {
+    return static_b;
+  }
+  if (*const_m <= 0) {
+    return false;
+  }
+
+  dot_shape shape;
+  learn_shape_from_b(shape, num_k_dims, b);
+  shape.m = std::min<size_t>(*const_m, 480);
+  shape.n = std::min<size_t>(shape.n, 384);
+  shape.k1 = std::min<size_t>(shape.k1, 256);
+
+  dot_kernel int8_m = get_dot_kernel(
+      {ynn_type_int8, b.type, ynn_type_int32}, cost_models, shape,
+      pref.int8_packed_shape, /*required_flags=*/0,
+      /*transpose_a=*/std::nullopt, arch_flags);
+  dot_kernel uint8_m = get_dot_kernel(
+      {ynn_type_uint8, b.type, ynn_type_int32}, cost_models, shape,
+      pref.uint8_packed_shape, /*required_flags=*/0,
+      /*transpose_a=*/std::nullopt, arch_flags);
+  if (!uint8_m.kernel || !uint8_m.cost_model || !int8_m.kernel ||
+      !int8_m.cost_model) {
+    return false;
+  }
+  if (static_b) {
+    return uint8_m.cost < int8_m.cost;
+  }
+
+  dot_shape sum_b_shape = shape;
+  sum_b_shape.m = 1;
+  dot_kernel uint8_sum_b = get_dot_kernel(
+      {ynn_type_uint8, b.type, ynn_type_int32}, cost_models, sum_b_shape,
+      pref.uint8_packed_shape, /*required_flags=*/0,
+      /*transpose_a=*/std::nullopt, arch_flags);
+  if (!uint8_sum_b.kernel || !uint8_sum_b.cost_model) {
+    return false;
+  }
+  return (uint8_m.cost + uint8_sum_b.cost) * 1.25f < int8_m.cost;
+}
+
 // Some hardware (mostly x86) prefer `a` of a dot to be uint8, while `b` is a
 // signed type, because pmaddubsw and dpbusd instructions multiply a signed and
 // an unsigned int8. This function checks if the current machine is such
@@ -205,21 +315,31 @@ bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
   const ynn_value& a = subgraph.value(input_a_id);
   if (a.type != ynn_type_int8) return false;
 
-  ynn_type b_type = subgraph.value(input_b_id).type;
-  if (!prefer_uint8_dot(b_type)) {
+  const ynn_value& b = subgraph.value(input_b_id);
+  const dot_cost_models& cost_models = get_dot_cost_models();
+  const uint64_t arch_flags = get_supported_arch_flags();
+  const uint8_dot_preference_info pref =
+      get_uint8_dot_preference(b.type, cost_models, arch_flags);
+  if (pref.preference == uint8_dot_preference::none) {
     // This hardware does not prefer uint8.
+    return false;
+  }
+
+  if (try_dynamic_quantization_rewrite(subgraph, input_a_id)) {
+    // `a` was produced by dynamic quantization, and we rewrote it to quantize
+    // to uint8.
+    YNN_LOG_DEBUG() << "Rewriting dynamically quantized input A (" << input_a_id
+                    << ") to uint8 for dot";
+    return true;
+  }
+
+  if (!should_requantize_input_a_to_uint8(subgraph, a, b, num_k_dims, pref,
+                                          cost_models, arch_flags)) {
     return false;
   }
 
   YNN_LOG_DEBUG() << "Rewriting input A (" << input_a_id
                   << ") to uint8 for dot";
-
-  if (try_dynamic_quantization_rewrite(subgraph, input_a_id)) {
-    // `a` was produced by dynamic quantization, and we rewrote it to quantize
-    // to uint8.
-    return true;
-  }
-
   return try_requantize_rewrite(subgraph, input_a_id, input_b_id, input_c_id,
                                 num_k_dims);
 }
@@ -1363,7 +1483,7 @@ bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
 }
 
 bool is_constant_or_gather_of_constant(const ynn_subgraph& subgraph,
-                                       uint32_t id, int depth = 3) {
+                                       uint32_t id, int depth) {
   if (is_constant(subgraph, id, depth)) {
     return true;
   }
