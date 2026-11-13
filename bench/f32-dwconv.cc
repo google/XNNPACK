@@ -19,6 +19,7 @@
 #include "src/xnnpack/dwconv.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/indirection.h"
+#include "src/xnnpack/kai-dwconv.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microkernel-utils.h"
 #include "src/xnnpack/microparams-init.h"
@@ -163,6 +164,142 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
 
 // #include "src/f32-dwconv/f32-dwconv.inc"
 #include "src/f32-dwconv/f32-dwconv-minmax.inc"
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && \
+    (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
+static void direct_bench_impl(benchmark::State& state,
+                              xnn_kai_f32_dwconv_minmax_ukernel_fn dwconv,
+                              size_t channel_tile, size_t output_height_tile) {
+  const size_t input_height = state.range(0);
+  const size_t input_width = state.range(1);
+  const size_t kernel_height = state.range(2);
+  const size_t kernel_width = state.range(3);
+  const size_t padding_height = state.range(4);
+  const size_t padding_width = state.range(5);
+  const size_t subsampling = state.range(6);
+  const size_t dilation = state.range(7);
+  const size_t channels = state.range(8);
+
+  if (kernel_height != 3 || kernel_width != 3 || subsampling != 1 ||
+      dilation != 1) {
+    state.SkipWithError("direct dwconv supports 3x3 stride 1 only");
+    return;
+  }
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
+                          std::ref(rng));
+
+  const size_t padding_left = padding_width / 2;
+  const size_t padding_top = padding_height / 2;
+  const size_t output_height = input_height + padding_height - 2;
+  const size_t output_width = input_width + padding_width - 2;
+  const size_t output_size = output_height * output_width;
+  const size_t c_stride =
+      benchmark::utils::RoundUp<size_t>(channels, channel_tile);
+
+  xnnpack::Buffer<float> a(channels * input_height * input_width,
+                           xnnpack::XnnExtraBytes);
+  std::generate(a.begin(), a.end(), std::ref(f32rng));
+  xnnpack::Buffer<float> k(channels * 9);
+  std::generate(k.begin(), k.end(), std::ref(f32rng));
+  xnnpack::Buffer<float> b(channels);
+  std::generate(b.begin(), b.end(), std::ref(f32rng));
+
+  const size_t w_elements = 10 * c_stride;
+  const size_t c_elements = output_size * channels;
+  const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
+                                     benchmark::utils::GetMaxCacheSize(),
+                                     sizeof(float) * (w_elements + c_elements));
+
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
+  xnn_pack_kai_f32_dwconv_ghw_w(/*primary_tile=*/9, 3, 3, channels,
+                                channel_tile, k.data(), b.data(),
+                                /*scale=*/nullptr, w.data(),
+                                /*per_tile_extra_bytes=*/0, nullptr);
+  for (size_t n = 1; n < num_buffers; n++) {
+    std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
+  }
+
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
+
+  const size_t input_pixel_stride = channels * sizeof(float);
+  const size_t input_height_stride = input_width * input_pixel_stride;
+  const size_t output_pixel_stride = channels * sizeof(float);
+  const size_t output_height_stride = output_width * output_pixel_stride;
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = +std::numeric_limits<float>::infinity();
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(float));
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (size_t y = 0; y < output_height; y += output_height_tile) {
+      const size_t input_y =
+          std::min(y < padding_top ? 0 : y - padding_top, input_height);
+      const size_t pad_top = y < padding_top ? padding_top - y : 0;
+      const size_t valid_input_rows =
+          input_y < input_height ? input_height - input_y : 0;
+      const size_t valid_output_rows =
+          std::min(output_height_tile, output_height - y);
+      dwconv(a.data() + input_y * input_width * channels,
+             w.data() + buffer_index * w_elements,
+             c.data() + buffer_index * c_elements + y * output_width * channels,
+             input_height_stride, input_pixel_stride, output_height_stride,
+             output_pixel_stride, valid_input_rows, valid_output_rows,
+             padding_left, pad_top, /*padding_value=*/0.0f, output_min,
+             output_max);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["FLOPS"] = benchmark::Counter(
+      uint64_t(state.iterations()) * 2 * output_size * channels * 9,
+      benchmark::Counter::kIsRate);
+
+  state.counters["bytes"] = benchmark::Counter(
+      uint64_t(state.iterations()) *
+          (output_size + input_height * input_width + 9 + 1 /* bias */) *
+          channels * sizeof(float),
+      benchmark::Counter::kIsRate);
+}
+
+#if XNN_ENABLE_KLEIDIAI
+static void BM_xnn_kai_f32_dwconv_minmax_ukernel_9pvc__neonsme2(
+    benchmark::State& state) {
+  if (!benchmark::utils::CheckArchFlags(state, xnn_arch_arm_sme2)) {
+    return;
+  }
+  direct_bench_impl(
+      state, xnn_kai_f32_dwconv_minmax_ukernel_9pvc__neonsme2,
+      xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile(),
+      xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_output_height_tile());
+}
+BENCHMARK_DWCONV(BM_xnn_kai_f32_dwconv_minmax_ukernel_9pvc__neonsme2);
+#endif  // XNN_ENABLE_KLEIDIAI
+
+#if XNN_ENABLE_ARM_SME_ACLE
+static void BM_xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2(
+    benchmark::State& state) {
+  if (!benchmark::utils::CheckArchFlags(state, xnn_arch_arm_sme2)) {
+    return;
+  }
+  direct_bench_impl(
+      state, xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2,
+      xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2_get_channel_tile(),
+      xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2_get_output_height_tile());
+}
+BENCHMARK_DWCONV(BM_xnn_f32_dwconv_minmax_ukernel_9p4xvc__sme2);
+#endif  // XNN_ENABLE_ARM_SME_ACLE
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 &&
+        // (XNN_ENABLE_KLEIDIAI || XNN_ENABLE_ARM_SME_ACLE)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

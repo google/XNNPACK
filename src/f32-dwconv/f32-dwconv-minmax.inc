@@ -12,6 +12,10 @@ XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, 4, true, 4, 9, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+XNN_UKERNEL(xnn_arch_arm_sme2, xnn_f32_dwconv_minmax_ukernel_9p1vc__sme2, (xnn_init_hardware_config() && (xnn_init_hardware_config()->arch_flags & xnn_arch_arm_sme2) ? xnn_f32_dwconv_minmax_ukernel_9p1vc__sme2_get_channel_tile() : 16), false, (xnn_init_hardware_config() && (xnn_init_hardware_config()->arch_flags & xnn_arch_arm_sme2) ? xnn_f32_dwconv_minmax_ukernel_9p1vc__sme2_get_channel_tile() : 16), 9, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_ARM_SME_ACLE
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_dwconv_minmax_ukernel_3p4c__neon, 4, false, 4, 3, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_dwconv_minmax_ukernel_3p4c__neon_acc2, 4, false, 4, 3, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)

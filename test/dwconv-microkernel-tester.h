@@ -153,6 +153,50 @@ class DWConvMicrokernelTester {
 
   size_t last_pass_tile() const { return this->last_pass_tile_; }
 
+  DWConvMicrokernelTester& height(uint32_t height) {
+    assert(height >= 1);
+    this->height_ = height;
+    return *this;
+  }
+
+  uint32_t height() const { return this->height_; }
+
+  DWConvMicrokernelTester& output_height_tile(uint32_t output_height_tile) {
+    assert(output_height_tile != 0);
+    this->output_height_tile_ = output_height_tile;
+    return *this;
+  }
+
+  uint32_t output_height_tile() const { return this->output_height_tile_; }
+
+  DWConvMicrokernelTester& padding_left(uint32_t padding_left) {
+    this->padding_left_ = padding_left;
+    return *this;
+  }
+
+  uint32_t padding_left() const { return this->padding_left_; }
+
+  DWConvMicrokernelTester& padding_right(uint32_t padding_right) {
+    this->padding_right_ = padding_right;
+    return *this;
+  }
+
+  uint32_t padding_right() const { return this->padding_right_; }
+
+  DWConvMicrokernelTester& padding_top(uint32_t padding_top) {
+    this->padding_top_ = padding_top;
+    return *this;
+  }
+
+  uint32_t padding_top() const { return this->padding_top_; }
+
+  DWConvMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
+    this->padding_bottom_ = padding_bottom;
+    return *this;
+  }
+
+  uint32_t padding_bottom() const { return this->padding_bottom_; }
+
   void Test(xnn_qu8_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qu8_conv_minmax_params_fn init_params,
             xnn_qu8_requantize_fn requantize) const;
@@ -174,14 +218,22 @@ class DWConvMicrokernelTester {
   void Test(xnn_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f32_minmax_params_fn init_params) const;
 
+  void Test(xnn_kai_f32_dwconv_minmax_ukernel_fn dwconv_minmax) const;
+
  private:
   uint32_t channels_{1};
   uint32_t channel_tile_{1};
   uint32_t kernel_tile_{1};
   uint32_t kernel_size_{1};
   uint32_t width_{1};
+  uint32_t height_{4};
+  uint32_t output_height_tile_{4};
   uint32_t step_{1};
   uint32_t output_stride_{0};
+  uint32_t padding_left_{1};
+  uint32_t padding_right_{1};
+  uint32_t padding_top_{1};
+  uint32_t padding_bottom_{1};
   uint8_t input_zero_point_{127};
   uint8_t kernel_zero_point_{127};
   uint8_t qmin_{0};
