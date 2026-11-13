@@ -3274,42 +3274,58 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   const size_t rhs_stride = output_channels * sizeof(int8_t);
+  const bool has_bias = accumulator_init != NULL;
 
   // Some packing kernels assume that the bias is non-null. Allocate a zero
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(int32_t));
-    if (accumulator_init == NULL) {
-      xnn_log_error(
-          "failed to allocate %zu bytes for KleidiAI SME bias substitute "
-          "buffer",
-          output_channels * sizeof(int32_t));
-      assert(false);
-      return;
+    static const int32_t zero_bias[16] = {};
+    if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0 &&
+        output_channels <= sizeof(zero_bias) / sizeof(zero_bias[0])) {
+      accumulator_init = zero_bias;
+    } else {
+      accumulator_init = calloc(output_channels, sizeof(int32_t));
+      if (accumulator_init == NULL) {
+        xnn_log_error(
+            "failed to allocate %zu bytes for KleidiAI SME bias substitute "
+            "buffer",
+            output_channels * sizeof(int32_t));
+        assert(false);
+        return;
+      }
+      free_accumulator_init = true;
     }
-    free_accumulator_init = true;
   }
   const struct xnn_qs8_packing_params* xnn_params =
       reinterpret_cast<const struct xnn_qs8_packing_params*>(params);
   struct kai_rhs_pack_qsi8cx_params kai_params;
   kai_params.lhs_zero_point = xnn_params->input_zero_point;
   kai_params.scale_multiplier = 1.f;
-  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
-        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
-        /*rhs=*/weights,
-        /*bias=*/accumulator_init,
-        /*scale=*/extra_data0,
-        /*rhs_packed=*/packed_weights_ptr,
-        /*extra_bytes=*/0, &kai_params);
-  } else {
-    assert(groups == 1);
-    pack_qs8_nxk_sme(output_channels, 1, input_channels, nr,
-                    static_cast<const int8_t*>(weights),
-                    static_cast<const int32_t*>(accumulator_init),
-                    static_cast<const float*>(extra_data0), packed_weights_ptr,
-                    xnn_params);
+  const size_t weights_group_size = input_channels * output_channels;
+  const size_t packed_group_size =
+      groups > 1
+          ? kai_get_rhs_packed_size_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+                output_channels, input_channels)
+          : 0;
+  for (size_t group = 0; group < groups; ++group) {
+    const int8_t* group_weights =
+        static_cast<const int8_t*>(weights) + group * weights_group_size;
+    const int32_t* group_bias = static_cast<const int32_t*>(accumulator_init) +
+                                (has_bias ? group * output_channels : 0);
+    const float* group_scale =
+        static_cast<const float*>(extra_data0) + group * output_channels;
+    uint8_t* group_packed =
+        static_cast<uint8_t*>(packed_weights_ptr) + group * packed_group_size;
+    if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+      kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+          1, output_channels, input_channels, nr, kr, sr, rhs_stride,
+          group_weights, group_bias, group_scale, group_packed,
+          /*extra_bytes=*/0, &kai_params);
+    } else {
+      pack_qs8_nxk_sme(output_channels, 1, input_channels, nr, group_weights,
+                       group_bias, group_scale, group_packed, xnn_params);
+    }
   }
   if (free_accumulator_init) {
     free((void*)accumulator_init);
