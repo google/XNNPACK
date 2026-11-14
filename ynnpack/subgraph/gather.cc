@@ -33,16 +33,20 @@ namespace ynn {
 namespace {
 
 // Call a lut kernel.
-auto make_lut_impl(lut_kernel_fn kernel) {
-  return [kernel](slinky::raw_buffer lut, slinky::raw_buffer a,
-                  slinky::raw_buffer x) -> slinky::index_t {
+auto make_lut_impl(lut_kernel_fn kernel, size_t index_elem_count) {
+  return [kernel, index_elem_count](slinky::raw_buffer lut,
+                                    slinky::raw_buffer a,
+                                    slinky::raw_buffer x) -> slinky::index_t {
     assert(is_contiguous(x.dim(0), x.elem_size));
 
     slinky::dim x_dim = ynn::slice_dim0(x);
     if (x_dim.empty()) {
       return 0;
     }
-    slinky::dim a_dim = ynn::slice_dim0(a, slinky::in_bounds{x_dim.min()});
+    assert(x_dim.min() % static_cast<slinky::index_t>(index_elem_count) == 0);
+    slinky::dim a_dim = ynn::slice_dim0(
+        a, slinky::in_bounds{x_dim.min() /
+                             static_cast<slinky::index_t>(index_elem_count)});
 
     assert(is_contiguous(a_dim, a.elem_size));
     assert(is_contiguous(x_dim, x.elem_size));
@@ -240,7 +244,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
       if (allow_in_place(node.inputs[1], node.outputs[0], *runtime.subgraph)) {
         attrs.allow_in_place = (1 << 1);
       }
-      func = slinky::func::make(make_lut_impl(kernel),
+      func = slinky::func::make(make_lut_impl(kernel, index_elem_count),
                                 {{input.buffer, std::move(input_bounds)},
                                  {index.buffer, std::move(index_bounds)}},
                                 {{output.buffer, dims}}, std::move(attrs));
