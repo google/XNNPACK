@@ -1315,6 +1315,7 @@ typedef void (*xnn_compute_reciprocal_fn)(const void* input, void* output);
 
 struct floating_point_softmax_context {
   size_t n;
+  bool safe_softmax;
   const void* x;
   size_t x_stride;
   void* y;

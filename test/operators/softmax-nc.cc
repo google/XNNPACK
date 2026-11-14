@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -336,3 +337,88 @@ TEST(SOFTMAX_NC_QU8, overflow_batch_stride) {
                 /*threadpool=*/nullptr));
 }
 
+TEST(SOFTMAX_NC_F32, safe_special_rows) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  for (size_t threads : {size_t(1), size_t(4)}) {
+    pthreadpool_t pool = pthreadpool_create(threads);
+    for (size_t channels :
+         {size_t(1), size_t(3), size_t(7), size_t(17), size_t(1500)}) {
+      const size_t input_stride = channels + 5;
+      const size_t output_stride = channels + 11;
+      std::vector<float> input(
+          8 * input_stride + XNN_EXTRA_BYTES / sizeof(float), -INFINITY);
+      std::vector<float> output(
+          8 * output_stride + XNN_EXTRA_BYTES / sizeof(float), 42.0f);
+      for (size_t c = 0; c < channels; c++) {
+        input[input_stride + c] = float(c) / float(channels);
+        input[2 * input_stride + c] = c % 2 ? -INFINITY : 0.0f;
+        input[5 * input_stride + c] = c % 2 ? -0.0f : 0.0f;
+      }
+      input[3 * input_stride + channels / 2] = NAN;
+      input[4 * input_stride + channels / 2] = INFINITY;
+      input[6 * input_stride] = NAN;
+      input[7 * input_stride + channels - 1] = NAN;
+      xnn_operator_t op = nullptr;
+      ASSERT_EQ(xnn_status_success,
+                xnn_create_softmax_nc_f32(XNN_FLAG_SAFE_SOFTMAX, &op));
+      for (size_t batch : {size_t(1), size_t(8), size_t(3)}) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_softmax_nc_f32(op, channels, input_stride,
+                                             output_stride, batch, pool));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_softmax_nc_f32(op, input.data(), output.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(op, pool));
+        for (size_t b = 0; b < batch; b++) {
+          double sum = 0;
+          if (b == 1 || b == 2 || b == 5) {
+            for (size_t c = 0; c < channels; c++)
+              sum += std::exp(double(input[b * input_stride + c]));
+          }
+          for (size_t c = 0; c < channels; c++) {
+            const float actual = output[b * output_stride + c];
+            if (b == 0) {
+              EXPECT_EQ(actual, 0.0f);
+              EXPECT_FALSE(std::signbit(actual));
+            } else if (b == 3 || b == 4 || b == 6 || b == 7) {
+              EXPECT_TRUE(std::isnan(actual)) << b << ":" << c;
+            } else {
+              EXPECT_NEAR(actual,
+                          std::exp(double(input[b * input_stride + c])) / sum,
+                          1.0e-6);
+            }
+          }
+          for (size_t c = channels; c < output_stride; c++)
+            EXPECT_EQ(output[b * output_stride + c], 42.0f);
+        }
+      }
+      xnn_delete_operator(op);
+    }
+    pthreadpool_destroy(pool);
+  }
+}
+
+TEST(SOFTMAX_NC_F32, ordinary_fully_masked_row) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  std::vector<float> input(17 + XNN_EXTRA_BYTES / sizeof(float), -INFINITY);
+  std::vector<float> output(input.size());
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_softmax_nc_f32(0, &op));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_softmax_nc_f32(op, 17, 17, 17, 1, nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_softmax_nc_f32(op, input.data(), output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, nullptr));
+  for (size_t c = 0; c < 17; c++) EXPECT_TRUE(std::isnan(output[c]));
+  xnn_delete_operator(op);
+}
+
+TEST(SOFTMAX_NC_F32, safe_rejects_other_datatypes) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_operator_t op = nullptr;
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_create_softmax_nc_f16(XNN_FLAG_SAFE_SOFTMAX, &op));
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_create_softmax_nc_qu8(1.0f, 0, 0x1.0p-8f, XNN_FLAG_SAFE_SOFTMAX,
+                                      &op));
+  EXPECT_EQ(op, nullptr);
+}
