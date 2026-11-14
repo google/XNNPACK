@@ -132,6 +132,23 @@ struct loop_metadata {
   slinky::expr proposed_step;
 };
 
+int physical_output_dim(const slinky::func& f, int d) {
+  // Skip dimensions sliced by `slinky::func::make_stack` when indexing the
+  // buffer's physical dimensions.
+  int od = d;
+  if (!f.inputs().empty()) {
+    const std::vector<slinky::expr>& slices = f.inputs()[0].output_slice;
+    for (int slice_d = 0;
+         slice_d <= od && slice_d < static_cast<int>(slices.size());
+         ++slice_d) {
+      if (slices[slice_d].defined()) {
+        ++od;
+      }
+    }
+  }
+  return od;
+}
+
 // Least common multiple of two (possibly symbolic) loop steps, evaluated at
 // runtime. Used to reconcile two producers that require different tiles for a
 // shared loop: a multiple of both keeps the fused loop an integer number of
@@ -237,8 +254,8 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
           for (const auto& out : f.outputs()) {
             for (int od = 0; od < out.dims.size(); ++od) {
               if (out.dims[od] == v) {
-                parent_source_regions.push_back(
-                    get_source_region(out.sym(), od));
+                parent_source_regions.push_back(get_source_region(
+                    out.sym(), physical_output_dim(f, od)));
               }
             }
           }
@@ -495,7 +512,8 @@ int loop_source_region(const slinky::func* f, slinky::var v,
   for (const auto& out : f->outputs()) {
     for (int i = 0; i < static_cast<int>(out.dims.size()); ++i) {
       if (out.dims[i] == v) {
-        return get_source_region(source_regions, out.sym(), i);
+        return get_source_region(source_regions, out.sym(),
+                                 physical_output_dim(*f, i));
       }
     }
   }

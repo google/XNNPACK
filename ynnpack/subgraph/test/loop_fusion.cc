@@ -448,5 +448,50 @@ TEST_F(LoopFusionTest, TransposedInputANotRecomputedAcrossN) {
   }
 }
 
+// `make_stack` erases the stacked dimension from `func::output::dims` while
+// slicing it via `output_slice`. `infer_source_regions` must map the remaining
+// output dims to their physical buffer dimensions so producers feeding `stack`
+// still fuse into downstream consumer loops along the non-stacked dimensions.
+TEST_F(LoopFusionTest, StackProducersFuseWithConsumer) {
+  const size_t M = 1024, N = 256;
+  const uint32_t in0_id = 0;
+  const uint32_t in1_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t neg0_id = YNN_INVALID_VALUE_ID;
+  uint32_t neg1_id = YNN_INVALID_VALUE_ID;
+  uint32_t stacked_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), in0_id)
+      .AddInput(type_of<float>(), TensorShape(2), in1_id)
+      .AddOutput(type_of<float>(), TensorShape(3), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), neg0_id)
+      .AddTensor(type_of<float>(), TensorShape(2), neg1_id)
+      .AddTensor(type_of<float>(), TensorShape(3), stacked_id)
+      .AddUnary(ynn_unary_negate, in0_id, neg0_id)
+      .AddUnary(ynn_unary_negate, in1_id, neg1_id)
+      .AddStack(/*axis=*/2, {neg0_id, neg1_id}, stacked_id)
+      .AddUnary(ynn_unary_abs, stacked_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> in0({M, N});
+  Tensor<float> in1({M, N});
+  Tensor<float> out({M, N, 2});
+  in0.fill(-2.0f);
+  in1.fill(-3.0f);
+  ReshapeExternalTensor(in0_id, {M, N}, in0.data());
+  ReshapeExternalTensor(in1_id, {M, N}, in1.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  EXPECT_LT(max_allocation_size_, in0.size_bytes());
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(out({i, j, 0}), 2.0f);
+      ASSERT_EQ(out({i, j, 1}), 3.0f);
+    }
+  }
+}
+
 }  // namespace
 }  // namespace ynn
