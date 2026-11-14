@@ -4120,6 +4120,36 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
   return xnn_status_success;
 }
 
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+static size_t batch_matrix_multiply_logical_m(
+    const struct xnn_node* node, const struct xnn_value* input_value) {
+  assert(node->type == xnn_node_type_batch_matrix_multiply);
+  assert(input_value->shape.num_dims >= 2);
+  const size_t m_dimension =
+      (node->flags & XNN_FLAG_TRANSPOSE_A) != 0
+          ? input_value->shape.num_dims - 1
+          : input_value->shape.num_dims - 2;
+  return input_value->shape.dim[m_dimension];
+}
+
+static bool use_qp8_f32_qc8w_bmm_on_sme2(uint32_t optimization_flags,
+                                         size_t m) {
+  // SME2 setup and dynamic LHS quantization are not amortized by the small M
+  // values used during decode. Keep these shapes on the mixed F32/QC8W path.
+  static const size_t qp8_f32_qc8w_bmm_sme2_m_threshold = 32;
+  if (m <= qp8_f32_qc8w_bmm_sme2_m_threshold ||
+      (optimization_flags & (XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC |
+                             XNN_FLAG_NO_INLINED_LHS_PACKING)) != 0) {
+    return false;
+  }
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  return hardware_config != NULL &&
+         (hardware_config->arch_flags & xnn_arch_arm_sme2) != 0 &&
+         xnn_init_qp8_f32_qc8w_gemm_config() != NULL;
+}
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+
 enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                                                  uint32_t optimization_flags) {
   xnn_subgraph_analyze_consumers_and_producers(subgraph);
@@ -4158,12 +4188,25 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             }
             break;
           case xnn_datatype_fp32:
-            if (input_datatype == output_datatype &&
-                (kernel_datatype == xnn_datatype_fp32 ||
-                  kernel_datatype == xnn_datatype_fp16)) {
-              if ((gemm_config = xnn_init_pf32_gemm_config())) {
-                assumed_datatype = xnn_datatype_pfp32;
+            if (input_datatype == output_datatype) {
+              if (kernel_datatype == xnn_datatype_fp32 ||
+                  kernel_datatype == xnn_datatype_fp16) {
+                if ((gemm_config = xnn_init_pf32_gemm_config())) {
+                  assumed_datatype = xnn_datatype_pfp32;
+                }
               }
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+              else if (kernel_datatype == xnn_datatype_qcint8 &&
+                       node->type == xnn_node_type_batch_matrix_multiply &&
+                       input_value->shape.num_dims >= 2 &&
+                       use_qp8_f32_qc8w_bmm_on_sme2(
+                           optimization_flags,
+                           batch_matrix_multiply_logical_m(node,
+                                                           input_value))) {
+                gemm_config = xnn_init_qp8_f32_qc8w_gemm_config();
+                assumed_datatype = xnn_datatype_qpint8;
+              }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
             }
             break;
           case xnn_datatype_qint8:
