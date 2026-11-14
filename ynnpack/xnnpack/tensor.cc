@@ -139,6 +139,21 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     const float* scale, size_t num_dims, size_t channel_dim, const size_t* dims,
     const void* data, uint32_t external_id, uint32_t flags, uint32_t* id_out,
     const float* channelwise_zero_point) {
+  if (num_dims > YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "failed to define channelwise quantized tensor value: "
+                       "num_dims "
+                    << num_dims << " exceeds YNN_MAX_TENSOR_RANK ("
+                    << YNN_MAX_TENSOR_RANK << ")";
+    return xnn_status_unsupported_parameter;
+  }
+  if (channel_dim >= num_dims) {
+    YNN_LOG_ERROR() << "failed to define channelwise quantized tensor value: "
+                       "channel_dim "
+                    << channel_dim << " is out of range for a tensor of rank "
+                    << num_dims;
+    return xnn_status_invalid_parameter;
+  }
+
   // The shape of XNNPACK scale data depends on which op is consuming it. We do
   // our best to estimate the shape here, but this is only correct for some ops.
   // Some specific examples are:
