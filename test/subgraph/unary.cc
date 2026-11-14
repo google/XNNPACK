@@ -274,6 +274,56 @@ void TestImpl<quantized<int8_t>, qcint8>(size_t rank, xnn_unary_operator op) {
   }
 }
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(UnaryTest, ConvertQs8Qc8OverflowChannelwiseScaleBuffer) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+
+  const std::vector<size_t> shape = {2, 2, 2};
+  const float scale = 0.125f;
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(
+      xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph),
+      xnn_status_success);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/0, scale,
+                shape.size(), shape.data(), /*data=*/nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  std::vector<float> channelwise_scale(shape.back(), 1.0f);
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, channelwise_scale.data(),
+                shape.size(), /*channel_dim=*/shape.size() - 1, shape.data(),
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                             input_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  xnn_runtime_t runtime_raw = nullptr;
+  ASSERT_EQ(xnn_create_runtime_v2(subgraph, /*threadpool=*/nullptr,
+                                  xnn_test_runtime_flags(), &runtime_raw),
+            xnn_status_success);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> runtime(
+      runtime_raw, xnn_delete_runtime);
+
+  // Force the num_channels * sizeof(float) * qc8_batch_size computation in
+  // reshape_convert_operator()'s xnn_operator_type_convert_nc_qs8_qc8 case to
+  // overflow size_t, without xnn_safe_mul this wrapped around and produced
+  // an undersized allocation instead of xnn_status_out_of_memory.
+  runtime->values[input_id].shape.dim[0] = SIZE_MAX / 2;
+  runtime->values[input_id].shape.dim[2] = 4;
+
+  EXPECT_EQ(xnn_reshape_runtime(runtime.get()), xnn_status_out_of_memory);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 class IntegerOps : public testing::TestWithParam<Param> {};
 class RealOps : public testing::TestWithParam<Param> {};
 class Convert : public testing::TestWithParam<ConvertParam> {};
