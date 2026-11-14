@@ -191,10 +191,7 @@ ynn_status ynn_define_dynamic_quantization(ynn_subgraph_t subgraph,
     auto sched =
         runtime.make_schedule(dims, scale.extents, scale.buffer->elem_size());
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
   subgraph->add_node(std::move(node));

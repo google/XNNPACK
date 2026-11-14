@@ -232,11 +232,10 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     }
 
     slinky::func f;
-    std::unique_ptr<scheduling_info> sched;
+    scheduling_info sched;
     if (op.alias) {
       f = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                   {output.buffer, output_dims});
-      sched = std::make_unique<scheduling_info>();
     } else {
       slinky::call_stmt::attributes attrs;
       attrs.name = "transpose";
@@ -283,9 +282,7 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
                                 /*loop_order=*/{}, alignments);
     }
 
-    f.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-    runtime.funcs.push_back(std::move(f));
+    runtime.funcs.push_back({std::move(f), std::move(sched)});
     return ynn_status_success;
   };
 }

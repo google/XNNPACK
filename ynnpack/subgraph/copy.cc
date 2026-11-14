@@ -184,7 +184,8 @@ void require_dense(slinky::buffer_expr& buf,
   require_contiguous(buf);
 }
 
-slinky::func make_reshape(ynn_runtime& runtime, const ynn_node& node) {
+ynn_runtime::scheduled_func make_reshape(ynn_runtime& runtime,
+                                         const ynn_node& node) {
   const ynn_node::reshape& op = std::get<ynn_node::reshape>(node.op);
   const ynn_runtime_value& input = runtime.value(node.inputs[0]);
   const ynn_runtime_value& output = runtime.value(node.outputs[0]);
@@ -259,12 +260,9 @@ slinky::func make_reshape(ynn_runtime& runtime, const ynn_node& node) {
   slinky::func result =
       slinky::func::make(std::move(fn), {{input_buf, std::move(bounds)}},
                          {{output_buf, dims}}, std::move(attrs));
-  auto sched = std::make_unique<scheduling_info>();
-  sched->force_root = true;
-  result.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-
-  return result;
+  scheduling_info sched;
+  sched.force_root = true;
+  return {std::move(result), std::move(sched)};
 
   // TODO(https://github.com/dsharlet/slinky/issues/187): When slinky can
   // properly optimize reshapes, we can change this to use slinky::copy

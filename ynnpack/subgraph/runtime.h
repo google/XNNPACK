@@ -8,7 +8,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 #include <utility>
 #include <vector>
 
@@ -49,10 +48,18 @@ struct ynn_runtime {
   // corrupting the subgraph.
   ynn::slinky_globals globals;
 
+  struct scheduled_func {
+    slinky::func func;
+    ynn::scheduling_info info;
+
+    scheduled_func(slinky::func func,  // NOLINT(google-explicit-constructor)
+                   ynn::scheduling_info info = {})
+        : func(std::move(func)), info(std::move(info)) {}
+  };
+
   // Keep the slinky funcs and scheduling info alive until we build the pipeline
   // with them.
-  std::vector<slinky::func> funcs;
-  std::vector<std::unique_ptr<ynn::scheduling_info>> scheduling_info_storage;
+  std::vector<scheduled_func> funcs;
 
   // This implements the logic to evaluate the symbolic shapes.
   slinky::stmt reshape_impl;
@@ -70,12 +77,12 @@ struct ynn_runtime {
     return values[id];
   }
 
-  std::unique_ptr<ynn::scheduling_info> make_schedule(
+  ynn::scheduling_info make_schedule(
       ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
       ynn::span<const slinky::expr> splits,
       ynn::span<const int> loop_order = {});
 
-  std::unique_ptr<ynn::scheduling_info> make_schedule(
+  ynn::scheduling_info make_schedule(
       ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
       const slinky::expr& element_cost,
       ynn::span<const slinky::expr> given_splits = {},

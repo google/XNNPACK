@@ -73,7 +73,7 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
   make_buffer(runtime, ynn::type_size_bytes(type));
 }
 
-std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
+ynn::scheduling_info ynn_runtime::make_schedule(
     ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
     ynn::span<const slinky::expr> given_splits, ynn::span<const int> loop_order,
@@ -90,7 +90,7 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   return make_schedule(dims, extents, splits, loop_order);
 }
 
-std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
+ynn::scheduling_info ynn_runtime::make_schedule(
     ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
     ynn::span<const slinky::expr> splits, ynn::span<const int> loop_order) {
   const int rank = dims.size();
@@ -111,8 +111,8 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     }
   }
 
-  auto scheduling_info = std::make_unique<ynn::scheduling_info>();
-  scheduling_info->loop_splits = std::move(loop_splits);
+  ynn::scheduling_info scheduling_info;
+  scheduling_info.loop_splits = std::move(loop_splits);
   return scheduling_info;
 }
 
@@ -178,7 +178,7 @@ slinky::expr lcm_sat(ynn::slinky_globals& globals, slinky::expr a,
 // to the backward bounds inference, but much more lightweight because we
 // only care if given extents are the same in terms of consumer extents.
 std::map<std::pair<slinky::var, int>, int> infer_source_regions(
-    const std::vector<slinky::func>& funcs) {
+    const std::vector<ynn_runtime::scheduled_func>& funcs) {
   // Maps {buffer_sym, dim_index} to its inferred source region unique
   // identifier.
   std::map<std::pair<slinky::var, int>, int> source_regions;
@@ -196,8 +196,9 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
   };
 
   // Traverses operations backwards to propagate source region symbols.
-  for (int i = funcs.size() - 1; i >= 0; --i) {
-    const slinky::func& f = funcs[i];
+  for (int i = static_cast<int>(funcs.size()) - 1; i >= 0; --i) {
+    const slinky::func& f = funcs[i].func;
+    const ynn::scheduling_info& sched = funcs[i].info;
     if (f.outputs().empty()) continue;
 
     // Collect all unique output variables for this function.
@@ -208,13 +209,11 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
       }
     }
 
-    const auto* sched = static_cast<const ynn::scheduling_info*>(f.user_data());
-
     for (size_t in_idx = 0; in_idx < f.inputs().size(); ++in_idx) {
       const auto& in = f.inputs()[in_idx];
       const std::vector<slinky::interval_expr>* scheduler_bounds = nullptr;
-      if (sched && in_idx < sched->input_scheduler_bounds.size()) {
-        scheduler_bounds = &sched->input_scheduler_bounds[in_idx];
+      if (in_idx < sched.input_scheduler_bounds.size()) {
+        scheduler_bounds = &sched.input_scheduler_bounds[in_idx];
       }
 
       for (int d = 0; d < in.bounds.size(); ++d) {
@@ -759,7 +758,8 @@ slinky::loop_nest ynn_runtime::schedule() {
   }
 
   for (int i = static_cast<int>(funcs.size()) - 1; i >= 0; --i) {
-    const slinky::func& f = funcs[i];
+    const slinky::func& f = funcs[i].func;
+    const ynn::scheduling_info& sched = funcs[i].info;
     // Find the least common ancestor across all consumers of `f`'s outputs.
     slinky::loop_ref consumer_lca = loops.root();
     bool has_consumers = false;
@@ -771,7 +771,6 @@ slinky::loop_nest ynn_runtime::schedule() {
       has_consumers = true;
     }
 
-    const auto* sched = static_cast<const ynn::scheduling_info*>(f.user_data());
     std::vector<ynn::scheduling_split> loop_splits;
     std::vector<bool> split_matched;
     slinky::loop_ref place_at = consumer_lca;
@@ -779,10 +778,9 @@ slinky::loop_nest ynn_runtime::schedule() {
     // If they are not matching and the extents of f are smaller than parent
     // we are risking over-compute. If it doesn't have schedule info then we
     // just compute at the innermost location.
-    if (sched && !sched->loop_splits.empty()) {
+    if (!sched.loop_splits.empty()) {
       // Reverse to match from outermost inwards.
-      loop_splits.assign(sched->loop_splits.rbegin(),
-                         sched->loop_splits.rend());
+      loop_splits.assign(sched.loop_splits.rbegin(), sched.loop_splits.rend());
       split_matched = initial_split_matches(globals, loop_splits);
 
       // Collect the candidate consumer loop path from `root()` down to
@@ -820,7 +818,7 @@ slinky::loop_nest ynn_runtime::schedule() {
     // A function producing an external output cannot be fused into a loop of
     // its consumers without recomputing all of it on every iteration, see
     // `external_output_syms` above.
-    if ((sched && sched->force_root) ||
+    if (sched.force_root ||
         (!place_at.is_root() &&
          produces_external_output(f, external_output_syms))) {
       place_at = loops.root();
@@ -1154,6 +1152,7 @@ ynn_status ynn_runtime::build() {
 
   pipeline = slinky::build_pipeline(globals.symbols, {}, inputs, outputs, loops,
                                     globals.lets, options);
+  funcs.clear();
 
   slinky::call_stmt::attributes attrs;
   attrs.name = "ynn_reshape_runtime";

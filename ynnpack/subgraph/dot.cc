@@ -780,24 +780,21 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
     auto sched =
         runtime.make_schedule(dims, output.physical_extents(),
                               output.buffer->elem_size(), given_splits);
-    sched->loop_splits[0].step_is_required = true;
-    sched->loop_splits[1].step_is_required = true;
+    sched.loop_splits[0].step_is_required = true;
+    sched.loop_splits[1].step_is_required = true;
 
     // The real bounds of the input's n dimension are blocks of size block_n
     // indexed by `no`, which breaks the scheduler's source region inference.
     // Declare a virtual 1-to-1 mapping with `no` instead, so producers of the
     // input can be fused with loops derived from it.
     if (op.transpose) {
-      sched->input_scheduler_bounds = {
+      sched.input_scheduler_bounds = {
           {slinky::interval_expr{}, slinky::point(no)}};
     } else {
-      sched->input_scheduler_bounds = {{slinky::point(no)}};
+      sched.input_scheduler_bounds = {{slinky::point(no)}};
     }
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
   subgraph.add_node(std::move(node));
@@ -970,17 +967,14 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
     // indexed by `mo`, which breaks the scheduler's source region inference.
     // Declare a virtual 1-to-1 mapping with `mo` instead, so producers of the
     // input can be fused with loops derived from it.
-    sched->input_scheduler_bounds.resize(1);
-    sched->input_scheduler_bounds[0].resize(
+    sched.input_scheduler_bounds.resize(1);
+    sched.input_scheduler_bounds[0].resize(
         std::min<int>(m_dim + 1, input.buffer->rank()));
     if (m_dim < input.buffer->rank()) {
-      sched->input_scheduler_bounds[0][m_dim] = slinky::point(mo);
+      sched.input_scheduler_bounds[0][m_dim] = slinky::point(mo);
     }
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 }
@@ -1921,9 +1915,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     for (size_t dim_idx = 0; dim_idx < std::min<size_t>(output_dims.size(), 2);
          ++dim_idx) {
       slinky::var sym = output_dims[dim_idx];
-      for (size_t i = 0; i < sched->loop_splits.size(); ++i) {
-        if (sched->loop_splits[i].var == sym) {
-          sched->loop_splits[i].step_is_required = true;
+      for (size_t i = 0; i < sched.loop_splits.size(); ++i) {
+        if (sched.loop_splits[i].var == sym) {
+          sched.loop_splits[i].step_is_required = true;
           break;
         }
       }
@@ -1933,23 +1927,20 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // indices (j / block_n), which breaks the scheduler's source region
     // inference. Declare a virtual 1-to-1 mapping with `j` instead, so the
     // pack (and anything feeding it) can be fused with loops derived from j.
-    sched->input_scheduler_bounds.resize(2);
+    sched.input_scheduler_bounds.resize(2);
     if (pack_b) {
-      sched->input_scheduler_bounds[1].resize(4);
-      sched->input_scheduler_bounds[1][3] = slinky::point(j);
+      sched.input_scheduler_bounds[1].resize(4);
+      sched.input_scheduler_bounds[1][3] = slinky::point(j);
     }
     if (transpose_a) {
-      sched->input_scheduler_bounds[0].resize(num_a_k_dims + 1);
+      sched.input_scheduler_bounds[0].resize(num_a_k_dims + 1);
       if (output_dims.size() >= 2) {
         slinky::var i = output_dims[1];
-        sched->input_scheduler_bounds[0][num_a_k_dims] = slinky::point(i);
+        sched.input_scheduler_bounds[0][num_a_k_dims] = slinky::point(i);
       }
     }
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 

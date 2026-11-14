@@ -260,9 +260,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
 
     auto sched = runtime.make_schedule(dims, output.physical_extents(),
                                        output.buffer->elem_size());
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 }

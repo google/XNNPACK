@@ -228,10 +228,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   auto sched = runtime.make_schedule(
       dims, x.physical_extents(), x.buffer->elem_size());
 
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-
-  runtime.funcs.push_back(std::move(func));
+  runtime.funcs.push_back({std::move(func), std::move(sched)});
   return ynn_status_success;
 }
 
@@ -268,9 +265,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
 
   auto sched =
       runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-  runtime.funcs.push_back(std::move(func));
+  runtime.funcs.push_back({std::move(func), std::move(sched)});
 
   return ynn_status_success;
 }
@@ -314,9 +309,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
 
   auto sched =
       runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-  runtime.funcs.push_back(std::move(func));
+  runtime.funcs.push_back({std::move(func), std::move(sched)});
 
   return ynn_status_success;
 }
@@ -436,10 +429,7 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
 
     auto sched = runtime.make_schedule(dims, output.physical_extents(),
                                        output.buffer->elem_size());
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
   return true;
