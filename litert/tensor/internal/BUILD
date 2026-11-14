@@ -115,6 +115,8 @@ cc_library(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:macros",
+        "//litert/tensor/utils:parallel",
+        "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:inlined_vector",
         "@abseil-cpp//absl/log:absl_log",
@@ -122,6 +124,7 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/synchronization",
         "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
     ],
@@ -136,6 +139,7 @@ cc_test(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:matchers",
+        "//litert/tensor/utils:parallel",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings:string_view",
@@ -244,4 +248,14 @@ cc_test(
 cc_library(
     name = "fp16",
     hdrs = ["fp16.h"],
+)
+
+cc_library(
+    name = "tensor_hash",
+    hdrs = ["tensor_hash.h"],
+    deps = [
+        ":graph",
+        "//litert/tensor:buffer",
+        "@abseil-cpp//absl/strings:string_view",
+    ],
 )
