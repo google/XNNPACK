@@ -15,5 +15,8 @@ BENCH_PARTIAL_LOAD_STORE(hvx, s8, 128);
 BENCH_PARTIAL_LOAD_STORE(hvx, s16, 64);
 BENCH_PARTIAL_LOAD_STORE(hvx, s32, 32);
 
+BENCH_CAST(hvx, bf16, f32, 64);
+BENCH_CAST(hvx, f8_e5m2, f16, 128);
+
 }  // namespace simd
 }  // namespace ynn
