@@ -25,3 +25,17 @@
   cpp-check: XNN_ENABLE_KLEIDIAI
   k-block: 4
   mr-packed: 32
+
+# Hexagon HVX / HMX kernels
+- name: xnn_pqs8_qc8w_gemm_minmax_ukernel_1x64c4__hvx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc8w_weights_and_biases
+  packed-stride: xnn_packed_stride_qs8_to_qu8_qc8w_weights_and_biases
+  k-block: 4
+  mr-packed: 1
+- name: xnn_pqs8_qc8w_gemm_minmax_ukernel_32x64c4__hmx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc8w_weights_and_biases
+  packed-stride: xnn_packed_stride_qs8_to_qu8_qc8w_weights_and_biases
+  k-block: 4
+  mr-packed: 32

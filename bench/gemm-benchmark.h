@@ -216,7 +216,6 @@ typedef void (*xnn_x32_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
                                            size_t lhs_stride,
                                            void* lhs_packed);
 
-#if XNN_ENABLE_KLEIDIAI
 typedef void (*xnn_pqs8_qc8w_gemm_minmax_ukernel_fn)(
     size_t, size_t, size_t, const void*, const void*, void*, size_t, size_t,
     const union xnn_qs8_qc8w_conv_minmax_params*);
@@ -230,6 +229,7 @@ void GEMMBenchmark(benchmark::State& state,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
 
+#if XNN_ENABLE_KLEIDIAI
 typedef void (*xnn_x16_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
                                            size_t kr, size_t sr,
                                            size_t m_idx_start,

@@ -254,6 +254,12 @@ static void init_x8_pack_lh_config(void) {
     x8_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn)xnn_x8_pack_lh_offset__neonsme2;
   }
 #endif  // XNN_ENABLE_ARM_SME2
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  if ((hardware_config->arch_flags & xnn_arch_hvx)) {
+    x8_pack_lh_config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_x8_pack_lh_ukernel__hvx;
+    x8_pack_lh_config.size_fn = (xnn_pack_lh_size_fn)xnn_x8_pack_lh_size__hvx;
+    x8_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn)xnn_x8_pack_lh_offset__hvx;
+  }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   x8_pack_lh_config.log2_input_element_size = 0;
   x8_pack_lh_config.log2_packed_element_size = 0;
@@ -293,6 +299,15 @@ static void init_x8_igemm_pack_lh_config(void) {
     x8_igemm_pack_lh_config.offset_for_igemm_fn = (xnn_pack_lh_igemm_offset_fn) xnn_x8_pack_lh_offset__igemm_neonsme;
   }
 #endif  // XNN_ENABLE_ARM_SME
+#elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+  if ((hardware_config->arch_flags & xnn_arch_hvx)) {
+    x8_igemm_pack_lh_config.pack_lh_for_igemm_fn =
+        (xnn_pack_lh_igemm_ukernel_fn)xnn_x8_pack_lh_ukernel__igemm_hvx;
+    x8_igemm_pack_lh_config.size_for_igemm_fn =
+        (xnn_pack_lh_igemm_size_fn)xnn_x8_pack_lh_size__igemm_hvx;
+    x8_igemm_pack_lh_config.offset_for_igemm_fn =
+        (xnn_pack_lh_igemm_offset_fn)xnn_x8_pack_lh_offset__igemm_hvx;
+  }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   x8_igemm_pack_lh_config.log2_input_element_size = 0;
   x8_igemm_pack_lh_config.log2_packed_element_size = 0;

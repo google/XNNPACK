@@ -707,7 +707,8 @@ static XNN_INLINE void xnn_requantize_and_store_row_qs8(
 
 // HVX fallback used if HMX/VTCM cannot be acquired.
 static void xnn_qs8_qc8w_gemm_minmax_hvx_fallback(
-    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+    size_t mr, size_t nc, size_t kc,
+    const int8_t* restrict a, size_t a_stride,
     const void* restrict w, int8_t* restrict c, size_t cm_stride,
     size_t cn_stride,
     const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
@@ -812,8 +813,9 @@ static XNN_INLINE void xnn_hmx_exec_panel_b(
 static void xnn_qs8_qc8w_gemm_minmax_32x64c4__hmx_impl(
     struct xnn_hmx_worker_slot* slot, const xnn_hmx_crm_mutex_t* crm_mutex,
     bool hmx_already_held, size_t mr, size_t nc, size_t kc,
-    const int8_t* restrict a, size_t a_stride, const void* restrict w,
-    int8_t* restrict c, size_t cm_stride, size_t cn_stride,
+    const int8_t* restrict a, size_t a_stride,
+    const void* restrict w, int8_t* restrict c, size_t cm_stride,
+    size_t cn_stride,
     const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
   const size_t k_chunk_max = xnn_hmx_ctx.max_k_chunk;
   const HVX_Vector* vtcm_bias = xnn_hmx_ctx.vtcm_bias;

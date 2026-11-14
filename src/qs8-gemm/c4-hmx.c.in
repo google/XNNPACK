@@ -5,19 +5,21 @@
 
 $assert MR == 32
 $assert NR == 64
-$assert DATATYPE in ["QC8", "QS8_QC4", "QD8_F32", "QC4_F32"]
+$assert DATATYPE in ["QC8", "QS8_QC4", "QD8_F32", "QC4_F32", "PQS8_QC8W", "PQS8_QC4W"]
 $IS_QD8 = DATATYPE in ["QD8_F32", "QC4_F32"]
-$IS_QC4 = DATATYPE in ["QS8_QC4", "QC4_F32"]
-$assert (not REQUANTIZATION) if IS_QD8 else (REQUANTIZATION == "FP32")
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
+$IS_PQS8 = DATATYPE in ["PQS8_QC8W", "PQS8_QC4W"]
+$USE_DMA = IS_QD8 or IS_PQS8
+$IS_QC4 = DATATYPE in ["QS8_QC4", "QC4_F32", "PQS8_QC4W"]
+$assert (not REQUANTIZATION) if (IS_QD8 or DATATYPE == "PQS8_QC8W") else (REQUANTIZATION == "FP32")
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w", "PQS8_QC8W": "pqs8_qc8w", "PQS8_QC4W": "pqs8_qc4w"}[DATATYPE]
 $WGT_SUFFIX = "n" if IS_QC4 else "b"
 $WGT_TILE_BYTES = 512 if IS_QC4 else 1024
 $WGT_TILE_VECS = 4 if IS_QC4 else 8
 $K_STEP = 8 if IS_QC4 else 4
 $LOG2_K_STEP = 3 if IS_QC4 else 2
 $OUT_T = "float" if IS_QD8 else "int8_t"
-$REQUANTIZATION_SPEC = "" if IS_QD8 else ("_" + REQUANTIZATION.lower())
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$REQUANTIZATION_SPEC = ("_" + REQUANTIZATION.lower()) if REQUANTIZATION else ""
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params", "PQS8_QC8W": "union xnn_qs8_qc8w_conv_minmax_params", "PQS8_QC4W": "union xnn_qs8_qc8w_conv_minmax_params"}[DATATYPE]
 
 #include <HAP_compute_res.h>
 #include <HAP_power.h>
@@ -476,7 +478,7 @@ __attribute__((destructor)) static void xnn_deinit_hmx_vtcm(void) {
   pthread_mutex_destroy(&xnn_hmx_ctx.init_mutex);
 }
 
-$if IS_QD8:
+$if USE_DMA:
   static XNN_INLINE uint32_t xnn_dma_poll(void) {
     uint32_t status = 0;
     __asm__ __volatile__("%0 = dmpoll" : "=r"(status) : : "memory");
@@ -573,11 +575,20 @@ $if IS_QD8:
                                      HVX_Vector* restrict dst_wgt1,
                                      const void* w_weights, size_t num_rows,
                                      size_t total_vecs) {
-    const HVX_UVector* w_vec = (const HVX_UVector*) w_weights;
-    for (size_t r = 0; r < num_rows; ++r) {
-      dst_wgt0[r] = w_vec[0];
-      dst_wgt1[r] = w_vec[1];
-      w_vec += 2;
+    if XNN_LIKELY(((uintptr_t) w_weights & 127u) == 0u) {
+      const HVX_Vector* restrict w_vec = (const HVX_Vector*) w_weights;
+      for (size_t r = 0; r < num_rows; ++r) {
+        dst_wgt0[r] = w_vec[0];
+        dst_wgt1[r] = w_vec[1];
+        w_vec += 2;
+      }
+    } else {
+      const HVX_UVector* restrict w_vec = (const HVX_UVector*) w_weights;
+      for (size_t r = 0; r < num_rows; ++r) {
+        dst_wgt0[r] = w_vec[0];
+        dst_wgt1[r] = w_vec[1];
+        w_vec += 2;
+      }
     }
     const HVX_Vector vzero = Q6_V_vzero();
     for (size_t r = num_rows; r < total_vecs; ++r) {
@@ -607,103 +618,145 @@ $if IS_QD8:
     }
   }
 
-// Pack up to 32 activation rows [0 .. m_count) into the 32 odd `:cm` spatial
-// pegs (2*r + 1) of a 64-peg 2048B tile in `vtcm_act`, leaving the 32 even pegs
-// (2*r) zeroed so `cvt.uh = acc:2x1` (`(acc[2*r] >> 8) + acc[2*r + 1]`) reads
-// `acc[2*r + 1]` losslessly.
-static void xnn_pack_act_qs8_to_qu8_cm_32rows(
-    uint8_t* restrict vtcm_act, const int8_t* a, size_t a_stride,
-    size_t m_count, size_t k_offset, size_t k_per_chunk) {
-  const size_t num_v = (m_count + 1) >> 1;
-  HVX_Vector* restrict vtcm_vec = (HVX_Vector*) vtcm_act;
-  const HVX_Vector vzero = Q6_V_vzero();
-  const HVX_Vector v0x80 = Q6_Vb_vsplat_R(-128);
+$if IS_PQS8:
+  // Expand up to 32 pre-packed unsigned uint8 activation rows (`lhs_packed`,
+  // woven as 32 rows x 32 K-bytes per 1024B tile) into the 32 odd `:cm` spatial
+  // pegs (2*r + 1) of a 64-peg 2048B tile in `vtcm_act`, leaving the 32 even
+  // pegs (2*r) zeroed so `cvt.uh = acc:2x1` reads `acc[2*r + 1]` losslessly.
+  static void xnn_unpack_packed_lhs_cm_32rows(
+      uint8_t* restrict vtcm_act, const void* restrict lhs_packed,
+      size_t m_count, size_t k_offset, size_t k_per_chunk) {
+    assert((k_offset & 31) == 0);
+    const size_t t_start = k_offset >> 5;
+    const size_t num_tiles = (k_per_chunk + 31) >> 5;
+    const size_t num_g = (m_count + 3) >> 2;
+    HVX_Vector* restrict dst_vec = (HVX_Vector*) vtcm_act;
+    const HVX_Vector vzero = Q6_V_vzero();
 
-  for (size_t v = 0; v < num_v; ++v) {
-    const size_t r0 = 2 * v;
-    const uint8_t* src_r0 =
-        (const uint8_t*) ((const uintptr_t) a + r0 * a_stride + k_offset);
-    const uint8_t* src_r1 =
-        (r0 + 1 < m_count)
-            ? (const uint8_t*) ((const uintptr_t) a + (r0 + 1) * a_stride +
-                                k_offset)
-            : NULL;
-
-    size_t k = k_per_chunk;
-    size_t t = 0;
-    for (; k >= 128; k -= 128, t += 4) {
-      const HVX_Vector v_r0 =
-          Q6_V_vxor_VV(*((const HVX_UVector*) src_r0), v0x80);
-      src_r0 += 128;
-      HVX_Vector v_r1 = vzero;
-      if (src_r1 != NULL) {
-        v_r1 = Q6_V_vxor_VV(*((const HVX_UVector*) src_r1), v0x80);
-        src_r1 += 128;
-      }
-      const HVX_VectorPair p0 = Q6_W_vshuff_VVR(v_r0, vzero, -32);
-      const HVX_VectorPair p1 = Q6_W_vshuff_VVR(v_r1, vzero, -32);
-      const HVX_VectorPair q01 =
-          Q6_W_vshuff_VVR(Q6_V_lo_W(p1), Q6_V_lo_W(p0), -64);
-      const HVX_VectorPair q23 =
-          Q6_W_vshuff_VVR(Q6_V_hi_W(p1), Q6_V_hi_W(p0), -64);
-      vtcm_vec[(t + 0) * 16 + v] = Q6_V_lo_W(q01);
-      vtcm_vec[(t + 1) * 16 + v] = Q6_V_hi_W(q01);
-      vtcm_vec[(t + 2) * 16 + v] = Q6_V_lo_W(q23);
-      vtcm_vec[(t + 3) * 16 + v] = Q6_V_hi_W(q23);
-    }
-    if (k > 0) {
-#if defined(__HEXAGON_ARCH__)
-      const HVX_VectorPred qmask = Q6_Q_vsetq_R(k);
-      const HVX_Vector v_r0 = Q6_V_vmux_QVV(
-          qmask, Q6_V_vxor_VV(*((const HVX_UVector*) src_r0), v0x80), vzero);
-      HVX_Vector v_r1 = vzero;
-      if (src_r1 != NULL) {
-        v_r1 = Q6_V_vmux_QVV(
-            qmask, Q6_V_vxor_VV(*((const HVX_UVector*) src_r1), v0x80), vzero);
-      }
-#else
-      uint8_t tmp0[128];
-      for (size_t i = 0; i < k; ++i) {
-        tmp0[i] = src_r0[i] ^ 0x80;
-      }
-      for (size_t i = k; i < 128; ++i) {
-        tmp0[i] = 0;
-      }
-      const HVX_Vector v_r0 = *((const HVX_UVector*) tmp0);
-      HVX_Vector v_r1 = vzero;
-      if (src_r1 != NULL) {
-        uint8_t tmp1[128];
-        for (size_t i = 0; i < k; ++i) {
-          tmp1[i] = src_r1[i] ^ 0x80;
+    if XNN_LIKELY(((uintptr_t) lhs_packed & 127u) == 0u) {
+      const HVX_Vector* restrict src_vec =
+          (const HVX_Vector*) lhs_packed + t_start * 8;
+      for (size_t t = 0; t < num_tiles; ++t) {
+        for (size_t g = 0; g < num_g; ++g) {
+          const HVX_VectorPair p = Q6_W_vshuff_VVR(src_vec[g], vzero, -32);
+          dst_vec[2 * g + 0] = Q6_V_lo_W(p);
+          dst_vec[2 * g + 1] = Q6_V_hi_W(p);
         }
-        for (size_t i = k; i < 128; ++i) {
-          tmp1[i] = 0;
+        src_vec += 8;
+        dst_vec += 16;
+      }
+    } else {
+      const HVX_UVector* restrict src_uvec =
+          (const HVX_UVector*) lhs_packed + t_start * 8;
+      for (size_t t = 0; t < num_tiles; ++t) {
+        for (size_t g = 0; g < num_g; ++g) {
+          const HVX_VectorPair p = Q6_W_vshuff_VVR(src_uvec[g], vzero, -32);
+          dst_vec[2 * g + 0] = Q6_V_lo_W(p);
+          dst_vec[2 * g + 1] = Q6_V_hi_W(p);
         }
-        v_r1 = *((const HVX_UVector*) tmp1);
-      }
-#endif
-      const HVX_VectorPair p0 = Q6_W_vshuff_VVR(v_r0, vzero, -32);
-      const HVX_VectorPair p1 = Q6_W_vshuff_VVR(v_r1, vzero, -32);
-      const HVX_VectorPair q01 =
-          Q6_W_vshuff_VVR(Q6_V_lo_W(p1), Q6_V_lo_W(p0), -64);
-      const HVX_VectorPair q23 =
-          Q6_W_vshuff_VVR(Q6_V_hi_W(p1), Q6_V_hi_W(p0), -64);
-      const size_t rem_tiles = (k + 31) >> 5;
-      vtcm_vec[(t + 0) * 16 + v] = Q6_V_lo_W(q01);
-      if (rem_tiles > 1) {
-        vtcm_vec[(t + 1) * 16 + v] = Q6_V_hi_W(q01);
-      }
-      if (rem_tiles > 2) {
-        vtcm_vec[(t + 2) * 16 + v] = Q6_V_lo_W(q23);
-      }
-      if (rem_tiles > 3) {
-        vtcm_vec[(t + 3) * 16 + v] = Q6_V_hi_W(q23);
+        src_uvec += 8;
+        dst_vec += 16;
       }
     }
   }
-}
+$else:
+  // Pack up to 32 activation rows [0 .. m_count) into the 32 odd `:cm` spatial
+  // pegs (2*r + 1) of a 64-peg 2048B tile in `vtcm_act`, leaving the 32 even pegs
+  // (2*r) zeroed so `cvt.uh = acc:2x1` (`(acc[2*r] >> 8) + acc[2*r + 1]`) reads
+  // `acc[2*r + 1]` losslessly.
+  static void xnn_pack_act_qs8_to_qu8_cm_32rows(
+      uint8_t* restrict vtcm_act, const int8_t* a, size_t a_stride,
+      size_t m_count, size_t k_offset, size_t k_per_chunk) {
+    const size_t num_v = (m_count + 1) >> 1;
+    HVX_Vector* restrict vtcm_vec = (HVX_Vector*) vtcm_act;
+    const HVX_Vector vzero = Q6_V_vzero();
+    const HVX_Vector v0x80 = Q6_Vb_vsplat_R(-128);
 
-$if not IS_QD8:
+    for (size_t v = 0; v < num_v; ++v) {
+      const size_t r0 = 2 * v;
+      const uint8_t* src_r0 =
+          (const uint8_t*) ((const uintptr_t) a + r0 * a_stride + k_offset);
+      const uint8_t* src_r1 =
+          (r0 + 1 < m_count)
+              ? (const uint8_t*) ((const uintptr_t) a + (r0 + 1) * a_stride +
+                                  k_offset)
+              : NULL;
+
+      size_t k = k_per_chunk;
+      size_t t = 0;
+      for (; k >= 128; k -= 128, t += 4) {
+        const HVX_Vector v_r0 =
+            Q6_V_vxor_VV(*((const HVX_UVector*) src_r0), v0x80);
+        src_r0 += 128;
+        HVX_Vector v_r1 = vzero;
+        if (src_r1 != NULL) {
+          v_r1 = Q6_V_vxor_VV(*((const HVX_UVector*) src_r1), v0x80);
+          src_r1 += 128;
+        }
+        const HVX_VectorPair p0 = Q6_W_vshuff_VVR(v_r0, vzero, -32);
+        const HVX_VectorPair p1 = Q6_W_vshuff_VVR(v_r1, vzero, -32);
+        const HVX_VectorPair q01 =
+            Q6_W_vshuff_VVR(Q6_V_lo_W(p1), Q6_V_lo_W(p0), -64);
+        const HVX_VectorPair q23 =
+            Q6_W_vshuff_VVR(Q6_V_hi_W(p1), Q6_V_hi_W(p0), -64);
+        vtcm_vec[(t + 0) * 16 + v] = Q6_V_lo_W(q01);
+        vtcm_vec[(t + 1) * 16 + v] = Q6_V_hi_W(q01);
+        vtcm_vec[(t + 2) * 16 + v] = Q6_V_lo_W(q23);
+        vtcm_vec[(t + 3) * 16 + v] = Q6_V_hi_W(q23);
+      }
+      if (k > 0) {
+  #if defined(__HEXAGON_ARCH__)
+        const HVX_VectorPred qmask = Q6_Q_vsetq_R(k);
+        const HVX_Vector v_r0 = Q6_V_vmux_QVV(
+            qmask, Q6_V_vxor_VV(*((const HVX_UVector*) src_r0), v0x80), vzero);
+        HVX_Vector v_r1 = vzero;
+        if (src_r1 != NULL) {
+          v_r1 = Q6_V_vmux_QVV(
+              qmask, Q6_V_vxor_VV(*((const HVX_UVector*) src_r1), v0x80), vzero);
+        }
+  #else
+        uint8_t tmp0[128];
+        for (size_t i = 0; i < k; ++i) {
+          tmp0[i] = src_r0[i] ^ 0x80;
+        }
+        for (size_t i = k; i < 128; ++i) {
+          tmp0[i] = 0;
+        }
+        const HVX_Vector v_r0 = *((const HVX_UVector*) tmp0);
+        HVX_Vector v_r1 = vzero;
+        if (src_r1 != NULL) {
+          uint8_t tmp1[128];
+          for (size_t i = 0; i < k; ++i) {
+            tmp1[i] = src_r1[i] ^ 0x80;
+          }
+          for (size_t i = k; i < 128; ++i) {
+            tmp1[i] = 0;
+          }
+          v_r1 = *((const HVX_UVector*) tmp1);
+        }
+  #endif
+        const HVX_VectorPair p0 = Q6_W_vshuff_VVR(v_r0, vzero, -32);
+        const HVX_VectorPair p1 = Q6_W_vshuff_VVR(v_r1, vzero, -32);
+        const HVX_VectorPair q01 =
+            Q6_W_vshuff_VVR(Q6_V_lo_W(p1), Q6_V_lo_W(p0), -64);
+        const HVX_VectorPair q23 =
+            Q6_W_vshuff_VVR(Q6_V_hi_W(p1), Q6_V_hi_W(p0), -64);
+        const size_t rem_tiles = (k + 31) >> 5;
+        vtcm_vec[(t + 0) * 16 + v] = Q6_V_lo_W(q01);
+        if (rem_tiles > 1) {
+          vtcm_vec[(t + 1) * 16 + v] = Q6_V_hi_W(q01);
+        }
+        if (rem_tiles > 2) {
+          vtcm_vec[(t + 2) * 16 + v] = Q6_V_lo_W(q23);
+        }
+        if (rem_tiles > 3) {
+          vtcm_vec[(t + 3) * 16 + v] = Q6_V_hi_W(q23);
+        }
+      }
+    }
+  }
+
+$if not USE_DMA:
   $if DATATYPE == "QS8_QC4":
     // XNNPACK `qs8_qc4w` planar weights (`kr=4`, `planes=2`) match HMX `weight.n`
     // 1x layout bit-for-bit (low nibbles = k_base + 0..3, high nibbles = k_base +
@@ -944,7 +997,11 @@ $else:
 
 // HVX fallback used if HMX/VTCM cannot be acquired.
 static void xnn_${DATATYPE_SPEC}_gemm_minmax_hvx_fallback(
-    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+    size_t mr, size_t nc, size_t kc,
+    $if IS_PQS8:
+      const void* restrict lhs_packed,
+    $else:
+      const int8_t* restrict a, size_t a_stride,
     const void* restrict w, ${OUT_T}* restrict c, size_t cm_stride,
     size_t cn_stride,
     $if IS_QD8:
@@ -983,7 +1040,8 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_hvx_fallback(
 
     const void* w_panel = w;
     for (size_t m = 0; m < mr; ++m) {
-      const int8_t* a_row = (const int8_t*) ((uintptr_t) a + m * a_stride);
+      $if not IS_PQS8:
+        const int8_t* a_row = (const int8_t*) ((uintptr_t) a + m * a_stride);
       const int8_t* w_ptr = (const int8_t*) w_panel;
       $if IS_QD8:
         const HVX_Vector vzp = Q6_V_vsplat_R(quantization_params[m].zero_point);
@@ -993,52 +1051,94 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_hvx_fallback(
         HVX_Vector vacc0 = vinit0;
         HVX_Vector vacc1 = vinit1;
 
-      size_t k = kc;
-      $if IS_QC4:
-        for (; k >= 8; k -= 8) {
-          const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
-          const HVX_Vector va4567 = Q6_V_vsplat_R(unaligned_load_s32(a_row + 4));
-          a_row += 8;
+      $if IS_PQS8:
+        const size_t k_end = round_up_po2(kc, ${K_STEP});
+        $if IS_QC4:
+          for (size_t k_idx = 0; k_idx < k_end; k_idx += 8) {
+            const uint8_t* a_ptr =
+                (const uint8_t*) lhs_packed + (k_idx >> 5) * 1024 + m * 32 +
+                (k_idx & 31);
+            const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_u32(a_ptr));
+            const HVX_Vector va4567 =
+                Q6_V_vsplat_R(unaligned_load_u32(a_ptr + 4));
 
-          const HVX_Vector vb0 = *((const HVX_UVector*) w_ptr);
-          const HVX_Vector vb1 = *((const HVX_UVector*) (w_ptr + 128));
-          w_ptr += 256;
+            const HVX_Vector vb0 = *((const HVX_UVector*) w_ptr);
+            const HVX_Vector vb1 = *((const HVX_UVector*) (w_ptr + 128));
+            w_ptr += 256;
 
-          const HVX_Vector vb0x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb0, 4), vmask);
-          const HVX_Vector vb1x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb1, 4), vmask);
-          const HVX_Vector vb0x4567 = Q6_V_vand_VV(vb0, vmask);
-          const HVX_Vector vb1x4567 = Q6_V_vand_VV(vb1, vmask);
+            const HVX_Vector vb0x0123 =
+                Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb0, 4), vmask);
+            const HVX_Vector vb1x0123 =
+                Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb1, 4), vmask);
+            const HVX_Vector vb0x4567 = Q6_V_vand_VV(vb0, vmask);
+            const HVX_Vector vb1x4567 = Q6_V_vand_VV(vb1, vmask);
 
-          vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
-          vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
-          vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va4567, vb0x4567);
-          vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va4567, vb1x4567);
-        }
-        if (k != 0) {
-          const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
+            vacc0 = Q6_Vw_vrmpyacc_VwVubVb(vacc0, va0123, vb0x0123);
+            vacc1 = Q6_Vw_vrmpyacc_VwVubVb(vacc1, va0123, vb1x0123);
+            vacc0 = Q6_Vw_vrmpyacc_VwVubVb(vacc0, va4567, vb0x4567);
+            vacc1 = Q6_Vw_vrmpyacc_VwVubVb(vacc1, va4567, vb1x4567);
+          }
+        $else:
+          for (size_t k_idx = 0; k_idx < k_end; k_idx += 4) {
+            const uint8_t* a_ptr =
+                (const uint8_t*) lhs_packed + (k_idx >> 5) * 1024 + m * 32 +
+                (k_idx & 31);
+            const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_u32(a_ptr));
 
-          const HVX_Vector vb0 = *((const HVX_UVector*) w_ptr);
-          const HVX_Vector vb1 = *((const HVX_UVector*) (w_ptr + 128));
-          w_ptr += 256;
+            const HVX_Vector vb0x0123 = *((const HVX_UVector*) w_ptr);
+            const HVX_Vector vb1x0123 = *((const HVX_UVector*) (w_ptr + 128));
+            w_ptr += 256;
 
-          const HVX_Vector vb0x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb0, 4), vmask);
-          const HVX_Vector vb1x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb1, 4), vmask);
-
-          vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
-          vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
-        }
+            vacc0 = Q6_Vw_vrmpyacc_VwVubVb(vacc0, va0123, vb0x0123);
+            vacc1 = Q6_Vw_vrmpyacc_VwVubVb(vacc1, va0123, vb1x0123);
+          }
       $else:
-        for (; k >= 4; k -= 4) {
-          const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
-          a_row += 4;
+        size_t k = kc;
+        $if IS_QC4:
+          for (; k >= 8; k -= 8) {
+            const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
+            const HVX_Vector va4567 = Q6_V_vsplat_R(unaligned_load_s32(a_row + 4));
+            a_row += 8;
 
-          const HVX_Vector vb0x0123 = *((const HVX_UVector*) w_ptr);
-          const HVX_Vector vb1x0123 = *((const HVX_UVector*) (w_ptr + 128));
-          w_ptr += 256;
+            const HVX_Vector vb0 = *((const HVX_UVector*) w_ptr);
+            const HVX_Vector vb1 = *((const HVX_UVector*) (w_ptr + 128));
+            w_ptr += 256;
 
-          vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
-          vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
-        }
+            const HVX_Vector vb0x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb0, 4), vmask);
+            const HVX_Vector vb1x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb1, 4), vmask);
+            const HVX_Vector vb0x4567 = Q6_V_vand_VV(vb0, vmask);
+            const HVX_Vector vb1x4567 = Q6_V_vand_VV(vb1, vmask);
+
+            vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
+            vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
+            vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va4567, vb0x4567);
+            vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va4567, vb1x4567);
+          }
+          if (k != 0) {
+            const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
+
+            const HVX_Vector vb0 = *((const HVX_UVector*) w_ptr);
+            const HVX_Vector vb1 = *((const HVX_UVector*) (w_ptr + 128));
+            w_ptr += 256;
+
+            const HVX_Vector vb0x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb0, 4), vmask);
+            const HVX_Vector vb1x0123 = Q6_V_vand_VV(Q6_Vw_vasl_VwR(vb1, 4), vmask);
+
+            vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
+            vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
+          }
+        $else:
+          for (; k >= 4; k -= 4) {
+            const HVX_Vector va0123 = Q6_V_vsplat_R(unaligned_load_s32(a_row));
+            a_row += 4;
+
+            const HVX_Vector vb0x0123 = *((const HVX_UVector*) w_ptr);
+            const HVX_Vector vb1x0123 = *((const HVX_UVector*) (w_ptr + 128));
+            w_ptr += 256;
+
+            vacc0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0, va0123, vb0x0123);
+            vacc1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1, va0123, vb1x0123);
+          }
 
       const HVX_Vector vscale0 = *((const HVX_UVector*) w_ptr);
       const HVX_Vector vscale1 =
@@ -1126,9 +1226,14 @@ static XNN_INLINE void xnn_hmx_exec_panel_${WGT_SUFFIX}(
 // thread.
 static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
     struct xnn_hmx_worker_slot* slot, const xnn_hmx_crm_mutex_t* crm_mutex,
-    bool hmx_already_held, size_t mr, size_t nc, size_t kc,
-    const int8_t* restrict a, size_t a_stride, const void* restrict w,
-    ${OUT_T}* restrict c, size_t cm_stride, size_t cn_stride,
+    $if IS_PQS8:
+      bool hmx_already_held, bool wgt_already_staged, size_t mr, size_t nc,
+      size_t kc, const void* restrict lhs_packed,
+    $else:
+      bool hmx_already_held, size_t mr, size_t nc, size_t kc,
+      const int8_t* restrict a, size_t a_stride,
+    const void* restrict w, ${OUT_T}* restrict c, size_t cm_stride,
+    size_t cn_stride,
     $if IS_QD8:
       const ${PARAMS_TYPE}* restrict params,
       const struct xnn_qd8_quantization_params* restrict quantization_params) {
@@ -1160,7 +1265,7 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
   const size_t num_v = (mr + 1) >> 1;
   const HVX_Vector vzero = Q6_V_vzero();
 
-  $if IS_QD8:
+  $if USE_DMA:
     if (kc <= k_chunk_max) {
       const size_t num_k_tiles = (kc + 31) >> 5;
       const size_t num_rows = round_up_po2(kc, ${K_STEP}) >> ${LOG2_K_STEP};
@@ -1169,17 +1274,31 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
       const uint32_t act_ctrl = (uint32_t) (num_k_tiles * 2048) - 1;
       const uint32_t wgt_ctrl =
           (uint32_t) (num_k_tiles * ${WGT_TILE_BYTES}) - 1;
-      const size_t panel_bytes = (num_rows + 3) * 256;
+      const size_t panel_bytes = (num_rows + ${3 if IS_QD8 else 2}) * 256;
 
       size_t cur_dma_slot = 0;
       HVX_Vector* cur_wgt0 = vtcm_wgt;
       HVX_Vector* cur_wgt1 = cur_wgt0 + half_panel_vecs;
-      bool cur_used_dma = xnn_dma_submit_wgt_2d(
-          &slot->dma_descs[0][0], &slot->dma_descs[0][1], cur_wgt0, cur_wgt1,
-          (const uint8_t*) w + 256, num_rows);
-
-      xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+      $if IS_PQS8:
+        const bool use_wgt_dma = (num_rows >= 64) && (nc > 64);
+        bool cur_used_dma = false;
+        if (!wgt_already_staged) {
+          if (use_wgt_dma) {
+            cur_used_dma = xnn_dma_submit_wgt_2d(
+                &slot->dma_descs[0][0], &slot->dma_descs[0][1], cur_wgt0,
+                cur_wgt1, (const uint8_t*) w + 256, num_rows);
+          } else {
+            l2fetch_2d(w, 256, 256, (uint32_t) (num_rows + 2));
+          }
+        }
+        xnn_unpack_packed_lhs_cm_32rows(vtcm_act0, lhs_packed, mr,
                                         /*k_offset=*/0, kc);
+      $else:
+        bool cur_used_dma = xnn_dma_submit_wgt_2d(
+            &slot->dma_descs[0][0], &slot->dma_descs[0][1], cur_wgt0, cur_wgt1,
+            (const uint8_t*) w + 256, num_rows);
+        xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+                                          /*k_offset=*/0, kc);
       xnn_hvx_vtcm_fence((HVX_Vector*) &vtcm_act0[num_k_tiles * 2048 - 128]);
 
       do {
@@ -1189,10 +1308,21 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
         HVX_Vector* next_wgt1 = next_wgt0 + half_panel_vecs;
         bool next_used_dma = false;
         if (nc > 64) {
-          next_used_dma = xnn_dma_submit_wgt_2d(
-              &slot->dma_descs[next_dma_slot][0],
-              &slot->dma_descs[next_dma_slot][1], next_wgt0, next_wgt1,
-              (const uint8_t*) w + panel_bytes + 256, num_rows);
+          $if IS_PQS8:
+            if (use_wgt_dma) {
+              next_used_dma = xnn_dma_submit_wgt_2d(
+                  &slot->dma_descs[next_dma_slot][0],
+                  &slot->dma_descs[next_dma_slot][1], next_wgt0, next_wgt1,
+                  (const uint8_t*) w + panel_bytes + 256, num_rows);
+            } else {
+              l2fetch_2d((const uint8_t*) w + panel_bytes, 256, 256,
+                         (uint32_t) (num_rows + 2));
+            }
+          $else:
+            next_used_dma = xnn_dma_submit_wgt_2d(
+                &slot->dma_descs[next_dma_slot][0],
+                &slot->dma_descs[next_dma_slot][1], next_wgt0, next_wgt1,
+                (const uint8_t*) w + panel_bytes + 256, num_rows);
         }
 
         const HVX_Vector vpacked_b0 = *((const HVX_UVector*) w);
@@ -1210,11 +1340,18 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
                                               num_rows * 256);
         const HVX_Vector vw_scale0 = *((const HVX_UVector*) w_tail);
         const HVX_Vector vw_scale1 = *((const HVX_UVector*) (w_tail + 32));
-        const HVX_Vector vbias0 = *((const HVX_UVector*) (w_tail + 64));
-        const HVX_Vector vbias1 = *((const HVX_UVector*) (w_tail + 96));
+        $if IS_QD8:
+          const HVX_Vector vbias0 = *((const HVX_UVector*) (w_tail + 64));
+          const HVX_Vector vbias1 = *((const HVX_UVector*) (w_tail + 96));
 
-        xnn_finish_wgt_stage(slot, cur_dma_slot, cur_used_dma, cur_wgt0,
-                             cur_wgt1, w_weights, num_rows, total_vecs);
+        $if IS_PQS8:
+          if (!wgt_already_staged) {
+            xnn_finish_wgt_stage(slot, cur_dma_slot, cur_used_dma, cur_wgt0,
+                                 cur_wgt1, w_weights, num_rows, total_vecs);
+          }
+        $else:
+          xnn_finish_wgt_stage(slot, cur_dma_slot, cur_used_dma, cur_wgt0,
+                               cur_wgt1, w_weights, num_rows, total_vecs);
 
         xnn_hmx_exec_panel_${WGT_SUFFIX}(crm_mutex, hmx_already_held, vtcm_act0,
                                          act_ctrl, cur_wgt0, cur_wgt1, wgt_ctrl,
@@ -1231,17 +1368,32 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
           }
           const size_t m_base = 2 * v;
           ${OUT_T}* c_row = (${OUT_T}*) ((uintptr_t) c + m_base * cm_stride);
-          xnn_dequantize_and_store_row_qd8(
-              c_row, step_nc, vhmx0_0, vhmx1_0, vneg_ksum0, vneg_ksum1,
-              &quantization_params[m_base], vw_scale0, vw_scale1, vbias0,
-              vbias1, vmin, vmax);
-          if (m_base + 1 < mr) {
-            c_row = (${OUT_T}*) ((uintptr_t) c_row + cm_stride);
+          $if IS_QD8:
             xnn_dequantize_and_store_row_qd8(
-                c_row, step_nc, vhmx0_1, vhmx1_1, vneg_ksum0, vneg_ksum1,
-                &quantization_params[m_base + 1], vw_scale0, vw_scale1, vbias0,
+                c_row, step_nc, vhmx0_0, vhmx1_0, vneg_ksum0, vneg_ksum1,
+                &quantization_params[m_base], vw_scale0, vw_scale1, vbias0,
                 vbias1, vmin, vmax);
-          }
+            if (m_base + 1 < mr) {
+              c_row = (${OUT_T}*) ((uintptr_t) c_row + cm_stride);
+              xnn_dequantize_and_store_row_qd8(
+                  c_row, step_nc, vhmx0_1, vhmx1_1, vneg_ksum0, vneg_ksum1,
+                  &quantization_params[m_base + 1], vw_scale0, vw_scale1, vbias0,
+                  vbias1, vmin, vmax);
+            }
+          $else:
+            xnn_requantize_and_store_row_qs8(
+                c_row, step_nc, Q6_Vw_vadd_VwVw(vhmx0_0, vneg_ksum0),
+                Q6_Vw_vadd_VwVw(vhmx1_0, vneg_ksum1), vw_scale0, vw_scale1,
+                vmagic_bias, vmagic_bias_less_zero_point, voutput_min,
+                voutput_max);
+            if (m_base + 1 < mr) {
+              c_row = (int8_t*) ((uintptr_t) c_row + cm_stride);
+              xnn_requantize_and_store_row_qs8(
+                  c_row, step_nc, Q6_Vw_vadd_VwVw(vhmx0_1, vneg_ksum0),
+                  Q6_Vw_vadd_VwVw(vhmx1_1, vneg_ksum1), vw_scale0, vw_scale1,
+                  vmagic_bias, vmagic_bias_less_zero_point, voutput_min,
+                  voutput_max);
+            }
         }
 
         w = (const uint8_t*) w + panel_bytes;
@@ -1269,8 +1421,12 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
         for (size_t k_offset = 0; k_offset < kc; k_offset += k_chunk_max) {
           const size_t chunk_k = min(kc - k_offset, k_chunk_max);
           const size_t chunk_tiles = (chunk_k + 31) >> 5;
-          xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0 + k_offset * 64, a,
-                                            a_stride, mr, k_offset, chunk_k);
+          $if IS_PQS8:
+            xnn_unpack_packed_lhs_cm_32rows(vtcm_act0 + k_offset * 64,
+                                            lhs_packed, mr, k_offset, chunk_k);
+          $else:
+            xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0 + k_offset * 64, a,
+                                              a_stride, mr, k_offset, chunk_k);
           last_fence_bytes = k_offset * 64 + chunk_tiles * 2048;
         }
         xnn_hvx_vtcm_fence((HVX_Vector*) &vtcm_act0[last_fence_bytes - 128]);
@@ -1322,15 +1478,20 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
             next_used_dma = xnn_dma_submit_wgt_2d(
                 &slot->dma_descs[next_buf][0], &slot->dma_descs[next_buf][1],
                 next_base, next_base + first_half_vecs,
-                (const uint8_t*) w + 768, first_chunk_rows);
+                (const uint8_t*) w + ${768 if IS_QD8 else 512},
+                first_chunk_rows);
           }
 
           const uint8_t* chunk_act0 = vtcm_act0;
           if (prepack_all_act) {
             chunk_act0 = vtcm_act0 + k_offset * 64;
           } else {
-            xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+            $if IS_PQS8:
+              xnn_unpack_packed_lhs_cm_32rows(vtcm_act0, lhs_packed, mr,
                                               k_offset, chunk_k);
+            $else:
+              xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+                                                k_offset, chunk_k);
             xnn_hvx_vtcm_fence(
                 (HVX_Vector*) &vtcm_act0[chunk_tiles * 2048 - 128]);
           }
@@ -1375,17 +1536,31 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
         const float* w_tail = (const float*) w;
         const HVX_Vector vw_scale0 = *((const HVX_UVector*) w_tail);
         const HVX_Vector vw_scale1 = *((const HVX_UVector*) (w_tail + 32));
-        const HVX_Vector vbias0 = *((const HVX_UVector*) (w_tail + 64));
-        const HVX_Vector vbias1 = *((const HVX_UVector*) (w_tail + 96));
-        w = w_tail + 128;
+        $if IS_QD8:
+          const HVX_Vector vbias0 = *((const HVX_UVector*) (w_tail + 64));
+          const HVX_Vector vbias1 = *((const HVX_UVector*) (w_tail + 96));
+          w = w_tail + 128;
 
-        for (size_t m = 0; m < mr; ++m) {
-          ${OUT_T}* c_row = (${OUT_T}*) ((uintptr_t) c + m * cm_stride);
-          xnn_dequantize_and_store_row_qd8(
-              c_row, step_nc, vtcm_acc[m * 2 + 0], vtcm_acc[m * 2 + 1],
-              vneg_ksum0, vneg_ksum1, &quantization_params[m], vw_scale0,
-              vw_scale1, vbias0, vbias1, vmin, vmax);
-        }
+          for (size_t m = 0; m < mr; ++m) {
+            ${OUT_T}* c_row = (${OUT_T}*) ((uintptr_t) c + m * cm_stride);
+            xnn_dequantize_and_store_row_qd8(
+                c_row, step_nc, vtcm_acc[m * 2 + 0], vtcm_acc[m * 2 + 1],
+                vneg_ksum0, vneg_ksum1, &quantization_params[m], vw_scale0,
+                vw_scale1, vbias0, vbias1, vmin, vmax);
+          }
+        $else:
+          w = w_tail + 64;
+
+          for (size_t m = 0; m < mr; ++m) {
+            int8_t* c_row = (int8_t*) ((uintptr_t) c + m * cm_stride);
+            const HVX_Vector vacc0 =
+                Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 0], vneg_ksum0);
+            const HVX_Vector vacc1 =
+                Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 1], vneg_ksum1);
+            xnn_requantize_and_store_row_qs8(
+                c_row, step_nc, vacc0, vacc1, vw_scale0, vw_scale1, vmagic_bias,
+                vmagic_bias_less_zero_point, voutput_min, voutput_max);
+          }
 
         c = (${OUT_T}*) ((uintptr_t) c + cn_stride);
         nc = (nc > 64) ? (nc - 64) : 0;
@@ -1569,80 +1744,188 @@ static void xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
 
 #endif  // __HEXAGON_ARCH__ >= 73
 
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hmx(
-    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
-    const void* restrict w, ${OUT_T}* restrict c, size_t cm_stride,
-    size_t cn_stride,
-    $if IS_QD8:
-      const ${PARAMS_TYPE}* restrict params,
-      const struct xnn_qd8_quantization_params* restrict quantization_params) {
-    $else:
-      const ${PARAMS_TYPE}* restrict params) {
-  assert(mr != 0);
-  assert(mr <= ${MR});
+$if IS_PQS8:
+  size_t xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hmx_get_mr(void) {
+    return ${MR};
+  }
+
+  size_t xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hmx_get_nr(void) {
+    return ${NR};
+  }
+
+  $if DATATYPE == "PQS8_QC8W":
+    void xnn_pqs8_qc8w_gemm_minmax_32x64c4_hmx(
+        size_t m, size_t nc, size_t kc, const void* lhs_packed, const void* w,
+        void* dst, size_t dst_stride_row, size_t dst_stride_col,
+        const ${PARAMS_TYPE}* params) {
+  $else:
+    void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hmx(
+        size_t m, size_t nc, size_t kc, const void* lhs_packed, const void* w,
+        void* dst, size_t dst_stride_row, size_t dst_stride_col,
+        const ${PARAMS_TYPE}* params) {
+  assert(m != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(a != NULL);
+  assert(lhs_packed != NULL);
   assert(w != NULL);
-  assert(c != NULL);
-  $if IS_QD8:
-    assert(quantization_params != NULL);
+  assert(dst != NULL);
+  assert(dst_stride_col == sizeof(int8_t));
+  (void) dst_stride_col;
 
-#if __HEXAGON_ARCH__ >= 73
-  xnn_hmx_crm_mutex_t crm_mutex = {0};
-  pthread_mutex_lock(&xnn_hmx_ctx.init_mutex);
-  if XNN_UNLIKELY(!xnn_hmx_ctx.initialized && !xnn_hmx_ctx.init_failed) {
-    xnn_hmx_ctx.init_failed = !xnn_init_hmx_vtcm();
+  const size_t lhs_tile_bytes = divide_round_up(kc, 32) * 1024;
+  const size_t cn_stride = ${NR} * sizeof(int8_t);
+
+  #if __HEXAGON_ARCH__ >= 73
+    xnn_hmx_crm_mutex_t crm_mutex = {0};
+    pthread_mutex_lock(&xnn_hmx_ctx.init_mutex);
+    if XNN_UNLIKELY(!xnn_hmx_ctx.initialized && !xnn_hmx_ctx.init_failed) {
+      xnn_hmx_ctx.init_failed = !xnn_init_hmx_vtcm();
+    }
+    const bool hmx_ready =
+        xnn_hmx_ctx.initialized && xnn_hmx_lock_thread(&crm_mutex);
+    const bool hold_hmx_outer = (xnn_hmx_ctx.num_locked_tids <= 1);
+    pthread_mutex_unlock(&xnn_hmx_ctx.init_mutex);
+
+    if XNN_LIKELY(hmx_ready) {
+      const size_t num_slots = xnn_hmx_ctx.num_slots;
+      const size_t start_slot = ((size_t) qurt_thread_get_id()) % num_slots;
+      size_t slot_idx = start_slot;
+      bool acquired = false;
+      for (size_t i = 0; i < num_slots; ++i) {
+        const size_t try_idx = (start_slot + i) % num_slots;
+        if (pthread_mutex_trylock(&xnn_hmx_ctx.slots[try_idx].mutex) == 0) {
+          slot_idx = try_idx;
+          acquired = true;
+          break;
+        }
+      }
+      if (!acquired) {
+        pthread_mutex_lock(&xnn_hmx_ctx.slots[slot_idx].mutex);
+      }
+      if XNN_LIKELY(hold_hmx_outer) {
+        pthread_mutex_lock(&xnn_hmx_ctx.hmx_exec_mutex);
+        if (crm_mutex.lock != NULL) {
+          crm_mutex.lock(crm_mutex.mutex);
+        }
+      }
+      const bool single_panel_wgt =
+          (nc <= 64) && (kc <= xnn_hmx_ctx.max_k_chunk);
+      for (size_t m_off = 0; m_off < m; m_off += ${MR}) {
+        const size_t tile_m = min(m - m_off, (size_t) ${MR});
+        const void* lhs_tile =
+            (const uint8_t*) lhs_packed + (m_off >> 5) * lhs_tile_bytes;
+        int8_t* c_tile = (int8_t*) ((uintptr_t) dst + m_off * dst_stride_row);
+        xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
+            &xnn_hmx_ctx.slots[slot_idx], &crm_mutex, hold_hmx_outer,
+            /*wgt_already_staged=*/(m_off > 0 && single_panel_wgt), tile_m,
+            nc, kc, lhs_tile, w, c_tile, dst_stride_row, cn_stride, params);
+      }
+      if XNN_LIKELY(hold_hmx_outer) {
+        if (crm_mutex.unlock != NULL) {
+          crm_mutex.unlock(crm_mutex.mutex);
+        }
+        pthread_mutex_unlock(&xnn_hmx_ctx.hmx_exec_mutex);
+      }
+      pthread_mutex_unlock(&xnn_hmx_ctx.slots[slot_idx].mutex);
+      return;
+    }
+  #endif  // __HEXAGON_ARCH__ >= 73
+
+    for (size_t m_off = 0; m_off < m; m_off += ${MR}) {
+      const size_t tile_m = min(m - m_off, (size_t) ${MR});
+      const void* lhs_tile =
+          (const uint8_t*) lhs_packed + (m_off >> 5) * lhs_tile_bytes;
+      int8_t* c_tile = (int8_t*) ((uintptr_t) dst + m_off * dst_stride_row);
+      xnn_${DATATYPE_SPEC}_gemm_minmax_hvx_fallback(
+          tile_m, nc, kc, lhs_tile, w, c_tile, dst_stride_row, cn_stride,
+          params);
+    }
   }
-  const bool hmx_ready =
-      xnn_hmx_ctx.initialized && xnn_hmx_lock_thread(&crm_mutex);
-  const bool hold_hmx_outer = (xnn_hmx_ctx.num_locked_tids <= 1);
-  pthread_mutex_unlock(&xnn_hmx_ctx.init_mutex);
 
-  if XNN_LIKELY(hmx_ready) {
-    const size_t num_slots = xnn_hmx_ctx.num_slots;
-    const size_t start_slot = ((size_t) qurt_thread_get_id()) % num_slots;
-    size_t slot_idx = start_slot;
-    bool acquired = false;
-    for (size_t i = 0; i < num_slots; ++i) {
-      const size_t try_idx = (start_slot + i) % num_slots;
-      if (pthread_mutex_trylock(&xnn_hmx_ctx.slots[try_idx].mutex) == 0) {
-        slot_idx = try_idx;
-        acquired = true;
-        break;
+  $if DATATYPE == "PQS8_QC8W":
+    void xnn_pqs8_qc8w_gemm_minmax_ukernel_32x64c4__hmx(
+        size_t m, size_t nc, size_t kc, const void* lhs_packed, const void* w,
+        void* dst, size_t dst_stride_row, size_t dst_stride_col,
+        const union xnn_qs8_qc8w_conv_minmax_params* params) {
+      xnn_pqs8_qc8w_gemm_minmax_32x64c4_hmx(m, nc, kc, lhs_packed, w, dst,
+                                            dst_stride_row, dst_stride_col,
+                                            params);
+    }
+$else:
+  void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hmx(
+      size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
+      const void* restrict w, ${OUT_T}* restrict c, size_t cm_stride,
+      size_t cn_stride,
+      $if IS_QD8:
+        const ${PARAMS_TYPE}* restrict params,
+        const struct xnn_qd8_quantization_params* restrict quantization_params) {
+      $else:
+        const ${PARAMS_TYPE}* restrict params) {
+    assert(mr != 0);
+    assert(mr <= ${MR});
+    assert(nc != 0);
+    assert(kc != 0);
+    assert(a != NULL);
+    assert(w != NULL);
+    assert(c != NULL);
+    $if IS_QD8:
+      assert(quantization_params != NULL);
+
+  #if __HEXAGON_ARCH__ >= 73
+    xnn_hmx_crm_mutex_t crm_mutex = {0};
+    pthread_mutex_lock(&xnn_hmx_ctx.init_mutex);
+    if XNN_UNLIKELY(!xnn_hmx_ctx.initialized && !xnn_hmx_ctx.init_failed) {
+      xnn_hmx_ctx.init_failed = !xnn_init_hmx_vtcm();
+    }
+    const bool hmx_ready =
+        xnn_hmx_ctx.initialized && xnn_hmx_lock_thread(&crm_mutex);
+    const bool hold_hmx_outer = (xnn_hmx_ctx.num_locked_tids <= 1);
+    pthread_mutex_unlock(&xnn_hmx_ctx.init_mutex);
+
+    if XNN_LIKELY(hmx_ready) {
+      const size_t num_slots = xnn_hmx_ctx.num_slots;
+      const size_t start_slot = ((size_t) qurt_thread_get_id()) % num_slots;
+      size_t slot_idx = start_slot;
+      bool acquired = false;
+      for (size_t i = 0; i < num_slots; ++i) {
+        const size_t try_idx = (start_slot + i) % num_slots;
+        if (pthread_mutex_trylock(&xnn_hmx_ctx.slots[try_idx].mutex) == 0) {
+          slot_idx = try_idx;
+          acquired = true;
+          break;
+        }
       }
-    }
-    if (!acquired) {
-      pthread_mutex_lock(&xnn_hmx_ctx.slots[slot_idx].mutex);
-    }
-    if XNN_LIKELY(hold_hmx_outer) {
-      pthread_mutex_lock(&xnn_hmx_ctx.hmx_exec_mutex);
-      if (crm_mutex.lock != NULL) {
-        crm_mutex.lock(crm_mutex.mutex);
+      if (!acquired) {
+        pthread_mutex_lock(&xnn_hmx_ctx.slots[slot_idx].mutex);
       }
+      if XNN_LIKELY(hold_hmx_outer) {
+        pthread_mutex_lock(&xnn_hmx_ctx.hmx_exec_mutex);
+        if (crm_mutex.lock != NULL) {
+          crm_mutex.lock(crm_mutex.mutex);
+        }
+      }
+      xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
+          &xnn_hmx_ctx.slots[slot_idx], &crm_mutex, hold_hmx_outer, mr, nc, kc, a,
+          a_stride, w, c, cm_stride, cn_stride,
+          $if IS_QD8:
+            params, quantization_params);
+          $else:
+            params);
+      if XNN_LIKELY(hold_hmx_outer) {
+        if (crm_mutex.unlock != NULL) {
+          crm_mutex.unlock(crm_mutex.mutex);
+        }
+        pthread_mutex_unlock(&xnn_hmx_ctx.hmx_exec_mutex);
+      }
+      pthread_mutex_unlock(&xnn_hmx_ctx.slots[slot_idx].mutex);
+      return;
     }
-    xnn_${DATATYPE_SPEC}_gemm_minmax_${MR}x${NR}c4__hmx_impl(
-        &xnn_hmx_ctx.slots[slot_idx], &crm_mutex, hold_hmx_outer, mr, nc, kc, a,
-        a_stride, w, c, cm_stride, cn_stride,
+  #endif  // __HEXAGON_ARCH__ >= 73
+
+    xnn_${DATATYPE_SPEC}_gemm_minmax_hvx_fallback(
+        mr, nc, kc, a, a_stride, w, c, cm_stride, cn_stride,
         $if IS_QD8:
           params, quantization_params);
         $else:
           params);
-    if XNN_LIKELY(hold_hmx_outer) {
-      if (crm_mutex.unlock != NULL) {
-        crm_mutex.unlock(crm_mutex.mutex);
-      }
-      pthread_mutex_unlock(&xnn_hmx_ctx.hmx_exec_mutex);
-    }
-    pthread_mutex_unlock(&xnn_hmx_ctx.slots[slot_idx].mutex);
-    return;
   }
-#endif  // __HEXAGON_ARCH__ >= 73
-
-  xnn_${DATATYPE_SPEC}_gemm_minmax_hvx_fallback(
-      mr, nc, kc, a, a_stride, w, c, cm_stride, cn_stride,
-      $if IS_QD8:
-        params, quantization_params);
-      $else:
-        params);
-}

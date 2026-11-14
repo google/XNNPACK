@@ -3793,6 +3793,13 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 
+#if XNN_ARCH_HEXAGON && (__HEXAGON_ARCH__ < 81)
+  // HVX loses 1 bit of accuracy due to qfloat for FP32 quantization on V73;
+  // V79+ is lossless.
+  const int32_t tolerance = 1;
+#else
+  const int32_t tolerance = 0;
+#endif
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       const size_t idx = i * cm_stride() + j;
@@ -3800,8 +3807,8 @@ void GemmMicrokernelTester::Test_PQS8(
                 static_cast<int32_t>(qmax()) - 0x80);
       ASSERT_GE(static_cast<int32_t>(c[idx]),
                 static_cast<int32_t>(qmin()) - 0x80);
-      ASSERT_EQ(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(c_ref[i * n() + j]))
+      ASSERT_NEAR(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(c_ref[i * n() + j]), tolerance)
           << "at " << i << ", " << j
           << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
           << " (accumulator = " << acc[i * n() + j]
@@ -3936,6 +3943,13 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
     }
   }
 
+#if XNN_ARCH_HEXAGON && (__HEXAGON_ARCH__ < 81)
+  // HVX loses 1 bit of accuracy due to qfloat for FP32 quantization on V73;
+  // V79+ is lossless.
+  const int32_t tolerance = 1;
+#else
+  const int32_t tolerance = 0;
+#endif
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       const size_t idx = i * cm_stride() + j;
@@ -3943,8 +3957,8 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
                 static_cast<int32_t>(qmax()) - 0x80);
       ASSERT_GE(static_cast<int32_t>(c[idx]),
                 static_cast<int32_t>(qmin()) - 0x80);
-      ASSERT_EQ(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(c_ref[i * n() + j]))
+      ASSERT_NEAR(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(c_ref[i * n() + j]), tolerance)
           << "at " << i << ", " << j
           << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
           << " (accumulator = " << acc[i * n() + j]
