@@ -282,7 +282,7 @@ def main() -> None:
 
   args = parser.parse_args()
   p1, p2 = args.compile_commands_1, args.compile_commands_2
-  repo_root = args.repo_root or find_repo_root(p1)
+  repo_root = (args.repo_root or find_repo_root(p1)).resolve()
   include_re = re.compile(args.include_define)
   ignore_res = [re.compile(pat) for pat in args.ignore_define]
   raw_dirs = (
