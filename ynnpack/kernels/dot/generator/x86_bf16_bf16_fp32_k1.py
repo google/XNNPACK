@@ -62,6 +62,29 @@ __m{bits}i b_{k}_{j}_i = {mm}_cvtepi16_epi32(b_raw_{k}_{j});
 __m{bits} b_{k}_{j} = {cast}({mm}_slli_epi32(b_{k}_{j}_i, 16));
 """
 
+  def generate_block(self, a_tail=False, b_tail=False):
+    m_tiles = self.block_shape[0] // self.tile_shape[0]
+    n_tiles = self.block_shape[1] // self.tile_shape[1]
+    num_regs = 32 if self.bits == 512 else 16
+    if (
+        m_tiles <= n_tiles
+        or m_tiles * n_tiles + m_tiles + n_tiles + 1 <= num_regs
+        or (self.bits == 512 and n_tiles == 1)
+    ):
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    result = ""
+    load_a = self.load_a_tile_tail if a_tail else self.load_a_tile
+    load_b = self.load_b_tile_tail if b_tail else self.load_b_tile
+    for k in range(0, self.block_shape[2], self.tile_shape[2]):
+      for j in range(0, self.block_shape[1], self.tile_shape[1]):
+        result += load_b(k, j)
+      for i in range(0, self.block_shape[0], self.tile_shape[0]):
+        result += load_a(i, k)
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += self.product(i, j, k)
+    result += "\n"
+    return result
+
 
 class x86_avx2_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx):
   def __init__(self, arch="avx2", bits=256, tile_shape=(1, 8, 1)):

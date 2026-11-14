@@ -106,6 +106,60 @@ __m{self.bits}i c_{i}_{j+n} = {mm}_setzero_si{self.bits}();
     n = self.tile_shape[1] // 2
     return f"c_{i}_{j} = {mm}_hadd_epi32(c_{i}_{j}, c_{i}_{j+n});\n"
 
+  def generate_block(self, a_tail=False, b_tail=False):
+    bits = self.bits
+    mm = self._mm()
+    n = self.tile_shape[1] // 2
+    m_tiles = self.block_shape[0] // self.tile_shape[0]
+    n_tiles = self.block_shape[1] // self.tile_shape[1]
+    num_regs = 32 if bits == 512 else 16
+    # Stream across j only when n_tiles > 1 and live C + local int16 c_block +
+    # B + A + constants fit in the vector register file.
+    if n_tiles == 1 or 2 * m_tiles * (n_tiles + 1) + 5 > num_regs:
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    result = ""
+    for j in range(0, self.block_shape[1], self.tile_shape[1]):
+      for i in range(m_tiles):
+        result += f"__m{bits}i c_{i}_{j+0}_block;\n"
+        result += f"__m{bits}i c_{i}_{j+n}_block;\n"
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        result += "{\n"
+        result += self.load_b_tile(k, j)
+        for i in range(m_tiles):
+          result += self.load_a_tile(i, k)
+          result += f"YNN_OPTIMIZATION_BARRIER(a_{i}_{k});\n"
+          a_ik = f"a_{i}_{k}"
+          b_kj0 = f"b_{k}_{j+0}"
+          b_kjn = f"b_{k}_{j+n}"
+          c_ij0 = f"c_{i}_{j+0}"
+          c_ijn = f"c_{i}_{j+n}"
+          if k == 0:
+            result += f"{c_ij0}_block = {mm}_maddubs_epi16({a_ik}, {b_kj0});\n"
+            result += f"{c_ijn}_block = {mm}_maddubs_epi16({a_ik}, {b_kjn});\n"
+          else:
+            assert k <= 32
+            result += (
+                f"{c_ij0}_block = {mm}_add_epi16("
+                f"{c_ij0}_block, {mm}_maddubs_epi16({a_ik}, {b_kj0}));\n"
+            )
+            result += (
+                f"{c_ijn}_block = {mm}_add_epi16("
+                f"{c_ijn}_block, {mm}_maddubs_epi16({a_ik}, {b_kjn}));\n"
+            )
+        result += "}\n"
+      for i in range(m_tiles):
+        c_ij0 = f"c_{i}_{j+0}"
+        c_ijn = f"c_{i}_{j+n}"
+        result += (
+            f"{c_ij0} = {mm}_sub_epi32("
+            f"{c_ij0}, {mm}_madd_epi16({c_ij0}_block, {mm}_set1_epi16(-1)));\n"
+        )
+        result += (
+            f"{c_ijn} = {mm}_sub_epi32("
+            f"{c_ijn}, {mm}_madd_epi16({c_ijn}_block, {mm}_set1_epi16(-1)));\n"
+        )
+    return result
+
 
 class x86_avx2_uint8_int4_int32(x86_uint8_int4_int32, x86_avx):
 
@@ -162,6 +216,9 @@ class x86_avx512vnni_uint8_int4_int32(x86_avx512_uint8_int4_int32):
   def __init__(self, arch="avx512vnni"):
     super().__init__(arch)
 
+  def generate_block(self, a_tail=False, b_tail=False):
+    return x86.generate_block(self, a_tail=a_tail, b_tail=b_tail)
+
   def product(self, i, j, k):
     mm = self._mm()
     return f"""
@@ -174,6 +231,9 @@ class x86_avxvnni_uint8_int4_int32(x86_avx2_uint8_int4_int32):
 
   def __init__(self, arch="avxvnni"):
     super().__init__(arch)
+
+  def generate_block(self, a_tail=False, b_tail=False):
+    return x86.generate_block(self, a_tail=a_tail, b_tail=b_tail)
 
   def product(self, i, j, k):
     mm = self._mm()

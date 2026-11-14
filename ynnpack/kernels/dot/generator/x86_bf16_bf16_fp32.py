@@ -65,32 +65,124 @@ __m{bits} b_{k+0}_{j} = {cast}({self._mm()}_slli_epi32({b_kj}, 16));
 __m{bits} b_{k+1}_{j} = {cast}({self._mm()}_and_si{bits}({b_kj}, {mask}));
 """
 
+  def generate_block(self, a_tail=False, b_tail=False):
+    # Each unpacked bf16x2 tile produces 2 vector registers. When all C, A, and
+    # B tiles exceed the vector register file, stream the larger of M or N
+    # tiles one tile at a time (or split into two sub-k passes when even
+    # streaming still overflows) to avoid register spills.
+    m_tiles = self.block_shape[0] // self.tile_shape[0]
+    n_tiles = self.block_shape[1] // self.tile_shape[1]
+    num_regs = 32 if self.bits == 512 else 16
+    num_c = m_tiles * n_tiles
+    if num_c + 2 * (m_tiles + n_tiles) + 2 <= num_regs:
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    # When m_tiles > n_tiles > 1 and 1-pass streaming still overflows (e.g.
+    # 5x16x2 AVX2), neither 1-pass streaming nor 2-pass B re-unpacking beats
+    # the default schedule.
+    if (
+        m_tiles > n_tiles
+        and n_tiles > 1
+        and num_c + 2 * n_tiles + 3 > num_regs
+    ):
+      return super().generate_block(a_tail=a_tail, b_tail=b_tail)
+    result = ""
+    load_a = self.load_a_tile_tail if a_tail else self.load_a_tile
+    load_b = self.load_b_tile_tail if b_tail else self.load_b_tile
+    if (
+        m_tiles > n_tiles
+        and n_tiles == 1
+        and num_c + 2 * n_tiles + 4 > num_regs
+    ) or (m_tiles <= n_tiles and num_c + 2 * m_tiles + 4 >= num_regs):
+      # Register pressure is too tight to keep unpacked k+0 and k+1 tiles live
+      # simultaneously; run k+1 then k+0 in two passes so only one k-slice is
+      # live at a time (preserving the exact k+1 -> k+0 FMA reduction order).
+      bits = self.bits
+      mm = self._mm()
+      cast = f"{mm}_castsi{bits}_ps"
+      mask = f"{mm}_set1_epi32(0xffff0000)"
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        for sub_k in (1, 0):
+          if m_tiles > n_tiles:
+            for j in range(0, self.block_shape[1], self.tile_shape[1]):
+              b_raw = f"{mm}_load_si{bits}({self.b_ptr(k, j, f'__m{bits}i')})"
+              if sub_k == 1:
+                b_val = f"{cast}({mm}_and_si{bits}({b_raw}, {mask}))"
+              else:
+                b_val = f"{cast}({mm}_slli_epi32({b_raw}, 16))"
+              result += f"__m{bits} b_{k+sub_k}_{j} = {b_val};\n"
+            for i in range(0, self.block_shape[0], self.tile_shape[0]):
+              a_raw = f"{mm}_set1_epi16(*{self.a_ptr(i, k + sub_k)})"
+              result += (
+                  f"__m{bits} a_{i}_{k+sub_k} ="
+                  f" {cast}({mm}_slli_epi32({a_raw}, 16));\n"
+              )
+              for j in range(0, self.block_shape[1], self.tile_shape[1]):
+                result += self.product_sub_k(i, j, k + sub_k)
+          else:
+            for i in range(0, self.block_shape[0], self.tile_shape[0]):
+              a_raw = f"{mm}_set1_epi16(*{self.a_ptr(i, k + sub_k)})"
+              result += (
+                  f"__m{bits} a_{i}_{k+sub_k} ="
+                  f" {cast}({mm}_slli_epi32({a_raw}, 16));\n"
+              )
+            for j in range(0, self.block_shape[1], self.tile_shape[1]):
+              b_raw = f"{mm}_load_si{bits}({self.b_ptr(k, j, f'__m{bits}i')})"
+              if sub_k == 1:
+                b_val = f"{cast}({mm}_and_si{bits}({b_raw}, {mask}))"
+              else:
+                b_val = f"{cast}({mm}_slli_epi32({b_raw}, 16))"
+              result += f"__m{bits} b_{k+sub_k}_{j} = {b_val};\n"
+              for i in range(0, self.block_shape[0], self.tile_shape[0]):
+                result += self.product_sub_k(i, j, k + sub_k)
+      result += "\n"
+      return result
+
+    for k in range(0, self.block_shape[2], self.tile_shape[2]):
+      if m_tiles > n_tiles:
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += load_b(k, j)
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += load_a(i, k)
+          for j in range(0, self.block_shape[1], self.tile_shape[1]):
+            result += self.product(i, j, k)
+      else:
+        for i in range(0, self.block_shape[0], self.tile_shape[0]):
+          result += load_a(i, k)
+        for j in range(0, self.block_shape[1], self.tile_shape[1]):
+          result += load_b(k, j)
+          for i in range(0, self.block_shape[0], self.tile_shape[0]):
+            result += self.product(i, j, k)
+    result += "\n"
+    return result
+
 
 class x86_avx2_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx):
   def __init__(self, arch="avx2", bits=256, tile_shape=(1, 8, 2)):
     super().__init__(arch, bits, tile_shape)
 
-  def product(self, i, j, k):
+  def product_sub_k(self, i, j, k_idx):
     add = f"{self._mm()}_add_ps"
     mul = f"{self._mm()}_mul_ps"
+    return (
+        f"c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k_idx}, b_{k_idx}_{j}));\n"
+    )
+
+  def product(self, i, j, k):
     # This "backwards" reduction order (1 first, then 0) is used to match the
     # behavior of dpbf16ps, which is documented to do the reduction in this
     # order, enabling all of these kernels to be numerically consistent.
-    return f"""
-c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+1}, b_{k+1}_{j}));
-c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+0}, b_{k+0}_{j}));
-"""
+    return self.product_sub_k(i, j, k + 1) + self.product_sub_k(i, j, k + 0)
 
 
 class x86_avx2_fma3_bf16_bf16_fp32(x86_avx2_bf16_bf16_fp32):
   def __init__(self, arch="avx2_fma3", bits=256, tile_shape=(1, 8, 2)):
     super().__init__(arch, bits, tile_shape)
 
-  def product(self, i, j, k):
-    return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+1}, b_{k+1}_{j}, c_{i}_{j});
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
-"""
+  def product_sub_k(self, i, j, k_idx):
+    return (
+        f"c_{i}_{j} = {self._mm()}_fmadd_ps("
+        f"a_{i}_{k_idx}, b_{k_idx}_{j}, c_{i}_{j});\n"
+    )
 
 
 class x86_avx512_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
@@ -98,11 +190,14 @@ class x86_avx512_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
   def __init__(self, arch="avx512", bits=512, tile_shape=(1, 16, 2)):
     super().__init__(arch, bits, tile_shape)
 
+  def product_sub_k(self, i, j, k_idx):
+    return (
+        f"c_{i}_{j} = {self._mm()}_fmadd_ps("
+        f"a_{i}_{k_idx}, b_{k_idx}_{j}, c_{i}_{j});\n"
+    )
+
   def product(self, i, j, k):
-    return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+1}, b_{k+1}_{j}, c_{i}_{j});
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
-"""
+    return self.product_sub_k(i, j, k + 1) + self.product_sub_k(i, j, k + 0)
 
 
 class x86_avx512bf16_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
@@ -141,6 +236,9 @@ __m{self.bits}bh a_{i}_{k} = reinterpret_cast<__m{self.bits}bh>({a});
         f"c_{i}_{j} = {self._mm()}_dpbf16_ps(c_{i}_{j}, a_{i}_{k},"
         f" b_{k}_{j});\n"
     )
+
+  def generate_block(self, a_tail=False, b_tail=False):
+    return x86.generate_block(self, a_tail=a_tail, b_tail=b_tail)
 
 
 generate_dot_kernels(
