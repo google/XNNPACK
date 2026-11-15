@@ -939,16 +939,28 @@ size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value
   if (num_elements == SIZE_MAX) {
     return SIZE_MAX;
   }
-  size_t size_bits;
-  if (!xnn_safe_mul(num_elements, xnn_datatype_size_bits(datatype), &size_bits)) {
-    return SIZE_MAX;
+  // Work in bytes: a bit count overflows a 32-bit size_t for any tensor over
+  // 512 MiB, long before the byte size does.
+  const size_t element_bits = xnn_datatype_size_bits(datatype);
+  if (element_bits % 8 == 0) {
+    size_t size;
+    if (!xnn_safe_mul(num_elements, element_bits / 8, &size)) {
+      return SIZE_MAX;
+    }
+    return size;
   }
-  if (!xnn_safe_add(size_bits, 7, &size_bits)) {
-    return SIZE_MAX;
-  }
+  // Sub-byte types: 8 elements always fill a whole number of bytes, so round
+  // up only the bits of the last partial group of 8.
   // TODO: We should not be using this helper for non-byte-addressable types,
   // perhaps we should just assert here.
-  return size_bits >> 3;
+  size_t size;
+  if (!xnn_safe_mul(num_elements / 8, element_bits, &size)) {
+    return SIZE_MAX;
+  }
+  if (!xnn_safe_add(size, ((num_elements % 8) * element_bits + 7) / 8, &size)) {
+    return SIZE_MAX;
+  }
+  return size;
 }
 
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value)

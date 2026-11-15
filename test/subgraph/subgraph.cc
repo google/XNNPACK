@@ -226,6 +226,51 @@ TEST(SUBGRAPH, reserve_nodes_overflow) {
   ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
 }
 
+// A tensor's size in bits can overflow size_t while its size in bytes does
+// not. On 32-bit targets (wasm32, armv7) that is any fp32 tensor over 512 MiB,
+// such as an LLM's [1, seq_len, vocab] logits.
+TEST(SUBGRAPH, define_tensor_whose_size_in_bits_overflows) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(
+      xnn_create_subgraph(/*external_value_ids=*/0, /*flags=*/0, &subgraph),
+      xnn_status_success);
+
+  // 2^(W-3) elements of 32 bits: 2^(W-1) bytes, but 2^(W+2) bits.
+  constexpr size_t kHalfWidth = sizeof(size_t) * 4;
+  const size_t dims[2] = {size_t{1} << (kHalfWidth - 2),
+                          size_t{1} << (kHalfWidth - 1)};
+  uint32_t id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                                    /*flags=*/0, &id),
+            xnn_status_success);
+  EXPECT_EQ(subgraph->values[id].size,
+            sizeof(float) * (size_t{1} << (2 * kHalfWidth - 3)));
+
+  ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
+TEST(SUBGRAPH, define_tensor_whose_size_in_bytes_overflows) {
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(
+      xnn_create_subgraph(/*external_value_ids=*/0, /*flags=*/0, &subgraph),
+      xnn_status_success);
+
+  // 2^(W-1) elements of 32 bits: 2^(W+1) bytes.
+  constexpr size_t kHalfWidth = sizeof(size_t) * 4;
+  const size_t dims[2] = {size_t{1} << kHalfWidth,
+                          size_t{1} << (kHalfWidth - 1)};
+  uint32_t id = XNN_INVALID_VALUE_ID;
+  EXPECT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2, dims,
+                                    /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                                    /*flags=*/0, &id),
+            xnn_status_unsupported_parameter);
+
+  ASSERT_EQ(xnn_delete_subgraph(subgraph), xnn_status_success);
+}
+
 TEST(SUBGRAPH, static_scalar_sub_byte_value) {
   SubgraphTester tester(/*external_value_ids=*/2, /*flags=*/0);
   xnn_subgraph_t subgraph = tester.Subgraph();
