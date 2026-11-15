@@ -125,4 +125,39 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::Range(1, YNN_MAX_TENSOR_RANK)),
     test_param_to_string<BroadcastLike::ParamType>);
 
+TEST(BroadcastLike, static_input_dynamic_template_dot) {
+  const uint32_t a_id = 0;
+  const uint32_t out_id = 1;
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  uint32_t a_broadcast_id = YNN_INVALID_VALUE_ID;
+  uint32_t b_broadcast_id = YNN_INVALID_VALUE_ID;
+  std::vector<float> b_data(2 * 4 * 8, 1.0f);
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(ynn_type_fp32, 3, a_id)
+      .AddTensor(ynn_type_fp32, {2, 4, 8}, b_id, b_data.data())
+      .AddTensor(ynn_type_fp32, 3, a_broadcast_id)
+      .AddTensor(ynn_type_fp32, 3, b_broadcast_id)
+      .AddOutput(ynn_type_fp32, 3, out_id)
+      .AddBroadcastLike({0}, a_id, b_id, a_broadcast_id)
+      .AddBroadcastLike({0}, b_id, a_id, b_broadcast_id)
+      .AddDot(1, a_broadcast_id, b_broadcast_id, YNN_INVALID_VALUE_ID, out_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<float> a_data(1 * 6 * 4, 2.0f);
+  std::vector<float> out_data(2 * 6 * 8, 0.0f);
+  runtime.ReshapeExternalTensor({1, 6, 4}, a_data.data(), a_id)
+      .ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  ASSERT_EQ(runtime.GetExternalTensorShape(out_id),
+            (std::vector<size_t>{2, 6, 8}));
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor({3, 6, 4}, a_data.data(), a_id);
+  ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
+}
+
 }  // namespace ynn

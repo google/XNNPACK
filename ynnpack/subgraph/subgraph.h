@@ -60,17 +60,6 @@ inline bool operator<(const axes_set& a, const axes_set& b) {
   return a.to_ulong() < b.to_ulong();
 }
 
-inline axes_set permute(span<const int32_t> p, const axes_set& x) {
-  axes_set result;
-  for (size_t i = 0; i < p.size(); ++i) {
-    int32_t src_i = p[i];
-    if (src_i >= 0 && static_cast<size_t>(src_i) < x.size()) {
-      result[i] = x[src_i];
-    }
-  }
-  return result;
-}
-
 // Validation helpers for public APIs.
 ynn_status validate_subgraph(const char* node, ynn_subgraph_t subgraph);
 ynn_status validate_rank(const char* node, const char* rank_of, size_t rank);
@@ -218,16 +207,6 @@ struct ynn_node {
     }
   };
 
-  struct broadcast_like {
-    // The dimensions to attempt to broadcast.
-    ynn::axes_set axes;
-    friend bool operator==(const broadcast_like& a, const broadcast_like& b) {
-      return a.axes == b.axes;
-    }
-    friend bool operator<(const broadcast_like& a, const broadcast_like& b) {
-      return a.axes < b.axes;
-    }
-  };
   struct concatenate {
     int32_t axis;
     friend bool operator==(const concatenate& a, const concatenate& b) {
@@ -617,12 +596,12 @@ struct ynn_node {
   // TODO: We need an absl::InlinedVector for things like this.
   std::vector<uint32_t> inputs;
   std::vector<uint32_t> outputs;
-  std::variant<invalid, opaque, broadcast_like, concatenate, even_split, copy,
-               gather, stack, reshape, static_broadcast, static_pad,
-               static_slice, slice_like, static_transpose, stencil_copy,
-               unary_elementwise, binary_elementwise, ternary_elementwise, dot,
-               iota, pack_b, transpose_a, get_tensor_shape, reduce,
-               dequantize_dot, dynamic_quantization>
+  std::variant<invalid, opaque, concatenate, even_split, copy, gather, stack,
+               reshape, static_broadcast, static_pad, static_slice, slice_like,
+               static_transpose, stencil_copy, unary_elementwise,
+               binary_elementwise, ternary_elementwise, dot, iota, pack_b,
+               transpose_a, get_tensor_shape, reduce, dequantize_dot,
+               dynamic_quantization>
       op;
 
   const char* name() const;

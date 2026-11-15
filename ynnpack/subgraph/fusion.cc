@@ -91,8 +91,7 @@ struct scalar_arithmetic {
 
 // These nodes do not change the value of any element in a value.
 bool is_layout_transform(const ynn_node& node) {
-  return std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
-         std::holds_alternative<ynn_node::copy>(node.op) ||
+  return std::holds_alternative<ynn_node::copy>(node.op) ||
          std::holds_alternative<ynn_node::gather>(node.op) ||
          std::holds_alternative<ynn_node::reshape>(node.op) ||
          std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
@@ -756,9 +755,6 @@ ynn::axes_set get_broadcast_axes(const ynn_subgraph& subgraph,
                                  const ynn_node& node) {
   if (std::holds_alternative<ynn_node::static_broadcast>(node.op)) {
     return get_static_broadcast_axes(subgraph, node);
-  } else if (const auto* broadcast_like =
-                 std::get_if<ynn_node::broadcast_like>(&node.op)) {
-    return broadcast_like->axes;
   }
   // We don't handle broadcast here because it doesn't actually broadcast the
   // data, so it's harmless.
@@ -790,20 +786,6 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
     return false;
   }
 
-  if (std::holds_alternative<ynn_node::broadcast_like>(broadcast.op)) {
-    // broadcast_like takes shape from its template value, which is not permuted
-    // by this rewrite.
-    // We should probably add a permutation to broadcast_like (and slice_like)
-    // to allow those ops to use a different dimension than the corresponding
-    // one in the input, and we could apply this permutation here instead of
-    // bailing on this rewrite.
-    for (size_t i = 0; i < perm.size(); ++i) {
-      if (axes[i] && perm[i] != static_cast<int32_t>(i)) {
-        return false;
-      }
-    }
-  }
-
   // Currently we have consumer(broadcast(x)), we want broadcast(consumer(x)).
   for (uint32_t& input_id : consumer->inputs) {
     if (input_id == broadcast_id) {
@@ -812,12 +794,8 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
     }
   }
 
-  if (auto* b = std::get_if<ynn_node::broadcast_like>(&broadcast.op)) {
-    b->axes = permute(perm, b->axes);
-  }
   // A static_broadcast learns its shape from its output value, which is the
   // original output of the consumer after this rewrite.
-
   ynn_value& broadcast_output = subgraph.value(broadcast.outputs[0]);
   broadcast_output.type = consumer_output.type;
   broadcast_output.extents = permute(perm, input.extents, slinky::expr{});
@@ -829,60 +807,6 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
   analysis.invalidate();
 
   return true;
-}
-
-template <typename BroadcastOp>
-bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
-                      subgraph_analysis& analysis) {
-  BroadcastOp* broadcast = std::get_if<BroadcastOp>(&node.op);
-  if (broadcast == nullptr) {
-    return false;
-  }
-
-  const ynn_value& input = subgraph.value(node.inputs[0]);
-  ynn_value& output = subgraph.value(node.outputs[0]);
-
-  std::vector<ynn_node*>& consumers = analysis.consumers[node.outputs[0]];
-  if (!std::all_of(consumers.begin(), consumers.end(), [&](const ynn_node* i) {
-        return can_implicitly_broadcast(*i, output.id);
-      })) {
-    // One of the consumers can't handle implicit broadcasts.
-    return false;
-  }
-
-  if (input.is_static()) {
-    // If the input is static, all broadcastable dimensions are already implicit
-    // broadcasts.
-    YNN_LOG_DEBUG() << "Replacing explicit broadcast of static value with "
-                       "implicit broadcast";
-    broadcast->axes = ynn::axes_set{};
-  }
-
-  bool simplified = false;
-  for (size_t d = 0; d < broadcast->axes.size(); ++d) {
-    if (!broadcast->axes[d]) continue;
-    if (d >= input.extents.size() || !input.extents[d].defined() ||
-        !output.extents[d].defined()) {
-      YNN_LOG_DEBUG() << "Replacing explicit broadcast with implicit broadcast "
-                         "in dimension "
-                      << d;
-      if (d < output.extents.size()) {
-        output.extents[d] = {};
-      }
-      broadcast->axes[d] = false;
-      simplified = true;
-    }
-  }
-
-  if (!output.is_external_output() && !broadcast->axes.any()) {
-    // This broadcast is a no-op, replace consumers with our input, and remove
-    // the op.
-    YNN_LOG_DEBUG() << "Removing broadcast";
-    analysis.replace_all_uses(node.outputs[0], node.inputs[0]);
-    analysis.invalidate_node(node);
-    return true;
-  }
-  return simplified;
 }
 
 bool is_expand_dims_noop(const ynn_value& input,
@@ -928,14 +852,6 @@ bool remove_broadcast_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
   analysis.replace_all_uses(node.outputs[0], node.inputs[0]);
   analysis.invalidate_node(node);
   return true;
-}
-
-bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
-                      subgraph_analysis& analysis) {
-  // expand_dims is often used to broadcast trailing dimensions and not needed
-  // in this case.
-  return remove_broadcast_expand_dims(subgraph, node, analysis) ||
-         remove_broadcast<ynn_node::broadcast_like>(subgraph, node, analysis);
 }
 
 // If the producer of an elementwise op is a static_broadcast, and the dimension
@@ -2145,7 +2061,8 @@ bool rewrite_transpose_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   // Redefine T (node) to be B' (new_broadcast), which broadcasts to the shape
   // of z.
   analysis.update_node(node, [&]() {
-    ynn::define_static_broadcast(subgraph, node, y_prime_id, z_id);
+    ynn::define_static_broadcast(subgraph, node, subgraph.value(z_id).extents,
+                                 y_prime_id, &z_id);
   });
 
   return true;
@@ -2778,7 +2695,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_dequantize_dot_convert(*this, node, analysis) ||
                 ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
                 ynn::move_broadcast_to_output(*this, node, analysis) ||
-                ynn::remove_broadcast(*this, node, analysis) ||
+                ynn::remove_broadcast_expand_dims(*this, node, analysis) ||
                 ynn::rewrite_transpose_broadcast(*this, node, analysis) ||
                 ynn::remove_static_broadcast_from_elementwise(*this, node,
                                                               analysis) ||

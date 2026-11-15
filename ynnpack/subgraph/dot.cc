@@ -1483,16 +1483,18 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   if (subgraph.value(input_a_id).rank() == 0) {
     // We could support broadcasting `a` more generally. For now, broadcast a
     // scalar `a` to [1, k...], where k... are the k dimensions of `b`.
-    ynn_value& broadcast_a =
-        subgraph.new_internal_value(subgraph.value(input_a_id).type);
-    broadcast_a.extents.resize(num_k_dims + 1);
+    std::vector<slinky::expr> output_extents(num_k_dims + 1);
     for (size_t d = 0; d < num_k_dims; ++d) {
-      broadcast_a.extents[d] = subgraph.value(input_b_id).extent(d + 1);
+      output_extents[d] = subgraph.value(input_b_id).extent(d + 1);
     }
+    uint32_t broadcast_a_id = YNN_INVALID_VALUE_ID;
     ynn_node broadcast;
-    define_static_broadcast(subgraph, broadcast, input_a_id, broadcast_a.id);
-    subgraph.add_node(std::move(broadcast));
-    input_a_id = broadcast_a.id;
+    define_static_broadcast(subgraph, broadcast, std::move(output_extents),
+                            input_a_id, &broadcast_a_id);
+    if (broadcast.is_valid()) {
+      subgraph.add_node(std::move(broadcast));
+    }
+    input_a_id = broadcast_a_id;
   }
   const bool b_transposed =
       always_alias_transpose(subgraph, input_b_id, 0, 1) == ynn_status_success;

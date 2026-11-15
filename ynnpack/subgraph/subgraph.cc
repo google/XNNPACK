@@ -451,7 +451,6 @@ size_t static_size_of_inputs(const ynn_subgraph& subgraph,
 bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
   const auto* transpose = std::get_if<ynn_node::static_transpose>(&node.op);
   if ((transpose && transpose->alias) ||
-      std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
       std::holds_alternative<ynn_node::reshape>(node.op) ||
       std::holds_alternative<ynn_node::static_broadcast>(node.op)) {
     // Don't constant fold these "free" ops. If we allowed them to constant
@@ -1218,9 +1217,6 @@ const char* name_of(const ynn_node::ternary_elementwise&) {
   return "ternary_elementwise";
 }
 const char* name_of(const ynn_node::reduce&) { return "reduce"; }
-const char* name_of(const ynn_node::broadcast_like&) {
-  return "broadcast_like";
-}
 const char* name_of(const ynn_node::concatenate&) { return "concatenate"; }
 const char* name_of(const ynn_node::stack&) { return "stack"; }
 const char* name_of(const ynn_node::even_split&) { return "even_split"; }
@@ -1324,10 +1320,6 @@ void print(std::ostream& os, const ynn_node::reduce& op) {
   if (op.keep_dims) {
     os << " keep_dims";
   }
-}
-
-void print(std::ostream& os, const ynn_node::broadcast_like& op) {
-  os << "axes=" << op.axes;
 }
 
 void print(std::ostream& os, const ynn_node::concatenate& op) {

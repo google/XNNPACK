@@ -286,13 +286,6 @@ MATCHER_P(IsPackB, transpose, "") {
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsIota());
 MATCHER(IsIota, "") { return std::holds_alternative<ynn_node::iota>(arg.op); }
 
-// Checks that the given node is a broadcast_like.
-//
-// Example:
-//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsBroadcastLike());
-MATCHER(IsBroadcastLike, "") {
-  return std::holds_alternative<ynn_node::broadcast_like>(arg.op);
-}
 MATCHER(IsStaticBroadcast, "") {
   return std::holds_alternative<ynn_node::static_broadcast>(arg.op);
 }

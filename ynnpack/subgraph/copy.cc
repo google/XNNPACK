@@ -383,9 +383,33 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
 }
 
 void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
-                             uint32_t input_id, uint32_t output_id) {
+                             std::vector<slinky::expr> output_extents,
+                             uint32_t input_id, uint32_t* output_id) {
   const ynn_value& input = subgraph.value(input_id);
-  const ynn_value& output = subgraph.value(output_id);
+  for (slinky::expr& e : output_extents) {
+    if (slinky::is_constant(e, 1)) {
+      e = {};
+    }
+  }
+
+  bool noop = output_extents.size() == input.extents.size();
+  if (noop) {
+    for (size_t d = 0; d < output_extents.size(); ++d) {
+      if (input.extents[d].defined() != output_extents[d].defined() ||
+          (input.extents[d].defined() &&
+           !slinky::prove_true(input.extents[d] == output_extents[d]))) {
+        noop = false;
+        break;
+      }
+    }
+  }
+  if (noop && *output_id == YNN_INVALID_VALUE_ID) {
+    *output_id = input_id;
+    return;
+  }
+
+  ynn_value& output = subgraph.get_output_value(output_id, input);
+  output.extents = std::move(output_extents);
   for (size_t d = 0; d < std::min(input.extents.size(), output.extents.size());
        ++d) {
     if (input.extents[d].defined()) {
@@ -397,7 +421,7 @@ void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   node.inputs = {input_id};
-  node.outputs = {output_id};
+  node.outputs = {*output_id};
   node.op = ynn_node::static_broadcast{};
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const int input_id = node.inputs[0];
@@ -485,39 +509,20 @@ ynn_status ynn_define_static_broadcast(ynn_subgraph_t subgraph, size_t rank,
   // dimensions. 0 indicates the dimension is passed through unchanged.
   const ynn_value& input = subgraph->value(input_id);
   std::vector<slinky::expr> output_extents = input.extents;
-  bool noop = true;
+  output_extents.resize(std::max(output_extents.size(), rank));
   for (size_t d = 0; d < rank; ++d) {
     const size_t new_dim_d = new_dims[rank - 1 - d];
-    if (d >= output_extents.size()) {
-      // This is a new outer dimension.
-      output_extents.push_back(new_dim_d <= 1 ? slinky::expr{}
-                                              : slinky::expr(new_dim_d));
-      noop = false;
-      continue;
+    if (new_dim_d != 0) {
+      output_extents[d] = slinky::expr(new_dim_d);
     }
-    if (new_dim_d == 0) continue;
-    if ((!output_extents[d].defined() && new_dim_d == 1) ||
-        slinky::prove_true(output_extents[d] == new_dim_d)) {
-      // This dimension is a no-op.
-      continue;
-    }
-    noop = false;
-    output_extents[d] = new_dim_d == 1 ? slinky::expr{}
-                                       : slinky::expr(new_dim_d);
   }
-
-  if (noop && *output_id == YNN_INVALID_VALUE_ID) {
-    // This node is a no-op, skip it.
-    *output_id = input_id;
-    return ynn_status_success;
-  }
-
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-  output.extents = std::move(output_extents);
 
   ynn_node node;
-  define_static_broadcast(*subgraph, node, input_id, *output_id);
-  subgraph->add_node(std::move(node));
+  define_static_broadcast(*subgraph, node, std::move(output_extents), input_id,
+                          output_id);
+  if (node.is_valid()) {
+    subgraph->add_node(std::move(node));
+  }
   return ynn_status_success;
 }
 

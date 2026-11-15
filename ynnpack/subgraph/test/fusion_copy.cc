@@ -30,7 +30,7 @@ TEST(fusion, broadcast_of_static) {
       .AddOutput(ynn_type_fp32, 2, x_id)
       .AddTensor(ynn_type_fp32, {10, 1}, b_id, value)
       .AddTensor(ynn_type_fp32, 2, broadcast_b_id);
-  builder.AddBroadcastLike({0, 1}, b_id, a_id, broadcast_b_id)
+  builder.AddBroadcastLike({1}, b_id, a_id, broadcast_b_id)
       .AddBinary(ynn_binary_min, a_id, broadcast_b_id, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
@@ -375,10 +375,10 @@ TEST(fusion, move_static_broadcast_to_output_transpose) {
               AllOf(IsStaticTranspose(), InputsAre(x_id)));
 }
 
-TEST(fusion, do_not_move_broadcast_like_to_output_transpose) {
-  // transpose(broadcast_like(x, y)) should not be rewritten to
-  // broadcast_like(transpose(x), y) when the transpose permutes the broadcasted
-  // dimension, because y is not transposed.
+TEST(fusion, move_broadcast_like_permuted_to_output_transpose) {
+  // transpose(broadcast_like(x, y)) is rewritten to
+  // static_broadcast(transpose(x)) even when the transpose permutes the
+  // broadcasted dimension.
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   const uint32_t out_id = 2;
@@ -398,14 +398,15 @@ TEST(fusion, do_not_move_broadcast_like_to_output_transpose) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticTranspose());
-  EXPECT_THAT(ProducerOf(broadcast_x_id, subgraph), IsBroadcastLike());
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
+  uint32_t transpose_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(transpose_out_id, subgraph),
+              AllOf(IsStaticTranspose(), InputsAre(x_id)));
 }
 
 TEST(fusion, move_broadcast_like_to_output_transpose) {
-  // transpose(broadcast_like(x, y)) should be rewritten to
-  // broadcast_like(transpose(x), y) when the transpose does not permute the
-  // broadcasted dimension.
+  // transpose(broadcast_like(x, y)) is rewritten to
+  // static_broadcast(transpose(x)).
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   const uint32_t out_id = 2;
@@ -425,7 +426,7 @@ TEST(fusion, move_broadcast_like_to_output_transpose) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  EXPECT_THAT(ProducerOf(out_id, subgraph), IsBroadcastLike());
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
   uint32_t transpose_out_id = ProducerOf(out_id, subgraph).inputs[0];
   EXPECT_THAT(ProducerOf(transpose_out_id, subgraph),
               AllOf(IsStaticTranspose(), InputsAre(x_id)));
