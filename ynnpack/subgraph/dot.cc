@@ -1583,11 +1583,12 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     kernel = unpacked_kernel;
   }
+  const bool transpose_a = (kernel.flags & dot_flag::transpose_a) != 0;
 
   ynn_node node;
   node.inputs = {input_a_id, input_b_id, input_c_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::dot{num_k_dims, symmetric_b};
+  node.op = ynn_node::dot{num_k_dims, symmetric_b, pack_b, transpose_a};
 
   // Propagate shape.
   int c_rank;
@@ -1641,7 +1642,6 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   // wouldn't need to put input_b into the inputs in the first place.
   node.inputs[1] = packed_b_id;
 
-  const bool transpose_a = kernel.flags & dot_flag::transpose_a;
   if (transpose_a) {
     // The kernel we want to use has a transposed a.
     // By definition, `m_dim` is the first dimension after the k dims.
@@ -1662,12 +1662,14 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       kernel.cost /
       (static_cast<float>(std::max<size_t>(1, shape.m)) *
        std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
-  node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
-                 block_n_unpacked, seconds_per_mac, tile_k = kernel.tile_k,
+  node.create = [block_n_unpacked, seconds_per_mac, tile_k = kernel.tile_k,
                  tile_m = kernel.tile_m](const ynn_node& node,
                                          ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
+    const bool symmetric_b = op.symmetric_b;
+    const bool pack_b = op.pack_b;
+    const bool transpose_a = op.transpose_a;
     ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
     ynn_runtime_value& input_b = runtime.value(node.inputs[1]);
     ynn_runtime_value input_c;
@@ -1822,6 +1824,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, input_b.type, output.type};
+    const bool consistent_arithmetic =
+        (!type_is_integral(input_a.type) || !type_is_integral(input_b.type)) &&
+        (runtime.subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
     const int thread_count =
         runtime.threadpool() ? runtime.threadpool()->thread_count() + 1 : 1;
     auto func = slinky::func(
