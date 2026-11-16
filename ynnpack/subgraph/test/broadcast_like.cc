@@ -61,8 +61,10 @@ void TestImpl(T, size_t rank) {
   for (size_t input_rank = 0; input_rank <= rank; input_rank++) {
     for (std::pair<size_t, size_t> input_ranks :
          {std::make_pair(input_rank, rank), std::make_pair(rank, input_rank)}) {
-      std::vector<int32_t> axes(input_ranks.first);
-      std::iota(axes.begin(), axes.end(), 0);
+      // Broadcast all of the dimensions of the template, including those the
+      // input does not have.
+      std::vector<int32_t> axes(rank);
+      std::iota(axes.begin(), axes.end(), -static_cast<int32_t>(rank));
 
       // Define subgraph
       SubgraphBuilder subgraph(3);
@@ -158,6 +160,55 @@ TEST(BroadcastLike, static_input_dynamic_template_dot) {
 
   runtime.ReshapeExternalTensor({3, 6, 4}, a_data.data(), a_id);
   ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
+}
+
+// Dimensions of the template that are not in the requested axes are not
+// broadcasted, even if the template has more dimensions than the input.
+TEST(BroadcastLike, noop_higher_rank_template) {
+  const uint32_t template_id = 0;
+  uint32_t input_id = YNN_INVALID_VALUE_ID;
+  std::vector<float> input_data(2 * 4 * 8, 1.0f);
+
+  SubgraphBuilder subgraph(1);
+  subgraph.AddInput(ynn_type_fp32, {0, 2, 1, 4}, template_id)
+      .AddTensor(ynn_type_fp32, {2, 4, 8}, input_id, input_data.data());
+
+  const int32_t axes[] = {0};
+  uint32_t output_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_broadcast_like(subgraph.GetSubgraph(), 1, axes, input_id,
+                                      template_id, &output_id, /*flags=*/0),
+            ynn_status_success);
+  EXPECT_EQ(output_id, input_id);
+}
+
+// If the output is already defined, it has the rank of the template, but only
+// the requested axes are broadcasted.
+TEST(BroadcastLike, defined_output_has_template_rank) {
+  const uint32_t input_id = 0;
+  const uint32_t template_id = 1;
+  const uint32_t output_id = 2;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, 1, input_id)
+      .AddInput(ynn_type_fp32, 3, template_id)
+      .AddOutput(ynn_type_fp32, 3, output_id)
+      .AddBroadcastLike({-1}, input_id, template_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<float> input = {1.0f, 2.0f, 3.0f, 4.0f};
+  runtime.ReshapeExternalTensor({4}, input.data(), input_id)
+      .ReshapeExternalTensor({2, 3, 4}, nullptr, template_id)
+      .ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  ASSERT_EQ(runtime.GetExternalTensorShape(output_id),
+            (std::vector<size_t>{1, 1, 4}));
+
+  std::vector<float> output(4);
+  runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_THAT(output, testing::ElementsAreArray(input));
 }
 
 }  // namespace ynn

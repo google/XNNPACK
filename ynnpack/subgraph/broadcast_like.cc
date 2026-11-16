@@ -41,31 +41,34 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
     }
   }
 
-  // Propagate shape. Any dimensions the template has that the input does not
-  // are broadcasted.
+  // Propagate shape. Only the dimensions in `axes` are broadcasted. Dimensions
+  // the input does not have are only added if they need to be broadcasted.
   const std::vector<slinky::expr>& template_extents = template_value.extents;
   std::vector<slinky::expr> output_extents = input.extents;
-  if (template_extents.size() > static_cast<size_t>(input.rank())) {
-    output_extents.insert(output_extents.end(),
-                          template_extents.begin() + input.rank(),
-                          template_extents.end());
-  }
-
   for (int d = 0; d < static_cast<int>(template_extents.size()); ++d) {
     if (!axes_set[d]) continue;
 
     const slinky::expr& template_extent = template_extents[d];
-    slinky::expr& output_extent = output_extents[d];
     if (!template_extent.defined() || slinky::is_one(template_extent)) {
       continue;
     }
 
+    if (d >= static_cast<int>(output_extents.size())) {
+      output_extents.resize(d + 1);
+    }
+    slinky::expr& output_extent = output_extents[d];
     if (!output_extent.defined() || slinky::is_one(output_extent)) {
       output_extent = template_extent;
     } else if (!slinky::prove_true(template_extent == output_extent)) {
       output_extent = subgraph->globals.get(
           select(template_extent != 1, template_extent, output_extent), "b");
     }
+  }
+
+  if (*output_id != YNN_INVALID_VALUE_ID &&
+      output_extents.size() < template_extents.size()) {
+    // The output is already defined, it should have the rank of the template.
+    output_extents.resize(template_extents.size());
   }
 
   ynn_node node;
