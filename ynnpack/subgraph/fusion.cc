@@ -661,25 +661,6 @@ bool rewrite_exp_subtract(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
-// Rewrite get_tensor_shape(unary(x)) to get_tensor_shape(x). This is useful
-// because unary(x) might otherwise be unused after another rewrite (e.g.
-// sum(square(x)) => sum_squared(x)).
-bool rewrite_get_tensor_shape_of_unary(ynn_subgraph& subgraph, ynn_node& node,
-                                       subgraph_analysis& analysis) {
-  if (!std::get_if<ynn_node::get_tensor_shape>(&node.op)) {
-    return false;
-  }
-  ynn_node* producer = analysis.producer_of(node.inputs[0]);
-  if (producer && std::get_if<ynn_node::unary_elementwise>(&producer->op)) {
-    // This is a get_tensor_shape of a unary elementwise op.
-    YNN_LOG_DEBUG() << "Rewriting get_tensor_shape(unary_elementwise(x)) to "
-                       "get_tensor_shape(x)";
-    analysis.replace_input_id(node, node.inputs[0], producer->inputs[0]);
-    return true;
-  }
-  return false;
-}
-
 bool can_implicitly_broadcast(const ynn_node& node, uint32_t input_id) {
   if (std::get_if<ynn_node::binary_elementwise>(&node.op)) {
     return true;
@@ -2693,7 +2674,6 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_dequantize_dot(*this, node, analysis) ||
                 ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
                 ynn::rewrite_dequantize_dot_convert(*this, node, analysis) ||
-                ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
                 ynn::move_broadcast_to_output(*this, node, analysis) ||
                 ynn::remove_broadcast_expand_dims(*this, node, analysis) ||
                 ynn::rewrite_transpose_broadcast(*this, node, analysis) ||

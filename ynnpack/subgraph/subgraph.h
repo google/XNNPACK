@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_SUBGRAPH_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_SUBGRAPH_H_
 
+#include <algorithm>
 #include <bitset>
 #include <cassert>
 #include <cstddef>
@@ -31,6 +32,7 @@
 #include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "slinky/base/arithmetic.h"
+#include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -546,18 +548,20 @@ struct ynn_node {
     }
   };
   struct get_tensor_shape {
-    std::vector<int32_t> axes;
-    bool reshape_1d;
-    bool unique_dims;
+    std::vector<slinky::expr> extents;
     friend bool operator==(const get_tensor_shape& a,
                            const get_tensor_shape& b) {
-      return a.axes == b.axes && a.reshape_1d == b.reshape_1d &&
-             a.unique_dims == b.unique_dims;
+      return a.extents.size() == b.extents.size() &&
+             std::equal(a.extents.begin(), a.extents.end(), b.extents.begin(),
+                        [](const slinky::expr& x, const slinky::expr& y) {
+                          return slinky::match(x, y);
+                        });
     }
     friend bool operator<(const get_tensor_shape& a,
                           const get_tensor_shape& b) {
-      return std::tie(a.axes, a.reshape_1d, a.unique_dims) <
-             std::tie(b.axes, b.reshape_1d, b.unique_dims);
+      return std::lexicographical_compare(a.extents.begin(), a.extents.end(),
+                                          b.extents.begin(), b.extents.end(),
+                                          slinky::node_less{});
     }
   };
   struct reduce {

@@ -714,17 +714,18 @@ ynn_status fold_constant_get_tensor_shape(ynn_subgraph& subgraph) {
     const auto* op = std::get_if<ynn_node::get_tensor_shape>(&node.op);
     if (!op) continue;
 
-    assert(node.inputs.size() == 1);
-    const ynn_value& input = subgraph.value(node.inputs[0]);
-
-    if (ynn::any_n(input.rank(), [&](size_t i) {
-          return !slinky::as_constant(input.extent(i));
-        })) {
+    if (std::any_of(op->extents.begin(), op->extents.end(),
+                    [](const slinky::expr& e) {
+                      return !slinky::as_constant(e).has_value();
+                    })) {
       continue;
     }
 
     uint32_t output_id = node.outputs[0];
     ynn_value& output = subgraph.value(output_id);
+    if (output.is_external_output()) {
+      continue;
+    }
 
     assert(output.rank() <= ynn::max_tensor_rank);
     std::array<slinky::dim, ynn::max_tensor_rank> dims;
@@ -736,8 +737,7 @@ ynn_status fold_constant_get_tensor_shape(ynn_subgraph& subgraph) {
         output.rank(), ynn::type_size_bytes(output.type), dims.data(),
         YNN_ALLOCATION_ALIGNMENT);
 
-    ynn::implement_get_tensor_shape(input.extents, op->axes, op->reshape_1d,
-                                    output.type, *output.data);
+    ynn::implement_get_tensor_shape(op->extents, output.type, *output.data);
 
     node.invalidate();
   }
@@ -765,6 +765,14 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   std::vector<int> static_refs(values.size(), 0);
   for (ynn_node& node : nodes) {
     if (!node.is_valid()) continue;
+    if (const auto* op = std::get_if<ynn_node::get_tensor_shape>(&node.op)) {
+      if (std::any_of(op->extents.begin(), op->extents.end(),
+                      [](const slinky::expr& e) {
+                        return !slinky::as_constant(e).has_value();
+                      })) {
+        continue;
+      }
+    }
     if (std::any_of(node.inputs.begin(), node.inputs.end(), [&](uint32_t i) {
           return i != YNN_INVALID_VALUE_ID && !value_is_static[i];
         })) {
@@ -1403,10 +1411,7 @@ void print(std::ostream& os, const ynn_node::dynamic_quantization& op) {
 }
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
-  os << "axes=" << op.axes;
-  if (op.reshape_1d) {
-    os << " reshape_1d";
-  }
+  os << "extents=" << op.extents;
 }
 
 std::string value_ids_to_string(const std::vector<uint32_t>& value_ids) {

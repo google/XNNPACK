@@ -6,8 +6,6 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_GET_TENSOR_SHAPE_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_GET_TENSOR_SHAPE_H_
 
-#include <cstdint>
-
 #include "ynnpack/base/span.h"
 #include "ynnpack/include/ynnpack.h"
 #include "slinky/runtime/buffer.h"
@@ -20,7 +18,6 @@ class eval_context;
 namespace ynn {
 
 void implement_get_tensor_shape(ynn::span<const slinky::expr> extents,
-                                ynn::span<const int32_t> axes, bool reshape_1d,
                                 ynn_type type, const slinky::raw_buffer& output,
                                 slinky::eval_context* ctx = nullptr);
 
