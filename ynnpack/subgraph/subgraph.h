@@ -502,16 +502,25 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
-    bool symmetric_b = false;
-    bool pack_b = false;
-    bool transpose_a = false;
+    uint32_t flags = 0;
+    bool packed_b = false;
+    bool transposed_a = false;
+    bool optimized = false;
+    size_t tile_m = 1;
+    size_t tile_k = 1;
+    int block_n_unpacked = 0;
+    float seconds_per_mac = 0.0f;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims && a.symmetric_b == b.symmetric_b &&
-             a.pack_b == b.pack_b && a.transpose_a == b.transpose_a;
+      return a.num_k_dims == b.num_k_dims && a.flags == b.flags &&
+             a.packed_b == b.packed_b && a.transposed_a == b.transposed_a &&
+             a.optimized == b.optimized && a.tile_m == b.tile_m &&
+             a.tile_k == b.tile_k;
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return std::tie(a.num_k_dims, a.symmetric_b, a.pack_b, a.transpose_a) <
-             std::tie(b.num_k_dims, b.symmetric_b, b.pack_b, b.transpose_a);
+      return std::tie(a.num_k_dims, a.flags, a.packed_b, a.transposed_a,
+                      a.optimized, a.tile_m, a.tile_k) <
+             std::tie(b.num_k_dims, b.flags, b.packed_b, b.transposed_a,
+                      b.optimized, b.tile_m, b.tile_k);
     }
   };
   struct iota {
@@ -718,6 +727,9 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
 
   // Rewrite parts of the graph that we have optimized patterns for.
   ynn_status fusion();
+
+  // Select dot kernels and insert `pack_b` / `transpose_a` nodes for dots.
+  ynn_status optimize_dots();
 
   // Common subexpression elimination.
   ynn_status eliminate_common_subgraphs();

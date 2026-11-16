@@ -67,6 +67,9 @@ cc_library(
         "copy.cc",
         "copy.h",
         "dot.cc",
+        "dot_pack.cc",
+        "dot_schedule.cc",
+        "dot_schedule.h",
         "dynamic_quantization.cc",
         "elementwise.cc",
         "even_split.cc",
@@ -100,6 +103,7 @@ cc_library(
     ],
     hdrs = [
         "dot.h",  # Only public for tests...
+        "dot_pack.h",  # Only public for tests...
         "elementwise.h",  # Only public for tests...
         "runtime.h",
         "slinky.h",
