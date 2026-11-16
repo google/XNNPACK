@@ -26,7 +26,7 @@
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/copy.h"
-#include "ynnpack/subgraph/dot.h"
+#include "ynnpack/subgraph/dot_pack.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/fusion_lut.h"
 #include "ynnpack/subgraph/fusion_types.h"
