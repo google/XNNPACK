@@ -27,6 +27,7 @@
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
+#include "ynnpack/subgraph/dot_pack.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/fusion_lut.h"
 #include "ynnpack/subgraph/fusion_types.h"
@@ -2339,6 +2340,56 @@ bool rewrite_pack_b_transpose(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite transpose_a(static_transpose(x)) to use an aliased transpose when
+// static_transpose only swaps (or preserves) dim 0 and m_dim.
+bool rewrite_transpose_a_transpose(ynn_subgraph& subgraph, ynn_node& node,
+                                   subgraph_analysis& analysis) {
+  const auto* transpose_a_op = std::get_if<ynn_node::transpose_a>(&node.op);
+  if (!transpose_a_op) return false;
+
+  const uint32_t input_id = node.inputs[0];
+  if (type_element_count(subgraph.value(input_id).type) != 1) {
+    // We can't alias a transpose of sub-byte types.
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(input_id);
+  if (!producer) return false;
+
+  auto* transpose_op = std::get_if<ynn_node::static_transpose>(&producer->op);
+  if (!transpose_op || transpose_op->alias) return false;
+
+  const int m_dim = transpose_a_op->m_dim;
+  const auto& perm = transpose_op->permutation;
+  if (m_dim <= 0 || static_cast<size_t>(m_dim) >= perm.size()) return false;
+
+  const int p0 = perm[0];
+  const int pm = perm[m_dim];
+  if (!((p0 == 0 && pm == m_dim) || (p0 == m_dim && pm == 0))) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Aliasing static_transpose feeding transpose_a";
+  if (analysis.consumers[input_id].size() == 1 &&
+      !subgraph.value(input_id).is_external_output()) {
+    transpose_op->alias = true;
+    return true;
+  }
+
+  std::vector<int32_t> new_perm = perm;
+  const uint32_t x_id = producer->inputs[0];
+  uint32_t aliased_id = YNN_INVALID_VALUE_ID;
+  ynn_node new_node;
+  define_static_transpose(subgraph, new_node, std::move(new_perm), x_id,
+                          &aliased_id, /*alias=*/true);
+  subgraph.add_node(std::move(new_node));
+  node.inputs[0] = aliased_id;
+
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
 // Rewrites sum(a * b) to dot(a, b).
 // dot(a, b) is sum(a(., k1, k2, k3, i, ...) * b(j, k1, k2, k3, ., ...)) where .
 // indicates a new dimension. This rewrite looks for sums that can be transposed
@@ -2641,6 +2692,211 @@ bool rewrite_requantize_quantize(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
+                                      uint32_t input_a_id,
+                                      subgraph_analysis& analysis) {
+  // Walk upstream through layout transforms to find `quantize_int8`.
+  uint32_t quantize_output_id = input_a_id;
+  ynn_node* producer_a = analysis.producer_of(quantize_output_id);
+  while (producer_a && is_layout_transform(*producer_a)) {
+    quantize_output_id = producer_a->inputs[0];
+    producer_a = analysis.producer_of(quantize_output_id);
+  }
+  if (!producer_a || !is_ternary_node(*producer_a, ternary_op::quantize_int8)) {
+    return false;
+  }
+
+  uint32_t zp_id = producer_a->inputs[2];
+  ynn_node* producer_zp = analysis.producer_of(zp_id);
+  if (!producer_zp) return false;
+
+  auto* dq_op = std::get_if<ynn_node::dynamic_quantization>(&producer_zp->op);
+  if (!dq_op || dq_op->output_zero_point != 0) return false;
+
+  // `dq_op->output_zero_point = 128` shifts `zp_id` by +128, so it must not be
+  // exposed externally or consumed by another quantize/dequantize node.
+  if (subgraph.value(zp_id).is_external_output()) return false;
+  if (auto zp_consumers = analysis.consumers.find(zp_id);
+      zp_consumers != analysis.consumers.end()) {
+    for (const ynn_node* consumer : zp_consumers->second) {
+      if (consumer == producer_a) continue;
+      if (is_ternary_node(*consumer, ternary_op::quantize_int8) ||
+          is_ternary_node(*consumer, ternary_op::quantize_uint8) ||
+          is_ternary_node(*consumer, ternary_op::dequantize)) {
+        return false;
+      }
+    }
+  }
+
+  uint32_t input_id = producer_a->inputs[0];
+  const ynn_value& input = subgraph.value(input_id);
+  const ynn::ternary_kernel_fn kernel =
+      ynn::get_ternary_kernel(ternary_op::quantize_uint8, input.type,
+                              ynn_type_fp32, ynn_type_int32, ynn_type_uint8);
+  if (!kernel) return false;
+
+  // Verify that every transitive consumer of `quantize_output_id` (through
+  // layout transforms) is an unoptimized `dot` whose input A prefers uint8,
+  // and that none of the rewritten values are external outputs. This handles
+  // both single-dot chains and fan-outs (e.g. Q/K/V or gate/up projections)
+  // while refusing to mutate values shared with non-dot consumers.
+  std::vector<uint32_t> values_to_rewrite = {quantize_output_id};
+  for (size_t i = 0; i < values_to_rewrite.size(); ++i) {
+    uint32_t id = values_to_rewrite[i];
+    const ynn_value& val = subgraph.value(id);
+    if (val.type != ynn_type_int8 || val.is_external_output()) {
+      return false;
+    }
+    auto it = analysis.consumers.find(id);
+    if (it == analysis.consumers.end()) {
+      continue;
+    }
+    for (const ynn_node* consumer : it->second) {
+      if (is_layout_transform(*consumer)) {
+        // Only the data input (`inputs[0]`) is value-preserving; e.g. `gather`
+        // interprets `inputs[1]` as signed/unsigned indices.
+        if (consumer->inputs[0] != id) {
+          return false;
+        }
+        for (size_t j = 1; j < consumer->inputs.size(); ++j) {
+          if (consumer->inputs[j] == id) {
+            return false;
+          }
+        }
+        uint32_t out_id = consumer->outputs[0];
+        if (std::find(values_to_rewrite.begin(), values_to_rewrite.end(),
+                      out_id) == values_to_rewrite.end()) {
+          values_to_rewrite.push_back(out_id);
+        }
+      } else if (const auto* consumer_dot =
+                     std::get_if<ynn_node::dot>(&consumer->op)) {
+        if (consumer_dot->optimized || consumer->inputs[0] != id ||
+            consumer->inputs[1] == id || consumer->inputs[2] == id) {
+          return false;
+        }
+        if (!prefer_uint8_dot(subgraph.value(consumer->inputs[1]).type)) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+
+  // This is a dynamic quantization feeding only uint8-preferring dots. Rewrite
+  // it (and all layout-transformed values) to produce uint8 instead of int8.
+  uint32_t scale_id = producer_a->inputs[1];
+  dq_op->output_zero_point = 128;
+  for (uint32_t id : values_to_rewrite) {
+    subgraph.value(id).type = ynn_type_uint8;
+  }
+  analysis.update_node(*producer_a, [&]() {
+    ynn::define_ternary(subgraph, *producer_a, input_id, scale_id, zp_id,
+                        quantize_output_id, ternary_op::quantize_uint8, kernel);
+  });
+  return true;
+}
+
+bool try_requantize_rewrite(ynn_subgraph& subgraph, ynn_node& node,
+                            subgraph_analysis& analysis) {
+  const auto& dot_op = std::get<ynn_node::dot>(node.op);
+  const size_t num_k_dims = dot_op.num_k_dims;
+  const uint32_t input_a_id = node.inputs[0];
+  const uint32_t input_b_id = node.inputs[1];
+  const uint32_t input_c_id = node.inputs[2];
+
+  uint32_t uint8_a_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn_define_unary(&subgraph, ynn_unary_requantize_to_uint8,
+                                       input_a_id, &uint8_a_id, 0);
+  if (status != ynn_status_success) {
+    YNN_LOG_ERROR() << "Failed to define requantize_to_uint8 for input A";
+    analysis.invalidate();
+    return false;
+  }
+
+  // Compute sum(b) as dot(1, b), which is much faster than a reduction over
+  // the (non-innermost) k dimensions of b. The result has a broadcast m
+  // dimension.
+  uint32_t one_id = subgraph.get_scalar_value_id<uint8_t>(1);
+  uint32_t sum_b_expanded_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_dot(&subgraph, num_k_dims, one_id, input_b_id,
+                          YNN_INVALID_VALUE_ID, &sum_b_expanded_id, 0);
+  if (status != ynn_status_success) {
+    YNN_LOG_ERROR() << "Failed to define sum of B in uint8 rewrite";
+    analysis.invalidate();
+    return false;
+  }
+
+  // Multiply sum_b_expanded by 128 (or -128) and adjust input_c_id.
+  uint32_t new_c_id = YNN_INVALID_VALUE_ID;
+  if (input_c_id == YNN_INVALID_VALUE_ID) {
+    uint32_t c_neg128_id = subgraph.get_scalar_value_id<int32_t>(-128);
+    status = ynn_define_binary(&subgraph, ynn_binary_multiply,
+                               sum_b_expanded_id, c_neg128_id, &new_c_id, 0);
+    if (status != ynn_status_success) {
+      YNN_LOG_ERROR() << "Failed to multiply sum_b by -128";
+      analysis.invalidate();
+      return false;
+    }
+  } else {
+    uint32_t c128_id = subgraph.get_scalar_value_id<int32_t>(128);
+    uint32_t sum_b_times_128_id = YNN_INVALID_VALUE_ID;
+    status =
+        ynn_define_binary(&subgraph, ynn_binary_multiply, sum_b_expanded_id,
+                          c128_id, &sum_b_times_128_id, 0);
+    if (status != ynn_status_success) {
+      YNN_LOG_ERROR() << "Failed to multiply sum_b by 128";
+      analysis.invalidate();
+      return false;
+    }
+
+    status = ynn_define_binary(&subgraph, ynn_binary_subtract, input_c_id,
+                               sum_b_times_128_id, &new_c_id, 0);
+    if (status != ynn_status_success) {
+      YNN_LOG_ERROR() << "Failed to subtract sum_b_times_128 from input_c";
+      analysis.invalidate();
+      return false;
+    }
+  }
+
+  node.inputs[0] = uint8_a_id;
+  node.inputs[2] = new_c_id;
+  subgraph.topological_sort();
+  analysis.invalidate();
+  return true;
+}
+
+// Some hardware (mostly x86) prefers `a` of a dot to be uint8 while `b` is a
+// signed type, because pmaddubsw and dpbusd instructions multiply a signed and
+// an unsigned int8. This checks if the current machine is such hardware, and
+// if so, rewrites input A to uint8 instead of int8.
+bool rewrite_dot_input_a_to_uint8(ynn_subgraph& subgraph, ynn_node& node,
+                                  subgraph_analysis& analysis) {
+  const ynn_node::dot* dot_op = std::get_if<ynn_node::dot>(&node.op);
+  if (!dot_op || dot_op->optimized) return false;
+
+  const uint32_t input_a_id = node.inputs[0];
+  const ynn_value& a = subgraph.value(input_a_id);
+  if (a.type != ynn_type_int8) return false;
+
+  const ynn_type b_type = subgraph.value(node.inputs[1]).type;
+  if (!prefer_uint8_dot(b_type)) {
+    // This hardware does not prefer uint8.
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting input A (" << input_a_id
+                  << ") to uint8 for dot";
+
+  if (try_dynamic_quantization_rewrite(subgraph, input_a_id, analysis)) {
+    // `a` was produced by dynamic quantization, and we rewrote it to quantize
+    // to uint8.
+    return true;
+  }
+
+  return try_requantize_rewrite(subgraph, node, analysis);
+}
+
 }  // namespace
 
 }  // namespace ynn
@@ -2686,12 +2942,27 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_gather(*this, node, analysis) ||
                 ynn::rewrite_pack_b_transpose(*this, node, analysis) ||
+                ynn::rewrite_transpose_a_transpose(*this, node, analysis) ||
                 ynn::rewrite_fast_math(*this, node, analysis) ||
                 ynn::rewrite_requantize_quantize(*this, node, analysis) ||
                 changed;
 
       if (!analysis.is_valid) {
         break;
+      }
+    }
+    // Wait for other rewrites (e.g. `dequantize_dot`, `sum_to_dot`) and
+    // dead-value cleanup before committing to a dot uint8 input A rewrite.
+    if (!changed) {
+      for (ynn_node& node : nodes) {
+        if (!node.is_valid()) continue;
+
+        changed =
+            ynn::rewrite_dot_input_a_to_uint8(*this, node, analysis) || changed;
+
+        if (!analysis.is_valid) {
+          break;
+        }
       }
     }
     if (changed) invalidate_dead_values();

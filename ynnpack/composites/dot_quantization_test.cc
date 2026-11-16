@@ -92,6 +92,9 @@ TEST(DotQuantizationTest, Basic) {
                               zero_fp32_id, &scale_out_id, 0),
             ynn_status_success);
 
+  ASSERT_EQ(ynn_optimize_subgraph(subgraph.get(), nullptr, 0),
+            ynn_status_success);
+
   // Create runtime
   runtime_ptr runtime = create_runtime(subgraph, nullptr, 0);
   ASSERT_NE(runtime, nullptr);
