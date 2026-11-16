@@ -77,7 +77,8 @@ bool IsValid(const Config* config) {
   } else if constexpr (std::is_same_v<Config, xnn_dwconv_config>) {
     return config && config->minmax;
   } else if constexpr (std::is_same_v<Config, xnn_gemm_config>) {
-    return config && config->minmax.gemm[0].function[0];
+    return config && config->mr != 0 &&
+           config->minmax.gemm[config->mr - 1].function[0];
   } else if constexpr (std::is_same_v<Config, xnn_binary_elementwise_config>) {
     return config && config->op_ukernel &&
            (xnn_is_f16_supported_natively(xnn_init_hardware_config()) ||
