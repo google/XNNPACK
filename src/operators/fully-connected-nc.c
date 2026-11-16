@@ -3467,12 +3467,17 @@ reshape_fully_connected_nc_with_pack_lh_config(
         xnn_operator_type_to_string_v2(fully_connected_op));
     return xnn_status_out_of_memory;
   }
+  const uint32_t nr_tile =
+      (mr == 1 && fully_connected_op->gemm_config != NULL &&
+       fully_connected_op->gemm_config->nr_gemv != 0)
+          ? fully_connected_op->gemm_config->nr_gemv
+          : nr;
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
       /*m_stride=*/m_stride,
       /*n_stride=*/
       fully_connected_op->weights_stride,
-      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr_tile,
       /*num_threads=*/num_threads);
 
   // If we are packing the LHS, provide a per-thread workspace to do so inline.
@@ -3504,6 +3509,10 @@ reshape_fully_connected_nc_with_pack_lh_config(
             "it is a no-op for GEMV.",
             xnn_operator_type_to_string(fully_connected_op->type), batch_size,
             output_channels, input_channels);
+        inline_lhs_packing = should_inline_lhs_packing;
+        log2_input_element_size = inline_lhs_packing
+                                      ? packed_lh_config->log2_input_element_size
+                                      : packed_lh_config->log2_packed_element_size;
       } else if (!should_inline_lhs_packing ||
                  num_threads * mr > round_up(batch_size, mr)) {
         xnn_log_debug(

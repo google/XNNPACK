@@ -547,13 +547,17 @@ reshape_dynamic_fully_connected_nc(
   }
 
   // Compute the optimal tile size for this GEMM.
+  const uint32_t nr_tile =
+      (mr == 1 && gemm_config != NULL && gemm_config->nr_gemv != 0)
+          ? gemm_config->nr_gemv
+          : nr;
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
       /*m_stride=*/input_stride
           << (packed_lh_config ? packed_lh_config->log2_packed_element_size
                                : log2_input_element_size),
       /*n_stride=*/weights_stride,
-      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr_tile,
       /*num_threads=*/num_threads);
 
   const size_t workspace_offset =
@@ -590,6 +594,7 @@ reshape_dynamic_fully_connected_nc(
             "it is a no-op for GEMV.",
             xnn_operator_type_to_string(dynamic_fully_connected_op->type),
             batch_size, output_channels, input_channels);
+        inline_lhs_packing = should_inline_lhs_packing;
       } else if (!should_inline_lhs_packing ||
                  num_threads * mr > round_up(batch_size, mr)) {
         xnn_log_debug(

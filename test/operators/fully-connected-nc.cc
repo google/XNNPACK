@@ -525,6 +525,54 @@ TEST(FULLY_CONNECTED_NC_PQS8_QC4W, signed_weights_without_bias) {
       .TestPQS8QC4W();
 }
 
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unit_batch_unsigned_weights_with_bias) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(29)
+      .kernel_zero_point(8)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unit_batch_unsigned_weights_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(29)
+      .kernel_zero_point(8)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unit_batch_signed_weights_with_bias) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(29)
+      .kernel_zero_point(0)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unit_batch_signed_weights_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(29)
+      .kernel_zero_point(0)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unit_batch_multi_tile_with_weights_cache) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(531)
+      .use_weights_cache(true)
+      .kernel_zero_point(8)
+      .TestPQS8QC4W();
+}
+
 TEST(FULLY_CONNECTED_NC_PQS8_QC4W, invalid_kernel_zero_point) {
   ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
 
