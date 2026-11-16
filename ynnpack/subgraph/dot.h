@@ -9,7 +9,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dot/cost_model/cost_model.h"
 #include "ynnpack/kernels/dot/dot.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/runtime/buffer.h"
@@ -22,7 +24,10 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node,
 
 // Returns true if dots of type uint8 x `b_type` are faster than dots of type
 // int8 x `b_type`.
-bool prefer_uint8_dot(ynn_type b_type);
+bool prefer_uint8_dot(
+    ynn_type b_type,
+    const dot_cost_models& cost_models = get_dot_cost_models(),
+    uint64_t arch_flags = get_supported_arch_flags());
 
 uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,

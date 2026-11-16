@@ -48,6 +48,20 @@ static constexpr dot_cost_models redwood_cove = {
         /*load_b_cost=*/4.09e-12f,
         /*output_c=*/2.02e-11f,
     },
+    // Ratio (predicted / actual): std=0.001, min=0.996, max=1.002 (n=18)
+    .x86_amx_int8_int4 = {
+        /*block_overhead=*/0.00e+00f,
+        /*load_a_cost=*/7.45e-12f,
+        /*load_b_cost=*/1.64e-11f,
+        /*output_c=*/1.86e-11f,
+    },
+    // Ratio (predicted / actual): std=0.001, min=0.996, max=1.002 (n=18)
+    .x86_amx_uint8_int4 = {
+        /*block_overhead=*/0.00e+00f,
+        /*load_a_cost=*/7.45e-12f,
+        /*load_b_cost=*/1.64e-11f,
+        /*output_c=*/1.86e-11f,
+    },
 #endif  // YNN_ARCH_X86_AMXINT8
 #ifdef YNN_ARCH_X86_AVX512VNNI
     // Ratio (predicted / actual): std=0.088, min=0.822, max=1.150 (n=119)

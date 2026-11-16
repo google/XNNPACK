@@ -15,6 +15,7 @@
 #include "ynnpack/kernels/dot/cost_model/cost_model.h"
 #include "ynnpack/kernels/dot/dot.h"
 #if defined(YNN_ARCH_X86)
+#include "ynnpack/kernels/dot/cost_model/golden_cove.h"
 #include "ynnpack/kernels/dot/cost_model/redwood_cove.h"
 #elif defined(YNN_ARCH_ARM64)
 #include "ynnpack/kernels/dot/cost_model/donan_everest.h"
@@ -243,10 +244,45 @@ TEST(get_dot_kernel, int4_amxint8) {
   const uint64_t arch_flags_amxint8 =
       arch_flags_avx512 | arch_flag::avx512vnni | arch_flag::amxint8;
 
-  EXPECT_EQ(get_dot_kernel_name(int8_int4, {m, n, k}, arch_flags_amxint8),
-            "dot_int8_int4_int32_32x32x64_16x16x8_amxint8");
-  EXPECT_EQ(get_dot_kernel_name(uint8_int4, {m, n, k}, arch_flags_amxint8),
-            "dot_uint8_int4_int32_32x32x64_16x16x8_amxint8");
+  for (const dot_cost_models* cost_models : {&golden_cove, &redwood_cove}) {
+    auto get_name = [&](const dot_type& type, const dot_shape& shape,
+                        const dot_packed_shape& packed_shape = {}) {
+      return kernels[get_dot_kernel(type, *cost_models, shape, packed_shape,
+                                    /*required_flags=*/0,
+                                    /*transpose_a=*/std::nullopt,
+                                    arch_flags_amxint8)
+                         .kernel];
+    };
+
+    EXPECT_EQ(get_name(int8_int4, {m, n, k}),
+              "dot_int8_int4_int32_32x32x64_16x16x8_amxint8");
+    dot_kernel k_prefill =
+        get_dot_kernel(uint8_int4, *cost_models, {m, n, k}, {},
+                       /*required_flags=*/0, std::nullopt, arch_flags_amxint8);
+    EXPECT_EQ(kernels[k_prefill.kernel],
+              "dot_uint8_int4_int32_32x32x64_16x16x8_amxint8");
+
+    // Small m (decode) should select AVX512VNNI kernels even when reusing the
+    // prefill packed B layout, switching to 16x32x64 AMX for mid-sized m and
+    // 32x32x64 AMX for larger m.
+    dot_packed_shape packed_shape = {k_prefill.block_n, k_prefill.tile_k};
+    EXPECT_EQ(get_name(uint8_int4, {1, 4096, 5376}),
+              "dot_uint8_int4_int32_1x32x8_1x16x8_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int4, {1, 4096, 5376}, packed_shape),
+              "dot_uint8_int4_int32_1x32x8_1x16x8_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int4, {4, 4096, 5376}, packed_shape),
+              "dot_uint8_int4_int32_4x32x8_1x16x8_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int4, {8, 4096, 5376}, packed_shape),
+              "dot_uint8_int4_int32_16x32x64_16x16x8_amxint8");
+    EXPECT_EQ(get_name(uint8_int4, {16, 4096, 5376}, packed_shape),
+              "dot_uint8_int4_int32_16x32x64_16x16x8_amxint8");
+    EXPECT_EQ(get_name(uint8_int4, {32, 4096, 5376}, packed_shape),
+              "dot_uint8_int4_int32_32x32x64_16x16x8_amxint8");
+    EXPECT_EQ(get_name(int8_int4, {8, 4096, 5376}, packed_shape),
+              "dot_int8_int4_int32_16x32x64_16x16x8_amxint8");
+    EXPECT_EQ(get_name(int8_int4, {16, 4096, 5376}, packed_shape),
+              "dot_int8_int4_int32_16x32x64_16x16x8_amxint8");
+  }
 }
 #endif  // !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) &&
         // defined(YNN_ARCH_X86_AMXINT8)

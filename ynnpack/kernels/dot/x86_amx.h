@@ -673,6 +673,22 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2_impl(
 
 template <typename TAB, typename TC, template <int, int, int> class TileOp,
           typename TB = TAB>
+YNN_ALWAYS_INLINE static void x86_amx_dot_1x2(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out,
+    dot_kernel_state& state) {
+  assert(M <= 16);
+  internal::x86_amx_dot_2x2_impl<TAB, TC, TileOp, /*HasM1=*/false, TB>(
+      M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
+      B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
+      state);
+  set_amx_destructor(state);
+}
+
+template <typename TAB, typename TC, template <int, int, int> class TileOp,
+          typename TB = TAB>
 YNN_ALWAYS_INLINE static void x86_amx_dot_2x2(
     size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,

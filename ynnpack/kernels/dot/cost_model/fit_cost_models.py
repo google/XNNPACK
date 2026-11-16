@@ -212,7 +212,12 @@ def infer_kernel_model_name(
     arch_variants.append("f16c_fma3")
 
   type_variants = [type_str]
-  first_part = type_str.split("_")[0]
+  parts = type_str.split("_")
+  if len(parts) >= 2:
+    ab_type = f"{parts[0]}_{parts[1]}"
+    if ab_type not in type_variants:
+      type_variants.append(ab_type)
+  first_part = parts[0]
   if first_part not in type_variants:
     type_variants.append(first_part)
 
@@ -542,14 +547,16 @@ def main():
 
     # Fit int8 and uint8 AMX models to the combined data so they share the exact
     # same cost model parameters.
-    amx_int8_combined = by_model.get("x86_amx_int8", []) + by_model.get(
-        "x86_amx_uint8", []
-    )
-    if amx_int8_combined:
-      if "x86_amx_int8" in valid_models:
-        by_model["x86_amx_int8"] = amx_int8_combined
-      if "x86_amx_uint8" in valid_models:
-        by_model["x86_amx_uint8"] = amx_int8_combined
+    for int8_model, uint8_model in (
+        ("x86_amx_int8", "x86_amx_uint8"),
+        ("x86_amx_int8_int4", "x86_amx_uint8_int4"),
+    ):
+      combined = by_model.get(int8_model, []) + by_model.get(uint8_model, [])
+      if combined:
+        if int8_model in valid_models:
+          by_model[int8_model] = combined
+        if uint8_model in valid_models:
+          by_model[uint8_model] = combined
 
     fitted_models: Dict[str, Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
     for _, field_name in header_fields:

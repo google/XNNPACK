@@ -209,7 +209,10 @@ cc_test(
     srcs = ["dynamically_quantized_dot.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
-    deps = TEST_DEPS + ["//ynnpack/subgraph"],
+    deps = TEST_DEPS + [
+        "//ynnpack/kernels/dot/cost_model",
+        "//ynnpack/subgraph",
+    ],
 )
 
 [cc_test(
