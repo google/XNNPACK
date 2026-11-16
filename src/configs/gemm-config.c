@@ -2593,11 +2593,11 @@ static void init_qd8_f16_qc2w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_AVX512VNNIGFNI
+    #if XNN_ENABLE_AVX512VNNIGFNI && XNN_ENABLE_AVX512VNNI
       // AMD Zen4 and Zen5 have gfni but it is slow.
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && hardware_config->uarch[XNN_UARCH_INDEX] != xnn_uarch_zen4 && hardware_config->uarch[XNN_UARCH_INDEX] != xnn_uarch_zen5) {
         qd8_f16_qc2w_gemm_config.arch = xnn_arch_x86_avx512vnnigfni;
-        qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
+        qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm);
         qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnnigfni_prfm);
         qd8_f16_qc2w_gemm_config.mr = 8;
         qd8_f16_qc2w_gemm_config.nr = 16;
@@ -2915,11 +2915,11 @@ static void init_qd8_f32_qc2w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_AVX512VNNIGFNI
+    #if XNN_ENABLE_AVX512VNNIGFNI && XNN_ENABLE_AVX512VNNI
       // AMD Zen4 and Zen5 have gfni but it is slow.
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && hardware_config->uarch[XNN_UARCH_INDEX] != xnn_uarch_zen4 && hardware_config->uarch[XNN_UARCH_INDEX] != xnn_uarch_zen5) {
         qd8_f32_qc2w_gemm_config.arch = xnn_arch_x86_avx512vnnigfni;
-        qd8_f32_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
+        qd8_f32_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm);
         qd8_f32_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnnigfni_prfm);
         qd8_f32_qc2w_gemm_config.mr = 8;
         qd8_f32_qc2w_gemm_config.nr = 16;

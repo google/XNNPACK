@@ -93,47 +93,48 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm(
     c7 = c6;
   }
 
-  const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point);
-  const __m512i vinput_zero_point1 = _mm512_set1_epi32((int) quantization_params[1].zero_point);
-  const __m512i vinput_zero_point2 = _mm512_set1_epi32((int) quantization_params[2].zero_point);
-  const __m512i vinput_zero_point3 = _mm512_set1_epi32((int) quantization_params[3].zero_point);
-  const __m512i vinput_zero_point4 = _mm512_set1_epi32((int) quantization_params[4].zero_point);
-  const __m512i vinput_zero_point5 = _mm512_set1_epi32((int) quantization_params[5].zero_point);
-  const __m512i vinput_zero_point6 = _mm512_set1_epi32((int) quantization_params[6].zero_point);
-  const __m512i vinput_zero_point7 = _mm512_set1_epi32((int) quantization_params[7].zero_point);
   const __m512 voutput_min = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.min));
   const __m512 voutput_max = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.max));
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0x03);
+  // -(kzp + 2) * row_sum + kzp * kc * zero_point is evaluated as
+  // -2 * row_sum + kzp * (kc * zero_point - row_sum).
+  const float neg_two_row_sum0 = -2.0f * row_sum[0];
+  const float kzp_scale0 = (float) original_kc * quantization_params[0].zero_point - row_sum[0];
+  const float neg_two_row_sum1 = -2.0f * row_sum[1];
+  const float kzp_scale1 = (float) original_kc * quantization_params[1].zero_point - row_sum[1];
+  const float neg_two_row_sum2 = -2.0f * row_sum[2];
+  const float kzp_scale2 = (float) original_kc * quantization_params[2].zero_point - row_sum[2];
+  const float neg_two_row_sum3 = -2.0f * row_sum[3];
+  const float kzp_scale3 = (float) original_kc * quantization_params[3].zero_point - row_sum[3];
+  const float neg_two_row_sum4 = -2.0f * row_sum[4];
+  const float kzp_scale4 = (float) original_kc * quantization_params[4].zero_point - row_sum[4];
+  const float neg_two_row_sum5 = -2.0f * row_sum[5];
+  const float kzp_scale5 = (float) original_kc * quantization_params[5].zero_point - row_sum[5];
+  const float neg_two_row_sum6 = -2.0f * row_sum[6];
+  const float kzp_scale6 = (float) original_kc * quantization_params[6].zero_point - row_sum[6];
+  const float neg_two_row_sum7 = -2.0f * row_sum[7];
+  const float kzp_scale7 = (float) original_kc * quantization_params[7].zero_point - row_sum[7];
   do {
-    const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
-    __m512i vsum0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);
-    __m512i vacc0x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum0x0123456789ABCDEF, 0));
-    __m512i vacc0x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum0x0123456789ABCDEF, 1));
-    __m512i vsum1x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point1);
-    __m512i vacc1x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum1x0123456789ABCDEF, 0));
-    __m512i vacc1x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum1x0123456789ABCDEF, 1));
-    __m512i vsum2x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point2);
-    __m512i vacc2x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum2x0123456789ABCDEF, 0));
-    __m512i vacc2x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum2x0123456789ABCDEF, 1));
-    __m512i vsum3x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point3);
-    __m512i vacc3x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum3x0123456789ABCDEF, 0));
-    __m512i vacc3x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum3x0123456789ABCDEF, 1));
-    __m512i vsum4x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point4);
-    __m512i vacc4x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum4x0123456789ABCDEF, 0));
-    __m512i vacc4x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum4x0123456789ABCDEF, 1));
-    __m512i vsum5x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point5);
-    __m512i vacc5x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum5x0123456789ABCDEF, 0));
-    __m512i vacc5x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum5x0123456789ABCDEF, 1));
-    __m512i vsum6x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point6);
-    __m512i vacc6x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum6x0123456789ABCDEF, 0));
-    __m512i vacc6x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum6x0123456789ABCDEF, 1));
-    __m512i vsum7x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point7);
-    __m512i vacc7x01234567 = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum7x0123456789ABCDEF, 0));
-    __m512i vacc7x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum7x0123456789ABCDEF, 1));
+    const int32_t* ksum = (const int32_t*) w;
+    __m512i vacc0x01234567 = _mm512_setzero_si512();
+    __m512i vacc0x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc1x01234567 = _mm512_setzero_si512();
+    __m512i vacc1x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc2x01234567 = _mm512_setzero_si512();
+    __m512i vacc2x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc3x01234567 = _mm512_setzero_si512();
+    __m512i vacc3x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc4x01234567 = _mm512_setzero_si512();
+    __m512i vacc4x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc5x01234567 = _mm512_setzero_si512();
+    __m512i vacc5x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc6x01234567 = _mm512_setzero_si512();
+    __m512i vacc6x89ABCDEF = _mm512_setzero_si512();
+    __m512i vacc7x01234567 = _mm512_setzero_si512();
+    __m512i vacc7x89ABCDEF = _mm512_setzero_si512();
     w = (const int32_t*) w + 16;
-    const void* kzp = w;
     w = (const float*) w + 16;
 
     size_t k = kc;
@@ -447,6 +448,15 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm(
     const __m512i vsum7x01234567 = _mm512_add_epi32(vacc7x01234567, _mm512_srli_epi64(vacc7x01234567, 32));
     const __m512i vsum7x89ABCDEF = _mm512_add_epi32(vacc7x89ABCDEF, _mm512_srli_epi64(vacc7x89ABCDEF, 32));
     __m512i vacc7x0123456789ABCDEF = _mm512_permutex2var_epi32(vsum7x01234567, vidx, vsum7x89ABCDEF);
+    const __m512i vksum0123456789ABCDEF = _mm512_load_si512(ksum);
+    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[0].zero_point)));
+    vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc1x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[1].zero_point)));
+    vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc2x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[2].zero_point)));
+    vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc3x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[3].zero_point)));
+    vacc4x0123456789ABCDEF = _mm512_add_epi32(vacc4x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[4].zero_point)));
+    vacc5x0123456789ABCDEF = _mm512_add_epi32(vacc5x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[5].zero_point)));
+    vacc6x0123456789ABCDEF = _mm512_add_epi32(vacc6x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[6].zero_point)));
+    vacc7x0123456789ABCDEF = _mm512_add_epi32(vacc7x0123456789ABCDEF, _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[7].zero_point)));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);
@@ -457,43 +467,27 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm(
     __m512 vscaled6x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc6x0123456789ABCDEF);
     __m512 vscaled7x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc7x0123456789ABCDEF);
 
-    const __m512 rh_zero_points_0123456789ABCDEF = _mm512_load_ps((const float*) kzp);
-    const __m512 biased_rh_zero_points_0123456789ABCDEF = _mm512_add_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(2.0f));
+    const __m512 rh_zero_points_0123456789ABCDEF = _mm512_load_ps((const float*) (ksum + 16));
 
-    // Subtract out the scaled left-hand row sums.
-    const __m512 lh_row_sum_0 = _mm512_set1_ps(row_sum[0]);
-    vscaled0x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_0, vscaled0x0123456789ABCDEF);
-    const __m512 lh_row_sum_1 = _mm512_set1_ps(row_sum[1]);
-    vscaled1x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_1, vscaled1x0123456789ABCDEF);
-    const __m512 lh_row_sum_2 = _mm512_set1_ps(row_sum[2]);
-    vscaled2x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_2, vscaled2x0123456789ABCDEF);
-    const __m512 lh_row_sum_3 = _mm512_set1_ps(row_sum[3]);
-    vscaled3x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_3, vscaled3x0123456789ABCDEF);
-    const __m512 lh_row_sum_4 = _mm512_set1_ps(row_sum[4]);
-    vscaled4x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_4, vscaled4x0123456789ABCDEF);
-    const __m512 lh_row_sum_5 = _mm512_set1_ps(row_sum[5]);
-    vscaled5x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_5, vscaled5x0123456789ABCDEF);
-    const __m512 lh_row_sum_6 = _mm512_set1_ps(row_sum[6]);
-    vscaled6x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_6, vscaled6x0123456789ABCDEF);
-    const __m512 lh_row_sum_7 = _mm512_set1_ps(row_sum[7]);
-    vscaled7x0123456789ABCDEF = _mm512_fnmadd_ps(biased_rh_zero_points_0123456789ABCDEF, lh_row_sum_7, vscaled7x0123456789ABCDEF);
-    // Add the product of left/right-hand zero points and `kc`.
-    const __m512 vscaled_lh_zero_point_0 = _mm512_set1_ps((float) original_kc * quantization_params[0].zero_point);
-    const __m512 vscaled_lh_zero_point_1 = _mm512_set1_ps((float) original_kc * quantization_params[1].zero_point);
-    const __m512 vscaled_lh_zero_point_2 = _mm512_set1_ps((float) original_kc * quantization_params[2].zero_point);
-    const __m512 vscaled_lh_zero_point_3 = _mm512_set1_ps((float) original_kc * quantization_params[3].zero_point);
-    const __m512 vscaled_lh_zero_point_4 = _mm512_set1_ps((float) original_kc * quantization_params[4].zero_point);
-    const __m512 vscaled_lh_zero_point_5 = _mm512_set1_ps((float) original_kc * quantization_params[5].zero_point);
-    const __m512 vscaled_lh_zero_point_6 = _mm512_set1_ps((float) original_kc * quantization_params[6].zero_point);
-    const __m512 vscaled_lh_zero_point_7 = _mm512_set1_ps((float) original_kc * quantization_params[7].zero_point);
-    vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_0, vscaled0x0123456789ABCDEF);
-    vscaled1x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_1, vscaled1x0123456789ABCDEF);
-    vscaled2x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_2, vscaled2x0123456789ABCDEF);
-    vscaled3x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_3, vscaled3x0123456789ABCDEF);
-    vscaled4x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_4, vscaled4x0123456789ABCDEF);
-    vscaled5x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_5, vscaled5x0123456789ABCDEF);
-    vscaled6x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_6, vscaled6x0123456789ABCDEF);
-    vscaled7x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, vscaled_lh_zero_point_7, vscaled7x0123456789ABCDEF);
+    // Subtract out the left-hand row sums scaled by the weight bias of 2.
+    vscaled0x0123456789ABCDEF = _mm512_add_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum0));
+    vscaled1x0123456789ABCDEF = _mm512_add_ps(vscaled1x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum1));
+    vscaled2x0123456789ABCDEF = _mm512_add_ps(vscaled2x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum2));
+    vscaled3x0123456789ABCDEF = _mm512_add_ps(vscaled3x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum3));
+    vscaled4x0123456789ABCDEF = _mm512_add_ps(vscaled4x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum4));
+    vscaled5x0123456789ABCDEF = _mm512_add_ps(vscaled5x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum5));
+    vscaled6x0123456789ABCDEF = _mm512_add_ps(vscaled6x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum6));
+    vscaled7x0123456789ABCDEF = _mm512_add_ps(vscaled7x0123456789ABCDEF, _mm512_set1_ps(neg_two_row_sum7));
+    // Add the right-hand zero points scaled by the left-hand zero points
+    // and `original_kc` less the left-hand row sums.
+    vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale0), vscaled0x0123456789ABCDEF);
+    vscaled1x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale1), vscaled1x0123456789ABCDEF);
+    vscaled2x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale2), vscaled2x0123456789ABCDEF);
+    vscaled3x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale3), vscaled3x0123456789ABCDEF);
+    vscaled4x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale4), vscaled4x0123456789ABCDEF);
+    vscaled5x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale5), vscaled5x0123456789ABCDEF);
+    vscaled6x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale6), vscaled6x0123456789ABCDEF);
+    vscaled7x0123456789ABCDEF = _mm512_fmadd_ps(rh_zero_points_0123456789ABCDEF, _mm512_set1_ps(kzp_scale7), vscaled7x0123456789ABCDEF);
     vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale));
     vscaled1x0123456789ABCDEF = _mm512_mul_ps(vscaled1x0123456789ABCDEF, _mm512_set1_ps(quantization_params[1].inv_scale));
     vscaled2x0123456789ABCDEF = _mm512_mul_ps(vscaled2x0123456789ABCDEF, _mm512_set1_ps(quantization_params[2].inv_scale));
