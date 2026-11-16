@@ -240,7 +240,11 @@ const std::array<size_t, 3>& get_dot_cache_budgets() {
   static const std::array<size_t, 3> budgets = []() {
     const std::array<size_t, 3> sizes = get_cache_sizes();
     const size_t l3_size = sizes[2] > sizes[1] ? sizes[2] : 0;
-    return std::array<size_t, 3>{sizes[0] / 2, sizes[1] / 4, l3_size / 4};
+    const std::array<size_t, 3> result = {sizes[0] / 2, sizes[1] / 4,
+                                          l3_size / 4};
+    assert(result[0] > 0);
+    assert(result[1] > 0);
+    return result;
   }();
   return budgets;
 }
@@ -1395,6 +1399,20 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // the fly as if B were dynamic).
     return true;
   }
+  // Pack B if it comes from a transpose that moves K away from dim 1 (e.g.,
+  // sequence-major {0, 2, 1, 3}, where K is strided across outer dims and
+  // unpacked `dot` cannot alias `require_contiguous` external inputs without
+  // copying, or `permutation[1] == 0`, which fuses into
+  // `pack_b(transpose=true)`).
+  if (const ynn_node* producer = subgraph.get_producer(b.id)) {
+    if (const auto* transpose_op =
+            std::get_if<ynn_node::static_transpose>(&producer->op)) {
+      if (transpose_op->permutation.size() >= 2 &&
+          transpose_op->permutation[1] != 1) {
+        return true;
+      }
+    }
+  }
 
   const int block_m = unpacked_kernel.block_m;
   slinky::expr a_batch = 1;
@@ -1427,7 +1445,24 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   // loads of unpacked data are strided.
   const int b_elem_size = type_size_bytes(b.type);
   const int block_n = unpacked_kernel.block_n;
-  if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
+  if (kernel.tile_k == 1 &&
+      (block_n * b_elem_size) % YNN_CACHE_LINE_SIZE == 0) {
+    if (slinky::prove_true(b.extent(0) <= block_n &&
+                           b.extent(0) % kernel.tile_n == 0)) {
+      return false;
+    }
+    slinky::expr b_matrix_bytes = b_elem_size;
+    for (size_t i = 0; i < num_k_dims + 1; ++i) {
+      if (b.extent(i).defined()) b_matrix_bytes *= b.extent(i);
+    }
+    const std::array<size_t, 3>& cache_budgets = get_dot_cache_budgets();
+    const slinky::index_t cache_budget =
+        std::max<size_t>(cache_budgets[1], cache_budgets[2] / 4);
+    if (slinky::prove_true(b.extent(0) % kernel.tile_n == 0) &&
+        slinky::prove_true(b_matrix_bytes <= cache_budget)) {
+      max_unpacked_blocks = std::max(max_unpacked_blocks, 64);
+    }
+  } else if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
     slinky::expr b_bytes = b_batch * b_elem_size;
     for (size_t i = 0; i < num_k_dims + 1; ++i) {
       if (b.extent(i).defined()) b_bytes *= b.extent(i);
@@ -1867,7 +1902,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // TODO: b/555814090 - More sophisticated automatic scheduling would help.
     const bool n_outer =
         rank >= 2 && !input_b.is_static() &&
-        (!input_a.is_internal() || !slinky::prove_true(n < m));
+        (!input_a.is_internal() ||
+         (input_b.is_internal() && !slinky::prove_true(n < m)));
     if (is_split_k) {
       if (n_outer) {
         loop_order.push_back(num_k_dims + 1);  // m (innermost)
