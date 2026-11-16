@@ -3,8 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
 #include <cstdint>
+#include <numeric>
+#include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
@@ -108,6 +112,236 @@ TEST(runtime, cross_runtime_isolation) {
   for (float v : out_b) {
     EXPECT_FLOAT_EQ(v, -2.0f);
   }
+}
+
+namespace {
+
+std::vector<size_t> GetStrides(ynn_runtime_t runtime, uint32_t id) {
+  size_t rank = YNN_MAX_TENSOR_RANK;
+  std::vector<size_t> strides(rank);
+  EXPECT_EQ(ynn_get_external_value_strides(runtime, id, &rank, strides.data()),
+            ynn_status_success);
+  strides.resize(rank);
+  return strides;
+}
+
+}  // namespace
+
+TEST(runtime, external_strides) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t b_id = 1;
+  constexpr uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), 2, a_id)
+      .AddInput(type_of<float>(), 2, b_id)
+      .AddOutput(type_of<float>(), 2, x_id)
+      .AddBinary(ynn_binary_add, a_id, b_id, x_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  // `a` and `x` are the first `cols` columns of arrays with wider rows.
+  constexpr size_t rows = 5;
+  constexpr size_t cols = 7;
+  constexpr size_t a_cols = 10;
+  constexpr size_t x_cols = 9;
+  std::vector<float> a(rows * a_cols);
+  std::vector<float> b(rows * cols);
+  std::vector<float> x(rows * x_cols, -1.0f);
+  std::iota(a.begin(), a.end(), 0.0f);
+  std::iota(b.begin(), b.end(), 1000.0f);
+
+  const size_t extents[] = {rows, cols};
+  const size_t a_strides[] = {a_cols * sizeof(float), sizeof(float)};
+  const size_t x_strides[] = {x_cols * sizeof(float), sizeof(float)};
+  const size_t dense_strides[] = {cols * sizeof(float), sizeof(float)};
+
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, extents),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), b_id, 2, extents),
+            ynn_status_success);
+
+  // The required strides are not known until the runtime is reshaped.
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), a_id, a.data(), 2,
+                                           a_strides),
+            ynn_status_invalid_parameter);
+
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  EXPECT_THAT(GetStrides(runtime.get(), a_id),
+              testing::ElementsAreArray(dense_strides));
+  EXPECT_THAT(GetStrides(runtime.get(), x_id),
+              testing::ElementsAreArray(dense_strides));
+
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), a_id, a.data(), 2,
+                                           a_strides),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), b_id, b.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), x_id, x.data(), 2,
+                                           x_strides),
+            ynn_status_success);
+  EXPECT_THAT(GetStrides(runtime.get(), a_id),
+              testing::ElementsAreArray(a_strides));
+  EXPECT_THAT(GetStrides(runtime.get(), x_id),
+              testing::ElementsAreArray(x_strides));
+
+  ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < x_cols; ++j) {
+      const float expected =
+          j < cols ? a[i * a_cols + j] + b[i * cols + j] : -1.0f;
+      ASSERT_EQ(x[i * x_cols + j], expected) << i << ", " << j;
+    }
+  }
+
+  // Setting only the data does not change the strides.
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), x_id, x.data()),
+            ynn_status_success);
+  EXPECT_THAT(GetStrides(runtime.get(), x_id),
+              testing::ElementsAreArray(x_strides));
+
+  // Reshaping resets the strides of outputs, but not inputs.
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  EXPECT_THAT(GetStrides(runtime.get(), a_id),
+              testing::ElementsAreArray(a_strides));
+  EXPECT_THAT(GetStrides(runtime.get(), x_id),
+              testing::ElementsAreArray(dense_strides));
+
+  // Setting the shape resets the strides of an input.
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, extents),
+            ynn_status_success);
+  EXPECT_THAT(GetStrides(runtime.get(), a_id),
+              testing::ElementsAreArray(dense_strides));
+}
+
+TEST(runtime, external_strides_dot) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t b_id = 1;
+  constexpr uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), 2, a_id)
+      .AddInput(type_of<float>(), 2, b_id)
+      .AddOutput(type_of<float>(), 2, x_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, x_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  constexpr size_t m = 5;
+  constexpr size_t k = 6;
+  constexpr size_t n = 7;
+  constexpr size_t a_cols = 8;
+  constexpr size_t x_cols = 11;
+  std::vector<float> a(m * a_cols);
+  std::vector<float> b(k * n);
+  std::vector<float> x(m * x_cols, -1.0f);
+  std::iota(a.begin(), a.end(), 0.0f);
+  std::iota(b.begin(), b.end(), 1.0f);
+
+  const size_t a_extents[] = {m, k};
+  const size_t b_extents[] = {k, n};
+  const size_t a_strides[] = {a_cols * sizeof(float), sizeof(float)};
+  const size_t x_strides[] = {x_cols * sizeof(float), sizeof(float)};
+
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, a_extents),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), b_id, 2, b_extents),
+            ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), a_id, a.data(), 2,
+                                           a_strides),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), b_id, b.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), x_id, x.data(), 2,
+                                           x_strides),
+            ynn_status_success);
+  ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+
+  for (size_t i = 0; i < m; ++i) {
+    for (size_t j = 0; j < x_cols; ++j) {
+      float expected = -1.0f;
+      if (j < n) {
+        expected = 0.0f;
+        for (size_t l = 0; l < k; ++l) {
+          expected += a[i * a_cols + l] * b[l * n + j];
+        }
+      }
+      ASSERT_EQ(x[i * x_cols + j], expected) << i << ", " << j;
+    }
+  }
+}
+
+TEST(runtime, external_strides_innermost_dimension) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  builder.AddInput(type_of<float>(), 2, a_id)
+      .AddOutput(type_of<float>(), 2, x_id)
+      .AddUnary(ynn_unary_negate, a_id, x_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  const size_t extents[] = {5, 7};
+  const size_t bad_strides[] = {7 * 2 * sizeof(float), 2 * sizeof(float)};
+  const size_t dense_strides[] = {7 * sizeof(float), sizeof(float)};
+
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, extents),
+            ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+
+  for (uint32_t id : {a_id, x_id}) {
+    ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), id, nullptr, 2,
+                                             bad_strides),
+              ynn_status_invalid_parameter);
+    EXPECT_THAT(GetStrides(runtime.get(), id),
+                testing::ElementsAreArray(dense_strides));
+    ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), id, nullptr, 2,
+                                             dense_strides),
+              ynn_status_success);
+  }
+}
+
+TEST(runtime, external_strides_required_by_reshape) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  builder.AddInput(type_of<float>(), {4, 6}, a_id)
+      .AddOutput(type_of<float>(), {3, 8}, x_id)
+      .AddReshape({3, 8}, a_id, x_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+
+  std::vector<float> a(4 * 6);
+  std::vector<float> x(3 * 8);
+  std::iota(a.begin(), a.end(), 0.0f);
+
+  // Reshaping requires both the input and output to be dense.
+  const size_t a_bad_strides[] = {8 * sizeof(float), sizeof(float)};
+  const size_t a_strides[] = {6 * sizeof(float), sizeof(float)};
+  const size_t x_bad_strides[] = {10 * sizeof(float), sizeof(float)};
+  const size_t x_strides[] = {8 * sizeof(float), sizeof(float)};
+
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), a_id, a.data(), 2,
+                                           a_bad_strides),
+            ynn_status_invalid_parameter);
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), a_id, a.data(), 2,
+                                           a_strides),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), x_id, x.data(), 2,
+                                           x_bad_strides),
+            ynn_status_invalid_parameter);
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), x_id, x.data(), 2,
+                                           x_strides),
+            ynn_status_success);
+
+  ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+  ASSERT_THAT(x, testing::ElementsAreArray(a));
 }
 
 }  // namespace ynn

@@ -714,6 +714,27 @@ enum ynn_status ynn_reshape_runtime(ynn_runtime_t runtime);
 enum ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
                                             uint32_t external_id, void* data);
 
+// Set the data and strides of an external value.
+//
+// `strides` is an array of `rank` elements, where `strides[d]` is the distance
+// in bytes between elements adjacent in dimension `d`. If `strides` is NULL,
+// the strides are unchanged. The strides of dimensions with extent 1 are
+// ignored.
+//
+// `ynn_set_external_value_shape` resets the strides of the value to those of
+// a dense array, and `ynn_reshape_runtime` does the same for external outputs.
+enum ynn_status ynn_set_external_value_data_v2(ynn_runtime_t runtime,
+                                               uint32_t external_id, void* data,
+                                               size_t rank,
+                                               const size_t* strides);
+
+// Get the strides of an external value. `rank` must point to the number of
+// elements available in `strides`, and will be updated to the rank of the
+// value. The stride of a dimension with extent 1 may be reported as 0.
+enum ynn_status ynn_get_external_value_strides(ynn_runtime_t runtime,
+                                               uint32_t external_id,
+                                               size_t* rank, size_t* strides);
+
 enum ynn_status ynn_invoke_runtime(ynn_runtime_t runtime);
 
 enum ynn_runtime_property {

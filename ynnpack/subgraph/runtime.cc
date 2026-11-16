@@ -896,6 +896,43 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+// Computes the strides that the nodes producing or consuming the external
+// value `value` require of its buffer.
+void compute_required_strides(ynn_runtime_value& value,
+                              slinky::eval_context& ctx) {
+  const slinky::raw_buffer& data = *value.data;
+  value.required_strides.assign(data.rank, slinky::dim::auto_stride);
+  for (size_t d = 0; d < data.rank; ++d) {
+    if (data.dim(d).extent() == 1) continue;
+    const slinky::expr& stride = value.buffer->dim(d).stride;
+    if (d == 0) {
+      // YNNPACK kernels assume the innermost dimension is dense.
+      value.required_strides[d] = data.elem_size;
+    } else if (stride.defined() &&
+               !slinky::is_variable(stride, value.buffer->sym(),
+                                    slinky::buffer_field::stride, d)) {
+      value.required_strides[d] = evaluate(stride, ctx);
+    }
+  }
+}
+
+// Returns true if `stride(d)` is the stride required of each dimension `d` of
+// `value`.
+template <typename StrideFn>
+bool check_required_strides(const ynn_runtime_value& value, StrideFn stride) {
+  const size_t rank = value.required_strides.size();
+  bool valid = true;
+  for (size_t d = 0; d < rank; ++d) {
+    const slinky::index_t required = value.required_strides[d];
+    if (required == slinky::dim::auto_stride || stride(d) == required) continue;
+    YNN_LOG_ERROR() << "value " << value.id << " has stride " << stride(d)
+                    << " in dimension " << rank - 1 - d << ", but stride "
+                    << required << " is required";
+    valid = false;
+  }
+  return valid;
+}
+
 // This generates a call that populates all the shapes of the xnn_values using
 // the forward bounds expressions.
 auto make_reshape_impl(ynn_runtime* runtime) {
@@ -934,7 +971,7 @@ auto make_reshape_impl(ynn_runtime* runtime) {
     }
 
     for (auto& i : runtime->values) {
-      if (!i.is_valid()) continue;
+      if (!i.is_valid() || !i.is_external()) continue;
       if (i.is_external_output()) {
         assert(i.data);
         assert(i.data->rank == i.rank());
@@ -944,6 +981,7 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         }
         ynn::init_buffer_strides(*i.data);
       }
+      compute_required_strides(i, ctx);
     }
     return 0;
   };
@@ -1165,6 +1203,7 @@ ynn_status ynn_runtime::build() {
 ynn_status ynn_runtime::reshape() {
   setup();
   slinky::index_t result = slinky::evaluate(reshape_impl, eval_context);
+  is_reshaped = result == 0;
   static_assert(ynn_status_success == 0, "");
   return static_cast<ynn_status>(result);
 }
@@ -1240,7 +1279,9 @@ ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
     return ynn_status_invalid_parameter;
   }
   ynn_runtime_value& value = runtime->value(external_id);
-  return value.set_external_shape(rank, dims);
+  YNN_RETURN_IF_ERROR(value.set_external_shape(rank, dims));
+  runtime->is_reshaped = false;
+  return ynn_status_success;
 }
 
 ynn_status ynn_get_external_value_shape(ynn_runtime_t runtime,
@@ -1265,14 +1306,75 @@ ynn_status ynn_reshape_runtime(ynn_runtime_t runtime) {
 
 ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
                                        uint32_t external_id, void* data) {
+  return ynn_set_external_value_data_v2(runtime, external_id, data, /*rank=*/0,
+                                        /*strides=*/nullptr);
+}
+
+ynn_status ynn_set_external_value_data_v2(ynn_runtime_t runtime,
+                                          uint32_t external_id, void* data,
+                                          size_t rank, const size_t* strides) {
   YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   if (!runtime->subgraph->is_valid_value(external_id)) {
     YNN_LOG_ERROR() << "invalid value ID: " << external_id;
     return ynn_status_invalid_parameter;
   }
-  ynn_value& value = runtime->values[external_id];
+  ynn_runtime_value& value = runtime->values[external_id];
   assert(value.data);
+  if (strides) {
+    if (!runtime->is_reshaped) {
+      YNN_LOG_ERROR() << "ynn_reshape_runtime must be called before setting "
+                         "the strides of value "
+                      << external_id;
+      return ynn_status_invalid_parameter;
+    }
+    if (value.required_strides.size() != rank) {
+      YNN_LOG_ERROR() << "strides rank " << rank << " does not match rank "
+                      << value.required_strides.size() << " of value "
+                      << external_id;
+      return ynn_status_invalid_parameter;
+    }
+    if (!check_required_strides(value, [=](size_t d) -> slinky::index_t {
+          return strides[rank - 1 - d];
+        })) {
+      return ynn_status_invalid_parameter;
+    }
+    for (size_t d = 0; d < rank; ++d) {
+      if (value.data->dim(d) != slinky::dim::broadcast()) {
+        value.data->mutable_dim(d).set_stride(strides[rank - 1 - d]);
+      }
+    }
+  }
   value.data->base = data;
+  return ynn_status_success;
+}
+
+ynn_status ynn_get_external_value_strides(ynn_runtime_t runtime,
+                                          uint32_t external_id, size_t* rank,
+                                          size_t* strides) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
+  if (!runtime->subgraph->is_valid_value(external_id)) {
+    YNN_LOG_ERROR() << "invalid value ID: " << external_id;
+    return ynn_status_invalid_parameter;
+  }
+  const ynn_runtime_value& value = runtime->value(external_id);
+  if (rank == nullptr) {
+    YNN_LOG_ERROR() << "rank pointer is null";
+    return ynn_status_invalid_parameter;
+  }
+  if (!value.data) {
+    YNN_LOG_ERROR() << "value " << external_id << " has no data buffer.";
+    return ynn_status_invalid_parameter;
+  }
+  if (*rank < value.data->rank) {
+    YNN_LOG_ERROR() << "ynn_get_external_value_strides called with rank ("
+                    << *rank << ") < value " << external_id << " rank ("
+                    << value.data->rank << ")";
+    return ynn_status_invalid_parameter;
+  }
+  *rank = value.data->rank;
+  for (size_t i = 0; i < *rank; ++i) {
+    strides[i] = value.data->dim(*rank - 1 - i).stride();
+  }
   return ynn_status_success;
 }
 

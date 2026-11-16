@@ -31,6 +31,11 @@ struct ynn_runtime_value : public ynn_value {
 
   slinky::buffer_expr_ptr buffer;
 
+  // The strides required of `data`, computed by `ynn_runtime::reshape`.
+  // `slinky::dim::auto_stride` indicates the stride of a dimension is not
+  // required to have a particular value.
+  std::vector<slinky::index_t> required_strides;
+
   void make_buffer(ynn_runtime& runtime);
   void make_buffer(ynn_runtime& runtime, slinky::expr elem_size);
 };
@@ -63,6 +68,10 @@ struct ynn_runtime {
 
   // This implements the logic to evaluate the symbolic shapes.
   slinky::stmt reshape_impl;
+
+  // True if `reshape` has succeeded since the shape of an external value was
+  // last set.
+  bool is_reshaped = false;
 
   // The evaluateable slinky pipeline, and the context to run it.
   slinky::pipeline pipeline;
