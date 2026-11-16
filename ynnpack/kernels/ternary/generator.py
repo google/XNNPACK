@@ -25,6 +25,7 @@ def main(argv: Sequence[str]) -> None:
           # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (8, 1)),
           (clamp_fp64_fp64_fp64, (4, 1)),
+          (dequantize_int4_to_fp32, (32, 1)),
           (dequantize_int8_to_fp32, (16, 1)),
           (multiply_add_fp32_fp32_fp32, (8, 1)),
           (multiply_add_fp64_fp64_fp64, (4, 1)),
@@ -53,6 +54,8 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_avx2": [
           # go/keep-sorted start
+          (dequantize_int4_to_bf16, (32, 1)),
+          (dequantize_int4_to_fp32, (32, 1)),
           (dequantize_int8_to_bf16, (32, 1)),
           (dequantize_int8_to_fp32, (32, 1)),
           (dequantize_uint8_to_bf16, (32, 1)),
@@ -71,6 +74,9 @@ def main(argv: Sequence[str]) -> None:
           # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (32, 1)),
           (clamp_fp64_fp64_fp64, (16, 1)),
+          (dequantize_int4_to_bf16, (64, 1)),
+          (dequantize_int4_to_fp16, (64, 1)),
+          (dequantize_int4_to_fp32, (64, 1)),
           (dequantize_int8_to_bf16, (64, 1)),
           (dequantize_int8_to_fp16, (64, 1)),
           (dequantize_int8_to_fp32, (64, 1)),
@@ -96,6 +102,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_avx512bf16": [
           # go/keep-sorted start
+          (dequantize_int4_to_bf16, (64, 1)),
           (dequantize_int8_to_bf16, (64, 1)),
           (dequantize_uint8_to_bf16, (64, 1)),
           (multiply_add_bf16_bf16_fp32, (64, 1)),
@@ -103,6 +110,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_f16c": [
           # go/keep-sorted start
+          (dequantize_int4_to_fp16, (32, 1)),
           (dequantize_int8_to_fp16, (32, 1)),
           (dequantize_uint8_to_fp16, (32, 1)),
           (multiply_add_fp16_fp16_fp32, (32, 1)),
@@ -113,6 +121,8 @@ def main(argv: Sequence[str]) -> None:
       "arm_neon": [
           # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (32, 1)),
+          (dequantize_int4_to_bf16, (32, 1)),
+          (dequantize_int4_to_fp32, (32, 1)),
           (dequantize_int8_to_bf16, (16, 1)),
           (dequantize_int8_to_fp32, (16, 1)),
           (dequantize_uint8_to_bf16, (16, 1)),
@@ -131,6 +141,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "arm_neonbf16": [
           # go/keep-sorted start
+          (dequantize_int4_to_bf16, (32, 1)),
           (dequantize_int8_to_bf16, (16, 1)),
           (dequantize_uint8_to_bf16, (16, 1)),
           (multiply_add_bf16_bf16_fp32, (16, 1)),
@@ -138,6 +149,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "arm_neonfp16": [
           # go/keep-sorted start
+          (dequantize_int4_to_fp16, (32, 1)),
           (dequantize_int8_to_fp16, (16, 1)),
           (dequantize_uint8_to_fp16, (16, 1)),
           (multiply_add_fp16_fp16_fp32, (16, 1)),

@@ -158,4 +158,66 @@ TEST(SubByteTypesRegression, Int4TransposeDequantizeTensorParams) {
   TestInt4TransposeDequantize(/*kn_params=*/true);
 }
 
+// Dequantizes int4 to `X`, optionally converting it to int8 first.
+template <typename X>
+void TestInt4Dequantize(bool convert_to_int8) {
+  const std::vector<size_t> shape = {3, 70};
+  const quantization_params quantization = {
+      .zero_point = -3,
+      .scale = 0.25f,
+  };
+
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<int4x2>(), shape, a_id)
+      .AddOutput(type_of<X>(), 2, x_id);
+  uint32_t quantized_id = a_id;
+  if (convert_to_int8) {
+    quantized_id = YNN_INVALID_VALUE_ID;
+    subgraph.AddTensor(type_of<int8_t>(), 2, quantized_id)
+        .AddConvert(a_id, type_of<int8_t>(), quantized_id);
+  }
+  subgraph.AddDequantize(quantized_id, quantization, type_of<X>(), x_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  ReplicableRandomDevice rng;
+  Tensor<int4x2> a(shape);
+  Tensor<X> x(shape);
+  fill_random(a.data(), a.size(), rng, -8, 7);
+
+  runtime.SetupExternalTensor(a.data(), a_id)
+      .SetupExternalTensor(x.data(), x_id)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t i = 0; i < shape[0]; ++i) {
+    const int4x2* a_i = address_of(a(i, 0));
+    for (size_t j = 0; j < shape[1]; ++j) {
+      // The result is exactly representable in every type we test.
+      const float expected =
+          (type_info<int4x2>::get(a_i, j) - quantization.zero_point) *
+          quantization.scale;
+      ASSERT_EQ(static_cast<float>(x(i, j)), expected)
+          << "i=" << i << ", j=" << j;
+    }
+  }
+}
+
+TEST(SubByteTypes, Int4DequantizeFp16) {
+  TestInt4Dequantize<half>(/*convert_to_int8=*/false);
+}
+TEST(SubByteTypes, Int4DequantizeBf16) {
+  TestInt4Dequantize<bfloat16>(/*convert_to_int8=*/false);
+}
+TEST(SubByteTypes, Int4ConvertDequantizeFp16) {
+  TestInt4Dequantize<half>(/*convert_to_int8=*/true);
+}
+TEST(SubByteTypes, Int4ConvertDequantizeBf16) {
+  TestInt4Dequantize<bfloat16>(/*convert_to_int8=*/true);
+}
+
 }  // namespace ynn

@@ -1,8 +1,14 @@
 // clang-format off
 
+#ifdef YNN_ARCH_X86_AVX512BF16
+#include "ynnpack/kernels/ternary/x86_avx512bf16.inc"
+#endif  // YNN_ARCH_X86_AVX512BF16
 #ifdef YNN_ARCH_X86_AVX512
 #include "ynnpack/kernels/ternary/x86_avx512.inc"
 #endif  // YNN_ARCH_X86_AVX512
+#ifdef YNN_ARCH_X86_F16C
+#include "ynnpack/kernels/ternary/x86_f16c.inc"
+#endif  // YNN_ARCH_X86_F16C
 #ifdef YNN_ARCH_X86_AVX2
 #include "ynnpack/kernels/ternary/x86_avx2.inc"
 #endif  // YNN_ARCH_X86_AVX2
@@ -16,6 +22,12 @@
 #include "ynnpack/kernels/ternary/x86_sse2.inc"
 #endif  // YNN_ARCH_X86
 
+#ifdef YNN_ARCH_ARM_NEONBF16
+#include "ynnpack/kernels/ternary/arm_neonbf16.inc"
+#endif  // YNN_ARCH_ARM_NEONBF16
+#ifdef YNN_ARCH_ARM_NEONFP16
+#include "ynnpack/kernels/ternary/arm_neonfp16.inc"
+#endif  // YNN_ARCH_ARM_NEONFP16
 #ifdef YNN_ARCH_ARM64_NEON
 #include "ynnpack/kernels/ternary/arm64_neon.inc"
 #endif  // YNN_ARCH_ARM64_NEON
