@@ -197,6 +197,141 @@ void VerifyDotResults(Tensor<A> a, Tensor<B> b, Tensor<C> c, Tensor<C> expected,
 }
 
 template <typename A, typename B, typename C>
+void TestStaticA(A, B, C) {
+  ReplicableRandomDevice rng;
+
+  const float max_abs_value = 10.0f;
+
+  TestScheduler scheduler(3);
+
+  for (auto _ : FuzzTest(std::chrono::seconds(1))) {
+    const size_t input_rank = rank_dist(rng);
+    const size_t max_k_dims = std::min<size_t>(2, input_rank - 2) + 1;
+    const size_t num_k_dims =
+        std::uniform_int_distribution<size_t>(1, max_k_dims)(rng);
+    const size_t output_rank = input_rank - num_k_dims + 1;
+
+    constexpr size_t max_size = 20;
+    const size_t max_output_dim = static_cast<size_t>(std::ceil(
+        std::pow(static_cast<double>(max_size),
+                 1.0 / static_cast<double>(std::max<size_t>(1, output_rank)))));
+
+    const bool a_has_batches = output_rank > 2 && random_bool(rng);
+    const std::vector<size_t> fixed_batch_dims =
+        random_shape(rng, output_rank - 2, 1, max_output_dim);
+    const size_t m = output_rank == 2
+                         ? std::uniform_int_distribution<size_t>(1, 64)(rng)
+                         : std::uniform_int_distribution<size_t>(1, 20)(rng);
+
+    std::vector<size_t> k_dims(num_k_dims);
+    for (size_t d = 0; d + 1 < num_k_dims; ++d) {
+      k_dims[d] = k23_dim_dist(rng);
+    }
+    k_dims.back() = std::uniform_int_distribution<size_t>(1, 128)(rng);
+
+    std::vector<size_t> a_shape =
+        a_has_batches ? fixed_batch_dims : std::vector<size_t>{};
+    a_shape.push_back(m);
+    a_shape.insert(a_shape.end(), k_dims.begin(), k_dims.end());
+    a_shape = align_logical_shape<A>(a_shape);
+    k_dims.back() = a_shape.back();
+
+    Tensor<A> a(a_shape);
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+
+    uint32_t subgraph_flags = 0;
+    if (random_bool(rng)) {
+      subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    std::vector<size_t> batch_template_shape =
+        a_has_batches ? fixed_batch_dims
+                      : random_shape(rng, output_rank - 2, 0, 9);
+    std::vector<size_t> b_template_shape = batch_template_shape;
+    b_template_shape.insert(b_template_shape.end(), k_dims.begin(),
+                            k_dims.end());
+    b_template_shape.push_back(0);
+
+    SubgraphBuilder subgraph(4, subgraph_flags);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t output_id = 3;
+    subgraph.AddTensor(a, a_id)
+        .AddInput(type_of<B>(), b_template_shape, b_id)
+        .AddOutput(type_of<C>(), output_rank, output_id);
+
+    uint32_t c_id = 2;
+    const bool init_c = random_bool(rng);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
+    if (init_c) {
+      if (init_value == 0 && random_bool(rng)) {
+        c_id = YNN_INVALID_VALUE_ID;
+      } else {
+        subgraph.AddScalar<C>(init_value, c_id);
+      }
+    } else {
+      subgraph.AddInput(type_of<C>(), output_rank, c_id);
+    }
+
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_SYMMETRIC_B;
+    }
+    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id, dot_flags);
+
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> batch_dims =
+          a_has_batches
+              ? fixed_batch_dims
+              : random_shape(rng, batch_template_shape, 1, max_output_dim);
+      const size_t n =
+          align_up(dim_dist(rng), type_element_count(type_of<B>()));
+
+      std::vector<size_t> b_shape = batch_dims;
+      b_shape.insert(b_shape.end(), k_dims.begin(), k_dims.end());
+      b_shape.push_back(n);
+
+      std::vector<size_t> c_shape = batch_dims;
+      c_shape.push_back(m);
+      c_shape.push_back(n);
+
+      Tensor<B> b(b_shape);
+      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+
+      runtime.ReshapeExternalTensor(b_shape, b.data(), b_id);
+
+      Tensor<C> c(c_shape);
+      if (!init_c) {
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
+        runtime.ReshapeExternalTensor(c_shape, c.data(), c_id);
+      }
+      runtime.ReshapeRuntime();
+      ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), c_shape);
+
+      Tensor<C> expected(c_shape);
+      if (init_c) {
+        expected.fill(init_value);
+      } else {
+        expected.assign(c);
+      }
+
+      runtime.SetupExternalTensor(c.data(), output_id).InvokeRuntime();
+      ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+      VerifyDotResults(a, b, c, expected, batch_dims, a_shape, b_shape,
+                       num_k_dims, max_abs_value);
+    }
+  }
+}
+
+template <typename A, typename B, typename C>
 void TestStaticB(A, B, C) {
   ReplicableRandomDevice rng;
 
@@ -962,6 +1097,12 @@ void TestScalarA(A, B, C) {
 TEST_P(Dot, ScalarA) {
   SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
     TestScalarA(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, StaticA) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestStaticA(a_type, b_type, c_type);
   });
 }
 

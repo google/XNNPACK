@@ -896,12 +896,47 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+bool has_custom_layout(const ynn_runtime_value& value) {
+  for (size_t d = 0; d < value.rank(); ++d) {
+    const slinky::dim_expr& buf_dim = value.buffer->dim(d);
+    const bool is_broadcast =
+        !value.extents[d].defined() || slinky::is_constant(value.extents[d], 1);
+    const bool default_stride =
+        !buf_dim.stride.defined() ||
+        slinky::is_variable(buf_dim.stride, value.symbol,
+                            slinky::buffer_field::stride, d) ||
+        (is_broadcast && slinky::is_constant(buf_dim.stride, 0));
+    const bool default_fold =
+        !buf_dim.fold_factor.defined() ||
+        slinky::is_variable(buf_dim.fold_factor, value.symbol,
+                            slinky::buffer_field::fold_factor, d) ||
+        slinky::is_constant(buf_dim.fold_factor, slinky::dim::unfolded) ||
+        (is_broadcast && slinky::is_constant(buf_dim.fold_factor, 0));
+    if (!default_stride || !default_fold) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // This generates a call that populates all the shapes of the xnn_values using
 // the forward bounds expressions.
 auto make_reshape_impl(ynn_runtime* runtime) {
-  // Gather only what we need for capturing in the callback lambda.
-  return [runtime](const slinky::call_stmt*,
-                   slinky::eval_context& ctx) -> slinky::index_t {
+  struct external_output {
+    size_t value_idx;
+    bool custom_layout;
+  };
+  std::vector<external_output> external_outputs;
+  for (size_t idx = 0; idx < runtime->values.size(); ++idx) {
+    const ynn_runtime_value& value = runtime->values[idx];
+    if (value.is_valid() && value.is_external_output()) {
+      external_outputs.push_back({idx, has_custom_layout(value)});
+    }
+  }
+
+  return [runtime, external_outputs = std::move(external_outputs)](
+             const slinky::call_stmt*,
+             slinky::eval_context& ctx) -> slinky::index_t {
     int errors = 0;
     for (const ynn_node& node : runtime->subgraph->nodes) {
       if (!node.is_valid()) continue;
@@ -933,16 +968,40 @@ auto make_reshape_impl(ynn_runtime* runtime) {
       return ynn_status_invalid_parameter;
     }
 
-    for (auto& i : runtime->values) {
-      if (!i.is_valid()) continue;
-      if (i.is_external_output()) {
-        assert(i.data);
-        assert(i.data->rank == i.rank());
+    for (const external_output& out : external_outputs) {
+      ynn_runtime_value& i = runtime->values[out.value_idx];
+      assert(i.data);
+      assert(i.data->rank == i.rank());
+      if (!out.custom_layout) {
         for (size_t d = 0; d < i.rank(); ++d) {
           slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
           i.data->dims[d].set_min_extent(0, extent_d);
         }
         ynn::init_buffer_strides(*i.data);
+      } else {
+        slinky::index_t strides[ynn::max_tensor_rank];
+        slinky::index_t fold_factors[ynn::max_tensor_rank];
+        for (size_t d = 0; d < i.rank(); ++d) {
+          slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
+          i.data->dims[d].set_min_extent(0, extent_d);
+          i.data->dims[d].set_stride(slinky::dim::auto_stride);
+          i.data->dims[d].set_fold_factor(slinky::dim::unfolded);
+        }
+        for (size_t d = 0; d < i.rank(); ++d) {
+          const slinky::dim_expr& buf_dim = i.buffer->dim(d);
+          strides[d] = buf_dim.stride.defined() ? evaluate(buf_dim.stride, ctx)
+                                                : slinky::dim::auto_stride;
+          fold_factors[d] = buf_dim.fold_factor.defined()
+                                ? evaluate(buf_dim.fold_factor, ctx)
+                                : slinky::dim::unfolded;
+        }
+        for (size_t d = 0; d < i.rank(); ++d) {
+          i.data->dims[d].set_stride(strides[d]);
+          i.data->dims[d].set_fold_factor(fold_factors[d]);
+        }
+        if (!i.data->init_strides()) {
+          return ynn_status_error;
+        }
       }
     }
     return 0;

@@ -451,6 +451,62 @@ TEST(fold_constants, symbolic_output_shape) {
   EXPECT_THAT(subgraph, HasValidNodeCount(3));
 }
 
+TEST(fold_constants, transpose_a) {
+  for (size_t tile_m : {1, 2}) {
+    for (size_t tile_k : {1, 2}) {
+      const size_t m = 2 * tile_m;
+      const size_t k = 3 * tile_k;
+      std::vector<float> constant_values(m * k);
+      std::iota(constant_values.begin(), constant_values.end(), 0.0f);
+
+      const uint32_t output_id = 0;
+      uint32_t constant_id = 1;
+      uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+
+      SubgraphBuilder builder(2);
+      builder.AddOutput(type_of<float>(), {2, 3, tile_m, tile_k}, output_id)
+          .AddTensor(type_of<float>(), {m, k}, constant_id,
+                     constant_values.data())
+          .AddTensor(type_of<float>(), 4, transposed_id);
+
+      ynn_subgraph_t subgraph = builder.GetSubgraph();
+      ynn_node transpose;
+      define_transpose_a(*subgraph, transpose, tile_m, tile_k, /*m_dim=*/1,
+                         constant_id, transposed_id);
+      subgraph->add_node(std::move(transpose));
+      builder.AddCopy(transposed_id, output_id);
+
+      subgraph->fold_constants(nullptr);
+
+      const ynn_value& transposed = subgraph->value(transposed_id);
+      ASSERT_TRUE(transposed.is_static());
+      ASSERT_EQ(transposed.data->rank, 4);
+      EXPECT_EQ(transposed.data->dim(0).extent(), tile_k);
+      EXPECT_EQ(transposed.data->dim(1).extent(), tile_m);
+      EXPECT_EQ(transposed.data->dim(2).extent(), 3);
+      EXPECT_EQ(transposed.data->dim(3).extent(), 2);
+      EXPECT_EQ(transposed.data->dim(0).stride(), sizeof(float));
+      EXPECT_EQ(transposed.data->dim(1).stride(), sizeof(float) * tile_k);
+      EXPECT_EQ(transposed.data->dim(3).stride(),
+                sizeof(float) * tile_k * tile_m);
+      EXPECT_EQ(transposed.data->dim(2).stride(),
+                transposed.data->dim(3).stride() * 2);
+
+      for (size_t ko = 0; ko < 3; ++ko) {
+        for (size_t mo = 0; mo < 2; ++mo) {
+          for (size_t mi = 0; mi < tile_m; ++mi) {
+            for (size_t ki = 0; ki < tile_k; ++ki) {
+              EXPECT_EQ(
+                  transposed.data->at<float>(ki, mi, ko, mo),
+                  constant_values[(mo * tile_m + mi) * k + (ko * tile_k + ki)]);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 TEST(fold_constants, cache_distinguishes_output_type) {
   constexpr float constant_values[] = {1.5f, -2.5f, 3.0f, 4.0f};
 
