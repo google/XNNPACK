@@ -27,8 +27,11 @@ TEST_FMA(x86_fma3, f32, 8);
 
 TEST_UNARY(x86_fma3, exp, f32, 8, std::exp, 1);
 TEST_UNARY(x86_fma3, exp, f64, 4, std::exp, 1);
-TEST_UNARY(x86_fma3, expm1, f32, 8, std::expm1, 2);
+TEST_UNARY(x86_fma3, expm1, f32, 8, std::expm1, 1);
 TEST_UNARY(x86_fma3, expm1, f64, 4, std::expm1, 2);
+TEST_KEEPS_SIGNED_ZERO(x86_fma3, expm1, f32, 8);
+TEST_KEEPS_SIGNED_ZERO(x86_fma3, expm1, f64, 4);
+TEST_EXPM1_ULP_ERROR(x86_fma3, 8);
 TEST_UNARY(x86_fma3, log, f32, 8, std::log, 1);
 TEST_UNARY(x86_fma3, log, f64, 4, std::log, 2);
 TEST_UNARY(x86_fma3, log1p, f32, 8, std::log1p, 2);
@@ -42,6 +45,8 @@ TEST_UNARY(x86_fma3, sin, f64, 4, std::sin, 2);
 TEST_UNARY(x86_fma3, cos, f32, 8, std::cos, 2);
 TEST_UNARY(x86_fma3, cos, f64, 4, std::cos, 2);
 
+TEST_UNARY(x86_fma3, approx_expm1, f32, 8, std::expm1, 2);
+TEST_UNARY(x86_fma3, approx_expm1, f64, 4, std::expm1, 2);
 TEST_UNARY(x86_fma3, approx_erf, f32, 8, std::erf, 5);
 TEST_UNARY(x86_fma3, approx_tanh, f32, 8, std::tanh, 5);
 
