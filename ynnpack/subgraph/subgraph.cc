@@ -954,6 +954,16 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     if (cached_values.count(i)) {
       values[i].data = folded.data;
     } else {
+      // The producer of the constant may require strides that are not those of
+      // a dense array.
+      for (size_t d = 0; d < folded.data->rank; ++d) {
+        if (folded.data->dim(d) != slinky::dim::broadcast()) {
+          folded.data->mutable_dim(d).set_stride(folded.required_strides[d]);
+        }
+      }
+      if (!folded.data->init_strides()) {
+        return ynn_status_error;
+      }
       // Make a new value to put the constant in.
       values[i].data =
           slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,

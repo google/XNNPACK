@@ -390,7 +390,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     const index_t a_tile_k = a_k1i.extent();
     const slinky::dim& a_mi = transposed_a ? a.dim(1) : dummy_dim;
     const slinky::dim& a_m = a.dim(a_k1_dim + num_k_dims);
-    const index_t a_stride_m = transposed_a ? a_mi.stride() : a_m.stride();
+    // Kernels with a transposed A assume the stride of m is tile_k elements.
+    const index_t a_stride_m =
+        transposed_a ? a.elem_size * a_tile_k : a_m.stride();
     const slinky::dim& a_k1o = a.dim(a_k1_dim);
     const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(a_k1_dim + 1) : dummy_dim;
     const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(a_k1_dim + 2) : dummy_dim;
@@ -416,8 +418,10 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
                     (r_k1.min() - a_k1o.min() * a_tile_k) * a_k_strides[0]);
 
     // The kernels assume that the column dimension of a is stride 1 element.
+    assert(a_mi.extent() == 1 || a_mi.stride() == a_stride_m);
     assert(transposed_a
-               ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
+               ? (a_m.extent() == 1 ||
+                  a_m.stride() == a_stride_m * a_mi.extent())
                : (a_k1o.extent() == 1 ||
                   a_k_strides[0] == static_cast<size_t>(a.elem_size)));
 

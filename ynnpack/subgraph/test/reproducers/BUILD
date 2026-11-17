@@ -92,3 +92,17 @@ cc_test(
         "//ynnpack/subgraph/test:subgraph_builder",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "static_a_dot_reduce",
+    srcs = ["static_a_dot_reduce.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/subgraph/test:scheduler",
+        "//ynnpack/subgraph/test:subgraph_builder",
+    ] + ynn_test_deps(),
+)

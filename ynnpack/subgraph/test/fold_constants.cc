@@ -517,4 +517,55 @@ TEST(fold_constants, cache_distinguishes_output_shape) {
               ElementsAre(0, 1, 2, 3, 1, 2, 3, 4));
 }
 
+TEST(fold_constants, transpose_a) {
+  constexpr size_t tile_m = 2;
+  constexpr size_t tile_k = 2;
+  constexpr size_t m = 2 * tile_m;
+  constexpr size_t k = 3 * tile_k;
+  std::vector<float> a(m * k);
+  std::iota(a.begin(), a.end(), 0.0f);
+
+  const uint32_t output_id = 0;
+  uint32_t a_id = 1;
+  uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(2);
+  builder
+      .AddOutput(type_of<float>(), {m / tile_m, k / tile_k, tile_m, tile_k},
+                 output_id)
+      .AddTensor(type_of<float>(), {m, k}, a_id, a.data())
+      .AddTensor(type_of<float>(), 4, transposed_id);
+
+  ynn_subgraph_t subgraph = builder.GetSubgraph();
+  ynn_node transpose;
+  define_transpose_a(*subgraph, transpose, tile_m, tile_k, /*m_dim=*/1, a_id,
+                     transposed_id);
+  subgraph->add_node(std::move(transpose));
+  builder.AddCopy(transposed_id, output_id);
+
+  ASSERT_EQ(subgraph->fold_constants(nullptr), ynn_status_success);
+
+  const ynn_value& transposed = subgraph->value(transposed_id);
+  ASSERT_TRUE(transposed.is_static());
+  const slinky::raw_buffer& data = *transposed.data;
+  ASSERT_EQ(data.rank, 4);
+
+  // The transposed constant is not a dense array: the k dimension is outside
+  // the m dimension.
+  EXPECT_EQ(data.dim(0).stride(), sizeof(float));
+  EXPECT_EQ(data.dim(1).stride(), sizeof(float) * tile_k);
+  EXPECT_EQ(data.dim(3).stride(), sizeof(float) * tile_k * tile_m);
+  EXPECT_EQ(data.dim(2).stride(), data.dim(3).stride() * (m / tile_m));
+
+  for (size_t ko = 0; ko < k / tile_k; ++ko) {
+    for (size_t mo = 0; mo < m / tile_m; ++mo) {
+      for (size_t mi = 0; mi < tile_m; ++mi) {
+        for (size_t ki = 0; ki < tile_k; ++ki) {
+          EXPECT_EQ(data.at<float>(ki, mi, ko, mo),
+                    a[(mo * tile_m + mi) * k + (ko * tile_k + ki)]);
+        }
+      }
+    }
+  }
+}
+
 }  // namespace ynn
