@@ -176,6 +176,24 @@ vec<T, N> round_small(vec<T, N> a) {
   return (magic + a) - magic;
 }
 
+// Computes 2^b * (expm1_r + 1) - m, given exp2_b = 2^b.
+template <int m, typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> scale_expm1(vec<T, N> exp2_b, vec<T, N> expm1_r) {
+#ifndef YNN_HAVE_FMA
+  if constexpr (m == 0) {
+    // Without FMA, the product 2^b * expm1_r below is rounded on its own. It
+    // can be subnormal when the result is not, and then the result is 2^b if
+    // subnormals are flushed to zero. Scaling by 2^b last is exact.
+    return (expm1_r + broadcast<N>(static_cast<T>(1))) * exp2_b;
+  }
+#endif
+  // We avoid catastrophic cancellation by distributing 2^b, and then
+  // reassociating the subtraction, so when 2^b = m we keep the low bits of the
+  // result.
+  return multiply_add(exp2_b, expm1_r,
+                      exp2_b - broadcast<N>(static_cast<T>(m)));
+}
+
 // Implements exp(x) (m = 0) or expm1(x) (m = 1), given polynomials
 // such that expm1(x) ~= x*P(x)/Q(x) for x in [-0.5, 0.5], i.e. the
 // polynomials P(x)/Q(x) approximate the error after 1 term of the Taylor
@@ -200,11 +218,7 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor1(vec<T, N> x, const P& p,
 
   auto exp2_r = eval_polynomial(p, r) * r;
 
-  // Compute 2^b * (exp(r) + 1) - m. We avoid catastrophic cancellation
-  // by distributing 2^b, and then reassociating the subtraction, so when
-  // 2^b = m we keep the low bits of the result.
-  auto exp_x =
-      multiply_add(exp2_b, exp2_r, exp2_b - broadcast<N>(static_cast<T>(m)));
+  auto exp_x = scale_expm1<m>(exp2_b, exp2_r);
   return select(b > broadcast<N>(max_b), exp_x + exp_x, exp_x);
 }
 
@@ -235,11 +249,7 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
   auto q_r = eval_polynomial(q, r, r2);
   auto exp2_r = multiply_add(r2, divide(p_r, q_r), r);  // r^2 * p_r + r
 
-  // Compute 2^b * (exp(r) + 1) - m. We avoid catastrophic cancellation
-  // by distributing 2^b, and then reassociating the subtraction, so when
-  // 2^b = m we keep the low bits of the result.
-  auto exp_x =
-      multiply_add(exp2_b, exp2_r, exp2_b - broadcast<N>(static_cast<T>(m)));
+  auto exp_x = scale_expm1<m>(exp2_b, exp2_r);
   return select(b > broadcast<N>(max_b), exp_x + exp_x, exp_x);
 }
 

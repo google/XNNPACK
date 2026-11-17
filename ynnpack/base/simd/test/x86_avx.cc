@@ -147,6 +147,9 @@ TEST_CAST(x86_avx, f64, f32x4);
 TEST_CAST(x86_avx, f64, f32x8);
 TEST_CAST(x86_avx, f32, f64x4);
 
+TEST_EXP_FLUSH_TO_ZERO(x86_avx, f32, 8, 1);
+TEST_EXP_FLUSH_TO_ZERO(x86_avx, f64, 4, 1);
+
 TEST_UNARY(x86_avx, exp, f32, 8, std::exp, 1);
 TEST_UNARY(x86_avx, exp, f64, 4, std::exp, 1);
 TEST_UNARY(x86_avx, expm1, f32, 8, std::expm1, 2);
