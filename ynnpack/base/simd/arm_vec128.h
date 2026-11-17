@@ -241,6 +241,10 @@ struct vec<int8_t, 16> {
   int8x16_t v;
 };
 
+struct s4x32 {
+  int8x16_t v;
+};
+
 using f32x4 = vec<float, 4>;
 #ifdef YNN_ARCH_ARM64
 using f64x2 = vec<double, 2>;
@@ -2078,6 +2082,7 @@ using s32x8 = vec<int32_t, 8>;
 using s16x16 = vec<int16_t, 16>;
 using s32x16 = vec<int32_t, 16>;
 using f32x16 = vec<float, 16>;
+using s8x32 = vec<int8_t, 32>;
 
 YNN_ALWAYS_INLINE f32x4 cast(bf16x4 a, float) {
   return f32x4{vreinterpretq_f32_u32(vshll_n_u16(a.v, 16))};
@@ -2119,6 +2124,14 @@ YNN_ALWAYS_INLINE s16x16 cast(u8x16 b, int16_t) {
       s16x8{vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(b.v)))},
       s16x8{vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(b.v)))},
   };
+}
+
+YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
+  // Sign extend the low and high 4 bits of each byte, and interleave them.
+  const int8x16_t lo = vshrq_n_s8(vshlq_n_s8(from.v, 4), 4);
+  const int8x16_t hi = vshrq_n_s8(from.v, 4);
+  const int8x16x2_t result = vzipq_s8(lo, hi);
+  return {s8x16{result.val[0]}, s8x16{result.val[1]}};
 }
 
 YNN_ALWAYS_INLINE s32x8 cast(s16x8 b, int32_t) {

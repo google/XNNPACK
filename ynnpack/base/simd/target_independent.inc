@@ -436,15 +436,16 @@ static vec<float, N> log_impl(vec<float, N> x, precision12) {
 
 template <int p, size_t N>
 static vec<float, N> log_impl(vec<float, N> x) {
-  std::array<float, 3> P = {
-      -5.4032374173e-03f,
-      -3.3338883519e-01f,
-      -4.9999994040e-01f,
+  std::array<float, 4> P = {
+      1.0975961341e-03f,
+      -8.6822109297e-03f,
+      -2.8452688456e-01f,
+      -3.7500002980e-01f,
   };
   std::array<float, 3> Q = {
-      3.9975959063e-01f,
-      1.3334366083e+00f,
-      1.0000000000e+00f,
+      3.5507091880e-01f,
+      1.0690534115e+00f,
+      7.5000000000e-01f,
   };
   return log_taylor2<p, int32_t>(x, P, Q);
 }

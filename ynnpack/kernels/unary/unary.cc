@@ -481,8 +481,12 @@ unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type,
       return get_convert_kernel<int32_t>(x_type);
     case ynn_type_int4:
       return get_convert_kernel<int4x2>(x_type);
+    case ynn_type_uint4:
+      return get_convert_kernel<uint4x2>(x_type);
     case ynn_type_int2:
       return get_convert_kernel<int2x4>(x_type);
+    case ynn_type_uint2:
+      return get_convert_kernel<uint2x4>(x_type);
     default:
       return nullptr;
   }

@@ -164,12 +164,6 @@ slinky::ref_count<ynn_subgraph> clone_subgraph_subset(
   return new_subgraph;
 }
 
-template <typename T>
-bool is_broadcast_op(const ynn_node& node) {
-  const T* op = std::get_if<T>(&node.op);
-  return op && op->axes.any();
-}
-
 bool allow_in_place(uint32_t input_id, uint32_t output_id,
                     const ynn_subgraph& subgraph) {
   if (input_id == YNN_INVALID_VALUE_ID) return false;
@@ -208,7 +202,7 @@ bool allow_in_place(uint32_t input_id, uint32_t output_id,
     return false;
   }
 
-  if (is_broadcast_op<ynn_node::broadcast_like>(*producer)) {
+  if (std::holds_alternative<ynn_node::static_broadcast>(producer->op)) {
     // We can't compute in place with a broadcast input.
     return false;
   }

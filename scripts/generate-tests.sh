@@ -75,6 +75,27 @@ tools/generate-gemm-test.py --spec test/qs8-qc8w-igemm-minmax-fp32.yaml --output
 tools/generate-gemm-test.py --spec test/f32-ppmm-minmax.yaml --output-test test/f32-ppmm-minmax.cc &
 
 ### Tests for VBinary micro-kernels
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vadd --output test/bf16-vadd.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vdiv --output test/bf16-vdiv.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vmax --output test/bf16-vmax.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vmin --output test/bf16-vmin.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vmul --output test/bf16-vmul.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vprelu --output test/bf16-vprelu.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vsqrdiff --output test/bf16-vsqrdiff.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel bf16-vsub --output test/bf16-vsub.cc &
+
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vaddc --output test/bf16-vaddc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vdivc --output test/bf16-vdivc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vrdivc --output test/bf16-vrdivc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vmaxc --output test/bf16-vmaxc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vminc --output test/bf16-vminc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vmulc --output test/bf16-vmulc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vpreluc --output test/bf16-vpreluc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vrpreluc --output test/bf16-vrpreluc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vsqrdiffc --output test/bf16-vsqrdiffc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vsubc --output test/bf16-vsubc.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel bf16-vrsubc --output test/bf16-vrsubc.cc &
+
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f16-vadd --output test/f16-vadd.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f16-vdiv --output test/f16-vdiv.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f16-vmax --output test/f16-vmax.cc &
@@ -267,13 +288,5 @@ tools/xngen test/simd/s16-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 |
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2)" -o test/simd/s16-simd-avx2.cc &
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=avx512skx -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512skx)" -o test/simd/s16-simd-avx512skx.cc &
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s16-simd-wasmsimd.cc &
-
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s32-simd-scalar.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s32-simd-neon.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1)" -o test/simd/s32-simd-sse41.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2)" -o test/simd/s32-simd-avx2.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512f)" -o test/simd/s32-simd-avx512f.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s32-simd-wasmsimd.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s32-simd-hvx.cc &
 
 wait

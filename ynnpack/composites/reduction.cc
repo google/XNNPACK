@@ -59,6 +59,9 @@ ynn_status define_reduce_sum(ynn_subgraph_t subgraph, size_t num_axes,
           &N_fp_id, YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS));
 
       // Scale_acc = Scale_in / N.
+      if (input_scale_id == YNN_INVALID_VALUE_ID) {
+        YNN_RETURN_IF_ERROR(define_constant(subgraph, 1.0f, input_scale_id));
+      }
       YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_divide,
                                             input_scale_id, N_fp_id,
                                             &scale_acc_id, 0));

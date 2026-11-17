@@ -414,6 +414,13 @@ std::optional<size_t> index_of(const C& container, const T& value) {
   return static_cast<size_t>(std::distance(container.begin(), it));
 }
 
+bool has_constant_shape(const ynn_value& value) {
+  return std::all_of(value.extents.begin(), value.extents.end(),
+                     [](const slinky::expr& e) {
+                       return !e.defined() || slinky::as_constant(e);
+                     });
+}
+
 size_t static_size_of_value(const ynn_value& value) {
   size_t n = 1;
   for (size_t i = 0; i < value.extents.size(); ++i) {
@@ -444,7 +451,6 @@ size_t static_size_of_inputs(const ynn_subgraph& subgraph,
 bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
   const auto* transpose = std::get_if<ynn_node::static_transpose>(&node.op);
   if ((transpose && transpose->alias) ||
-      std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
       std::holds_alternative<ynn_node::reshape>(node.op) ||
       std::holds_alternative<ynn_node::static_broadcast>(node.op)) {
     // Don't constant fold these "free" ops. If we allowed them to constant
@@ -479,11 +485,12 @@ bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
   }
 }
 
-// When caching folded constants, we need a cache key. To avoid the need to have
-// arbitrary producer graphs as cache keys, we only cache values that have a
-// single chain of producers, where each producer consumes either constants or
-// at most one other produced value. The following 3 structs define the 3 kinds
-// of inputs a producer may have.
+// When caching folded constants, we need a cache key. The cache key is the tree
+// of producers of the value, serialized in post-order (the producers of a
+// node's inputs come before the node itself, in the order of the inputs). This
+// is unambiguous because each node records how many inputs it has, and which of
+// them are produced values. The following 3 structs define the 3 kinds of
+// inputs a producer may have.
 struct input_pointer {
   ynn_type ynn_type_val = ynn_type_invalid;
   std::array<slinky::index_t, ynn::max_tensor_rank> extents;
@@ -526,16 +533,34 @@ struct input_producer {
   }
 };
 
+struct output_key {
+  ynn_type type;
+  std::vector<slinky::index_t> extents;
+
+  bool operator==(const output_key& other) const {
+    return type == other.type && extents == other.extents;
+  }
+  bool operator<(const output_key& other) const {
+    return std::tie(type, extents) < std::tie(other.type, other.extents);
+  }
+};
+
 struct op_key {
   decltype(ynn_node::op) op;
   using input_key = std::variant<input_pointer, input_value, input_producer>;
   std::vector<input_key> inputs;
+  // Some ops have behavior that depends on the type and shape of their outputs
+  // (e.g. `convert`, `static_broadcast`, `pack_b`), so the output type and
+  // shape are part of the key. Undefined (broadcast) extents are 1, and
+  // symbolic extents (such as `pack_b`'s `block_n`) are -1.
+  std::vector<output_key> outputs;
 
   bool operator==(const op_key& other) const {
-    return op == other.op && inputs == other.inputs;
+    return op == other.op && inputs == other.inputs && outputs == other.outputs;
   }
   bool operator<(const op_key& other) const {
-    return std::tie(op, inputs) < std::tie(other.op, other.inputs);
+    return std::tie(op, inputs, outputs) <
+           std::tie(other.op, other.inputs, other.outputs);
   }
 };
 
@@ -552,20 +577,31 @@ struct cache_key {
   }
 };
 
-bool build_chain(const ynn_subgraph& subgraph, uint32_t v_id,
-                 std::vector<op_key>& chain, size_t& output_index) {
+// Appends the producers of `v_id` to `producers` in post-order.
+bool build_producers(const ynn_subgraph& subgraph, uint32_t v_id,
+                     std::vector<op_key>& producers) {
   const ynn_node* producer = subgraph.get_producer(v_id);
   if (!producer) return false;
 
-  std::optional<size_t> idx = index_of(producer->outputs, v_id);
-  if (!idx) return false;
-  output_index = *idx;
-
   op_key op_key;
   op_key.op = producer->op;
-
-  uint32_t chain_input_id = YNN_INVALID_VALUE_ID;
-  int chain_inputs_count = 0;
+  for (uint32_t output_id : producer->outputs) {
+    output_key& out_key = op_key.outputs.emplace_back();
+    if (output_id == YNN_INVALID_VALUE_ID) {
+      out_key.type = ynn_type_invalid;
+      continue;
+    }
+    const ynn_value& out = subgraph.value(output_id);
+    out_key.type = out.type;
+    out_key.extents.reserve(out.extents.size());
+    for (const slinky::expr& extent : out.extents) {
+      if (!extent.defined()) {
+        out_key.extents.push_back(1);
+      } else {
+        out_key.extents.push_back(slinky::as_constant(extent).value_or(-1));
+      }
+    }
+  }
 
   for (uint32_t input_id : producer->inputs) {
     if (input_id == YNN_INVALID_VALUE_ID) {
@@ -601,31 +637,26 @@ bool build_chain(const ynn_subgraph& subgraph, uint32_t v_id,
 
       op_key.inputs.push_back(input_producer{*output_index});
 
-      chain_input_id = input_id;
-      chain_inputs_count++;
+      if (!build_producers(subgraph, input_id, producers)) {
+        return false;
+      }
     }
   }
 
-  if (chain_inputs_count > 1) {
-    // We only support caching values with one non-static input.
-    return false;
-  }
-
-  chain.push_back(op_key);
-
-  size_t dummy_output_index;
-  return chain_inputs_count == 0 ||
-         build_chain(subgraph, chain_input_id, chain, dummy_output_index);
+  producers.push_back(std::move(op_key));
+  return true;
 }
 
 bool build_cache_key(const ynn_subgraph& subgraph, uint32_t v_id,
                      cache_key& key) {
+  const ynn_node* producer = subgraph.get_producer(v_id);
+  if (!producer) return false;
+  std::optional<size_t> output_index = index_of(producer->outputs, v_id);
+  if (!output_index) return false;
+  key.output_index = *output_index;
+
   key.producers.clear();
-  if (!build_chain(subgraph, v_id, key.producers, key.output_index)) {
-    return false;
-  }
-  std::reverse(key.producers.begin(), key.producers.end());
-  return true;
+  return build_producers(subgraph, v_id, key.producers);
 }
 
 using constant_cache_map =
@@ -683,17 +714,18 @@ ynn_status fold_constant_get_tensor_shape(ynn_subgraph& subgraph) {
     const auto* op = std::get_if<ynn_node::get_tensor_shape>(&node.op);
     if (!op) continue;
 
-    assert(node.inputs.size() == 1);
-    const ynn_value& input = subgraph.value(node.inputs[0]);
-
-    if (ynn::any_n(input.rank(), [&](size_t i) {
-          return !slinky::as_constant(input.extent(i));
-        })) {
+    if (std::any_of(op->extents.begin(), op->extents.end(),
+                    [](const slinky::expr& e) {
+                      return !slinky::as_constant(e).has_value();
+                    })) {
       continue;
     }
 
     uint32_t output_id = node.outputs[0];
     ynn_value& output = subgraph.value(output_id);
+    if (output.is_external_output()) {
+      continue;
+    }
 
     assert(output.rank() <= ynn::max_tensor_rank);
     std::array<slinky::dim, ynn::max_tensor_rank> dims;
@@ -705,8 +737,7 @@ ynn_status fold_constant_get_tensor_shape(ynn_subgraph& subgraph) {
         output.rank(), ynn::type_size_bytes(output.type), dims.data(),
         YNN_ALLOCATION_ALIGNMENT);
 
-    ynn::implement_get_tensor_shape(input.extents, op->axes, op->reshape_1d,
-                                    output.type, *output.data);
+    ynn::implement_get_tensor_shape(op->extents, output.type, *output.data);
 
     node.invalidate();
   }
@@ -725,6 +756,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   for (uint32_t i = 0; i < values.size(); ++i) {
     if (values[i].is_static()) {
       assert(!values[i].is_external_output());
+      assert(has_constant_shape(values[i]));
       value_is_static[i] = true;
     }
   }
@@ -733,6 +765,14 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   std::vector<int> static_refs(values.size(), 0);
   for (ynn_node& node : nodes) {
     if (!node.is_valid()) continue;
+    if (const auto* op = std::get_if<ynn_node::get_tensor_shape>(&node.op)) {
+      if (std::any_of(op->extents.begin(), op->extents.end(),
+                      [](const slinky::expr& e) {
+                        return !slinky::as_constant(e).has_value();
+                      })) {
+        continue;
+      }
+    }
     if (std::any_of(node.inputs.begin(), node.inputs.end(), [&](uint32_t i) {
           return i != YNN_INVALID_VALUE_ID && !value_is_static[i];
         })) {
@@ -741,9 +781,11 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     }
 
     if (std::any_of(node.outputs.begin(), node.outputs.end(), [&](uint32_t i) {
-          return i != YNN_INVALID_VALUE_ID && values[i].is_external_output();
+          return i != YNN_INVALID_VALUE_ID && (values[i].is_external_output() ||
+                                               !has_constant_shape(values[i]));
         })) {
-      // This op has an external output, so it is not constant folded.
+      // This op has an external output or symbolic shape, so it cannot be
+      // constant folded.
       continue;
     }
 
@@ -912,6 +954,16 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     if (cached_values.count(i)) {
       values[i].data = folded.data;
     } else {
+      // The producer of the constant may require strides that are not those of
+      // a dense array.
+      for (size_t d = 0; d < folded.data->rank; ++d) {
+        if (folded.data->dim(d) != slinky::dim::broadcast()) {
+          folded.data->mutable_dim(d).set_stride(folded.required_strides[d]);
+        }
+      }
+      if (!folded.data->init_strides()) {
+        return ynn_status_error;
+      }
       // Make a new value to put the constant in.
       values[i].data =
           slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,
@@ -1066,7 +1118,6 @@ ynn_status ynn_subgraph::eliminate_common_subgraphs() {
     // If so, replace the outputs of this node with the outputs of the
     // existing node.
     for (const std::vector<uint32_t>& existing_outputs : seen_ops[key]) {
-      assert(existing_outputs.size() == node.outputs.size());
       if (outputs_are_compatible(*this, node.outputs, existing_outputs)) {
         // We found a duplicate node. Replace the outputs of this node with
         // the outputs of the existing node.
@@ -1153,12 +1204,12 @@ ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
     return status;
   }
 
-  status = fold_constants(threadpool);
+  status = eliminate_common_subgraphs();
   if (status != ynn_status_success) {
     return status;
   }
 
-  status = eliminate_common_subgraphs();
+  status = fold_constants(threadpool);
   if (status != ynn_status_success) {
     return status;
   }
@@ -1183,9 +1234,6 @@ const char* name_of(const ynn_node::ternary_elementwise&) {
   return "ternary_elementwise";
 }
 const char* name_of(const ynn_node::reduce&) { return "reduce"; }
-const char* name_of(const ynn_node::broadcast_like&) {
-  return "broadcast_like";
-}
 const char* name_of(const ynn_node::concatenate&) { return "concatenate"; }
 const char* name_of(const ynn_node::stack&) { return "stack"; }
 const char* name_of(const ynn_node::even_split&) { return "even_split"; }
@@ -1291,10 +1339,6 @@ void print(std::ostream& os, const ynn_node::reduce& op) {
   }
 }
 
-void print(std::ostream& os, const ynn_node::broadcast_like& op) {
-  os << "axes=" << op.axes;
-}
-
 void print(std::ostream& os, const ynn_node::concatenate& op) {
   os << "axis=" << op.axis;
 }
@@ -1316,9 +1360,7 @@ void print(std::ostream& os, const ynn_node::reshape& op) {
   os << "groups=" << op.groups;
 }
 
-void print(std::ostream& os, const ynn_node::static_broadcast& op) {
-  os << "new_dims=" << op.new_dims;
-}
+void print(std::ostream& os, const ynn_node::static_broadcast& op) {}
 
 void print(std::ostream& os, const ynn_node::static_pad& op) {
   os << "paddings=" << op.paddings;
@@ -1374,14 +1416,15 @@ void print(std::ostream& os, const ynn_node::transpose_a& op) {
 
 void print(std::ostream& os, const ynn_node::dequantize_dot& op) {}
 void print(std::ostream& os, const ynn_node::dynamic_quantization& op) {
-  os << "output_zero_point=" << op.output_zero_point;
+  if (op.output_zero_point.has_value()) {
+    os << "output_zero_point=" << *op.output_zero_point;
+  } else {
+    os << "symmetric";
+  }
 }
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
-  os << "axes=" << op.axes;
-  if (op.reshape_1d) {
-    os << " reshape_1d";
-  }
+  os << "extents=" << op.extents;
 }
 
 std::string value_ids_to_string(const std::vector<uint32_t>& value_ids) {

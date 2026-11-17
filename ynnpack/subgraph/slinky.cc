@@ -13,6 +13,8 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/algorithm.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/span.h"
 #include "slinky/base/arithmetic.h"
 #include "slinky/builder/pipeline.h"
@@ -286,6 +288,27 @@ std::vector<slinky::expr> make_split_factors(
     }
   }
   return splits;
+}
+
+void padded_copy(const slinky::raw_buffer& src, const slinky::raw_buffer& dst,
+                 const slinky::raw_buffer& pad) {
+  if (any_n(dst.rank, [&](size_t d) { return src.dim(d).is_broadcast(); })) {
+    const size_t rank = std::max(src.rank, dst.rank);
+    slinky::dim* dims = YNN_ALLOCA(slinky::dim, rank);
+    for (size_t i = 0; i < rank; ++i) {
+      dims[i] = src.dim(i);
+      if (dims[i].is_broadcast()) {
+        dims[i].set_stride(src.elem_size);
+        dims[i].set_fold_factor(slinky::dim::unfolded);
+      }
+    }
+    slinky::raw_buffer non_broadcast_src = src;
+    non_broadcast_src.rank = rank;
+    non_broadcast_src.dims = dims;
+    slinky::copy(non_broadcast_src, dst, pad);
+  } else {
+    slinky::copy(src, dst, pad);
+  }
 }
 
 }  // namespace ynn

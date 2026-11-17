@@ -1,0 +1,206 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+#include <assert.h>
+#include <immintrin.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/avgpool.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/unaligned.h"
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$_MM256_CVTEPX8_EPI16 = {"QS8": "_mm256_cvtepi8_epi16", "QU8": "_mm256_cvtepu8_epi16"}[DATATYPE]
+$_MM256_PACKXS_EPI16 = {"QS8": "_mm256_packs_epi16", "QU8": "_mm256_packus_epi16"}[DATATYPE]
+$_MM256_MAX_EPX8 = {"QS8": "_mm256_max_epi8", "QU8": "_mm256_max_epu8"}[DATATYPE]
+$_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
+$_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_avgpool_minmax_fp32_ukernel_9p__avx2_u32(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const ${XINT8_T}** input,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const ${XINT8_T}* zero,
+    const float* multiplier,
+    ${XINT8_T}* output,
+    size_t input_increment,
+    size_t output_increment,
+    const struct xnn_${DATATYPE.lower()}_avgpool_minmax_params* restrict params) XNN_OOB_READS
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(channels != 0);
+
+  const __m256i vinit_bias = _mm256_set1_epi32(params->scalar.init_bias);
+  __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps(
+      (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8((char) params->scalar.output_min);
+  const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
+
+  XNN_FORCE_REALIZATION(vinit_bias);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(vpermute_mask);
+
+  do {
+    if (multiplier != NULL) {
+      vscale = _mm256_set1_ps(*multiplier++);
+    }
+
+    ${XINT8_T}* o = output;
+    size_t c_offset = 0;
+    size_t c = channels;
+    for (; c >= 32; c -= 32) {
+      const ${XINT8_T}** i = input;
+      size_t k = kernel_elements;
+      __m256i vacc0 = _mm256_setzero_si256();
+      __m256i vacc1 = _mm256_setzero_si256();
+      __m256i vacc2 = _mm256_setzero_si256();
+      __m256i vacc3 = _mm256_setzero_si256();
+      do {
+        vacc0 = _mm256_add_epi32(vacc0, vinit_bias);
+        vacc1 = _mm256_add_epi32(vacc1, vinit_bias);
+        vacc2 = _mm256_add_epi32(vacc2, vinit_bias);
+        vacc3 = _mm256_add_epi32(vacc3, vinit_bias);
+
+        $for K in range(9):
+          const ${XINT8_T}* i${K} = ${K} < k ? *i++ : zero;
+          assert(i${K} != NULL);
+          if XNN_UNPREDICTABLE(i${K} != zero) {
+            i${K} = (const ${XINT8_T}*) ((uintptr_t) i${K} + input_offset);
+          }
+          i${K} += c_offset;
+          const __m256i vi${K}_lo = ${_MM256_CVTEPX8_EPI16}(_mm_loadu_si128((const __m128i*) i${K}));
+          const __m256i vi${K}_hi = ${_MM256_CVTEPX8_EPI16}(_mm_loadu_si128((const __m128i*) (i${K} + 16)));
+
+        const __m256i vsum018_lo = _mm256_add_epi16(_mm256_add_epi16(vi0_lo, vi1_lo), vi8_lo);
+        const __m256i vsum23_lo = _mm256_add_epi16(vi2_lo, vi3_lo);
+        const __m256i vsum45_lo = _mm256_add_epi16(vi4_lo, vi5_lo);
+        const __m256i vsum67_lo = _mm256_add_epi16(vi6_lo, vi7_lo);
+        const __m256i vsum_lo = _mm256_add_epi16(_mm256_add_epi16(vsum23_lo, vsum45_lo), _mm256_add_epi16(vsum018_lo, vsum67_lo));
+
+        const __m256i vsum018_hi = _mm256_add_epi16(_mm256_add_epi16(vi0_hi, vi1_hi), vi8_hi);
+        const __m256i vsum23_hi = _mm256_add_epi16(vi2_hi, vi3_hi);
+        const __m256i vsum45_hi = _mm256_add_epi16(vi4_hi, vi5_hi);
+        const __m256i vsum67_hi = _mm256_add_epi16(vi6_hi, vi7_hi);
+        const __m256i vsum_hi = _mm256_add_epi16(_mm256_add_epi16(vsum23_hi, vsum45_hi), _mm256_add_epi16(vsum018_hi, vsum67_hi));
+
+        vacc0 = _mm256_add_epi32(vacc0, _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vsum_lo)));
+        vacc1 = _mm256_add_epi32(vacc1, _mm256_cvtepi16_epi32(_mm256_extracti128_si256(vsum_lo, 1)));
+        vacc2 = _mm256_add_epi32(vacc2, _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vsum_hi)));
+        vacc3 = _mm256_add_epi32(vacc3, _mm256_cvtepi16_epi32(_mm256_extracti128_si256(vsum_hi, 1)));
+
+        k = doz(k, 9);
+      } while (k != 0);
+
+      __m256 vscaled0 = _mm256_min_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(vacc0), vscale), voutput_max_less_zero_point);
+      __m256 vscaled1 = _mm256_min_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(vacc1), vscale), voutput_max_less_zero_point);
+      __m256 vscaled2 = _mm256_min_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(vacc2), vscale), voutput_max_less_zero_point);
+      __m256 vscaled3 = _mm256_min_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(vacc3), vscale), voutput_max_less_zero_point);
+
+      vacc0 = _mm256_cvtps_epi32(vscaled0);
+      vacc1 = _mm256_cvtps_epi32(vscaled1);
+      vacc2 = _mm256_cvtps_epi32(vscaled2);
+      vacc3 = _mm256_cvtps_epi32(vscaled3);
+
+      const __m256i vout01 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0, vacc1), voutput_zero_point);
+      const __m256i vout23 = _mm256_adds_epi16(_mm256_packs_epi32(vacc2, vacc3), voutput_zero_point);
+
+      __m256i vout = ${_MM256_PACKXS_EPI16}(vout01, vout23);
+      vout = _mm256_permutevar8x32_epi32(vout, vpermute_mask);
+      vout = ${_MM256_MAX_EPX8}(vout, voutput_min);
+
+      _mm256_storeu_si256((__m256i*) o, vout);
+      o += 32;
+      c_offset += 32;
+    }
+    if XNN_UNLIKELY(c != 0) {
+      do {
+        const ${XINT8_T}** i = input;
+        size_t k = kernel_elements;
+        __m256i vacc0 = _mm256_setzero_si256();
+        __m256i vacc1 = _mm256_setzero_si256();
+        do {
+          vacc0 = _mm256_add_epi32(vacc0, vinit_bias);
+          vacc1 = _mm256_add_epi32(vacc1, vinit_bias);
+
+          $for K in range(9):
+            const ${XINT8_T}* i${K} = ${K} < k ? *i++ : zero;
+            assert(i${K} != NULL);
+            if XNN_UNPREDICTABLE(i${K} != zero) {
+              i${K} = (const ${XINT8_T}*) ((uintptr_t) i${K} + input_offset);
+            }
+            i${K} += c_offset;
+            const __m256i vi${K} = ${_MM256_CVTEPX8_EPI16}(_mm_loadu_si128((const __m128i*) i${K}));
+
+          const __m256i vsum018 = _mm256_add_epi16(_mm256_add_epi16(vi0, vi1), vi8);
+          const __m256i vsum23 = _mm256_add_epi16(vi2, vi3);
+          const __m256i vsum45 = _mm256_add_epi16(vi4, vi5);
+          const __m256i vsum67 = _mm256_add_epi16(vi6, vi7);
+          const __m256i vsum = _mm256_add_epi16(_mm256_add_epi16(vsum23, vsum45), _mm256_add_epi16(vsum018, vsum67));
+
+          vacc0 = _mm256_add_epi32(vacc0, _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vsum)));
+          vacc1 = _mm256_add_epi32(vacc1, _mm256_cvtepi16_epi32(_mm256_extracti128_si256(vsum, 1)));
+
+          k = doz(k, 9);
+        } while (k != 0);
+
+        __m256 vscaled0 = _mm256_min_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(vacc0), vscale), voutput_max_less_zero_point);
+        __m256 vscaled1 = _mm256_min_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(vacc1), vscale), voutput_max_less_zero_point);
+
+        vacc0 = _mm256_cvtps_epi32(vscaled0);
+        vacc1 = _mm256_cvtps_epi32(vscaled1);
+
+        const __m256i vout01 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0, vacc1), voutput_zero_point);
+        __m128i vout = _mm_shuffle_epi32(
+            ${_MM_PACKXS_EPI16}(_mm256_castsi256_si128(vout01), _mm256_extracti128_si256(vout01, 1)),
+            _MM_SHUFFLE(3, 1, 2, 0));
+        vout = ${_MM_MAX_EPX8}(vout, _mm256_castsi256_si128(voutput_min));
+
+        if XNN_LIKELY(c >= 16) {
+          _mm_storeu_si128((__m128i*) o, vout);
+          o += 16;
+          c_offset += 16;
+          c -= 16;
+        } else {
+          if (c & 8) {
+            _mm_storel_epi64((__m128i*) o, vout);
+            vout = _mm_srli_si128(vout, 8);
+            o += 8;
+          }
+          if (c & 4) {
+            unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
+            vout = _mm_srli_epi64(vout, 32);
+            o += 4;
+          }
+          if (c & 2) {
+            unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
+            vout = _mm_srli_epi32(vout, 16);
+            o += 2;
+          }
+          if (c & 1) {
+            *o = (${XINT8_T}) _mm_extract_epi8(vout, 0);
+          }
+          c = 0;
+        }
+      } while (c != 0);
+    }
+
+    input = (const ${XINT8_T}**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
+    output = (${XINT8_T}*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}

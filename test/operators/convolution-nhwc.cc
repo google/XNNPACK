@@ -16,8 +16,10 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/kai-dwconv.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
 #include "test/operators/convolution-operator-tester.h"
 
@@ -2329,5 +2331,101 @@ TEST(CONVOLUTION_NHWC_F32, batch_stride_overflow) {
       xnn_reshape_convolution2d_nhwc_f32(
           convolution_op, overflow_batch, 1, 1, &workspace_size,
           nullptr, nullptr, nullptr));
+}
+
+TEST(DWCONV_CONFIG, valid_configs_and_dwconv_dispatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  const xnn_dwconv_config* f32_config = xnn_init_f32_dwconv_config();
+  const xnn_dwconv_config* qs8_qc8w_config = xnn_init_qs8_qc8w_dwconv_config();
+  const xnn_dwconv_config* qs8_config = xnn_init_qs8_dwconv_config();
+  const xnn_dwconv_config* qu8_config = xnn_init_qu8_dwconv_config();
+  ASSERT_NE(nullptr, f32_config);
+  ASSERT_NE(nullptr, qs8_qc8w_config);
+  ASSERT_NE(nullptr, qs8_config);
+  ASSERT_NE(nullptr, qu8_config);
+
+  for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; ++i) {
+    if (f32_config[i].primary_tile != 0) {
+      EXPECT_NE(nullptr, f32_config[i].minmax);
+      EXPECT_NE(nullptr, f32_config[i].init.f32);
+      EXPECT_GT(f32_config[i].channel_tile, 0);
+    }
+  }
+  for (size_t i = 0; i < XNN_MAX_QC8_DWCONV_UKERNELS; ++i) {
+    if (qs8_qc8w_config[i].primary_tile != 0) {
+      EXPECT_NE(nullptr, qs8_qc8w_config[i].minmax);
+      EXPECT_NE(nullptr, qs8_qc8w_config[i].init.qs8_qc8w);
+      EXPECT_GT(qs8_qc8w_config[i].channel_tile, 0);
+    }
+  }
+  EXPECT_EQ(9, qs8_config[0].primary_tile);
+  EXPECT_EQ(25, qs8_config[1].primary_tile);
+  for (size_t i = 0; i < XNN_MAX_QS8_DWCONV_UKERNELS; ++i) {
+    if (qs8_config[i].primary_tile != 0) {
+      EXPECT_NE(nullptr, qs8_config[i].minmax);
+      EXPECT_NE(nullptr, qs8_config[i].init.qs8);
+      EXPECT_GT(qs8_config[i].channel_tile, 0);
+    }
+  }
+  EXPECT_EQ(9, qu8_config[0].primary_tile);
+  EXPECT_EQ(25, qu8_config[1].primary_tile);
+  for (size_t i = 0; i < XNN_MAX_QU8_DWCONV_UKERNELS; ++i) {
+    if (qu8_config[i].primary_tile != 0) {
+      EXPECT_NE(nullptr, qu8_config[i].minmax);
+      EXPECT_NE(nullptr, qu8_config[i].init.qu8);
+      EXPECT_GT(qu8_config[i].channel_tile, 0);
+    }
+  }
+
+  // Ensure init_qu8_dwconv_config does not overwrite qs8_dwconv_config and
+  // init_qs8_dwconv_config uses per-tensor qs8 init rather than qs8_qc8w init.
+  EXPECT_NE(qs8_config[0].minmax, qu8_config[0].minmax);
+  EXPECT_NE(qs8_config[1].minmax, qu8_config[1].minmax);
+  EXPECT_NE(reinterpret_cast<uintptr_t>(qs8_config[0].init.qs8),
+            reinterpret_cast<uintptr_t>(qs8_qc8w_config[1].init.qs8_qc8w));
+
+  const xnn_dwconv_config* f16_config = xnn_init_f16_dwconv_config();
+  if (f16_config != nullptr) {
+    EXPECT_NE(0, f16_config[0].primary_tile);
+    for (size_t i = 0; i < XNN_MAX_F16_DWCONV_UKERNELS; ++i) {
+      if (f16_config[i].primary_tile != 0) {
+        EXPECT_NE(nullptr, f16_config[i].minmax);
+        EXPECT_NE(nullptr, f16_config[i].init.f16);
+        EXPECT_GT(f16_config[i].channel_tile, 0);
+      }
+    }
+  }
+
+  // Verify 3x3 and 5x5 depthwise convolutions dispatch dwconv rather than
+  // falling back to igemm.
+  constexpr uint32_t kGroups = 8;
+  const std::vector<uint8_t> qu8_kernel(5 * 5 * kGroups, 128);
+  const std::vector<int8_t> qs8_kernel(5 * 5 * kGroups, 0);
+  const std::vector<int32_t> q_bias(kGroups, 0);
+  const std::vector<float> qc8_scale(kGroups, 1.0f);
+  for (uint32_t k : {3u, 5u}) {
+    xnn_operator_t qu8_op = nullptr;
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_create_convolution2d_nhwc_qu8(
+            0, 0, 0, 0, k, k, 1, 1, 1, 1, kGroups, 1, 1, kGroups, kGroups, 128,
+            1.0f, 128, 1.0f, qu8_kernel.data(), q_bias.data(), 128, 1.0f, 0,
+            255, XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, &qu8_op));
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qu8_op(
+        qu8_op, xnn_delete_operator);
+    EXPECT_EQ(xnn_microkernel_type_dwconv, qu8_op->ukernel.type);
+
+    xnn_operator_t qc8_op = nullptr;
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_create_convolution2d_nhwc_qs8_qc8w(
+            0, 0, 0, 0, k, k, 1, 1, 1, 1, kGroups, 1, 1, kGroups, kGroups, 0,
+            1.0f, qc8_scale.data(), qs8_kernel.data(), q_bias.data(), 0, 1.0f,
+            -128, 127, XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, &qc8_op));
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qc8_op(
+        qc8_op, xnn_delete_operator);
+    EXPECT_EQ(xnn_microkernel_type_dwconv, qc8_op->ukernel.type);
+  }
 }
 }  // namespace

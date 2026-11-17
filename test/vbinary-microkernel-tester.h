@@ -185,6 +185,9 @@ class VBinaryMicrokernelTester {
 
   size_t iterations() const { return this->iterations_; }
 
+  void Test(xnn_bf16_vbinary_ukernel_fn vbinary, OpType op_type,
+            xnn_init_bf16_default_params_fn init_params = nullptr) const;
+
   void Test(xnn_f16_vbinary_ukernel_fn vbinary, OpType op_type,
             xnn_init_f16_default_params_fn init_params = nullptr) const;
 

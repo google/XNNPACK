@@ -70,12 +70,14 @@ TEST_MULTIPLY(hvx, f32, 32);
 TEST_MIN(hvx, u8, 128);
 TEST_MIN(hvx, s8, 128);
 TEST_MIN(hvx, s16, 64);
+TEST_MIN(hvx, s32, 32);
 TEST_MIN(hvx, f16, 64);
 TEST_MIN(hvx, f32, 32);
 
 TEST_MAX(hvx, u8, 128);
 TEST_MAX(hvx, s8, 128);
 TEST_MAX(hvx, s16, 64);
+TEST_MAX(hvx, s32, 32);
 TEST_MAX(hvx, f16, 64);
 TEST_MAX(hvx, f32, 32);
 

@@ -295,9 +295,9 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
 // Is this op supported when bf16 hardware is missing (allow-list).
 //
 // bf16 has very few native microkernels, so most ops fall back to fp32. The
-// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32), reductions, and
-// selected unary operators, which are kept native when their configs are
-// available.
+// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32), reductions,
+// binary elementwise operators, and selected unary operators, which are kept
+// native when their configs are available.
 OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
     case xnn_node_type_fully_connected: {
@@ -366,6 +366,52 @@ OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
             return OpAction::kNone;
           }
         } break;
+        default:
+          break;
+      }
+      break;
+    case xnn_node_type_binary_elementwise:
+      switch (node.binary_operator) {
+        case xnn_binary_add:
+          if (IsValid(xnn_init_bf16_vadd_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_subtract:
+          if (IsValid(xnn_init_bf16_vsub_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_multiply:
+          if (IsValid(xnn_init_bf16_vmul_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_divide:
+          if (IsValid(xnn_init_bf16_vdiv_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_maximum:
+          if (IsValid(xnn_init_bf16_vmax_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_minimum:
+          if (IsValid(xnn_init_bf16_vmin_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_prelu:
+          if (IsValid(xnn_init_bf16_vprelu_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_binary_squared_difference:
+          if (IsValid(xnn_init_bf16_vsqrdiff_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
         default:
           break;
       }

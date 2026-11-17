@@ -1700,6 +1700,23 @@ YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
                              _mm_and_si128(imask, _mm_set1_epi32(0x7fffffff)))};
 }
 
+namespace internal {
+
+// Sign extend the low 4 bits of each byte to 8 bits.
+YNN_ALWAYS_INLINE __m128i sign_extend_int4(__m128i x) {
+  x = _mm_and_si128(x, _mm_set1_epi8(0x0f));
+#ifdef YNN_ARCH_X86_SSE41
+  const __m128i lut =
+      _mm_setr_epi8(0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1);
+  return _mm_shuffle_epi8(lut, x);
+#else
+  const __m128i sign = _mm_set1_epi8(0x08);
+  return _mm_sub_epi8(_mm_xor_si128(x, sign), sign);
+#endif  // YNN_ARCH_X86_SSE41
+}
+
+}  // namespace internal
+
 #ifndef YNN_ARCH_X86_AVX
 
 // These casts have a better implementation in AVX
@@ -1772,6 +1789,15 @@ YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
 }
 
 #endif  // YNN_ARCH_X86_SSE41
+
+YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
+  const __m128i even = internal::sign_extend_int4(from.v);
+  const __m128i odd = internal::sign_extend_int4(_mm_srli_epi16(from.v, 4));
+  return {
+      s8x16{_mm_unpacklo_epi8(even, odd)},
+      s8x16{_mm_unpackhi_epi8(even, odd)},
+  };
+}
 
 YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
   return cast(cast(a, int32_t()), float());

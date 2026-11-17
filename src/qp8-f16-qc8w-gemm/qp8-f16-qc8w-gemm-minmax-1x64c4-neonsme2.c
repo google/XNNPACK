@@ -29,7 +29,7 @@ size_t xnn_qp8_f16_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr() {
 void xnn_qp8_f16_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
-    size_t dst_stride_col, struct xnn_f32_minmax_params* minmax_params) {
+    size_t dst_stride_col, const void* minmax_params) {
 #if XNN_ENABLE_KLEIDIAI
   const struct xnn_f16_minmax_params* f16_minmax_params =
       (const struct xnn_f16_minmax_params*) minmax_params;

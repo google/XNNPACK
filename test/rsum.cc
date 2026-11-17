@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -33,6 +34,14 @@ class Tester {
   }
   float scale() const { return scale_; }
 
+  // Fill the input with random values, or with the min or max of the type.
+  enum class InputFill { kRandom, kMin, kMax };
+  Tester& input_fill(InputFill fill) {
+    input_fill_ = fill;
+    return *this;
+  }
+  InputFill input_fill() const { return input_fill_; }
+
   // Type deduction helper.
   template <typename Input, typename Output, typename Params>
   using UKernelFn = void (*)(size_t, const Input*, Output*, const Params*);
@@ -46,8 +55,20 @@ class Tester {
 
     const float max_abs_value = 10.0f;
     xnnpack::DatatypeGenerator<Input> input_gen(-max_abs_value, max_abs_value);
-    std::generate_n(input.data(), input.size(),
-                    [&]() { return input_gen(rng); });
+    switch (input_fill()) {
+      case InputFill::kRandom:
+        std::generate_n(input.data(), input.size(),
+                        [&]() { return input_gen(rng); });
+        break;
+      case InputFill::kMin:
+        std::fill_n(input.data(), input.size(),
+                    xnnpack::NumericLimits<Input>::min());
+        break;
+      case InputFill::kMax:
+        std::fill_n(input.data(), input.size(),
+                    xnnpack::NumericLimits<Input>::max());
+        break;
+    }
 
     xnnpack::DatatypeGenerator<Output> output_gen(-max_abs_value,
                                                   max_abs_value);
@@ -80,6 +101,7 @@ class Tester {
  private:
   size_t batch_size_;
   float scale_ = 1.0f;
+  InputFill input_fill_ = InputFill::kRandom;
 };
 
 struct Kernel {
@@ -153,7 +175,7 @@ TEST_P(Test, batch_div) {
   const size_t batch_tile = param.batch_tile * get_batch_scale(param.elem_size);
   for (size_t batch_size = batch_tile; batch_size < batch_tile * 5;
        batch_size += batch_tile) {
-    Tester().batch_size(batch_tile).Test(param.kernel);
+    Tester().batch_size(batch_size).Test(param.kernel);
   }
 }
 
@@ -188,4 +210,23 @@ TEST_P(Test, overflow_accumulator) {
   const KernelInfo& param = GetParam();
   TEST_REQUIRES_ARCH_FLAGS(param.arch_flags);
   Tester().batch_size(128).Test(param.kernel);
+}
+
+TEST_P(Test, overflow_int16_accumulator) {
+  const KernelInfo& param = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(param.arch_flags);
+  if (param.elem_size != 1) {
+    GTEST_SKIP() << "Only 8-bit kernels accumulate in int16";
+  }
+  const size_t batch_sizes[] = {8191, 16384, 16384 + 17, 65536 + 17};
+  for (size_t batch_size : batch_sizes) {
+    Tester()
+        .batch_size(batch_size)
+        .input_fill(Tester::InputFill::kMin)
+        .Test(param.kernel);
+    Tester()
+        .batch_size(batch_size)
+        .input_fill(Tester::InputFill::kMax)
+        .Test(param.kernel);
+  }
 }

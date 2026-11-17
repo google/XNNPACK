@@ -11,11 +11,13 @@
 // front.
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -361,6 +363,134 @@ TEST_F(LoopFusionTest, SplitDimOutputIsAliased) {
     ASSERT_EQ(out.data()[i], -in.data()[i]) << i;
   }
   EXPECT_EQ(max_allocation_size_, 0);
+}
+
+TEST_F(LoopFusionTest, TransposedInputAFusesWithStaticBDot) {
+  const size_t M = 1024, K = 64, N = 1024;
+  Tensor<float> b({K, N});
+  b.fill(1.0f);
+
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t a_t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddTensor(b, b_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), a_t_id)
+      .AddTranspose({1, 0}, a_id, a_t_id)
+      .AddDot(1, a_t_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> a({K, M});
+  Tensor<float> out({M, N});
+  a.fill(1.0f);
+  ReshapeExternalTensor(a_id, {K, M}, a.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  EXPECT_LT(max_allocation_size_, a.size_bytes());
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(out({i, j}), K) << i << " " << j;
+    }
+  }
+}
+
+TEST_F(LoopFusionTest, TransposedInputANotRecomputedAcrossN) {
+  const size_t M = 256, K = 64, N = 1024;
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t a_t_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddInput(type_of<float>(), TensorShape(2), b_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), a_t_id)
+      .AddTranspose({1, 0}, a_id, a_t_id)
+      .AddDot(1, a_t_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  TestScheduler scheduler(3);
+  Runtime runtime(subgraph.GetSubgraph(), &scheduler,
+                  YNN_FLAG_ENABLE_SLINKY_TRACE);
+
+  std::atomic<size_t> transpose_calls = 0;
+  runtime.get()->eval_config.trace_begin =
+      [&](const char* name) -> slinky::index_t {
+    if (name != nullptr) {
+      const std::string_view name_view = name;
+      if (name_view == "transpose" || name_view == "transpose_a") {
+        ++transpose_calls;
+      }
+    }
+    return 0;
+  };
+
+  Tensor<float> a({K, M});
+  Tensor<float> b({K, N});
+  Tensor<float> out({M, N});
+  a.fill(1.0f);
+  b.fill(1.0f);
+  runtime.ReshapeExternalTensor({K, M}, a.data(), a_id)
+      .ReshapeExternalTensor({K, N}, b.data(), b_id)
+      .ReshapeRuntime()
+      .SetupExternalTensor(out.data(), out_id)
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_GT(transpose_calls, 0);
+  EXPECT_LE(transpose_calls, M / 16);
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(out({i, j}), K) << i << " " << j;
+    }
+  }
+}
+
+// `make_stack` erases the stacked dimension from `func::output::dims` while
+// slicing it via `output_slice`. `infer_source_regions` must map the remaining
+// output dims to their physical buffer dimensions so producers feeding `stack`
+// still fuse into downstream consumer loops along the non-stacked dimensions.
+TEST_F(LoopFusionTest, StackProducersFuseWithConsumer) {
+  const size_t M = 1024, N = 256;
+  const uint32_t in0_id = 0;
+  const uint32_t in1_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t neg0_id = YNN_INVALID_VALUE_ID;
+  uint32_t neg1_id = YNN_INVALID_VALUE_ID;
+  uint32_t stacked_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), in0_id)
+      .AddInput(type_of<float>(), TensorShape(2), in1_id)
+      .AddOutput(type_of<float>(), TensorShape(3), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), neg0_id)
+      .AddTensor(type_of<float>(), TensorShape(2), neg1_id)
+      .AddTensor(type_of<float>(), TensorShape(3), stacked_id)
+      .AddUnary(ynn_unary_negate, in0_id, neg0_id)
+      .AddUnary(ynn_unary_negate, in1_id, neg1_id)
+      .AddStack(/*axis=*/2, {neg0_id, neg1_id}, stacked_id)
+      .AddUnary(ynn_unary_abs, stacked_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> in0({M, N});
+  Tensor<float> in1({M, N});
+  Tensor<float> out({M, N, 2});
+  in0.fill(-2.0f);
+  in1.fill(-3.0f);
+  ReshapeExternalTensor(in0_id, {M, N}, in0.data());
+  ReshapeExternalTensor(in1_id, {M, N}, in1.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  EXPECT_LT(max_allocation_size_, in0.size_bytes());
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(out({i, j, 0}), 2.0f);
+      ASSERT_EQ(out({i, j, 1}), 3.0f);
+    }
+  }
 }
 
 }  // namespace

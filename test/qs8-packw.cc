@@ -209,7 +209,7 @@ INSTANTIATE_TEST_SUITE_P(qs8_packw, XnnTestQS8,
                          GetTestQS8Name);
 
 // Enable on all platforms when scalar available
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 || XNN_ARCH_HEXAGON
 
 namespace {
 
@@ -395,6 +395,6 @@ INSTANTIATE_TEST_SUITE_P(qs8_gio_packw, XnnTestQS8GIO,
                          testing::ValuesIn(xnn_test_qs8_gio_params),
                          GetTestQS8GIOName);
 
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 || XNN_ARCH_HEXAGON
 
 }  // namespace

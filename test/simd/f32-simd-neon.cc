@@ -1027,6 +1027,75 @@ TEST_F(F32SimdNEONTest, StoreTail) {
   }
 }
 
+#if (defined(__ARM_FP16_FORMAT_IEEE) || \
+     defined(__ARM_FP16_FORMAT_ALTERNATIVE)) && \
+        (defined(__ARM_FP) && (__ARM_FP & 2)) || \
+    (XNN_COMPILER_MSVC && XNN_ARCH_ARM64)
+TEST_F(F32SimdNEONTest, LoadTailF16) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16);
+  std::vector<xnn_float16> loaded_f16(xnn_simd_size_f32);
+  for (size_t offset = 0; offset <= 1; offset++) {
+    for (size_t num_elements = 1; num_elements <= xnn_simd_size_f32;
+         num_elements++) {
+      std::vector<xnn_float16> tail_in(offset + num_elements,
+                                       xnn_float16_from_bits(0xDEAD));
+      for (size_t k = 0; k < num_elements; k++) {
+        tail_in[offset + k] = xnn_float16_from_float(inputs_[k]);
+      }
+      const xnn_simd_f16_t v =
+          xnn_load_tail_f16(tail_in.data() + offset, num_elements);
+      xnn_storeu_f16(loaded_f16.data(), v);
+      xnn_storeu_f32(output_.data(), xnn_cvt_f32_f16(v));
+      for (size_t k = 0; k < num_elements; k++) {
+        ASSERT_EQ(xnn_float16_to_bits(loaded_f16[k]),
+                  xnn_float16_to_bits(tail_in[offset + k]));
+        ASSERT_EQ(output_[k], xnn_float16_to_float(tail_in[offset + k]));
+      }
+      for (size_t k = num_elements; k < xnn_simd_size_f32; k++) {
+        ASSERT_EQ(xnn_float16_to_bits(loaded_f16[k]), 0);
+        ASSERT_EQ(output_[k], 0.0f);
+      }
+    }
+  }
+}
+
+TEST_F(F32SimdNEONTest, StoreTailF16) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16);
+  const xnn_simd_f16_t v = xnn_cvt_f16_f32(xnn_loadu_f32(inputs_.data()));
+  std::vector<xnn_float16> expected(xnn_simd_size_f32);
+  xnn_storeu_f16(expected.data(), v);
+  for (size_t offset = 0; offset <= 1; offset++) {
+    for (size_t num_elements = 1; num_elements <= xnn_simd_size_f32;
+         num_elements++) {
+      std::vector<xnn_float16> tail_out(offset + num_elements,
+                                        xnn_float16_from_bits(0xDEAD));
+      xnn_store_tail_f16(tail_out.data() + offset, v, num_elements);
+      for (size_t k = 0; k < offset; k++) {
+        ASSERT_EQ(xnn_float16_to_bits(tail_out[k]), 0xDEAD);
+      }
+      for (size_t k = 0; k < num_elements; k++) {
+        ASSERT_EQ(xnn_float16_to_bits(tail_out[offset + k]),
+                  xnn_float16_to_bits(expected[k]));
+      }
+
+      std::vector<xnn_float16> padded_out(
+          offset + xnn_simd_size_f32 + 2, xnn_float16_from_bits(0xBEEF));
+      xnn_store_tail_f16(padded_out.data() + offset, v, num_elements);
+      for (size_t k = 0; k < offset; k++) {
+        ASSERT_EQ(xnn_float16_to_bits(padded_out[k]), 0xBEEF);
+      }
+      for (size_t k = 0; k < num_elements; k++) {
+        ASSERT_EQ(xnn_float16_to_bits(padded_out[offset + k]),
+                  xnn_float16_to_bits(expected[k]));
+      }
+      for (size_t k = offset + num_elements; k < padded_out.size(); k++) {
+        ASSERT_EQ(xnn_float16_to_bits(padded_out[k]), 0xBEEF);
+      }
+    }
+  }
+}
+#endif  // __ARM_FP16_FORMAT_* || (XNN_COMPILER_MSVC && XNN_ARCH_ARM64)
+
 
 }  // namespace xnnpack
 

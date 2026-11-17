@@ -229,6 +229,45 @@ TEST_F(Bf16ToFp32FallbackTest, NativeUnaryOpsStayBf16) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
+TEST_F(Bf16ToFp32FallbackTest, NativeBinaryOpsStayBf16) {
+#if XNN_ARCH_ARM64
+  mock_config_.arch_flags |= xnn_arch_arm_neon;
+#elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512SKX
+  mock_config_.arch_flags |= xnn_arch_x86_avx512skx;
+#else
+  GTEST_SKIP();
+#endif
+  xnn_set_hardware_config(&mock_config_);
+
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor a({.type = Type::kBF16, .shape = {3, 4}});
+    XnnTensor b({.type = Type::kBF16, .shape = {3, 4}});
+    XnnTensor c({.type = Type::kBF16, .shape = {4}});
+    a = Add(a, b);
+    a = Sub(a, c);
+    a = Mul(a, b);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({a}));
+  }
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor a({.type = Type::kBF16, .shape = {3, 4}});
+    XnnTensor b({.type = Type::kBF16, .shape = {3, 4}});
+    XnnTensor c({.type = Type::kBF16, .shape = {4}});
+    a = Add(a, b);
+    a = Sub(a, c);
+    a = Mul(a, b);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
+  }
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
 TEST_F(Bf16ToFp32FallbackTest, ReshapeAllowsBf16Inputs) {
   // Reshape is transparent: if its inputs are bf16, it isn't rewritten.
   std::unique_ptr<XnnpackGraph> graph;

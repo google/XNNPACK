@@ -17,7 +17,7 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     size_t batch,
     const float* input,
     int8_t* output,
-    const struct xnn_f32_qs8_cvt_params* restrict params)
+    const struct xnn_f32_qs8_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -25,8 +25,14 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
   assert(output != NULL);
 
   const HVX_Vector vscale = xnn_set1_f32(params->scalar.scale);
+#if __HVX_ARCH__ >= 81
   const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
+#else
+  // Vqf32 has 23 magnitude bits and truncates on add, so bias by 1.5 * 2^22 + 0.5.
+  const HVX_Vector vmagic_bias = xnn_set1_f32(6291456.5f);
+  const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(INT32_C(0x25600000) - (int32_t) params->scalar.output_zero_point);
+#endif
   XNN_FORCE_REALIZATION(vmagic_bias);
   for (; batch >= 256 * sizeof(float); batch -= 256 * sizeof(float)) {
     HVX_Vector vx0 = xnn_loadu_f32(input);
@@ -48,6 +54,7 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     vx6 = xnn_fmadd_f32(vx6, vscale, vmagic_bias);
     vx7 = xnn_fmadd_f32(vx7, vscale, vmagic_bias);
 
+    #if __HVX_ARCH__ >= 81
     const HVX_Vector vacc0 = Q6_Vw_vsub_VwVw_sat(vx0, vmagic_bias_less_zero_point);
     const HVX_Vector vacc1 = Q6_Vw_vsub_VwVw_sat(vx1, vmagic_bias_less_zero_point);
     const HVX_Vector vacc2 = Q6_Vw_vsub_VwVw_sat(vx2, vmagic_bias_less_zero_point);
@@ -56,6 +63,16 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     const HVX_Vector vacc5 = Q6_Vw_vsub_VwVw_sat(vx5, vmagic_bias_less_zero_point);
     const HVX_Vector vacc6 = Q6_Vw_vsub_VwVw_sat(vx6, vmagic_bias_less_zero_point);
     const HVX_Vector vacc7 = Q6_Vw_vsub_VwVw_sat(vx7, vmagic_bias_less_zero_point);
+    #else
+    const HVX_Vector vacc0 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx0, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc1 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx1, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc2 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx2, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc3 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx3, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc4 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx4, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc5 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx5, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc6 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx6, 1), vmagic_bias_less_zero_point);
+    const HVX_Vector vacc7 = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx7, 1), vmagic_bias_less_zero_point);
+    #endif
 
     // narrowing 32-bit to 16-bit
     const HVX_Vector vacc_h0 = Q6_Vh_vpack_VwVw_sat(vacc1, vacc0);
@@ -78,7 +95,11 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
+#if __HVX_ARCH__ >= 81
     const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(vx, vmagic_bias_less_zero_point);
+#else
+    const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx, 1), vmagic_bias_less_zero_point);
+#endif
 
     const HVX_Vector vacc_h = Q6_Vh_vpack_VwVw_sat(vacc, vacc);
 
@@ -88,19 +109,20 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_Vector vx = xnn_loadu_f32(input);
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
+#if __HVX_ARCH__ >= 81
     const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(vx, vmagic_bias_less_zero_point);
+#else
+    const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(Q6_Vw_vasr_VwR(vx, 1), vmagic_bias_less_zero_point);
+#endif
 
     const HVX_Vector vacc_h = Q6_Vh_vpack_VwVw_sat(vacc, vacc);
 
     HVX_Vector vy = Q6_Vb_vpack_VhVh_sat(vacc_h, vacc_h);
 
-    // Since the output data type is int8_t,
-    // we simply determine the number of elements using batch >> 2
-    // without multiplying by sizeof(int8_t).
     Q6_V_vstu_variable(output, batch >> 2, vy);
   }
 }

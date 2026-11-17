@@ -72,7 +72,9 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_x86_amx_tile() && can_use_amx_tile()) {
       if (cpuinfo_has_x86_amx_bf16()) result |= arch_flag::amxbf16;
       if (cpuinfo_has_x86_amx_fp16()) result |= arch_flag::amxfp16;
-      if (cpuinfo_has_x86_amx_int8()) result |= arch_flag::amxint8;
+      if (cpuinfo_has_x86_amx_int8() && cpuinfo_has_x86_gfni()) {
+        result |= arch_flag::amxint8;
+      }
 #ifdef YNN_ENABLE_X86_ACE
       if (cpuinfo_has_x86_avx10_2() && cpuinfo_has_x86_ace()) {
         result |= arch_flag::ace;
@@ -138,11 +140,19 @@ std::array<size_t, 3> get_cache_sizes() {
     std::array<size_t, 3> result = {32 * 1024, 512 * 1024, 0};
 #ifdef YNN_ENABLE_CPUINFO
     if (cpuinfo_initialize()) {
+      const cpuinfo_cache* l2_cache = cpuinfo_get_l2_cache(0);
       const size_t l1 = get_cache_size_per_core(cpuinfo_get_l1d_cache(0));
-      const size_t l2 = get_cache_size_per_core(cpuinfo_get_l2_cache(0));
+      const size_t l2 = get_cache_size_per_core(l2_cache);
       const size_t l3 = get_cache_size_per_core(cpuinfo_get_l3_cache(0));
       if (l1 > 0) result[0] = l1;
-      if (l2 > 0) result[1] = l2;
+      if (l2 > result[0]) {
+        result[1] = l2;
+      } else if (l2_cache && l2_cache->size > result[0]) {
+        // Containerized or missing sysfs on ARM servers can report all cores on
+        // the socket as sharing a private per-core L2 cache, dividing a 1-2 MiB
+        // private L2 below L1. Use the undivided L2 size.
+        result[1] = l2_cache->size;
+      }
       if (l3 > 0) result[2] = l3;
     }
 #endif  // YNN_ENABLE_CPUINFO

@@ -14,9 +14,12 @@ namespace ynn {
 void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
                  uint32_t output_id, uint32_t flags);
 
+// Defines a broadcast of `input_id` to a value with extents `output_extents`.
+// If the broadcast is a no-op and `*output_id == YNN_INVALID_VALUE_ID`, sets
+// `*output_id = input_id` without defining a node.
 void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
-                             std::vector<size_t> new_dims, uint32_t input_id,
-                             uint32_t* output_id);
+                             std::vector<slinky::expr> output_extents,
+                             uint32_t input_id, uint32_t* output_id);
 
 // Defines a reshape of `input_id` to a value with extents `output_extents`.
 // `groups` describes the structure of the reshape (see `ynn_node::reshape`).

@@ -565,7 +565,8 @@ xnn_status xnn_define_average_pooling_2d(
   bool no_explicit_padding =
       (input_padding_top == 0 && input_padding_right == 0 &&
        input_padding_bottom == 0 && input_padding_left == 0);
-  if (no_explicit_padding) {
+  if (no_explicit_padding && !ynn::is_value_quantized(subgraph, input_id) &&
+      !ynn::is_value_quantized(subgraph, output_id)) {
     bool padding_same = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
     ynn_status status = ynn::define_average_pool_2d(
         subgraph->ynn, input_id, ynn::type_of_value(subgraph, input_id),
@@ -597,16 +598,12 @@ xnn_status xnn_define_average_pooling_2d(
     //
     // We could compute this in the width and height dimensions separately and
     // multiply the results later...
-    uint32_t ones_squezed_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn::define_scalar_value_like(subgraph, input_id, 1.0f,
-                                                      &ones_squezed_id);
-    if (status != ynn_status_success) {
-      return ynn::xnn_status_from_ynn(status);
-    }
+    uint32_t ones_squezed_id =
+        subgraph->ynn->get_scalar_value_id(ynn_type_fp32, 1.0f);
 
     uint32_t ones_id = YNN_INVALID_VALUE_ID;
     const int32_t dims[4] = {0, 1, 2, 3};
-    status = ynn_define_static_expand_dims(
+    ynn_status status = ynn_define_static_expand_dims(
         subgraph->ynn, 4, dims, ones_squezed_id, &ones_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
@@ -666,9 +663,34 @@ xnn_status xnn_define_average_pooling_2d(
       return ynn::xnn_status_from_ynn(status);
     }
 
+    if (ynn::is_value_quantized(subgraph, input_id)) {
+      uint32_t input_zp_id = ynn::get_zero_point_id(subgraph, input_id);
+      uint32_t input_scale_id = ynn::get_scale_id(subgraph, input_id);
+      uint32_t zp_acc_id = YNN_INVALID_VALUE_ID;
+      if (input_zp_id != YNN_INVALID_VALUE_ID) {
+        uint32_t kernel_size_id = subgraph->ynn->get_scalar_value_id<int32_t>(
+            pooling_height * pooling_width);
+        status = ynn_define_binary(subgraph->ynn, ynn_binary_multiply,
+                                   kernel_size_id, input_zp_id, &zp_acc_id,
+                                   /*flags=*/0);
+        if (status != ynn_status_success) {
+          return ynn::xnn_status_from_ynn(status);
+        }
+      }
+      uint32_t sum_fp32_id = YNN_INVALID_VALUE_ID;
+      status = ynn_define_dequantize(subgraph->ynn, sum_id, zp_acc_id,
+                                     input_scale_id, ynn_type_fp32,
+                                     &sum_fp32_id, /*flags=*/0);
+      if (status != ynn_status_success) {
+        return ynn::xnn_status_from_ynn(status);
+      }
+      sum_id = sum_fp32_id;
+    }
+
     uint32_t output_widened_id = output_id;
-    if (ynn::type_of_value(subgraph, output_id) !=
-        ynn::type_of_value(subgraph, sum_id)) {
+    if (ynn::is_value_quantized(subgraph, output_id) ||
+        ynn::type_of_value(subgraph, output_id) !=
+            ynn::type_of_value(subgraph, sum_id)) {
       // The sum is higher precision than the output, compute the division into
       // a temporary value.
       output_widened_id = YNN_INVALID_VALUE_ID;
@@ -680,10 +702,18 @@ xnn_status xnn_define_average_pooling_2d(
     }
 
     if (output_widened_id != output_id) {
-      // The sum is higher precision than the output, convert the division
-      // result to the output.
-      status = ynn_define_unary(subgraph->ynn, ynn_unary_convert,
-                                output_widened_id, &output_id, /*flags=*/0);
+      if (ynn::is_value_quantized(subgraph, output_id)) {
+        status = ynn_define_quantize(
+            subgraph->ynn, output_widened_id,
+            ynn::type_of_value(subgraph, output_id),
+            ynn::get_zero_point_id(subgraph, output_id),
+            ynn::get_scale_id(subgraph, output_id), &output_id, /*flags=*/0);
+      } else {
+        // The sum is higher precision than the output, convert the division
+        // result to the output.
+        status = ynn_define_unary(subgraph->ynn, ynn_unary_convert,
+                                  output_widened_id, &output_id, /*flags=*/0);
+      }
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
       }

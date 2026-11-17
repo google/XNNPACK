@@ -91,6 +91,8 @@ using xf8x128 = sign_magnitude<s8x128>;
 
 MIN_MAX_K1_KERNEL(min_max_k1_fp32_hvx, f32x32, f32x32, float, 32);
 MIN_MAX_KN_KERNEL(min_max_kn_fp32_hvx, f32x32, f32x32, float, 32);
+MIN_MAX_K1_KERNEL(min_max_k1_int32_hvx, s32x32, s32x32, int32_t, 32);
+MIN_MAX_KN_KERNEL(min_max_kn_int32_hvx, s32x32, s32x32, int32_t, 32);
 MIN_MAX_K1_KERNEL(min_max_k1_fp16_hvx, f16x64, f16x64, half, 64);
 MIN_MAX_KN_KERNEL(min_max_kn_fp16_hvx, f16x64, f16x64, half, 64);
 MIN_MAX_K1_KERNEL(min_max_k1_xf16_hvx, xf16x64, xf16x64, int16_t, 64);
@@ -104,6 +106,8 @@ MIN_MAX_KN_KERNEL(min_max_kn_int8_hvx, s8x128, s8x128, int8_t, 128);
 
 MIN_MAX_K1_KERNEL(min_k1_fp32_hvx, f32x32, dummy_t, float, 32);
 MIN_MAX_KN_KERNEL(min_kn_fp32_hvx, f32x32, dummy_t, float, 32);
+MIN_MAX_K1_KERNEL(min_k1_int32_hvx, s32x32, dummy_t, int32_t, 32);
+MIN_MAX_KN_KERNEL(min_kn_int32_hvx, s32x32, dummy_t, int32_t, 32);
 MIN_MAX_K1_KERNEL(min_k1_fp16_hvx, f16x64, dummy_t, half, 64);
 MIN_MAX_KN_KERNEL(min_kn_fp16_hvx, f16x64, dummy_t, half, 64);
 MIN_MAX_K1_KERNEL(min_k1_xf16_hvx, xf16x64, dummy_t, int16_t, 64);
@@ -117,6 +121,8 @@ MIN_MAX_KN_KERNEL(min_kn_int8_hvx, s8x128, dummy_t, int8_t, 128);
 
 MIN_MAX_K1_KERNEL(max_k1_fp32_hvx, dummy_t, f32x32, float, 32);
 MIN_MAX_KN_KERNEL(max_kn_fp32_hvx, dummy_t, f32x32, float, 32);
+MIN_MAX_K1_KERNEL(max_k1_int32_hvx, dummy_t, s32x32, int32_t, 32);
+MIN_MAX_KN_KERNEL(max_kn_int32_hvx, dummy_t, s32x32, int32_t, 32);
 MIN_MAX_K1_KERNEL(max_k1_fp16_hvx, dummy_t, f16x64, half, 64);
 MIN_MAX_KN_KERNEL(max_kn_fp16_hvx, dummy_t, f16x64, half, 64);
 MIN_MAX_K1_KERNEL(max_k1_xf16_hvx, dummy_t, xf16x64, int16_t, 64);

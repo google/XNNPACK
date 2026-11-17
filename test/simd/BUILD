@@ -63,9 +63,12 @@ SIMD_TEST_DEPS = [
 [xnnpack_unit_test(
     name = "s32_simd_" + arch + "_test",
     srcs = [
-        "s32-simd-" + arch + ".cc",
+        "s32-simd.cc",
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
+    defines = [
+        "XNN_SIMD_" + arch.upper(),
+    ],
     tags = ["simd_wrapper_test"],
     deps = SIMD_TEST_DEPS,
 ) for arch in xnnpack_simd_s32_archs()]

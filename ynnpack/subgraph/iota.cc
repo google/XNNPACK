@@ -277,8 +277,7 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
       }
     }
 
-    runtime.funcs.back().user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
+    runtime.funcs.back().info = std::move(sched);
 
     return ynn_status_success;
   };

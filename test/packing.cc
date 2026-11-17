@@ -281,6 +281,110 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GIO_W, kr_eq_4) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
+TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_8_padded) {
+  size_t g = 1;
+  size_t nc = 1;
+  size_t kc = 4;
+  size_t nr = 1;
+  size_t kr = 8;
+  size_t sr = 1;
+
+  std::vector<int32_t> b(g * nc, 0);
+  std::vector<float> kernel_zero_point(g * nc, 16.0f);
+  // Crumbs 0..3: raw 0, 1, 2, 3 -> signed 0, +1, -2, -1 (ksum = -2),
+  // unsigned 2, 3, 0, 1. Crumbs 4..7 (>= k4) and upper planes must be 0.
+  std::vector<uint8_t> k = {0xE4};
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) *
+      (sizeof(float) * 2 + round_up_po2(kc, kr * sr * 4) / 4));
+  auto a = xnn_qd8_qc2w_packing_params{1, kernel_zero_point.data()};
+  xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+                               /*input_channels=*/kc, nr, kr, sr,
+                               /*n_stride=*/kc, k.data(), b.data(),
+                               /*scale=*/nullptr, packed_weights.data(),
+                               /*extra_bytes=*/0, /*params=*/&a);
+
+  std::vector<uint8_t> expected = {
+      // 1 bias.
+      0x00, 0x00, 0x00, 0x00,
+      // 1 kernel zero point.
+      0x00, 0x00, 0x00, 0x00,
+      // 8 bytes of weights (plane 0 crumbs 0..3 = 2,3,0,1; crumbs 4..7 = 0).
+      0x02, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+  };
+  reinterpret_cast<int32_t*>(expected.data())[0] = 2;
+  reinterpret_cast<float*>(expected.data())[1] = kernel_zero_point[0];
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+
+  // Unaligned kc = 2 (k4 = 4): crumbs 0..1 are raw^2 (2, 3), crumbs 2..3
+  // (< k4) are zero-weight 2, and crumbs 4..7 (>= k4) are 0.
+  kc = 2;
+  xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+                               /*input_channels=*/kc, nr, kr, sr,
+                               /*n_stride=*/4, k.data(), b.data(),
+                               /*scale=*/nullptr, packed_weights.data(),
+                               /*extra_bytes=*/0, /*params=*/&a);
+  expected = {
+      0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00,
+      0x02, 0x03, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00,
+  };
+  reinterpret_cast<int32_t*>(expected.data())[0] = -1;
+  reinterpret_cast<float*>(expected.data())[1] = kernel_zero_point[0];
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+TEST(PACK_QD8_F32_QC2W_GEMM_GIO_W, kr_eq_8_padded) {
+  size_t g = 1;
+  size_t nc = 1;
+  size_t kc = 4;
+  size_t nr = 1;
+  size_t kr = 8;
+  size_t sr = 1;
+
+  std::vector<int32_t> b(g * nc, 0);
+  std::vector<float> kernel_zero_point(g * nc, 16.0f);
+  std::vector<uint8_t> k = {0xE4};
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) *
+      (sizeof(float) * 2 + round_up_po2(kc, kr * sr * 4) / 4));
+  auto a = xnn_qd8_qc2w_packing_params{1, kernel_zero_point.data()};
+  xnn_pack_qd8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
+                               /*input_channels=*/kc, nr, kr, sr, nc, k.data(),
+                               b.data(), /*scale=*/nullptr,
+                               packed_weights.data(), /*extra_bytes=*/0,
+                               /*params=*/&a);
+
+  std::vector<uint8_t> expected = {
+      // 1 bias.
+      0x00, 0x00, 0x00, 0x00,
+      // 1 kernel zero point.
+      0x00, 0x00, 0x00, 0x00,
+      // 8 bytes of weights (plane 0 crumbs 0..3 = 2,3,0,1; crumbs 4..7 = 0).
+      0x02, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+  };
+  reinterpret_cast<int32_t*>(expected.data())[0] = 2;
+  reinterpret_cast<float*>(expected.data())[1] = kernel_zero_point[0];
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+
+  // Unaligned kc = 2 (k4 = 4): crumbs 0..1 are raw^2 (2, 3), crumbs 2..3
+  // (< k4) are zero-weight 2, and crumbs 4..7 (>= k4) are 0.
+  kc = 2;
+  xnn_pack_qd8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
+                               /*input_channels=*/kc, nr, kr, sr, nc, k.data(),
+                               b.data(), /*scale=*/nullptr,
+                               packed_weights.data(), /*extra_bytes=*/0,
+                               /*params=*/&a);
+  expected = {
+      0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00,
+      0x02, 0x03, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00,
+  };
+  reinterpret_cast<int32_t*>(expected.data())[0] = -1;
+  reinterpret_cast<float*>(expected.data())[1] = kernel_zero_point[0];
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
 // QD8-F32-QC4W GEMM packing tests.
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4) {

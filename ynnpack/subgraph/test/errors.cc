@@ -49,4 +49,23 @@ TEST(Errors, bad_dot_shape) {
   ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
 }
 
+TEST(Errors, bad_broadcast_like_shape) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, {10, 20}, a_id)
+      .AddInput(ynn_type_fp32, 2, b_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddBroadcastLike({0}, a_id, b_id, x_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor({10, 20}, nullptr, a_id)
+      .ReshapeExternalTensor({5, 20}, nullptr, b_id);
+
+  ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
+}
+
 }  // namespace ynn

@@ -1485,6 +1485,13 @@ YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
 
   return s8x32{_mm256_shuffle_epi8(lut, indices)};
 }
+#else   // YNN_ARCH_X86_AVX2
+YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
+  const __m128i even = internal::sign_extend_int4(from.v);
+  const __m128i odd = internal::sign_extend_int4(_mm_srli_epi16(from.v, 4));
+  return s8x32{internal::concat(_mm_unpacklo_epi8(even, odd),
+                                _mm_unpackhi_epi8(even, odd))};
+}
 #endif  // YNN_ARCH_X86_AVX2
 
 #ifdef YNN_ARCH_X86_AVX2

@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -66,22 +67,24 @@ void Reference(size_t m, size_t n, size_t stride_dot_m, const int32_t* dot,
 
 template <typename Output>
 void TestKernel(uint64_t arch_flags, dequantize_dot_kernel_fn kernel,
-                const Shape& shape) {
+                const Shape& dot_shape, size_t a_offset_m, size_t b_offset_n,
+                size_t offset_n, size_t a_scale_m, size_t b_scale_n) {
   if (!is_arch_supported(arch_flags)) {
     GTEST_SKIP() << "Unsupported hardware";
   }
 
   ReplicableRandomDevice rng;
 
-  size_t m = shape.m;
-  size_t n = shape.n;
+  const size_t m = std::max({dot_shape.m, a_offset_m, a_scale_m});
+  const size_t n = std::max({dot_shape.n, b_offset_n, offset_n, b_scale_n});
+  ASSERT_EQ(dot_shape.n, n);
 
-  Tensor<int32_t> dot({m, n});
-  Tensor<int32_t> a_offset({m});
-  Tensor<int32_t> b_offset({n});
-  Tensor<float> offset({n});
-  Tensor<float> a_scale({m});
-  Tensor<float> b_scale({n});
+  Tensor<int32_t> dot({dot_shape.m, dot_shape.n});
+  Tensor<int32_t> a_offset({a_offset_m});
+  Tensor<int32_t> b_offset({b_offset_n});
+  Tensor<float> offset({offset_n});
+  Tensor<float> a_scale({a_scale_m});
+  Tensor<float> b_scale({b_scale_n});
   Tensor<Output> output({m, n});
   Tensor<Output> reference({m, n});
 
@@ -102,25 +105,29 @@ void TestKernel(uint64_t arch_flags, dequantize_dot_kernel_fn kernel,
   fill_random(b_scale.data(), b_scale.size(), rng, 0.01f * max_abs_ab_scale,
               max_abs_ab_scale);
 
+  broadcast_extent_1(dot);
+  broadcast_extent_1(a_offset);
+  broadcast_extent_1(b_offset);
+  broadcast_extent_1(offset);
+  broadcast_extent_1(a_scale);
+  broadcast_extent_1(b_scale);
+  broadcast_extent_1(output);
+
   dequantize_dot_params params = {};
 
-  kernel(m, n, dot.stride(0) * sizeof(int32_t), dot.base(),
-         a_offset.stride(0) * sizeof(int32_t), a_offset.base(),
-         b_offset.stride(0) * sizeof(int32_t), b_offset.base(),
-         offset.stride(0) * sizeof(float), offset.base(),
-         a_scale.stride(0) * sizeof(float), a_scale.base(),
-         b_scale.stride(0) * sizeof(float), b_scale.base(),
-         output.stride(0) * sizeof(Output), output.base(), &params);
+  kernel(m, n, dot.stride_bytes(0), dot.base(), a_offset.stride_bytes(0),
+         a_offset.base(), b_offset.stride_bytes(0), b_offset.base(),
+         offset.stride_bytes(0), offset.base(), a_scale.stride_bytes(0),
+         a_scale.base(), b_scale.stride_bytes(0), b_scale.base(),
+         output.stride_bytes(0), output.base(), &params);
 
-  Reference<Output>(m, n, dot.stride(0) * sizeof(int32_t), dot.base(),
-                    a_offset.stride(0) * sizeof(int32_t), a_offset.base(),
-                    b_offset.stride(0) * sizeof(int32_t), b_offset.base(),
-                    offset.stride(0) * sizeof(float), offset.base(),
-                    a_scale.base(), a_scale.stride(0) * sizeof(float),
-                    b_scale.base(), b_scale.stride(0) * sizeof(float),
-                    reference.stride(0) * sizeof(Output),
-                    reference.stride(1) * sizeof(Output), reference.base(),
-                    params);
+  Reference<Output>(m, n, dot.stride_bytes(0), dot.base(),
+                    a_offset.stride_bytes(0), a_offset.base(),
+                    b_offset.stride_bytes(0), b_offset.base(),
+                    offset.stride_bytes(0), offset.base(), a_scale.base(),
+                    a_scale.stride_bytes(0), b_scale.base(),
+                    b_scale.stride_bytes(0), reference.stride_bytes(0),
+                    reference.stride_bytes(1), reference.base(), params);
 
   tolerance_spec tol = {/*relative=*/3.0f, /*absolute=*/2.0f};
   for (size_t i = 0; i < m; ++i) {
@@ -142,15 +149,47 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
-#define YNN_DEQUANTIZE_DOT_KERNEL(arch_flags, kernel, type)                \
-  class RescaleDotTest_##kernel : public testing::TestWithParam<Shape> {}; \
-                                                                           \
-  TEST_P(RescaleDotTest_##kernel, test) {                                  \
-    TestKernel<type>(arch_flags, kernel, GetParam());                      \
-  }                                                                        \
-                                                                           \
-  INSTANTIATE_TEST_SUITE_P(kernel, RescaleDotTest_##kernel,                \
-                           testing::ValuesIn(all_shapes),                  \
+#define YNN_DEQUANTIZE_DOT_KERNEL(arch_flags, kernel, type)                   \
+  class DequantizeDotTest_##kernel : public testing::TestWithParam<Shape> {}; \
+                                                                              \
+  TEST_P(DequantizeDotTest_##kernel, no_broadcast) {                          \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, shape, shape.m, shape.n, shape.n,    \
+                     shape.m, shape.n);                                       \
+  }                                                                           \
+  TEST_P(DequantizeDotTest_##kernel, broadcast_dot) {                         \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, {1, shape.n}, shape.m, shape.n,      \
+                     shape.n, shape.m, shape.n);                              \
+  }                                                                           \
+  TEST_P(DequantizeDotTest_##kernel, broadcast_a_offset) {                    \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, shape, 1, shape.n, shape.n, shape.m, \
+                     shape.n);                                                \
+  }                                                                           \
+  TEST_P(DequantizeDotTest_##kernel, broadcast_b_offset) {                    \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, shape, shape.m, 1, shape.n, shape.m, \
+                     shape.n);                                                \
+  }                                                                           \
+  TEST_P(DequantizeDotTest_##kernel, broadcast_offset) {                      \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, shape, shape.m, shape.n, 1, shape.m, \
+                     shape.n);                                                \
+  }                                                                           \
+  TEST_P(DequantizeDotTest_##kernel, broadcast_a_scale) {                     \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, shape, shape.m, shape.n, shape.n, 1, \
+                     shape.n);                                                \
+  }                                                                           \
+  TEST_P(DequantizeDotTest_##kernel, broadcast_b_scale) {                     \
+    const Shape& shape = GetParam();                                          \
+    TestKernel<type>(arch_flags, kernel, shape, shape.m, shape.n, shape.n,    \
+                     shape.m, 1);                                             \
+  }                                                                           \
+                                                                              \
+  INSTANTIATE_TEST_SUITE_P(kernel, DequantizeDotTest_##kernel,                \
+                           testing::ValuesIn(all_shapes),                     \
                            [](const auto& i) { return to_string(i.param); });
 
 #include "ynnpack/kernels/dequantize_dot/kernels.inc"

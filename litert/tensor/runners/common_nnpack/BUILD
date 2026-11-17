@@ -28,6 +28,7 @@ cc_library(
         "//litert/tensor/backends/common_nnpack:utils",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
+        "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:dynamic_annotations",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",

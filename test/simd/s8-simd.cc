@@ -11,6 +11,29 @@
 #elif defined(XNN_SIMD_SSE41) && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 #include "src/xnnpack/simd/s8-sse41.h"
 #define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_x86_sse4_1
+#elif defined(XNN_SIMD_AVX2) && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#include "src/xnnpack/simd/s8-avx2.h"
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_x86_avx2
+#elif defined(XNN_SIMD_AVX512SKX) && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+// Scope AVX-512 target attributes to the SIMD header and test bodies so the
+// test fixture SetUp() (which checks ISA support) can run on older CPUs.
+#define XNN_SIMD_USES_AVX512SKX_TARGET 1
+#if defined(__clang__)
+#pragma clang attribute push(                                             \
+    __attribute__((                                                       \
+        target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c"))), \
+    apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c")
+#endif
+#include "src/xnnpack/simd/s8-avx512skx.h"
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+#define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_x86_avx512skx
 #elif defined(XNN_SIMD_NEON) && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 #include "src/xnnpack/simd/s8-neon.h"
 #define XNN_SIMD_TEST_ARCH_FLAGS xnn_arch_arm_neon
@@ -53,6 +76,18 @@ class S8SimdTest : public ::testing::Test {
   std::vector<int8_t> inputs_;
   std::vector<int8_t> output_;
 };
+
+#if defined(XNN_SIMD_USES_AVX512SKX_TARGET)
+#if defined(__clang__)
+#pragma clang attribute push(                                             \
+    __attribute__((                                                       \
+        target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c"))), \
+    apply_to = function)
+#elif defined(__GNUC__)
+#pragma GCC push_options
+#pragma GCC target("avx512f,avx512cd,avx512bw,avx512dq,avx512vl,fma,f16c")
+#endif
+#endif  // defined(XNN_SIMD_USES_AVX512SKX_TARGET)
 
 TEST_F(S8SimdTest, Add) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
@@ -127,6 +162,14 @@ TEST_F(S8SimdTest, StoreTail) {
     }
   }
 }
+
+#if defined(XNN_SIMD_USES_AVX512SKX_TARGET)
+#if defined(__clang__)
+#pragma clang attribute pop
+#elif defined(__GNUC__)
+#pragma GCC pop_options
+#endif
+#endif  // defined(XNN_SIMD_USES_AVX512SKX_TARGET)
 
 }  // namespace xnnpack
 

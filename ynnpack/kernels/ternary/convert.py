@@ -74,8 +74,38 @@ def quantize_bf16_to_uint8(a, scale, zero_point, x):
 
 
 def dequantize(result_type, a, zero_point, scale, x):
-  zeroed = cast(Float(32), load(a)) - cast(Float(32), load(zero_point))
+  a = load(a)
+  if a.ty.size < 8:
+    a = cast(Int(8), a)
+  zeroed = cast(Float(32), a) - cast(Float(32), load(zero_point))
   return store(cast(result_type, zeroed * load(scale)), x)
+
+
+@const_buffer("a", Int(4), BroadcastMode.NONE)
+@const_buffer("zero_point", Int(32), BroadcastMode.LOCAL_VAR)
+@const_buffer("scale", Float(32), BroadcastMode.LOCAL_VAR)
+@buffer("x", Float(32))
+@operator_name("dequantize")
+def dequantize_int4_to_fp32(a, zero_point, scale, x):
+  return dequantize(Float(32), a, zero_point, scale, x)
+
+
+@const_buffer("a", Int(4), BroadcastMode.NONE)
+@const_buffer("zero_point", Int(32), BroadcastMode.LOCAL_VAR)
+@const_buffer("scale", Float(32), BroadcastMode.LOCAL_VAR)
+@buffer("x", Float(16))
+@operator_name("dequantize")
+def dequantize_int4_to_fp16(a, zero_point, scale, x):
+  return dequantize(Float(16), a, zero_point, scale, x)
+
+
+@const_buffer("a", Int(4), BroadcastMode.NONE)
+@const_buffer("zero_point", Int(32), BroadcastMode.LOCAL_VAR)
+@const_buffer("scale", Float(32), BroadcastMode.LOCAL_VAR)
+@buffer("x", BFloat(16))
+@operator_name("dequantize")
+def dequantize_int4_to_bf16(a, zero_point, scale, x):
+  return dequantize(BFloat(16), a, zero_point, scale, x)
 
 
 @const_buffer("a", Int(8), BroadcastMode.LOCAL_VAR)

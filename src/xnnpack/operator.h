@@ -218,6 +218,8 @@ union xnn_params {
   struct xnn_f32_minmax_params f32_minmax;
   struct xnn_f32_scaleminmax_params f32_scaleminmax;
   struct xnn_f32_scale_params f32_scale;
+  struct xnn_qs8_avgpool_minmax_params qs8_avgpool;
+  struct xnn_qu8_avgpool_minmax_params qu8_avgpool;
   struct xnn_f16_minmax_params f16_chw;
   struct xnn_f32_minmax_params f32_chw;
   struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
@@ -296,6 +298,7 @@ struct xnn_operator {
     } softmax;
     struct {
       uint32_t pad_value;
+      float scale;
     } padding;
   };
 

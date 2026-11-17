@@ -54,8 +54,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p1c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p1c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-scalar-acc2.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-scalar-2x1-acc2.c
@@ -163,6 +161,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x2-minmax-scalar.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x4-minmax-scalar.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x4-minmax-scalar.c
+  src/qs8-avgpool/gen/qs8-avgpool-9p-minmax-fp32-scalar-fmagic-u1.c
   src/qs8-dwconv/gen/qs8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/qs8-dwconv-9p2c-minmax-fp32-scalar-lrintf.c
   src/qs8-dwconv/gen/qs8-dwconv-25p1c-minmax-fp32-scalar-fmagic.c
@@ -175,7 +174,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-packw/gen/qs8-packw-x16c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-scalar.c
-  src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x2-minmax-fp32-scalar-fmagic.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x4-minmax-fp32-scalar-fmagic.c
@@ -208,6 +206,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-vprelu/gen/qs8-vprelu-scalar-u8.c
   src/qs8-vpreluc/gen/qs8-vpreluc-scalar-u8.c
   src/qs8-vrpreluc/gen/qs8-vrpreluc-scalar-u8.c
+  src/qu8-avgpool/gen/qu8-avgpool-9p-minmax-fp32-scalar-fmagic-u1.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/qu8-dwconv-9p2c-minmax-fp32-scalar-lrintf.c
   src/qu8-dwconv/gen/qu8-dwconv-25p1c-minmax-fp32-scalar-fmagic.c
@@ -366,7 +365,9 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-9p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-25p1c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-scalar.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-scalar.c
@@ -652,6 +653,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-scalar.c
   src/qs8-packw/gen/qs8-packw-x32c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-scalar.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x2-minmax-fp32-scalar-lrintf.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-2x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x2-minmax-fp32-scalar-fmagic.c

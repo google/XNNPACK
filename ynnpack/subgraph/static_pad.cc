@@ -105,7 +105,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
       // In this case, we don't allow broadcasting of extent 1 dimensions, so we
       // ignore the bounds that make_elementwise_bounds produced for us here.
       func_input.bounds[p.axis] = slinky::point(dims[p.axis]) - p.pre_padding;
-      func_input.input_crop[p.axis] = all_bounds(input.extent(p.axis));
+      func_input.input_crop[p.axis] = all_bounds(input.physical_extent(p.axis));
     }
 
     slinky::func f;
@@ -120,7 +120,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
 
       f = slinky::func::make_copy(std::move(func_input),
                                   {output.buffer, std::move(dims)},
-                                  std::move(padding));
+                                  std::move(padding), padded_copy);
     } else {
       f = slinky::func::make_copy(std::move(func_input),
                                   {output.buffer, std::move(dims)});

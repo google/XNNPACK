@@ -30,6 +30,7 @@
 #include "ynnpack/kernels/dot/pack.h"
 #include "ynnpack/kernels/dot/schedule.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/runtime.h"
@@ -147,28 +148,15 @@ bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
   }
   input_a_id = uint8_a_id;
 
-  const ynn_value& b_val = subgraph.value(input_b_id);
-  int32_t reduce_axes[max_tensor_rank];
-  for (size_t i = 0; i < num_k_dims; ++i) {
-    reduce_axes[i] = b_val.rank() - 1 - num_k_dims + i;
-  }
-
-  uint32_t sum_b_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_reduce(&subgraph, ynn_reduce_sum, num_k_dims, reduce_axes,
-                             input_b_id, YNN_INVALID_VALUE_ID, &sum_b_id, 0);
-  if (status != ynn_status_success) {
-    YNN_LOG_ERROR() << "Failed to define reduce sum for B in uint8 rewrite";
-    return false;
-  }
-
-  // 3. Expand sum_b to add a 1 dimension for M: sum_b_expanded =
-  // expand_dims(sum_b, axis)
+  // Compute sum(b) as dot(1, b), which is much faster than a reduction over
+  // the (non-innermost) k dimensions of b. The result has a broadcast m
+  // dimension.
+  uint32_t one_id = subgraph.get_scalar_value_id<uint8_t>(1);
   uint32_t sum_b_expanded_id = YNN_INVALID_VALUE_ID;
-  int32_t expand_axis = b_val.rank() - num_k_dims - 1;
-  status = ynn_define_static_expand_dims(&subgraph, 1, &expand_axis, sum_b_id,
-                                         &sum_b_expanded_id, 0);
+  status = ynn_define_dot(&subgraph, num_k_dims, one_id, input_b_id,
+                          YNN_INVALID_VALUE_ID, &sum_b_expanded_id, 0);
   if (status != ynn_status_success) {
-    YNN_LOG_ERROR() << "Failed to expand dims of sum_b in uint8 rewrite";
+    YNN_LOG_ERROR() << "Failed to define sum of B in uint8 rewrite";
     return false;
   }
 
@@ -402,7 +390,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     const index_t a_tile_k = a_k1i.extent();
     const slinky::dim& a_mi = transposed_a ? a.dim(1) : dummy_dim;
     const slinky::dim& a_m = a.dim(a_k1_dim + num_k_dims);
-    const index_t a_stride_m = transposed_a ? a_mi.stride() : a_m.stride();
+    // Kernels with a transposed A assume the stride of m is tile_k elements.
+    const index_t a_stride_m =
+        transposed_a ? a.elem_size * a_tile_k : a_m.stride();
     const slinky::dim& a_k1o = a.dim(a_k1_dim);
     const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(a_k1_dim + 1) : dummy_dim;
     const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(a_k1_dim + 2) : dummy_dim;
@@ -428,8 +418,10 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
                     (r_k1.min() - a_k1o.min() * a_tile_k) * a_k_strides[0]);
 
     // The kernels assume that the column dimension of a is stride 1 element.
+    assert(a_mi.extent() == 1 || a_mi.stride() == a_stride_m);
     assert(transposed_a
-               ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
+               ? (a_m.extent() == 1 ||
+                  a_m.stride() == a_stride_m * a_mi.extent())
                : (a_k1o.extent() == 1 ||
                   a_k_strides[0] == static_cast<size_t>(a.elem_size)));
 
@@ -655,25 +647,13 @@ auto make_pack_impl(int elem_count, bool transpose) {
   };
 }
 
-// L1 and L2 act as simultaneous upper bounds on the tile working set: L2
-// prevents spilling to L3/DRAM on smaller-L2 CPUs, while a multiple of L1
-// prevents L1 thrashing and preserves enough parallel tiles on large-L2
-// (1-2 MiB) CPUs.
-// Constants:
-//   - L2/4 (x86) or L2/8 (ARM) leaves L2 headroom for the other operand,
-//   accumulator, and set-associativity conflicts;
-//   - L1*4 on x86 (128-192 KiB) feeds wider AVX-512/AMX panels;
-//   - L1*2 on ARM (64-128 KiB) accounts for larger 64 KiB L1s and narrower
-//   NEON/SVE kernels across cores.
+// L1 and L2 act as simultaneous upper bounds on the tile working set: L2/4
+// leaves L2 headroom for the other operand, accumulator, and set-associativity
+// conflicts on smaller-L2 CPUs, while L1*4 prevents L1 thrashing and preserves
+// enough parallel tiles on large-L2 (1-2 MiB) CPUs.
 size_t get_dot_l1_l2_budget() {
   const std::array<size_t, 3> cache_sizes = get_cache_sizes();
-  const size_t l1_cache_size = cache_sizes[0];
-  const size_t l2_cache_size = cache_sizes[1];
-#ifdef YNN_ARCH_ARM
-  return std::min(l1_cache_size * 2, l2_cache_size / 8);
-#else
-  return std::min(l1_cache_size * 4, l2_cache_size / 4);
-#endif
+  return std::min(cache_sizes[0] * 4, cache_sizes[1] / 4);
 }
 
 }  // namespace
@@ -804,24 +784,21 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
     auto sched =
         runtime.make_schedule(dims, output.physical_extents(),
                               output.buffer->elem_size(), given_splits);
-    sched->loop_splits[0].step_is_required = true;
-    sched->loop_splits[1].step_is_required = true;
+    sched.loop_splits[0].step_is_required = true;
+    sched.loop_splits[1].step_is_required = true;
 
     // The real bounds of the input's n dimension are blocks of size block_n
     // indexed by `no`, which breaks the scheduler's source region inference.
     // Declare a virtual 1-to-1 mapping with `no` instead, so producers of the
     // input can be fused with loops derived from it.
     if (op.transpose) {
-      sched->input_scheduler_bounds = {
+      sched.input_scheduler_bounds = {
           {slinky::interval_expr{}, slinky::point(no)}};
     } else {
-      sched->input_scheduler_bounds = {{slinky::point(no)}};
+      sched.input_scheduler_bounds = {{slinky::point(no)}};
     }
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
   subgraph.add_node(std::move(node));
@@ -994,17 +971,14 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_m,
     // indexed by `mo`, which breaks the scheduler's source region inference.
     // Declare a virtual 1-to-1 mapping with `mo` instead, so producers of the
     // input can be fused with loops derived from it.
-    sched->input_scheduler_bounds.resize(1);
-    sched->input_scheduler_bounds[0].resize(
+    sched.input_scheduler_bounds.resize(1);
+    sched.input_scheduler_bounds[0].resize(
         std::min<int>(m_dim + 1, input.buffer->rank()));
     if (m_dim < input.buffer->rank()) {
-      sched->input_scheduler_bounds[0][m_dim] = slinky::point(mo);
+      sched.input_scheduler_bounds[0][m_dim] = slinky::point(mo);
     }
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 }
@@ -1065,18 +1039,22 @@ constexpr index_t step_k = 1024;
 //   L1).
 //
 // Sizing rationale:
-// - We set `k_threshold` so that k-splitting only triggers when a single
-//   input slice along k reaches `proxy_cache_for_k`.
+// - When `m <= step_m`, there is only a single `m` tile, so B is not reused
+//   across `m` tiles and `schedule_dot` already tiles `k` within each task.
+//   Avoid splitting `k` so we don't force serial threadpool dispatches, spill
+//   the accumulator, or prevent loop fusion of consumers into `dot`.
+// - Otherwise, we set `k_threshold` so that k-splitting only triggers when a
+//   single input slice along k reaches `proxy_cache_for_k`.
 // - We use half of `proxy_cache_for_k` to set the split size so that both A
 //   and B fit in L1.
 // - A proxy L1 cache size is used to maintain a consistent splitting behavior
 //   across different machines.
-index_t choose_split_k(index_t k, size_t a_elem_size) {
+index_t choose_split_k(index_t m, index_t k, size_t a_elem_size) {
   assert(a_elem_size > 0);
   constexpr index_t proxy_cache_for_k = 32 * 1024;
   const index_t k_threshold = proxy_cache_for_k / a_elem_size;
   const index_t k_split_size = k_threshold / 2;
-  index_t split_k = k >= k_threshold ? k_split_size : k;
+  index_t split_k = (m > step_m && k >= k_threshold) ? k_split_size : k;
   split_k = align_up<index_t>(split_k, step_k);
   return std::min<index_t>(split_k, max_multiplier_k * step_k);
 }
@@ -1098,8 +1076,41 @@ constexpr float task_output_bytes_per_second = 16e9f;
 
 std::tuple<index_t, index_t, index_t> choose_split_factors(
     index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
-    size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac) {
+    size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac,
+    bool a_is_produced) {
   assert(block_n > 0);
+
+  index_t split_k = choose_split_k(m, k, a_elem_size);
+  const index_t task_k = std::min(k, split_k);
+
+  const double a_bytes_total = static_cast<double>(m) * task_k * a_elem_size;
+  const double b_bytes_total =
+      (static_cast<double>(n) * task_k * b_elem_bits) / 8.0;
+  const float operand_seconds = static_cast<float>(
+      (a_bytes_total + b_bytes_total) / task_bytes_per_second);
+  const float dot_seconds =
+      static_cast<float>(m) * n * task_k * seconds_per_mac + operand_seconds;
+
+  // If A is produced in this pipeline (neither an external input nor a
+  // constant), each task computes its rows of A and reads them back alongside
+  // B and C. Cap this working set at twice the L1/L2 budget when A's O(m*k)
+  // traffic is a meaningful share of total dot time, and relax the cap
+  // proportionally once GEMM compute and B traffic dominate A.
+  uint64_t max_produced_task_bytes = 0;
+  if (a_is_produced) {
+    max_produced_task_bytes = 2 * get_dot_l1_l2_budget();
+    const double a_seconds = a_bytes_total / task_bytes_per_second;
+    const double l2_reload_seconds =
+        a_seconds * (b_bytes_total / get_cache_sizes()[1]);
+    const double total_dot_seconds = dot_seconds + l2_reload_seconds;
+    constexpr double min_dot_to_a_ratio = 12.0;
+    if (a_seconds > 0.0 && total_dot_seconds > min_dot_to_a_ratio * a_seconds) {
+      const double scale = total_dot_seconds / (min_dot_to_a_ratio * a_seconds);
+      constexpr double max_task_bytes = 1024.0 * 1024.0 * 1024.0;
+      max_produced_task_bytes = static_cast<uint64_t>(
+          std::min<double>(max_task_bytes, max_produced_task_bytes * scale));
+    }
+  }
 
   // If k gets big, we're going to tile k anyways. It could be faster to
   // parallelize more finely, but it will waste CPU cycles due to more memory
@@ -1127,12 +1138,24 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   const index_t aspect_ratio = 4;
 
   // Make the tile bigger, doubling the dimension that keeps it closest to
-  // `aspect_ratio`. Returns false if the tile already covers the whole dot.
-  auto grow = [&](index_t& split_m, index_t& split_n) {
-    if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
+  // `aspect_ratio`. Returns false if the tile cannot grow further.
+  auto grow = [&](bool limit_produced_a, index_t& split_m, index_t& split_n) {
+    bool can_grow_m = split_m < m;
+    if (can_grow_m && limit_produced_a) {
+      const index_t next_m = split_m * 2;
+      const uint64_t a_bytes =
+          static_cast<uint64_t>(next_m) * task_k * a_elem_size;
+      const uint64_t b_bytes =
+          (static_cast<uint64_t>(split_n) * task_k * b_elem_bits) / 8;
+      const uint64_t c_bytes =
+          static_cast<uint64_t>(next_m) * split_n * c_elem_size;
+      can_grow_m = a_bytes + b_bytes + c_bytes <= max_produced_task_bytes;
+    }
+    const bool can_grow_n = split_n < n;
+    if ((aspect_ratio * split_n <= split_m || !can_grow_m) && can_grow_n) {
       split_n *= 2;
-    } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
-               split_m < m) {
+    } else if ((split_m <= aspect_ratio * split_n || !can_grow_n) &&
+               can_grow_m) {
       split_m *= 2;
     } else {
       return false;
@@ -1152,22 +1175,15 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
       }
     }
     // We want to make the tile bigger, figure out which dimension to grow.
-    if (!grow(split_m, split_n)) break;
+    if (!grow(a_is_produced, split_m, split_n)) break;
   }
-
-  index_t split_k = choose_split_k(k, a_elem_size);
 
   // Make the tasks bigger if they are too small to be worth running in
   // parallel.
-  const float task_k = std::min(k, split_k);
-  const float operand_seconds = (m * a_elem_size + n * b_elem_bits / 8.0f) *
-                                task_k / task_bytes_per_second;
-  const float dot_seconds =
-      static_cast<float>(m) * n * task_k * seconds_per_mac + operand_seconds;
   while (true) {
     index_t next_m = split_m;
     index_t next_n = split_n;
-    if (!grow(next_m, next_n)) break;
+    if (!grow(/*limit_produced_a=*/false, next_m, next_n)) break;
     const index_t tasks =
         ceil_div(m, std::min(m, split_m)) * ceil_div(n, std::min(n, split_n));
     const float area =
@@ -1219,7 +1235,7 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
     slinky::expr block_n, size_t a_elem_size, size_t b_elem_bits,
-    size_t c_elem_size, float seconds_per_mac) {
+    size_t c_elem_size, float seconds_per_mac, bool a_is_produced) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
@@ -1228,7 +1244,7 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     index_t block_n = evaluate(op->args[3], ctx);
     auto [split_n, split_m, split_k] =
         choose_split_factors(m, n, k, block_n, a_elem_size, b_elem_bits,
-                             c_elem_size, seconds_per_mac);
+                             c_elem_size, seconds_per_mac, a_is_produced);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
     index_t mult_m = std::max<index_t>(1, split_m / step_m);
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
@@ -1468,6 +1484,22 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
+  if (subgraph.value(input_a_id).rank() == 0) {
+    // We could support broadcasting `a` more generally. For now, broadcast a
+    // scalar `a` to [1, k...], where k... are the k dimensions of `b`.
+    std::vector<slinky::expr> output_extents(num_k_dims + 1);
+    for (size_t d = 0; d < num_k_dims; ++d) {
+      output_extents[d] = subgraph.value(input_b_id).extent(d + 1);
+    }
+    uint32_t broadcast_a_id = YNN_INVALID_VALUE_ID;
+    ynn_node broadcast;
+    define_static_broadcast(subgraph, broadcast, std::move(output_extents),
+                            input_a_id, &broadcast_a_id);
+    if (broadcast.is_valid()) {
+      subgraph.add_node(std::move(broadcast));
+    }
+    input_a_id = broadcast_a_id;
+  }
   const bool b_transposed =
       always_alias_transpose(subgraph, input_b_id, 0, 1) == ynn_status_success;
 
@@ -1555,11 +1587,12 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     kernel = unpacked_kernel;
   }
+  const bool transpose_a = (kernel.flags & dot_flag::transpose_a) != 0;
 
   ynn_node node;
   node.inputs = {input_a_id, input_b_id, input_c_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::dot{num_k_dims};
+  node.op = ynn_node::dot{num_k_dims, symmetric_b, pack_b, transpose_a};
 
   // Propagate shape.
   int c_rank;
@@ -1613,7 +1646,6 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   // wouldn't need to put input_b into the inputs in the first place.
   node.inputs[1] = packed_b_id;
 
-  const bool transpose_a = kernel.flags & dot_flag::transpose_a;
   if (transpose_a) {
     // The kernel we want to use has a transposed a.
     // By definition, `m_dim` is the first dimension after the k dims.
@@ -1634,12 +1666,14 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       kernel.cost /
       (static_cast<float>(std::max<size_t>(1, shape.m)) *
        std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
-  node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
-                 block_n_unpacked, seconds_per_mac, tile_k = kernel.tile_k,
+  node.create = [block_n_unpacked, seconds_per_mac, tile_k = kernel.tile_k,
                  tile_m = kernel.tile_m](const ynn_node& node,
                                          ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
+    const bool symmetric_b = op.symmetric_b;
+    const bool pack_b = op.pack_b;
+    const bool transpose_a = op.transpose_a;
     ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
     ynn_runtime_value& input_b = runtime.value(node.inputs[1]);
     ynn_runtime_value input_c;
@@ -1794,6 +1828,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, input_b.type, output.type};
+    const bool consistent_arithmetic =
+        (!type_is_integral(input_a.type) || !type_is_integral(input_b.type)) &&
+        (runtime.subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
     const int thread_count =
         runtime.threadpool() ? runtime.threadpool()->thread_count() + 1 : 1;
     auto func = slinky::func(
@@ -1822,7 +1859,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     auto [split_n, split_m, split_k] = choose_split_factors(
         runtime, m, n, k, block_n, type_size_bytes(input_a.type),
         type_size_bits(input_b.type), type_size_bytes(output.type),
-        seconds_per_mac);
+        seconds_per_mac, input_a.is_internal());
 
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
@@ -1889,9 +1926,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     for (size_t dim_idx = 0; dim_idx < std::min<size_t>(output_dims.size(), 2);
          ++dim_idx) {
       slinky::var sym = output_dims[dim_idx];
-      for (size_t i = 0; i < sched->loop_splits.size(); ++i) {
-        if (sched->loop_splits[i].var == sym) {
-          sched->loop_splits[i].step_is_required = true;
+      for (size_t i = 0; i < sched.loop_splits.size(); ++i) {
+        if (sched.loop_splits[i].var == sym) {
+          sched.loop_splits[i].step_is_required = true;
           break;
         }
       }
@@ -1901,23 +1938,20 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // indices (j / block_n), which breaks the scheduler's source region
     // inference. Declare a virtual 1-to-1 mapping with `j` instead, so the
     // pack (and anything feeding it) can be fused with loops derived from j.
-    sched->input_scheduler_bounds.resize(2);
+    sched.input_scheduler_bounds.resize(2);
     if (pack_b) {
-      sched->input_scheduler_bounds[1].resize(4);
-      sched->input_scheduler_bounds[1][3] = slinky::point(j);
+      sched.input_scheduler_bounds[1].resize(4);
+      sched.input_scheduler_bounds[1][3] = slinky::point(j);
     }
     if (transpose_a) {
-      sched->input_scheduler_bounds[0].resize(num_a_k_dims + 1);
+      sched.input_scheduler_bounds[0].resize(num_a_k_dims + 1);
       if (output_dims.size() >= 2) {
         slinky::var i = output_dims[1];
-        sched->input_scheduler_bounds[0][num_a_k_dims] = slinky::point(i);
+        sched.input_scheduler_bounds[0][num_a_k_dims] = slinky::point(i);
       }
     }
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 

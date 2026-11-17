@@ -309,6 +309,7 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
 
 #if (defined(__ARM_FP16_FORMAT_IEEE) || defined(__ARM_FP16_FORMAT_ALTERNATIVE)) && (defined(__ARM_FP) && (__ARM_FP & 2)) || (XNN_COMPILER_MSVC && XNN_ARCH_ARM64)
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 typedef float16x4_t xnn_simd_f16_t;
 
@@ -338,31 +339,42 @@ static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
                                                    size_t num_elements) {
-  XNN_ALIGN(8) xnn_float16 padded[4] = {0};
-  memcpy(padded, input, num_elements * sizeof(xnn_float16));
-#if XNN_COMPILER_MSVC
-  return vreinterpret_f16_u16(vld1_u16((const uint16_t*)padded));
-#else
-  return vld1_f16((const __fp16*)padded);
-#endif
+  assert(num_elements > 0);
+  assert(num_elements <= xnn_simd_size_f32);
+  if (num_elements == 4) {
+    return xnn_loadu_f16(input);
+  }
+  const uint16_t* p = (const uint16_t*)input + num_elements;
+  uint16x4_t v = vdup_n_u16(0);
+  if (num_elements & 1) {
+    p -= 1;
+    v = vld1_lane_u16(p, v, 0);
+  }
+  if (num_elements & 2) {
+    p -= 2;
+    v = vext_u16(v, v, 2);
+    v = vreinterpret_u16_u32(
+        vset_lane_u32(unaligned_load_u32(p), vreinterpret_u32_u16(v), 0));
+  }
+  return vreinterpret_f16_u16(v);
 }
 
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
                                           size_t num_elements) {
+  assert(num_elements > 0);
+  assert(num_elements <= xnn_simd_size_f32);
   if (num_elements == 4) {
-#if XNN_COMPILER_MSVC
-    vst1_u16((uint16_t*)output, vreinterpret_u16_f16(v));
-#else
-    vst1_f16((__fp16*)output, v);
-#endif
-  } else {
-    XNN_ALIGN(8) xnn_float16 padded[4];
-#if XNN_COMPILER_MSVC
-    vst1_u16((uint16_t*)padded, vreinterpret_u16_f16(v));
-#else
-    vst1_f16((__fp16*)padded, v);
-#endif
-    memcpy(output, padded, num_elements * sizeof(xnn_float16));
+    xnn_storeu_f16(output, v);
+    return;
+  }
+  uint16x4_t v_u16 = vreinterpret_u16_f16(v);
+  if (num_elements & 2) {
+    unaligned_store_u32(output, vget_lane_u32(vreinterpret_u32_u16(v_u16), 0));
+    output += 2;
+    v_u16 = vext_u16(v_u16, v_u16, 2);
+  }
+  if (num_elements & 1) {
+    vst1_lane_u16((uint16_t*)output, v_u16, 0);
   }
 }
 #endif  // defined(__ARM_FP16_FORMAT_IEEE) || defined(__ARM_FP16_FORMAT_ALTERNATIVE) || (XNN_COMPILER_MSVC && XNN_ARCH_ARM64)

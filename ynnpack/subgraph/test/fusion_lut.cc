@@ -434,4 +434,128 @@ TEST(fusion_lut, binary_nonscalar_constant_unsupported) {
       });
 }
 
+TEST(fusion_lut, int4_to_uint8) {
+  constexpr quantization_params input_quantization = {
+      .zero_point = -2,
+      .scale = 0.25f,
+  };
+  constexpr quantization_params output_quantization = {
+      .zero_point = 0,
+      .scale = 1.0f / 255.0f,
+  };
+
+  uint32_t x_id = 0;
+  uint32_t y_id = 1;
+  uint32_t a_id = YNN_INVALID_VALUE_ID;
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(/*external_value_count=*/2);
+  builder.AddInput(ynn_type_int4, 2, x_id)
+      .AddOutput(ynn_type_uint8, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, a_id)
+      .AddTensor(ynn_type_fp32, 2, b_id);
+
+  builder.AddDequantize(x_id, input_quantization, ynn_type_fp32, a_id)
+      .AddUnary(ynn_unary_sigmoid, a_id, b_id)
+      .AddQuantize(b_id, ynn_type_uint8, output_quantization, y_id);
+
+  constexpr size_t rows = 3;
+  constexpr size_t cols = 50;  // Exercises 32-wide SIMD loop + scalar tail.
+  std::vector<int4x2> input_data(rows * (cols / 2));
+  for (size_t i = 0; i < input_data.size(); ++i) {
+    int8_t v0 = static_cast<int8_t>((2 * i) % 16) - 8;
+    int8_t v1 = static_cast<int8_t>((2 * i + 1) % 16) - 8;
+    input_data[i] = int4x2(v0, v1);
+  }
+
+  RunFuseCompare<int4x2, uint8_t>(
+      builder, {x_id}, {input_data}, {TensorShape({rows, cols})}, y_id,
+      rows * cols, [&](const ynn_subgraph& subgraph) {
+        ASSERT_THAT(subgraph,
+                    AllOf(HasValidNodeCount(2), HasValidValueIds(x_id, y_id)));
+        const ynn_node& lut_node = ProducerOf(y_id, subgraph);
+        EXPECT_THAT(lut_node, IsLut(subgraph));
+
+        uint32_t gather_index_id = lut_node.inputs[1];
+        EXPECT_EQ(subgraph.value(gather_index_id).type, ynn_type_uint4);
+        EXPECT_THAT(ProducerOf(gather_index_id, subgraph),
+                    AllOf(IsCopy(), InputsAre(x_id)));
+      });
+}
+
+TEST(fusion_lut, uint4_and_int2_chains) {
+  const quantization_params quantization = {
+      .zero_point = -10,
+      .scale = 1.0f / 64.0f,
+  };
+
+  {
+    uint32_t x_id = 0;
+    uint32_t y_id = 1;
+    uint32_t a_id = YNN_INVALID_VALUE_ID;
+    uint32_t b_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(/*external_value_count=*/2);
+    builder.AddInput(ynn_type_uint4, {48}, x_id)
+        .AddOutput(ynn_type_int8, {48}, y_id)
+        .AddTensor(ynn_type_fp32, {48}, a_id)
+        .AddTensor(ynn_type_fp32, {48}, b_id);
+
+    builder.AddConvert(x_id, ynn_type_fp32, a_id)
+        .AddUnary(ynn_unary_sigmoid, a_id, b_id)
+        .AddQuantize(b_id, ynn_type_int8, quantization, y_id);
+
+    std::vector<uint4x2> input_data(24);
+    for (size_t i = 0; i < input_data.size(); ++i) {
+      input_data[i] = uint4x2(static_cast<uint8_t>((2 * i) % 16),
+                              static_cast<uint8_t>((2 * i + 1) % 16));
+    }
+
+    RunFuseCompare<uint4x2, int8_t>(
+        builder, {x_id}, {input_data}, {TensorShape({48})}, y_id, 48,
+        [&](const ynn_subgraph& subgraph) {
+          ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1),
+                                      HasValidValueIds(x_id, y_id)));
+          EXPECT_THAT(ProducerOf(y_id, subgraph),
+                      AllOf(IsLut(subgraph),
+                            InputsAre(IsValidValueIn(subgraph), x_id)));
+        });
+  }
+
+  {
+    uint32_t x_id = 0;
+    uint32_t y_id = 1;
+    uint32_t a_id = YNN_INVALID_VALUE_ID;
+    uint32_t b_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(/*external_value_count=*/2);
+    builder.AddInput(ynn_type_int2, {68}, x_id)
+        .AddOutput(ynn_type_uint8, {68}, y_id)
+        .AddTensor(ynn_type_fp32, {68}, a_id)
+        .AddTensor(ynn_type_fp32, {68}, b_id);
+
+    builder.AddConvert(x_id, ynn_type_fp32, a_id)
+        .AddUnary(ynn_unary_exp, a_id, b_id)
+        .AddConvert(b_id, ynn_type_uint8, y_id);
+
+    std::vector<int2x4> input_data(17);
+    for (size_t i = 0; i < input_data.size(); ++i) {
+      input_data[i] = int2x4(-2, -1, 0, 1);
+    }
+
+    RunFuseCompare<int2x4, uint8_t>(
+        builder, {x_id}, {input_data}, {TensorShape({68})}, y_id, 68,
+        [&](const ynn_subgraph& subgraph) {
+          ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2),
+                                      HasValidValueIds(x_id, y_id)));
+          const ynn_node& lut_node = ProducerOf(y_id, subgraph);
+          EXPECT_THAT(lut_node, IsLut(subgraph));
+          uint32_t gather_index_id = lut_node.inputs[1];
+          EXPECT_EQ(subgraph.value(gather_index_id).type, ynn_type_uint2);
+          EXPECT_THAT(ProducerOf(gather_index_id, subgraph),
+                      AllOf(IsCopy(), InputsAre(x_id)));
+        });
+  }
+}
+
 }  // namespace ynn

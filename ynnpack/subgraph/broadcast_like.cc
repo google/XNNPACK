@@ -3,20 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <memory>
 #include <utility>
 #include <vector>
 
 #include "ynnpack/include/ynnpack.h"
-#include "ynnpack/subgraph/runtime.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/expr.h"
 
@@ -46,103 +41,42 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
     }
   }
 
-  ynn_node node;
-
-  // Propagate shape.
-
-  // Any dimensions the template has that the input does not are broadcasted.
+  // Propagate shape. Only the dimensions in `axes` are broadcasted. Dimensions
+  // the input does not have are only added if they need to be broadcasted.
   const std::vector<slinky::expr>& template_extents = template_value.extents;
   std::vector<slinky::expr> output_extents = input.extents;
-  if (template_extents.size() > input.rank()) {
-    output_extents.insert(output_extents.end(),
-                          template_extents.begin() + input.rank(),
-                          template_extents.end());
-  }
-
-  for (int d = 0; d < template_extents.size(); ++d) {
-    if (!axes_set[d]) {
-      // Not broadcasting this dimension.
-      continue;
-    }
+  for (int d = 0; d < static_cast<int>(template_extents.size()); ++d) {
+    if (!axes_set[d]) continue;
 
     const slinky::expr& template_extent = template_extents[d];
-    slinky::expr& output_extent = output_extents[d];
-
-    if (!template_extent.defined() ||
-        slinky::prove_true(template_extent == output_extent) ||
-        slinky::is_one(template_extent)) {
-      // This broadcast is a no-op in this dimension.
-      axes_set[d] = false;
+    if (!template_extent.defined() || slinky::is_one(template_extent)) {
       continue;
     }
 
-    // Implement broadcasting logic: if the input is 1, we take the
-    // extent of the other operand.
+    if (d >= static_cast<int>(output_extents.size())) {
+      output_extents.resize(d + 1);
+    }
+    slinky::expr& output_extent = output_extents[d];
     if (!output_extent.defined() || slinky::is_one(output_extent)) {
-      // We know the output extent is one, just use the template.
       output_extent = template_extent;
-    } else {
-      slinky::expr input_extent = output_extent;
+    } else if (!slinky::prove_true(template_extent == output_extent)) {
       output_extent = subgraph->globals.get(
-          select(template_extent > 1, template_extent, input_extent), "b");
-
-      node.add_check(input_extent == 1 || template_extent == 1 ||
-                         input_extent == template_extent,
-                     {"invalid broadcast in dimension ", d, " of ",
-                      ynn_node::input_idx{0}, " and ", ynn_node::input_idx{1}});
+          select(template_extent != 1, template_extent, output_extent), "b");
     }
   }
 
-  if (!axes_set.any() && *output_id == YNN_INVALID_VALUE_ID) {
-    // This node is a no-op, skip it.
-    *output_id = input_id;
-    return ynn_status_success;
+  if (*output_id != YNN_INVALID_VALUE_ID &&
+      output_extents.size() < template_extents.size()) {
+    // The output is already defined, it should have the rank of the template.
+    output_extents.resize(template_extents.size());
   }
 
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-  output.extents = std::move(output_extents);
-
-  // Note the template is not an input to the node, we only needed its shape.
-  node.inputs = {input_id, template_id};
-  node.outputs = {*output_id};
-  node.op = ynn_node::broadcast_like{axes_set};
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn::axes_set& axes =
-        std::get<ynn_node::broadcast_like>(node.op).axes;
-    const int input_id = node.inputs[0];
-    const int output_id = node.outputs[0];
-    const ynn_runtime_value& input = runtime.value(input_id);
-    ynn_runtime_value& output = runtime.value(output_id);
-
-    if (!axes.any() && !output.is_external_output()) {
-      // This node is a no-op, skip it.
-      output.buffer = input.buffer;
-      return ynn_status_success;
-    }
-
-    output.make_buffer(runtime, input.buffer->elem_size());
-
-    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds =
-        make_elementwise_bounds(dims, input.physical_extents());
-
-    for (size_t i = 0; i < axes.size(); ++i) {
-      if (!axes[i]) continue;
-      bounds[i] = make_broadcast_bounds(dims[i], input.physical_extent(i),
-                                        output.physical_extent(i));
-    }
-
-    if (bounds.size() > input.rank()) {
-      bounds.resize(input.rank());
-    }
-
-    auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
-                                        {output.buffer, std::move(dims)});
-    runtime.funcs.push_back(std::move(func));
-
-    return ynn_status_success;
-  };
-  subgraph->add_node(std::move(node));
+  ynn_node node;
+  define_static_broadcast(*subgraph, node, std::move(output_extents), input_id,
+                          output_id);
+  if (node.is_valid()) {
+    subgraph->add_node(std::move(node));
+  }
   return ynn_status_success;
 }
 

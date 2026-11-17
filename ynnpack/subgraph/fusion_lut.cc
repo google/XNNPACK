@@ -25,38 +25,63 @@ namespace ynn {
 
 namespace {
 
-constexpr size_t kLog2MaxLutInputSize = 8;
-
-const std::array<int8_t, 256>& get_int8_lut_data() {
-  static const auto data = [] {
-    std::array<int8_t, 256> result;
-    for (int i = -128; i < 128; ++i) {
-      result[static_cast<uint8_t>(i)] = i;
-    }
-    return result;
-  }();
-  return data;
+ynn_type unsigned_lut_index_type(ynn_type type) {
+  switch (type) {
+    case ynn_type_int8:
+    case ynn_type_uint8:
+      return ynn_type_uint8;
+    case ynn_type_int4:
+    case ynn_type_uint4:
+      return ynn_type_uint4;
+    case ynn_type_int2:
+    case ynn_type_uint2:
+      return ynn_type_uint2;
+    default:
+      return ynn_type_invalid;
+  }
 }
 
-const std::array<uint8_t, 256>& get_uint8_lut_data() {
-  static const auto data = [] {
-    std::array<uint8_t, 256> result;
-    for (int i = 0; i < 256; ++i) {
-      result[i] = static_cast<uint8_t>(i);
-    }
-    return result;
-  }();
-  return data;
+bool is_lut_input_type(ynn_type type) {
+  return unsigned_lut_index_type(type) != ynn_type_invalid;
 }
 
+// Signed and unsigned types of the same bit width use the same raw bit-pattern
+// identity table: element `u` in `0 .. (1 << bits) - 1` has raw unsigned bit
+// pattern `u`, matching the index read after bitcasting signed inputs to their
+// unsigned counterpart.
 const void* get_lut_input_data(ynn_type type) {
-  if (type == ynn_type_int8) {
-    return get_int8_lut_data().data();
-  } else if (type == ynn_type_uint8) {
-    return get_uint8_lut_data().data();
-  } else {
-    assert(false);
-    return nullptr;
+  switch (type) {
+    case ynn_type_int8:
+    case ynn_type_uint8: {
+      static const auto data = [] {
+        std::array<uint8_t, 256> result;
+        for (int i = 0; i < 256; ++i) {
+          result[i] = static_cast<uint8_t>(i);
+        }
+        return result;
+      }();
+      return data.data();
+    }
+    case ynn_type_int4:
+    case ynn_type_uint4: {
+      static const auto data = [] {
+        std::array<uint4x2, 8> result;
+        for (int i = 0; i < 8; ++i) {
+          result[i] = uint4x2(static_cast<uint8_t>(2 * i),
+                              static_cast<uint8_t>(2 * i + 1));
+        }
+        return result;
+      }();
+      return data.data();
+    }
+    case ynn_type_int2:
+    case ynn_type_uint2: {
+      static const uint2x4 data(0, 1, 2, 3);
+      return &data;
+    }
+    default:
+      assert(false);
+      return nullptr;
   }
 }
 
@@ -121,8 +146,8 @@ bool should_lut_single_node(const ynn_node& node) {
 // A subgraph that can be optimized with a unary LUT.
 // The subgraph is a chain of elementwise nodes ending at the node with output
 // `output_id`.
-// The input to the start of the chain, denoted by `input_id`, must be int8 or
-// uint8.
+// The input to the start of the chain, denoted by `input_id`, must be an 8-,
+// 4-, or 2-bit integer type.
 // Intermediate nodes may have any type and may have multiple consumers as long
 // as their outputs eventually feed into `output_id`.
 class subgraph_candidate {
@@ -166,7 +191,7 @@ subgraph_candidate find_subgraph_for_unary_lut(
     return candidate;
   }
   const ynn_value& output = subgraph.value(node.outputs[0]);
-  if (type_size_bytes(output.type) > 1) {
+  if (type_size_bytes(output.type) > 1 || type_element_count(output.type) > 1) {
     return candidate;
   }
 
@@ -184,7 +209,8 @@ subgraph_candidate find_subgraph_for_unary_lut(
   auto maybe_update_best_candidate = [&](const subgraph_candidate& candidate) {
     if (inputs_to_traverse.size() == 1) {
       uint32_t in_id = *inputs_to_traverse.begin();
-      if (type_size_bits(subgraph.value(in_id).type) <= kLog2MaxLutInputSize) {
+      const ynn_value& in_val = subgraph.value(in_id);
+      if (in_val.rank() > 0 && is_lut_input_type(in_val.type)) {
         best_candidate = candidate;
         best_candidate.set_input_id(in_id);
       }
@@ -273,7 +299,9 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   }
 
   // Resize subgraph to be the same rank and size as the LUT table.
-  const size_t range = 256;
+  const ynn_value& input_value = lut_subgraph->value(lut_input_id);
+  const size_t range = static_cast<size_t>(1)
+                       << type_size_bits(input_value.type);
   for (ynn_value& value : lut_subgraph->values) {
     if (value.is_valid() && !value.is_static()) {
       value.extents = {static_cast<slinky::index_t>(range)};
@@ -284,7 +312,6 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
     node.checks.clear();
   }
 
-  const ynn_value& input_value = lut_subgraph->value(lut_input_id);
   const void* input_data = get_lut_input_data(input_value.type);
 
   // Run the cloned subgraph.
@@ -331,11 +358,12 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
 
   uint32_t gather_index_id = best_candidate.get_input_id();
   const ynn_value& input_val = subgraph.value(gather_index_id);
-  if (input_val.type == ynn_type_int8) {
+  const ynn_type unsigned_type = unsigned_lut_index_type(input_val.type);
+  if (input_val.type != unsigned_type) {
     // We need to "bitcast" the input to be unsigned with a copy (it should be
     // a no-op).
     uint32_t converted_id = YNN_INVALID_VALUE_ID;
-    subgraph.get_output_value(&converted_id, ynn_type_uint8);
+    subgraph.get_output_value(&converted_id, unsigned_type);
 
     ynn_status status =
         ynn_define_copy(&subgraph, gather_index_id, &converted_id, 0);

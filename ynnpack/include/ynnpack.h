@@ -19,6 +19,10 @@ extern "C" {
 // The most dimensions that can appear in a value.
 #define YNN_MAX_TENSOR_RANK 8
 
+// Indicates that a rank parameter should be inferred from the operation inputs
+// or pre-defined output tensor.
+#define YNN_UNKNOWN_RANK SIZE_MAX
+
 // This flag indicates that YNNPACK should attempt to produce numerically
 // consistent results from a specific build of YNNPACK. This causes YNNPACK to
 // avoid using faster codepaths that are numerically inconsistent with any
@@ -282,7 +286,9 @@ enum ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph,
 // where index 0 is the min and index 1 is the max (this requirement is
 // satisfied by producing `min_max_id` by `ynn_define_reduce` with the
 // `ynn_reduce_min_max` operator). `zero_point_id` and `scale_id` will have the
-// same dimensions as `min_max_id` except for this leading dimension.
+// same dimensions as `min_max_id` except for this leading dimension. If
+// `zero_point_id` is NULL, symmetric quantization with a zero point of 0 is
+// used (requires `type == ynn_type_int8`).
 enum ynn_status ynn_define_dynamic_quantization(
     ynn_subgraph_t subgraph, uint32_t min_max_id, enum ynn_type type,
     uint32_t* zero_point_id, uint32_t* scale_id, uint32_t flags);
@@ -390,7 +396,15 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
 //
 // where the `index` tensor replaces the gathered axis.
 //
-// `output_rank` specifies the rank of the output tensor.
+// `output_rank` specifies the rank of the output tensor, or `YNN_UNKNOWN_RANK`
+// to infer it from `*output_id` (if it is an external/static tensor with a
+// defined rank) or from `input_id` and `index_id`. When inferring from inputs,
+// `YNN_UNKNOWN_RANK` assumes `num_axes == 1` omits the size-1 coordinate
+// dimension and preserves ungathered dimensions of `input_id` (dropping
+// trailing ungathered size-1 dimensions if `num_axes > 1` requires a lower
+// rank); pass an explicit `output_rank` or pre-defined external `*output_id`
+// when keeping an explicit size-1 coordinate dimension for `num_axes == 1` or
+// dropping leading ungathered size-1 dimensions.
 enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
                                   const int32_t* axes, size_t output_rank,
                                   uint32_t input_id, uint32_t index_id,
@@ -701,6 +715,27 @@ enum ynn_status ynn_reshape_runtime(ynn_runtime_t runtime);
 
 enum ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
                                             uint32_t external_id, void* data);
+
+// Set the data and strides of an external value.
+//
+// `strides` is an array of `rank` elements, where `strides[d]` is the distance
+// in bytes between elements adjacent in dimension `d`. If `strides` is NULL,
+// the strides are unchanged. The strides of dimensions with extent 1 are
+// ignored.
+//
+// `ynn_set_external_value_shape` resets the strides of the value to those of
+// a dense array, and `ynn_reshape_runtime` does the same for external outputs.
+enum ynn_status ynn_set_external_value_data_v2(ynn_runtime_t runtime,
+                                               uint32_t external_id, void* data,
+                                               size_t rank,
+                                               const size_t* strides);
+
+// Get the strides of an external value. `rank` must point to the number of
+// elements available in `strides`, and will be updated to the rank of the
+// value. The stride of a dimension with extent 1 may be reported as 0.
+enum ynn_status ynn_get_external_value_strides(ynn_runtime_t runtime,
+                                               uint32_t external_id,
+                                               size_t* rank, size_t* strides);
 
 enum ynn_status ynn_invoke_runtime(ynn_runtime_t runtime);
 

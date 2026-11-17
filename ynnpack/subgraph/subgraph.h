@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_SUBGRAPH_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_SUBGRAPH_H_
 
+#include <algorithm>
 #include <bitset>
 #include <cassert>
 #include <cstddef>
@@ -31,6 +32,7 @@
 #include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "slinky/base/arithmetic.h"
+#include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -58,17 +60,6 @@ struct axes_set : std::bitset<max_tensor_rank> {
 
 inline bool operator<(const axes_set& a, const axes_set& b) {
   return a.to_ulong() < b.to_ulong();
-}
-
-inline axes_set permute(span<const int32_t> p, const axes_set& x) {
-  axes_set result;
-  for (size_t i = 0; i < p.size(); ++i) {
-    int32_t src_i = p[i];
-    if (src_i >= 0 && static_cast<size_t>(src_i) < x.size()) {
-      result[i] = x[src_i];
-    }
-  }
-  return result;
 }
 
 // Validation helpers for public APIs.
@@ -218,16 +209,6 @@ struct ynn_node {
     }
   };
 
-  struct broadcast_like {
-    // The dimensions to attempt to broadcast.
-    ynn::axes_set axes;
-    friend bool operator==(const broadcast_like& a, const broadcast_like& b) {
-      return a.axes == b.axes;
-    }
-    friend bool operator<(const broadcast_like& a, const broadcast_like& b) {
-      return a.axes < b.axes;
-    }
-  };
   struct concatenate {
     int32_t axis;
     friend bool operator==(const concatenate& a, const concatenate& b) {
@@ -415,17 +396,13 @@ struct ynn_node {
       return a.groups < b.groups;
     }
   };
+  // Broadcasts the input to the shape of the output value.
   struct static_broadcast {
-    // Extents of the new dimensions after a broadcast. '0' is replaced with the
-    // original extent of the input.
-    std::vector<size_t> new_dims;
-    friend bool operator==(const static_broadcast& a,
-                           const static_broadcast& b) {
-      return a.new_dims == b.new_dims;
+    friend bool operator==(const static_broadcast&, const static_broadcast&) {
+      return true;
     }
-    friend bool operator<(const static_broadcast& a,
-                          const static_broadcast& b) {
-      return a.new_dims < b.new_dims;
+    friend bool operator<(const static_broadcast&, const static_broadcast&) {
+      return false;
     }
   };
   struct static_pad {
@@ -525,11 +502,16 @@ struct ynn_node {
   };
   struct dot {
     size_t num_k_dims;
+    bool symmetric_b = false;
+    bool pack_b = false;
+    bool transpose_a = false;
     friend bool operator==(const dot& a, const dot& b) {
-      return a.num_k_dims == b.num_k_dims;
+      return a.num_k_dims == b.num_k_dims && a.symmetric_b == b.symmetric_b &&
+             a.pack_b == b.pack_b && a.transpose_a == b.transpose_a;
     }
     friend bool operator<(const dot& a, const dot& b) {
-      return a.num_k_dims < b.num_k_dims;
+      return std::tie(a.num_k_dims, a.symmetric_b, a.pack_b, a.transpose_a) <
+             std::tie(b.num_k_dims, b.symmetric_b, b.pack_b, b.transpose_a);
     }
   };
   struct iota {
@@ -566,18 +548,20 @@ struct ynn_node {
     }
   };
   struct get_tensor_shape {
-    std::vector<int32_t> axes;
-    bool reshape_1d;
-    bool unique_dims;
+    std::vector<slinky::expr> extents;
     friend bool operator==(const get_tensor_shape& a,
                            const get_tensor_shape& b) {
-      return a.axes == b.axes && a.reshape_1d == b.reshape_1d &&
-             a.unique_dims == b.unique_dims;
+      return a.extents.size() == b.extents.size() &&
+             std::equal(a.extents.begin(), a.extents.end(), b.extents.begin(),
+                        [](const slinky::expr& x, const slinky::expr& y) {
+                          return slinky::match(x, y);
+                        });
     }
     friend bool operator<(const get_tensor_shape& a,
                           const get_tensor_shape& b) {
-      return std::tie(a.axes, a.reshape_1d, a.unique_dims) <
-             std::tie(b.axes, b.reshape_1d, b.unique_dims);
+      return std::lexicographical_compare(a.extents.begin(), a.extents.end(),
+                                          b.extents.begin(), b.extents.end(),
+                                          slinky::node_less{});
     }
   };
   struct reduce {
@@ -604,7 +588,7 @@ struct ynn_node {
     }
   };
   struct dynamic_quantization {
-    int32_t output_zero_point;
+    std::optional<int32_t> output_zero_point;
     friend bool operator==(const dynamic_quantization& a,
                            const dynamic_quantization& b) {
       return a.output_zero_point == b.output_zero_point;
@@ -619,12 +603,12 @@ struct ynn_node {
   // TODO: We need an absl::InlinedVector for things like this.
   std::vector<uint32_t> inputs;
   std::vector<uint32_t> outputs;
-  std::variant<invalid, opaque, broadcast_like, concatenate, even_split, copy,
-               gather, stack, reshape, static_broadcast, static_pad,
-               static_slice, slice_like, static_transpose, stencil_copy,
-               unary_elementwise, binary_elementwise, ternary_elementwise, dot,
-               iota, pack_b, transpose_a, get_tensor_shape, reduce,
-               dequantize_dot, dynamic_quantization>
+  std::variant<invalid, opaque, concatenate, even_split, copy, gather, stack,
+               reshape, static_broadcast, static_pad, static_slice, slice_like,
+               static_transpose, stencil_copy, unary_elementwise,
+               binary_elementwise, ternary_elementwise, dot, iota, pack_b,
+               transpose_a, get_tensor_shape, reduce, dequantize_dot,
+               dynamic_quantization>
       op;
 
   const char* name() const;

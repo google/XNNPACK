@@ -38,6 +38,12 @@ XNN_UKERNEL(xnn_arch_arm_neon_v8, xnn_f16_qs8_vcvt_ukernel__neonv8_u24, 24, fals
 XNN_UKERNEL(xnn_arch_arm_neon_v8, xnn_f16_qs8_vcvt_ukernel__neonv8_u32, 32, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_qs8_vcvt_ukernel__hvx_u32, 32, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_qs8_vcvt_ukernel__hvx_u64, 64, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_qs8_vcvt_ukernel__hvx_u128, 128, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u1, 1, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u2, 2, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u3, 3, false, xnn_float16, XNN_QUANTIZED(int8_t), struct xnn_f16_qs8_cvt_params, xnn_init_f16_qs8_cvt_scalar_params)

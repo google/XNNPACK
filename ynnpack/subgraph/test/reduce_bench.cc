@@ -336,7 +336,7 @@ Options:
   --thread_count=N
   --op=op1,op2,...  (sum, min, max)
   --propagate_nan[=true|false]
-  --type=t1,t2,...  (int2, uint2, int4, uint4, int8, uint8, fp8_e5m2, fp8_e4m3, fp16, bf16, fp32, fp64)
+  --type=t1,t2,...  (int2, uint2, int4, uint4, int8, uint8, int32, fp8_e5m2, fp8_e4m3, fp16, bf16, fp32, fp64)
   --shape=d0,d1,d2
   -d0=d0_1,d0_2,...
   -d1=d1_1,d1_2,...
@@ -448,9 +448,9 @@ int main(int argc, char** argv) {
 
   if (types.empty()) {
     types = {
-        ynn_type_int2,  ynn_type_int4,     ynn_type_int8,
-        ynn_type_uint8, ynn_type_fp8_e5m2, ynn_type_fp8_e4m3,
-        ynn_type_fp16,  ynn_type_bf16,     ynn_type_fp32,
+        ynn_type_int2,  ynn_type_int4,     ynn_type_int8,     ynn_type_uint8,
+        ynn_type_int32, ynn_type_fp8_e5m2, ynn_type_fp8_e4m3, ynn_type_fp16,
+        ynn_type_bf16,  ynn_type_fp32,
     };
   } else {
     for (ynn_type type : types) {

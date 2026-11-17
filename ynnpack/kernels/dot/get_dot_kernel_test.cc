@@ -236,6 +236,21 @@ TEST(get_dot_kernel, uint8_int2_int32_avxvnni) {
       "dot_uint8_int2_int32_1x32x16_1x8x16_avxvnni");
 }
 
+#if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) && defined(YNN_ARCH_X86_AMXINT8)
+TEST(get_dot_kernel, int4_amxint8) {
+  dot_type int8_int4 = {ynn_type_int8, ynn_type_int4, ynn_type_int32};
+  dot_type uint8_int4 = {ynn_type_uint8, ynn_type_int4, ynn_type_int32};
+  const uint64_t arch_flags_amxint8 =
+      arch_flags_avx512 | arch_flag::avx512vnni | arch_flag::amxint8;
+
+  EXPECT_EQ(get_dot_kernel_name(int8_int4, {m, n, k}, arch_flags_amxint8),
+            "dot_int8_int4_int32_32x32x64_16x16x8_amxint8");
+  EXPECT_EQ(get_dot_kernel_name(uint8_int4, {m, n, k}, arch_flags_amxint8),
+            "dot_uint8_int4_int32_32x32x64_16x16x8_amxint8");
+}
+#endif  // !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) &&
+        // defined(YNN_ARCH_X86_AMXINT8)
+
 #if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) && defined(YNN_ARCH_X86_ACE)
 TEST(get_dot_kernel, int8_int8_int32_ace) {
   dot_type int8_int8 = {ynn_type_int8, ynn_type_int8, ynn_type_int32};

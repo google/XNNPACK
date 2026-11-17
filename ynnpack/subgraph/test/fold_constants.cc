@@ -13,6 +13,7 @@
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
@@ -413,6 +414,157 @@ TEST(fold_constants, static_transpose) {
 
     EXPECT_FALSE(subgraph->value(transposed_id).is_static());
     EXPECT_THAT(subgraph, HasValidNodeCount(2));
+  }
+}
+
+TEST(fold_constants, symbolic_output_shape) {
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t constant_id = 2;
+  uint32_t broadcast_id = YNN_INVALID_VALUE_ID;
+  uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), 2, input_id)
+      .AddOutput(type_of<float>(), 4, output_id)
+      .AddScalar(1.0f, constant_id)
+      .AddTensor(type_of<float>(), 2, broadcast_id)
+      .AddTensor(type_of<float>(), 4, transposed_id);
+
+  builder.AddStaticBroadcast({1, 1}, constant_id, broadcast_id);
+
+  ynn_subgraph_t subgraph = builder.GetSubgraph();
+  subgraph->value(broadcast_id).extents[0] =
+      subgraph->value(input_id).extent(0);
+
+  ynn_node transpose;
+  define_transpose_a(*subgraph, transpose, /*tile_m=*/4, /*tile_k=*/4,
+                     /*m_dim=*/1, broadcast_id, transposed_id);
+  subgraph->add_node(std::move(transpose));
+
+  builder.AddCopy(transposed_id, output_id);
+
+  subgraph->fold_constants(nullptr);
+
+  EXPECT_FALSE(subgraph->value(broadcast_id).is_static());
+  EXPECT_FALSE(subgraph->value(transposed_id).is_static());
+  EXPECT_THAT(subgraph, HasValidNodeCount(3));
+}
+
+TEST(fold_constants, cache_distinguishes_output_type) {
+  constexpr float constant_values[] = {1.5f, -2.5f, 3.0f, 4.0f};
+
+  uint32_t half_const_id = 1;
+  uint32_t half_folded_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder half_builder(2);
+  half_builder.AddOutput(type_of<half>(), {4}, 0)
+      .AddTensor(type_of<float>(), {4}, half_const_id, &constant_values)
+      .AddTensor(type_of<half>(), {4}, half_folded_id);
+  half_builder.AddConvert(half_const_id, type_of<half>(), half_folded_id)
+      .AddCopy(half_folded_id, 0);
+  half_builder.GetSubgraph()->fold_constants(nullptr);
+
+  uint32_t int_const_id = 1;
+  uint32_t int_folded_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder int_builder(2);
+  int_builder.AddOutput(type_of<int32_t>(), {4}, 0)
+      .AddTensor(type_of<float>(), {4}, int_const_id, &constant_values)
+      .AddTensor(type_of<int32_t>(), {4}, int_folded_id);
+  int_builder.AddConvert(int_const_id, type_of<int32_t>(), int_folded_id)
+      .AddCopy(int_folded_id, 0);
+  int_builder.GetSubgraph()->fold_constants(nullptr);
+
+  const ynn_value& half_val = half_builder.GetSubgraph()->value(half_folded_id);
+  const ynn_value& int_val = int_builder.GetSubgraph()->value(int_folded_id);
+  ASSERT_TRUE(half_val.is_static());
+  ASSERT_TRUE(int_val.is_static());
+  EXPECT_EQ(half_val.type, ynn_type_fp16);
+  EXPECT_EQ(int_val.type, ynn_type_int32);
+  EXPECT_EQ(half_val.data->elem_size, sizeof(half));
+  EXPECT_EQ(int_val.data->elem_size, sizeof(int32_t));
+  EXPECT_THAT(ValuesIn<int32_t>(int_val), ElementsAre(2, -2, 3, 4));
+}
+
+TEST(fold_constants, cache_distinguishes_output_shape) {
+  uint32_t folded_1d_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder_1d(1);
+  uint32_t begin_1d = builder_1d.DefineScalar(int32_t{0});
+  uint32_t stride_1d = builder_1d.DefineScalar(int32_t{1});
+  builder_1d.AddOutput(type_of<int32_t>(), {4}, 0)
+      .AddTensor(type_of<int32_t>(), {4}, folded_1d_id)
+      .AddIota(type_of<int32_t>(), {4}, begin_1d, stride_1d, folded_1d_id)
+      .AddCopy(folded_1d_id, 0);
+  builder_1d.GetSubgraph()->fold_constants(nullptr);
+
+  uint32_t folded_2d_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder_2d(1);
+  uint32_t begin_2d = builder_2d.DefineScalar(int32_t{0});
+  uint32_t stride_2d = builder_2d.DefineScalar(int32_t{1});
+  builder_2d.AddOutput(type_of<int32_t>(), {2, 4}, 0)
+      .AddTensor(type_of<int32_t>(), {2, 4}, folded_2d_id)
+      .AddIota(type_of<int32_t>(), {2, 4}, begin_2d, stride_2d, folded_2d_id)
+      .AddCopy(folded_2d_id, 0);
+  builder_2d.GetSubgraph()->fold_constants(nullptr);
+
+  const ynn_value& val_1d = builder_1d.GetSubgraph()->value(folded_1d_id);
+  const ynn_value& val_2d = builder_2d.GetSubgraph()->value(folded_2d_id);
+  ASSERT_TRUE(val_1d.is_static());
+  ASSERT_TRUE(val_2d.is_static());
+  EXPECT_EQ(val_1d.data->rank, 1);
+  EXPECT_EQ(val_2d.data->rank, 2);
+  EXPECT_THAT(ValuesIn<int32_t>(val_1d), ElementsAre(0, 1, 2, 3));
+  EXPECT_THAT(ValuesIn<int32_t>(val_2d),
+              ElementsAre(0, 1, 2, 3, 1, 2, 3, 4));
+}
+
+TEST(fold_constants, transpose_a) {
+  constexpr size_t tile_m = 2;
+  constexpr size_t tile_k = 2;
+  constexpr size_t m = 2 * tile_m;
+  constexpr size_t k = 3 * tile_k;
+  std::vector<float> a(m * k);
+  std::iota(a.begin(), a.end(), 0.0f);
+
+  const uint32_t output_id = 0;
+  uint32_t a_id = 1;
+  uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(2);
+  builder
+      .AddOutput(type_of<float>(), {m / tile_m, k / tile_k, tile_m, tile_k},
+                 output_id)
+      .AddTensor(type_of<float>(), {m, k}, a_id, a.data())
+      .AddTensor(type_of<float>(), 4, transposed_id);
+
+  ynn_subgraph_t subgraph = builder.GetSubgraph();
+  ynn_node transpose;
+  define_transpose_a(*subgraph, transpose, tile_m, tile_k, /*m_dim=*/1, a_id,
+                     transposed_id);
+  subgraph->add_node(std::move(transpose));
+  builder.AddCopy(transposed_id, output_id);
+
+  ASSERT_EQ(subgraph->fold_constants(nullptr), ynn_status_success);
+
+  const ynn_value& transposed = subgraph->value(transposed_id);
+  ASSERT_TRUE(transposed.is_static());
+  const slinky::raw_buffer& data = *transposed.data;
+  ASSERT_EQ(data.rank, 4);
+
+  // The transposed constant is not a dense array: the k dimension is outside
+  // the m dimension.
+  EXPECT_EQ(data.dim(0).stride(), sizeof(float));
+  EXPECT_EQ(data.dim(1).stride(), sizeof(float) * tile_k);
+  EXPECT_EQ(data.dim(3).stride(), sizeof(float) * tile_k * tile_m);
+  EXPECT_EQ(data.dim(2).stride(), data.dim(3).stride() * (m / tile_m));
+
+  for (size_t ko = 0; ko < k / tile_k; ++ko) {
+    for (size_t mo = 0; mo < m / tile_m; ++mo) {
+      for (size_t mi = 0; mi < tile_m; ++mi) {
+        for (size_t ki = 0; ki < tile_k; ++ki) {
+          EXPECT_EQ(data.at<float>(ki, mi, ko, mo),
+                    a[(mo * tile_m + mi) * k + (ko * tile_k + ki)]);
+        }
+      }
+    }
   }
 }
 

@@ -66,6 +66,14 @@ class PackQMicrokernelTester {
 
   bool nullbias() const { return this->nullbias_; }
 
+  // The input is filled with consecutive values starting at `input_offset`.
+  PackQMicrokernelTester& input_offset(float input_offset) {
+    this->input_offset_ = input_offset;
+    return *this;
+  }
+
+  float input_offset() const { return this->input_offset_; }
+
   void Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const;
 
  private:
@@ -75,6 +83,7 @@ class PackQMicrokernelTester {
   size_t kr_{1};
   size_t sr_{1};
   bool nullbias_{false};
+  float input_offset_{0.0f};
 };
 
 };  // namespace xnnpack

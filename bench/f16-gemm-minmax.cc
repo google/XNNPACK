@@ -118,7 +118,7 @@ namespace {
 #endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 
-#if XNN_ENABLE_AVX512AMXFP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_AVX512AMXFP16 && XNN_ARCH_X86_64
   #if XNN_ENABLE_AVX512SKX
   static void f16_gemm_minmax_ukernel_1x16c2__avx512amxfp16(benchmark::State& state) {
     GEMMBenchmark(state,
@@ -219,7 +219,7 @@ namespace {
 
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_16x64c2__avx512amxfp16_prfm)
   #endif  // XNN_ENABLE_AVX512SKX
-#endif  // XNN_ENABLE_AVX512AMXFP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#endif  // XNN_ENABLE_AVX512AMXFP16 && XNN_ARCH_X86_64
 
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

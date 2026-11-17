@@ -452,6 +452,9 @@ YNN_ALWAYS_INLINE f32x4 min_no_nan(f32x4 a, f32x4 b) {
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_min(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s32x4 min(s32x4 a, s32x4 b) {
+  return s32x4{wasm_i32x4_min(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE u16x8 min(u16x8 a, u16x8 b) {
   return u16x8{wasm_u16x8_min(a.v, b.v)};
 }
@@ -470,6 +473,9 @@ YNN_ALWAYS_INLINE f32x4 max_no_nan(f32x4 a, f32x4 b) {
 }
 YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_max(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
+  return s32x4{wasm_i32x4_max(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE u16x8 max(u16x8 a, u16x8 b) {
   return u16x8{wasm_u16x8_max(a.v, b.v)};

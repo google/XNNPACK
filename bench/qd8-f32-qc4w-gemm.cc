@@ -28,6 +28,50 @@ namespace {
 
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__hvx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__hvx)
+
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_2x64c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x64c4__hvx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/2, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_2x64c4__hvx)
+
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_3x64c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x64c4__hvx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/3, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_3x64c4__hvx)
+
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_4x64c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x64c4__hvx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_4x64c4__hvx)
+
   static void qd8_f32_qc4w_gemm_minmax_ukernel_1x128c4__hvx(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x128c4__hvx,
@@ -49,6 +93,28 @@ namespace {
   }
 
   BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_2x128c4__hvx)
+
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_3x128c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x128c4__hvx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/3, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_3x128c4__hvx)
+
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_4x128c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x128c4__hvx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_4x128c4__hvx)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
@@ -983,7 +1049,7 @@ namespace {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
   static void qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__avx512amx,
@@ -1082,7 +1148,7 @@ namespace {
   }
 
   BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx_prfm)
-#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#endif  // XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
 
 
 #if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -4382,6 +4448,20 @@ static void qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state
 }
 
 BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar)
+
+#if XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+  static void qd8_f32_qc4w_gemm_minmax_ukernel_32x64c4__hmx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc4w_gemm_minmax_ukernel_32x64c4__hmx,
+      xnn_init_f32_qc4w_minmax_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/32, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc4w_gemm_minmax_ukernel_32x64c4__hmx)
+#endif  // XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+
 
 }  // namespace
 

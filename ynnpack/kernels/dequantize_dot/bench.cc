@@ -25,11 +25,12 @@ void bench(benchmark::State& state, uint64_t arch_flags,
 
   size_t m = state.range(0);
   size_t n = state.range(1);
+  bool broadcast_n = state.range(2);
 
   Tensor<int32_t> dot({m, n});
   Tensor<int32_t> a_offset({m});
-  Tensor<int32_t> b_offset({n});
-  Tensor<float> offset({n});
+  Tensor<int32_t> b_offset({broadcast_n ? 1 : n});
+  Tensor<float> offset({broadcast_n ? 1 : n});
   Tensor<float> a_scale({m});
   Tensor<float> b_scale({n});
   Tensor<Output> output({m, n});
@@ -41,6 +42,8 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   offset.fill(1.0f);
   a_scale.fill(1.0f);
   b_scale.fill(1.0f);
+  broadcast_extent_1(b_offset);
+  broadcast_extent_1(offset);
 
   for (auto _ : state) {
     kernel(m, n, dot.stride(0) * sizeof(int32_t), dot.base(),
@@ -64,11 +67,13 @@ void bench(benchmark::State& state, uint64_t arch_flags,
 }
 
 void Params(benchmark::Benchmark* b) {
-  b->ArgNames({"m", "n"});
-  b->Args({1, 4096});
-  b->Args({4, 1024});
-  b->Args({16, 256});
-  b->Args({64, 64});
+  b->ArgNames({"m", "n", "broadcast_n"});
+  for (int broadcast_n : {0, 1}) {
+    b->Args({1, 4096, broadcast_n});
+    b->Args({4, 1024, broadcast_n});
+    b->Args({16, 256, broadcast_n});
+    b->Args({64, 64, broadcast_n});
+  }
 }
 
 #define YNN_DEQUANTIZE_DOT_KERNEL(arch_flags, kernel, type)    \

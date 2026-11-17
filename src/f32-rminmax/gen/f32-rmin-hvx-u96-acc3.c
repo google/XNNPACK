@@ -24,8 +24,8 @@ static XNN_INLINE void load_tail_reduce_minmax_f32(
 ) {
   assert(num_elements < xnn_simd_size_f32);
   if XNN_UNLIKELY(num_elements) {
-    const xnn_simd_f32_t vt = xnn_load_tail_f32(input, num_elements >> XNN_LOG2_SIZEOF_FLOAT);
-    HVX_VectorPred mask = Q6_Q_vsetq_R(num_elements);
+    const xnn_simd_f32_t vt = xnn_load_tail_f32(input, num_elements);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(num_elements << XNN_LOG2_SIZEOF_FLOAT);
 
     vmin = xnn_min_f32(vmin, Q6_V_vmux_QVV(mask, vt, vmin));
   }

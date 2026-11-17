@@ -81,16 +81,20 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
   // Term 1: a_zp * sum(b)
   uint32_t term_a_sum_b = YNN_INVALID_VALUE_ID;
   if (a_zero_point_id != YNN_INVALID_VALUE_ID) {
-    uint32_t sum_b = YNN_INVALID_VALUE_ID;
-    YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, num_k_dims,
-                                          b_k_dims, b_id, YNN_INVALID_VALUE_ID,
-                                          &sum_b, 0));
     uint32_t sum_b_expanded = YNN_INVALID_VALUE_ID;
     if (num_k_dims > 0) {
-      YNN_RETURN_IF_ERROR(ynn_define_static_expand_dims(
-          subgraph, 1, &b_k_dims[0], sum_b, &sum_b_expanded, 0));
+      // Compute sum(b) as dot(1, b), with a broadcast m dimension in the
+      // result. This is much faster than a reduction over the (non-innermost)
+      // k dimensions of b.
+      uint32_t one_id = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(define_constant<int8_t>(subgraph, 1, one_id));
+      YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, num_k_dims, one_id, b_id,
+                                         YNN_INVALID_VALUE_ID, &sum_b_expanded,
+                                         0));
     } else {
-      sum_b_expanded = sum_b;
+      YNN_RETURN_IF_ERROR(ynn_define_reduce(
+          subgraph, ynn_reduce_sum, num_k_dims, b_k_dims, b_id,
+          YNN_INVALID_VALUE_ID, &sum_b_expanded, 0));
     }
     uint32_t a_zp_broadcasted = a_zero_point_id;
     uint32_t sum_b_broadcasted = sum_b_expanded;

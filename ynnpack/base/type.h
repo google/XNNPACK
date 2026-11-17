@@ -398,12 +398,18 @@ class type_info {
   }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
-  static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }
+  static constexpr T smallest_normal() {
+    return std::is_integral_v<T> ? 0 : std::numeric_limits<T>::min();
+  }
 
   // These are the identity values (values such that f(x, identity) = x) for a
   // min or max operation.
-  static constexpr T min_identity() { return infinity(); }
-  static constexpr T max_identity() { return -infinity(); }
+  static constexpr T min_identity() {
+    return std::is_integral_v<T> ? max() : infinity();
+  }
+  static constexpr T max_identity() {
+    return std::is_integral_v<T> ? min() : -infinity();
+  }
   static constexpr T sum_identity() { return 0; }
 
   static constexpr size_t element_count() { return 1; }

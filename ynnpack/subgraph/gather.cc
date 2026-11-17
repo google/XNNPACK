@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -32,16 +33,20 @@ namespace ynn {
 namespace {
 
 // Call a lut kernel.
-auto make_lut_impl(lut_kernel_fn kernel) {
-  return [kernel](slinky::raw_buffer lut, slinky::raw_buffer a,
-                  slinky::raw_buffer x) -> slinky::index_t {
+auto make_lut_impl(lut_kernel_fn kernel, size_t index_elem_count) {
+  return [kernel, index_elem_count](slinky::raw_buffer lut,
+                                    slinky::raw_buffer a,
+                                    slinky::raw_buffer x) -> slinky::index_t {
     assert(is_contiguous(x.dim(0), x.elem_size));
 
     slinky::dim x_dim = ynn::slice_dim0(x);
     if (x_dim.empty()) {
       return 0;
     }
-    slinky::dim a_dim = ynn::slice_dim0(a, slinky::in_bounds{x_dim.min()});
+    assert(x_dim.min() % static_cast<slinky::index_t>(index_elem_count) == 0);
+    slinky::dim a_dim = ynn::slice_dim0(
+        a, slinky::in_bounds{x_dim.min() /
+                             static_cast<slinky::index_t>(index_elem_count)});
 
     assert(is_contiguous(a_dim, a.elem_size));
     assert(is_contiguous(x_dim, x.elem_size));
@@ -174,6 +179,21 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
                                        /*output_dim=*/d);
     }
   }
+  if (static_cast<size_t>(subgraph.value(index_id).rank()) > output_rank) {
+    slinky::expr coord_dim = subgraph.value(index_id).extent(output_rank);
+    const slinky::index_t expected = static_cast<slinky::index_t>(axes.size());
+    node.add_check(
+        coord_dim == expected,
+        {"coordinate dimension (", coord_dim, ") of ", ynn_node::input_idx{1},
+         " does not match num_axes (", expected, ")"});
+  }
+  for (int d = static_cast<int>(output_rank); d < input.rank(); ++d) {
+    if (std::find(axes.begin(), axes.end(), d) == axes.end()) {
+      slinky::expr ext = input.extent(d);
+      node.add_check(ext == 1, {"ungathered dimension ", d, " (", ext, ") of ",
+                                ynn_node::input_idx{0}, " must be 1"});
+    }
+  }
 
   node.op = ynn_node::gather{std::move(axes)};
 
@@ -194,20 +214,20 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
 
     slinky::box_expr input_bounds =
         make_elementwise_bounds(dims, input.physical_extents());
+    input_bounds.resize(input.rank(), slinky::point(0));
     for (size_t d : axes) {
       // We need all of the gathered dimensions.
-      if (d < input_bounds.size()) {
-        input_bounds[d] = all_bounds(input.physical_extents()[d]);
-      }
+      input_bounds[d] = all_bounds(input.physical_extents()[d]);
     }
 
     slinky::box_expr index_bounds =
         make_elementwise_bounds(dims, index.physical_extents());
+    index_bounds.resize(std::min<size_t>(output_rank, index.rank()));
     size_t index_elem_count = type_element_count(index.type);
     if (index_elem_count != 1 && !index_bounds.empty()) {
       index_bounds[0] /= (int)index_elem_count;
     }
-    if (index.rank() > output_rank) {
+    if (static_cast<size_t>(index.rank()) > output_rank) {
       // We need an index for each axis we are gathering.
       index_bounds.push_back(all_bounds(axes.size()));
     }
@@ -224,7 +244,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
       if (allow_in_place(node.inputs[1], node.outputs[0], *runtime.subgraph)) {
         attrs.allow_in_place = (1 << 1);
       }
-      func = slinky::func::make(make_lut_impl(kernel),
+      func = slinky::func::make(make_lut_impl(kernel, index_elem_count),
                                 {{input.buffer, std::move(input_bounds)},
                                  {index.buffer, std::move(index_bounds)}},
                                 {{output.buffer, dims}}, std::move(attrs));
@@ -240,9 +260,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
 
     auto sched = runtime.make_schedule(dims, output.physical_extents(),
                                        output.buffer->elem_size());
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 }
@@ -262,7 +280,6 @@ ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
       ynn::validate_input_tensor("gather", subgraph, "index_id", index_id));
   YNN_RETURN_IF_ERROR(
       ynn::validate_output_tensor("gather", subgraph, "output_id", output_id));
-  YNN_RETURN_IF_ERROR(ynn::validate_rank("gather", "output", output_rank));
 
   if (num_axes == 0) {
     YNN_LOG_ERROR() << "For node `gather`, num_axes must be greater than 0";
@@ -298,6 +315,88 @@ ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
     YNN_RETURN_IF_ERROR(
         ynn::validate_axis("gather", "input", input.rank(), axes[i]));
     axes_vec[i] = ynn::axis_to_slinky_dim(input.rank(), axes[i]);
+    if (std::find(axes_vec.begin(), axes_vec.begin() + i, axes_vec[i]) !=
+        axes_vec.begin() + i) {
+      YNN_LOG_ERROR() << "For node `gather`, duplicate axis " << axes[i];
+      return ynn_status_invalid_parameter;
+    }
+  }
+
+  size_t ungathered_input_rank = 0;
+  for (int d = 0; d < input.rank(); ++d) {
+    if (std::find(axes_vec.begin(), axes_vec.end(), d) == axes_vec.end()) {
+      ungathered_input_rank = static_cast<size_t>(d) + 1;
+    }
+  }
+  if (*output_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& out = subgraph->value(*output_id);
+    size_t declared_rank = YNN_UNKNOWN_RANK;
+    if (!out.extents.empty()) {
+      declared_rank = out.rank();
+    } else if (out.data) {
+      declared_rank = out.data->rank;
+    }
+    if (declared_rank != YNN_UNKNOWN_RANK) {
+      if (output_rank == YNN_UNKNOWN_RANK) {
+        output_rank = declared_rank;
+      } else if (output_rank != declared_rank) {
+        YNN_LOG_ERROR() << "For node `gather`, output_rank (" << output_rank
+                        << ") does not match pre-defined output tensor rank ("
+                        << declared_rank << ")";
+        return ynn_status_invalid_parameter;
+      }
+    }
+  }
+  if (output_rank == YNN_UNKNOWN_RANK) {
+    const size_t coord_dims = num_axes > 1 ? 1 : 0;
+    const size_t index_output_rank = ynn::sub_sat(index.rank(), coord_dims);
+    size_t effective_ungathered_rank = ungathered_input_rank;
+    if (num_axes > 1) {
+      while (effective_ungathered_rank > index_output_rank) {
+        const int d = static_cast<int>(effective_ungathered_rank - 1);
+        const bool is_ungathered =
+            std::find(axes_vec.begin(), axes_vec.end(), d) == axes_vec.end();
+        const auto ext_c = slinky::as_constant(input.extent(d));
+        if (is_ungathered && (!ext_c || *ext_c != 1)) {
+          break;
+        }
+        --effective_ungathered_rank;
+      }
+    }
+    output_rank = std::max(effective_ungathered_rank, index_output_rank);
+  }
+  YNN_RETURN_IF_ERROR(ynn::validate_rank("gather", "output", output_rank));
+  if (static_cast<size_t>(index.rank()) > output_rank + 1) {
+    YNN_LOG_ERROR() << "For node `gather`, index rank (" << index.rank()
+                    << ") must be at most output_rank + 1 ("
+                    << (output_rank + 1) << ")";
+    return ynn_status_invalid_parameter;
+  }
+  if (num_axes > 1 && static_cast<size_t>(index.rank()) <= output_rank) {
+    YNN_LOG_ERROR() << "For node `gather`, multi-axis index rank ("
+                    << index.rank() << ") must exceed output rank ("
+                    << output_rank << ")";
+    return ynn_status_invalid_parameter;
+  }
+  if (static_cast<size_t>(index.rank()) > output_rank) {
+    const auto coord_c = slinky::as_constant(index.extent(output_rank));
+    if (coord_c && *coord_c != static_cast<slinky::index_t>(num_axes)) {
+      YNN_LOG_ERROR() << "For node `gather`, coordinate dimension (" << *coord_c
+                      << ") of index does not match num_axes (" << num_axes
+                      << ")";
+      return ynn_status_invalid_parameter;
+    }
+  }
+  for (int d = static_cast<int>(output_rank); d < input.rank(); ++d) {
+    if (std::find(axes_vec.begin(), axes_vec.end(), d) == axes_vec.end()) {
+      const auto ext_c = slinky::as_constant(input.extent(d));
+      if (ext_c && *ext_c != 1) {
+        YNN_LOG_ERROR() << "For node `gather`, ungathered input dimension " << d
+                        << " (" << *ext_c << ") exceeds output_rank ("
+                        << output_rank << ")";
+        return ynn_status_invalid_parameter;
+      }
+    }
   }
 
   ynn_node node;

@@ -175,10 +175,6 @@ generate_dot_kernels(
         # block_k unrolling, despite widening earlier. For m > 1, the widening
         # optimization is more helpful.
         (1, 32, 16),
-        (2, 32, 32),
-        (3, 32, 32),
-        (4, 32, 32),
-        # These kernels have marginal value, but help the cost model fit.
         (2, 16, 32),
         (3, 16, 32),
         (4, 16, 32),

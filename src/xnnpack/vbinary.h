@@ -22,6 +22,32 @@ extern "C" {
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, \
                     params_type, init_params)                               \
+  XNN_INTERNAL void ukernel(size_t n, const xnn_bfloat16* a,                \
+                            const xnn_bfloat16* b, xnn_bfloat16* y,         \
+                            const params_type* params);
+#include "src/bf16-vbinary/bf16-vadd.inc"
+#include "src/bf16-vbinary/bf16-vaddc.inc"
+#include "src/bf16-vbinary/bf16-vdiv.inc"
+#include "src/bf16-vbinary/bf16-vdivc.inc"
+#include "src/bf16-vbinary/bf16-vmax.inc"
+#include "src/bf16-vbinary/bf16-vmaxc.inc"
+#include "src/bf16-vbinary/bf16-vmin.inc"
+#include "src/bf16-vbinary/bf16-vminc.inc"
+#include "src/bf16-vbinary/bf16-vmul.inc"
+#include "src/bf16-vbinary/bf16-vmulc.inc"
+#include "src/bf16-vbinary/bf16-vprelu.inc"
+#include "src/bf16-vbinary/bf16-vpreluc.inc"
+#include "src/bf16-vbinary/bf16-vrdivc.inc"
+#include "src/bf16-vbinary/bf16-vrpreluc.inc"
+#include "src/bf16-vbinary/bf16-vrsubc.inc"
+#include "src/bf16-vbinary/bf16-vsqrdiff.inc"
+#include "src/bf16-vbinary/bf16-vsqrdiffc.inc"
+#include "src/bf16-vbinary/bf16-vsub.inc"
+#include "src/bf16-vbinary/bf16-vsubc.inc"
+#undef XNN_UKERNEL
+
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
   XNN_INTERNAL void ukernel(size_t n, const xnn_float16* a,                 \
                             const xnn_float16* b, xnn_float16* y,           \
                             const params_type* params);

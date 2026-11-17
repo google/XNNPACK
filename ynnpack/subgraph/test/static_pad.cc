@@ -79,11 +79,6 @@ void TestImpl(T, size_t rank) {
     std::vector<int64_t> post_padding = random_padding(rng, rank, -3, 3);
 
     for (int i = static_cast<int>(rank) - 1; i >= 0; --i) {
-      if (input_shape[i] == 1) {
-        // TODO: b/510492094 - Avoid weird edge case where if the extent is 1,
-        // it becomes a broadcast dimension, which doesn't get padding.
-        input_shape[i] = 0;
-      }
       if (bool_dist(rng)) {
         // Randomly remove dimensions from the padding op. To implement the
         // reference result, just set the padding to 0.

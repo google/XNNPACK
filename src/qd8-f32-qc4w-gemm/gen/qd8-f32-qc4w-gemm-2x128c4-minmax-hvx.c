@@ -211,15 +211,15 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x128c4__hvx(
     vacc1x3 = Q6_Vw_vasr_VwR(vacc1x3, 4);
 
     const HVX_Vector vinput_scale0 = Q6_V_vsplat_R(float_as_uint32(quantization_params[0].inv_scale));
-    HVX_Vector vout0x0 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc0x0), vinput_scale0);
-    HVX_Vector vout0x1 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc0x1), vinput_scale0);
-    HVX_Vector vout0x2 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc0x2), vinput_scale0);
-    HVX_Vector vout0x3 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc0x3), vinput_scale0);
+    HVX_Vector vout0x0 = xnn_mul_f32(xnn_cvt_f32_s32(vacc0x0), vinput_scale0);
+    HVX_Vector vout0x1 = xnn_mul_f32(xnn_cvt_f32_s32(vacc0x1), vinput_scale0);
+    HVX_Vector vout0x2 = xnn_mul_f32(xnn_cvt_f32_s32(vacc0x2), vinput_scale0);
+    HVX_Vector vout0x3 = xnn_mul_f32(xnn_cvt_f32_s32(vacc0x3), vinput_scale0);
     const HVX_Vector vinput_scale1 = Q6_V_vsplat_R(float_as_uint32(quantization_params[1].inv_scale));
-    HVX_Vector vout1x0 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc1x0), vinput_scale1);
-    HVX_Vector vout1x1 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc1x1), vinput_scale1);
-    HVX_Vector vout1x2 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc1x2), vinput_scale1);
-    HVX_Vector vout1x3 = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc1x3), vinput_scale1);
+    HVX_Vector vout1x0 = xnn_mul_f32(xnn_cvt_f32_s32(vacc1x0), vinput_scale1);
+    HVX_Vector vout1x1 = xnn_mul_f32(xnn_cvt_f32_s32(vacc1x1), vinput_scale1);
+    HVX_Vector vout1x2 = xnn_mul_f32(xnn_cvt_f32_s32(vacc1x2), vinput_scale1);
+    HVX_Vector vout1x3 = xnn_mul_f32(xnn_cvt_f32_s32(vacc1x3), vinput_scale1);
 
     const HVX_Vector vfilter_output_scale0 = *((const HVX_Vector*) w); w = (const int8_t*) w + 128;
     vout0x0 = xnn_mul_f32(vout0x0, vfilter_output_scale0);

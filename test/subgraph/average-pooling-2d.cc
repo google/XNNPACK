@@ -23,8 +23,9 @@
 namespace xnnpack {
 
 template <typename T>
-Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
-                            const StencilParams& kw) {
+Tensor<float> ReferenceImpl(Tensor<T> input,
+                            const xnn_quantization_params& input_quantization,
+                            const StencilParams& kh, const StencilParams& kw) {
   Tensor<float> output({input.extent(0), kh.output_extent(input.extent(1)),
                         kw.output_extent(input.extent(2)), input.extent(3)});
   output.fill(0.0f);
@@ -34,7 +35,8 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
   ones.fill(1.0f);
 
   // Pad the input and the ones
-  input = input.pad(0.0f, {0, kh.padding_min, kw.padding_min, 0},
+  input = input.pad(static_cast<T>(input_quantization.zero_point),
+                    {0, kh.padding_min, kw.padding_min, 0},
                     {0, kh.padding_max, kw.padding_max, 0});
   ones = ones.pad(0.0f, {kh.padding_min, kw.padding_min},
                   {kh.padding_max, kw.padding_max});
@@ -56,7 +58,8 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
         for (size_t c = 0; c < output.extent(3); ++c) {
           for (size_t dy = 0; dy < kh.size; ++dy) {
             for (size_t dx = 0; dx < kw.size; ++dx) {
-              output(n, y, x, c) += input(n, y, dy, x, dx, c);
+              output(n, y, x, c) +=
+                  dequantize(input(n, y, dy, x, dx, c), input_quantization);
             }
           }
         }
@@ -73,17 +76,17 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
 
 template <typename T>
 void TestImpl() {
+  const xnn_datatype datatype = xnn_datatype_of<T>();
   ReplicableRandomDevice rng;
   std::bernoulli_distribution bool_dist(0.5);
+  std::uniform_int_distribution<int32_t> i8_dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
-    // TODO(b/406664150): Test kernels bigger than 5.
-    StencilParams kw =
-        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
-    StencilParams kh =
-        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
+    StencilParams kw = random_stencil_params(rng, /*max_dilation=*/1);
+    StencilParams kh = random_stencil_params(rng, /*max_dilation=*/1);
 
     const bool same_padding = bool_dist(rng);
 
@@ -94,10 +97,19 @@ void TestImpl() {
       kh.padding_min = kh.padding_max = 0;
     }
 
+    xnn_quantization_params input_quantization =
+        random_quantization(datatype, rng);
+    xnn_quantization_params output_quantization =
+        random_quantization(datatype, rng);
+    if (datatype == xnn_datatype_qint8) {
+      input_quantization.zero_point = i8_dist(rng);
+      output_quantization.zero_point = i8_dist(rng);
+    }
+
     // Define subgraph
     SubgraphTester subgraph(2);
-    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), 0)
-        .AddOutputTensor(4, xnn_datatype_of<T>(), 1)
+    subgraph.AddInputTensor(4, datatype, input_quantization, 0)
+        .AddOutputTensor(4, datatype, output_quantization, 1)
         .AddAveragePooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
                              kw.padding_min, kh.size, kw.size, kh.stride,
                              kw.stride, 0, 1, flags);
@@ -122,14 +134,6 @@ void TestImpl() {
         kw.compute_tf_same_padding(input_shape[2]);
       }
 
-      if (input_shape[1] <= kh.padding() || input_shape[2] <= kw.padding()) {
-        // TODO(b/406664150): This is a hack around a horrible long-standing bug
-        // where xnn_indirection_init_dwconv2d_compressed produces incorrect
-        // results if the input is smaller than the padded area. If we hit this
-        // case, just try again.
-        break;
-      }
-
       // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
       // not necessary.
       if (kh.result_is_identity(input_shape[1], output_shape[1]) ||
@@ -138,7 +142,7 @@ void TestImpl() {
       }
 
       Tensor<T> input(input_shape, XnnExtraBytes);
-      DatatypeGenerator<T> gen(-10.0f, 20.0f);
+      DatatypeGenerator<T> gen(-10.0f, 20.0f, input_quantization);
       input.generate([&]() { return gen(rng); });
 
       subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
@@ -154,21 +158,71 @@ void TestImpl() {
           .InvokeRuntime();
 
       // Verify results.
-      Tensor<float> expected = ReferenceImpl(input, kh, kw);
-      const float tolerance = 10.0f * xnnpack::epsilon(xnn_datatype_of<T>());
-      for (const auto& i : EnumerateIndices(output.extents())) {
-        ASSERT_NEAR(output(i), expected(i),
-                    tolerance * (1.0f + std::abs(expected(i))))
-            << "input_shape=" << index_to_string(input_shape)
-            << ", output_shape=" << index_to_string(output_shape)
-            << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+      Tensor<float> expected = ReferenceImpl(input, input_quantization, kh, kw);
+      if (xnn_datatype_is_quantized(datatype)) {
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(output(i), quantize<T>(expected(i), output_quantization),
+                      1)
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+        }
+      } else {
+        const float tolerance = 10.0f * xnnpack::epsilon(datatype);
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(output(i), expected(i),
+                      tolerance * (1.0f + std::abs(expected(i))))
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+        }
       }
     }
   }
 }
 
+TEST(AveragePooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
+TEST(AveragePooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
 TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
+
+TEST(AveragePooling2D, PaddingExceedsInputHeight) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor({1, 3, 4, 32}, xnn_datatype_fp32, 0)
+      .AddOutputTensor({1, 3, 4, 32}, xnn_datatype_fp32, 1)
+      .AddAveragePooling2D(/*input_padding_top=*/1, /*input_padding_right=*/0,
+                           /*input_padding_bottom=*/5, /*input_padding_left=*/0,
+                           /*pooling_height=*/7, /*pooling_width=*/1,
+                           /*stride_height=*/1, /*stride_width=*/1,
+                           /*input_id=*/0, /*output_id=*/1);
+  const xnn_status status = subgraph.CreateRuntime();
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  subgraph.ReshapeRuntime();
+  Tensor<float> input({1, 3, 4, 32}, XnnExtraBytes);
+  for (size_t y = 0; y < 3; ++y) {
+    for (size_t x = 0; x < 4; ++x) {
+      for (size_t c = 0; c < 32; ++c) {
+        input(0, y, x, c) = static_cast<float>(y + 1);
+      }
+    }
+  }
+  Tensor<float> output({1, 3, 4, 32});
+  subgraph.SetupExternalTensor(input.base(), 0)
+      .SetupExternalTensor(output.base(), 1)
+      .SetupRuntime()
+      .InvokeRuntime();
+  for (size_t x = 0; x < 4; ++x) {
+    for (size_t c = 0; c < 32; ++c) {
+      EXPECT_FLOAT_EQ(output(0, 0, x, c), 2.0f);
+      EXPECT_FLOAT_EQ(output(0, 1, x, c), 2.0f);
+      EXPECT_FLOAT_EQ(output(0, 2, x, c), 2.5f);
+    }
+  }
+}
 
 #ifndef XNNPACK_USE_YNNPACK
 static xnn_status DefineAveragePooling2D(xnn_subgraph_t subgraph) {
@@ -210,6 +264,57 @@ TEST(AveragePooling2D, DefineRejectsZeroPoolingSize) {
                 std::numeric_limits<float>::infinity(), /*input_id=*/0,
                 /*output_id=*/1, /*flags=*/0),
             xnn_status_invalid_parameter);
+}
+
+TEST(AveragePooling2D, DefineRejectsUnderflowQuantizedScaleForKernelArea) {
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    const int32_t zero_point = datatype == xnn_datatype_quint8 ? 128 : 0;
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(4, datatype, {zero_point, 0x1.0p-32f}, 0)
+        .AddOutputTensor(4, datatype, {zero_point, 1.0f}, 1);
+    EXPECT_EQ(xnn_define_average_pooling_2d(
+                  subgraph.Subgraph(), /*input_padding_top=*/0,
+                  /*input_padding_right=*/0, /*input_padding_bottom=*/0,
+                  /*input_padding_left=*/0, /*pooling_height=*/3,
+                  /*pooling_width=*/3, /*stride_height=*/1, /*stride_width=*/1,
+                  -std::numeric_limits<float>::infinity(),
+                  std::numeric_limits<float>::infinity(), /*input_id=*/0,
+                  /*output_id=*/1, /*flags=*/0),
+              xnn_status_unsupported_parameter);
+  }
+}
+
+TEST(AveragePooling2D, QuantizedCollapsedOutputRange) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    const int32_t zero_point = datatype == xnn_datatype_quint8 ? 128 : 0;
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor({1, 4, 4, 17}, datatype, {zero_point, 1.0f}, 0)
+        .AddOutputTensor({1, 2, 2, 17}, datatype, {zero_point, 1.0f}, 1);
+    ASSERT_EQ(xnn_status_success,
+              xnn_define_average_pooling_2d(
+                  subgraph.Subgraph(), /*input_padding_top=*/0,
+                  /*input_padding_right=*/0, /*input_padding_bottom=*/0,
+                  /*input_padding_left=*/0, /*pooling_height=*/3,
+                  /*pooling_width=*/3, /*stride_height=*/1, /*stride_width=*/1,
+                  /*output_min=*/0.0f, /*output_max=*/0.1f, /*input_id=*/0,
+                  /*output_id=*/1, /*flags=*/0));
+    ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+    subgraph.ReshapeRuntime();
+    std::vector<uint8_t> input(4 * 4 * 17 + XNN_EXTRA_BYTES, 200);
+    std::vector<uint8_t> output(2 * 2 * 17, 42);
+    subgraph.SetupExternalTensor(input.data(), 0)
+        .SetupExternalTensor(output.data(), 1)
+        .SetupRuntime()
+        .InvokeRuntime();
+    for (uint8_t v : output) {
+      if (datatype == xnn_datatype_qint8) {
+        EXPECT_EQ(static_cast<int8_t>(v), 0);
+      } else {
+        EXPECT_EQ(v, 128);
+      }
+    }
+  }
 }
 
 TEST(AveragePooling2D, ReshapeOverflowInputElements) {

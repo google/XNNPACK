@@ -535,7 +535,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     // changes (a partial reduction's given pr_split loops are pure and stay
     // where they are declared).
     std::vector<slinky::expr> phys_extents = input_a.physical_extents();
-    std::unique_ptr<ynn::scheduling_info> sched;
+    ynn::scheduling_info sched;
     bool computed_reduction = false;
     for (size_t d = split_factors.size(); d < all_dims.size(); ++d) {
       if (phys_extents[d].defined() &&
@@ -569,9 +569,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
          {reduction_buffer, std::move(reduction_dims)}},
         std::move(attrs));
 
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
 }

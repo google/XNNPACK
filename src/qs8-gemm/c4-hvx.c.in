@@ -230,7 +230,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       $for M in range(MR):
         const HVX_Vector vinput_scale${M} = Q6_V_vsplat_R(float_as_uint32(quantization_params[${M}].inv_scale));
         $for N in range(0, NR, 32):
-          HVX_Vector vout${M}x${N//32} = xnn_mul_f32(Q6_Vsf_equals_Vw(vacc${M}x${N//32}), vinput_scale${M});
+          HVX_Vector vout${M}x${N//32} = xnn_mul_f32(xnn_cvt_f32_s32(vacc${M}x${N//32}), vinput_scale${M});
 
       $for N in range(0, NR, 32):
         const HVX_Vector vfilter_output_scale${N//32} = *((const HVX_Vector*) w); w = (const int8_t*) w + 128;

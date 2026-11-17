@@ -25,6 +25,12 @@ XNN_UKERNEL(xnn_arch_x86_avx512bf16, xnn_f32_bf16_vcvt_ukernel__avx512bf16_u16, 
 XNN_UKERNEL(xnn_arch_x86_avx512bf16, xnn_f32_bf16_vcvt_ukernel__avx512bf16_u32, 32, false, float, xnn_bfloat16, void, NULL)
 #endif  // XNN_ENABLE_AVX512BF16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_bf16_vcvt_ukernel__hvx_u32, 32, false, float, xnn_bfloat16, void, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_bf16_vcvt_ukernel__hvx_u64, 64, false, float, xnn_bfloat16, void, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_bf16_vcvt_ukernel__hvx_u128, 128, false, float, xnn_bfloat16, void, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_bf16_vcvt_ukernel__scalar_u1, 1, false, float, xnn_bfloat16, void, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_bf16_vcvt_ukernel__scalar_u2, 2, false, float, xnn_bfloat16, void, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_bf16_vcvt_ukernel__scalar_u3, 3, false, float, xnn_bfloat16, void, NULL)

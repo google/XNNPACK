@@ -200,9 +200,15 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
         subgraph, b_zero_point_id, b_zp_aligned_id, /*expand_m_dim=*/true));
   }
 
-  // B's zero point contribution per block is -b_zp * sum_k(a), which varies at
-  // runtime and is initialized in each block's accumulator.
-  uint32_t accum_init_id = YNN_INVALID_VALUE_ID;
+  // Run inner dot: produces [..., num_blocks, M, N].
+  uint32_t dot_blocks_id = YNN_INVALID_VALUE_ID;
+  YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, a_inner_id,
+                                     b_inner_id, YNN_INVALID_VALUE_ID,
+                                     &dot_blocks_id, flags));
+
+  // Subtract B's zero point contribution per block: b_zp * sum_k(a).
+  // Subtracting after the dot avoids truncating floating-point zero points to
+  // the integer dot accumulator type.
   if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
     int32_t a_k_axis = -1;
     uint32_t sum_a_id = YNN_INVALID_VALUE_ID;
@@ -213,15 +219,12 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
     YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
                                           b_zp_aligned_id, sum_a_id,
                                           &b_zp_term_id, 0));
-    YNN_RETURN_IF_ERROR(ynn_define_unary(subgraph, ynn_unary_negate,
-                                         b_zp_term_id, &accum_init_id, 0));
+    uint32_t adjusted_blocks_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_subtract,
+                                          dot_blocks_id, b_zp_term_id,
+                                          &adjusted_blocks_id, 0));
+    dot_blocks_id = adjusted_blocks_id;
   }
-
-  // Run inner dot: produces [..., num_blocks, M, N].
-  uint32_t dot_blocks_id = YNN_INVALID_VALUE_ID;
-  YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, a_inner_id,
-                                     b_inner_id, accum_init_id, &dot_blocks_id,
-                                     flags));
 
   // Multiply by b_scale.
   uint32_t scaled_blocks_id = YNN_INVALID_VALUE_ID;

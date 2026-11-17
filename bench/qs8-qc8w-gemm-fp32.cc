@@ -2465,7 +2465,7 @@ namespace {
 #endif  // XNN_ARCH_ARM
 
 
-#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx,
@@ -2564,7 +2564,7 @@ namespace {
   }
 
   BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx_prfm)
-#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#endif  // XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
 
 
 #if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

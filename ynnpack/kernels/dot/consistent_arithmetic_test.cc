@@ -176,6 +176,18 @@ TEST_P(Dot, Consistent) {
   });
 }
 
+// Integer dot kernels should have consistent arithmetic.
+TEST(Dot, IntegerKernelsConsistent) {
+  for (const KernelInfo& kernel : all_kernels) {
+    SwitchThreeTypes(kernel.type, [&](auto a, auto b, auto c) {
+      if (is_integral<decltype(c)>::value) {
+        EXPECT_TRUE(kernel.flags & dot_flag::consistent_arithmetic)
+            << kernel.name;
+      }
+    });
+  }
+}
+
 std::set<multi_type> get_kernel_types() {
   std::set<multi_type> types;
   for (const auto& kernel : all_kernels) {

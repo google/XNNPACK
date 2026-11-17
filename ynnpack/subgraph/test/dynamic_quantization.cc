@@ -90,6 +90,51 @@ void TestImpl(T, ynn_type target_type) {
   }
 }
 
+template <typename T>
+void TestSymmetricImpl(T) {
+  const uint32_t min_max_id = 0;
+  uint32_t scale_id = 1;
+
+  const float scales[8] = {0.125f, 0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 8.0f, 16.0f};
+  std::vector<size_t> output_shape = {8, 2};
+  std::vector<size_t> min_max_shape = {2, 8, 2};
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<T>(), 3, min_max_id)
+      .AddOutput(ynn_type_fp32, 2, scale_id);
+
+  ynn_status status = ynn_define_dynamic_quantization(
+      subgraph.GetSubgraph(), min_max_id, ynn_type_int8,
+      /*zero_point_id=*/nullptr, &scale_id, /*flags=*/0);
+  ASSERT_EQ(status, ynn_status_success);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  Tensor<T> min_max(min_max_shape);
+  for (int s_idx = 0; s_idx < 8; ++s_idx) {
+    const float s = scales[s_idx];
+    // Asymmetric range where max_abs is determined by max.
+    min_max(0, s_idx, 0) = static_cast<T>(-10.0f * s);
+    min_max(1, s_idx, 0) = static_cast<T>(127.0f * s);
+    // Asymmetric range where max_abs is determined by min.
+    min_max(0, s_idx, 1) = static_cast<T>(-127.0f * s);
+    min_max(1, s_idx, 1) = static_cast<T>(10.0f * s);
+  }
+
+  runtime.ReshapeExternalTensor(min_max_shape, min_max.base(), min_max_id)
+      .ReshapeRuntime();
+  ASSERT_EQ(runtime.GetExternalTensorShape(scale_id), output_shape);
+
+  Tensor<float> scale(output_shape);
+  runtime.SetupExternalTensor(scale.base(), scale_id).InvokeRuntime();
+
+  for (int s_idx = 0; s_idx < 8; ++s_idx) {
+    EXPECT_NEAR(scale(s_idx, 0), scales[s_idx], 1e-5);
+    EXPECT_NEAR(scale(s_idx, 1), scales[s_idx], 1e-5);
+  }
+}
+
 template <typename F>
 constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
   switch (type) {
@@ -111,6 +156,12 @@ TEST_P(DynamicQuantizationTest, Run) {
   SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
     TestImpl(a_type, std::get<1>(GetParam()));
   });
+}
+
+TEST_P(DynamicQuantizationTest, Symmetric) {
+  if (std::get<1>(GetParam()) != ynn_type_int8) GTEST_SKIP();
+  SwitchType(std::get<0>(GetParam()),
+             [&](auto a_type) { TestSymmetricImpl(a_type); });
 }
 
 INSTANTIATE_TEST_SUITE_P(

@@ -459,5 +459,148 @@ TEST(DotTest, BlockwiseDotWithZeroPoints) {
   }
 }
 
+TEST(DotTest, BlockwiseDotWithFloatZeroPoints) {
+  for (ynn_type b_type : {ynn_type_int8, ynn_type_int2}) {
+    for (bool has_a_zp : {false, true}) {
+      subgraph_ptr subgraph = create_subgraph(2, 0);
+      ASSERT_NE(subgraph, nullptr);
+
+      const size_t M = 2;
+      const size_t K = 4;
+      const size_t N = 4;
+      const size_t block_size = 2;
+      const size_t num_blocks = K / block_size;
+
+      // A: [M, K] = [2, 4], type int8
+      const int8_t a_data[M * K] = {1, 2, 3, 4, -1, 0, 2, -2};
+      uint32_t a_id = 0;
+      ASSERT_EQ(
+          ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, nullptr, nullptr,
+                            YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_id),
+          ynn_status_success);
+
+      uint32_t out_id = 1;
+      ASSERT_EQ(
+          ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, nullptr, nullptr,
+                            YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id),
+          ynn_status_success);
+
+      // A zero point: [M, 1] = [2, 1]
+      const int8_t a_zp_data[M] = {1, -2};
+      const size_t a_zp_dims[2] = {M, 1};
+      uint32_t a_zp_id = YNN_INVALID_VALUE_ID;
+      if (has_a_zp) {
+        ASSERT_EQ(
+            ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, a_zp_dims,
+                              a_zp_data, YNN_VALUE_FLAG_COPY_DATA, &a_zp_id),
+            ynn_status_success);
+      }
+
+      // A scale: [M, 1] = [2, 1]
+      const float a_scale_data[M] = {2.0f, 0.5f};
+      const size_t a_scale_dims[2] = {M, 1};
+      uint32_t a_scale_id = YNN_INVALID_VALUE_ID;
+      ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2,
+                                  a_scale_dims, a_scale_data,
+                                  YNN_VALUE_FLAG_COPY_DATA, &a_scale_id),
+                ynn_status_success);
+
+      // B: [K, N] = [4, 4] in [-2, 1] so values fit both int8 and int2.
+      const int8_t b_vals[K * N] = {
+          -2, -1, 0,  1,   // k = 0
+          1,  -2, -1, 0,   // k = 1
+          0,  1,  -2, -1,  // k = 2
+          -1, 0,  1,  -2,  // k = 3
+      };
+      const size_t b_dims[2] = {K, N};
+      uint32_t b_id = YNN_INVALID_VALUE_ID;
+      if (b_type == ynn_type_int8) {
+        ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, b_dims,
+                                    b_vals, YNN_VALUE_FLAG_COPY_DATA, &b_id),
+                  ynn_status_success);
+      } else {
+        uint8_t packed_b[K * N / 4] = {};
+        for (size_t i = 0; i < K * N; ++i) {
+          packed_b[i / 4] |= (static_cast<uint8_t>(b_vals[i]) & 0x03)
+                             << ((i % 4) * 2);
+        }
+        ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int2, 2, b_dims,
+                                    packed_b, YNN_VALUE_FLAG_COPY_DATA, &b_id),
+                  ynn_status_success);
+      }
+
+      // Fractional B zero point: [N, num_blocks] = [4, 2]
+      const float b_zp_data[N * num_blocks] = {
+          -0.5f, 0.25f, 1.5f, -0.75f, 0.5f, -1.25f, -0.5f, 0.75f,
+      };
+      const size_t b_zp_dims[2] = {N, num_blocks};
+      uint32_t b_zp_id = YNN_INVALID_VALUE_ID;
+      ASSERT_EQ(
+          ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, b_zp_dims,
+                            b_zp_data, YNN_VALUE_FLAG_COPY_DATA, &b_zp_id),
+          ynn_status_success);
+
+      // B scale: [N, num_blocks] = [4, 2]
+      const float b_scale_data[N * num_blocks] = {
+          0.5f, 2.0f, 0.25f, 1.0f, 1.5f, 0.75f, 0.5f, 1.25f,
+      };
+      const size_t b_scale_dims[2] = {N, num_blocks};
+      uint32_t b_scale_id = YNN_INVALID_VALUE_ID;
+      ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2,
+                                  b_scale_dims, b_scale_data,
+                                  YNN_VALUE_FLAG_COPY_DATA, &b_scale_id),
+                ynn_status_success);
+
+      ASSERT_EQ(
+          define_blockwise_dot(subgraph.get(), a_id, a_zp_id, a_scale_id, b_id,
+                               b_zp_id, b_scale_id, block_size,
+                               YNN_INVALID_VALUE_ID, ynn_type_fp32, out_id, 0),
+          ynn_status_success);
+
+      ASSERT_EQ(ynn_optimize_subgraph(subgraph.get(), nullptr, 0),
+                ynn_status_success);
+
+      runtime_ptr runtime = create_runtime(subgraph, nullptr, 0);
+      ASSERT_NE(runtime, nullptr);
+
+      const size_t a_shape[2] = {M, K};
+      ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, a_shape),
+                ynn_status_success);
+      std::vector<float> out_data(M * N, 0.0f);
+      ASSERT_EQ(ynn_set_external_value_data(runtime.get(), a_id,
+                                            const_cast<int8_t*>(a_data)),
+                ynn_status_success);
+      ASSERT_EQ(
+          ynn_set_external_value_data(runtime.get(), out_id, out_data.data()),
+          ynn_status_success);
+
+      ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+      ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+
+      for (size_t m = 0; m < M; ++m) {
+        for (size_t n = 0; n < N; ++n) {
+          float sum = 0.0f;
+          for (size_t b = 0; b < num_blocks; ++b) {
+            float block_sum = 0.0f;
+            float b_zp = b_zp_data[n * num_blocks + b];
+            float a_zp = has_a_zp ? a_zp_data[m] : 0.0f;
+            for (size_t k_in_block = 0; k_in_block < block_size; ++k_in_block) {
+              size_t k = b * block_size + k_in_block;
+              float a_val = static_cast<float>(a_data[m * K + k]) - a_zp;
+              float b_val = static_cast<float>(b_vals[k * N + n]) - b_zp;
+              block_sum += a_val * b_val;
+            }
+            sum += block_sum * b_scale_data[n * num_blocks + b];
+          }
+          float expected = sum * a_scale_data[m];
+          EXPECT_NEAR(out_data[m * N + n], expected, 1e-4f)
+              << "Mismatch at (" << m << ", " << n
+              << ") with has_a_zp=" << has_a_zp << ", b_type=" << b_type;
+        }
+      }
+    }
+  }
+}
+
 }  // namespace
 }  // namespace ynn

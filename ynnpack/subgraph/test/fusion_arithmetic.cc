@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 #include <variant>
@@ -11,6 +12,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/test/tensor.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
@@ -1468,6 +1470,203 @@ TEST(fusion, rsqrt_transpose_ternary_multiply_fusion) {
   EXPECT_EQ(rsqrt_node.inputs[0], y_id);
   const auto& unary = std::get<ynn_node::unary_elementwise>(rsqrt_node.op);
   EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 6.0f, 1e-6f);
+}
+
+TEST(fusion, dequantize_dot_bf16_offset_type) {
+  {
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t a_offset_id = 2;
+    const uint32_t b_offset_id = 3;
+    const uint32_t c_id = 4;
+    const uint32_t d_id = 5;
+    const uint32_t out_id = 6;
+    SubgraphBuilder builder(7);
+
+    uint32_t sm_id = YNN_INVALID_VALUE_ID;
+    uint32_t dot_output_id = YNN_INVALID_VALUE_ID;
+    uint32_t zero_id = builder.DefineScalar(0);
+
+    builder.AddInput(ynn_type_uint8, 2, a_id)
+        .AddInput(ynn_type_int8, 2, b_id)
+        .AddInput(ynn_type_int32, 1, a_offset_id)
+        .AddInput(ynn_type_int32, 1, b_offset_id)
+        .AddInput(ynn_type_fp32, 1, c_id)
+        .AddInput(ynn_type_fp32, 1, d_id)
+        .AddOutput(ynn_type_bf16, 2, out_id)
+        .AddTensor(ynn_type_int32, 1, sm_id)
+        .AddTensor(ynn_type_int32, 2, dot_output_id);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+    ynn_node sm_node;
+    ynn::define_ternary(
+        subgraph, sm_node, zero_id, a_offset_id, b_offset_id, sm_id,
+        ternary_op::subtract_multiply,
+        get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_int32,
+                           ynn_type_int32, ynn_type_int32, ynn_type_int32));
+    subgraph.add_node(std::move(sm_node));
+
+    builder.AddDot(1, a_id, b_id, sm_id, dot_output_id);
+
+    ynn_node mul_node;
+    ynn::define_ternary(subgraph, mul_node, dot_output_id, c_id, d_id, out_id,
+                        ternary_op::multiply, nullptr);
+    subgraph.add_node(std::move(mul_node));
+
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
+
+    const ynn_node& dequant_node = ProducerOf(out_id, subgraph);
+    ASSERT_THAT(dequant_node, AllOf(IsDequantizeDot(), HasInputCount(6)));
+    EXPECT_EQ(subgraph.value(dequant_node.inputs[5]).type, ynn_type_fp32);
+    EXPECT_EQ(subgraph.value(dequant_node.inputs[5]).data->elem_size,
+              sizeof(float));
+  }
+  {
+    SubgraphBuilder builder(7);
+    uint32_t dequant_out_id = YNN_INVALID_VALUE_ID;
+    uint32_t zero_id = builder.DefineScalar(0.0f);
+    builder.AddInput(ynn_type_int32, 2, 0)
+        .AddInput(ynn_type_int32, 1, 1)
+        .AddInput(ynn_type_int32, 1, 2)
+        .AddInput(ynn_type_fp32, 1, 3)
+        .AddInput(ynn_type_fp32, 1, 4)
+        .AddInput(ynn_type_bf16, 1, 5)
+        .AddOutput(ynn_type_bf16, 2, 6)
+        .AddTensor(ynn_type_bf16, 2, dequant_out_id);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+    ynn_node rescale_node;
+    ynn::define_dequantize_dot(subgraph, rescale_node, ynn_type_bf16, 0, 1, 2,
+                               3, 4, zero_id, dequant_out_id,
+                               ynn::dequantize_dot_params{});
+    subgraph.add_node(std::move(rescale_node));
+
+    ynn_node add_node;
+    ynn::define_binary(subgraph, add_node, dequant_out_id, 5, 6, ynn_binary_add,
+                       nullptr);
+    subgraph.add_node(std::move(add_node));
+
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
+
+    EXPECT_THAT(ProducerOf(6, subgraph), IsBinary(ynn_binary_add));
+  }
+}
+
+TEST(fusion, dequantize_dot_broadcast_shapes) {
+  // Offset outranking `dot` ([2, 4] dot vs [2, 2, 4] offset), and `dot`
+  // broadcast along M or N ([1, 4] and [2, 1] dot vs [3, 4] and [2, 4] offset).
+  auto run_case =
+      [](std::vector<size_t> dot_shape, std::vector<int32_t> dot_data,
+         std::vector<size_t> a_scale_shape, std::vector<float> a_scale_data,
+         std::vector<size_t> b_scale_shape, std::vector<float> b_scale_data,
+         std::vector<size_t> offset_shape, std::vector<float> offset_data,
+         std::vector<size_t> out_shape, Tensor<float>& out) {
+        SubgraphBuilder builder(7);
+        uint32_t dequant_out_id = YNN_INVALID_VALUE_ID;
+        uint32_t zero_id = builder.DefineScalar(0.0f);
+        builder.AddInput(ynn_type_int32, dot_shape, 0)
+            .AddInput(ynn_type_int32, {1}, 1)
+            .AddInput(ynn_type_int32, {1}, 2)
+            .AddInput(ynn_type_fp32, a_scale_shape, 3)
+            .AddInput(ynn_type_fp32, b_scale_shape, 4)
+            .AddInput(ynn_type_fp32, offset_shape, 5)
+            .AddOutput(ynn_type_fp32, out_shape, 6)
+            .AddTensor(ynn_type_fp32, dot_shape.size(), dequant_out_id);
+
+        ynn_subgraph& subgraph = *builder.GetSubgraph();
+        ynn_node rescale_node;
+        ASSERT_TRUE(ynn::define_dequantize_dot(
+            subgraph, rescale_node, ynn_type_fp32, 0, 1, 2, 3, 4, zero_id,
+            dequant_out_id, ynn::dequantize_dot_params{}));
+        subgraph.add_node(std::move(rescale_node));
+        builder.AddBinary(ynn_binary_add, dequant_out_id, 5, 6);
+
+        subgraph.fusion();
+        subgraph.invalidate_dead_values();
+        ASSERT_THAT(subgraph, HasValidNodeCount(1));
+        const ynn_node& fused = ProducerOf(6, subgraph);
+        ASSERT_THAT(fused, IsDequantizeDot());
+        EXPECT_EQ(subgraph.value(6).rank(), out_shape.size());
+
+        int32_t a_off = 2;
+        int32_t b_off = 3;
+        Runtime runtime(builder.GetSubgraph());
+        ASSERT_EQ(runtime.Status(), ynn_status_success);
+        out = Tensor<float>(out_shape);
+        runtime.ReshapeExternalTensor(dot_shape, dot_data.data(), 0)
+            .ReshapeExternalTensor({1}, &a_off, 1)
+            .ReshapeExternalTensor({1}, &b_off, 2)
+            .ReshapeExternalTensor(a_scale_shape, a_scale_data.data(), 3)
+            .ReshapeExternalTensor(b_scale_shape, b_scale_data.data(), 4)
+            .ReshapeExternalTensor(offset_shape, offset_data.data(), 5)
+            .ReshapeRuntime();
+        ASSERT_EQ(runtime.Status(), ynn_status_success);
+        EXPECT_EQ(runtime.GetExternalTensorShape(6), out_shape);
+        runtime.SetupExternalTensor(out.data(), 6).InvokeRuntime();
+        ASSERT_EQ(runtime.Status(), ynn_status_success);
+      };
+
+  // Case 1: 3D offset [2, 2, 4] on 2D dot [2, 4].
+  {
+    std::vector<int32_t> dot = {10, 11, 12, 13, 14, 15, 16, 17};
+    std::vector<float> a_scale = {0.5f, 1.0f};
+    std::vector<float> b_scale = {1.0f, 2.0f, 1.0f, 2.0f};
+    std::vector<float> offset(16);
+    for (size_t i = 0; i < 16; ++i) offset[i] = static_cast<float>(i);
+    Tensor<float> out;
+    ASSERT_NO_FATAL_FAILURE(run_case({2, 4}, dot, {2, 1}, a_scale, {4}, b_scale,
+                                     {2, 2, 4}, offset, {2, 2, 4}, out));
+    for (size_t b = 0; b < 2; ++b) {
+      for (size_t i = 0; i < 2; ++i) {
+        for (size_t j = 0; j < 4; ++j) {
+          float expected =
+              static_cast<float>(dot[i * 4 + j] - 6) * a_scale[i] * b_scale[j] +
+              offset[(b * 2 + i) * 4 + j];
+          EXPECT_FLOAT_EQ(out(b, i, j), expected);
+        }
+      }
+    }
+  }
+
+  // Case 2: dot broadcast along M ([1, 4] dot, [3, 1] a_scale, [3, 4] offset).
+  {
+    std::vector<int32_t> dot = {10, 11, 12, 13};
+    std::vector<float> a_scale = {1.0f, 2.0f, 3.0f};
+    std::vector<float> b_scale = {1.0f, 1.0f, 1.0f, 1.0f};
+    std::vector<float> offset(12, 1.5f);
+    Tensor<float> out;
+    ASSERT_NO_FATAL_FAILURE(run_case({1, 4}, dot, {3, 1}, a_scale, {4}, b_scale,
+                                     {3, 4}, offset, {3, 4}, out));
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 4; ++j) {
+        float expected =
+            static_cast<float>(dot[j] - 6) * a_scale[i] + offset[i * 4 + j];
+        EXPECT_FLOAT_EQ(out(i, j), expected);
+      }
+    }
+  }
+
+  // Case 3: dot broadcast along N ([2, 1] dot, [4] b_scale, [2, 4] offset).
+  {
+    std::vector<int32_t> dot = {10, 20};
+    std::vector<float> a_scale = {0.5f, 1.0f};
+    std::vector<float> b_scale = {1.0f, 2.0f, 3.0f, 4.0f};
+    std::vector<float> offset = {0.5f, 1.0f, 1.5f, 2.0f,
+                                 2.5f, 3.0f, 3.5f, 4.0f};
+    Tensor<float> out;
+    ASSERT_NO_FATAL_FAILURE(run_case({2, 1}, dot, {2, 1}, a_scale, {4}, b_scale,
+                                     {2, 4}, offset, {2, 4}, out));
+    for (size_t i = 0; i < 2; ++i) {
+      for (size_t j = 0; j < 4; ++j) {
+        float expected =
+            static_cast<float>(dot[i] - 6) * a_scale[i] * b_scale[j] +
+            offset[i * 4 + j];
+        EXPECT_FLOAT_EQ(out(i, j), expected);
+      }
+    }
+  }
 }
 
 }  // namespace ynn

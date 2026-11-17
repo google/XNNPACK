@@ -199,8 +199,12 @@ constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
       return std::forward<F>(f)(float());
     case ynn_type_int4:
       return std::forward<F>(f)(int4x2());
+    case ynn_type_uint4:
+      return std::forward<F>(f)(uint4x2());
     case ynn_type_int2:
       return std::forward<F>(f)(int2x4());
+    case ynn_type_uint2:
+      return std::forward<F>(f)(uint2x4());
     default:
       YNN_UNREACHABLE;
   }
@@ -239,7 +243,9 @@ TEST_P(ReferenceConvert, op) {
 // clang-format off
 ynn_type all_convert_input_types[] = {
     ynn_type_int2,
+    ynn_type_uint2,
     ynn_type_int4,
+    ynn_type_uint4,
     ynn_type_int8,
     ynn_type_uint8,
     ynn_type_int32,

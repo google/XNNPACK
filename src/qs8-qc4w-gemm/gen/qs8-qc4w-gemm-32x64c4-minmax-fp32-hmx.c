@@ -37,11 +37,14 @@
 // K = 1024) per issue on Hexagon V81; earlier generations stall above ~32 KB
 // (K = 512), so `max_k_chunk` is chosen at init.
 #define XNN_HMX_MAX_K_CHUNK 1024
+#define XNN_HMX_MAX_ACT_K 9216
+#define XNN_HMX_MAX_SLOTS 4
+#define XNN_HMX_SLOT_BYTES (720 * 1024)
 
 static XNN_INLINE void l2fetch_2d(const void* p, uint32_t stride,
                                   uint32_t width, uint32_t height) {
-  const uint64_t control =
-      ((uint64_t) stride << 32) | ((uint64_t) width << 16) | (uint64_t) height;
+  const uint64_t control = ((uint64_t) stride << 32) |
+                           ((uint64_t) width << 16) | (uint64_t) height;
   __asm__ __volatile__("l2fetch(%0,%1)" : : "r"(p), "r"(control));
 }
 
@@ -87,7 +90,7 @@ static XNN_INLINE void xnn_hmx_store_cvt_i24_cm(
       : "memory");
 }
 
-// Drain preceding HVX vector stores to VTCM before HMX `mxmem` reads them.
+// Drain preceding HVX/HMX stores to VTCM before subsequent reads/writes.
 static XNN_INLINE void xnn_hvx_vtcm_fence(const void* vtcm_ptr) {
   HVX_Vector vdummy;
   __asm__ __volatile__("%0 = vmem(%1+#0)"
@@ -96,62 +99,122 @@ static XNN_INLINE void xnn_hvx_vtcm_fence(const void* vtcm_ptr) {
                        : "memory");
 }
 
-#define XNN_HMX_MAX_CACHED_PANELS 16
+// 64B-aligned Hexagon 2D User DMA (`dm0`) descriptor (`DESC_DESCTYPE_2D`).
+struct XNN_ALIGN(64) xnn_hmx_dma_desc_2d {
+  uint32_t next;
+  uint32_t dstate_order_bypass_desctype_length;
+  uint32_t src;
+  uint32_t dst;
+  uint32_t allocation;
+  uint32_t roiheight_roiwidth;
+  uint32_t dststride_srcstride;
+  uint32_t dstwidthoffset_srcwidthoffset;
+  uint32_t pad[8];
+};
 
-struct xnn_hmx_qs8_vtcm_context {
+struct xnn_hmx_worker_slot {
+  XNN_ALIGN(64) struct xnn_hmx_dma_desc_2d dma_descs[2][2];
   pthread_mutex_t mutex;
+  uint8_t* vtcm_act0;
+  HVX_Vector* vtcm_wgt;
+  HVX_Vector* vtcm_out;
+  HVX_Vector* vtcm_acc;
+};
+
+#define XNN_HMX_AUTONOMOUS_PREEMPT_MASK (2U | 4U | 8U)
+
+#ifdef HAP_COMPUTE_RES_AUTONOMOUS_PREEMPTION
+typedef compute_res_hmx_mutex_t xnn_hmx_crm_mutex_t;
+#else
+typedef enum {
+  HAP_COMPUTE_RES_PREEMPTION_CAPABILITY = 1,
+} xnn_compute_res_capability_id_t;
+typedef struct {
+  void* mutex;
+  void (*lock)(void* mutex);
+  void (*unlock)(void* mutex);
+} xnn_hmx_crm_mutex_t;
+int __attribute__((weak)) crm_query_capability(
+    xnn_compute_res_capability_id_t capability_id, unsigned int* data);
+int __attribute__((weak)) crm_hmx_lock3(unsigned int context_id,
+                                        compute_res_hmx_type_t type,
+                                        xnn_hmx_crm_mutex_t* mutex,
+                                        unsigned int timeout_us);
+int __attribute__((weak)) crm_hmx_unlock3(unsigned int context_id,
+                                          compute_res_hmx_type_t type,
+                                          xnn_hmx_crm_mutex_t* mutex);
+#endif
+
+enum xnn_hmx_lock_mode {
+  XNN_HMX_LOCK_NONE = 0,
+  XNN_HMX_LOCK_SHARED_V3 = 1,
+  XNN_HMX_LOCK_SHARED_V2 = 2,
+  XNN_HMX_LOCK_SINGLE_THREAD = 3,
+};
+
+struct xnn_hmx_vtcm_context {
+  XNN_ALIGN(128) struct xnn_hmx_worker_slot slots[XNN_HMX_MAX_SLOTS];
+  pthread_mutex_t init_mutex;
+  pthread_mutex_t hmx_exec_mutex;
+  pthread_mutex_t dma_mutex;
   bool initialized;
   bool init_failed;
-  bool shared_lock;
+  enum xnn_hmx_lock_mode lock_mode;
   uint32_t context_id;
   int power_ctx;
   uint8_t* vtcm_base;
   HVX_Vector* vtcm_bias;
-  uint8_t* vtcm_act0;
-  HVX_Vector* vtcm_wgt0;
-  HVX_Vector* vtcm_wgt1;
-  HVX_Vector* vtcm_out;
-  HVX_Vector* vtcm_acc;
+  size_t num_slots;
   size_t max_k_chunk;
-  qurt_thread_t locked_tids[8];
+  void* last_dma_desc;
+  qurt_thread_t locked_tids[64];
+  xnn_hmx_crm_mutex_t locked_crm_mutex[64];
   size_t num_locked_tids;
-  uint32_t last_datatype;
-  const int8_t* last_a;
-  size_t last_a_stride;
-  size_t last_mr;
-  size_t last_kc;
-  size_t last_nc;
-  const void* last_w_start;
-  HVX_Vector last_vbias0[XNN_HMX_MAX_CACHED_PANELS];
-  HVX_Vector last_vbias1[XNN_HMX_MAX_CACHED_PANELS];
-  HVX_Vector last_vscale0[XNN_HMX_MAX_CACHED_PANELS];
-  HVX_Vector last_vscale1[XNN_HMX_MAX_CACHED_PANELS];
 };
 
-__attribute__((weak)) struct xnn_hmx_qs8_vtcm_context xnn_hmx_ctx = {
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+__attribute__((weak)) struct xnn_hmx_vtcm_context xnn_hmx_ctx = {
+    .init_mutex = PTHREAD_MUTEX_INITIALIZER,
+    .hmx_exec_mutex = PTHREAD_MUTEX_INITIALIZER,
+    .dma_mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
-// Must be called with `xnn_hmx_ctx.mutex` held.
-static bool xnn_hmx_lock_thread(void) {
+// Must be called with `xnn_hmx_ctx.init_mutex` held.
+static bool xnn_hmx_lock_thread(xnn_hmx_crm_mutex_t* out_crm_mutex) {
   const qurt_thread_t tid = qurt_thread_get_id();
   for (size_t i = 0; i < xnn_hmx_ctx.num_locked_tids; ++i) {
     if (xnn_hmx_ctx.locked_tids[i] == tid) {
+      *out_crm_mutex = xnn_hmx_ctx.locked_crm_mutex[i];
       return true;
     }
   }
-  if (!xnn_hmx_ctx.shared_lock ||
-      HAP_compute_res_hmx_lock2(xnn_hmx_ctx.context_id,
-                                HAP_COMPUTE_RES_HMX_SHARED) != 0) {
-    return false;
+  xnn_hmx_crm_mutex_t crm_mutex = {0};
+  switch (xnn_hmx_ctx.lock_mode) {
+    case XNN_HMX_LOCK_SHARED_V3:
+      if (crm_hmx_lock3 == NULL ||
+          crm_hmx_lock3(xnn_hmx_ctx.context_id, HAP_COMPUTE_RES_HMX_SHARED,
+                        &crm_mutex, 100000) != 0) {
+        return false;
+      }
+      break;
+    case XNN_HMX_LOCK_SHARED_V2:
+      if (HAP_compute_res_hmx_lock2(xnn_hmx_ctx.context_id,
+                                    HAP_COMPUTE_RES_HMX_SHARED) != 0) {
+        return false;
+      }
+      break;
+    default:
+      return false;
   }
-  if (xnn_hmx_ctx.num_locked_tids < 8) {
-    xnn_hmx_ctx.locked_tids[xnn_hmx_ctx.num_locked_tids++] = tid;
+  if (xnn_hmx_ctx.num_locked_tids < 64) {
+    const size_t idx = xnn_hmx_ctx.num_locked_tids++;
+    xnn_hmx_ctx.locked_tids[idx] = tid;
+    xnn_hmx_ctx.locked_crm_mutex[idx] = crm_mutex;
   }
+  *out_crm_mutex = crm_mutex;
   return true;
 }
 
-// Must be called with `xnn_hmx_ctx.mutex` held.
+// Must be called with `xnn_hmx_ctx.init_mutex` held.
 static bool xnn_init_hmx_vtcm(void) {
   HAP_power_request_t request = {
       .type = HAP_power_set_apptype,
@@ -160,21 +223,47 @@ static bool xnn_init_hmx_vtcm(void) {
   HAP_power_set(&xnn_hmx_ctx.power_ctx, &request);
 
   request = (HAP_power_request_t) {
-      .type = HAP_power_set_DCVS_v2,
-      .dcvs_v2 = {
+      .type = HAP_power_set_DCVS_v3,
+      .dcvs_v3 = {
+          .set_dcvs_enable = 1,
           .dcvs_enable = 1,
           .dcvs_option = HAP_DCVS_V2_PERFORMANCE_MODE,
           .set_latency = 1,
           .latency = 100,
-          .set_dcvs_params = 1,
-          .dcvs_params = {
+          .set_core_params = 1,
+          .core_params = {
               .min_corner = HAP_DCVS_VCORNER_MAX,
               .max_corner = HAP_DCVS_VCORNER_MAX,
               .target_corner = HAP_DCVS_VCORNER_MAX,
           },
+          .set_bus_params = 1,
+          .bus_params = {
+              .min_corner = HAP_DCVS_VCORNER_MAX,
+              .max_corner = HAP_DCVS_VCORNER_MAX,
+              .target_corner = HAP_DCVS_VCORNER_MAX,
+          },
+          .set_sleep_disable = 1,
+          .sleep_disable = HAP_DCVS_LPM_LEVEL1,
       },
   };
-  HAP_power_set(&xnn_hmx_ctx.power_ctx, &request);
+  if (HAP_power_set(&xnn_hmx_ctx.power_ctx, &request) != 0) {
+    request = (HAP_power_request_t) {
+        .type = HAP_power_set_DCVS_v2,
+        .dcvs_v2 = {
+            .dcvs_enable = 1,
+            .dcvs_option = HAP_DCVS_V2_PERFORMANCE_MODE,
+            .set_latency = 1,
+            .latency = 100,
+            .set_dcvs_params = 1,
+            .dcvs_params = {
+                .min_corner = HAP_DCVS_VCORNER_MAX,
+                .max_corner = HAP_DCVS_VCORNER_MAX,
+                .target_corner = HAP_DCVS_VCORNER_MAX,
+            },
+        },
+    };
+    HAP_power_set(&xnn_hmx_ctx.power_ctx, &request);
+  }
 
   request = (HAP_power_request_t) {
       .type = HAP_power_set_HVX,
@@ -187,43 +276,109 @@ static bool xnn_init_hmx_vtcm(void) {
       .hmx.power_up = 1,
   };
   if (HAP_power_set(&xnn_hmx_ctx.power_ctx, &request) != 0) {
+    HAP_power_destroy(&xnn_hmx_ctx.power_ctx);
     return false;
   }
 
-  // VTCM layout for XNN_HMX_MAX_K_CHUNK = 1024 (all sections 2048B-aligned):
-  //   [0 .. 2KB):       bias/scale descriptor (2 KB)
-  //   [2KB .. 66KB):    act0: 32 rows at odd `:cm` pegs, 32 K-tiles (64 KB)
-  //   [66KB .. 194KB):  wgt: up to 16 cached 64-col panels (128 KB)
-  //   [194KB .. 202KB): 4 x 2048B `:cm` readout tiles (8 KB)
-  //   [202KB .. 210KB): 32 x 64 x int32 multi-chunk accumulator (8 KB)
-  const unsigned int required_vtcm_bytes = 224 * 1024;
-  compute_res_attr_t compute_res;
-  HAP_compute_res_attr_init(&compute_res);
-  HAP_compute_res_attr_set_vtcm_param(&compute_res, required_vtcm_bytes, 1);
-  HAP_compute_res_attr_set_hmx_param(&compute_res, 1);
-  xnn_hmx_ctx.context_id = HAP_compute_res_acquire(&compute_res, 100000);
-  if (xnn_hmx_ctx.context_id == 0) {
-    return false;
+  // VTCM layout (all sections 2048B-aligned):
+  //   [0 .. 2KB): shared bias/scale descriptor (2 KB)
+  //   Per worker slot (720 KB each, up to XNN_HMX_MAX_SLOTS = 4 slots):
+  //     [+0KB   .. +576KB): act0: 32 rows at odd `:cm` pegs, up to K=9216
+  //     [+576KB .. +704KB): wgt: 2 x 64KB DMA ping-pong buffers (128 KB)
+  //     [+704KB .. +712KB): out: 4 x 2048B `:cm` readout tiles (8 KB)
+  //     [+712KB .. +720KB): acc: 32 x 64 x int32 multi-chunk accumulator (8 KB)
+  // Pad `compute_res_attr_t` (64B in SDK v5, 160B in SDK v6) so binaries built
+  // against older headers do not overflow stack when run on newer DSP firmware.
+  union {
+    compute_res_attr_t attr;
+    unsigned long long pad[24];
+  } compute_res;
+  size_t acquired_slots = 0;
+  unsigned int acquired_bytes = 0;
+
+  unsigned int preempt_caps = 0;
+  const bool has_auto_preempt =
+      (crm_query_capability != NULL && crm_hmx_lock3 != NULL &&
+       crm_query_capability(HAP_COMPUTE_RES_PREEMPTION_CAPABILITY,
+                            &preempt_caps) == 0 &&
+       (preempt_caps & XNN_HMX_AUTONOMOUS_PREEMPT_MASK) != 0);
+
+  if (has_auto_preempt) {
+    for (size_t s = XNN_HMX_MAX_SLOTS; s >= 1; s >>= 1) {
+      const unsigned int try_bytes =
+          (unsigned int) (4096 + s * XNN_HMX_SLOT_BYTES);
+      memset(&compute_res, 0, sizeof(compute_res));
+      HAP_compute_res_attr_init(&compute_res.attr);
+      HAP_compute_res_attr_set_vtcm_param(&compute_res.attr, try_bytes, 1);
+      xnn_hmx_ctx.context_id =
+          HAP_compute_res_acquire(&compute_res.attr, 100000);
+      if (xnn_hmx_ctx.context_id != 0) {
+        acquired_slots = s;
+        acquired_bytes = try_bytes;
+        break;
+      }
+    }
+    if (xnn_hmx_ctx.context_id != 0) {
+      xnn_hmx_crm_mutex_t crm_mutex = {0};
+      if (crm_hmx_lock3(xnn_hmx_ctx.context_id, HAP_COMPUTE_RES_HMX_SHARED,
+                        &crm_mutex, 100000) == 0) {
+        xnn_hmx_ctx.lock_mode = XNN_HMX_LOCK_SHARED_V3;
+        xnn_hmx_ctx.locked_crm_mutex[0] = crm_mutex;
+      } else {
+        HAP_compute_res_release(xnn_hmx_ctx.context_id);
+        xnn_hmx_ctx.context_id = 0;
+        acquired_slots = 0;
+        acquired_bytes = 0;
+      }
+    }
   }
+
+  if (xnn_hmx_ctx.context_id == 0) {
+    for (size_t s = XNN_HMX_MAX_SLOTS; s >= 1; s >>= 1) {
+      const unsigned int try_bytes =
+          (unsigned int) (4096 + s * XNN_HMX_SLOT_BYTES);
+      memset(&compute_res, 0, sizeof(compute_res));
+      HAP_compute_res_attr_init(&compute_res.attr);
+      HAP_compute_res_attr_set_vtcm_param(&compute_res.attr, try_bytes, 1);
+      HAP_compute_res_attr_set_hmx_param(&compute_res.attr, 1);
+      xnn_hmx_ctx.context_id =
+          HAP_compute_res_acquire(&compute_res.attr, 100000);
+      if (xnn_hmx_ctx.context_id != 0) {
+        acquired_slots = s;
+        acquired_bytes = try_bytes;
+        break;
+      }
+    }
+    if (xnn_hmx_ctx.context_id == 0) {
+      HAP_power_destroy(&xnn_hmx_ctx.power_ctx);
+      return false;
+    }
+    if (HAP_compute_res_hmx_lock2(xnn_hmx_ctx.context_id,
+                                  HAP_COMPUTE_RES_HMX_SHARED) == 0) {
+      xnn_hmx_ctx.lock_mode = XNN_HMX_LOCK_SHARED_V2;
+    } else if (HAP_compute_res_hmx_lock(xnn_hmx_ctx.context_id) == 0) {
+      xnn_hmx_ctx.lock_mode = XNN_HMX_LOCK_SINGLE_THREAD;
+    } else {
+      HAP_compute_res_release(xnn_hmx_ctx.context_id);
+      xnn_hmx_ctx.context_id = 0;
+      HAP_power_destroy(&xnn_hmx_ctx.power_ctx);
+      return false;
+    }
+  }
+
   xnn_hmx_ctx.vtcm_base =
-      (uint8_t*) HAP_compute_res_attr_get_vtcm_ptr(&compute_res);
+      (uint8_t*) HAP_compute_res_attr_get_vtcm_ptr(&compute_res.attr);
   if (xnn_hmx_ctx.vtcm_base == NULL) {
     HAP_compute_res_release(xnn_hmx_ctx.context_id);
     xnn_hmx_ctx.context_id = 0;
-    return false;
-  }
-  if (HAP_compute_res_hmx_lock2(xnn_hmx_ctx.context_id,
-                                HAP_COMPUTE_RES_HMX_SHARED) == 0) {
-    xnn_hmx_ctx.shared_lock = true;
-  } else if (HAP_compute_res_hmx_lock(xnn_hmx_ctx.context_id) != 0) {
-    HAP_compute_res_release(xnn_hmx_ctx.context_id);
-    xnn_hmx_ctx.context_id = 0;
-    xnn_hmx_ctx.vtcm_base = NULL;
+    HAP_power_destroy(&xnn_hmx_ctx.power_ctx);
     return false;
   }
   xnn_hmx_ctx.locked_tids[0] = qurt_thread_get_id();
   xnn_hmx_ctx.num_locked_tids = 1;
-  memset(xnn_hmx_ctx.vtcm_base, 0, required_vtcm_bytes);
+  xnn_hmx_ctx.num_slots =
+      (xnn_hmx_ctx.lock_mode == XNN_HMX_LOCK_SINGLE_THREAD) ? 1 : acquired_slots;
+  memset(xnn_hmx_ctx.vtcm_base, 0, acquired_bytes);
 
   qurt_arch_version_t arch = {0};
   const unsigned int arch_version =
@@ -233,15 +388,19 @@ static bool xnn_init_hmx_vtcm(void) {
   xnn_hmx_ctx.max_k_chunk = arch_version >= 0x81 ? XNN_HMX_MAX_K_CHUNK
                                                  : XNN_HMX_MAX_K_CHUNK / 2;
 
-  uintptr_t vtcm_aligned =
+  const uintptr_t vtcm_aligned =
       ((uintptr_t) xnn_hmx_ctx.vtcm_base + 2047) & ~(uintptr_t) 2047;
   xnn_hmx_ctx.vtcm_bias = (HVX_Vector*) vtcm_aligned;
-  xnn_hmx_ctx.vtcm_act0 = (uint8_t*) (vtcm_aligned + 2048);
-  xnn_hmx_ctx.vtcm_wgt0 = (HVX_Vector*) (vtcm_aligned + 2048 + 65536);
-  xnn_hmx_ctx.vtcm_wgt1 = (HVX_Vector*) (vtcm_aligned + 2048 + 65536 + 65536);
-  xnn_hmx_ctx.vtcm_out = (HVX_Vector*) (vtcm_aligned + 2048 + 65536 + 131072);
-  xnn_hmx_ctx.vtcm_acc =
-      (HVX_Vector*) (vtcm_aligned + 2048 + 65536 + 131072 + 8192);
+  for (size_t i = 0; i < xnn_hmx_ctx.num_slots; ++i) {
+    pthread_mutex_init(&xnn_hmx_ctx.slots[i].mutex, NULL);
+    const uintptr_t slot_base = vtcm_aligned + 2048 + i * XNN_HMX_SLOT_BYTES;
+    xnn_hmx_ctx.slots[i].vtcm_act0 = (uint8_t*) slot_base;
+    xnn_hmx_ctx.slots[i].vtcm_wgt = (HVX_Vector*) (slot_base + 589824);
+    xnn_hmx_ctx.slots[i].vtcm_out =
+        (HVX_Vector*) (slot_base + 589824 + 131072);
+    xnn_hmx_ctx.slots[i].vtcm_acc =
+        (HVX_Vector*) (slot_base + 589824 + 131072 + 8192);
+  }
 
   // Area 0 uses S = 16 (16 << 10 = 0x4000) to extract bits [15:0] via
   // `cvt.uh:2x1`, and Area 1 uses S = 8 (8 << 10 = 0x2000) to extract bits
@@ -253,6 +412,56 @@ static bool xnn_init_hmx_vtcm(void) {
   xnn_hmx_ctx.initialized = true;
   return true;
 }
+
+__attribute__((destructor)) static void xnn_deinit_hmx_vtcm(void) {
+  if (!xnn_hmx_ctx.initialized && !xnn_hmx_ctx.init_failed) {
+    return;
+  }
+  const bool was_initialized = xnn_hmx_ctx.initialized;
+  xnn_hmx_ctx.initialized = false;
+  xnn_hmx_ctx.init_failed = false;
+  if (was_initialized) {
+    if (xnn_hmx_ctx.last_dma_desc != NULL) {
+      uint32_t dummy = 0;
+      __asm__ __volatile__("%0 = dmwait" : "=r"(dummy) : : "memory");
+      xnn_hmx_ctx.last_dma_desc = NULL;
+    }
+    if (xnn_hmx_ctx.num_locked_tids > 0 &&
+        xnn_hmx_ctx.locked_tids[0] == qurt_thread_get_id()) {
+      switch (xnn_hmx_ctx.lock_mode) {
+        case XNN_HMX_LOCK_SHARED_V3:
+          if (crm_hmx_unlock3 != NULL) {
+            crm_hmx_unlock3(xnn_hmx_ctx.context_id, HAP_COMPUTE_RES_HMX_SHARED,
+                            &xnn_hmx_ctx.locked_crm_mutex[0]);
+          }
+          break;
+        case XNN_HMX_LOCK_SHARED_V2:
+          HAP_compute_res_hmx_unlock2(xnn_hmx_ctx.context_id,
+                                      HAP_COMPUTE_RES_HMX_SHARED);
+          break;
+        case XNN_HMX_LOCK_SINGLE_THREAD:
+          HAP_compute_res_hmx_unlock(xnn_hmx_ctx.context_id);
+          break;
+        default:
+          break;
+      }
+    }
+    if (xnn_hmx_ctx.context_id != 0) {
+      HAP_compute_res_release(xnn_hmx_ctx.context_id);
+      xnn_hmx_ctx.context_id = 0;
+    }
+    HAP_power_destroy(&xnn_hmx_ctx.power_ctx);
+    for (size_t i = 0; i < xnn_hmx_ctx.num_slots; ++i) {
+      pthread_mutex_destroy(&xnn_hmx_ctx.slots[i].mutex);
+    }
+    xnn_hmx_ctx.num_slots = 0;
+    xnn_hmx_ctx.num_locked_tids = 0;
+  }
+  pthread_mutex_destroy(&xnn_hmx_ctx.dma_mutex);
+  pthread_mutex_destroy(&xnn_hmx_ctx.hmx_exec_mutex);
+  pthread_mutex_destroy(&xnn_hmx_ctx.init_mutex);
+}
+
 
 // Pack up to 32 activation rows [0 .. m_count) into the 32 odd `:cm` spatial
 // pegs (2*r + 1) of a 64-peg 2048B tile in `vtcm_act`, leaving the 32 even pegs
@@ -424,7 +633,6 @@ static XNN_INLINE void xnn_unpack_hmx_i24_2rows(const HVX_Vector* out_lo16,
 }
 
 #endif  // __HEXAGON_ARCH__ >= 73
-
 #if __HVX_ARCH__ < 73
 static HVX_Vector xnn_rescale_fp32(HVX_Vector vacc, HVX_Vector vscale) {
   XNN_ALIGN(128) int32_t vacc_buffer[32];
@@ -457,7 +665,7 @@ static XNN_INLINE void xnn_requantize_and_store_row_qs8(
   const HVX_Vector vpack_h = Q6_Vh_vpack_VwVw_sat(vacc1, vacc0);
 #elif __HVX_ARCH__ >= 73
   // On HVX v73-v79, `Vqf32` has a 24-bit signed 2's complement mantissa (23
-  // magnitude bits), so using `vmagic_bias = 6291456.0f` (`1.5 * 2^22`,
+  // magnitude bits), so using `vmagic_bias = 6291456.5f` (`1.5 * 2^22`,
   // `0x4AC00000`) places the ULP at 1.0 in `Vqf32` for exact round-to-nearest-
   // even rounding; converting back to 24-bit IEEE-754 `Vsf` shifts the integer
   // left by 1 bit (`0x4AC00000 + (N << 1)`).
@@ -495,19 +703,19 @@ static void xnn_qs8_qc4w_gemm_minmax_hvx_fallback(
     size_t cn_stride,
     const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
   kc = round_up_po2(kc, 4);
-#if __HVX_ARCH__ >= 81
+  #if __HVX_ARCH__ >= 81
   const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
       INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
-#elif __HVX_ARCH__ >= 73
+  #elif __HVX_ARCH__ >= 73
   const HVX_Vector vmagic_bias = xnn_set1_f32(6291456.5f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
       INT32_C(0x25600000) - (int32_t) params->fp32_scalar.output_zero_point);
-#else
+  #else
   const HVX_Vector vmagic_bias = Q6_V_vzero();
   const HVX_Vector vmagic_bias_less_zero_point =
       Q6_Vh_vsplat_R(params->fp32_scalar.output_zero_point);
-#endif
+  #endif
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
   const HVX_Vector vmask = Q6_Vb_vsplat_R(0xF0);
@@ -582,30 +790,62 @@ static void xnn_qs8_qc4w_gemm_minmax_hvx_fallback(
 
 #if __HEXAGON_ARCH__ >= 73
 
-// Must be called with `xnn_hmx_ctx.mutex` held and the HMX lock taken by this
+static XNN_INLINE void xnn_hmx_exec_panel_n(
+    const xnn_hmx_crm_mutex_t* crm_mutex, bool hmx_already_held,
+    const uint8_t* vtcm_act0, uint32_t act_ctrl, const HVX_Vector* cur_wgt0,
+    const HVX_Vector* cur_wgt1, uint32_t wgt_ctrl, HVX_Vector* vtcm_out,
+    const HVX_Vector* vtcm_bias, size_t step_nc) {
+  if XNN_UNLIKELY(!hmx_already_held) {
+    pthread_mutex_lock(&xnn_hmx_ctx.hmx_exec_mutex);
+    if (crm_mutex->lock != NULL) {
+      crm_mutex->lock(crm_mutex->mutex);
+    }
+  }
+  xnn_hmx_tile_clear();
+  xnn_hmx_mpy_ub_cm_n(vtcm_act0, act_ctrl, cur_wgt0, wgt_ctrl);
+  xnn_hmx_store_cvt_i24_cm(&vtcm_out[0], &vtcm_out[16], &vtcm_bias[0],
+                           &vtcm_bias[1]);
+  if (step_nc > 32) {
+    xnn_hmx_tile_clear();
+    xnn_hmx_mpy_ub_cm_n(vtcm_act0, act_ctrl, cur_wgt1, wgt_ctrl);
+    xnn_hmx_store_cvt_i24_cm(&vtcm_out[32], &vtcm_out[48], &vtcm_bias[0],
+                             &vtcm_bias[1]);
+    xnn_hvx_vtcm_fence(&vtcm_out[48]);
+  } else {
+    xnn_hvx_vtcm_fence(&vtcm_out[16]);
+  }
+  if XNN_UNLIKELY(!hmx_already_held) {
+    if (crm_mutex->unlock != NULL) {
+      crm_mutex->unlock(crm_mutex->mutex);
+    }
+    pthread_mutex_unlock(&xnn_hmx_ctx.hmx_exec_mutex);
+  }
+}
+
+// Must be called with `slot->mutex` held and the HMX lock registered for this
 // thread.
-static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
-    size_t mr, size_t nc, size_t kc, const int8_t* restrict a, size_t a_stride,
-    const void* restrict w, int8_t* restrict c, size_t cm_stride,
-    size_t cn_stride,
+static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_impl(
+    struct xnn_hmx_worker_slot* slot, const xnn_hmx_crm_mutex_t* crm_mutex,
+    bool hmx_already_held, size_t mr, size_t nc, size_t kc,
+    const int8_t* restrict a, size_t a_stride, const void* restrict w,
+    int8_t* restrict c, size_t cm_stride, size_t cn_stride,
     const union xnn_qs8_qc8w_conv_minmax_params* restrict params) {
   const size_t k_chunk_max = xnn_hmx_ctx.max_k_chunk;
-  HVX_Vector* vtcm_bias = xnn_hmx_ctx.vtcm_bias;
-  uint8_t* vtcm_act0 = xnn_hmx_ctx.vtcm_act0;
-  HVX_Vector* vtcm_wgt0 = xnn_hmx_ctx.vtcm_wgt0;
-  HVX_Vector* vtcm_wgt1 = xnn_hmx_ctx.vtcm_wgt1;
-  HVX_Vector* vtcm_out = xnn_hmx_ctx.vtcm_out;
-  HVX_Vector* vtcm_acc = xnn_hmx_ctx.vtcm_acc;
+  const HVX_Vector* vtcm_bias = xnn_hmx_ctx.vtcm_bias;
+  uint8_t* vtcm_act0 = slot->vtcm_act0;
+  HVX_Vector* vtcm_wgt = slot->vtcm_wgt;
+  HVX_Vector* vtcm_out = slot->vtcm_out;
+  HVX_Vector* vtcm_acc = slot->vtcm_acc;
 
-#if __HVX_ARCH__ >= 81
+  #if __HVX_ARCH__ >= 81
   const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
       INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
-#else
+  #else
   const HVX_Vector vmagic_bias = xnn_set1_f32(6291456.5f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(
       INT32_C(0x25600000) - (int32_t) params->fp32_scalar.output_zero_point);
-#endif
+  #endif
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
 
@@ -615,99 +855,45 @@ static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
   if (kc <= k_chunk_max) {
     const size_t num_k_tiles = (kc + 31) >> 5;
     const uint32_t act_ctrl = (uint32_t) (num_k_tiles * 2048) - 1;
-    const uint32_t wgt_ctrl = (uint32_t) (num_k_tiles * 512) - 1;
+    const uint32_t wgt_ctrl =
+        (uint32_t) (num_k_tiles * 512) - 1;
     const uint32_t panel_rows_256B =
         (uint32_t) ((round_up_po2(kc, 8) >> 3) + 2);
     const size_t panel_bytes = (size_t) panel_rows_256B * 256;
     const size_t half_panel_vecs =
         (num_k_tiles * 4 + 15) & ~(size_t) 15;
-    const size_t panel_vecs = 2 * half_panel_vecs;
-    const size_t max_cached_panels =
-        min((size_t) XNN_HMX_MAX_CACHED_PANELS, (size_t) 1024 / panel_vecs);
-    const size_t orig_nc = nc;
-    const size_t num_panels = (orig_nc + 63) >> 6;
-    const bool can_cache_all_panels = (num_panels <= max_cached_panels);
-    const void* const w_start = w;
-    const uintptr_t w_delta =
-        (uintptr_t) w - (uintptr_t) xnn_hmx_ctx.last_w_start;
-    const uintptr_t a_delta = (uintptr_t) a - (uintptr_t) xnn_hmx_ctx.last_a;
-    const bool same_dtype = (xnn_hmx_ctx.last_datatype == 1);
-    const bool reuse_act =
-        (same_dtype && a == xnn_hmx_ctx.last_a &&
-         a_stride == xnn_hmx_ctx.last_a_stride && mr == xnn_hmx_ctx.last_mr &&
-         kc == xnn_hmx_ctx.last_kc && w_delta > 0 && w_delta <= panel_bytes);
-    const bool reuse_wgt =
-        (same_dtype && can_cache_all_panels &&
-         orig_nc == xnn_hmx_ctx.last_nc && w == xnn_hmx_ctx.last_w_start &&
-         kc == xnn_hmx_ctx.last_kc && a_stride == xnn_hmx_ctx.last_a_stride &&
-         a_delta > 0 && a_delta == xnn_hmx_ctx.last_mr * a_stride);
-    xnn_hmx_ctx.last_datatype = 1;
 
-    if (!reuse_wgt) {
-      l2fetch_2d(w, 256, 256, panel_rows_256B);
-    }
-    if (!reuse_act) {
-      xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
-                                        /*k_offset=*/0, kc);
-      xnn_hmx_ctx.last_a = a;
-      xnn_hmx_ctx.last_a_stride = a_stride;
-      xnn_hmx_ctx.last_mr = mr;
-      xnn_hmx_ctx.last_kc = kc;
-    }
+    l2fetch_2d(w, 256, 256, panel_rows_256B);
+    xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+                                      /*k_offset=*/0, kc);
     xnn_hvx_vtcm_fence((HVX_Vector*) &vtcm_act0[num_k_tiles * 2048 - 128]);
 
-    size_t panel_idx = 0;
+    HVX_Vector* const cur_wgt0 = vtcm_wgt;
+    HVX_Vector* const cur_wgt1 = cur_wgt0 + half_panel_vecs;
     do {
       const size_t step_nc = min(nc, 64);
-      const size_t slot = can_cache_all_panels ? panel_idx : 0;
-      HVX_Vector* const cur_wgt0 = vtcm_wgt0 + slot * panel_vecs;
-      HVX_Vector* const cur_wgt1 = cur_wgt0 + half_panel_vecs;
-
-      HVX_Vector vbias0, vbias1, vscale0, vscale1;
-      if (reuse_wgt) {
-        vbias0 = xnn_hmx_ctx.last_vbias0[panel_idx];
-        vbias1 = xnn_hmx_ctx.last_vbias1[panel_idx];
-        vscale0 = xnn_hmx_ctx.last_vscale0[panel_idx];
-        vscale1 = xnn_hmx_ctx.last_vscale1[panel_idx];
-      } else {
-        if (nc > 64) {
-          l2fetch_2d((const uint8_t*) w + panel_bytes, 256, 256,
-                     panel_rows_256B);
-        }
-        const HVX_Vector vpacked_b0 = *((const HVX_UVector*) w);
-        const HVX_Vector vpacked_b1 =
-            *((const HVX_UVector*) ((const int32_t*) w + 32));
-        w = (const int32_t*) w + 64;
-
-        vbias0 = Q6_Vw_vasr_VwR(vpacked_b0, 4);
-        vbias1 = Q6_Vw_vasr_VwR(vpacked_b1, 4);
-        w = xnn_pack_wgt_to_hmx_1x(cur_wgt0, cur_wgt1, w, kc, &vbias0,
-                                   &vbias1);
-        xnn_hvx_vtcm_fence(&cur_wgt1[num_k_tiles * 4 - 1]);
-
-        vscale0 = *((const HVX_UVector*) w);
-        vscale1 = *((const HVX_UVector*) ((const float*) w + 32));
-        w = (const float*) w + 64;
-
-        if (can_cache_all_panels) {
-          xnn_hmx_ctx.last_vbias0[panel_idx] = vbias0;
-          xnn_hmx_ctx.last_vbias1[panel_idx] = vbias1;
-          xnn_hmx_ctx.last_vscale0[panel_idx] = vscale0;
-          xnn_hmx_ctx.last_vscale1[panel_idx] = vscale1;
-        }
+      if (nc > 64) {
+        l2fetch_2d((const uint8_t*) w + panel_bytes, 256, 256,
+                   panel_rows_256B);
       }
+      const HVX_Vector vpacked_b0 = *((const HVX_UVector*) w);
+      const HVX_Vector vpacked_b1 =
+          *((const HVX_UVector*) ((const int32_t*) w + 32));
+      w = (const int32_t*) w + 64;
 
-      xnn_hmx_tile_clear();
-      xnn_hmx_mpy_ub_cm_n(vtcm_act0, act_ctrl, cur_wgt0, wgt_ctrl);
-      xnn_hmx_store_cvt_i24_cm(&vtcm_out[0], &vtcm_out[16], &vtcm_bias[0],
-                               &vtcm_bias[1]);
+      HVX_Vector vbias0 = Q6_Vw_vasr_VwR(vpacked_b0, 4);
+      HVX_Vector vbias1 = Q6_Vw_vasr_VwR(vpacked_b1, 4);
+      w = xnn_pack_wgt_to_hmx_1x(cur_wgt0, cur_wgt1, w, kc, &vbias0, &vbias1);
+      xnn_hvx_vtcm_fence(&cur_wgt1[num_k_tiles * 4 - 1]);
 
-      if (step_nc > 32) {
-        xnn_hmx_tile_clear();
-        xnn_hmx_mpy_ub_cm_n(vtcm_act0, act_ctrl, cur_wgt1, wgt_ctrl);
-        xnn_hmx_store_cvt_i24_cm(&vtcm_out[32], &vtcm_out[48], &vtcm_bias[0],
-                                 &vtcm_bias[1]);
-      }
+      const HVX_Vector vscale0 = *((const HVX_UVector*) w);
+      const HVX_Vector vscale1 =
+          *((const HVX_UVector*) ((const float*) w + 32));
+      w = (const float*) w + 64;
+
+      xnn_hmx_exec_panel_n(crm_mutex, hmx_already_held, vtcm_act0,
+                                       act_ctrl, cur_wgt0, cur_wgt1, wgt_ctrl,
+                                       vtcm_out, vtcm_bias, step_nc);
 
       for (size_t v = 0; v < num_v; ++v) {
         HVX_Vector vacc0_0, vacc0_1;
@@ -735,18 +921,23 @@ static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
 
       c = (int8_t*) ((uintptr_t) c + cn_stride);
       nc = (nc > 64) ? (nc - 64) : 0;
-      ++panel_idx;
     } while (nc != 0);
-    if (can_cache_all_panels) {
-      xnn_hmx_ctx.last_w_start = w_start;
-      xnn_hmx_ctx.last_nc = orig_nc;
-    } else {
-      xnn_hmx_ctx.last_w_start = NULL;
-      xnn_hmx_ctx.last_nc = 0;
-    }
   } else {
-    xnn_hmx_ctx.last_w_start = NULL;
-    xnn_hmx_ctx.last_nc = 0;
+    const bool prepack_all_act = (kc <= XNN_HMX_MAX_ACT_K);
+    if (prepack_all_act) {
+      size_t last_fence_bytes = 0;
+      for (size_t k_offset = 0; k_offset < kc; k_offset += k_chunk_max) {
+        const size_t chunk_k = min(kc - k_offset, k_chunk_max);
+        const size_t chunk_tiles = (chunk_k + 31) >> 5;
+        xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0 + k_offset * 64, a,
+                                          a_stride, mr, k_offset, chunk_k);
+        last_fence_bytes = k_offset * 64 + chunk_tiles * 2048;
+      }
+      xnn_hvx_vtcm_fence((HVX_Vector*) &vtcm_act0[last_fence_bytes - 128]);
+    }
+
+    HVX_Vector* const vtcm_wgt0 = vtcm_wgt;
+    HVX_Vector* const vtcm_wgt1 = vtcm_wgt + 256;
     do {
       const size_t step_nc = min(nc, 64);
       const HVX_Vector vpacked_b0 = *((const HVX_UVector*) w);
@@ -764,23 +955,23 @@ static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
         const uint32_t wgt_ctrl =
             (uint32_t) (chunk_tiles * 512) - 1;
 
-        xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr, k_offset,
-                                          chunk_k);
+        const uint8_t* chunk_act0 = vtcm_act0;
+        if (prepack_all_act) {
+          chunk_act0 = vtcm_act0 + k_offset * 64;
+        } else {
+          xnn_pack_act_qs8_to_qu8_cm_32rows(vtcm_act0, a, a_stride, mr,
+                                            k_offset, chunk_k);
+          xnn_hvx_vtcm_fence(
+              (HVX_Vector*) &vtcm_act0[chunk_tiles * 2048 - 128]);
+        }
         w = xnn_pack_wgt_to_hmx_1x(vtcm_wgt0, vtcm_wgt1, w, chunk_k, &vbias0,
                                    &vbias1);
         xnn_hvx_vtcm_fence(&vtcm_wgt1[chunk_tiles * 4 - 1]);
 
-        xnn_hmx_tile_clear();
-        xnn_hmx_mpy_ub_cm_n(vtcm_act0, act_ctrl, vtcm_wgt0, wgt_ctrl);
-        xnn_hmx_store_cvt_i24_cm(&vtcm_out[0], &vtcm_out[16], &vtcm_bias[0],
-                                 &vtcm_bias[1]);
-
-        if (step_nc > 32) {
-          xnn_hmx_tile_clear();
-          xnn_hmx_mpy_ub_cm_n(vtcm_act0, act_ctrl, vtcm_wgt1, wgt_ctrl);
-          xnn_hmx_store_cvt_i24_cm(&vtcm_out[32], &vtcm_out[48], &vtcm_bias[0],
-                                   &vtcm_bias[1]);
-        }
+        xnn_hmx_exec_panel_n(crm_mutex, hmx_already_held,
+                                         chunk_act0, act_ctrl, vtcm_wgt0,
+                                         vtcm_wgt1, wgt_ctrl, vtcm_out,
+                                         vtcm_bias, step_nc);
 
         for (size_t v = 0; v < num_v; ++v) {
           HVX_Vector vacc0_0, vacc0_1;
@@ -788,8 +979,8 @@ static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
           xnn_unpack_hmx_i24_2rows(&vtcm_out[0], &vtcm_out[16], v, &vacc0_0,
                                    &vacc0_1);
           if (step_nc > 32) {
-            xnn_unpack_hmx_i24_2rows(&vtcm_out[32], &vtcm_out[48], v, &vacc1_0,
-                                     &vacc1_1);
+            xnn_unpack_hmx_i24_2rows(&vtcm_out[32], &vtcm_out[48], v,
+                                     &vacc1_0, &vacc1_1);
           }
           HVX_Vector* acc_ptr = &vtcm_acc[v * 4];
           if (k_offset == 0) {
@@ -813,8 +1004,10 @@ static void xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
 
       for (size_t m = 0; m < mr; ++m) {
         int8_t* c_row = (int8_t*) ((uintptr_t) c + m * cm_stride);
-        const HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 0], vbias0);
-        const HVX_Vector vacc1 = Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 1], vbias1);
+        const HVX_Vector vacc0 =
+            Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 0], vbias0);
+        const HVX_Vector vacc1 =
+            Q6_Vw_vadd_VwVw(vtcm_acc[m * 2 + 1], vbias1);
         xnn_requantize_and_store_row_qs8(
             c_row, step_nc, vacc0, vacc1, vscale0, vscale1, vmagic_bias,
             vmagic_bias_less_zero_point, voutput_min, voutput_max);
@@ -842,23 +1035,54 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_32x64c4__hmx(
   assert(c != NULL);
 
 #if __HEXAGON_ARCH__ >= 73
-  pthread_mutex_lock(&xnn_hmx_ctx.mutex);
+  xnn_hmx_crm_mutex_t crm_mutex = {0};
+  pthread_mutex_lock(&xnn_hmx_ctx.init_mutex);
   if XNN_UNLIKELY(!xnn_hmx_ctx.initialized && !xnn_hmx_ctx.init_failed) {
     xnn_hmx_ctx.init_failed = !xnn_init_hmx_vtcm();
   }
-  const bool hmx_ready = xnn_hmx_ctx.initialized && xnn_hmx_lock_thread();
-  if XNN_LIKELY(hmx_ready) {
-    xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_locked(
-        mr, nc, kc, a, a_stride, w, c, cm_stride, cn_stride, params);
-  }
-  pthread_mutex_unlock(&xnn_hmx_ctx.mutex);
+  const bool hmx_ready =
+      xnn_hmx_ctx.initialized && xnn_hmx_lock_thread(&crm_mutex);
+  const bool hold_hmx_outer = (xnn_hmx_ctx.num_locked_tids <= 1);
+  pthread_mutex_unlock(&xnn_hmx_ctx.init_mutex);
 
-  if XNN_UNLIKELY(!hmx_ready) {
-    xnn_qs8_qc4w_gemm_minmax_hvx_fallback(mr, nc, kc, a, a_stride, w, c,
-                                                  cm_stride, cn_stride, params);
+  if XNN_LIKELY(hmx_ready) {
+    const size_t num_slots = xnn_hmx_ctx.num_slots;
+    const size_t start_slot = ((size_t) qurt_thread_get_id()) % num_slots;
+    size_t slot_idx = start_slot;
+    bool acquired = false;
+    for (size_t i = 0; i < num_slots; ++i) {
+      const size_t try_idx = (start_slot + i) % num_slots;
+      if (pthread_mutex_trylock(&xnn_hmx_ctx.slots[try_idx].mutex) == 0) {
+        slot_idx = try_idx;
+        acquired = true;
+        break;
+      }
+    }
+    if (!acquired) {
+      pthread_mutex_lock(&xnn_hmx_ctx.slots[slot_idx].mutex);
+    }
+    if XNN_LIKELY(hold_hmx_outer) {
+      pthread_mutex_lock(&xnn_hmx_ctx.hmx_exec_mutex);
+      if (crm_mutex.lock != NULL) {
+        crm_mutex.lock(crm_mutex.mutex);
+      }
+    }
+    xnn_qs8_qc4w_gemm_minmax_32x64c4__hmx_impl(
+        &xnn_hmx_ctx.slots[slot_idx], &crm_mutex, hold_hmx_outer, mr, nc, kc, a,
+        a_stride, w, c, cm_stride, cn_stride,
+        params);
+    if XNN_LIKELY(hold_hmx_outer) {
+      if (crm_mutex.unlock != NULL) {
+        crm_mutex.unlock(crm_mutex.mutex);
+      }
+      pthread_mutex_unlock(&xnn_hmx_ctx.hmx_exec_mutex);
+    }
+    pthread_mutex_unlock(&xnn_hmx_ctx.slots[slot_idx].mutex);
+    return;
   }
-#else
-  xnn_qs8_qc4w_gemm_minmax_hvx_fallback(mr, nc, kc, a, a_stride, w, c,
-                                                cm_stride, cn_stride, params);
 #endif  // __HEXAGON_ARCH__ >= 73
+
+  xnn_qs8_qc4w_gemm_minmax_hvx_fallback(
+      mr, nc, kc, a, a_stride, w, c, cm_stride, cn_stride,
+      params);
 }

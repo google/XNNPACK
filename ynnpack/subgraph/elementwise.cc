@@ -135,11 +135,12 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     using slinky::index_t;
 
     index_t n_extent = 1;
-    // These are intentionally left uninitialized, if the extent is 1 they
-    // should be unused.
-    index_t b_offset_n_stride, b_scale_n_stride, offset_n_stride;
-    if (is_contiguous(dot, 0, dot.elem_size) &&
-        is_broadcast(a_offset, 0) && is_broadcast(a_scale, 0)) {
+    index_t b_offset_n_stride = 0;
+    index_t b_scale_n_stride = 0;
+    index_t offset_n_stride = 0;
+    if (same_bounds(output.dim(0), dot.dim(0)) &&
+        is_contiguous(dot, 0, dot.elem_size) && is_broadcast(a_offset, 0) &&
+        is_broadcast(a_scale, 0)) {
       const slinky::dim& n = slice_dim0(output);
       assert(is_contiguous(n, output.elem_size));
       const slinky::in_bounds n_min{n.min()};
@@ -154,9 +155,10 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     }
 
     index_t m_extent = 1;
-    // These are intentionally left uninitialized, if the extent is 1 they
-    // should be unused.
-    index_t m_stride, dot_m_stride, a_offset_m_stride, a_scale_m_stride;
+    index_t m_stride = 0;
+    index_t dot_m_stride = 0;
+    index_t a_offset_m_stride = 0;
+    index_t a_scale_m_stride = 0;
     if (is_broadcast(b_offset, 0) && is_broadcast(b_scale, 0) &&
         is_broadcast(offset, 0)) {
       const slinky::dim& m = slice_dim0(output);
@@ -226,10 +228,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   auto sched = runtime.make_schedule(
       dims, x.physical_extents(), x.buffer->elem_size());
 
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-
-  runtime.funcs.push_back(std::move(func));
+  runtime.funcs.push_back({std::move(func), std::move(sched)});
   return ynn_status_success;
 }
 
@@ -266,9 +265,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
 
   auto sched =
       runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-  runtime.funcs.push_back(std::move(func));
+  runtime.funcs.push_back({std::move(func), std::move(sched)});
 
   return ynn_status_success;
 }
@@ -312,9 +309,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
 
   auto sched =
       runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-  runtime.funcs.push_back(std::move(func));
+  runtime.funcs.push_back({std::move(func), std::move(sched)});
 
   return ynn_status_success;
 }
@@ -386,16 +381,15 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  const ynn_value& dot = subgraph.value(dot_id);
   ynn_value& output = subgraph.get_output_value(&output_id, output_type);
-
-  // Propagate shape from dot.
-  output.extents = dot.extents;
+  output.extents.clear();
 
   node.inputs = {dot_id,     a_offset_id, b_offset_id,
                  a_scale_id, b_scale_id,  offset_id};
   node.outputs = {output_id};
   node.op = ynn_node::dequantize_dot{params};
+  node.checks.clear();
+  infer_shape(node, subgraph);
 
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dequantize_dot& op =
@@ -415,29 +409,27 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
 
-    slinky::box_expr bounds;
-    for (size_t i = 0; i < dims.size(); ++i) {
-      bounds.push_back(slinky::point(dims[i]));
-    }
+    auto make_bounds = [&](const ynn_runtime_value& v) {
+      slinky::box_expr b = make_elementwise_bounds(dims, v.physical_extents());
+      b.resize(v.rank(), slinky::point(0));
+      return b;
+    };
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "dequantize_dot";
     attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
     auto func = slinky::func::make(make_dequantize_dot_impl(kernel, op.params),
-                                   {{dot.buffer, bounds},
-                                    {a_offset.buffer, bounds},
-                                    {b_offset.buffer, bounds},
-                                    {a_scale.buffer, bounds},
-                                    {b_scale.buffer, bounds},
-                                    {offset.buffer, bounds}},
+                                   {{dot.buffer, make_bounds(dot)},
+                                    {a_offset.buffer, make_bounds(a_offset)},
+                                    {b_offset.buffer, make_bounds(b_offset)},
+                                    {a_scale.buffer, make_bounds(a_scale)},
+                                    {b_scale.buffer, make_bounds(b_scale)},
+                                    {offset.buffer, make_bounds(offset)}},
                                    {{output.buffer, dims}}, std::move(attrs));
 
     auto sched = runtime.make_schedule(dims, output.physical_extents(),
                                        output.buffer->elem_size());
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
-    runtime.funcs.push_back(std::move(func));
+    runtime.funcs.push_back({std::move(func), std::move(sched)});
     return ynn_status_success;
   };
   return true;

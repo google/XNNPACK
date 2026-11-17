@@ -35,6 +35,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vadd_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vadd_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vadd_config();
         case xnn_datatype_qint8:
           return xnn_init_qs8_vadd_config();
         case xnn_datatype_quint8:
@@ -48,6 +50,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vsub_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vsub_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vsub_config();
         case xnn_datatype_qint8:
           *sign_b = -1;
           return xnn_init_qs8_vadd_config();
@@ -63,6 +67,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vmul_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vmul_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vmul_config();
         case xnn_datatype_qint8:
           return xnn_init_qs8_vmul_config();
         case xnn_datatype_quint8:
@@ -76,6 +82,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vdiv_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vdiv_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vdiv_config();
         default:
           return NULL;
       }
@@ -85,6 +93,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vmax_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vmax_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vmax_config();
         default:
           return NULL;
       }
@@ -94,6 +104,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vmin_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vmin_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vmin_config();
         default:
           return NULL;
       }
@@ -110,6 +122,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vsqrdiff_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vsqrdiff_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vsqrdiff_config();
         default:
           return NULL;
       }
@@ -119,6 +133,8 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vprelu_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vprelu_config();
+        case xnn_datatype_bf16:
+          return xnn_init_bf16_vprelu_config();
         case xnn_datatype_qint8:
           return xnn_init_qs8_vprelu_config();
         case xnn_datatype_quint8:

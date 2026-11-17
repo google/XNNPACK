@@ -88,11 +88,9 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
         auto func = slinky::func::make_copy(std::move(func_input),
                                             {output.buffer, dims});
 
-        auto sched = std::make_unique<ynn::scheduling_info>();
-        sched->force_root = true;
-        func.user_data() = sched.get();
-        runtime.scheduling_info_storage.push_back(std::move(sched));
-        runtime.funcs.push_back(std::move(func));
+        ynn::scheduling_info sched;
+        sched.force_root = true;
+        runtime.funcs.push_back({std::move(func), std::move(sched)});
       }
       offset += delta;
     }

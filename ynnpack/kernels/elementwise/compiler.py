@@ -1642,14 +1642,16 @@ class Target:
       if not b.is_const:
         continue
 
+      # Sub-byte elements are packed into bytes.
+      elem_size = b.ty.size // 8 if b.ty.size >= 8 else 1
       assert_body = ""
       if b.broadcast_mode == BroadcastMode.ALWAYS:
         assert_body = f"stride_{b.name}_n == 0"
       elif b.broadcast_mode == BroadcastMode.NONE:
-        assert_body = f"stride_{b.name}_n == {b.ty.size // 8}"
+        assert_body = f"stride_{b.name}_n == {elem_size}"
       else:
         assert_body = (
-            f"stride_{b.name}_n == 0 || stride_{b.name}_n == {b.ty.size // 8}"
+            f"stride_{b.name}_n == 0 || stride_{b.name}_n == {elem_size}"
         )
       self.result += f"{self.indent()}assert({assert_body} || n == 1);\n"
 
