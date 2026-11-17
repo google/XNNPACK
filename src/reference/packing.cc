@@ -1566,11 +1566,11 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
   } while (--g != 0);
 }
 
-void xnn_pack_qs8_qc4w_gemm_gio_w(
+static void pack_qs8_qc4w_gemm_gio_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     size_t k_stride, const uint8_t* k, const int32_t* b, const float* scale,
-    void* packed_weights, size_t extra_bytes,
-    const struct xnn_qs8_qc4w_packing_params* params) {
+    void* packed_weights, size_t extra_bytes, uint32_t izp,
+    uint32_t kernel_zero_point) {
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
@@ -1579,12 +1579,9 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
   assert(sr >= 1 && sr <= 16);
   assert(k != nullptr);
   assert(packed_weights != nullptr);
-  assert(params != nullptr);
-  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+  assert(kernel_zero_point == 8 || kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
-  const uint32_t izp = (uint32_t)params->input_zero_point;
-  const uint32_t kernel_zero_point = (uint32_t)params->kernel_zero_point;
   do {
     size_t nr_block_start = 0;
     do {
@@ -1664,6 +1661,30 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
       b += nc;
     }
   } while (--g != 0);
+}
+
+void xnn_pack_qs8_qc4w_gemm_gio_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    size_t k_stride, const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr, k_stride, k, b, scale,
+                           packed_weights, extra_bytes,
+                           (uint32_t)(int32_t)params->input_zero_point,
+                           (uint32_t)params->kernel_zero_point);
+}
+
+void xnn_pack_qs8_to_qu8_qc4w_gemm_gio_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    size_t k_stride, const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr, k_stride, k, b, scale,
+                           packed_weights, extra_bytes,
+                           (uint32_t)((int32_t)params->input_zero_point + 0x80),
+                           (uint32_t)params->kernel_zero_point);
 }
 
 // Same as qc4w but unsigned 4 bit output
@@ -2389,6 +2410,138 @@ void xnn_pack_qs8_weights_and_biases(
       weights, init_extra_data0_fn, extra_data0, extra_data0_element_size,
       init_extra_data1_fn, extra_data1, extra_data1_element_size,
       packed_weights_ptr, extra_bytes, params);
+}
+
+size_t xnn_packed_stride_qs8_to_qu8_qc8w_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t packed_k_stride = round_up_po2(k, kr * sr);
+  const size_t scale_bytes = extra_bytes != 0 ? extra_bytes : sizeof(float);
+  return packed_k_stride * sizeof(int8_t) + sizeof(int32_t) + scale_bytes;
+}
+
+void xnn_pack_qs8_to_qu8_qc8w_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t unused_k_stride,
+    const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  (void)init_extra_data1_fn;
+  (void)extra_data1;
+  (void)extra_data1_element_size;
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t n_stride = round_up(output_channels, nr);
+  const size_t scale_bytes =
+      extra_data0_element_size != 0 ? extra_data0_element_size : sizeof(float);
+  const size_t weights_stride =
+      xnn_packed_stride_qs8_to_qu8_qc8w_weights_and_biases(
+          gemm_config, input_channels, unused_block_size, input_channels,
+          scale_bytes);
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_pack_qs8_to_qu8_gemm_gio_w(
+        groups, output_channels, input_channels, nr, kr, sr, output_channels,
+        static_cast<const int8_t*>(weights),
+        static_cast<const int32_t*>(accumulator_init), /*scale=*/nullptr,
+        packed_weights_ptr, nr * scale_bytes,
+        static_cast<const struct xnn_qs8_packing_params*>(params));
+  } else {
+    xnn_pack_qs8_to_qu8_gemm_goi_w(
+        groups, output_channels, input_channels, nr, kr, sr, input_channels,
+        static_cast<const int8_t*>(weights),
+        static_cast<const int32_t*>(accumulator_init), /*scale=*/nullptr,
+        packed_weights_ptr, nr * scale_bytes,
+        static_cast<const struct xnn_qs8_packing_params*>(params));
+  }
+  if (extra_data0 != nullptr) {
+    xnn_init_scale_params_fn init_fn =
+        init_extra_data0_fn != nullptr
+            ? init_extra_data0_fn
+            : (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params;
+    for (size_t group = 0; group < groups; group++) {
+      void* packed_group_ptr = static_cast<char*>(packed_weights_ptr) +
+                               group * n_stride * weights_stride;
+      void* scale_dst =
+          static_cast<char*>(packed_group_ptr) + nr * (weights_stride - scale_bytes);
+      const void* scale_src =
+          static_cast<const char*>(extra_data0) +
+          scale_bytes * output_channels * group;
+      init_fn(output_channels, nr, nr * weights_stride, scale_src, scale_dst);
+    }
+  }
+}
+
+size_t xnn_packed_stride_qs8_to_qu8_qc4w_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t packed_k_stride = round_up_po2(k, kr * sr * 2) >> 1;
+  const size_t scale_bytes = extra_bytes != 0 ? extra_bytes : sizeof(float);
+  return packed_k_stride + sizeof(int32_t) + scale_bytes;
+}
+
+void xnn_pack_qs8_to_qu8_qc4w_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t unused_k_stride,
+    const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  (void)init_extra_data1_fn;
+  (void)extra_data1;
+  (void)extra_data1_element_size;
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t n_stride = round_up(output_channels, nr);
+  const size_t scale_bytes =
+      extra_data0_element_size != 0 ? extra_data0_element_size : sizeof(float);
+  const size_t weights_stride =
+      xnn_packed_stride_qs8_to_qu8_qc4w_weights_and_biases(
+          gemm_config, input_channels, unused_block_size, input_channels,
+          scale_bytes);
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_pack_qs8_to_qu8_qc4w_gemm_gio_w(
+        groups, output_channels, input_channels, nr, kr, sr, output_channels,
+        static_cast<const uint8_t*>(weights),
+        static_cast<const int32_t*>(accumulator_init), /*scale=*/nullptr,
+        packed_weights_ptr, nr * scale_bytes,
+        static_cast<const struct xnn_qs8_qc4w_packing_params*>(params));
+  } else {
+    xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w(
+        groups, output_channels, input_channels, nr, kr, sr,
+        round_up_po2(input_channels, 2), static_cast<const uint8_t*>(weights),
+        static_cast<const int32_t*>(accumulator_init), /*scale=*/nullptr,
+        packed_weights_ptr, nr * scale_bytes,
+        static_cast<const struct xnn_qs8_qc4w_packing_params*>(params));
+  }
+  if (extra_data0 != nullptr) {
+    xnn_init_scale_params_fn init_fn =
+        init_extra_data0_fn != nullptr
+            ? init_extra_data0_fn
+            : (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params;
+    for (size_t group = 0; group < groups; group++) {
+      void* packed_group_ptr = static_cast<char*>(packed_weights_ptr) +
+                               group * n_stride * weights_stride;
+      void* scale_dst =
+          static_cast<char*>(packed_group_ptr) + nr * (weights_stride - scale_bytes);
+      const void* scale_src =
+          static_cast<const char*>(extra_data0) +
+          scale_bytes * output_channels * group;
+      init_fn(output_channels, nr, nr * weights_stride, scale_src, scale_dst);
+    }
+  }
 }
 
 size_t xnn_packed_stride_qs4_weights_and_biases(
@@ -4334,12 +4487,25 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
           packed_weights = (int8_t*)packed_weights + (nr - nr_block_size) * kr;
         }
       }
+      if (scale != nullptr && extra_bytes >= nr * sizeof(float)) {
+        size_t i = 0;
+        for (; i < nr_block_size; ++i) {
+          unaligned_store_f32((float*)packed_weights + i,
+                              scale[nr_block_start + i]);
+        }
+        for (; i < nr; ++i) {
+          unaligned_store_f32((float*)packed_weights + i, 0.0f);
+        }
+      }
       packed_weights =
           reinterpret_cast<void*>((uintptr_t)packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE (b != nullptr) {
       b += nc;
+    }
+    if XNN_UNPREDICTABLE (scale != nullptr) {
+      scale += nc;
     }
   } while (--g != 0);
 }

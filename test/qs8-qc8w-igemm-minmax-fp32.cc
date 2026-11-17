@@ -762,9 +762,223 @@ std::vector<GemmTestParams> CreateHmxGemmTests(
   return gemm_tests;
 }
 
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
+std::vector<GemmTestParams> CreateHmxPackedGemmTests(
+    size_t k_block, size_t adj_k_block,
+    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
+    ConstantOrFunction mr_packed,
+    bool is_igemm,
+    bool unsigned_inputs,
+    uint8_t planes,
+    std::function<void(GemmMicrokernelTester& tester)> test_func,
+    uint64_t arch_flags = 0) {
+  std::string kbs = std::to_string(k_block);
+  std::string akbs = std::to_string(adj_k_block);
+  std::string nrs = std::to_string(nr);
+
+  const GemmMicrokernelTester tester = GemmMicrokernelTester()
+      .mr(mr).nr(nr).kr(kr).sr(sr).mr_packed(mr_packed).unsigned_inputs(unsigned_inputs).planes(planes);
+
+  std::vector<GemmTestParams> gemm_tests;
+  gemm_tests.reserve(42);
+
+  gemm_tests.push_back(GemmTestParams(
+      "k_eq_" + kbs,
+      tester.clone()
+          .m(mr).n(nr).k(k_block)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "k_eq_" + kbs + "_subtile",
+      tester.clone()
+          .k(k_block)
+      , test_func, arch_flags)
+      .loop_n(1, nr)
+      .loop_m(1, mr));
+  gemm_tests.push_back(GemmTestParams(
+      "k_eq_" + kbs + "_subtile_m",
+      tester.clone()
+          .n(nr).k(k_block)
+      , test_func, arch_flags)
+      .loop_m(1, mr));
+  gemm_tests.push_back(GemmTestParams(
+      "k_eq_" + kbs + "_subtile_n",
+      tester.clone()
+          .m(mr).k(k_block)
+      , test_func, arch_flags)
+      .loop_n(1, nr));
+  if (k_block > 1) {
+    gemm_tests.push_back(GemmTestParams(
+        "k_lt_" + akbs,
+        tester.clone()
+            .m(mr).n(nr)
+        , test_func, arch_flags)
+        .loop_k(1, adj_k_block - 1));
+    gemm_tests.push_back(GemmTestParams(
+        "k_lt_" + akbs + "_subtile",
+        tester.clone()
+        , test_func, arch_flags)
+        .loop_k(1, adj_k_block - 1)
+        .loop_n(1, nr)
+        .loop_m(1, mr));
+  }
+  gemm_tests.push_back(GemmTestParams(
+      "k_gt_" + akbs,
+      tester.clone()
+          .m(mr).n(nr)
+      , test_func, arch_flags)
+      .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block));
+  gemm_tests.push_back(GemmTestParams(
+      "k_gt_" + akbs + "_subtile",
+      tester.clone()
+      , test_func, arch_flags)
+      .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block)
+      .loop_n(1, nr)
+      .loop_m(1, mr));
+  if (k_block > 1) {
+    gemm_tests.push_back(GemmTestParams(
+        "k_div_" + kbs,
+        tester.clone()
+            .m(mr).n(nr)
+        , test_func, arch_flags)
+        .loop_k(adj_k_block + k_block, k_block * 5, k_block));
+    gemm_tests.push_back(GemmTestParams(
+        "k_div_" + kbs + "_subtile",
+        tester.clone()
+        , test_func, arch_flags)
+        .loop_k(adj_k_block + k_block, k_block * 5, k_block)
+        .loop_n(1, nr)
+        .loop_m(1, mr));
+  }
+  gemm_tests.push_back(GemmTestParams(
+      "n_gt_" + nrs,
+      tester.clone()
+          .m(mr)
+      , test_func, arch_flags)
+      .loop_n(nr + 1, nr * 2 - 1)
+      .loop_k(1, k_block * 3, k_block + 1));
+  gemm_tests.push_back(GemmTestParams(
+      "n_gt_" + nrs + "_subtile",
+      tester.clone()
+      , test_func, arch_flags)
+      .loop_n(nr + 1, nr * 2 - 1)
+      .loop_k(1, k_block * 3, k_block + 1)
+      .loop_m(1, mr));
+  gemm_tests.push_back(GemmTestParams(
+      "n_div_" + nrs,
+      tester.clone()
+          .m(mr)
+      , test_func, arch_flags)
+      .loop_n(nr * 2, nr * 3, nr)
+      .loop_k(1, k_block * 3, k_block + 1));
+  gemm_tests.push_back(GemmTestParams(
+      "n_div_" + nrs + "_subtile",
+      tester.clone()
+      , test_func, arch_flags)
+      .loop_n(nr * 2, nr * 3, nr)
+      .loop_k(1, k_block * 3, k_block + 1)
+      .loop_m(1, mr));
+  if (is_igemm) {
+    gemm_tests.push_back(GemmTestParams(
+        "small_kernel",
+        tester.clone()
+            .m(mr).n(nr).ks(3)
+        , test_func, arch_flags)
+        .loop_k(1, k_block * 3, k_block + 1));
+    gemm_tests.push_back(GemmTestParams(
+        "small_kernel_subtile",
+        tester.clone()
+            .ks(3)
+        , test_func, arch_flags)
+        .loop_k(1, k_block * 3, k_block + 1)
+        .loop_n(1, nr)
+        .loop_m(1, mr));
+    gemm_tests.push_back(GemmTestParams(
+        "n_gt_" + nrs + "_small_kernel",
+        tester.clone()
+            .m(mr).ks(3)
+        , test_func, arch_flags)
+        .loop_n(nr + 1, nr * 2 - 1)
+        .loop_k(1, k_block * 3, k_block + 1));
+    gemm_tests.push_back(GemmTestParams(
+        "n_div_" + nrs + "_small_kernel",
+        tester.clone()
+            .m(mr).ks(3)
+        , test_func, arch_flags)
+        .loop_n(nr * 2, nr * 3, nr)
+        .loop_k(1, k_block * 3, k_block + 1));
+  }
+  gemm_tests.push_back(GemmTestParams(
+      "strided_cm_subtile",
+      tester.clone()
+          .mr(mr).nr(nr).kr(kr).sr(sr)
+          .cm_stride(xnnpack::NextPrime(nr + 1))
+      , test_func, arch_flags)
+      .loop_k(1, k_block * 3, k_block + 1)
+      .loop_n(1, nr)
+      .loop_m(1, mr));
+  if (is_igemm) {
+    gemm_tests.push_back(GemmTestParams(
+        "a_offset",
+        tester.clone()
+            .m(mr).n(nr).ks(3)
+            .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
+        , test_func, arch_flags)
+        .loop_k(1, k_block * 3, k_block + 1));
+    gemm_tests.push_back(GemmTestParams(
+        "zero",
+        tester.clone()
+            .m(mr).n(nr).ks(3)
+            .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
+        , test_func, arch_flags)
+        .loop_k(1, k_block * 3, k_block + 1)
+        .loop_zi(0, mr - 1));
+  }
+  gemm_tests.push_back(GemmTestParams(
+      "qmin",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).qmin(128)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "qmax",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).qmax(128)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "strided_cm",
+      tester.clone()
+          .m(mr).n(nr).k(k_block)
+          .cm_stride(xnnpack::NextPrime(nr + 1))
+      , test_func, arch_flags));
+
+  // Partial and multiple 32-deep HMX K tiles, including odd K and the
+  // 64-element LHS transfer tail.
+  gemm_tests.push_back(GemmTestParams(
+      "k_tiles",
+      tester.clone()
+          .m(mr).n(nr)
+      , test_func, arch_flags)
+      .loop_k(1, 72, 5));
+  gemm_tests.push_back(GemmTestParams(
+      "k_tiles_subtile_m",
+      tester.clone()
+          .n(nr)
+      , test_func, arch_flags)
+      .loop_k(31, 65, 11, LoopStepType::Linear)
+      .loop_m(1, mr, 7));
+  // K around and beyond one VTCM-resident chunk (1024) exercises the full
+  // 64 KB HMX operand size and the chunked K path.
+  gemm_tests.push_back(GemmTestParams(
+      "k_large",
+      tester.clone()
+          .m(mr).n(nr)
+      , test_func, arch_flags)
+      .loop_k(1023, 1025, 2, LoopStepType::Linear));
+  return gemm_tests;
+}
+
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   // NOLINTNEXTLINE(clang-diagnostic-unused-function)
-  std::vector<GemmTestParams> CreateTests4(
+  std::vector<GemmTestParams> CreateTests5(
       size_t k_block, size_t adj_k_block,
       ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
       bool is_igemm,
@@ -4092,7 +4306,7 @@ INSTANTIATE_TEST_SUITE_P(
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC8W_IGEMM_MINMAX_FP32_1X1V__RVV, GemmTest,
-      testing::ValuesIn(CreateTests4(
+      testing::ValuesIn(CreateTests5(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/1, /*nr=*/1, /*kr=*/1, /*sr=*/1,
@@ -4112,7 +4326,7 @@ INSTANTIATE_TEST_SUITE_P(
 
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC8W_IGEMM_MINMAX_FP32_7X1V__RVV, GemmTest,
-      testing::ValuesIn(CreateTests4(
+      testing::ValuesIn(CreateTests5(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/7, /*nr=*/1, /*kr=*/1, /*sr=*/1,

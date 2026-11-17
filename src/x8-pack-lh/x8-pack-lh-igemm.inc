@@ -15,3 +15,9 @@ XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_pack_lh_ukernel__igemm_neonsme2,
             xnn_x8_pack_lh_size__igemm_neonsme2,
             xnn_x8_pack_lh_offset__igemm_neonsme2)
 #endif  // XNN_ENABLE_KLEIDIAI
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_x8_pack_lh_ukernel__igemm_hvx,
+            xnn_x8_pack_lh_size__igemm_hvx,
+            xnn_x8_pack_lh_offset__igemm_hvx)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX

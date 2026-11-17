@@ -6,7 +6,7 @@
 $assert NR in [64, 128]
 $assert KR == 4
 $assert DATATYPE == "QS8"
-$assert IZP == 0
+$assert IZP in [0, 128]
 $SIMD_TILE = NR // 32
 #include <assert.h>
 #include <hexagon_protos.h>
@@ -22,7 +22,7 @@ $SIMD_TILE = NR // 32
 #include "src/xnnpack/simd/s32-hvx.h"
 #include "src/xnnpack/unaligned.h"
 
-void xnn_qs8_packw_gemm_goi_ukernel_x${NR}c${KR}__hvx(
+void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${KR}__hvx(
     size_t g,
     size_t nc,
     size_t kc,

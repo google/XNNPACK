@@ -27,6 +27,22 @@ namespace {
 
 
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void pqs8_qc8w_gemm_minmax_ukernel_1x64c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_pqs8_qc8w_gemm_minmax_ukernel_1x64c4__hvx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_to_qu8_qc8w_weights_and_biases,
+      xnn_packed_stride_qs8_to_qu8_qc8w_weights_and_biases,
+      /*mr=*/1, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_1x64c4__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
   static void pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2(benchmark::State& state) {
@@ -155,6 +171,22 @@ namespace {
   BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
+  static void pqs8_qc8w_gemm_minmax_ukernel_32x64c4__hmx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_pqs8_qc8w_gemm_minmax_ukernel_32x64c4__hmx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_to_qu8_qc8w_weights_and_biases,
+      xnn_packed_stride_qs8_to_qu8_qc8w_weights_and_biases,
+      /*mr=*/32, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/32,
+      /*arch_flags=*/xnn_arch_hmx);
+  }
+
+  BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_32x64c4__hmx)
+#endif  // XNN_ENABLE_HMX && XNN_ARCH_HEXAGON
 
 
 }  // namespace

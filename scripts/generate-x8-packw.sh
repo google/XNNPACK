@@ -230,10 +230,14 @@ tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 
 ################################## Hexagon HVX #################################
 tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=128,256 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=hvx -o src/x8-packw/gen/x8-packw-gio-hvx-u2.c &
 
-tools/xngen src/x8-packw/c4-hvx.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-hvx.c &
-tools/xngen src/x8-packw/c4-hvx.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/c4-hvx.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/c4-hvx.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/c4-hvx.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x64c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/c4-hvx.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x128c4-gemm-goi-hvx.c &
 
-tools/xngen src/x8-packw/c4-gio-hvx.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-hvx.c &
-tools/xngen src/x8-packw/c4-gio-hvx.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-gio-hvx.c &
+tools/xngen src/x8-packw/c4-gio-hvx.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-hvx.c &
+tools/xngen src/x8-packw/c4-gio-hvx.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-gio-hvx.c &
+tools/xngen src/x8-packw/c4-gio-hvx.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x64c4-gemm-gio-hvx.c &
+tools/xngen src/x8-packw/c4-gio-hvx.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x128c4-gemm-gio-hvx.c &
 
 wait
