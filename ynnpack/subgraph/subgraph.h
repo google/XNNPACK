@@ -588,7 +588,7 @@ struct ynn_node {
     }
   };
   struct dynamic_quantization {
-    int32_t output_zero_point;
+    std::optional<int32_t> output_zero_point;
     friend bool operator==(const dynamic_quantization& a,
                            const dynamic_quantization& b) {
       return a.output_zero_point == b.output_zero_point;

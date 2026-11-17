@@ -343,4 +343,36 @@ TEST(eliminate_common_subgraphs, no_merge_dot_symmetric_b) {
   EXPECT_THAT(ProducerOf(output_id, subgraph), InputsAre(t1_id, t2_id));
 }
 
+TEST(eliminate_common_subgraphs,
+     no_merge_dynamic_quantization_symmetric_and_asymmetric) {
+  const uint32_t min_max_id = 0;
+  const uint32_t output_id = 1;
+  uint32_t scale1_id = YNN_INVALID_VALUE_ID;
+  uint32_t scale2_id = YNN_INVALID_VALUE_ID;
+  uint32_t zp2_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(2);
+  builder.AddInput(ynn_type_fp32, {2, 4}, min_max_id)
+      .AddOutput(ynn_type_fp32, {4}, output_id)
+      .AddTensor(ynn_type_fp32, {4}, scale1_id)
+      .AddTensor(ynn_type_fp32, {4}, scale2_id)
+      .AddTensor(ynn_type_int32, {4}, zp2_id);
+
+  ASSERT_EQ(ynn_define_dynamic_quantization(builder.GetSubgraph(), min_max_id,
+                                            ynn_type_int8, nullptr, &scale1_id,
+                                            /*flags=*/0),
+            ynn_status_success);
+  ASSERT_EQ(ynn_define_dynamic_quantization(builder.GetSubgraph(), min_max_id,
+                                            ynn_type_int8, &zp2_id, &scale2_id,
+                                            /*flags=*/0),
+            ynn_status_success);
+  builder.AddBinary(ynn_binary_add, scale1_id, scale2_id, output_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.eliminate_common_subgraphs();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(output_id, subgraph), InputsAre(scale1_id, scale2_id));
+}
+
 }  // namespace ynn

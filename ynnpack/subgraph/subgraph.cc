@@ -1108,7 +1108,6 @@ ynn_status ynn_subgraph::eliminate_common_subgraphs() {
     // If so, replace the outputs of this node with the outputs of the
     // existing node.
     for (const std::vector<uint32_t>& existing_outputs : seen_ops[key]) {
-      assert(existing_outputs.size() == node.outputs.size());
       if (outputs_are_compatible(*this, node.outputs, existing_outputs)) {
         // We found a duplicate node. Replace the outputs of this node with
         // the outputs of the existing node.
@@ -1407,7 +1406,11 @@ void print(std::ostream& os, const ynn_node::transpose_a& op) {
 
 void print(std::ostream& os, const ynn_node::dequantize_dot& op) {}
 void print(std::ostream& os, const ynn_node::dynamic_quantization& op) {
-  os << "output_zero_point=" << op.output_zero_point;
+  if (op.output_zero_point.has_value()) {
+    os << "output_zero_point=" << *op.output_zero_point;
+  } else {
+    os << "symmetric";
+  }
 }
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {

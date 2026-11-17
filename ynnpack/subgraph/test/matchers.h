@@ -255,7 +255,11 @@ MATCHER_P(IsDynamicQuantization, output_zero_point, "") {
     return false;
   }
   if (dq->output_zero_point != output_zero_point) {
-    *result_listener << "has output zero point " << dq->output_zero_point;
+    if (dq->output_zero_point.has_value()) {
+      *result_listener << "has output zero point " << *dq->output_zero_point;
+    } else {
+      *result_listener << "is symmetric";
+    }
     return false;
   }
   return true;
