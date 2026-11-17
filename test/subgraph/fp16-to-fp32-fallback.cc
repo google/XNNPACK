@@ -581,11 +581,21 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeConv2D) {
     XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
     XnnTensor bias({.type = Type::kFP16,
                     .shape = {8},
-                    .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+            .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
                         std::vector<float>(8, 1.0f))});
     XnnTensor output = TransposeConv2D(filter, input, bias, {1, 5, 5, 8},
                                        litert::tensor::kPaddingSame,
                                        /*stride_h=*/1, /*stride_w=*/1);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+        auto bias_add, litert::tensor::graph::GetProducer(output.GetRaw()));
+    XnnTensor deconvolution_output(bias_add->inputs[0]);
+    XnnTensor bias_fp32(
+        {.type = Type::kFP32,
+         .shape = {8},
+         .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+             std::vector<float>(8, 1.0f))});
+    output = Add(Cast(deconvolution_output, Type::kFP32), bias_fp32);
+    output = Cast(output, Type::kFP16);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
