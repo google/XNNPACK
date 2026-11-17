@@ -8,6 +8,8 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 namespace {
 
@@ -50,6 +52,48 @@ TEST(HardwareConfigResetTest, HardwareConfigResetAndInitialization) {
   EXPECT_EQ(restored_abs->ukernel, supported_ukernel);
 
   xnn_reset_hardware_config();
+}
+
+// NEON-FMA microkernels must not be selected on ARMv7 CPUs that have NEON
+// but not VFPv4 (e.g. Cortex-A8, Cortex-A9), as they would SIGILL.
+TEST(HardwareConfigResetTest, F32RaddstoreexpminusmaxNeonWithoutFma) {
+#if XNN_ARCH_ARM
+  xnn_hardware_config mock_neon{};
+  mock_neon.arch_flags |= xnn_arch_arm_neon;
+  xnn_set_hardware_config(&mock_neon);
+
+  const struct xnn_raddstoreexpminusmax_config* config =
+      xnn_init_f32_raddstoreexpminusmax_config(/*flags=*/0);
+  ASSERT_NE(config, nullptr);
+  ASSERT_NE(config->ukernel, nullptr);
+  EXPECT_NE(config->ukernel,
+            (xnn_raddstoreexpminusmax_ukernel_fn)
+                xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2);
+
+  xnn_reset_hardware_config();
+#else
+  GTEST_SKIP();
+#endif
+}
+
+// Same check with the detected hardware config, e.g. when run under
+// `qemu-arm -cpu cortex-a9`.
+TEST(HardwareConfigResetTest, F32RaddstoreexpminusmaxDetectedHardware) {
+#if XNN_ARCH_ARM
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  ASSERT_NE(hardware_config, nullptr);
+  const struct xnn_raddstoreexpminusmax_config* config =
+      xnn_init_f32_raddstoreexpminusmax_config(/*flags=*/0);
+  ASSERT_NE(config, nullptr);
+  if (!(hardware_config->arch_flags & xnn_arch_arm_neon_fma)) {
+    EXPECT_NE(config->ukernel,
+              (xnn_raddstoreexpminusmax_ukernel_fn)
+                  xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2);
+  }
+#else
+  GTEST_SKIP();
+#endif
 }
 
 }  // namespace

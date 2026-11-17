@@ -69,8 +69,10 @@ static void init_f32_raddstoreexpminusmax_config_impl(struct xnn_raddstoreexpmin
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fma) {
       config->ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2);
+    } else if (hardware_config->arch_flags & xnn_arch_arm_neon) {
+      config->ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_u16_acc2);
     } else {
       config->ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2);
     }

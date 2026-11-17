@@ -1202,6 +1202,8 @@ xnnpack_unit_test(
     tags = ["no_ynnpack"],
     deps = [
         "//:common",
+        "//:microfnptr_h",
+        "//:microkernel_hdrs",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
         "//src/configs:microkernel_configs",
