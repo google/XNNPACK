@@ -19,6 +19,7 @@ BENCH_UNARY(neon, exp2_round, f64, 2);
 
 BENCH_UNARY(neon, exp, f64, 2);
 BENCH_UNARY(neon, expm1, f64, 2);
+BENCH_UNARY(neon, approx_expm1, f64, 2);
 BENCH_UNARY(neon, log, f64, 2);
 BENCH_UNARY(neon, log1p, f64, 2);
 BENCH_UNARY(neon, erf, f64, 2);
