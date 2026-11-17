@@ -178,7 +178,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_cmplt_f16(
-  xnn_simd_f16_t a, xnn_simd_f16_t b) {
+    xnn_simd_f16_t a, xnn_simd_f16_t b) {
   const v128_t sign_a = wasm_i16x8_shr(a, 15);
   const v128_t sign_b = wasm_i16x8_shr(b, 15);
   const v128_t sign_bit = wasm_i16x8_splat((int16_t)0x8000);
