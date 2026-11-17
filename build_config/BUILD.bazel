@@ -445,3 +445,10 @@ alias(
         }),
 )
 
+# Open-source Bazel consumers may use Clang < 20 or AppleClang < 17 (lacking
+# <arm_sme.h> or SME streaming attributes), so ACLE is opt-in by default.
+alias(
+    name = "arm_sme_acle_default_enabled",
+    actual = ":always_false",
+)
+

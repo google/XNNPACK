@@ -1788,22 +1788,39 @@ alias(
     }),
 )
 
-selects.config_setting_group(
-    name = "arm_sme_acle_enabled_by_default",
-    match_any = [
-        "//build_config:aarch64",
-    ],
-)
-
 alias(
-    name = "arm_sme_acle_enabled",
+    name = "arm_sme_acle_flag_enabled",
     actual = select({
         ":xnn_enable_arm_sme_acle_explicit_true": ":xnn_enable_arm_sme_acle_explicit_true",
         ":xnn_enable_arm_sme_acle_explicit_false": ":xnn_enable_arm_sme_acle_explicit_true",
         "//build_config:gcc": ":xnn_enable_arm_sme_acle_explicit_true",
         "//build_config:windows_arm64": ":xnn_enable_arm_sme_acle_explicit_true",
-        "//conditions:default": ":arm_sme_acle_enabled_by_default",
+        "//conditions:default": "//build_config:arm_sme_acle_default_enabled",
     }),
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_enabled",
+    match_all = [
+        "//build_config:aarch64",
+        ":arm_sme_acle_flag_enabled",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_sme_enabled",
+    match_all = [
+        ":arm_sme_enabled",
+        ":arm_sme_acle_enabled",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_sme_acle_sme2_enabled",
+    match_all = [
+        ":arm_sme2_enabled",
+        ":arm_sme_acle_enabled",
+    ],
 )
 
 alias(
