@@ -126,9 +126,8 @@ struct loop_metadata {
   int funcs_count = 0;
   int source_region = -1;
   // A finer step for this loop, proposed by a function fused into it. Set by
-  // reconcile_step(); compute_workers() decides whether to use it, because
-  // that depends on the rest of the loop nest, which isn't built yet when
-  // functions are matched.
+  // reconcile_step(); resolve_proposed_steps() decides whether to use it once
+  // the whole loop nest is built.
   slinky::expr proposed_step;
 };
 
@@ -331,56 +330,30 @@ slinky::expr is_single_iteration(const ynn::slinky_globals& globals,
   return slinky::simplify(extent) <= resolve_let_var(globals, step);
 }
 
-// Decide how many workers each loop of `loops` should use. This must run after
-// the whole nest is built (and all the steps are final): after fusion, a
-// function's loops can end up inside loops of other functions, so the number
-// of tasks produced outside each loop is only known once the nest is complete.
-//
-// `loop_meta[i].funcs_count` is the number of functions whose body executes
-// inside loop `i`. A loop whose ancestors provably always produce enough tasks
-// can never run more than one worker, so its
-// `select(w > 1, parallel, serial)` is folded to `serial`. If such a loop
-// also contains a single function and its step is not required (no alignment
-// constraint), the loop is pure overhead: one kernel call per tile with
-// nothing to interleave or parallelize. Setting its step to the full extent
-// makes it a provable single iteration, which slinky then folds away,
-// leaving one kernel call over the whole range.
-void compute_workers(ynn::slinky_globals& globals, int max_threads,
-                     slinky::loop_nest& loops,
-                     const std::vector<loop_metadata>& loop_meta) {
-  // Enough tasks to have good load balancing.
-  // TODO(b/570143574): Evaluate using tasks_per_thread = 4 unconditionally or
-  // detecting heterogeneous cores instead of checking __ANDROID__.
-#if defined(__ANDROID__)
-  const slinky::index_t tasks_per_thread = 4;
-#else
-  const slinky::index_t tasks_per_thread = 2;
-#endif
-  const slinky::index_t target_task_count =
-      max_threads > 1 ? max_threads * tasks_per_thread : 1;
+// A guaranteed lower bound of the number of iterations of a loop:
+// ceil_div(lower bound of extent, upper bound of step), or 1 when either bound
+// is unknown (a scheduled loop runs at least one iteration).
+slinky::index_t min_loop_iterations(const ynn::slinky_globals& globals,
+                                    const slinky::expr& extent,
+                                    const slinky::expr& step) {
+  std::optional<slinky::index_t> extent_lb =
+      slinky::evaluate_constant_lower_bound(extent);
+  std::optional<slinky::index_t> step_ub =
+      slinky::evaluate_constant_upper_bound(resolve_let_var(globals, step));
+  if (extent_lb && step_ub && *step_ub > 0) {
+    return std::max<slinky::index_t>(slinky::ceil_div(*extent_lb, *step_ub), 1);
+  }
+  return 1;
+}
 
-  // A guaranteed lower bound of the number of iterations of loop `l`:
-  // ceil_div(lower bound of extent, upper bound of step), or 1 when either
-  // bound is unknown (a scheduled loop runs at least one iteration).
-  auto min_iterations = [&](slinky::loop_ref l,
-                            const loop_metadata& meta) -> slinky::index_t {
-    std::optional<slinky::index_t> extent_lb =
-        slinky::evaluate_constant_lower_bound(meta.extent);
-    std::optional<slinky::index_t> step_ub =
-        slinky::evaluate_constant_upper_bound(
-            resolve_let_var(globals, loops[l].step));
-    if (extent_lb && step_ub && *step_ub > 0) {
-      return std::max<slinky::index_t>(slinky::ceil_div(*extent_lb, *step_ub),
-                                       1);
-    }
-    return 1;
-  };
-
-  // For each loop, whether any of its descendants can be parallelized: a pure
-  // or partial-reduction ("r") loop that provably runs more than one iteration.
-  // Serial reduction ("k") loops never count, they run inside one task by
-  // construction. Loops are appended after their parent, so a single backward
-  // pass propagates each loop's answer up to its parent.
+// For each loop, whether any of its descendants can be parallelized: a pure or
+// partial-reduction ("r") loop that provably runs more than one iteration.
+// Serial reduction ("k") loops never count, they run inside one task by
+// construction. Loops are appended after their parent, so a single backward
+// pass propagates each loop's answer up to its parent.
+std::vector<bool> compute_parallel_in_subtree(
+    ynn::slinky_globals& globals, const slinky::loop_nest& loops,
+    const std::vector<loop_metadata>& loop_meta) {
   std::vector<bool> parallel_in_subtree(loops.size(), false);
   for (int i = static_cast<int>(loops.size()) - 1; i >= 1; --i) {
     const slinky::loop_ref l = loops.loop_at(i);
@@ -407,6 +380,79 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     }
     parallel_in_subtree[parent.index()] = true;
   }
+  return parallel_in_subtree;
+}
+
+// Take the finer step a fused function proposed for a loop, if that loop is
+// where the nest has to get its parallelism. It isn't if the ancestors already
+// produce enough tasks, or if the subtree below has a level that can be
+// parallelized instead - splitting here would then cost parallelism rather than
+// add it, because the extra outer tasks push the inner levels past the task
+// target and turn them serial. The inner levels are also the better place to
+// split: finer tasks over contiguous memory.
+void resolve_proposed_steps(ynn::slinky_globals& globals, int max_threads,
+                            slinky::index_t target_task_count,
+                            slinky::loop_nest& loops,
+                            const std::vector<loop_metadata>& loop_meta) {
+  if (max_threads <= 1) return;
+  const std::vector<bool> parallel_in_subtree =
+      compute_parallel_in_subtree(globals, loops, loop_meta);
+
+  std::vector<slinky::index_t> tasks_lb(loops.size(), 1);
+  for (size_t i = 1; i < loops.size(); ++i) {
+    slinky::loop_nest::loop& node = loops[loops.loop_at(i)];
+    const slinky::loop_ref parent = node.parent;
+    assert(static_cast<size_t>(parent.index()) < i);
+    const loop_metadata& meta = loop_meta[i];
+    const slinky::index_t tasks_above_lb = tasks_lb[parent.index()];
+    if (meta.proposed_step.defined() && !parallel_in_subtree[i] &&
+        tasks_above_lb < target_task_count) {
+      // Behind a global so per-task closures reference a variable evaluated
+      // once per invoke, not the whole select tree.
+      node.step =
+          globals.get(slinky::simplify(meta.proposed_step, globals.fact_bounds,
+                                       globals.fact_alignment),
+                      "s");
+    }
+    if (globals.is_reduction_dim(node.dims[0].dim)) {
+      tasks_lb[i] = tasks_above_lb;
+    } else {
+      tasks_lb[i] =
+          tasks_above_lb * min_loop_iterations(globals, meta.extent, node.step);
+    }
+  }
+}
+
+// Decide how many workers each loop of `loops` should use. This must run after
+// the whole nest is built: after fusion, a function's loops can end up inside
+// loops of other functions, so the number of tasks produced outside each loop
+// is only known once the nest is complete.
+//
+// `loop_meta[i].funcs_count` is the number of functions whose body executes
+// inside loop `i`. A loop whose ancestors provably always produce enough tasks
+// can never run more than one worker, so its
+// `select(w > 1, parallel, serial)` is folded to `serial`. If such a loop
+// also contains a single function and its step is not required (no alignment
+// constraint), the loop is pure overhead: one kernel call per tile with
+// nothing to interleave or parallelize. Setting its step to the full extent
+// makes it a provable single iteration, which slinky then folds away,
+// leaving one kernel call over the whole range.
+void compute_workers(ynn::slinky_globals& globals, int max_threads,
+                     slinky::loop_nest& loops,
+                     const std::vector<loop_metadata>& loop_meta) {
+  // Enough tasks to have good load balancing.
+  // TODO(b/570143574): Evaluate using tasks_per_thread = 4 unconditionally or
+  // detecting heterogeneous cores instead of checking __ANDROID__.
+#if defined(__ANDROID__)
+  const slinky::index_t tasks_per_thread = 4;
+#else
+  const slinky::index_t tasks_per_thread = 2;
+#endif
+  const slinky::index_t target_task_count =
+      max_threads > 1 ? max_threads * tasks_per_thread : 1;
+
+  resolve_proposed_steps(globals, max_threads, target_task_count, loops,
+                         loop_meta);
 
   // The number of tasks the loops from the root down to (and including) each
   // loop can produce. Serial loops (reductions) run their iterations within
@@ -422,23 +468,6 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     const loop_metadata& meta = loop_meta[i];
     const slinky::expr& tasks_above = tasks[parent.index()];
     const slinky::index_t tasks_above_lb = tasks_lb[parent.index()];
-    // Take the finer step a fused function proposed for this loop, if this
-    // loop is where the nest has to get its parallelism. It isn't if the
-    // ancestors already produce enough tasks, or if the subtree below has a
-    // level that can be parallelized instead - splitting here would then cost
-    // parallelism rather than add it, because the extra outer tasks push the
-    // inner levels past the task target and turn them serial. The inner
-    // levels are also the better place to split: finer tasks over contiguous
-    // memory.
-    if (meta.proposed_step.defined() && max_threads > 1 &&
-        !parallel_in_subtree[i] && tasks_above_lb < target_task_count) {
-      // Behind a global so per-task closures reference a variable evaluated
-      // once per invoke, not the whole select tree.
-      node.step =
-          globals.get(slinky::simplify(meta.proposed_step, globals.fact_bounds,
-                                       globals.fact_alignment),
-                      "s");
-    }
     // A loop that provably runs exactly one iteration is identical for any
     // number of functions inside it (required steps are excluded). Replacing
     // its step with the extent expression lets slinky prove the single
@@ -491,7 +520,8 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
       }
       tasks[i] = slinky::simplify(tasks_above *
                                   slinky::ceil_div(meta.extent, node.step));
-      tasks_lb[i] = tasks_above_lb * min_iterations(l, meta);
+      tasks_lb[i] =
+          tasks_above_lb * min_loop_iterations(globals, meta.extent, node.step);
     }
   }
 }
