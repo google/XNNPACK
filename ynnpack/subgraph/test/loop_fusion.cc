@@ -493,5 +493,57 @@ TEST_F(LoopFusionTest, StackProducersFuseWithConsumer) {
   }
 }
 
+// A dot producing an external output must run at the root rather than fusing
+// into a downstream consumer's loop, and must not mark that consumer loop's
+// step as required on the way there.
+TEST_F(LoopFusionTest, ExternalOutputProducerDoesNotConstrainConsumerLoop) {
+  const size_t M = 256, K = 64, N = 256;
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t dot_out_id = 2;
+  const uint32_t neg_out_id = 3;
+
+  SubgraphBuilder subgraph(4);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddInput(type_of<float>(), TensorShape(2), b_id)
+      .AddOutput(type_of<float>(), TensorShape(2), dot_out_id)
+      .AddOutput(type_of<float>(), TensorShape(2), neg_out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, dot_out_id)
+      .AddUnary(ynn_unary_negate, dot_out_id, neg_out_id);
+
+  Runtime runtime(subgraph.GetSubgraph(), /*scheduler=*/nullptr,
+                  YNN_FLAG_ENABLE_SLINKY_TRACE);
+
+  std::atomic<size_t> negate_calls = 0;
+  runtime.get()->eval_config.trace_begin =
+      [&](const char* name) -> slinky::index_t {
+    if (name != nullptr && std::string_view(name) == "negate") {
+      ++negate_calls;
+    }
+    return 0;
+  };
+
+  Tensor<float> a({M, K});
+  Tensor<float> b({K, N});
+  Tensor<float> dot_out({M, N});
+  Tensor<float> neg_out({M, N});
+  a.fill(1.0f);
+  b.fill(1.0f);
+  runtime.ReshapeExternalTensor({M, K}, a.data(), a_id)
+      .ReshapeExternalTensor({K, N}, b.data(), b_id)
+      .ReshapeRuntime()
+      .SetupExternalTensor(dot_out.data(), dot_out_id)
+      .SetupExternalTensor(neg_out.data(), neg_out_id)
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_EQ(negate_calls, 1);
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(dot_out({i, j}), K) << i << " " << j;
+      ASSERT_EQ(neg_out({i, j}), -static_cast<float>(K)) << i << " " << j;
+    }
+  }
+}
+
 }  // namespace
 }  // namespace ynn

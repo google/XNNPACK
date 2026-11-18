@@ -801,9 +801,14 @@ slinky::loop_nest ynn_runtime::schedule() {
       has_consumers = true;
     }
 
+    // A function forced to root or producing an external output cannot be
+    // fused into a loop of its consumers without recomputing all of it on
+    // every iteration, see `external_output_syms` above.
+    const bool must_run_at_root =
+        sched.force_root || produces_external_output(f, external_output_syms);
     std::vector<ynn::scheduling_split> loop_splits;
     std::vector<bool> split_matched;
-    slinky::loop_ref place_at = consumer_lca;
+    slinky::loop_ref place_at = must_run_at_root ? loops.root() : consumer_lca;
 
     // If they are not matching and the extents of f are smaller than parent
     // we are risking over-compute. If it doesn't have schedule info then we
@@ -812,47 +817,40 @@ slinky::loop_nest ynn_runtime::schedule() {
       // Reverse to match from outermost inwards.
       loop_splits.assign(sched.loop_splits.rbegin(), sched.loop_splits.rend());
       split_matched = initial_split_matches(globals, loop_splits);
-
-      // Collect the candidate consumer loop path from `root()` down to
-      // `consumer_lca`.
-      std::vector<slinky::loop_ref> candidate_loops;
-      for (slinky::loop_ref l = consumer_lca; !l.is_root();
-           l = loops[l].parent) {
-        candidate_loops.push_back(l);
-      }
-      std::reverse(candidate_loops.begin(), candidate_loops.end());
-
-      // Walk the loop nest from the outermost loop inwards, sharing each loop
-      // with a split of this function that covers the same source region (see
-      // find_matching_split and reconcile_step). We must stop at the first
-      // loop of the nest we can't cover: computing the function inside a loop
-      // which doesn't slice its output would recompute the function on every
-      // iteration of that loop.
       place_at = loops.root();
-      for (slinky::loop_ref candidate : candidate_loops) {
-        const int consumer_source_region =
-            loop_meta[candidate.index()].source_region;
-        const int matched_split =
-            find_matching_split(globals, f, loop_splits, split_matched,
-                                consumer_source_region, source_regions);
-        if (matched_split == -1) {
-          break;
+
+      if (!must_run_at_root) {
+        // Collect the candidate consumer loop path from `root()` down to
+        // `consumer_lca`.
+        std::vector<slinky::loop_ref> candidate_loops;
+        for (slinky::loop_ref l = consumer_lca; !l.is_root();
+             l = loops[l].parent) {
+          candidate_loops.push_back(l);
         }
-        split_matched[matched_split] = true;
-        reconcile_step(globals, loops[candidate], loop_meta[candidate.index()],
-                       f, loop_splits[matched_split], loop_splits);
-        place_at = candidate;
-      }
-    }
+        std::reverse(candidate_loops.begin(), candidate_loops.end());
 
-    // A function producing an external output cannot be fused into a loop of
-    // its consumers without recomputing all of it on every iteration, see
-    // `external_output_syms` above.
-    if (sched.force_root ||
-        (!place_at.is_root() &&
-         produces_external_output(f, external_output_syms))) {
-      place_at = loops.root();
-      split_matched.assign(loop_splits.size(), false);
+        // Walk the loop nest from the outermost loop inwards, sharing each loop
+        // with a split of this function that covers the same source region (see
+        // find_matching_split and reconcile_step). We must stop at the first
+        // loop of the nest we can't cover: computing the function inside a loop
+        // which doesn't slice its output would recompute the function on every
+        // iteration of that loop.
+        for (slinky::loop_ref candidate : candidate_loops) {
+          const int consumer_source_region =
+              loop_meta[candidate.index()].source_region;
+          const int matched_split =
+              find_matching_split(globals, f, loop_splits, split_matched,
+                                  consumer_source_region, source_regions);
+          if (matched_split == -1) {
+            break;
+          }
+          split_matched[matched_split] = true;
+          reconcile_step(globals, loops[candidate],
+                         loop_meta[candidate.index()], f,
+                         loop_splits[matched_split], loop_splits);
+          place_at = candidate;
+        }
+      }
     }
 
     // Append any splits that did not match an existing consumer loop as new
