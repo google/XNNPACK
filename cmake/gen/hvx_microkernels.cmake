@@ -93,6 +93,10 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vabs-hvx.c
   src/f32-vunary/gen/f32-vneg-hvx.c
   src/f32-vunary/gen/f32-vsqr-hvx.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x128c4-minmax-hvx.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-4x128c4-minmax-hvx.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x128c4-minmax-hvx.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-4x128c4-minmax-hvx.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x64c4-minmax-hvx.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x128c4-minmax-hvx.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x64c4-minmax-hvx.c
@@ -336,10 +340,6 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndz-hvx-u32.c
   src/f32-vrnd/gen/f32-vrndz-hvx-u64.c
   src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-nr.c
-  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x64c4-minmax-hvx.c
-  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x128c4-minmax-hvx.c
-  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x64c4-minmax-hvx.c
-  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x128c4-minmax-hvx.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x64c4-minmax-hvx.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x128c4-minmax-hvx.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x64c4-minmax-hvx.c

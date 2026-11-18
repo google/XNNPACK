@@ -27,6 +27,31 @@ namespace {
 
 
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_1x128c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x128c4__hvx,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_1x128c4__hvx)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_4x128c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x128c4__hvx,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_4x128c4__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
 #if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qd8_f16_qc2w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni(benchmark::State& state) {
     GEMMBenchmark(state,

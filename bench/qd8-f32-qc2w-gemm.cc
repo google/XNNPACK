@@ -27,6 +27,31 @@ namespace {
 
 
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void qd8_f32_qc2w_gemm_minmax_ukernel_1x128c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x128c4__hvx,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc2w_gemm_minmax_ukernel_1x128c4__hvx)
+
+  static void qd8_f32_qc2w_gemm_minmax_ukernel_4x128c4__hvx(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x128c4__hvx,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc2w_gemm_minmax_ukernel_4x128c4__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
 #if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qd8_f32_qc2w_gemm_minmax_ukernel_1x8c4__neondot(benchmark::State& state) {
     GEMMBenchmark(state,
