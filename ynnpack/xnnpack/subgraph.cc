@@ -305,10 +305,10 @@ xnn_status xnn_define_convolution_2d(
       subgraph->scale_ids[filter_id] = split_id;
     }
 
-    split_id = YNN_INVALID_VALUE_ID;
     if (bias_id != XNN_INVALID_VALUE_ID) {
       const size_t bias_split[] = {groups, 1, group_output_channels};
 
+      split_id = YNN_INVALID_VALUE_ID;
       status = ynn_define_split_dim(subgraph->ynn, 0, 3, bias_split, bias_id,
                                     &split_id, /*flags=*/0);
       if (status != ynn_status_success) {
@@ -316,6 +316,18 @@ xnn_status xnn_define_convolution_2d(
       }
       ynn::copy_quantization(subgraph, bias_id, split_id);
       bias_id = split_id;
+
+      uint32_t bias_scale_id = ynn::get_scale_id(subgraph, bias_id);
+      if (bias_scale_id != YNN_INVALID_VALUE_ID &&
+          ynn::rank_of_value(subgraph, bias_scale_id) >= 1) {
+        split_id = YNN_INVALID_VALUE_ID;
+        status = ynn_define_split_dim(subgraph->ynn, -1, 3, bias_split,
+                                      bias_scale_id, &split_id, /*flags=*/0);
+        if (status != ynn_status_success) {
+          return ynn::xnn_status_from_ynn(status);
+        }
+        subgraph->scale_ids[bias_id] = split_id;
+      }
     }
 
     uint32_t input_zero_point_id = ynn::get_zero_point_id(subgraph, input_id);

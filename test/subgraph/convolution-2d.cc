@@ -53,6 +53,9 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
   if (!bias.empty()) {
     bias = bias.split(0, {groups, group_output_channels});
   }
+  if (!bias_scale.empty()) {
+    bias_scale = bias_scale.split(0, {groups, group_output_channels});
+  }
   filter = filter.split(0, {groups, group_output_channels});
   if (!filter_scale.empty()) {
     filter_scale = filter_scale.split(0, {groups, group_output_channels});
@@ -210,6 +213,18 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
       params.output_max = std::numeric_limits<float>::infinity();
     }
 
+    int32_t bias_zero_point;
+    Tensor<Scale> bias_scale({bias.size()});
+    if (xnn_datatype_is_channelwise_quantized(datatype_of<Bias>())) {
+      bias_zero_point = filter_quantization.zero_point;
+      for (size_t k = 0; k < bias_scale.extent(0); k++) {
+        bias_scale(k) = input_quantization.scale * filter_scale(k);
+      }
+    } else {
+      bias_zero_point = bias_quantization.zero_point;
+      bias_scale.fill(bias_quantization.scale);
+    }
+
     SubgraphTester subgraph(4);
     const uint32_t input_id = 0;
     const uint32_t filter_id = 1;
@@ -235,8 +250,14 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
                                filter_quantization);
     }
     if (bias_id != XNN_INVALID_VALUE_ID) {
-      subgraph.AddStaticTensor(bias.extents(), bias_id, bias.base(),
-                               bias_quantization);
+      if (xnn_datatype_is_channelwise_quantized(datatype_of<Bias>())) {
+        subgraph.AddStaticChannelwiseQuantizedTensor(
+            bias.extents(), /*channel_dim=*/0, datatype_of<Bias>(),
+            bias_scale.data(), bias_id, /*flags=*/0, bias.base());
+      } else {
+        subgraph.AddStaticTensor(bias.extents(), bias_id, bias.base(),
+                                 bias_quantization);
+      }
     }
     subgraph
         .AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization,
@@ -304,17 +325,6 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
           .InvokeRuntime();
 
       // Verify results.
-      int32_t bias_zero_point;
-      Tensor<Scale> bias_scale({bias.size()});
-      if (xnn_datatype_is_channelwise_quantized(datatype_of<Bias>())) {
-        bias_zero_point = filter_quantization.zero_point;
-        for (size_t k = 0; k < bias_scale.extent(0); k++) {
-          bias_scale(k) = input_quantization.scale * filter_scale(k, 0);
-        }
-      } else {
-        bias_zero_point = bias_quantization.zero_point;
-        bias_scale.fill(bias_quantization.scale);
-      }
       Tensor<float> expected = ReferenceImpl(
           input, filter, bias, input_quantization,
           filter_quantization.zero_point, filter_scale, bias_zero_point,
