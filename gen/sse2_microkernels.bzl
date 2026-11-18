@@ -6,6 +6,7 @@
 #
 
 PROD_SSE2_MICROKERNEL_SRCS = [
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u32.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-u32.c",
     "src/f16-vunary/gen/f16-vabs-sse2-u16.c",
     "src/f16-vunary/gen/f16-vneg-sse2-u16.c",
@@ -116,6 +117,9 @@ PROD_SSE2_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_SSE2_MICROKERNEL_SRCS = [
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u8.c",
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u16.c",
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u24.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-u8.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-u16.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-u24.c",
