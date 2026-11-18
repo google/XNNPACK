@@ -271,6 +271,8 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_avx512": [
           # go/keep-sorted start
+          (abs_fp32, (32, 1), consistent),
+          (abs_fp64, (16, 1), consistent),
           (approx_erf_fp32, (32, 1)),
           (approx_tanh_fp32, (32, 1)),
           (ceil_fp32, (32, 1), consistent),
