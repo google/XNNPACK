@@ -10,6 +10,8 @@ PROD_SME2_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_SME2_MICROKERNEL_SRCS = [
+    "src/f32-dwconv/f32-dwconv-9p1vc-minmax-sme2.c",
+    "src/f32-dwconv/f32-dwconv-9p4xvc-minmax-sme2.c",
     "src/pf16-gemm/pf16-gemm-1x32c2-minmax-sme2.c",
     "src/pf16-gemm/pf16-gemm-32x32c2-minmax-sme2.c",
     "src/pf32-gemm/pf32-gemm-1x32-minmax-sme2.c",
