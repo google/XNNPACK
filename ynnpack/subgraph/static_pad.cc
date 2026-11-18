@@ -76,11 +76,17 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
   output.extents = input.extents;
 
   for (const ynn_node::static_pad::padding& p : op.paddings) {
-    if ((p.pre_padding + p.post_padding) != 0) {
+    const slinky::index_t total_padding =
+        static_cast<slinky::index_t>(p.pre_padding) +
+        static_cast<slinky::index_t>(p.post_padding);
+    // Tensor extents are >= 0, so positive total padding cannot underflow 0;
+    // omitting max(0, ...) avoids blocking Slinky from canceling it later.
+    if (total_padding > 0) {
+      output.extents[p.axis] =
+          slinky::simplify(output.extent(p.axis) + total_padding);
+    } else if (total_padding < 0) {
       output.extents[p.axis] = slinky::simplify(
-          slinky::max(0, output.extent(p.axis) +
-                             (static_cast<slinky::index_t>(p.pre_padding) +
-                              static_cast<slinky::index_t>(p.post_padding))));
+          slinky::max(0, output.extent(p.axis) + total_padding));
     }
   }
 

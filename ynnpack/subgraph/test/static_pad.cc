@@ -154,4 +154,25 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::Range(1, 4)),
     test_param_to_string<Pad::ParamType>);
 
+TEST(Pad, positive_padding_cancels_stencil_extent) {
+  const uint32_t input_id = 0;
+  uint32_t padded_id = YNN_INVALID_VALUE_ID;
+  uint32_t stenciled_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(1);
+  subgraph.AddInput(ynn_type_fp32, 1, input_id)
+      .AddTensor(ynn_type_fp32, 1, padded_id)
+      .AddTensor(ynn_type_fp32, 2, stenciled_id)
+      .AddPad({0}, {1}, {1}, input_id, YNN_INVALID_VALUE_ID, padded_id)
+      .AddStencilCopy({0}, {0}, {3}, {1}, {1}, padded_id, YNN_INVALID_VALUE_ID,
+                      stenciled_id);
+
+  const int32_t axes[] = {0};
+  uint32_t broadcast_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_broadcast_like(subgraph.GetSubgraph(), 1, axes, input_id,
+                                      stenciled_id, &broadcast_id, /*flags=*/0),
+            ynn_status_success);
+  EXPECT_EQ(broadcast_id, input_id);
+}
+
 }  // namespace ynn
