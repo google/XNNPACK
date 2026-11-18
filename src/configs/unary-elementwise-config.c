@@ -187,11 +187,19 @@ static void init_bf16_to_f32_cvt_config(void) {
         bf16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__avx512skx_u16);
         bf16_to_f32_cvt_config.element_tile = 16;
       } else
-    #endif
-    {
-      bf16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__scalar_u2);
-      bf16_to_f32_cvt_config.element_tile = 2;
-    }
+#endif
+#if XNN_ENABLE_AVX2
+          if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
+        bf16_to_f32_cvt_config.ukernel =
+            XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__avx2_u16);
+        bf16_to_f32_cvt_config.element_tile = 16;
+      } else
+#endif
+      {
+        bf16_to_f32_cvt_config.ukernel =
+            XNN_INIT_UNARY_UKERNEL(xnn_bf16_f32_vcvt_ukernel__scalar_u2);
+        bf16_to_f32_cvt_config.element_tile = 2;
+      }
 #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
