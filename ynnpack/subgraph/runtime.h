@@ -69,8 +69,16 @@ struct ynn_runtime {
   // This implements the logic to evaluate the symbolic shapes.
   slinky::stmt reshape_impl;
 
-  // True if `reshape` has succeeded since the shape of an external value was
-  // last set.
+  struct reshape_check {
+    const ynn_node* node;
+    const ynn_node::check* check;
+  };
+  std::vector<reshape_check> reshape_checks;
+  std::vector<uint32_t> external_value_ids;
+  std::vector<uint32_t> external_output_ids;
+
+  // True if `reshape` has succeeded since the shape of an external value last
+  // changed.
   bool is_reshaped = false;
 
   // The evaluateable slinky pipeline, and the context to run it.
@@ -107,7 +115,6 @@ struct ynn_runtime {
 
   ynn_status build();
   ynn_status reshape();
-  ynn_status setup();
   ynn_status invoke();
 
   slinky::buffer_expr_ptr null_buffer_ = nullptr;

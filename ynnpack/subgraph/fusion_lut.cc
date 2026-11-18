@@ -339,7 +339,6 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   }
 
   if (runtime.reshape() != ynn_status_success ||
-      runtime.setup() != ynn_status_success ||
       runtime.invoke() != ynn_status_success) {
     return false;
   }

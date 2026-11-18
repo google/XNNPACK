@@ -29,6 +29,7 @@
 #ifdef YNN_ENABLE_TSL_PROFILER
 #include "xla/tsl/profiler/lib/traceme.h"
 #endif
+#include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/ref_count.h"
@@ -968,38 +969,35 @@ auto make_reshape_impl(ynn_runtime* runtime) {
   return [runtime](const slinky::call_stmt*,
                    slinky::eval_context& ctx) -> slinky::index_t {
     int errors = 0;
-    for (const ynn_node& node : runtime->subgraph->nodes) {
-      if (!node.is_valid()) continue;
-      for (const auto& check : node.checks) {
-        if (!slinky::evaluate(check.condition, ctx)) {
-          std::stringstream error;
-          for (const auto& i : check.message) {
-            std::visit(overloaded{
-                           [&](const char* s) { error << s; },
-                           [&](slinky::expr e) { error << evaluate(e, ctx); },
-                           [&](ynn_node::input_idx i) {
-                             error << "input " << i.idx << " (id "
-                                   << node.inputs[i.idx] << ")";
-                           },
-                           [&](ynn_node::output_idx i) {
-                             error << "output " << i.idx << " (id "
-                                   << node.outputs[i.idx] << ")";
-                           },
-                       },
-                       i);
-          }
-          YNN_LOG_ERROR() << "Error in node '" << node.name() << ": "
-                          << error.str();
-          ++errors;
+    for (const auto& entry : runtime->reshape_checks) {
+      if (!slinky::evaluate(entry.check->condition, ctx)) {
+        std::stringstream error;
+        for (const auto& i : entry.check->message) {
+          std::visit(overloaded{
+                         [&](const char* s) { error << s; },
+                         [&](slinky::expr e) { error << evaluate(e, ctx); },
+                         [&](ynn_node::input_idx i) {
+                           error << "input " << i.idx << " (id "
+                                 << entry.node->inputs[i.idx] << ")";
+                         },
+                         [&](ynn_node::output_idx i) {
+                           error << "output " << i.idx << " (id "
+                                 << entry.node->outputs[i.idx] << ")";
+                         },
+                     },
+                     i);
         }
+        YNN_LOG_ERROR() << "Error in node '" << entry.node->name() << ": "
+                        << error.str();
+        ++errors;
       }
     }
     if (errors) {
       return ynn_status_invalid_parameter;
     }
 
-    for (auto& i : runtime->values) {
-      if (!i.is_valid() || !i.is_external()) continue;
+    for (uint32_t id : runtime->external_value_ids) {
+      ynn_runtime_value& i = runtime->values[id];
       if (i.is_external_output()) {
         assert(i.data);
         assert(i.data->rank == i.rank());
@@ -1220,39 +1218,97 @@ ynn_status ynn_runtime::build() {
                                     globals.lets, options);
   funcs.clear();
 
+  external_output_ids.clear();
+  external_value_ids.clear();
+  reshape_checks.clear();
+
+  std::vector<const slinky::raw_buffer*> input_bufs;
+  std::vector<const slinky::raw_buffer*> output_bufs;
+
+  std::set<slinky::var> needed_vars;
+  auto add_deps = [&](const slinky::expr& e) {
+    if (!e.defined()) return;
+    for (slinky::var v : slinky::find_dependencies(e)) {
+      needed_vars.insert(v);
+    }
+  };
+
+  for (const ynn_node& node : subgraph->nodes) {
+    if (!node.is_valid()) continue;
+    for (const auto& check : node.checks) {
+      reshape_checks.push_back({&node, &check});
+      add_deps(check.condition);
+      for (const auto& i : check.message) {
+        if (const auto* e = std::get_if<slinky::expr>(&i)) {
+          add_deps(*e);
+        }
+      }
+    }
+  }
+
+  for (const ynn_runtime_value& value : values) {
+    if (!value.is_valid()) continue;
+    if (value.is_external_input()) {
+      assert(value.data);
+      input_bufs.push_back(value.data.get());
+    } else if (value.is_external_output()) {
+      assert(value.data);
+      output_bufs.push_back(value.data.get());
+      external_output_ids.push_back(value.id);
+    }
+    if (value.is_external()) {
+      external_value_ids.push_back(value.id);
+      if (value.is_external_output()) {
+        for (size_t d = 0; d < value.rank(); ++d) {
+          add_deps(value.physical_extent(d));
+        }
+      }
+      for (size_t d = 0; d < value.rank(); ++d) {
+        const slinky::expr& stride = value.buffer->dim(d).stride;
+        if (stride.defined() &&
+            !slinky::is_variable(stride, value.buffer->sym(),
+                                 slinky::buffer_field::stride, d)) {
+          add_deps(stride);
+        }
+      }
+    }
+  }
+
+  std::vector<std::pair<slinky::var, slinky::expr>> reshape_lets;
+  for (auto it = globals.lets.rbegin(); it != globals.lets.rend(); ++it) {
+    if (needed_vars.count(it->first)) {
+      reshape_lets.push_back(*it);
+      add_deps(it->second);
+    }
+  }
+  std::reverse(reshape_lets.begin(), reshape_lets.end());
+
   slinky::call_stmt::attributes attrs;
   attrs.name = "ynn_reshape_runtime";
-  reshape_impl = slinky::let_stmt::make(
-      globals.lets, slinky::call_stmt::make(make_reshape_impl(this), {}, {}, {},
-                                            std::move(attrs)));
+  reshape_impl = slinky::call_stmt::make(make_reshape_impl(this), {}, {}, {},
+                                         std::move(attrs));
+  if (!reshape_lets.empty()) {
+    reshape_impl = slinky::let_stmt::make(std::move(reshape_lets),
+                                          std::move(reshape_impl));
+  }
+  pipeline.setup(input_bufs, output_bufs, eval_context);
   return ynn_status_success;
 }
 
 ynn_status ynn_runtime::reshape() {
-  setup();
+  if (is_reshaped) {
+    for (uint32_t id : external_output_ids) {
+      ynn::init_buffer_strides(*values[id].data);
+    }
+    return ynn_status_success;
+  }
+#ifdef YNN_ENABLE_PERFETTO
+  ynn::scoped_perfetto_trace trace("ynn_reshape_runtime");
+#endif
   slinky::index_t result = slinky::evaluate(reshape_impl, eval_context);
   is_reshaped = result == 0;
   static_assert(ynn_status_success == 0, "");
   return static_cast<ynn_status>(result);
-}
-
-ynn_status ynn_runtime::setup() {
-  std::vector<const slinky::raw_buffer*> inputs;
-  std::vector<const slinky::raw_buffer*> outputs;
-  for (const ynn_runtime_value& value : values) {
-    if (!value.is_valid()) {
-      // This value was removed or never defined.
-    } else if (value.is_external_input()) {
-      assert(value.data);
-      inputs.push_back(value.data.get());
-    } else if (value.is_external_output()) {
-      assert(value.data);
-      outputs.push_back(value.data.get());
-    }
-  }
-
-  pipeline.setup(inputs, outputs, eval_context);
-  return ynn_status_success;
 }
 
 ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
@@ -1272,7 +1328,6 @@ ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
   auto runtime =
       std::make_unique<ynn_runtime>(subgraph, slinky_threadpool, flags);
   YNN_RETURN_IF_ERROR(runtime->build());
-  YNN_RETURN_IF_ERROR(runtime->setup());
 
   *runtime_out = runtime.release();
   return ynn_status_success;
@@ -1307,8 +1362,16 @@ ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
     return ynn_status_invalid_parameter;
   }
   ynn_runtime_value& value = runtime->value(external_id);
+  if (value.is_external_input()) {
+    size_t old_extents[YNN_MAX_TENSOR_RANK];
+    size_t old_rank = YNN_MAX_TENSOR_RANK;
+    YNN_RETURN_IF_ERROR(value.get_external_shape(&old_rank, old_extents));
+    if (old_rank != rank ||
+        ynn::any_n(rank, [&](size_t i) { return old_extents[i] != dims[i]; })) {
+      runtime->is_reshaped = false;
+    }
+  }
   YNN_RETURN_IF_ERROR(value.set_external_shape(rank, dims));
-  runtime->is_reshaped = false;
   return ynn_status_success;
 }
 
@@ -1325,9 +1388,6 @@ ynn_status ynn_get_external_value_shape(ynn_runtime_t runtime,
 }
 
 ynn_status ynn_reshape_runtime(ynn_runtime_t runtime) {
-#ifdef YNN_ENABLE_PERFETTO
-  ynn::scoped_perfetto_trace trace("ynn_reshape_runtime");
-#endif
   YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   return runtime->reshape();
 }

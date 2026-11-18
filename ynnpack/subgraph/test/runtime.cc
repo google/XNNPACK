@@ -344,4 +344,77 @@ TEST(runtime, external_strides_required_by_reshape) {
   ASSERT_THAT(x, testing::ElementsAreArray(a));
 }
 
+TEST(runtime, reshape_skips_unchanged_shape) {
+  constexpr uint32_t a_id = 0;
+  constexpr uint32_t b_id = 1;
+  constexpr uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), 2, a_id)
+      .AddInput(type_of<float>(), 2, b_id)
+      .AddOutput(type_of<float>(), 2, x_id)
+      .AddBinary(ynn_binary_add, a_id, b_id, x_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  const size_t shape1[] = {3, 5};
+  const size_t bad_shape[] = {3, 4};
+  const size_t shape2[] = {2, 6};
+
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, shape1),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), b_id, 2, bad_shape),
+            ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_invalid_parameter);
+  // Retrying reshape after a failure must still fail.
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_invalid_parameter);
+
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), b_id, 2, shape1),
+            ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  EXPECT_EQ(runtime.GetExternalTensorShape(x_id), (std::vector<size_t>{3, 5}));
+
+  // Setting an unchanged shape keeps the runtime reshaped, while still
+  // resetting custom output strides on reshape.
+  std::vector<float> a(3 * 5, 2.0f);
+  std::vector<float> b(3 * 5, 3.0f);
+  std::vector<float> x(3 * 7, 0.0f);
+  const size_t x_strides[] = {7 * sizeof(float), sizeof(float)};
+  const size_t dense_strides1[] = {5 * sizeof(float), sizeof(float)};
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), x_id, x.data(), 2,
+                                           x_strides),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, shape1),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), b_id, 2, shape1),
+            ynn_status_success);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  EXPECT_THAT(GetStrides(runtime.get(), x_id),
+              testing::ElementsAreArray(dense_strides1));
+
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), a_id, a.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), b_id, b.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), x_id, x.data()),
+            ynn_status_success);
+  ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+  for (size_t i = 0; i < 15; ++i) {
+    EXPECT_FLOAT_EQ(x[i], 5.0f);
+  }
+
+  // Changing a shape requires a reshape before setting custom strides and
+  // updates the output shape.
+  const size_t x_strides2[] = {8 * sizeof(float), sizeof(float)};
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, shape2),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), b_id, 2, shape2),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data_v2(runtime.get(), x_id, x.data(), 2,
+                                           x_strides2),
+            ynn_status_invalid_parameter);
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  EXPECT_EQ(runtime.GetExternalTensorShape(x_id), (std::vector<size_t>{2, 6}));
+}
+
 }  // namespace ynn

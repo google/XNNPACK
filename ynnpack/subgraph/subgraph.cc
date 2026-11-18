@@ -968,14 +968,10 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
       values[i].data =
           slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,
                                    folded.data->dims, YNN_ALLOCATION_ALIGNMENT);
-      // Use the new value as the output of the constant folding runtime.
-      folded.data = values[i].data;
+      // Write directly into the new constant's buffer without replacing
+      // `folded.data`, so `pipeline.setup` bindings remain valid.
+      folded.data->base = values[i].data->base;
     }
-  }
-
-  status = runtime.setup();
-  if (status != ynn_status_success) {
-    return status;
   }
 
   status = runtime.invoke();
