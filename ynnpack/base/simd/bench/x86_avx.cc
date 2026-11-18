@@ -16,6 +16,9 @@ BENCH_PARTIAL_LOAD_STORE(avx, s8, 32);
 BENCH_PARTIAL_LOAD_STORE(avx, s16, 16);
 BENCH_PARTIAL_LOAD_STORE(avx, s32, 8);
 
+BENCH_CAST(avx, bf16, f32, 8);
+BENCH_CAST(avx, f8_e5m2, f16, 16);
+
 BENCH_UNARY(avx, exp, f32, 8);
 BENCH_UNARY(avx, exp, f64, 4);
 BENCH_UNARY(avx, expm1, f32, 8);

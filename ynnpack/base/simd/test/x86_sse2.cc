@@ -148,6 +148,7 @@ TEST_ALL(x86_sse2, s16, 8);
 TEST_ALL(x86_sse2, s32, 4);
 
 TEST_CAST(x86_sse2, f32, bf16x8);
+TEST_CAST(x86_sse2, f16, f8_e5m2x16);
 TEST_CAST(x86_sse2, s32, u8x16);
 TEST_CAST(x86_sse2, s32, s8x16);
 TEST_CAST(x86_sse2, f32, s32x4);

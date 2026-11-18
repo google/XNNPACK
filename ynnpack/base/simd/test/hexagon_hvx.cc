@@ -98,6 +98,8 @@ TEST_HORIZONTAL_MAX(hvx, s32, 32);
 TEST_HORIZONTAL_MAX(hvx, f16, 64);
 TEST_HORIZONTAL_MAX(hvx, f32, 32);
 
+TEST_CAST(hvx, f32, bf16x64);
+TEST_CAST(hvx, f16, f8_e5m2x128);
 TEST_CAST(hvx, s32, u8x128);
 TEST_CAST(hvx, s32, s8x128);
 TEST_CAST(hvx, s32, s16x64);
