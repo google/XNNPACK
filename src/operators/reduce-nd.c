@@ -128,6 +128,17 @@ static uint32_t get_identity_value(xnn_operator_t reduce_op, size_t num_reductio
   return identity_value;
 }
 
+// Tile the innermost output dimension so that each task reduces at least this
+// many input elements and small reductions don't wake the thread pool. Outer
+// output dimensions are not tiled.
+#define XNN_MIN_REDUCE_ELEMENTS_PER_TASK 4096
+
+static size_t reduce_tile(size_t reduction_elements, size_t granularity) {
+  return round_up(divide_round_up(XNN_MIN_REDUCE_ELEMENTS_PER_TASK,
+                                  max(reduction_elements, 1)),
+                  granularity);
+}
+
 static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     xnn_operator_t reduce_op, size_t num_reduction_axes,
     const int64_t* reduction_axes, size_t num_input_dims,
@@ -279,7 +290,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[0] = normalized_input_shape[0];
     reduce_op->compute[0].range[1] = normalized_input_shape[2];
     reduce_op->compute[0].range[2] = normalized_input_shape[4];
-    reduce_op->compute[0].tile[0] = 1;
+    reduce_op->compute[0].tile[0] = reduce_tile(num_reduction_elements, 1);
     reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
@@ -354,7 +365,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[0] = normalized_input_shape[1];
     reduce_op->compute[0].range[1] = normalized_input_shape[3];
     reduce_op->compute[0].range[2] = normalized_input_shape[5];
-    reduce_op->compute[0].tile[0] = max(reduce_op->reduce_config->rd_width, 1);
+    reduce_op->compute[0].tile[0] = reduce_tile(
+        num_reduction_elements, max(reduce_op->reduce_config->rd_width, 1));
     reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i * 2+3)]);

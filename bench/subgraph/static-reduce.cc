@@ -184,6 +184,10 @@ static void FP32Reduce(benchmark::State& state,
 
 static void ReduceArguments(benchmark::Benchmark* b) {
   b->ArgNames({"K1", "K2", "K3", "NormMask"});
+  b->Args({1, 8, 128, 4});
+  b->Args({1, 16, 128, 4});
+  b->Args({1, 2048, 128, 4});
+  b->Args({1, 128, 1024, 4});
   for (int norm_mask = 1; norm_mask < 8; ++norm_mask) {
     if ((norm_mask & (1 << 0)) == 0) {
       b->Args({1, 1024, 64, norm_mask});

@@ -37,6 +37,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       layer-norm
       mobilenet
       softmax
+      static-reduce
       transformer)
   FOREACH(BENCH ${SUBGRAPH_BENCHMARKS})
     ADD_EXECUTABLE(subgraph-${BENCH}-bench ${BENCH}.cc)

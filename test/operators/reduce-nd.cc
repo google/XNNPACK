@@ -621,3 +621,22 @@ std::vector<TestParam> GenerateTests() {
 
 INSTANTIATE_TEST_SUITE_P(ND, ReduceNDTest, testing::ValuesIn(GenerateTests()),
                          TestParam::GetName);
+
+// Large enough that the reduction is split into several multi-output tasks,
+// with a partial last task. The reduction size is odd so that the quantized
+// mean is never an exact .5 tie, which the reference rounds differently.
+TEST_F(ReduceNDTest, multithreaded_tiles) {
+  for (const auto& [input_shape, reduction_axis] :
+       {std::make_pair(std::vector<size_t>{67, 1001}, 1),
+        std::make_pair(std::vector<size_t>{1001, 131}, 0)}) {
+    for (xnn_reduce_operator operation : {xnn_reduce_mean, xnn_reduce_max}) {
+      ReduceOperatorTester tester;
+      tester.operation(operation)
+          .input_shape(input_shape)
+          .reduction_axes({reduction_axis})
+          .threadpool(ReduceNDTest::threadpool());
+      tester.Test<ReduceOperatorTester::F32Config>();
+      tester.Test<ReduceOperatorTester::QS8Config>();
+    }
+  }
+}
