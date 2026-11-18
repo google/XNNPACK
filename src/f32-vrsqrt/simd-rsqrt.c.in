@@ -66,6 +66,7 @@ $for BATCH_TILE in BATCH_TILES:
     const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
 
     const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
+    const xnn_simd_f32_t kMinusZero = xnn_set1_f32(-0.0f);
 
     $if BATCH_TILE > SIMD_SIZE:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
@@ -98,6 +99,17 @@ $for BATCH_TILE in BATCH_TILES:
         $for N in range(SIMD_TILE):
           vy${ABC[N]} = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx${ABC[N]}), vy${ABC[N]});
 
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vzero_mask_${ABC[N]} =
+              xnn_cmpeq_f32(vx${ABC[N]}, xnn_zero_f32());
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vsigned_inf_${ABC[N]} =
+              xnn_or_f32(kInf, xnn_and_f32(vx${ABC[N]}, kMinusZero));
+        $for N in range(SIMD_TILE):
+          vy${ABC[N]} = xnn_or_f32(
+              xnn_andnot_f32(vzero_mask_${ABC[N]}, vy${ABC[N]}),
+              xnn_and_f32(vzero_mask_${ABC[N]}, vsigned_inf_${ABC[N]}));
+
         // Store the results.
         xnn_storeu_f32(output, vy${ABC[0]});
         $for N in range(1, SIMD_TILE):
@@ -125,6 +137,12 @@ $for BATCH_TILE in BATCH_TILES:
       // Set output to 0 where the input is infinity (and not NaN)
       vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
+      const xnn_simd_f32_t vzero_mask = xnn_cmpeq_f32(vx, xnn_zero_f32());
+      const xnn_simd_f32_t vsigned_inf =
+          xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+      vy = xnn_or_f32(
+          xnn_andnot_f32(vzero_mask, vy), xnn_and_f32(vzero_mask, vsigned_inf));
+
       xnn_storeu_f32(output, vy);
       output += xnn_simd_size_f32;
     }
@@ -149,6 +167,14 @@ $for BATCH_TILE in BATCH_TILES:
 
       // Set output to 0 where the input is infinity (and not NaN)
       vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
+      const xnn_simd_f32_t vzero_mask_tail =
+          xnn_cmpeq_f32(vx, xnn_zero_f32());
+      const xnn_simd_f32_t vsigned_inf_tail =
+          xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+      vy = xnn_or_f32(
+          xnn_andnot_f32(vzero_mask_tail, vy),
+          xnn_and_f32(vzero_mask_tail, vsigned_inf_tail));
 
       xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
     }

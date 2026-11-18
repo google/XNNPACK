@@ -64,6 +64,7 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u4(
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
 
   const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
+  const xnn_simd_f32_t kMinusZero = xnn_set1_f32(-0.0f);
 
 
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
@@ -85,6 +86,12 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u4(
 
     // Set output to 0 where the input is infinity (and not NaN)
     vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
+    const xnn_simd_f32_t vzero_mask = xnn_cmpeq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf =
+        xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+    vy = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask, vy), xnn_and_f32(vzero_mask, vsigned_inf));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -111,6 +118,14 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u4(
     // Set output to 0 where the input is infinity (and not NaN)
     vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
+    const xnn_simd_f32_t vzero_mask_tail =
+        xnn_cmpeq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf_tail =
+        xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+    vy = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_tail, vy),
+        xnn_and_f32(vzero_mask_tail, vsigned_inf_tail));
+
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
@@ -128,6 +143,7 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u8(
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
 
   const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
+  const xnn_simd_f32_t kMinusZero = xnn_set1_f32(-0.0f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -158,6 +174,21 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u8(
     vy0 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx0), vy0);
     vy1 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx1), vy1);
 
+    const xnn_simd_f32_t vzero_mask_0 =
+        xnn_cmpeq_f32(vx0, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_1 =
+        xnn_cmpeq_f32(vx1, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf_0 =
+        xnn_or_f32(kInf, xnn_and_f32(vx0, kMinusZero));
+    const xnn_simd_f32_t vsigned_inf_1 =
+        xnn_or_f32(kInf, xnn_and_f32(vx1, kMinusZero));
+    vy0 = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_0, vy0),
+        xnn_and_f32(vzero_mask_0, vsigned_inf_0));
+    vy1 = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_1, vy1),
+        xnn_and_f32(vzero_mask_1, vsigned_inf_1));
+
     // Store the results.
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 4, vy1);
@@ -184,6 +215,12 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u8(
     // Set output to 0 where the input is infinity (and not NaN)
     vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
+    const xnn_simd_f32_t vzero_mask = xnn_cmpeq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf =
+        xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+    vy = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask, vy), xnn_and_f32(vzero_mask, vsigned_inf));
+
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
   }
@@ -209,6 +246,14 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u8(
     // Set output to 0 where the input is infinity (and not NaN)
     vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
+    const xnn_simd_f32_t vzero_mask_tail =
+        xnn_cmpeq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf_tail =
+        xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+    vy = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_tail, vy),
+        xnn_and_f32(vzero_mask_tail, vsigned_inf_tail));
+
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
@@ -226,6 +271,7 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u16(
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
 
   const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
+  const xnn_simd_f32_t kMinusZero = xnn_set1_f32(-0.0f);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -274,6 +320,35 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u16(
     vy2 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx2), vy2);
     vy3 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx3), vy3);
 
+    const xnn_simd_f32_t vzero_mask_0 =
+        xnn_cmpeq_f32(vx0, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_1 =
+        xnn_cmpeq_f32(vx1, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_2 =
+        xnn_cmpeq_f32(vx2, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_3 =
+        xnn_cmpeq_f32(vx3, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf_0 =
+        xnn_or_f32(kInf, xnn_and_f32(vx0, kMinusZero));
+    const xnn_simd_f32_t vsigned_inf_1 =
+        xnn_or_f32(kInf, xnn_and_f32(vx1, kMinusZero));
+    const xnn_simd_f32_t vsigned_inf_2 =
+        xnn_or_f32(kInf, xnn_and_f32(vx2, kMinusZero));
+    const xnn_simd_f32_t vsigned_inf_3 =
+        xnn_or_f32(kInf, xnn_and_f32(vx3, kMinusZero));
+    vy0 = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_0, vy0),
+        xnn_and_f32(vzero_mask_0, vsigned_inf_0));
+    vy1 = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_1, vy1),
+        xnn_and_f32(vzero_mask_1, vsigned_inf_1));
+    vy2 = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_2, vy2),
+        xnn_and_f32(vzero_mask_2, vsigned_inf_2));
+    vy3 = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_3, vy3),
+        xnn_and_f32(vzero_mask_3, vsigned_inf_3));
+
     // Store the results.
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 4, vy1);
@@ -302,6 +377,12 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u16(
     // Set output to 0 where the input is infinity (and not NaN)
     vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
+    const xnn_simd_f32_t vzero_mask = xnn_cmpeq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf =
+        xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+    vy = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask, vy), xnn_and_f32(vzero_mask, vsigned_inf));
+
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
   }
@@ -326,6 +407,14 @@ void xnn_f32_vrsqrt_ukernel__sse2_rsqrt_u16(
 
     // Set output to 0 where the input is infinity (and not NaN)
     vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
+    const xnn_simd_f32_t vzero_mask_tail =
+        xnn_cmpeq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vsigned_inf_tail =
+        xnn_or_f32(kInf, xnn_and_f32(vx, kMinusZero));
+    vy = xnn_or_f32(
+        xnn_andnot_f32(vzero_mask_tail, vy),
+        xnn_and_f32(vzero_mask_tail, vsigned_inf_tail));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
