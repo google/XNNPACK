@@ -12,6 +12,7 @@ load(
     ":build_defs.bzl",
     "xnnpack_cc_library",
     "xnnpack_cxx_library",
+    "xnnpack_genrule",
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_min_size_copts",
     "xnnpack_select_if",
@@ -596,16 +597,20 @@ xnnpack_source_list_file(
 # Avoid py_binary here: depending on rules_python pulls Python/Go/host
 # toolchains into every C++ build (including mobile/Android) and inflates Bazel
 # JVM heap and clean-build time.
-genrule(
+xnnpack_genrule(
     name = "generate_build_identifier",
     srcs = [
-        ":build_identifier_ukernel_srcs_list",
         ":build_identifier_ukernel_srcs",
+        ":build_identifier_ukernel_srcs_list",
     ],
     outs = ["src/build_identifier.c"],
     cmd = """
       set -eu
       HEX=$$(LC_ALL=C sort "$(execpath :build_identifier_ukernel_srcs_list)" | tr '\\n' '\\0' | xargs -0 cat | (sha256sum 2>/dev/null || shasum -a 256) | awk '{print tolower($$1)}')
+      if [ "$${#HEX}" -ne 64 ]; then
+        echo "generate_build_identifier: failed to compute SHA-256 digest" >&2
+        exit 1
+      fi
       {
         echo "// clang-format off"
         echo "// Copyright 2024 Google LLC"
@@ -644,6 +649,58 @@ genrule(
         echo "}"
       } > "$@"
     """,
+    cmd_ps = "; ".join([
+        "[System.Environment]::CurrentDirectory = (Get-Location).ProviderPath",
+        "$$paths = New-Object 'System.Collections.Generic.List[string]'",
+        "foreach ($$l in [System.IO.File]::ReadAllLines('$(execpath :build_identifier_ukernel_srcs_list)')) { if ($$l.Length -gt 0) { $$paths.Add($$l) } }",
+        "$$paths.Sort([System.StringComparer]::Ordinal)",
+        "$$sha = [System.Security.Cryptography.SHA256]::Create()",
+        "foreach ($$p in $$paths) { $$b = [System.IO.File]::ReadAllBytes($$p); if ($$b.Length -gt 0) { [void]$$sha.TransformBlock($$b, 0, $$b.Length, $$null, 0) } }",
+        "[void]$$sha.TransformFinalBlock([byte[]]@(), 0, 0)",
+        "$$h = $$sha.Hash",
+        "$$sha.Dispose()",
+        "if ($$h.Length -ne 32) { throw 'generate_build_identifier: unexpected SHA-256 digest length' }",
+        "$$rows = foreach ($$r in 0,8,16,24) { $$sep = if ($$r -lt 24) { ',' } else { '' }; '  ' + (($$r..($$r + 7) | ForEach-Object { $$h[$$_].ToString().PadLeft(3) }) -join ', ') + $$sep }",
+        "$$lines = @(" + ", ".join([
+            "'// clang-format off'",
+            "'// Copyright 2024 Google LLC'",
+            "'//'",
+            "'// This source code is licensed under the BSD-style license found in the'",
+            "'// LICENSE file in the root directory of this source tree.'",
+            "''",
+            "'// Auto-generated file. Do not edit!'",
+            "'//   Generator: generate_build_identifier'",
+            "'//'",
+            "'// The following inputs were used to generate this file.'",
+        ]) + ") + @($$paths | ForEach-Object { '// - ' + $$_ }) + @(" + ", ".join([
+            "''",
+            "'#include <stdbool.h>'",
+            "'#include <stdint.h>'",
+            "'#include <stddef.h>'",
+            "'#include <string.h>'",
+            "''",
+            "'static const uint8_t xnn_build_identifier[] = {'",
+        ]) + ") + $$rows + @(" + ", ".join([
+            "'};'",
+            "''",
+            "'size_t xnn_experimental_get_build_identifier_size() {'",
+            "'  return sizeof(xnn_build_identifier);'",
+            "'}'",
+            "''",
+            "'const void* xnn_experimental_get_build_identifier_data() {'",
+            "'  return xnn_build_identifier;'",
+            "'}'",
+            "''",
+            "'bool xnn_experimental_check_build_identifier(const void* data, const size_t size) {'",
+            "'  if (size != xnn_experimental_get_build_identifier_size()) {'",
+            "'    return false;'",
+            "'  }'",
+            "'  return !memcmp(data, xnn_build_identifier, size);'",
+            "'}'",
+            "''",
+        ]) + ")",
+        "[System.IO.File]::WriteAllText('$@', ($$lines -join [char]10), (New-Object System.Text.UTF8Encoding $$false))",
+    ]),
 )
 
 xnnpack_cc_library(

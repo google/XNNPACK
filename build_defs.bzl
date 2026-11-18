@@ -608,3 +608,9 @@ xnnpack_source_list_file = rule(
         "srcs": attr.label_list(allow_files = True),
     },
 )
+
+def xnnpack_genrule(name, cmd_ps = None, **kwargs):
+    """Genrule wrapper that forwards cmd_ps to open-source Bazel."""
+    if cmd_ps != None:
+        kwargs["cmd_ps"] = cmd_ps
+    native.genrule(name = name, **kwargs)
