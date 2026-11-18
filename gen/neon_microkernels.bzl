@@ -6,7 +6,7 @@
 #
 
 PROD_NEON_MICROKERNEL_SRCS = [
-    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u8.c",
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u16.c",
     "src/bf16-rminmax/gen/bf16-rmax-neon-u32-acc4.c",
     "src/bf16-rminmax/gen/bf16-rmin-neon-u32-acc4.c",
     "src/bf16-rminmax/gen/bf16-rminmax-neon-u32-acc4.c",
@@ -211,7 +211,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEON_MICROKERNEL_SRCS = [
-    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u16.c",
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u8.c",
     "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u24.c",
     "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u32.c",
     "src/bf16-rminmax/gen/bf16-rmax-neon-u8.c",

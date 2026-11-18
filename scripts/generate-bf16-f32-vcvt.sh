@@ -4,9 +4,23 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+##################################### SSE2 ####################################
+tools/xngen src/bf16-f32-vcvt/sse2.c.in -D BATCH_TILE=8  -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u8.c &
+tools/xngen src/bf16-f32-vcvt/sse2.c.in -D BATCH_TILE=16 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u16.c &
+tools/xngen src/bf16-f32-vcvt/sse2.c.in -D BATCH_TILE=24 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u24.c &
+tools/xngen src/bf16-f32-vcvt/sse2.c.in -D BATCH_TILE=32 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-sse2-u32.c &
+
+##################################### AVX2 ####################################
+tools/xngen src/bf16-f32-vcvt/avx2.c.in -D BATCH_TILE=8  -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx2-u8.c &
+tools/xngen src/bf16-f32-vcvt/avx2.c.in -D BATCH_TILE=16 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx2-u16.c &
+tools/xngen src/bf16-f32-vcvt/avx2.c.in -D BATCH_TILE=24 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx2-u24.c &
+tools/xngen src/bf16-f32-vcvt/avx2.c.in -D BATCH_TILE=32 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx2-u32.c &
+
 ################################## AVX512SKX ##################################
 tools/xngen src/bf16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=16 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u16.c &
 tools/xngen src/bf16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=32 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u32.c &
+tools/xngen src/bf16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=48 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u48.c &
+tools/xngen src/bf16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=64 -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u64.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/bf16-f32-vcvt/neon.c.in -D BATCH_TILE=8  -o src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u8.c &
