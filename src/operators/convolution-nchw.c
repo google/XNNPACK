@@ -1086,16 +1086,23 @@ static enum xnn_fingerprint_id get_fingerprint_id_for(
   //
   // We can use a dummy config here. We're only interested in the microkernel
   // type populated by `select_convolution2d_ukernel()`.
-  enum xnn_microkernel_type microkernel_type;
+  enum xnn_microkernel_type microkernel_type = xnn_microkernel_type_default;
   {
     struct xnn_dwconv2d_chw_config dummy_config = {};
     const struct xnn_dwconv2d_chw_parameters* dummy_parameters = NULL;
-    select_convolution2d_ukernel(
+    const enum xnn_status status = select_convolution2d_ukernel(
         &microkernel_type, &dummy_parameters, context->input_padding_top,
         context->input_padding_right, context->input_padding_bottom, context->input_padding_left,
         context->kernel_height, context->kernel_width, context->subsampling_height, context->subsampling_width,
         context->dilation_height, context->dilation_width, context->groups, context->group_input_channels,
         context->group_output_channels, context->flags, &dummy_config, context->operator_type);
+    // No microkernel matches these parameters: skip fingerprinting and let
+    // `create_convolution2d_nchw()` report the actual error. Note that
+    // `xnn_status_unsupported_hardware` is expected here for dwconv because of
+    // the dummy config, and the microkernel type is still valid in that case.
+    if (status == xnn_status_unsupported_parameter) {
+      return xnn_fingerprint_id_no_fingerprint;
+    }
   }
 
   // Compute the index in a static map of cases.

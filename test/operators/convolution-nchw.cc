@@ -4021,6 +4021,31 @@ TEST(CONVOLUTION_NCHW_F32, output_channels_overflow) {
   EXPECT_EQ(nullptr, convolution_op);
 }
 
+TEST(CONVOLUTION_NCHW_F32, unsupported_grouped_1x1) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // Grouped 1x1 convolution: no NCHW microkernel supports these parameters.
+  constexpr uint32_t groups = 2;
+  constexpr size_t group_input_channels = 1;
+  constexpr size_t group_output_channels = 2;
+  const std::array<float, groups * group_input_channels * group_output_channels>
+      kernel{};
+  const std::array<float, groups * group_output_channels> bias{};
+  xnn_operator_t convolution_op = nullptr;
+
+  const xnn_status status = xnn_create_convolution2d_nchw_f32(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, group_input_channels,
+      group_output_channels, groups * group_input_channels,
+      groups * group_output_channels, kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), 0, nullptr, &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(xnn_status_unsupported_parameter, status);
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
 TEST(CONVOLUTION_NCHW_F32, batch_stride_overflow) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
