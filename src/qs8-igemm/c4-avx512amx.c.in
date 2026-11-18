@@ -115,8 +115,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     $else:
       const __m512 voutput_min = _mm512_set1_ps(params->${PARAMS_STRUCT}.min);
       const __m512 voutput_max = _mm512_set1_ps(params->${PARAMS_STRUCT}.max);
-    // XNN_FORCE_REALIZATION(voutput_min);
-    // XNN_FORCE_REALIZATION(voutput_max);
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       const __m256i vmask = _mm256_set1_epi8(params->scalar.mask);
       XNN_FORCE_REALIZATION(vmask);
@@ -126,9 +124,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
     const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
-    // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
-    // XNN_FORCE_REALIZATION(voutput_zero_point);
-    // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:

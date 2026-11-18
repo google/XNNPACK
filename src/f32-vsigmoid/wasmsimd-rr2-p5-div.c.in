@@ -51,7 +51,6 @@ void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_u${BATCH_TILE}(
   XNN_FORCE_REALIZATION(vc3);
   XNN_FORCE_REALIZATION(vc2);
   XNN_FORCE_REALIZATION(vc1);
-  // XNN_FORCE_REALIZATION(vone);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   $if BATCH_TILE > 4:

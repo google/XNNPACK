@@ -48,7 +48,6 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u4(
   XNN_FORCE_REALIZATION(vc3);
   XNN_FORCE_REALIZATION(vc2);
   XNN_FORCE_REALIZATION(vc1);
-  // XNN_FORCE_REALIZATION(vone);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

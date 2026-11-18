@@ -96,8 +96,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x16c4__avx512amx_prfm(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
-  // XNN_FORCE_REALIZATION(voutput_min);
-  // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vzero_point = _mm512_set1_epi32((int) quantization_params->zero_point);
   const __m512 vinv_scale = _mm512_set1_ps(quantization_params->inv_scale);
 

@@ -79,10 +79,7 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx256skx_madd(
   const __m256i vinput_zero_point4 = _mm256_set1_epi32((int) quantization_params[4].zero_point);
   const __m256 voutput_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
   const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
-  // XNN_FORCE_REALIZATION(voutput_min);
-  // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0x0F);
-  // XNN_FORCE_REALIZATION(vmask);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);

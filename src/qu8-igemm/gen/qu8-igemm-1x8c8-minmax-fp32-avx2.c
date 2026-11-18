@@ -51,13 +51,9 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
   uint8_t* c0 = c;
 
   const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
-  // XNN_FORCE_REALIZATION(vscale);
   const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
   const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
   const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
-  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
-  // XNN_FORCE_REALIZATION(voutput_zero_point);
-  // XNN_FORCE_REALIZATION(voutput_min);
 
   const __m256i vb_zero_point = _mm256_set1_epi16(params->fp32_scalar.kernel_zero_point);
   XNN_FORCE_REALIZATION(vb_zero_point);

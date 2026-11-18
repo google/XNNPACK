@@ -43,7 +43,6 @@ void xnn_f16_vhswish_ukernel__f16c_u8(
   XNN_FORCE_REALIZATION(vsixth);
   XNN_FORCE_REALIZATION(vthree);
   XNN_FORCE_REALIZATION(vsix);
-  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));

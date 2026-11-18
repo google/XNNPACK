@@ -88,8 +88,6 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x8c8__avx2_madd(
   const __m256i vinput_zero_point5 = _mm256_set1_epi32((int) quantization_params[5].zero_point);
   const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
   const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
-  // XNN_FORCE_REALIZATION(voutput_min);
-  // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0x03);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);

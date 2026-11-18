@@ -40,11 +40,9 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_u8(
 
   XNN_FORCE_REALIZATION(vmagic_bias);
   XNN_FORCE_REALIZATION(vminus_log2e);
-  // XNN_FORCE_REALIZATION(vindex_mask);
   XNN_FORCE_REALIZATION(vln2_hi);
   XNN_FORCE_REALIZATION(vln2_lo);
   XNN_FORCE_REALIZATION(vc2);
-  // XNN_FORCE_REALIZATION(vone);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

@@ -55,10 +55,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
   const __m256 vinput_scale = _mm256_broadcast_ss(&quantization_params->inv_scale);
   const __m256 vmin = _mm256_set1_ps(params->scalar.min);
   const __m256 vmax = _mm256_set1_ps(params->scalar.max);
-  // XNN_FORCE_REALIZATION(vinput_zero_point);
-  // XNN_FORCE_REALIZATION(vinput_scale);
-  // XNN_FORCE_REALIZATION(vmin);
-  // XNN_FORCE_REALIZATION(vmax);
 
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);

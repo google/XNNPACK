@@ -39,9 +39,7 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_nr2fma_u12(
   const float32x4_t vdenorm_cutoff = vmovq_n_f32(0x1.5D589Ep+6f);
   XNN_FORCE_REALIZATION(vmagic_bias);
   XNN_FORCE_REALIZATION(vminus_log2e);
-  // XNN_FORCE_REALIZATION(vindex_mask);
   XNN_FORCE_REALIZATION(vc1);
-  // XNN_FORCE_REALIZATION(vone);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);

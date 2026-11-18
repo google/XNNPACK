@@ -46,10 +46,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__wasmusdot(
   const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
   const v128_t voutput_max = wasm_i8x16_splat(params->fp32_scalar.output_max);
-  //XNN_FORCE_REALIZATION(vmagic_bias);
-  //XNN_FORCE_REALIZATION(vmagic_min);
-  //XNN_FORCE_REALIZATION(vmagic_bias_less_output_zero_point);
-  //XNN_FORCE_REALIZATION(voutput_max);
 
   const v128_t vsign_mask = wasm_u8x16_const_splat(UINT8_C(0x80));
   XNN_FORCE_REALIZATION(vsign_mask);

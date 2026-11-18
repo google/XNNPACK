@@ -95,8 +95,6 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x16c8__avx512skx_madd(
   const __m512i vinput_zero_point6 = _mm512_set1_epi32((int) quantization_params[6].zero_point);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
-  // XNN_FORCE_REALIZATION(voutput_min);
-  // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0x03);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);

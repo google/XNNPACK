@@ -41,7 +41,6 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_u16(
   XNN_FORCE_REALIZATION(vsixth);
   XNN_FORCE_REALIZATION(vthree);
   XNN_FORCE_REALIZATION(vsix);
-  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     float16x8_t vx0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;

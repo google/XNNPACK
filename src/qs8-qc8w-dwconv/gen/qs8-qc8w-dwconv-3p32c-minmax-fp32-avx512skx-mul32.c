@@ -37,12 +37,9 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p32c__avx512skx_mul32(
   assert(output_width != 0);
 
   const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
-  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_set1_epi16((int16_t) params->fp32_scalar.output_zero_point);
   const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
   const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 5, 1, 6, 2, 4, 0);
-  // XNN_FORCE_REALIZATION(voutput_zero_point);
-  // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const int8_t* i0 = input[0];

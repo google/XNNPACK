@@ -48,7 +48,6 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_u12(
   XNN_FORCE_REALIZATION(vc3);
   XNN_FORCE_REALIZATION(vc2);
   XNN_FORCE_REALIZATION(vc1);
-  // XNN_FORCE_REALIZATION(vone);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {

@@ -90,8 +90,6 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.min));
   const __m512 voutput_max = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.max));
-  // XNN_FORCE_REALIZATION(voutput_min);
-  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0 = _mm512_load_epi32((const int32_t*) w + 0);
