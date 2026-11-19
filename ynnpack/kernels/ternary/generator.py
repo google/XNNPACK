@@ -32,7 +32,9 @@ def main(argv: Sequence[str]) -> None:
           (multiply_fp32_fp32_fp32, (8, 1)),
           (multiply_int32_fp32_fp32, (8, 1)),
           (quantize_fp32_to_int8, (16, 1)),
+          (subtract_multiply_fp32_fp32_fp32, (8, 1)),
           (subtract_multiply_fp32_fp32_int32, (8, 1)),
+          (subtract_multiply_int32_fp32_int32, (8, 1)),
           # go/keep-sorted end
       ],
       "x86_sse41": [
@@ -49,7 +51,9 @@ def main(argv: Sequence[str]) -> None:
           (multiply_add_fp32_fp32_fp32, (16, 1)),
           (multiply_add_fp64_fp64_fp64, (8, 1)),
           (multiply_fp32_fp32_fp32, (16, 1)),
+          (subtract_multiply_fp32_fp32_fp32, (16, 1)),
           (subtract_multiply_fp32_fp32_int32, (16, 1)),
+          (subtract_multiply_int32_fp32_int32, (16, 1)),
           # go/keep-sorted end
       ],
       "x86_avx2": [
@@ -96,7 +100,9 @@ def main(argv: Sequence[str]) -> None:
           (quantize_fp16_to_uint8, (64, 1)),
           (quantize_fp32_to_int8, (64, 1)),
           (quantize_fp32_to_uint8, (64, 1)),
+          (subtract_multiply_fp32_fp32_fp32, (32, 1)),
           (subtract_multiply_fp32_fp32_int32, (32, 1)),
+          (subtract_multiply_int32_fp32_int32, (32, 1)),
           (subtract_multiply_int32_int32_int32, (32, 1)),
           # go/keep-sorted end
       ],
@@ -135,7 +141,9 @@ def main(argv: Sequence[str]) -> None:
           (quantize_bf16_to_int8, (16, 1)),
           (quantize_bf16_to_uint8, (16, 1)),
           (quantize_fp32_to_int8, (16, 1)),
+          (subtract_multiply_fp32_fp32_fp32, (8, 1)),
           (subtract_multiply_fp32_fp32_int32, (8, 1)),
+          (subtract_multiply_int32_fp32_int32, (8, 1)),
           (subtract_multiply_int32_int32_int32, (8, 1)),
           # go/keep-sorted end
       ],
@@ -173,7 +181,9 @@ def main(argv: Sequence[str]) -> None:
           (multiply_fp32_fp32_fp32, (8, 1)),
           (multiply_int32_fp32_fp32, (8, 1)),
           (quantize_fp32_to_int8, (16, 1)),
+          (subtract_multiply_fp32_fp32_fp32, (8, 1)),
           (subtract_multiply_fp32_fp32_int32, (8, 1)),
+          (subtract_multiply_int32_fp32_int32, (8, 1)),
           (subtract_multiply_int32_int32_int32, (8, 1)),
           # go/keep-sorted end
       ],

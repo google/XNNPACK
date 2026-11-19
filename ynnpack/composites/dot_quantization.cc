@@ -45,7 +45,9 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
                                    uint32_t a_id, uint32_t a_zero_point_id,
                                    uint32_t a_scale_id, uint32_t b_id,
                                    uint32_t b_zero_point_id,
-                                   uint32_t b_scale_id, uint32_t& zero_point_id,
+                                   uint32_t b_scale_id,
+                                   uint32_t& a_zero_point_term_id,
+                                   uint32_t& b_zero_point_term_id,
                                    uint32_t& scale_id) {
   // 1. Compute scale_id = a_scale * b_scale
   scale_id = YNN_INVALID_VALUE_ID;
@@ -64,10 +66,13 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
     scale_id = b_scale_id;
   }
 
-  // 2. Compute zero_point_id = a_zp * sum(b) + b_zp * sum(a) - a_zp * b_zp * k
+  // 2. Compute:
+  //    a_zero_point_term_id = a_zp * sum(b)
+  //    b_zero_point_term_id = b_zp * (sum(a) - a_zp * k)
+  a_zero_point_term_id = YNN_INVALID_VALUE_ID;
+  b_zero_point_term_id = YNN_INVALID_VALUE_ID;
   if (a_zero_point_id == YNN_INVALID_VALUE_ID &&
       b_zero_point_id == YNN_INVALID_VALUE_ID) {
-    zero_point_id = YNN_INVALID_VALUE_ID;
     return ynn_status_success;
   }
 
@@ -79,7 +84,6 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
   std::reverse(b_k_dims, b_k_dims + num_k_dims);
 
   // Term 1: a_zp * sum(b)
-  uint32_t term_a_sum_b = YNN_INVALID_VALUE_ID;
   if (a_zero_point_id != YNN_INVALID_VALUE_ID) {
     uint32_t sum_b_expanded = YNN_INVALID_VALUE_ID;
     if (num_k_dims > 0) {
@@ -102,11 +106,10 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
         broadcast_inputs(subgraph, a_zp_broadcasted, sum_b_broadcasted));
     YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
                                           a_zp_broadcasted, sum_b_broadcasted,
-                                          &term_a_sum_b, 0));
+                                          &a_zero_point_term_id, 0));
   }
 
-  // Term 2: b_zp * sum(a)
-  uint32_t term_b_sum_a = YNN_INVALID_VALUE_ID;
+  // Term 2: b_zp * (sum(a) - a_zp * k)
   if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
     uint32_t sum_a = YNN_INVALID_VALUE_ID;
     YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, num_k_dims,
@@ -119,55 +122,58 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
     } else {
       sum_a_expanded = sum_a;
     }
+    if (a_zero_point_id != YNN_INVALID_VALUE_ID) {
+      uint32_t k_id = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(ynn_define_get_tensor_shape(
+          subgraph, num_k_dims, b_k_dims, ynn_type_int32,
+          /*rank=*/0, b_id, &k_id,
+          /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS));
+      uint32_t a_zp_broadcasted = a_zero_point_id;
+      uint32_t k_broadcasted = k_id;
+      YNN_RETURN_IF_ERROR(
+          broadcast_inputs(subgraph, a_zp_broadcasted, k_broadcasted));
+      uint32_t a_zp_k = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
+                                            a_zp_broadcasted, k_broadcasted,
+                                            &a_zp_k, 0));
+      uint32_t sum_a_shifted = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(
+          broadcast_inputs(subgraph, sum_a_expanded, a_zp_k));
+      YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_subtract,
+                                            sum_a_expanded, a_zp_k,
+                                            &sum_a_shifted, 0));
+      sum_a_expanded = sum_a_shifted;
+    }
     uint32_t b_zp_broadcasted = b_zero_point_id;
     uint32_t sum_a_broadcasted = sum_a_expanded;
     YNN_RETURN_IF_ERROR(
         broadcast_inputs(subgraph, b_zp_broadcasted, sum_a_broadcasted));
-    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
-                                          b_zp_broadcasted, sum_a_broadcasted,
-                                          &term_b_sum_a, 0));
+    YNN_RETURN_IF_ERROR(ynn_define_binary(
+        subgraph, ynn_binary_multiply, b_zp_broadcasted, sum_a_broadcasted,
+        &b_zero_point_term_id, 0));
   }
 
-  // Term 3: a_zp * b_zp * k
-  uint32_t term_ab_zp = YNN_INVALID_VALUE_ID;
-  if (a_zero_point_id != YNN_INVALID_VALUE_ID &&
-      b_zero_point_id != YNN_INVALID_VALUE_ID) {
-    uint32_t a_zp_broadcasted = a_zero_point_id;
-    uint32_t b_zp_broadcasted = b_zero_point_id;
-    YNN_RETURN_IF_ERROR(
-        broadcast_inputs(subgraph, a_zp_broadcasted, b_zp_broadcasted));
-    uint32_t zp_prod = YNN_INVALID_VALUE_ID;
-    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
-                                          a_zp_broadcasted, b_zp_broadcasted,
-                                          &zp_prod, 0));
-    uint32_t k_id = YNN_INVALID_VALUE_ID;
-    YNN_RETURN_IF_ERROR(ynn_define_get_tensor_shape(
-        subgraph, num_k_dims, b_k_dims, ynn_type_int32,
-        /*rank=*/0, b_id, &k_id,
-        /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS));
-    uint32_t zp_prod_broadcasted = zp_prod;
-    uint32_t k_broadcasted = k_id;
-    YNN_RETURN_IF_ERROR(
-        broadcast_inputs(subgraph, zp_prod_broadcasted, k_broadcasted));
-    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
-                                          zp_prod_broadcasted, k_broadcasted,
-                                          &term_ab_zp, 0));
-  }
+  return ynn_status_success;
+}
 
-  // Combine terms: zero_point_id = term_a_sum_b + term_b_sum_a - term_ab_zp
+ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                   uint32_t a_id, uint32_t a_zero_point_id,
+                                   uint32_t a_scale_id, uint32_t b_id,
+                                   uint32_t b_zero_point_id,
+                                   uint32_t b_scale_id, uint32_t& zero_point_id,
+                                   uint32_t& scale_id) {
+  uint32_t term_a_sum_b = YNN_INVALID_VALUE_ID;
+  uint32_t term_b_sum_a = YNN_INVALID_VALUE_ID;
+  YNN_RETURN_IF_ERROR(define_dot_quantization(
+      subgraph, num_k_dims, a_id, a_zero_point_id, a_scale_id, b_id,
+      b_zero_point_id, b_scale_id, term_a_sum_b, term_b_sum_a, scale_id));
+
   zero_point_id = YNN_INVALID_VALUE_ID;
   if (term_a_sum_b != YNN_INVALID_VALUE_ID &&
       term_b_sum_a != YNN_INVALID_VALUE_ID) {
-    uint32_t sum_terms = YNN_INVALID_VALUE_ID;
     YNN_RETURN_IF_ERROR(ynn_define_binary(
-        subgraph, ynn_binary_add, term_a_sum_b, term_b_sum_a, &sum_terms, 0));
-    if (term_ab_zp != YNN_INVALID_VALUE_ID) {
-      YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_subtract,
-                                            sum_terms, term_ab_zp,
-                                            &zero_point_id, 0));
-    } else {
-      zero_point_id = sum_terms;
-    }
+        subgraph, ynn_binary_add, term_a_sum_b, term_b_sum_a,
+        &zero_point_id, 0));
   } else if (term_a_sum_b != YNN_INVALID_VALUE_ID) {
     zero_point_id = term_a_sum_b;
   } else if (term_b_sum_a != YNN_INVALID_VALUE_ID) {

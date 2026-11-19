@@ -248,19 +248,37 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
   bool allow_reuse = bias_id == YNN_INVALID_VALUE_ID && !defer_init &&
                      type_of_value(subgraph, output_id) == accumulator_type;
 
-  uint32_t dot_zp_id = YNN_INVALID_VALUE_ID;
+  uint32_t a_zp_term_id = YNN_INVALID_VALUE_ID;
+  uint32_t b_zp_term_id = YNN_INVALID_VALUE_ID;
   uint32_t dot_scale_id = YNN_INVALID_VALUE_ID;
   ynn_status status = ynn::define_dot_quantization(
       subgraph->ynn, num_k_dims, a_id, a_zp_id, get_scale_id(subgraph, a_id),
-      b_id, b_zp_id, get_scale_id(subgraph, b_id), dot_zp_id, dot_scale_id);
+      b_id, b_zp_id, get_scale_id(subgraph, b_id), a_zp_term_id, b_zp_term_id,
+      dot_scale_id);
   if (status != ynn_status_success) return status;
 
-  uint32_t init_accumulator_id = YNN_INVALID_VALUE_ID;
-  if (dot_zp_id != YNN_INVALID_VALUE_ID) {
-    status = ynn_define_unary(subgraph->ynn, ynn_unary_negate, dot_zp_id,
-                              &init_accumulator_id, 0);
+  // Fold an integral zero-point term into `dot`'s C input when possible:
+  // `a_zp * sum(b)` if `a_zp` is integral, or `b_zp * sum(a)` if `a_zp` is
+  // absent and `b_zp` is integral.
+  uint32_t dot_init_id = YNN_INVALID_VALUE_ID;
+  if (a_zp_term_id != YNN_INVALID_VALUE_ID &&
+      !type_promotes_to_float(type_of_value(subgraph, a_zp_term_id))) {
+    status = ynn_define_unary(subgraph->ynn, ynn_unary_negate, a_zp_term_id,
+                              &dot_init_id, 0);
     if (status != ynn_status_success) return status;
+    a_zp_term_id = YNN_INVALID_VALUE_ID;
+  } else if (a_zp_term_id == YNN_INVALID_VALUE_ID &&
+             b_zp_term_id != YNN_INVALID_VALUE_ID &&
+             !type_promotes_to_float(type_of_value(subgraph, b_zp_term_id))) {
+    status = ynn_define_unary(subgraph->ynn, ynn_unary_negate, b_zp_term_id,
+                              &dot_init_id, 0);
+    if (status != ynn_status_success) return status;
+    b_zp_term_id = YNN_INVALID_VALUE_ID;
   }
+
+  bool has_post_dot_zp = (a_zp_term_id != YNN_INVALID_VALUE_ID) ||
+                         (b_zp_term_id != YNN_INVALID_VALUE_ID);
+  allow_reuse = allow_reuse && !has_post_dot_zp;
 
   uint32_t accumulator_id = allow_reuse ? output_id : YNN_INVALID_VALUE_ID;
   if (!allow_reuse) {
@@ -271,11 +289,21 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
     subgraph->scale_ids[accumulator_id] = dot_scale_id;
   }
 
-  uint32_t dot_init_id =
-      defer_init ? YNN_INVALID_VALUE_ID : init_accumulator_id;
   status = ynn_define_dot(subgraph->ynn, num_k_dims, a_id, b_id, dot_init_id,
                           &accumulator_id, /*flags=*/0);
   if (status != ynn_status_success) return status;
+
+  for (uint32_t term_id : {a_zp_term_id, b_zp_term_id}) {
+    if (term_id != YNN_INVALID_VALUE_ID) {
+      uint32_t adjusted_id = YNN_INVALID_VALUE_ID;
+      status = define_binary_with_broadcasting(
+          subgraph, ynn_binary_subtract, accumulator_id, term_id, &adjusted_id,
+          /*flags=*/0);
+      if (status != ynn_status_success) return status;
+      subgraph->scale_ids[adjusted_id] = get_scale_id(subgraph, accumulator_id);
+      accumulator_id = adjusted_id;
+    }
+  }
 
   // 3. Handle the bias, if present.
   if (bias_id != YNN_INVALID_VALUE_ID || defer_init) {
@@ -297,29 +325,18 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
       if (status != ynn_status_success) return status;
 
       dot_result_as_float_id = float_val_id;
-    }
-
-    if (defer_init && init_accumulator_id != YNN_INVALID_VALUE_ID) {
-      uint32_t scale_id = get_scale_id(subgraph, accumulator_id);
-      if (scale_id != YNN_INVALID_VALUE_ID) {
-        uint32_t scaled_init_id = YNN_INVALID_VALUE_ID;
-        status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
-                                                 init_accumulator_id, scale_id,
-                                                 &scaled_init_id, /*flags=*/0);
-        if (status != ynn_status_success) return status;
-        init_accumulator_id = scaled_init_id;
-      }
-
-      uint32_t added_dot_id =
+    } else if (get_scale_id(subgraph, accumulator_id) != YNN_INVALID_VALUE_ID) {
+      uint32_t float_val_id =
           (bias_id == YNN_INVALID_VALUE_ID &&
            type_of_value(subgraph, output_id) == ynn_type_fp32)
               ? output_id
               : YNN_INVALID_VALUE_ID;
       status = define_binary_with_broadcasting(
-          subgraph, ynn_binary_add, dot_result_as_float_id, init_accumulator_id,
-          &added_dot_id, /*flags=*/0);
+          subgraph, ynn_binary_multiply, accumulator_id,
+          get_scale_id(subgraph, accumulator_id), &float_val_id, /*flags=*/0);
       if (status != ynn_status_success) return status;
-      dot_result_as_float_id = added_dot_id;
+
+      dot_result_as_float_id = float_val_id;
     }
 
     if (bias_id != YNN_INVALID_VALUE_ID) {

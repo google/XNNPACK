@@ -80,6 +80,24 @@ ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
                                    uint32_t b_scale_id, uint32_t& zero_point_id,
                                    uint32_t& scale_id);
 
+// Same as above, but splits `zero_point` into `a_zero_point_term`
+// (`a_zero_point * sum(b)`) and `b_zero_point_term`
+// (`b_zero_point * (sum(a) - a_zero_point * k)`):
+//
+//   ((a.b - a_zero_point_term) - b_zero_point_term)*scale =
+//       ((a - a_zero_point)*a_scale).(b - b_zero_point)*b_scale
+//
+// Splitting these allows `-a_zero_point_term` to remain integer and fold into
+// `dot`'s C accumulator input even when `b_zero_point` is floating point.
+ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                   uint32_t a_id, uint32_t a_zero_point_id,
+                                   uint32_t a_scale_id, uint32_t b_id,
+                                   uint32_t b_zero_point_id,
+                                   uint32_t b_scale_id,
+                                   uint32_t& a_zero_point_term_id,
+                                   uint32_t& b_zero_point_term_id,
+                                   uint32_t& scale_id);
+
 // Splits an f32 value into multiple bf16 values such that
 // `sum(f32(output_ids[i])) ~= input_id`. The output values are ordered by
 // descending significance.
