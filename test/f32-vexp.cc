@@ -38,8 +38,8 @@ using TestInfo = Exp;
 TEST(ukernel, special_values) {                                                                                         \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
-    /*inputs=*/{0.0f, -1e3f, 1e3f},                                                                                     \
-    /*outputs=*/{1.0f, 0.0f, INFINITY},                                                                                 \
+    /*inputs=*/{NAN, 0.0f, -1e3f, 1e3f, -NAN},                                                                          \
+    /*outputs=*/{NAN, 1.0f, 0.0f, INFINITY, NAN},                                                                       \
     /*tolerance_ulp=*/1);                                                                                               \
 }
 #include "src/f32-vexp/f32-vexp.inc"

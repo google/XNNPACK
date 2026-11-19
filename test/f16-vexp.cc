@@ -34,7 +34,14 @@ using TestInfo = Exp;
   TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }\
   TEST(ukernel, batch_lt) { TestBatchLT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
   TEST(ukernel, batch_gt) { TestBatchGT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
-  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }   \
+TEST(ukernel, special_values) {                                                                                         \
+  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
+  VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
+    /*inputs=*/{NAN, 0.0f, -NAN},                                                                                       \
+    /*outputs=*/{NAN, 1.0f, NAN},                                                                                       \
+    /*tolerance_ulp=*/1);                                                                                               \
+}
 #include "src/f16-vexp/f16-vexp.inc"
 #undef XNN_UKERNEL
 #undef XNN_QUANTIZED

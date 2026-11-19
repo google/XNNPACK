@@ -107,9 +107,9 @@ SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
         tolerance_ulp=1,
     ),
     "Exp": SpecialValues(
-        num_elements=3,
-        inputs="{0.0f, -1e3f, 1e3f}",
-        expected_outputs="{1.0f, 0.0f, INFINITY}",
+        num_elements=5,
+        inputs="{NAN, 0.0f, -1e3f, 1e3f, -NAN}",
+        expected_outputs="{NAN, 1.0f, 0.0f, INFINITY, NAN}",
         tolerance_ulp=1,
     ),
     "Sine": SpecialValues(
@@ -128,6 +128,12 @@ SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
 
 
 SPECIAL_VALUES_BY_OP_TYPE_F16 = types.MappingProxyType({
+    "Exp": SpecialValues(
+        num_elements=3,
+        inputs="{NAN, 0.0f, -NAN}",
+        expected_outputs="{NAN, 1.0f, NAN}",
+        tolerance_ulp=1,
+    ),
     "Log": SpecialValues(
         num_elements=4,
         inputs="{1.0f, -1.0f, 0.0f, -0.0f}",
