@@ -32,11 +32,20 @@
 #define YNN_TILE_DPFP16PS(a, b, c) YNN_TILE_DP_IMPL(dpfp16ps, a, b, c)
 #define YNN_TILE_DPBSSD(a, b, c) YNN_TILE_DP_IMPL(dpbssd, a, b, c)
 #define YNN_TILE_DPBUSD(a, b, c) YNN_TILE_DP_IMPL(dpbusd, a, b, c)
+// GCC's _tile_loadd lacks a memory clobber, allowing DSE of stack stores or
+// reordering subsequent buffer writes before the load.
+#define YNN_TILE_LOADD(dst, base, stride) \
+  do {                                    \
+    __asm__ volatile("" ::: "memory");    \
+    _tile_loadd(dst, base, stride);       \
+    __asm__ volatile("" ::: "memory");    \
+  } while (0)
 #else
 #define YNN_TILE_DPBF16PS(a, b, c) _tile_dpbf16ps(a, b, c)
 #define YNN_TILE_DPFP16PS(a, b, c) _tile_dpfp16ps(a, b, c)
 #define YNN_TILE_DPBSSD(a, b, c) _tile_dpbssd(a, b, c)
 #define YNN_TILE_DPBUSD(a, b, c) _tile_dpbusd(a, b, c)
+#define YNN_TILE_LOADD(dst, base, stride) _tile_loadd(dst, base, stride)
 #endif
 
 namespace ynn {
@@ -437,12 +446,7 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
     size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
     size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
     const void* C_in, size_t C_out_stride_m, void* C_out) {
-  alignas(64)
-      int8_t b_tile0[std::is_same<TB, int4x2>::value ? 16 * tile_row_bytes : 1];
-  alignas(64) int8_t b_tile1[(std::is_same<TB, int4x2>::value && HasN1)
-                                 ? 16 * tile_row_bytes
-                                 : 1];
-  const size_t k_chunks = k_len / 8;
+  assert(k1_iters > 0);
 
   // Initialize accumulator tiles.
   if (C_in) {
@@ -475,74 +479,127 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
     do {
       const void* B_k1 = B_k2;
       const void* A_k1 = A_k2;
-      size_t k = k1_iters;
-      while (k--) {
-        if constexpr (HasM1 && HasN1) {  // 2x2 case.
-          _tile_loadd(4, A_k1, A_stride_m);
-          _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
-          if constexpr (std::is_same<TB, int4x2>::value) {
-            unpack_int4_b_tile<StaticKChunks>(b_tile0, B_k1, B_stride_k1,
-                                              k_chunks);
-            _tile_loadd(5, b_tile0, tile_row_bytes);
+      if constexpr (std::is_same<TB, int4x2>::value) {
+        alignas(64) int8_t b_buf0[16 * tile_row_bytes];
+        alignas(64) int8_t b_buf1[16 * tile_row_bytes];
+        const size_t k_chunks = k_len / 8;
+
+        if constexpr (HasN1) {
+          unpack_int4_b_tile<StaticKChunks>(b_buf0, B_k1, B_stride_k1,
+                                            k_chunks);
+          unpack_int4_b_tile<StaticKChunks>(b_buf1,
+                                            offset_bytes(B_k1, tile_row_bytes),
+                                            B_stride_k1, k_chunks);
+
+          for (size_t k = 0; k + 1 < k1_iters; ++k) {
+            _tile_loadd(4, A_k1, A_stride_m);
+            if constexpr (HasM1) {
+              _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
+            }
+            const void* B_next = offset_bytes(B_k1, B_stride_k1_block);
+
+            YNN_TILE_LOADD(5, b_buf0, tile_row_bytes);
             TileOp<0, 4, 5>()();
-            TileOp<2, 6, 5>()();
+            if constexpr (HasM1) {
+              TileOp<2, 6, 5>()();
+            }
+            unpack_int4_b_tile<StaticKChunks>(b_buf0, B_next, B_stride_k1,
+                                              k_chunks);
+
+            YNN_TILE_LOADD(7, b_buf1, tile_row_bytes);
+            TileOp<1, 4, 7>()();
+            if constexpr (HasM1) {
+              TileOp<3, 6, 7>()();
+            }
             unpack_int4_b_tile<StaticKChunks>(
-                b_tile1, offset_bytes(B_k1, tile_row_bytes), B_stride_k1,
+                b_buf1, offset_bytes(B_next, tile_row_bytes), B_stride_k1,
                 k_chunks);
-            _tile_loadd(7, b_tile1, tile_row_bytes);
-            TileOp<1, 4, 7>()();
-            TileOp<3, 6, 7>()();
-          } else {
-            _tile_loadd(5, offset_bytes(B_k1, 0), B_stride_k1);
-            _tile_loadd(7, offset_bytes(B_k1, tile_row_bytes), B_stride_k1);
-            TileOp<0, 4, 5>()();
+
+            B_k1 = B_next;
+            A_k1 = offset_bytes(A_k1, A_stride_k1);
+          }
+
+          _tile_loadd(4, A_k1, A_stride_m);
+          if constexpr (HasM1) {
+            _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
+          }
+          YNN_TILE_LOADD(5, b_buf0, tile_row_bytes);
+          TileOp<0, 4, 5>()();
+          if constexpr (HasM1) {
             TileOp<2, 6, 5>()();
-            TileOp<1, 4, 7>()();
+          }
+          YNN_TILE_LOADD(7, b_buf1, tile_row_bytes);
+          TileOp<1, 4, 7>()();
+          if constexpr (HasM1) {
             TileOp<3, 6, 7>()();
           }
-        } else if constexpr (!HasM1 && HasN1) {  // 1x2 case.
-          _tile_loadd(4, A_k1, A_stride_m);
-          if constexpr (std::is_same<TB, int4x2>::value) {
-            unpack_int4_b_tile<StaticKChunks>(b_tile0, B_k1, B_stride_k1,
-                                              k_chunks);
-            _tile_loadd(5, b_tile0, tile_row_bytes);
+        } else {
+          int8_t* bufs[2] = {b_buf0, b_buf1};
+          size_t cur = 0;
+
+          unpack_int4_b_tile<StaticKChunks>(bufs[0], B_k1, B_stride_k1,
+                                            k_chunks);
+
+          for (size_t k = 0; k + 1 < k1_iters; ++k) {
+            _tile_loadd(4, A_k1, A_stride_m);
+            if constexpr (HasM1) {
+              _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
+            }
+            YNN_TILE_LOADD(5, bufs[cur], tile_row_bytes);
             TileOp<0, 4, 5>()();
-            unpack_int4_b_tile<StaticKChunks>(
-                b_tile1, offset_bytes(B_k1, tile_row_bytes), B_stride_k1,
-                k_chunks);
-            _tile_loadd(7, b_tile1, tile_row_bytes);
-            TileOp<1, 4, 7>()();
-          } else {
-            _tile_loadd(5, offset_bytes(B_k1, 0), B_stride_k1);
-            _tile_loadd(7, offset_bytes(B_k1, tile_row_bytes), B_stride_k1);
-            TileOp<0, 4, 5>()();
-            TileOp<1, 4, 7>()();
-          }
-        } else if constexpr (HasM1 && !HasN1) {  // 2x1 case.
-          _tile_loadd(4, A_k1, A_stride_m);
-          _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
-          if constexpr (std::is_same<TB, int4x2>::value) {
-            unpack_int4_b_tile<StaticKChunks>(b_tile0, B_k1, B_stride_k1,
+            if constexpr (HasM1) {
+              TileOp<2, 6, 5>()();
+            }
+            B_k1 = offset_bytes(B_k1, B_stride_k1_block);
+            unpack_int4_b_tile<StaticKChunks>(bufs[cur ^ 1], B_k1, B_stride_k1,
                                               k_chunks);
-            _tile_loadd(5, b_tile0, tile_row_bytes);
-          } else {
-            _tile_loadd(5, B_k1, B_stride_k1);
+            cur ^= 1;
+            A_k1 = offset_bytes(A_k1, A_stride_k1);
           }
-          TileOp<0, 4, 5>()();
-          TileOp<2, 6, 5>()();
-        } else {  // 1x1 case.
+
           _tile_loadd(4, A_k1, A_stride_m);
-          if constexpr (std::is_same<TB, int4x2>::value) {
-            unpack_int4_b_tile<StaticKChunks>(b_tile0, B_k1, B_stride_k1,
-                                              k_chunks);
-            _tile_loadd(5, b_tile0, tile_row_bytes);
-          } else {
-            _tile_loadd(5, B_k1, B_stride_k1);
+          if constexpr (HasM1) {
+            _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
           }
+          YNN_TILE_LOADD(5, bufs[cur], tile_row_bytes);
           TileOp<0, 4, 5>()();
+          if constexpr (HasM1) {
+            TileOp<2, 6, 5>()();
+          }
         }
-        B_k1 = offset_bytes(B_k1, B_stride_k1_block);
-        A_k1 = offset_bytes(A_k1, A_stride_k1);
+      } else {
+        (void)k_len;
+        size_t k = k1_iters;
+        while (k--) {
+          if constexpr (HasM1 && HasN1) {  // 2x2 case.
+            _tile_loadd(4, A_k1, A_stride_m);
+            _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
+            _tile_loadd(5, offset_bytes(B_k1, 0), B_stride_k1);
+            _tile_loadd(7, offset_bytes(B_k1, tile_row_bytes), B_stride_k1);
+            TileOp<0, 4, 5>()();
+            TileOp<2, 6, 5>()();
+            TileOp<1, 4, 7>()();
+            TileOp<3, 6, 7>()();
+          } else if constexpr (!HasM1 && HasN1) {  // 1x2 case.
+            _tile_loadd(4, A_k1, A_stride_m);
+            _tile_loadd(5, offset_bytes(B_k1, 0), B_stride_k1);
+            _tile_loadd(7, offset_bytes(B_k1, tile_row_bytes), B_stride_k1);
+            TileOp<0, 4, 5>()();
+            TileOp<1, 4, 7>()();
+          } else if constexpr (HasM1 && !HasN1) {  // 2x1 case.
+            _tile_loadd(4, A_k1, A_stride_m);
+            _tile_loadd(6, offset_bytes(A_k1, 16 * A_stride_m), A_stride_m);
+            _tile_loadd(5, B_k1, B_stride_k1);
+            TileOp<0, 4, 5>()();
+            TileOp<2, 6, 5>()();
+          } else {  // 1x1 case.
+            _tile_loadd(4, A_k1, A_stride_m);
+            _tile_loadd(5, B_k1, B_stride_k1);
+            TileOp<0, 4, 5>()();
+          }
+          B_k1 = offset_bytes(B_k1, B_stride_k1_block);
+          A_k1 = offset_bytes(A_k1, A_stride_k1);
+        }
       }
       k2 -= 1;
       B_k2 = offset_bytes(B_k2, B_stride_k2);

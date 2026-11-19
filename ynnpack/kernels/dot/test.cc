@@ -379,6 +379,24 @@ TEST_P(Dot, TileAlignedK) {
   });
 }
 
+TEST_P(Dot, BlockPlusTileAlignedK) {
+  KernelInfo kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  const DotShape& block_shape = kernel.block_shape;
+  SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
+    const size_t align_n = type_element_count(type_of<decltype(b_type)>());
+    for (size_t k_blocks : {1, 2}) {
+      const size_t k = k_blocks * block_shape.k + kernel.tile_k;
+      for (size_t n : {block_shape.n, block_shape.n + align_n}) {
+        TestMatMul(a_type, b_type, c_type, block_shape.with_n(n).with_k(k),
+                   kernel, /*init_zero=*/false);
+        TestMatMul(a_type, b_type, c_type, block_shape.with_n(n).with_k(k),
+                   kernel, /*init_zero=*/true);
+      }
+    }
+  });
+}
+
 TEST_P(Dot, UnalignedM) {
   KernelInfo kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
