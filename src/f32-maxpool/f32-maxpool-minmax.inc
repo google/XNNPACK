@@ -13,6 +13,10 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_maxpool_minmax_ukernel_9p__neon_u4, 4, 9,
 XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4, 4, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_maxpool_minmax_ukernel_9p__avx_u8, 8, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4, 4, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

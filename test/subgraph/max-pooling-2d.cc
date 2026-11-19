@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -156,6 +157,50 @@ TEST(MaxPooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(MaxPooling2DF32, test) { TestImpl<float>(); }
 
 #ifndef XNNPACK_USE_YNNPACK
+
+template <typename T>
+void TestMaxPoolNaN() {
+  for (size_t width : {3, 11}) {
+    Tensor<T> input({1, 1, width, 19}, XnnExtraBytes);
+    input.fill(-2.0f);
+    for (size_t c = 0; c < 18; ++c) {
+      input(0, 0, c % width, c) = c % 2 ? -NAN : NAN;
+    }
+    input(0, 0, 1, 18) = INFINITY;
+    Tensor<T> output({1, 1, 3, 19});
+    const float upper = width == 3 ? INFINITY : 1.0f;
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(input.extents(), input.base(), 0)
+        .AddOutputTensor(output.extents(), output.base(), 1);
+    ASSERT_EQ(
+        xnn_define_max_pooling_2d(subgraph.Subgraph(), 0, 1, 0, 1, 1, width, 1,
+                                  1, 1, 1, -INFINITY, upper, 0, 1, 0),
+        xnn_status_success);
+    const xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+    }
+    ASSERT_EQ(status, xnn_status_success);
+    ASSERT_EQ(subgraph.ReshapeRuntime().SetupRuntime().InvokeRuntime(),
+              xnn_status_success);
+    for (size_t x = 0; x < 3; ++x) {
+      for (size_t c = 0; c < 18; ++c) {
+        const size_t nan_x = c % width + 1;  // In padded coordinates.
+        const float actual = output(0, 0, x, c);
+        if (x <= nan_x && nan_x < x + width) {
+          EXPECT_TRUE(std::isnan(actual)) << x << ", " << c;
+        } else {
+          EXPECT_EQ(actual, -2.0f);
+        }
+      }
+      EXPECT_EQ(float(output(0, 0, x, 18)), upper);
+    }
+  }
+}
+
+TEST(MaxPooling2DF16, PropagatesNaN) { TestMaxPoolNaN<xnn_float16>(); }
+TEST(MaxPooling2DF32, PropagatesNaN) { TestMaxPoolNaN<float>(); }
+
 static xnn_status DefineMaxPooling2D(xnn_subgraph_t subgraph) {
   return xnn_define_max_pooling_2d(
       subgraph, /*input_padding_top=*/0, /*input_padding_right=*/0,

@@ -25,6 +25,18 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/simd/f32-scalar.h"
 
+static XNN_INLINE xnn_simd_f32_t unordered(xnn_simd_f32_t a, xnn_simd_f32_t b) {
+  return uint32_as_float(isunordered(a, b) ? UINT32_MAX : 0);
+}
+
+static XNN_INLINE xnn_simd_f32_t nan_mask(
+    xnn_simd_f32_t v0, xnn_simd_f32_t v1, xnn_simd_f32_t v2, xnn_simd_f32_t v3,
+    xnn_simd_f32_t v4, xnn_simd_f32_t v5, xnn_simd_f32_t v6, xnn_simd_f32_t v7,
+    xnn_simd_f32_t v8, xnn_simd_f32_t v9) {
+  const xnn_simd_f32_t m0123 = xnn_or_f32(unordered(v0, v1), unordered(v2, v3));
+  const xnn_simd_f32_t m4567 = xnn_or_f32(unordered(v4, v5), unordered(v6, v7));
+  return xnn_or_f32(xnn_or_f32(m0123, m4567), unordered(v8, v9));
+}
 void xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1(
     size_t output_pixels,
     size_t kernel_elements,
@@ -92,6 +104,7 @@ void xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1(
 
       vacc = xnn_max_f32(vacc, vmin);
       vacc = xnn_min_f32(vacc, vmax);
+      vacc = xnn_or_f32(vacc, nan_mask(vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7, vi8, vi8));
 
       vacc = xnn_pre_store_impl(vacc);
 
@@ -146,6 +159,7 @@ void xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1(
         xnn_simd_f32_t vacc = xnn_max_f32(vprev, vmax012345678);
 
         vacc = xnn_min_f32(vacc, vmax);
+        vacc = xnn_or_f32(vacc, nan_mask(vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7, vi8, vprev));
 
         vacc = xnn_pre_store_impl(vacc);
 
