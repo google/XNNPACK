@@ -19,9 +19,9 @@ $if ARCH == "sse2" and DATATYPE == "s8":
   #define xnn_load_tail_safe_impl(x, c) xnn_xor_u8(xnn_load_tail_safe_u8(x, c), vsign_bit_mask)
   #define xnn_pre_store_impl(x) xnn_xor_u8(x, vsign_bit_mask)
 $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
-  #define xnn_load_impl(x) xnn_signcomplement_s16(xnn_loadu_s16(x))
-  #define xnn_load_tail_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_s16(x, c))
-  #define xnn_load_tail_safe_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_safe_s16(x, c))
+  #define xnn_load_impl(x) order_f16(xnn_loadu_s16(x))
+  #define xnn_load_tail_impl(x, c) order_f16(xnn_load_tail_s16(x, c))
+  #define xnn_load_tail_safe_impl(x, c) order_f16(xnn_load_tail_safe_s16(x, c))
   #define xnn_pre_store_impl(x) xnn_signcomplement_s16(x)
 $else:
   #define xnn_load_impl(x) xnn_loadu_${DATATYPE}(x)
@@ -34,6 +34,43 @@ $else:
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/simd/${DATATYPE_IMPL}-${ARCH}.h"
 
+$NAN_MASK = DATATYPE == "f32" and ARCH in ("scalar", "sse2", "avx", "hvx")
+$CLAMP_UPPER = "xnn_min_" + DATATYPE_IMPL
+$if DATATYPE == "f16" and ARCH != "neonfp16arith":
+  $MM = "_mm256" if ARCH == "avx2" else "_mm"
+  // Map both signs of NaN above +infinity in the signed integer ordering.
+  static XNN_INLINE xnn_simd_s16_t order_f16(xnn_simd_s16_t x) {
+    const xnn_simd_s16_t negative_number = ${MM}_cmpgt_epi16(${MM}_set1_epi16((int16_t) 0xFC01), x);
+    return ${MM}_xor_si${SIMD_SIZE * 16}(${MM}_and_si${SIMD_SIZE * 16}(x, ${MM}_set1_epi16(0x7FFF)), negative_number);
+  }
+
+  static XNN_INLINE xnn_simd_s16_t clamp_upper(xnn_simd_s16_t x, xnn_simd_s16_t upper) {
+    const xnn_simd_s16_t nan = ${MM}_cmpgt_epi16(x, ${MM}_set1_epi16(0x7C00));
+    return ${MM}_blendv_epi8(xnn_min_s16(x, upper), x, nan);
+  }
+
+  $CLAMP_UPPER = "clamp_upper"
+$elif NAN_MASK:
+  static XNN_INLINE xnn_simd_f32_t unordered(xnn_simd_f32_t a, xnn_simd_f32_t b) {
+    $if ARCH == "sse2":
+      return _mm_cmpunord_ps(a, b);
+    $elif ARCH == "avx":
+      return _mm256_cmp_ps(a, b, _CMP_UNORD_Q);
+    $elif ARCH == "hvx":
+      const HVX_Vector magnitude = Q6_Vw_vmax_VwVw(xnn_abs_f32(a), xnn_abs_f32(b));
+      return Q6_V_vand_QR(Q6_Q_vcmp_gt_VuwVuw(magnitude, Q6_V_vsplat_R(0x7F800000)), -1);
+    $else:
+      return uint32_as_float(isunordered(a, b) ? UINT32_MAX : 0);
+  }
+
+  static XNN_INLINE xnn_simd_f32_t nan_mask(
+      xnn_simd_f32_t v0, xnn_simd_f32_t v1, xnn_simd_f32_t v2, xnn_simd_f32_t v3,
+      xnn_simd_f32_t v4, xnn_simd_f32_t v5, xnn_simd_f32_t v6, xnn_simd_f32_t v7,
+      xnn_simd_f32_t v8, xnn_simd_f32_t v9) {
+    const xnn_simd_f32_t m0123 = xnn_or_f32(unordered(v0, v1), unordered(v2, v3));
+    const xnn_simd_f32_t m4567 = xnn_or_f32(unordered(v4, v5), unordered(v6, v7));
+    return xnn_or_f32(xnn_or_f32(m0123, m4567), unordered(v8, v9));
+  }
 $CTYPE = {"f32": "float", "f16": "xnn_float16", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE]
 $CTYPE_IMPL = {"f32": "float", "f16": "xnn_float16", "s16": "int16_t", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE_IMPL]
 void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
@@ -95,7 +132,9 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
       xnn_simd_${DATATYPE_IMPL}_t vacc = xnn_max_${DATATYPE_IMPL}(vmax2345, vmax01678);
 
       vacc = xnn_max_${DATATYPE_IMPL}(vacc, vmin);
-      vacc = xnn_min_${DATATYPE_IMPL}(vacc, vmax);
+      vacc = ${CLAMP_UPPER}(vacc, vmax);
+      $if NAN_MASK:
+        vacc = xnn_or_f32(vacc, nan_mask(vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7, vi8, vi8));
 
       vacc = xnn_pre_store_impl(vacc);
 
@@ -116,7 +155,9 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
         xnn_simd_${DATATYPE_IMPL}_t vacc = xnn_max_${DATATYPE_IMPL}(vmax2345, vmax01678);
 
         vacc = xnn_max_${DATATYPE_IMPL}(vacc, vmin);
-        vacc = xnn_min_${DATATYPE_IMPL}(vacc, vmax);
+        vacc = ${CLAMP_UPPER}(vacc, vmax);
+        $if NAN_MASK:
+          vacc = xnn_or_f32(vacc, nan_mask(vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7, vi8, vi8));
 
         vacc = xnn_pre_store_impl(vacc);
 
@@ -150,7 +191,9 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
 
         xnn_simd_${DATATYPE_IMPL}_t vacc = xnn_max_${DATATYPE_IMPL}(vprev, vmax012345678);
 
-        vacc = xnn_min_${DATATYPE_IMPL}(vacc, vmax);
+        vacc = ${CLAMP_UPPER}(vacc, vmax);
+        $if NAN_MASK:
+          vacc = xnn_or_f32(vacc, nan_mask(vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7, vi8, vprev));
 
         vacc = xnn_pre_store_impl(vacc);
 
@@ -173,7 +216,9 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
 
           xnn_simd_${DATATYPE_IMPL}_t vacc = xnn_max_${DATATYPE_IMPL}(vprev, vmax012345678);
 
-          vacc = xnn_min_${DATATYPE_IMPL}(vacc, vmax);
+          vacc = ${CLAMP_UPPER}(vacc, vmax);
+          $if NAN_MASK:
+            vacc = xnn_or_f32(vacc, nan_mask(vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7, vi8, vprev));
 
           vacc = xnn_pre_store_impl(vacc);
 

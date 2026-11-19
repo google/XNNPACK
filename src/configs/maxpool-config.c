@@ -95,6 +95,12 @@ static void init_f32_maxpool_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX
+      if (hardware_config->arch_flags & xnn_arch_x86_avx) {
+        f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__avx_u8);
+        f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      } else
+    #endif
     #if XNN_ENABLE_SSE2
       if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
         f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4);

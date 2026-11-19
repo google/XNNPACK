@@ -15,15 +15,26 @@
 
 // On some architectures, we have max(u8, u8) but not max(s8, s8). We can emulate max(s8, s8) on these architectures by
 // xoring with the sign bit mask.
-#define xnn_load_impl(x) xnn_signcomplement_s16(xnn_loadu_s16(x))
-#define xnn_load_tail_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_s16(x, c))
-#define xnn_load_tail_safe_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_safe_s16(x, c))
+#define xnn_load_impl(x) order_f16(xnn_loadu_s16(x))
+#define xnn_load_tail_impl(x, c) order_f16(xnn_load_tail_s16(x, c))
+#define xnn_load_tail_safe_impl(x, c) order_f16(xnn_load_tail_safe_s16(x, c))
 #define xnn_pre_store_impl(x) xnn_signcomplement_s16(x)
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/simd/s16-sse41.h"
+
+// Map both signs of NaN above +infinity in the signed integer ordering.
+static XNN_INLINE xnn_simd_s16_t order_f16(xnn_simd_s16_t x) {
+  const xnn_simd_s16_t negative_number = _mm_cmpgt_epi16(_mm_set1_epi16((int16_t) 0xFC01), x);
+  return _mm_xor_si128(_mm_and_si128(x, _mm_set1_epi16(0x7FFF)), negative_number);
+}
+
+static XNN_INLINE xnn_simd_s16_t clamp_upper(xnn_simd_s16_t x, xnn_simd_s16_t upper) {
+  const xnn_simd_s16_t nan = _mm_cmpgt_epi16(x, _mm_set1_epi16(0x7C00));
+  return _mm_blendv_epi8(xnn_min_s16(x, upper), x, nan);
+}
 
 void xnn_f16_maxpool_minmax_ukernel_9p__sse41_u8(
     size_t output_pixels,
@@ -91,7 +102,7 @@ XNN_FORCE_REALIZATION(vmax);
       xnn_simd_s16_t vacc = xnn_max_s16(vmax2345, vmax01678);
 
       vacc = xnn_max_s16(vacc, vmin);
-      vacc = xnn_min_s16(vacc, vmax);
+      vacc = clamp_upper(vacc, vmax);
 
       vacc = xnn_pre_store_impl(vacc);
 
@@ -118,7 +129,7 @@ XNN_FORCE_REALIZATION(vmax);
       xnn_simd_s16_t vacc = xnn_max_s16(vmax2345, vmax01678);
 
       vacc = xnn_max_s16(vacc, vmin);
-      vacc = xnn_min_s16(vacc, vmax);
+      vacc = clamp_upper(vacc, vmax);
 
       vacc = xnn_pre_store_impl(vacc);
 
@@ -172,7 +183,7 @@ XNN_FORCE_REALIZATION(vmax);
 
         xnn_simd_s16_t vacc = xnn_max_s16(vprev, vmax012345678);
 
-        vacc = xnn_min_s16(vacc, vmax);
+        vacc = clamp_upper(vacc, vmax);
 
         vacc = xnn_pre_store_impl(vacc);
 
@@ -201,7 +212,7 @@ XNN_FORCE_REALIZATION(vmax);
 
         xnn_simd_s16_t vacc = xnn_max_s16(vprev, vmax012345678);
 
-        vacc = xnn_min_s16(vacc, vmax);
+        vacc = clamp_upper(vacc, vmax);
 
         vacc = xnn_pre_store_impl(vacc);
 
