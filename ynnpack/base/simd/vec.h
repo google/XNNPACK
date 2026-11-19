@@ -343,6 +343,14 @@ YNN_ALWAYS_INLINE vec<T, 1> operator/(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{static_cast<T>(a.v / b.v)};
 }
 template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator-(vec<T, 1> a) {
+  return vec<T, 1>{static_cast<T>(-a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> fma(vec<T, 1> a, vec<T, 1> b, vec<T, 1> acc) {
+  return vec<T, 1>{std::fma(a.v, b.v, acc.v)};
+}
+template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{ynn::min(a.v, b.v)};
 }

@@ -16,6 +16,7 @@
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/simd/scalar.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
@@ -121,8 +122,12 @@ struct SquaredDifferenceOp {
 };
 
 struct PowOp {
-  float operator()(float a, float b) const { return std::pow(a, b); }
-  double operator()(double a, double b) const { return std::pow(a, b); }
+  float operator()(float a, float b) const {
+    return simd::pow(simd::vec<float, 1>{a}, simd::vec<float, 1>{b}).v;
+  }
+  double operator()(double a, double b) const {
+    return simd::pow(simd::vec<double, 1>{a}, simd::vec<double, 1>{b}).v;
+  }
   int32_t operator()(int32_t a, int32_t b) const { return integer_pow(a, b); }
   using commutative = std::false_type;
 };
