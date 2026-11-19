@@ -274,4 +274,52 @@ TEST(SUBGRAPH, static_scalar_sub_byte_value) {
   }
 }
 
+TEST(SUBGRAPH, blockwise_quantized_tensor_scale_validation) {
+  SubgraphTester tester(/*external_value_ids=*/0, /*flags=*/0);
+  xnn_subgraph_t subgraph = tester.Subgraph();
+  const size_t dims[2] = {2, 64};
+  uint32_t id = XNN_INVALID_VALUE_ID;
+
+  // FP16: 0.0, min subnormal (2^-24), max subnormal, 1.0.
+  const uint16_t valid_fp16_scales[4] = {0x0000, 0x0001, 0x03FF, 0x3C00};
+  EXPECT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                subgraph, xnn_datatype_qbint4, /*zero_point=*/8,
+                valid_fp16_scales, 2, /*channel_dim=*/0, /*block_size=*/32,
+                dims, /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0,
+                xnn_datatype_fp16, &id),
+            xnn_status_success);
+
+  // BF16: 0.0 and normal positive values are allowed.
+  const uint16_t valid_bf16_scales[4] = {0x0000, 0x0080, 0x3F80, 0x4000};
+  EXPECT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                subgraph, xnn_datatype_qbint4, /*zero_point=*/8,
+                valid_bf16_scales, 2, /*channel_dim=*/0, /*block_size=*/32,
+                dims, /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0,
+                xnn_datatype_bf16, &id),
+            xnn_status_success);
+
+  // FP16: negative (-1.0), +Inf, NaN must still be rejected.
+  for (uint16_t bad_fp16 :
+       {uint16_t{0xBC00}, uint16_t{0x7C00}, uint16_t{0x7E00}}) {
+    const uint16_t scales[4] = {0x3C00, bad_fp16, 0x3C00, 0x3C00};
+    EXPECT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                  subgraph, xnn_datatype_qbint4, /*zero_point=*/8, scales, 2,
+                  /*channel_dim=*/0, /*block_size=*/32, dims, /*data=*/nullptr,
+                  XNN_INVALID_VALUE_ID, /*flags=*/0, xnn_datatype_fp16, &id),
+              xnn_status_invalid_parameter);
+  }
+
+  // BF16: subnormals, negative (-1.0), +Inf, NaN must still be rejected.
+  for (uint16_t bad_bf16 :
+       {uint16_t{0x0001}, uint16_t{0x007F}, uint16_t{0xBF80}, uint16_t{0x7F80},
+        uint16_t{0x7FC0}}) {
+    const uint16_t scales[4] = {0x3F80, bad_bf16, 0x3F80, 0x3F80};
+    EXPECT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                  subgraph, xnn_datatype_qbint4, /*zero_point=*/8, scales, 2,
+                  /*channel_dim=*/0, /*block_size=*/32, dims, /*data=*/nullptr,
+                  XNN_INVALID_VALUE_ID, /*flags=*/0, xnn_datatype_bf16, &id),
+              xnn_status_invalid_parameter);
+  }
+}
+
 }  // namespace xnnpack
