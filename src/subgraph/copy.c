@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -285,9 +286,12 @@ static enum xnn_status resize_split_dims_output_tensor(
   }
 
   size_t count = 1;
+  bool has_inferred_split = false;
   for (size_t k = 0; k < num_dims; k++) {
     if (splits[k]) {
       count *= splits[k];
+    } else {
+      has_inferred_split = true;
     }
   }
   size_t remainder = input_shape->dim[axis] / count;
@@ -296,6 +300,15 @@ static enum xnn_status resize_split_dims_output_tensor(
                   " and output ID #%" PRIu32
                   ": product of defined splits, %zu, does not divide the split "
                   "input dimension, %zu",
+                  xnn_node_type_to_string(xnn_node_type_split_dims),
+                  input_id, output_id, count, input_shape->dim[axis]);
+    return xnn_status_invalid_parameter;
+  }
+  if (!has_inferred_split && count != input_shape->dim[axis]) {
+    xnn_log_error("failed to split dims in %s operator with input ID #%" PRIu32
+                  " and output ID #%" PRIu32
+                  ": product of splits, %zu, does not match the split input "
+                  "dimension, %zu",
                   xnn_node_type_to_string(xnn_node_type_split_dims),
                   input_id, output_id, count, input_shape->dim[axis]);
     return xnn_status_invalid_parameter;
