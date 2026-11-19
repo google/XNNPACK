@@ -90,7 +90,8 @@ templates and specification files.
   ```bash
   ./scripts/generate-<datatype>-<op>.sh
   ```
-  Generated C files are placed in `src/<datatype>-<op>/gen/`.
+  Generated C files are placed in `src/<datatype>-<op>/gen/`. As a rule of
+  thumb, generate 3 power-of-2 unroll amounts (typically 1, 2, and 4 vectors).
 
 ### 2. Registering Microkernels
 When adding a new microkernel:
@@ -168,6 +169,11 @@ bazel test -c fastbuild //test/...
 - **Comments**: Explain *why* an unusual constraint or non-obvious algorithm
   is used. Do not explain *what* standard C code does, and avoid LLM commentary
   or conversational restatements.
+- **Microkernel Unrolling & Dispatch (Rule of Thumb)**:
+  - In generator scripts (`scripts/generate-*.sh`), generate 3 unroll amounts
+    that are powers of 2 (typically 1, 2, and 4 vectors).
+  - In dispatch configs (`src/configs/*-config.c`), lean toward 2 vectors
+    unless 4 vectors is substantially faster, favoring code size savings.
 - **RISC-V Vector (RVV)**:
   - Target optimization for SiFive X280.
   - Prefer `m2` or `m4` LMUL. Avoid `m1` and `m8`.
