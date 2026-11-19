@@ -112,8 +112,8 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__rvv${ISA}_u${LMUL}v(
       ${VTYPE}m${LMUL}_t vacc = __riscv_vfadd(vprev, vsum012345678, vl);
 
       vacc = __riscv_vfmul(vacc, scale, vl);
-      vacc = __riscv_vfmax(vacc, min, vl);
-      vacc = __riscv_vfmin(vacc, max, vl);
+      vacc = __riscv_vfmerge(vacc, min, __riscv_vmflt(vacc, min, vl), vl);
+      vacc = __riscv_vfmerge(vacc, max, __riscv_vmfgt(vacc, max, vl), vl);
 
       ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
 

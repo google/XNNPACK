@@ -266,8 +266,8 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       __m256 vacc = _mm256_add_ps(vprev, vsum012345678);
 
       vacc = _mm256_mul_ps(vacc, vscale);
-      vacc = _mm256_max_ps(vacc, vmin);
-      vacc = _mm256_min_ps(vacc, vmax);
+      vacc = _mm256_max_ps(vmin, vacc);
+      vacc = _mm256_min_ps(vmax, vacc);
 
       _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); o += 8;
     }
@@ -295,8 +295,8 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       __m256 vacc = _mm256_add_ps(vprev, vsum012345678);
 
       vacc = _mm256_mul_ps(vacc, vscale);
-      vacc = _mm256_max_ps(vacc, vmin);
-      vacc = _mm256_min_ps(vacc, vmax);
+      vacc = _mm256_max_ps(vmin, vacc);
+      vacc = _mm256_min_ps(vmax, vacc);
 
       xnn_store_tail_f16((uint16_t*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c); o += c;
     }

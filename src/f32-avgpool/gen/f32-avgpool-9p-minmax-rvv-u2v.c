@@ -201,8 +201,8 @@ void xnn_f32_avgpool_minmax_ukernel_9p__rvv_u2v(
       vfloat32m2_t vacc = __riscv_vfadd(vprev, vsum012345678, vl);
 
       vacc = __riscv_vfmul(vacc, scale, vl);
-      vacc = __riscv_vfmax(vacc, min, vl);
-      vacc = __riscv_vfmin(vacc, max, vl);
+      vacc = __riscv_vfmerge(vacc, min, __riscv_vmflt(vacc, min, vl), vl);
+      vacc = __riscv_vfmerge(vacc, max, __riscv_vmfgt(vacc, max, vl), vl);
 
       __riscv_vse32_v_f32m2(o, vacc, vl); o += vl;
 

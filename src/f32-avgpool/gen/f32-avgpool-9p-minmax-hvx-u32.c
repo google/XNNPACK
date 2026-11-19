@@ -17,6 +17,10 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/simd/f32-hvx.h"
 
+static XNN_INLINE HVX_Vector clamp_f32(HVX_Vector x, HVX_Vector min, HVX_Vector max) {
+  const HVX_VectorPred nan = Q6_Q_vcmp_gt_VuwVuw(xnn_abs_f32(x), Q6_V_vsplat_R(0x7F800000));
+  return Q6_V_vmux_QVV(nan, x, xnn_min_f32(xnn_max_f32(x, min), max));
+}
 void xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32(
     size_t output_pixels,
     size_t kernel_elements,
@@ -110,15 +114,15 @@ void xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32(
         const xnn_simd_f32_t vi8 = xnn_loadu_f32(i8); i8 += 32;
         const xnn_simd_f32_t vprev = xnn_loadu_f32(prev_output); prev_output += 32;
 
-        const xnn_simd_f32_t vsum018 = xnn_add_f32(xnn_add_f32(vi0, vi1), vi8);
-        const xnn_simd_f32_t vsum23 = xnn_add_f32(vi2, vi3);
-        const xnn_simd_f32_t vsum45 = xnn_add_f32(vi4, vi5);
-        const xnn_simd_f32_t vsum67 = xnn_add_f32(vi6, vi7);
+        const xnn_simd_f32_t vsum018 = Q6_Vsf_vadd_VsfVsf(Q6_Vsf_vadd_VsfVsf(vi0, vi1), vi8);
+        const xnn_simd_f32_t vsum23 = Q6_Vsf_vadd_VsfVsf(vi2, vi3);
+        const xnn_simd_f32_t vsum45 = Q6_Vsf_vadd_VsfVsf(vi4, vi5);
+        const xnn_simd_f32_t vsum67 = Q6_Vsf_vadd_VsfVsf(vi6, vi7);
 
-        const xnn_simd_f32_t vsum2345 = xnn_add_f32(vsum23, vsum45);
-        const xnn_simd_f32_t vsum01678 = xnn_add_f32(vsum018, vsum67);
-        const xnn_simd_f32_t vsum012345678 = xnn_add_f32(vsum2345, vsum01678);
-        const xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
+        const xnn_simd_f32_t vsum2345 = Q6_Vsf_vadd_VsfVsf(vsum23, vsum45);
+        const xnn_simd_f32_t vsum01678 = Q6_Vsf_vadd_VsfVsf(vsum018, vsum67);
+        const xnn_simd_f32_t vsum012345678 = Q6_Vsf_vadd_VsfVsf(vsum2345, vsum01678);
+        const xnn_simd_f32_t vacc = Q6_Vsf_vadd_VsfVsf(vprev, vsum012345678);
         xnn_storeu_f32(o, vacc); o += 32;
       }
       if (c > 0) {
@@ -133,15 +137,15 @@ void xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32(
         const xnn_simd_f32_t vi8 = xnn_load_tail_f32(i8, c);
         const xnn_simd_f32_t vprev = xnn_load_tail_safe_f32(prev_output, c);
 
-        const xnn_simd_f32_t vsum018 = xnn_add_f32(xnn_add_f32(vi0, vi1), vi8);
-        const xnn_simd_f32_t vsum23 = xnn_add_f32(vi2, vi3);
-        const xnn_simd_f32_t vsum45 = xnn_add_f32(vi4, vi5);
-        const xnn_simd_f32_t vsum67 = xnn_add_f32(vi6, vi7);
+        const xnn_simd_f32_t vsum018 = Q6_Vsf_vadd_VsfVsf(Q6_Vsf_vadd_VsfVsf(vi0, vi1), vi8);
+        const xnn_simd_f32_t vsum23 = Q6_Vsf_vadd_VsfVsf(vi2, vi3);
+        const xnn_simd_f32_t vsum45 = Q6_Vsf_vadd_VsfVsf(vi4, vi5);
+        const xnn_simd_f32_t vsum67 = Q6_Vsf_vadd_VsfVsf(vi6, vi7);
 
-        const xnn_simd_f32_t vsum2345 = xnn_add_f32(vsum23, vsum45);
-        const xnn_simd_f32_t vsum01678 = xnn_add_f32(vsum018, vsum67);
-        const xnn_simd_f32_t vsum012345678 = xnn_add_f32(vsum2345, vsum01678);
-        const xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
+        const xnn_simd_f32_t vsum2345 = Q6_Vsf_vadd_VsfVsf(vsum23, vsum45);
+        const xnn_simd_f32_t vsum01678 = Q6_Vsf_vadd_VsfVsf(vsum018, vsum67);
+        const xnn_simd_f32_t vsum012345678 = Q6_Vsf_vadd_VsfVsf(vsum2345, vsum01678);
+        const xnn_simd_f32_t vacc = Q6_Vsf_vadd_VsfVsf(vprev, vsum012345678);
         xnn_store_tail_f32(o, vacc, c);
       }
 
@@ -213,20 +217,19 @@ void xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32(
       const xnn_simd_f32_t vi8 = xnn_loadu_f32(i8); i8 += 32;
       const xnn_simd_f32_t vprev = xnn_loadu_f32(prev_output); prev_output += 32;
 
-      const xnn_simd_f32_t vsum018 = xnn_add_f32(xnn_add_f32(vi0, vi1), vi8);
-      const xnn_simd_f32_t vsum23 = xnn_add_f32(vi2, vi3);
-      const xnn_simd_f32_t vsum45 = xnn_add_f32(vi4, vi5);
-      const xnn_simd_f32_t vsum67 = xnn_add_f32(vi6, vi7);
+      const xnn_simd_f32_t vsum018 = Q6_Vsf_vadd_VsfVsf(Q6_Vsf_vadd_VsfVsf(vi0, vi1), vi8);
+      const xnn_simd_f32_t vsum23 = Q6_Vsf_vadd_VsfVsf(vi2, vi3);
+      const xnn_simd_f32_t vsum45 = Q6_Vsf_vadd_VsfVsf(vi4, vi5);
+      const xnn_simd_f32_t vsum67 = Q6_Vsf_vadd_VsfVsf(vi6, vi7);
 
-      const xnn_simd_f32_t vsum2345 = xnn_add_f32(vsum23, vsum45);
-      const xnn_simd_f32_t vsum01678 = xnn_add_f32(vsum018, vsum67);
-      const xnn_simd_f32_t vsum012345678 = xnn_add_f32(vsum2345, vsum01678);
+      const xnn_simd_f32_t vsum2345 = Q6_Vsf_vadd_VsfVsf(vsum23, vsum45);
+      const xnn_simd_f32_t vsum01678 = Q6_Vsf_vadd_VsfVsf(vsum018, vsum67);
+      const xnn_simd_f32_t vsum012345678 = Q6_Vsf_vadd_VsfVsf(vsum2345, vsum01678);
 
-      xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
+      xnn_simd_f32_t vacc = Q6_Vsf_vadd_VsfVsf(vprev, vsum012345678);
 
-      vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = Q6_Vsf_vmpy_VsfVsf(vacc, vscale);
+      vacc = clamp_f32(vacc, vmin, vmax);
 
       xnn_storeu_f32(o, vacc); o += 32;
     }
@@ -242,20 +245,19 @@ void xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32(
       const xnn_simd_f32_t vi8 = xnn_load_tail_f32(i8, c);
       const xnn_simd_f32_t vprev = xnn_load_tail_safe_f32(prev_output, c);
 
-      const xnn_simd_f32_t vsum018 = xnn_add_f32(xnn_add_f32(vi0, vi1), vi8);
-      const xnn_simd_f32_t vsum23 = xnn_add_f32(vi2, vi3);
-      const xnn_simd_f32_t vsum45 = xnn_add_f32(vi4, vi5);
-      const xnn_simd_f32_t vsum67 = xnn_add_f32(vi6, vi7);
+      const xnn_simd_f32_t vsum018 = Q6_Vsf_vadd_VsfVsf(Q6_Vsf_vadd_VsfVsf(vi0, vi1), vi8);
+      const xnn_simd_f32_t vsum23 = Q6_Vsf_vadd_VsfVsf(vi2, vi3);
+      const xnn_simd_f32_t vsum45 = Q6_Vsf_vadd_VsfVsf(vi4, vi5);
+      const xnn_simd_f32_t vsum67 = Q6_Vsf_vadd_VsfVsf(vi6, vi7);
 
-      const xnn_simd_f32_t vsum2345 = xnn_add_f32(vsum23, vsum45);
-      const xnn_simd_f32_t vsum01678 = xnn_add_f32(vsum018, vsum67);
-      const xnn_simd_f32_t vsum012345678 = xnn_add_f32(vsum2345, vsum01678);
+      const xnn_simd_f32_t vsum2345 = Q6_Vsf_vadd_VsfVsf(vsum23, vsum45);
+      const xnn_simd_f32_t vsum01678 = Q6_Vsf_vadd_VsfVsf(vsum018, vsum67);
+      const xnn_simd_f32_t vsum012345678 = Q6_Vsf_vadd_VsfVsf(vsum2345, vsum01678);
 
-      xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
+      xnn_simd_f32_t vacc = Q6_Vsf_vadd_VsfVsf(vprev, vsum012345678);
 
-      vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = Q6_Vsf_vmpy_VsfVsf(vacc, vscale);
+      vacc = clamp_f32(vacc, vmin, vmax);
 
       xnn_store_tail_f32(o, vacc, c); o += c;
     }

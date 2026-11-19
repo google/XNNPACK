@@ -14,6 +14,20 @@ $UKERNEL_ARCH = "wasmrelaxedsimdfp16" if DATATYPE == "f16" and ARCH == "wasmrela
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/simd/${DATATYPE}-${ARCH}.h"
 
+$# The HVX qfloat accumulator cannot represent NaN.
+$ADD = "Q6_Vsf_vadd_VsfVsf" if ARCH == "hvx" else f"xnn_add_{DATATYPE}"
+$MUL = "Q6_Vsf_vmpy_VsfVsf" if ARCH == "hvx" else f"xnn_mul_{DATATYPE}"
+$if ARCH in ("sse2", "avx", "avx512f", "scalar"):
+  $LOWER = f"xnn_max_{DATATYPE}(vmin, vacc)"
+  $UPPER = f"xnn_min_{DATATYPE}(vmax, vacc)"
+$else:
+  $LOWER = f"xnn_max_{DATATYPE}(vacc, vmin)"
+  $UPPER = f"xnn_min_{DATATYPE}(vacc, vmax)"
+$if ARCH == "hvx":
+  static XNN_INLINE HVX_Vector clamp_f32(HVX_Vector x, HVX_Vector min, HVX_Vector max) {
+    const HVX_VectorPred nan = Q6_Q_vcmp_gt_VuwVuw(xnn_abs_f32(x), Q6_V_vsplat_R(0x7F800000));
+    return Q6_V_vmux_QVV(nan, x, xnn_min_f32(xnn_max_f32(x, min), max));
+  }
 $CTYPE = {"f32": "float", "f16": "xnn_float16"}[DATATYPE]
 void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
     size_t output_pixels,
@@ -62,15 +76,15 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
           const xnn_simd_${DATATYPE}_t vi${K} = xnn_loadu_${DATATYPE}(i${K}); i${K} += ${SIMD_SIZE};
         const xnn_simd_${DATATYPE}_t vprev = xnn_loadu_${DATATYPE}(prev_output); prev_output += ${SIMD_SIZE};
 
-        const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
-        const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
-        const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
-        const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+        const xnn_simd_${DATATYPE}_t vsum018 = ${ADD}(${ADD}(vi0, vi1), vi8);
+        const xnn_simd_${DATATYPE}_t vsum23 = ${ADD}(vi2, vi3);
+        const xnn_simd_${DATATYPE}_t vsum45 = ${ADD}(vi4, vi5);
+        const xnn_simd_${DATATYPE}_t vsum67 = ${ADD}(vi6, vi7);
 
-        const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
-        const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
-        const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
-        const xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+        const xnn_simd_${DATATYPE}_t vsum2345 = ${ADD}(vsum23, vsum45);
+        const xnn_simd_${DATATYPE}_t vsum01678 = ${ADD}(vsum018, vsum67);
+        const xnn_simd_${DATATYPE}_t vsum012345678 = ${ADD}(vsum2345, vsum01678);
+        const xnn_simd_${DATATYPE}_t vacc = ${ADD}(vprev, vsum012345678);
         xnn_storeu_${DATATYPE}(o, vacc); o += ${SIMD_SIZE};
       }
       $if SIMD_SIZE > 1:
@@ -79,15 +93,15 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
             const xnn_simd_${DATATYPE}_t vi${K} = xnn_load_tail_${DATATYPE}(i${K}, c);
           const xnn_simd_${DATATYPE}_t vprev = xnn_load_tail_safe_${DATATYPE}(prev_output, c);
 
-          const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
-          const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
-          const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
-          const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+          const xnn_simd_${DATATYPE}_t vsum018 = ${ADD}(${ADD}(vi0, vi1), vi8);
+          const xnn_simd_${DATATYPE}_t vsum23 = ${ADD}(vi2, vi3);
+          const xnn_simd_${DATATYPE}_t vsum45 = ${ADD}(vi4, vi5);
+          const xnn_simd_${DATATYPE}_t vsum67 = ${ADD}(vi6, vi7);
 
-          const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
-          const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
-          const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
-          const xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+          const xnn_simd_${DATATYPE}_t vsum2345 = ${ADD}(vsum23, vsum45);
+          const xnn_simd_${DATATYPE}_t vsum01678 = ${ADD}(vsum018, vsum67);
+          const xnn_simd_${DATATYPE}_t vsum012345678 = ${ADD}(vsum2345, vsum01678);
+          const xnn_simd_${DATATYPE}_t vacc = ${ADD}(vprev, vsum012345678);
           xnn_store_tail_${DATATYPE}(o, vacc, c);
         }
 
@@ -113,20 +127,23 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
         const xnn_simd_${DATATYPE}_t vi${K} = xnn_loadu_${DATATYPE}(i${K}); i${K} += ${SIMD_SIZE};
       const xnn_simd_${DATATYPE}_t vprev = xnn_loadu_${DATATYPE}(prev_output); prev_output += ${SIMD_SIZE};
 
-      const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
-      const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
-      const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
-      const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+      const xnn_simd_${DATATYPE}_t vsum018 = ${ADD}(${ADD}(vi0, vi1), vi8);
+      const xnn_simd_${DATATYPE}_t vsum23 = ${ADD}(vi2, vi3);
+      const xnn_simd_${DATATYPE}_t vsum45 = ${ADD}(vi4, vi5);
+      const xnn_simd_${DATATYPE}_t vsum67 = ${ADD}(vi6, vi7);
 
-      const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
-      const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
-      const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
+      const xnn_simd_${DATATYPE}_t vsum2345 = ${ADD}(vsum23, vsum45);
+      const xnn_simd_${DATATYPE}_t vsum01678 = ${ADD}(vsum018, vsum67);
+      const xnn_simd_${DATATYPE}_t vsum012345678 = ${ADD}(vsum2345, vsum01678);
 
-      xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+      xnn_simd_${DATATYPE}_t vacc = ${ADD}(vprev, vsum012345678);
 
-      vacc = xnn_mul_${DATATYPE}(vacc, vscale);
-      vacc = xnn_max_${DATATYPE}(vacc, vmin);
-      vacc = xnn_min_${DATATYPE}(vacc, vmax);
+      vacc = ${MUL}(vacc, vscale);
+      $if ARCH == "hvx":
+        vacc = clamp_f32(vacc, vmin, vmax);
+      $else:
+        vacc = ${LOWER};
+        vacc = ${UPPER};
 
       xnn_storeu_${DATATYPE}(o, vacc); o += ${SIMD_SIZE};
     }
@@ -136,20 +153,23 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
           const xnn_simd_${DATATYPE}_t vi${K} = xnn_load_tail_${DATATYPE}(i${K}, c);
         const xnn_simd_${DATATYPE}_t vprev = xnn_load_tail_safe_${DATATYPE}(prev_output, c);
 
-        const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
-        const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
-        const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
-        const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+        const xnn_simd_${DATATYPE}_t vsum018 = ${ADD}(${ADD}(vi0, vi1), vi8);
+        const xnn_simd_${DATATYPE}_t vsum23 = ${ADD}(vi2, vi3);
+        const xnn_simd_${DATATYPE}_t vsum45 = ${ADD}(vi4, vi5);
+        const xnn_simd_${DATATYPE}_t vsum67 = ${ADD}(vi6, vi7);
 
-        const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
-        const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
-        const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
+        const xnn_simd_${DATATYPE}_t vsum2345 = ${ADD}(vsum23, vsum45);
+        const xnn_simd_${DATATYPE}_t vsum01678 = ${ADD}(vsum018, vsum67);
+        const xnn_simd_${DATATYPE}_t vsum012345678 = ${ADD}(vsum2345, vsum01678);
 
-        xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+        xnn_simd_${DATATYPE}_t vacc = ${ADD}(vprev, vsum012345678);
 
-        vacc = xnn_mul_${DATATYPE}(vacc, vscale);
-        vacc = xnn_max_${DATATYPE}(vacc, vmin);
-        vacc = xnn_min_${DATATYPE}(vacc, vmax);
+        vacc = ${MUL}(vacc, vscale);
+        $if ARCH == "hvx":
+          vacc = clamp_f32(vacc, vmin, vmax);
+        $else:
+          vacc = ${LOWER};
+          vacc = ${UPPER};
 
         xnn_store_tail_${DATATYPE}(o, vacc, c); o += c;
       }
