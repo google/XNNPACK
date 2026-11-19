@@ -748,46 +748,52 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
   const ynn::axes_set axes = get_broadcast_axes(subgraph, broadcast);
   if (!axes.any()) return false;
 
-  const ynn_value& input = subgraph.value(broadcast.inputs[0]);
   uint32_t broadcast_id = broadcast.outputs[0];
 
   // Do not retype/reshape a value that is visible to the caller.
   if (subgraph.value(broadcast_id).is_external_output()) return false;
 
-  ynn_node* consumer = analysis.single_consumer_of(broadcast_id);
-  if (!consumer) return false;
+  for (ynn_node* consumer : analysis.consumers[broadcast_id]) {
+    if (consumer->outputs.size() != 1) continue;
 
-  // Currently we don't handle any ops with more than one output.
-  if (consumer->outputs.size() != 1) return false;
-
-  const ynn_value& consumer_output = subgraph.value(consumer->outputs[0]);
-  std::vector<int32_t> perm(consumer_output.rank());
-  if (!is_broadcast_noop(subgraph, *consumer, broadcast_id, axes, perm)) {
-    // This consumer needs this broadcast.
-    return false;
-  }
-
-  // Currently we have consumer(broadcast(x)), we want broadcast(consumer(x)).
-  for (uint32_t& input_id : consumer->inputs) {
-    if (input_id == broadcast_id) {
-      // Consume the broadcast input instead.
-      input_id = broadcast.inputs[0];
+    uint32_t consumer_output_id = consumer->outputs[0];
+    const ynn_value& consumer_output = subgraph.value(consumer_output_id);
+    std::vector<int32_t> perm(consumer_output.rank());
+    if (!is_broadcast_noop(subgraph, *consumer, broadcast_id, axes, perm)) {
+      continue;
     }
+
+    uint32_t input_id = broadcast.inputs[0];
+    ynn_type new_type = consumer_output.type;
+    std::vector<slinky::expr> new_extents =
+        permute(perm, subgraph.value(input_id).extents, slinky::expr{});
+    std::vector<slinky::expr> output_extents = consumer_output.extents;
+
+    // Create a new internal value for the unbroadcasted consumer output.
+    // new_internal_value() may reallocate subgraph.values, so do not hold
+    // references into subgraph.values across this call.
+    ynn_value& new_value = subgraph.new_internal_value();
+    new_value.type = new_type;
+    new_value.extents = std::move(new_extents);
+    uint32_t new_value_id = new_value.id;
+
+    for (uint32_t& id : consumer->inputs) {
+      if (id == broadcast_id) {
+        id = input_id;
+      }
+    }
+    consumer->outputs[0] = new_value_id;
+
+    ynn_node new_broadcast;
+    define_static_broadcast(subgraph, new_broadcast, std::move(output_extents),
+                            new_value_id, &consumer_output_id);
+    subgraph.add_node(std::move(new_broadcast));
+    subgraph.topological_sort();
+    analysis.invalidate();
+    return true;
   }
 
-  // A static_broadcast learns its shape from its output value, which is the
-  // original output of the consumer after this rewrite.
-  ynn_value& broadcast_output = subgraph.value(broadcast.outputs[0]);
-  broadcast_output.type = consumer_output.type;
-  broadcast_output.extents = permute(perm, input.extents, slinky::expr{});
-
-  broadcast.inputs[0] = broadcast.outputs[0];
-
-  std::swap(consumer->outputs[0], broadcast.outputs[0]);
-  subgraph.topological_sort();
-  analysis.invalidate();
-
-  return true;
+  return false;
 }
 
 bool is_expand_dims_noop(const ynn_value& input,
