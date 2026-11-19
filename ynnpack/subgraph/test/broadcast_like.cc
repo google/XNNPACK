@@ -211,4 +211,65 @@ TEST(BroadcastLike, defined_output_has_template_rank) {
   EXPECT_THAT(output, testing::ElementsAreArray(input));
 }
 
+TEST(BroadcastLike, symbolic_extent_inequality) {
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  uint32_t stenciled_id = YNN_INVALID_VALUE_ID;
+  uint32_t pooled_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(2);
+  const uint32_t zero_id = subgraph.DefineScalar<float>(0.0f);
+  subgraph.AddInput(ynn_type_fp32, 1, x_id)
+      .AddOutput(ynn_type_fp32, 1, out_id)
+      .AddTensor(ynn_type_fp32, 2, stenciled_id)
+      .AddTensor(ynn_type_fp32, 1, pooled_id)
+      .AddStencilCopy({0}, {1}, {2}, {1}, {1}, x_id, YNN_INVALID_VALUE_ID,
+                      stenciled_id)
+      .AddReduce(ynn_reduce_sum, {1}, stenciled_id, zero_id, pooled_id);
+
+  const int32_t axes[] = {0};
+  uint32_t x_broadcast_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_broadcast_like(subgraph.GetSubgraph(), 1, axes, x_id,
+                                      pooled_id, &x_broadcast_id, /*flags=*/0),
+            ynn_status_success);
+  EXPECT_EQ(x_broadcast_id, x_id);
+
+  subgraph.AddBroadcastLike({0}, pooled_id, x_id, out_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<float> x = {1.0f, 3.0f};
+  runtime.ReshapeExternalTensor({2}, x.data(), x_id).ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  ASSERT_EQ(runtime.GetExternalTensorShape(out_id), (std::vector<size_t>{2}));
+
+  std::vector<float> out(2);
+  runtime.SetupExternalTensor(out.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_THAT(out, testing::ElementsAre(4.0f, 4.0f));
+
+  std::vector<float> x_invalid(3, 1.0f);
+  runtime.ReshapeExternalTensor({3}, x_invalid.data(), x_id);
+  EXPECT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
+}
+
+TEST(BroadcastLike, bad_static_shape) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, {10, 20}, a_id)
+      .AddInput(ynn_type_fp32, {5, 20}, b_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddBroadcastLike({0}, a_id, b_id, x_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor({10, 20}, nullptr, a_id)
+      .ReshapeExternalTensor({5, 20}, nullptr, b_id);
+  EXPECT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
+}
+
 }  // namespace ynn

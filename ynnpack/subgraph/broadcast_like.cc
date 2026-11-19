@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -57,9 +58,20 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
       output_extents.resize(d + 1);
     }
     slinky::expr& output_extent = output_extents[d];
-    if (!output_extent.defined() || slinky::is_one(output_extent)) {
+    if (!output_extent.defined() || slinky::is_one(output_extent) ||
+        slinky::prove_true(template_extent != 1)) {
       output_extent = template_extent;
-    } else if (!slinky::prove_true(template_extent == output_extent)) {
+      continue;
+    }
+
+    // Assuming extents are >= 1, `template_extent > output_extent` implies
+    // `output_extent` must be 1, while `template_extent <= output_extent`
+    // implies `template_extent` is either 1 or `output_extent` (a no-op).
+    std::optional<bool> template_larger =
+        slinky::attempt_to_prove(template_extent > output_extent);
+    if (template_larger && *template_larger) {
+      output_extent = template_extent;
+    } else if (!template_larger) {
       output_extent = subgraph->globals.get(
           select(template_extent != 1, template_extent, output_extent), "b");
     }
