@@ -125,6 +125,7 @@ cc_library(
         "//litert/tensor/internal:graph_traversal",
         "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:macros",
+        "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base",
         "@abseil-cpp//absl/base:no_destructor",
         "@abseil-cpp//absl/container:flat_hash_map",
