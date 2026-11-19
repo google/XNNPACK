@@ -82,6 +82,7 @@ cc_library(
     srcs = ["dequantize.cc"],
     hdrs = ["dequantize.h"],
     deps = [
+        "//litert/tensor",
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
@@ -98,6 +99,7 @@ cc_test(
     srcs = ["dequantize_test.cc"],
     deps = [
         ":dequantize",
+        "//litert/tensor",
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
         "@abseil-cpp//absl/status",
