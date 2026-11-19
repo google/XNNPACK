@@ -726,6 +726,27 @@ TEST_F(Convolution2DDefine, InvalidFilterShape) {
       xnn_status_invalid_parameter);
 }
 
+TEST_F(Convolution2DDefine, MismatchedFilterKernelHeight) {
+  // The filter declares a 1-row kernel but the convolution asks for 3 rows;
+  // weight packing would read past the filter buffer, so it must be rejected.
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, {8, 1, 3, 4}, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_invalid_parameter);
+}
+
+TEST_F(Convolution2DDefine, MismatchedFilterInputChannels) {
+  // group_input_channels is 4 but the filter's last dimension is 2.
+  EXPECT_EQ(
+      Define(DenseTensor(xnn_datatype_fp32, input_dims_),
+             DenseTensor(xnn_datatype_fp32, {8, 3, 3, 2}, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, bias_dims_, /*is_static=*/true),
+             DenseTensor(xnn_datatype_fp32, output_dims_)),
+      xnn_status_invalid_parameter);
+}
+
 TEST_F(Convolution2DDefine, ValidQC8) {
   EXPECT_EQ(Define(QuantizedTensor(xnn_datatype_qint8, 0, input_dims_),
                    ChannelwiseTensor(xnn_datatype_qcint8, filter_dims_,

@@ -1330,6 +1330,18 @@ enum xnn_status xnn_define_convolution_2d(
     return xnn_status_invalid_parameter;
   }
 
+  if (filter_value->shape.num_dims != 4 ||
+      filter_value->shape.dim[1] != kernel_height ||
+      filter_value->shape.dim[2] != kernel_width ||
+      filter_value->shape.dim[3] != group_input_channels) {
+    xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32
+        ": filter must be [groups * group_output_channels, kernel_height, "
+        "kernel_width, group_input_channels].",
+        xnn_node_type_to_string(xnn_node_type_convolution_2d), filter_id);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
