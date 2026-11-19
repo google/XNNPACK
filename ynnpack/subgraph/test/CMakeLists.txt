@@ -70,6 +70,7 @@ YNN_ADD_SUBGRAPH_TEST(unary)
 TARGET_LINK_LIBRARIES(ynnpack_subgraph_unary_test ynnpack_kernels_unary_reference)
 
 YNN_ADD_SUBGRAPH_TEST(dot)
+YNN_ADD_SUBGRAPH_TEST(ragged_dot)
 YNN_ADD_SUBGRAPH_TEST(gelu)
 YNN_ADD_SUBGRAPH_TEST(subgraphs)
 YNN_ADD_SUBGRAPH_TEST(eliminate_common_subgraphs)

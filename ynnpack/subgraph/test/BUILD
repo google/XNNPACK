@@ -142,6 +142,16 @@ cc_test(
 )
 
 cc_test(
+    name = "ragged_dot",
+    srcs = ["ragged_dot.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    shard_count = 18,
+    tags = ["nowasm"],  # b/525770952
+    deps = TEST_DEPS,
+)
+
+cc_test(
     name = "dot_scheduling",
     srcs = ["dot_scheduling.cc"],
     linkopts = ynn_binary_linkopts(),
