@@ -348,8 +348,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx(
       k -= kremainder * sizeof(int8_t);
     }
 
-    // TODO: Instead of processing up to 4 tiles (16x64) consider
-    // quantizing 1 tile at a time (16 registers)
     _tile_stored(0, &res[0][0], 64);
     if XNN_LIKELY(nc > 16) {
       _tile_stored(1, &res[1][0], 64);
@@ -361,7 +359,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx(
       _tile_stored(3, &res[3][0], 64);
     }
 
-    // TODO: Fix msan for AMX
+    // MSan does not instrument AMX _tile_stored; unpoison materialized tile buffer.
     #if defined(__has_feature)
       #if __has_feature(memory_sanitizer)
         __msan_unpoison(res, sizeof(res));
