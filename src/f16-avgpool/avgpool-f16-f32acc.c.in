@@ -8,6 +8,8 @@ $SIMD_SIZE = {
 $  "scalar": 1,
 $  "wasmrelaxedsimd": 4,
 $}[ARCH]
+$MAX = "wasm_f32x4_max" if ARCH == "wasmrelaxedsimd" else "xnn_max_f32"
+$MIN = "wasm_f32x4_min" if ARCH == "wasmrelaxedsimd" else "xnn_min_f32"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -162,8 +164,8 @@ void xnn_f16_f32acc_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
 
       xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
       vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = ${MAX}(vmin, vacc);
+      vacc = ${MIN}(vmax, vacc);
 
       xnn_store_f32_f16(o, vacc); o += ${SIMD_SIZE};
     }
@@ -184,8 +186,8 @@ void xnn_f16_f32acc_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
 
         xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
         vacc = xnn_mul_f32(vacc, vscale);
-        vacc = xnn_max_f32(vacc, vmin);
-        vacc = xnn_min_f32(vacc, vmax);
+        vacc = ${MAX}(vmin, vacc);
+        vacc = ${MIN}(vmax, vacc);
 
         xnn_store_tail_f32_f16(o, vacc, c); o += c;
       }

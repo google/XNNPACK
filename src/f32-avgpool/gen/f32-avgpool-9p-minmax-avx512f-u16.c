@@ -225,8 +225,8 @@ void xnn_f32_avgpool_minmax_ukernel_9p__avx512f_u16(
       xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
 
       vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = xnn_max_f32(vmin, vacc);
+      vacc = xnn_min_f32(vmax, vacc);
 
       xnn_storeu_f32(o, vacc); o += 16;
     }
@@ -254,8 +254,8 @@ void xnn_f32_avgpool_minmax_ukernel_9p__avx512f_u16(
       xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
 
       vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = xnn_max_f32(vmin, vacc);
+      vacc = xnn_min_f32(vmax, vacc);
 
       xnn_store_tail_f32(o, vacc, c); o += c;
     }
