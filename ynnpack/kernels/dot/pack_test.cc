@@ -599,4 +599,50 @@ TEST(pack, tile_1xn_strided_output_padding) {
   EXPECT_THAT(output, ElementsAreArray(expected));
 }
 
+TEST(dot_packer, pack_a_panels_3d_k) {
+  constexpr size_t elem_size = sizeof(int);
+  constexpr size_t tile_k = 2;
+
+  // Pack an A-style panel (`tile_p = 1`) with unaligned `k1 = 3`, `k2 = 2`.
+  {
+    constexpr size_t m = 2;
+    constexpr size_t k1 = 3;
+    constexpr size_t k2 = 2;
+    const size_t ks[] = {k1, k2, 1};
+    const size_t src_k_strides[] = {elem_size, m * k1 * elem_size, 0};
+    const std::vector<int> input = {
+        // clang-format off
+        // k2 = 0
+        1, 2, 3,
+        4, 5, 6,
+        // k2 = 1
+        7, 8, 9,
+        10, 11, 12,
+        // clang-format on
+    };
+    const size_t bytes = dot_packer::packed_bytes(m, ks, elem_size * 8, tile_k,
+                                                  /*tile_p=*/1);
+    std::vector<int> output(bytes / elem_size, -1);
+    dot_packer dp(elem_size, k1 * elem_size, elem_size * 8, tile_k,
+                  /*tile_p=*/1, output.data());
+    size_t packed_stride_m = 0;
+    size_t packed_k_strides[3] = {};
+    EXPECT_EQ(dp.pack(m, ks, input.data(), src_k_strides, packed_stride_m,
+                      packed_k_strides),
+              output.data());
+    EXPECT_EQ(packed_stride_m, 4 * elem_size);
+    EXPECT_EQ(packed_k_strides[0], elem_size);
+    EXPECT_EQ(packed_k_strides[1], m * 4 * elem_size);
+    EXPECT_EQ(packed_k_strides[2], k2 * m * 4 * elem_size);
+    EXPECT_THAT(output, ElementsAreArray({
+                            // clang-format off
+                            1, 2, 3, 0,
+                            4, 5, 6, 0,
+                            7, 8, 9, 0,
+                            10, 11, 12, 0,
+                            // clang-format on
+                        }));
+  }
+}
+
 }  // namespace ynn
