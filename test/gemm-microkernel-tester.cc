@@ -3678,6 +3678,20 @@ void GemmMicrokernelTester::Test_PQS8(
     xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
     xnn_pack_weights_and_biases_fn pack,
     xnn_packed_stride_weights_and_biases_fn packed_stride) const {
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  ASSERT_NE(pack_lh_config, nullptr);
+  Test_PQS8(gemm, init_minmax_params,
+            (xnn_x8_pack_lh_ukernel_fn)pack_lh_config->pack_lh_fn,
+            pack_lh_config->size_fn, pack, packed_stride);
+}
+
+void GemmMicrokernelTester::Test_PQS8(
+    xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+    xnn_x8_pack_lh_ukernel_fn pack_lh_fn, xnn_pack_lh_size_fn pack_lh_size_fn,
+    xnn_pack_weights_and_biases_fn pack,
+    xnn_packed_stride_weights_and_biases_fn packed_stride) const {
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -3711,23 +3725,23 @@ void GemmMicrokernelTester::Test_PQS8(
   const size_t packed_w_size = packed_w_stride * round_up(n(), nr());
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
 
-  // Get the LHS packing config.
-  const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x8_pack_lh_config();
-  ASSERT_NE(pack_lh_config, nullptr);
-
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   std::generate(b.begin(), b.end(), std::ref(w8rng));
-  std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+  if (large_bias()) {
+    for (size_t j = 0; j < bias.size(); j++) {
+      bias[j] = (j % 2 == 0) ? INT32_C(200000000) : INT32_C(-200000000);
+    }
+  } else {
+    std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+  }
 
   // Pack the left-hand operand.
   const size_t input_packed_size =
-      pack_lh_config->size_fn(m(), k(), mr_packed(), kr(), sr());
+      pack_lh_size_fn(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size);
-  pack_lh_config->pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
-                             /*m_idx_start=*/0, a.data(),
-                             /*lhs_stride=*/k() * sizeof(int8_t),
-                             input_packed.data());
+  pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
+             /*m_idx_start=*/0, a.data(),
+             /*lhs_stride=*/k() * sizeof(int8_t), input_packed.data());
 
   // Compute 32-bit results and output quantization arguments.
   std::fill(acc.begin(), acc.end(), 0);
@@ -3756,7 +3770,7 @@ void GemmMicrokernelTester::Test_PQS8(
     const float c_scale = accumulated_range >= 256
                               ? static_cast<double>(accumulated_range) / 255.0
                               : 256.0 / 255;
-    scale[n_index] = 1.0f / c_scale;
+    scale[n_index] = large_bias() ? 1.0e-7f : (1.0f / c_scale);
   }
 
   // RHS packing.
@@ -3820,6 +3834,21 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
     xnn_pack_weights_and_biases_fn pack,
     xnn_packed_stride_weights_and_biases_fn packed_stride,
     xnn_qs8_requantize_fn requantize) const {
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  ASSERT_NE(pack_lh_config, nullptr);
+  Test_PQS8QC4W(gemm, init_minmax_params,
+                (xnn_x8_pack_lh_ukernel_fn)pack_lh_config->pack_lh_fn,
+                pack_lh_config->size_fn, pack, packed_stride, requantize);
+}
+
+void GemmMicrokernelTester::Test_PQS8QC4W(
+    xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+    xnn_x8_pack_lh_ukernel_fn pack_lh_fn, xnn_pack_lh_size_fn pack_lh_size_fn,
+    xnn_pack_weights_and_biases_fn pack,
+    xnn_packed_stride_weights_and_biases_fn packed_stride,
+    xnn_qs8_requantize_fn requantize) const {
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -3849,21 +3878,22 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
   const size_t packed_w_size = packed_w_stride * round_up(n(), nr());
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
 
-  const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x8_pack_lh_config();
-  ASSERT_NE(pack_lh_config, nullptr);
-
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::fill_uniform_random_bits(b.data(), b.size(), rng);
-  std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+  if (large_bias()) {
+    for (size_t j = 0; j < bias.size(); j++) {
+      bias[j] = (j % 2 == 0) ? INT32_C(200000000) : INT32_C(-200000000);
+    }
+  } else {
+    std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+  }
 
   const size_t input_packed_size =
-      pack_lh_config->size_fn(m(), k2, mr_packed(), kr(), sr());
+      pack_lh_size_fn(m(), k2, mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size);
-  pack_lh_config->pack_lh_fn(m(), k2, mr_packed(), kr(), sr(),
-                             /*m_idx_start=*/0, a.data(),
-                             /*lhs_stride=*/k2 * sizeof(int8_t),
-                             input_packed.data());
+  pack_lh_fn(m(), k2, mr_packed(), kr(), sr(),
+             /*m_idx_start=*/0, a.data(),
+             /*lhs_stride=*/k2 * sizeof(int8_t), input_packed.data());
 
   std::fill(acc.begin(), acc.end(), 0);
   for (size_t m_index = 0; m_index < m(); m_index++) {
@@ -3898,7 +3928,7 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
   const float c_scale = accumulated_range >= 256
                             ? static_cast<double>(accumulated_range) / 255.0
                             : 256.0 / 255;
-  const float requantization_scale = 1.0f / c_scale;
+  const float requantization_scale = large_bias() ? 1.0e-7f : (1.0f / c_scale);
   const xnnpack::Buffer<float> requantization_scale_buffer(
       n(), requantization_scale);
 
