@@ -710,10 +710,13 @@ static enum xnn_status check_block_size(const struct fc_variant* variant,
       const size_t scale_index = output_channel * num_blocks + block_index;
       const float fp32_scale =
           math_cvt_fp32_bf16(context->kernel_scale.bf16[scale_index]);
-      if (fp32_scale <= 0.0f || !isnormal(fp32_scale)) {
+      // Allow 0.0 for all-zero/near-zero blocks; non-zero FP16 subnormals are
+      // normal in FP32, while FP32/BF16 subnormals remain rejected.
+      if (fp32_scale < 0.0f || (fp32_scale != 0.0f && !isnormal(fp32_scale))) {
         xnn_log_error(
             "failed to create %s operator with %.7g kernel scale in output "
-            "channel #%zu, block #%zu: scale must be finite and positive",
+            "channel #%zu, block #%zu: scale must be zero or a finite, "
+            "normalized, positive value",
             xnn_operator_type_to_string(context->operator_type), fp32_scale,
             output_channel, block_index);
         return xnn_status_invalid_parameter;

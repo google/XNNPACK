@@ -1107,6 +1107,105 @@ TEST(FullyConnectedQD8F32QB4W_F16, static_b) {
   TestStaticB<float, qcint4, float, float, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
+
+TEST(FullyConnectedQD8F32QB4W_F16, zero_and_subnormal_scales) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t kInputChannels = 64;
+  constexpr size_t kOutputChannels = 4;
+  constexpr size_t kBlockSize = 32;
+  constexpr size_t kNumBlocks = kInputChannels / kBlockSize;
+
+  // All weights set to signed +1 (0x11 per byte with zero_point=0).
+  std::vector<uint8_t> filter_data(kOutputChannels * kInputChannels / 2, 0x11);
+  // Per-(oc, block) FP16 scales covering zero, subnormals, and normal values:
+  // oc=0: [0.0, 0.0]
+  // oc=1: [0.0, 1.0]
+  // oc=2: [2^-24 (min subnormal), 0.0]
+  // oc=3: [max subnormal, 1.0]
+  const std::vector<uint16_t> fp16_scales = {
+      0x0000, 0x0000,
+      0x0000, 0x3C00,
+      0x0001, 0x0000,
+      0x03FF, 0x3C00,
+  };
+  ASSERT_EQ(fp16_scales.size(), kOutputChannels * kNumBlocks);
+  const std::vector<float> bias = {0.5f, -1.25f, 2.0f, -0.75f};
+
+  // Asymmetric input range exercises non-zero dynamic quantization zero_point.
+  std::vector<float> input(kInputChannels, 1.0f);
+  input[0] = -0.5f;
+  std::vector<float> output(kOutputChannels, 0.0f);
+
+  SubgraphTester tester(/*external_value_ids=*/2);
+  const size_t input_dims[2] = {1, kInputChannels};
+  const size_t filter_dims[2] = {kOutputChannels, kInputChannels};
+  const size_t bias_dims[1] = {kOutputChannels};
+  const size_t output_dims[2] = {1, kOutputChannels};
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t qd_input_id = XNN_INVALID_VALUE_ID;
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                tester.Subgraph(), xnn_datatype_fp32, 2, input_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_dynamically_quantized_tensor_value(
+                tester.Subgraph(), xnn_datatype_qdint8, 2,
+                /*num_nonbatch_dims=*/1, input_dims, XNN_INVALID_VALUE_ID,
+                /*flags=*/0, &qd_input_id),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_unary(tester.Subgraph(), xnn_unary_convert, nullptr,
+                             input_id, qd_input_id, /*flags=*/0),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_blockwise_quantized_tensor_value_v2(
+                tester.Subgraph(), xnn_datatype_qbint4, /*zero_point=*/0,
+                fp16_scales.data(), 2, /*channel_dim=*/0, kBlockSize,
+                filter_dims, filter_data.data(), XNN_INVALID_VALUE_ID,
+                /*flags=*/0, xnn_datatype_fp16, &filter_id),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_tensor_value(
+                tester.Subgraph(), xnn_datatype_fp32, 1, bias_dims, bias.data(),
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &bias_id),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_tensor_value(
+                tester.Subgraph(), xnn_datatype_fp32, 2, output_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+  ASSERT_EQ(xnn_define_fully_connected(
+                tester.Subgraph(), -std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(), qd_input_id, filter_id,
+                bias_id, output_id, /*flags=*/0),
+            xnn_status_success);
+
+  xnn_status status = tester.CreateRuntime();
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(status, xnn_status_success);
+  tester.ReshapeRuntime()
+      .SetupExternalTensor(input.data(), input_id)
+      .SetupExternalTensor(output.data(), output_id)
+      .SetupRuntime()
+      .InvokeRuntime();
+
+  for (size_t oc = 0; oc < kOutputChannels; ++oc) {
+    float expected = bias[oc];
+    for (size_t b = 0; b < kNumBlocks; ++b) {
+      const float scale = xnn_float16_to_float(
+          xnn_float16_from_bits(fp16_scales[oc * kNumBlocks + b]));
+      float block_sum = 0.0f;
+      for (size_t i = 0; i < kBlockSize; ++i) {
+        block_sum += input[b * kBlockSize + i];
+      }
+      expected += block_sum * scale;
+    }
+    EXPECT_NEAR(output[oc], expected, 1e-2f + 2e-2f * std::abs(expected))
+        << "oc=" << oc;
+  }
+}
 // bf16 output only supports bf16-typed blockwise scales (there is no
 // qd8_bf16_qb4w_f16_scales create variant), so no _F16 counterpart here.
 TEST(FullyConnectedQD8BF16QB4W_BF16, static_b) {

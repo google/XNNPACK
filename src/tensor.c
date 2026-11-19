@@ -708,10 +708,13 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
       default:
         XNN_UNREACHABLE;
     }
-    if (float_scale <= 0.0f || !isnormal(float_scale)) {
+    // Allow 0.0 for all-zero/near-zero blocks; non-zero FP16 subnormals are
+    // normal in FP32, while FP32/BF16 subnormals remain rejected.
+    if (float_scale < 0.0f || (float_scale != 0.0f && !isnormal(float_scale))) {
       xnn_log_error(
           "failed to create Blockwise Quantized Dense Tensor value with %.7g "
-          "scale in block #%zu: scale must be finite, normalized, and positive",
+          "scale in block #%zu: scale must be zero or a finite, normalized, "
+          "positive value",
           float_scale, block);
       return xnn_status_invalid_parameter;
     }
