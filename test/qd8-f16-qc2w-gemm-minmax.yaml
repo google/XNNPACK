@@ -134,26 +134,6 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x8c8__avx2_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_3x8c8__avx2_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x8c8__avx2_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x8c8__avx2_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avx2_madd
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
@@ -176,37 +156,12 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x8c8__avxvnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_3x8c8__avxvnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x8c8__avxvnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c8__avxvnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x8c8__avxvnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
@@ -218,37 +173,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c8__avx512skx_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x16c8__avx512skx_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512skx_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_9x16c8__avx512skx_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_10x16c8__avx512skx_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_12x16c8__avx512skx_madd
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_14x16c8__avx512skx_madd
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
@@ -259,37 +184,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c8__avx512skx_madd_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x16c8__avx512skx_madd_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512skx_madd_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_9x16c8__avx512skx_madd_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_10x16c8__avx512skx_madd_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_12x16c8__avx512skx_madd_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_14x16c8__avx512skx_madd_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
@@ -301,37 +196,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c8__avx512vnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x16c8__avx512vnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_9x16c8__avx512vnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_10x16c8__avx512vnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_12x16c8__avx512vnni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_14x16c8__avx512vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
@@ -342,37 +207,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c8__avx512vnni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x16c8__avx512vnni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_9x16c8__avx512vnni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_10x16c8__avx512vnni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_12x16c8__avx512vnni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_14x16c8__avx512vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
@@ -389,37 +224,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c8__avx512vnnigfni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x16c8__avx512vnnigfni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnnigfni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_9x16c8__avx512vnnigfni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_12x16c8__avx512vnnigfni
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
@@ -430,37 +235,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
   planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c8__avx512vnnigfni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_7x16c8__avx512vnnigfni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
 - name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x16c8__avx512vnnigfni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_9x16c8__avx512vnnigfni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_12x16c8__avx512vnnigfni_prfm
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 32
-  planes: 4
-- name: xnn_qd8_f16_qc2w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 32
