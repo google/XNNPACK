@@ -199,7 +199,11 @@ def main(args):
       elements_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(
-          name, init_fn, elements_tile, vector_tile, isa
+          name,
+          init_fn,
+          elements_tile,
+          vector_tile,
+          isa,
       )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
