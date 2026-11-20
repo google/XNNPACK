@@ -96,6 +96,18 @@ cc_test(
 )
 
 cc_test(
+    name = "ragged_dot_test",
+    srcs = ["ragged_dot_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":composites",
+        "//ynnpack",
+        "//ynnpack/base",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
     name = "dot_bench",
     srcs = ["dot_bench.cc"],
     args = ["--benchmark_min_time=1x"],
