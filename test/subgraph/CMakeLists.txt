@@ -52,6 +52,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       fully-connected
       max-pooling-2d
       pack-lh
+      reshape-helpers
       rewrites
       rope
       softmax
