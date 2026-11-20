@@ -212,7 +212,12 @@ def infer_kernel_model_name(
     arch_variants.append("f16c_fma3")
 
   type_variants = [type_str]
-  first_part = type_str.split("_")[0]
+  parts = type_str.split("_")
+  if len(parts) >= 2:
+    ab_type = f"{parts[0]}_{parts[1]}"
+    if ab_type not in type_variants:
+      type_variants.append(ab_type)
+  first_part = parts[0]
   if first_part not in type_variants:
     type_variants.append(first_part)
 
