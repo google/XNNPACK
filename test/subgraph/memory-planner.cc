@@ -8,7 +8,12 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <memory>
+#include <vector>
+
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "test/subgraph/mock-allocator.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/subgraph.h"
@@ -55,6 +60,123 @@ TEST(MemoryPlanner, ValueLiveInfo) {
   EXPECT_EQ(1, tracker.usage[3].last_node);
 
   xnn_release_value_allocation_tracker(&tracker);
+}
+
+
+TEST(MemoryPlanner, FailedWorkspaceReplanRetriesBeforeInvoke) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  MockAllocator mock_allocator;
+  std::unique_ptr<MockAllocator, decltype(&RestoreDefaultAllocator)>
+      auto_mock_allocator(&mock_allocator, &RestoreDefaultAllocator);
+  SetUpMockAllocator(&mock_allocator);
+
+  size_t alloc_calls = 0;
+  EXPECT_CALL(mock_allocator, allocate(testing::_, testing::_))
+      .WillRepeatedly([&](void* context, size_t size) -> void* {
+        ++alloc_calls;
+        return xnn_default_allocator.allocate(context, size);
+      });
+  EXPECT_CALL(mock_allocator, reallocate(testing::_, testing::_, testing::_))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(mock_allocator, deallocate(testing::_, testing::_))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(mock_allocator, aligned_deallocate(testing::_, testing::_))
+      .Times(testing::AnyNumber());
+
+  size_t aligned_alloc_calls = 0;
+  bool fail_aligned_alloc = false;
+  EXPECT_CALL(mock_allocator,
+              aligned_allocate(testing::_, testing::_, testing::_))
+      .WillRepeatedly([&](void* context, size_t alignment, size_t size) -> void* {
+        ++aligned_alloc_calls;
+        if (fail_aligned_alloc) {
+          return nullptr;
+        }
+        return xnn_default_allocator.aligned_allocate(context, alignment, size);
+      });
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t initial_dim = 1;
+  uint32_t in_id = XNN_INVALID_VALUE_ID;
+  uint32_t mid_id = XNN_INVALID_VALUE_ID;
+  uint32_t out_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1,
+                                    &initial_dim, nullptr, 0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &in_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1,
+                                    &initial_dim, nullptr, XNN_INVALID_VALUE_ID,
+                                    0, &mid_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1,
+                                    &initial_dim, nullptr, 1,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id));
+
+  const int64_t begin = 0;
+  const int64_t end = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_static_slice_v3(subgraph, 1, &begin, &end, nullptr,
+                                       in_id, mid_id, 0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_static_slice_v3(subgraph, 1, &begin, &end, nullptr,
+                                       mid_id, out_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr, 0,
+                                  &runtime));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  std::vector<float> input(8192, 3.5f);
+  std::vector<float> output(8192, 0.0f);
+  const xnn_external_value external[2] = {
+      {in_id, input.data()},
+      {out_id, output.data()},
+  };
+
+  // 1. Positive baseline control: small arena plans and invokes cleanly.
+  size_t dim = 1;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, in_id, 1, &dim));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime_v2(runtime, 2, external));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+  EXPECT_FLOAT_EQ(output[0], 3.5f);
+
+  // 2. Grow internal workspace tensor to 8192 floats while aligned_allocate
+  // fails; reshape must report out_of_memory without marking the new size planned.
+  dim = 8192;
+  fail_aligned_alloc = true;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, in_id, 1, &dim));
+  EXPECT_EQ(xnn_status_out_of_memory, xnn_reshape_runtime(runtime));
+  fail_aligned_alloc = false;
+
+  // 3. Intermediate reshape (1 < 1024 < 8192) must retry memory planning rather
+  // than invoking against the stale 1-element workspace.
+  dim = 1024;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, in_id, 1, &dim));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime_v2(runtime, 2, external));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+  EXPECT_FLOAT_EQ(output[1023], 3.5f);
+
+  // 4. Steady-state same-shape reshape must not re-run memory planning once planned.
+  const size_t alloc_calls_after_recovery = alloc_calls;
+  const size_t calls_after_recovery = aligned_alloc_calls;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, in_id, 1, &dim));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  EXPECT_EQ(alloc_calls, alloc_calls_after_recovery);
+  EXPECT_EQ(aligned_alloc_calls, calls_after_recovery);
 }
 
 TEST(MemoryPlanner, MemoryBlocksCoalescing) {
