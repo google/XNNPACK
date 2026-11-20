@@ -167,28 +167,15 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__neoni8mm(
       }
       a += 8;
 
-      uint64x2x2_t va01x0123456789ABCDEF;
-      va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-      uint64x2x2_t va23x0123456789ABCDEF;
-      va23x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va23x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-      uint64x2x2_t va45x0123456789ABCDEF;
-      va45x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va45x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-      uint64x2x2_t va67x0123456789ABCDEF;
-      va67x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
-      va67x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
-
       // Inner accumulation loop along the 8 columns.
       size_t k = kc;
       // 2x partial unrolled loop to load 8 bytes at a time.
       while (k >= 16 * sizeof(int8_t)) {
         // Load a 8x16 block of activations.
-        va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
-        va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a2, va23x0123456789ABCDEF, 0); a2 += 16;
-        va45x0123456789ABCDEF = vld2q_lane_u64((const void*) a4, va45x0123456789ABCDEF, 0); a4 += 16;
-        va67x0123456789ABCDEF = vld2q_lane_u64((const void*) a6, va67x0123456789ABCDEF, 0); a6 += 16;
+        uint64x2x2_t va01x0123456789ABCDEF = vld2q_dup_u64((const void*) a0); a0 += 16;
+        uint64x2x2_t va23x0123456789ABCDEF = vld2q_dup_u64((const void*) a2); a2 += 16;
+        uint64x2x2_t va45x0123456789ABCDEF = vld2q_dup_u64((const void*) a4); a4 += 16;
+        uint64x2x2_t va67x0123456789ABCDEF = vld2q_dup_u64((const void*) a6); a6 += 16;
         va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
         va23x0123456789ABCDEF = vld2q_lane_u64((const void*) a3, va23x0123456789ABCDEF, 1); a3 += 16;
         va45x0123456789ABCDEF = vld2q_lane_u64((const void*) a5, va45x0123456789ABCDEF, 1); a5 += 16;
