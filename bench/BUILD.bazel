@@ -19,6 +19,18 @@ load(
     "xnnpack_visibility",
 )
 
+# Sources of the qs8_qc8w GEMM benchmark, for building it without `main`.
+exports_files(
+    [
+        "conv.h",
+        "gemm.h",
+        "gemm-benchmark.cc",
+        "gemm-benchmark.h",
+        "qs8-qc8w-gemm-fp32.cc",
+    ],
+    visibility = ["//:__subpackages__"],
+)
+
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
     "//:aligned_allocator",
