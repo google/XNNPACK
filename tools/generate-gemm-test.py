@@ -656,7 +656,7 @@ std::vector<GemmTestParams> CreateTests(
                 .m(mr).n(nr).k(128)
                 .b_zero_point(8)
             , test_func, arch_flags));
-      $if INPUT_DATATYPE == "pf32" and WEIGHTS_DATATYPE in ["qc8w", "qc4w"]:
+      $if (INPUT_DATATYPE == "pf32" or (INPUT_DATATYPE == "pqs8" and ISA in ["sme", "sme2"])) and WEIGHTS_DATATYPE in ["qc8w", "qc4w"]:
         gemm_tests.push_back(GemmTestParams(
             "k_large_256",
             tester.clone()
@@ -675,6 +675,22 @@ std::vector<GemmTestParams> CreateTests(
             "large_weights",
             tester.clone()
                 .m(1).n(4096).k(1024)
+                $if WEIGHTS_DATATYPE == "qc4w":
+                  .b_zero_point(8)
+            , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pqs8" and WEIGHTS_DATATYPE in ["qc8w", "qc4w"] and ISA in ["sme", "sme2"]:
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_4096",
+            tester.clone()
+                .m(mr).n(nr).k(4096)
+                $if WEIGHTS_DATATYPE == "qc4w":
+                  .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "large_bias",
+            tester.clone()
+                .m(mr).n(nr).k(k_block)
+                .large_bias(true)
                 $if WEIGHTS_DATATYPE == "qc4w":
                   .b_zero_point(8)
             , test_func, arch_flags));
