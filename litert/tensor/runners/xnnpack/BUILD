@@ -55,6 +55,7 @@ cc_test(
         "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/runners/common_nnpack:runner_test_suite",
         "@abseil-cpp//absl/status",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -73,6 +74,7 @@ cc_test(
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/base:log_severity",
         "@abseil-cpp//absl/log:scoped_mock_log",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

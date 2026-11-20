@@ -50,6 +50,7 @@ cc_test(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/types:source_location",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -106,6 +107,7 @@ cc_test(
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -153,6 +155,7 @@ cc_test(
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -176,6 +179,7 @@ cc_test(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -195,6 +199,7 @@ cc_test(
         "//litert/tensor/runners/xnnpack:runner",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

@@ -487,6 +487,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
         linkstatic = True,
         defines = xnnpack_configurable_defines() + defines,
         deps = [
+            "@com_google_googletest//:gtest",
             "@com_google_googletest//:gtest_main",
         ] + deps + select({
             "//build_config:emscripten": xnnpack_emscripten_deps(),
@@ -520,7 +521,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []):
+def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = [], **kwargs):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -565,6 +566,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
         tags = tags,
         defines = defines,
         args = ["--benchmark_min_time=1x"],
+        **kwargs
     )
 
 SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})

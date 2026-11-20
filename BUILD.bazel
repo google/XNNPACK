@@ -543,6 +543,7 @@ xnnpack_cc_library(
 xnnpack_cxx_library(
     name = "pack_lh",
     srcs = ["src/pack-lh.cc"],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = [
         ":common",
         ":logging",
@@ -562,6 +563,7 @@ xnnpack_cxx_library(
     name = "packing",
     srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = [
         ":allocator",
         ":common",
@@ -1041,6 +1043,7 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     visibility = xnnpack_visibility(),
     deps = select({
         "//ynnpack/xnnpack:use_ynnpack": ["//ynnpack/xnnpack"],

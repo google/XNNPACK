@@ -113,6 +113,7 @@ xnnpack_cxx_library(
         "gemm.h",
         "gemm-benchmark.h",
     ],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":conv",
         "//:indirection",
@@ -228,6 +229,7 @@ xnnpack_benchmark(
     srcs = [
         "qp8-f32-qc2w-gemm.cc",
     ],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
     ] + xnnpack_if_kleidiai_enabled([
@@ -240,6 +242,7 @@ xnnpack_benchmark(
     srcs = [
         "qp8-f32-qc4w-gemm.cc",
     ],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
     ] + xnnpack_if_kleidiai_enabled([
@@ -252,6 +255,7 @@ xnnpack_benchmark(
     srcs = [
         "qp8-f32-qc8w-gemm.cc",
     ],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
     ] + xnnpack_if_kleidiai_enabled([
@@ -262,6 +266,7 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qp8_f32_qb4w_gemm_bench",
     srcs = ["qp8-f32-qb4w-gemm.cc"],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
     ] + xnnpack_if_kleidiai_enabled([
@@ -272,6 +277,7 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "pf32_gemm_minmax_bench",
     srcs = ["pf32-gemm-minmax.cc"],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
     ] + xnnpack_if_kleidiai_enabled([
@@ -282,6 +288,7 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "pf16_gemm_minmax_bench",
     srcs = ["pf16-gemm-minmax.cc"],
+    features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
     ] + xnnpack_if_kleidiai_enabled([

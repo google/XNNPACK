@@ -65,6 +65,7 @@ cc_test(
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -84,6 +85,7 @@ cc_test(
     deps = [
         ":datatypes",
         "//litert/tensor/utils:matchers",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -136,6 +138,7 @@ cc_test(
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -155,6 +158,7 @@ cc_test(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:optional",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

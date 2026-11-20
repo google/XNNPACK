@@ -28,6 +28,7 @@ cc_test(
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:cord",
         "@abseil-cpp//absl/types:source_location",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

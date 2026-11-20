@@ -417,7 +417,7 @@ def ynn_test_deps():
             "@com_google_googletest//:gtest",  # no g3
             "//ynnpack/base/hexagon:test_main",
         ],
-        "//conditions:default": ["@com_google_googletest//:gtest_main"],
+        "//conditions:default": ["@com_google_googletest//:gtest", "@com_google_googletest//:gtest_main"],
     })
 
 def ynn_benchmark_deps():

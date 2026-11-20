@@ -39,6 +39,7 @@ cc_test(
     srcs = ["type_id_test.cc"],
     deps = [
         ":type_id",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -95,6 +96,7 @@ cc_test(
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -139,6 +141,7 @@ cc_test(
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -213,6 +216,7 @@ cc_test(
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -232,6 +236,7 @@ cc_test(
         "//litert/tensor:datatypes",
         "@abseil-cpp//absl/base:log_severity",
         "@abseil-cpp//absl/log:scoped_mock_log",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

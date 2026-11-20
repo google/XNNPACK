@@ -62,6 +62,7 @@ cc_test(
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -105,6 +106,7 @@ cc_test(
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )

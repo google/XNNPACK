@@ -1,6 +1,7 @@
 # Basic build settings
 build --jobs 128
 build --cxxopt='-std=c++17'
+build --features=layering_check
 
 # Don't let the compiler generate fmas unless we do so explicitly.
 build --copt='-ffp-contract=off'

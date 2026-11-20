@@ -281,6 +281,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     "neon": _create_params(
         cond = "//build_config:arm",
@@ -295,12 +296,14 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     "neon_aarch64": _create_params(
         cond = "//build_config:aarch64",
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     "neonfp16": _create_params(
         cond = "//build_config:arm",
@@ -391,6 +394,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     "neoni8mm": _create_params(
         cond = "//:arm_i8mm_enabled",
@@ -398,6 +402,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     # SVE2 kernels use NEON for arithmetic and SVE only where NEON has no
     # equivalent (e.g. LD1SB Z.S: load int8 sign-extended to 32-bit lanes),
@@ -412,6 +417,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     # KleidiAI wrapper translation units contain no SME or SVE intrinsics—they
     # only marshal arguments into KleidiAI's separately compiled assembly—and
@@ -421,6 +427,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     "neonsme2": _create_params(
         cond = "//:arm_sme2_enabled",
@@ -430,6 +437,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/dwconv:interface",
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
+        features = xnnpack_if_kleidiai_enabled(["-layering_check"]),
     ),
     # ARM SME ACLE microkernels (disabled by default; enabled via
     # `--define=xnn_enable_arm_sme_acle=true`). Pass
