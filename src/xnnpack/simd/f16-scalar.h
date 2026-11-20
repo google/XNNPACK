@@ -72,6 +72,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_fmadd_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
 #if XNN_HAVE_FLOAT16
+  XNN_PRAGMA_CLANG("clang fp contract(off)")
   return a * b + c;
 #else
   return xnn_float16_from_float(
@@ -84,6 +85,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_fnmadd_f16(xnn_simd_f16_t a,
                                                 xnn_simd_f16_t b,
                                                 xnn_simd_f16_t c) {
 #if XNN_HAVE_FLOAT16
+  XNN_PRAGMA_CLANG("clang fp contract(off)")
   return c - a * b;
 #else
   return xnn_float16_from_float(
@@ -96,6 +98,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_fmsub_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b,
                                                xnn_simd_f16_t c) {
 #if XNN_HAVE_FLOAT16
+  XNN_PRAGMA_CLANG("clang fp contract(off)")
   return a * b - c;
 #else
   return xnn_float16_from_float(
