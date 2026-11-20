@@ -7,12 +7,25 @@
 #define XNNPACK_YNNPACK_KERNELS_TERNARY_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
+
+// `enum class` doesn't work well for bitfield values.
+namespace ternary_flag {
+
+enum {
+  // This kernel produces results that are numerically consistent with all other
+  // kernels of the same type with this flag.
+  consistent_arithmetic = 1 << 0,
+};
+
+}  // namespace ternary_flag
 
 union ternary_params {};
 
@@ -53,9 +66,10 @@ inline std::ostream& operator<<(std::ostream& os, ternary_op op) {
   return os << to_string(op);
 }
 
-ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
-                                     ynn_type type_b, ynn_type type_c,
-                                     ynn_type type_x);
+ternary_kernel_fn get_ternary_kernel(
+    ternary_op op, ynn_type type_a, ynn_type type_b, ynn_type type_c,
+    ynn_type type_x, uint32_t required_flags = 0,
+    uint64_t supported_arch_flags = get_supported_arch_flags());
 
 ternary_params get_ternary_params(ternary_op op);
 

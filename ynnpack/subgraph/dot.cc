@@ -119,9 +119,13 @@ bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
 
   uint32_t input_id = producer_a->inputs[0];
   const ynn_value& input = subgraph.value(input_id);
-  const ynn::ternary_kernel_fn kernel =
-      ynn::get_ternary_kernel(ternary_op::quantize_uint8, input.type,
-                              ynn_type_fp32, ynn_type_int32, ynn_type_uint8);
+  const uint32_t required_flags =
+      (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+          ? ynn::ternary_flag::consistent_arithmetic
+          : 0;
+  const ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
+      ternary_op::quantize_uint8, input.type, ynn_type_fp32, ynn_type_int32,
+      ynn_type_uint8, required_flags);
   if (!kernel) return false;
 
   // This is a dynamic quantization. We can change it to produce uint8
