@@ -231,7 +231,13 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = ["convolution-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"] + select({
+        "//ynnpack/xnnpack:use_ynnpack": [],
+        "//conditions:default": [
+            "//:operator_h",
+            "//src/configs:config_h",
+        ],
+    }),
 )
 
 xnnpack_unit_test(
