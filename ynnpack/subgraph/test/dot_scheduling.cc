@@ -142,8 +142,11 @@ TEST(DotSchedulingTest, RaggedDotDecodeParallelizesAcrossActiveGroups) {
                             YNN_INVALID_VALUE_ID, rg_id, &out_id, /*flags=*/0),
       ynn_status_success);
 
+  ASSERT_EQ(ynn_optimize_subgraph(builder.GetSubgraph(), nullptr, 0),
+            ynn_status_success);
   TestScheduler scheduler(3);
-  Runtime runtime(builder.GetSubgraph(), &scheduler);
+  Runtime runtime(builder.GetSubgraph(), &scheduler, /*flags=*/0,
+                  /*optimize=*/false);
   ASSERT_EQ(runtime.Status(), ynn_status_success);
 
   // Empty batch (M = 0) reshapes and invokes cleanly with a thread pool.
@@ -218,8 +221,11 @@ TEST(DotSchedulingTest, RaggedDotPrefillSplitsOuterM) {
 
   // N = 16 fits in a single N-block, so parallel tasks can only come from
   // splitting outer M across sorted `row_group` slices.
+  ASSERT_EQ(ynn_optimize_subgraph(builder.GetSubgraph(), nullptr, 0),
+            ynn_status_success);
   TestScheduler scheduler(3);
-  Runtime runtime(builder.GetSubgraph(), &scheduler);
+  Runtime runtime(builder.GetSubgraph(), &scheduler, /*flags=*/0,
+                  /*optimize=*/false);
   ASSERT_EQ(runtime.Status(), ynn_status_success);
 
   Tensor<int32_t> out({M, N});
