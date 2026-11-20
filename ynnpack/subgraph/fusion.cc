@@ -1300,49 +1300,94 @@ bool fuse_quantize(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
-// Rewrite multiply(dot(..., subtract_multiply(0, a, b)), c, d) to
-// dequantize_dot(dot(..., YNN_INVALID_VALUE_ID), a, b, c, d, 0)
+// Rewrite multiply(dot(..., subtract_multiply(0, a, b)), c, d) or
+// multiply(subtract_multiply(x, a, b), c, d) to
+// dequantize_dot(dot(..., YNN_INVALID_VALUE_ID), a, b, c, d, 0) or
+// dequantize_dot(x, a, b, c, d, 0).
 bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                             subgraph_analysis& analysis) {
   if (!is_ternary_node(node, ternary_op::multiply)) {
     return false;
   }
 
-  ynn_node* dot_node = analysis.producer_of(node.inputs[0]);
-  if (!dot_node) return false;
-  const ynn_node::dot* dot_op = std::get_if<ynn_node::dot>(&dot_node->op);
-  if (!dot_op || dot_node->inputs.size() < 2) return false;
+  ynn_node* dot_node = nullptr;
+  uint32_t dot_id = YNN_INVALID_VALUE_ID;
+  uint32_t a_offset_id = YNN_INVALID_VALUE_ID;
+  uint32_t b_offset_id = YNN_INVALID_VALUE_ID;
 
-  uint32_t input_c_id = dot_node->inputs[2];
-  ynn_node* input_c_producer = analysis.producer_of(input_c_id);
-  if (!input_c_producer ||
-      !is_ternary_node(*input_c_producer, ternary_op::subtract_multiply)) {
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+
+  if (const auto* dot_op = std::get_if<ynn_node::dot>(&producer->op)) {
+    (void)dot_op;
+    if (producer->inputs.size() < 3) return false;
+    dot_node = producer;
+
+    uint32_t input_c_id = dot_node->inputs[2];
+    ynn_node* input_c_producer = analysis.producer_of(input_c_id);
+    if (!input_c_producer ||
+        !is_ternary_node(*input_c_producer, ternary_op::subtract_multiply)) {
+      return false;
+    }
+
+    if (analysis.consumers[dot_node->outputs[0]].size() != 1 ||
+        subgraph.value(dot_node->outputs[0]).is_external_output()) {
+      return false;
+    }
+    if (analysis.consumers[input_c_id].size() != 1 ||
+        subgraph.value(input_c_id).is_external_output()) {
+      return false;
+    }
+
+    // Check if subtract_multiply(0, a, b)
+    const ynn_value& sm_a = subgraph.value(input_c_producer->inputs[0]);
+    if (!sm_a.is_static_scalar() || sm_a.as_scalar() != 0.0f) {
+      return false;
+    }
+
+    dot_id = dot_node->outputs[0];
+    a_offset_id = input_c_producer->inputs[1];
+    b_offset_id = input_c_producer->inputs[2];
+  } else if (is_ternary_node(*producer, ternary_op::subtract_multiply)) {
+    if (analysis.consumers[producer->outputs[0]].size() != 1 ||
+        subgraph.value(producer->outputs[0]).is_external_output()) {
+      return false;
+    }
+    dot_id = producer->inputs[0];
+    a_offset_id = producer->inputs[1];
+    b_offset_id = producer->inputs[2];
+    if (subgraph.value(dot_id).type != ynn_type_int32 ||
+        subgraph.value(a_offset_id).type != ynn_type_int32 ||
+        subgraph.value(b_offset_id).type != ynn_type_int32) {
+      return false;
+    }
+  } else {
     return false;
   }
 
-  // Only do this rewrite if we won't break other consumers.
-  if (analysis.consumers[dot_node->outputs[0]].size() != 1 ||
-      subgraph.value(dot_node->outputs[0]).is_external_output()) {
-    return false;
-  }
-  if (analysis.consumers[input_c_id].size() != 1 ||
-      subgraph.value(input_c_id).is_external_output()) {
-    return false;
-  }
-
-  // Check if subtract_multiply(0, a, b)
-  const ynn_value& sm_a = subgraph.value(input_c_producer->inputs[0]);
-  if (!sm_a.is_static_scalar() || sm_a.as_scalar() != 0.0f) {
-    return false;
-  }
-
-  uint32_t a_offset_id = input_c_producer->inputs[1];
-  uint32_t b_offset_id = input_c_producer->inputs[2];
   uint32_t a_scale_id = node.inputs[1];
   uint32_t b_scale_id = node.inputs[2];
 
-  YNN_LOG_DEBUG() << "Rewriting multiply(dot(..., subtract_multiply(0, a, b)), "
-                     "c, d) to dequantize_dot";
+  // dequantize_dot only supports specific broadcasting of the scale and zero
+  // point operands.
+  auto is_a_operand = [&](uint32_t id) {
+    return slinky::is_constant(subgraph.value(id).extent(0), 1);
+  };
+  auto is_b_operand = [&](uint32_t id) {
+    return slinky::is_constant(subgraph.value(id).extent(1), 1);
+  };
+  auto order_operands = [&](uint32_t& a_id, uint32_t& b_id) {
+    if (!is_a_operand(a_id) || !is_b_operand(b_id)) {
+      std::swap(a_id, b_id);
+    }
+    return is_a_operand(a_id) && is_b_operand(b_id);
+  };
+  if (!order_operands(a_offset_id, b_offset_id) ||
+      !order_operands(a_scale_id, b_scale_id)) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting dot + zero-point + scale to dequantize_dot";
 
   const ynn_value& output = subgraph.value(node.outputs[0]);
   if (!get_dequantize_dot_kernel(output.type)) {
@@ -1350,12 +1395,14 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   }
   uint32_t offset_id = subgraph.get_scalar_value_id(ynn_type_fp32, 0.0f);
 
-  analysis.replace_input(*dot_node, 2, YNN_INVALID_VALUE_ID);
+  if (dot_node) {
+    analysis.replace_input(*dot_node, 2, YNN_INVALID_VALUE_ID);
+  }
   analysis.update_node(node, [&]() {
-    ynn::define_dequantize_dot(subgraph, node, output.type,
-                               dot_node->outputs[0], a_offset_id, b_offset_id,
-                               a_scale_id, b_scale_id, offset_id,
-                               node.outputs[0], dequantize_dot_params{});
+    ynn::define_dequantize_dot(subgraph, node, output.type, dot_id,
+                               a_offset_id, b_offset_id, a_scale_id, b_scale_id,
+                               offset_id, node.outputs[0],
+                               dequantize_dot_params{});
   });
   return true;
 }

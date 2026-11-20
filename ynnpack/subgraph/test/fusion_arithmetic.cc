@@ -448,12 +448,12 @@ TEST(fusion, dequantize_dot) {
 
   builder.AddInput(ynn_type_fp32, 2, a_id)
       .AddInput(ynn_type_fp32, 2, b_id)
-      .AddInput(ynn_type_fp32, 1, a_offset_id)
-      .AddInput(ynn_type_fp32, 1, b_offset_id)
-      .AddInput(ynn_type_fp32, 1, c_id)
-      .AddInput(ynn_type_fp32, 1, d_id)
+      .AddInput(ynn_type_fp32, {4, 1}, a_offset_id)
+      .AddInput(ynn_type_fp32, {1, 8}, b_offset_id)
+      .AddInput(ynn_type_fp32, {4, 1}, c_id)
+      .AddInput(ynn_type_fp32, {1, 8}, d_id)
       .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddTensor(ynn_type_fp32, 1, sm_id)
+      .AddTensor(ynn_type_fp32, 2, sm_id)
       .AddTensor(ynn_type_fp32, 2, dot_output_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
@@ -480,6 +480,142 @@ TEST(fusion, dequantize_dot) {
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(10)));
   EXPECT_THAT(ProducerOf(x_id, subgraph),
               AllOf(IsDequantizeDot(), HasInputCount(6)));
+}
+
+TEST(fusion, dequantize_dot_post_subtract_multiply) {
+  // rewrite multiply(subtract_multiply(x, a, b), c, d)
+  // -> dequantize_dot(x, a, b, c, d, 0)
+  const uint32_t x_in_id = 0;
+  const uint32_t a_offset_id = 1;
+  const uint32_t b_offset_id = 2;
+  const uint32_t c_id = 3;
+  const uint32_t d_id = 4;
+  const uint32_t x_id = 5;
+  SubgraphBuilder builder(6);
+
+  uint32_t sm_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_int32, {4, 8}, x_in_id)
+      .AddInput(ynn_type_int32, {4, 1}, a_offset_id)
+      .AddInput(ynn_type_int32, {1, 8}, b_offset_id)
+      .AddInput(ynn_type_fp32, {4, 1}, c_id)
+      .AddInput(ynn_type_fp32, {1, 8}, d_id)
+      .AddOutput(ynn_type_fp32, {4, 8}, x_id)
+      .AddTensor(ynn_type_int32, {4, 8}, sm_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node sm_node;
+  ynn::define_ternary(
+      subgraph, sm_node, x_in_id, a_offset_id, b_offset_id, sm_id,
+      ternary_op::subtract_multiply,
+      get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_int32,
+                         ynn_type_int32, ynn_type_int32, ynn_type_int32));
+  subgraph.add_node(std::move(sm_node));
+
+  ynn_node mul_node;
+  ynn::define_ternary(
+      subgraph, mul_node, sm_id, c_id, d_id, x_id, ternary_op::multiply,
+      get_ternary_kernel(ternary_op::multiply, ynn_type_int32, ynn_type_fp32,
+                         ynn_type_fp32, ynn_type_fp32));
+  subgraph.add_node(std::move(mul_node));
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsDequantizeDot(), HasInputCount(6)));
+}
+
+TEST(fusion, dequantize_dot_swapped_operands) {
+  // rewrite multiply(subtract_multiply(x, b_offset, a_offset), b_scale,
+  //                  a_scale)
+  // -> dequantize_dot(x, a_offset, b_offset, a_scale, b_scale, 0)
+  const uint32_t x_in_id = 0;
+  const uint32_t a_offset_id = 1;
+  const uint32_t b_offset_id = 2;
+  const uint32_t a_scale_id = 3;
+  const uint32_t b_scale_id = 4;
+  const uint32_t x_id = 5;
+  SubgraphBuilder builder(6);
+
+  uint32_t sm_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_int32, {4, 8}, x_in_id)
+      .AddInput(ynn_type_int32, {4, 1}, a_offset_id)
+      .AddInput(ynn_type_int32, {1, 8}, b_offset_id)
+      .AddInput(ynn_type_fp32, {4, 1}, a_scale_id)
+      .AddInput(ynn_type_fp32, {1, 8}, b_scale_id)
+      .AddOutput(ynn_type_fp32, {4, 8}, x_id)
+      .AddTensor(ynn_type_int32, {4, 8}, sm_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node sm_node;
+  ynn::define_ternary(
+      subgraph, sm_node, x_in_id, b_offset_id, a_offset_id, sm_id,
+      ternary_op::subtract_multiply,
+      get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_int32,
+                         ynn_type_int32, ynn_type_int32, ynn_type_int32));
+  subgraph.add_node(std::move(sm_node));
+
+  ynn_node mul_node;
+  ynn::define_ternary(
+      subgraph, mul_node, sm_id, b_scale_id, a_scale_id, x_id,
+      ternary_op::multiply,
+      get_ternary_kernel(ternary_op::multiply, ynn_type_int32, ynn_type_fp32,
+                         ynn_type_fp32, ynn_type_fp32));
+  subgraph.add_node(std::move(mul_node));
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  const ynn_node& dq = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(dq, AllOf(IsDequantizeDot(), HasInputCount(6)));
+  EXPECT_EQ(dq.inputs[1], a_offset_id);
+  EXPECT_EQ(dq.inputs[2], b_offset_id);
+  EXPECT_EQ(dq.inputs[3], a_scale_id);
+  EXPECT_EQ(dq.inputs[4], b_scale_id);
+}
+
+TEST(fusion, dequantize_dot_non_broadcast_not_fused) {
+  const uint32_t x_in_id = 0;
+  const uint32_t a_offset_id = 1;
+  const uint32_t b_offset_id = 2;
+  const uint32_t a_scale_id = 3;
+  const uint32_t b_scale_id = 4;
+  const uint32_t x_id = 5;
+  SubgraphBuilder builder(6);
+
+  uint32_t sm_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_int32, {4, 8}, x_in_id)
+      .AddInput(ynn_type_int32, {4, 8}, a_offset_id)
+      .AddInput(ynn_type_int32, {1, 8}, b_offset_id)
+      .AddInput(ynn_type_fp32, {4, 1}, a_scale_id)
+      .AddInput(ynn_type_fp32, {1, 8}, b_scale_id)
+      .AddOutput(ynn_type_fp32, {4, 8}, x_id)
+      .AddTensor(ynn_type_int32, {4, 8}, sm_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node sm_node;
+  ynn::define_ternary(
+      subgraph, sm_node, x_in_id, a_offset_id, b_offset_id, sm_id,
+      ternary_op::subtract_multiply,
+      get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_int32,
+                         ynn_type_int32, ynn_type_int32, ynn_type_int32));
+  subgraph.add_node(std::move(sm_node));
+
+  ynn_node mul_node;
+  ynn::define_ternary(
+      subgraph, mul_node, sm_id, a_scale_id, b_scale_id, x_id,
+      ternary_op::multiply,
+      get_ternary_kernel(ternary_op::multiply, ynn_type_int32, ynn_type_fp32,
+                         ynn_type_fp32, ynn_type_fp32));
+  subgraph.add_node(std::move(mul_node));
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(x_id, subgraph), testing::Not(IsDequantizeDot()));
 }
 
 TEST(fusion, dequantize_dot_add) {
@@ -1489,12 +1625,12 @@ TEST(fusion, dequantize_dot_bf16_offset_type) {
 
     builder.AddInput(ynn_type_uint8, 2, a_id)
         .AddInput(ynn_type_int8, 2, b_id)
-        .AddInput(ynn_type_int32, 1, a_offset_id)
-        .AddInput(ynn_type_int32, 1, b_offset_id)
-        .AddInput(ynn_type_fp32, 1, c_id)
-        .AddInput(ynn_type_fp32, 1, d_id)
+        .AddInput(ynn_type_int32, {4, 1}, a_offset_id)
+        .AddInput(ynn_type_int32, {1, 8}, b_offset_id)
+        .AddInput(ynn_type_fp32, {4, 1}, c_id)
+        .AddInput(ynn_type_fp32, {1, 8}, d_id)
         .AddOutput(ynn_type_bf16, 2, out_id)
-        .AddTensor(ynn_type_int32, 1, sm_id)
+        .AddTensor(ynn_type_int32, 2, sm_id)
         .AddTensor(ynn_type_int32, 2, dot_output_id);
 
     ynn_subgraph& subgraph = *builder.GetSubgraph();
