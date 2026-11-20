@@ -103,4 +103,38 @@ INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsF32, rank_params);
 
+// An expand_dims with no new axes must still grow its internal output when the
+// input is reshaped to a larger shape.
+TEST(ExpandDims, NoNewAxesReshapeToLargerInternalOutput) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  uint32_t internal_id = XNN_INVALID_VALUE_ID;
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(2, xnn_datatype_fp32, 0)
+      .AddInternalDynamicTensorF32({2, 3}, &internal_id)
+      .AddOutputTensor(2, xnn_datatype_fp32, 1)
+      .AddExpandDims(/*new_axes=*/{}, 0, internal_id)
+      .AddUnary(xnn_unary_negate, /*params=*/nullptr, internal_id, 1)
+      .CreateRuntime();
+
+  for (const std::vector<size_t>& shape :
+       {std::vector<size_t>{2, 3}, std::vector<size_t>{64, 128}}) {
+    Tensor<float> input(shape, xnnpack::XnnExtraBytes);
+    std::iota(input.begin(), input.end(), 0.0f);
+    Tensor<float> expected(shape);
+    std::transform(input.begin(), input.end(), expected.begin(),
+                   [](float x) { return -x; });
+
+    subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+    ASSERT_EQ(subgraph.GetExternalTensorShape(1), shape);
+
+    Tensor<float> output(shape);
+    subgraph.SetupExternalTensor(output.base(), 1)
+        .SetupRuntime()
+        .InvokeRuntime();
+
+    ASSERT_THAT(output, testing::ElementsAreArray(expected));
+  }
+}
+
 }  // namespace xnnpack

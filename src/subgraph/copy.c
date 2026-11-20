@@ -170,10 +170,6 @@ static enum xnn_status resize_expand_dims_output_tensor(
   size_t axes_iter = 0;
 
   output_shape->num_dims = num_output_dims;
-  if (opdata->num_reshape_dims == 0) {
-    memcpy(&output->shape.dim[0], &input->shape.dim[0], num_output_dims * sizeof(size_t));
-    return xnn_status_success;
-  }
   for (int i = 0; i < num_output_dims; ++i) {
     if (axes_iter < opdata->num_reshape_dims && new_axes[axes_iter] == i) {
       output_shape->dim[i] = 1;
