@@ -628,8 +628,13 @@ ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
 
   ternary_op op = x.type == ynn_type_int8 ? ternary_op::quantize_int8
                                           : ternary_op::quantize_uint8;
+  const uint32_t required_ternary_flags =
+      (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+          ? ternary_flag::consistent_arithmetic
+          : 0;
   ternary_kernel_fn kernel =
-      get_ternary_kernel(op, a.type, ynn_type_fp32, ynn_type_int32, x.type);
+      get_ternary_kernel(op, a.type, ynn_type_fp32, ynn_type_int32, x.type,
+                         required_ternary_flags);
   if (!kernel && a.type != ynn_type_fp32) {
     YNN_LOG_DEBUG() << "No ternary kernel for operator " << op
                     << ", input type " << a.type << " and output type "
@@ -637,7 +642,7 @@ ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
 
     // Try converting a to fp32 first.
     kernel = get_ternary_kernel(op, ynn_type_fp32, ynn_type_fp32,
-                                ynn_type_int32, x.type);
+                                ynn_type_int32, x.type, required_ternary_flags);
     assert(kernel);
     uint32_t input_float_id = YNN_INVALID_VALUE_ID;
     ynn_status status = ynn_define_convert(subgraph, input_id, ynn_type_fp32,
@@ -693,10 +698,19 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
   if (scale_id == YNN_INVALID_VALUE_ID) {
     scale_id = subgraph->get_scalar_value_id(1.0f);
   }
+  const uint32_t required_binary_flags =
+      (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+          ? binary_flag::consistent_arithmetic
+          : 0;
+  const uint32_t required_ternary_flags =
+      (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+          ? ternary_flag::consistent_arithmetic
+          : 0;
   if (zero_point_id == YNN_INVALID_VALUE_ID) {
     // First try to find a multiply kernel for this.
     binary_kernel_fn kernel =
-        get_binary_kernel(ynn_binary_multiply, a.type, ynn_type_fp32, x.type);
+        get_binary_kernel(ynn_binary_multiply, a.type, ynn_type_fp32, x.type,
+                          required_binary_flags);
     if (kernel) {
       ynn_node node;
       define_binary(*subgraph, node, input_id, scale_id, *output_id,
@@ -707,7 +721,7 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
 
     // Try converting from fp32.
     kernel = get_binary_kernel(ynn_binary_multiply, a.type, ynn_type_fp32,
-                               ynn_type_fp32);
+                               ynn_type_fp32, required_binary_flags);
     if (kernel) {
       uint32_t output_float_id = YNN_INVALID_VALUE_ID;
       ynn_status status = ynn_define_tensor(
@@ -730,8 +744,9 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
     zero_point_id = subgraph->get_scalar_value_id(0);
   }
 
-  ternary_kernel_fn kernel = get_ternary_kernel(
-      ternary_op::dequantize, a.type, ynn_type_int32, ynn_type_fp32, x.type);
+  ternary_kernel_fn kernel =
+      get_ternary_kernel(ternary_op::dequantize, a.type, ynn_type_int32,
+                         ynn_type_fp32, x.type, required_ternary_flags);
 
   if (kernel) {
     ynn_node node;
@@ -745,7 +760,8 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
                     << "; attempting to dequantize to fp32.";
 
     kernel = get_ternary_kernel(ternary_op::dequantize, a.type, ynn_type_int32,
-                                ynn_type_fp32, ynn_type_fp32);
+                                ynn_type_fp32, ynn_type_fp32,
+                                required_ternary_flags);
     assert(kernel);
 
     uint32_t output_float_id = YNN_INVALID_VALUE_ID;
@@ -809,7 +825,16 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
       subgraph->get_output_value(output_id, get_binary_output_type(op, a, b));
 
   // Find the kernel.
-  binary_kernel_fn kernel = get_binary_kernel(op, a.type, b.type, x.type);
+  const uint32_t required_flags =
+      (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+          ? binary_flag::consistent_arithmetic
+          : 0;
+  binary_kernel_fn kernel =
+      get_binary_kernel(op, a.type, b.type, x.type, required_flags);
+  if (!kernel && required_flags != 0 && a.type == x.type && b.type == x.type &&
+      (x.type == ynn_type_fp32 || x.type == ynn_type_fp64)) {
+    kernel = get_binary_kernel(op, a.type, b.type, x.type);
+  }
   if (!kernel) {
     YNN_LOG_DEBUG() << "No binary kernel for operator " << op
                     << ", input types " << a.type << ", " << b.type

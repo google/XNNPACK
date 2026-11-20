@@ -111,3 +111,18 @@ cc_test(
         "//ynnpack/base/test:tensor",
     ] + ynn_benchmark_deps(),
 )
+
+cc_test(
+    name = "consistent_arithmetic_test",
+    srcs = ["consistent_arithmetic_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":binary",
+        "//ynnpack:ynnpack_h",
+        "//ynnpack/base",
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
+        "//ynnpack/base/test:tensor",
+    ] + ynn_test_deps(),
+)

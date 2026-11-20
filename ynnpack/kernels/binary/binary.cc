@@ -142,7 +142,27 @@ struct CopysignOp {
 };
 
 template <typename T>
-binary_kernel_fn get_float_binary_reference_kernel(ynn_binary_operator op) {
+binary_kernel_fn get_float_binary_reference_kernel(ynn_binary_operator op,
+                                                   uint32_t required_flags) {
+  if (required_flags & binary_flag::consistent_arithmetic) {
+    switch (op) {
+      case ynn_binary_pow:
+        // We call into cmath, which might not be numerically consistent.
+        return nullptr;
+#ifdef YNN_ARCH_ARM32
+      // 32-bit ARM handles denormals differently between scalar and NEON.
+      case ynn_binary_add:
+      case ynn_binary_subtract:
+      case ynn_binary_multiply:
+      case ynn_binary_divide:
+      case ynn_binary_squared_difference:
+      case ynn_binary_leaky_relu:
+        return nullptr;
+#endif  // YNN_ARCH_ARM32
+      default:
+        break;
+    }
+  }
   switch (op) {
     case ynn_binary_add:
       return binary_impl<T, AddOp>;
@@ -173,12 +193,13 @@ binary_kernel_fn get_float_binary_reference_kernel(ynn_binary_operator op) {
 }  // namespace
 
 binary_kernel_fn get_binary_reference_kernel(ynn_binary_operator op,
-                                             ynn_type type) {
+                                             ynn_type type,
+                                             uint32_t required_flags) {
   if (type == ynn_type_fp32) {
-    return get_float_binary_reference_kernel<float>(op);
+    return get_float_binary_reference_kernel<float>(op, required_flags);
 #ifdef YNN_ENABLE_FP64
   } else if (type == ynn_type_fp64) {
-    return get_float_binary_reference_kernel<double>(op);
+    return get_float_binary_reference_kernel<double>(op, required_flags);
 #endif
   } else if (type == ynn_type_int32) {
     switch (op) {
@@ -207,9 +228,11 @@ binary_kernel_fn get_binary_reference_kernel(ynn_binary_operator op,
 
 binary_kernel_fn get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
                                    ynn_type type_b, ynn_type type_x,
+                                   uint32_t required_flags,
                                    uint64_t supported_arch_flags) {
 #define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, flags, A, B, X) \
   if (is_arch_supported(arch, supported_arch_flags) &&              \
+      (flags & required_flags) == required_flags &&                 \
       op == ynn_binary_##op_type) {                                 \
     if (type_of<A>() == type_a && type_of<B>() == type_b &&         \
         type_of<X>() == type_x) {                                   \
@@ -222,15 +245,15 @@ binary_kernel_fn get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
 #ifdef YNN_ENABLE_FP64
   if (type_a == ynn_type_fp64 && type_b == ynn_type_fp64 &&
       type_x == ynn_type_fp64) {
-    return get_binary_reference_kernel(op, type_x);
+    return get_binary_reference_kernel(op, type_x, required_flags);
   } else  // NOLINT
 #endif
       if (type_a == ynn_type_fp32 && type_b == ynn_type_fp32 &&
           type_x == ynn_type_fp32) {
-    return get_binary_reference_kernel(op, type_x);
+    return get_binary_reference_kernel(op, type_x, required_flags);
   } else if (type_a == ynn_type_int32 && type_b == ynn_type_int32 &&
              type_x == ynn_type_int32) {
-    return get_binary_reference_kernel(op, type_x);
+    return get_binary_reference_kernel(op, type_x, required_flags);
   }
   return nullptr;
 }

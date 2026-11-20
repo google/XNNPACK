@@ -68,6 +68,10 @@ IF(YNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(ynnpack_kernels_binary_test test.cc)
   TARGET_LINK_LIBRARIES(ynnpack_kernels_binary_test ynnpack_kernels_binary ynnpack_kernels_binary_reference ynnpack ynnpack_base ynnpack_base_test_fuzz ynnpack_base_test_random ynnpack_base_test_tensor ynnpack_base_test_util gmock gtest gtest_main)
   ADD_TEST(NAME ynnpack_kernels_binary_test COMMAND ynnpack_kernels_binary_test)
+
+  ADD_EXECUTABLE(ynnpack_kernels_binary_consistent_arithmetic_test consistent_arithmetic_test.cc)
+  TARGET_LINK_LIBRARIES(ynnpack_kernels_binary_consistent_arithmetic_test ynnpack_kernels_binary ynnpack_base ynnpack_base_test_fuzz ynnpack_base_test_random ynnpack_base_test_tensor gmock gtest gtest_main)
+  ADD_TEST(NAME ynnpack_kernels_binary_consistent_arithmetic_test COMMAND ynnpack_kernels_binary_consistent_arithmetic_test)
 ENDIF()
 
 IF(YNNPACK_BUILD_BENCHMARKS)

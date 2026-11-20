@@ -228,6 +228,18 @@ bool replace_uses(subgraph_analysis& analysis, ynn_subgraph& subgraph,
   }
 }
 
+uint32_t binary_flags(const ynn_subgraph& subgraph) {
+  return (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+             ? ynn::binary_flag::consistent_arithmetic
+             : 0;
+}
+
+uint32_t ternary_flags(const ynn_subgraph& subgraph) {
+  return (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC)
+             ? ynn::ternary_flag::consistent_arithmetic
+             : 0;
+}
+
 // Rewrite divide(x, sqrt(y)) to multiply(x, rsqrt(y))
 bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
                          subgraph_analysis& analysis) {
@@ -257,8 +269,9 @@ bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
 
   const ynn::unary_kernel_fn rsqrt_kernel =
       ynn::get_unary_kernel(ynn_unary_rsqrt, y.type, sqrt_y.type);
-  const ynn::binary_kernel_fn multiply_kernel = ynn::get_binary_kernel(
-      ynn_binary_multiply, x.type, sqrt_y.type, output.type);
+  const ynn::binary_kernel_fn multiply_kernel =
+      ynn::get_binary_kernel(ynn_binary_multiply, x.type, sqrt_y.type,
+                             output.type, binary_flags(subgraph));
 
   if (rsqrt_kernel != nullptr && multiply_kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting x/sqrt(y) to x*rsqrt(y)";
@@ -313,8 +326,8 @@ bool rewrite_multiply_reciprocal(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_value& y = subgraph.value(y_id);
   const ynn_value& output = subgraph.value(node.outputs[0]);
 
-  const ynn::binary_kernel_fn divide_kernel =
-      ynn::get_binary_kernel(ynn_binary_divide, x.type, y.type, output.type);
+  const ynn::binary_kernel_fn divide_kernel = ynn::get_binary_kernel(
+      ynn_binary_divide, x.type, y.type, output.type, binary_flags(subgraph));
 
   if (divide_kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting x * (1/y) to x / y";
@@ -423,8 +436,8 @@ bool rewrite_ternary(ynn_subgraph& subgraph, ynn_node& node,
       const ynn_value& b = subgraph.value(input_ids[perm[1]]);
       const ynn_value& c = subgraph.value(input_ids[perm[2]]);
       const ynn_value& x = subgraph.value(node.outputs[0]);
-      const ynn::ternary_kernel_fn kernel =
-          ynn::get_ternary_kernel(r.op, a.type, b.type, c.type, x.type);
+      const ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
+          r.op, a.type, b.type, c.type, x.type, ternary_flags(subgraph));
       if (kernel != nullptr) {
         // Yes we do. Rewrite this to a ternary op.
         YNN_LOG_DEBUG() << "Rewriting " << to_string(outer->op) << "("
@@ -467,8 +480,8 @@ bool rewrite_binary_convert(ynn_subgraph& subgraph, ynn_node& node,
 
   // If it's a square, we must rewrite both or neither to keep it a square.
   if (node.inputs[0] == node.inputs[1] && is_convert[0]) {
-    ynn::binary_kernel_fn kernel =
-        ynn::get_binary_kernel(binary->op, a.type, b.type, output.type);
+    ynn::binary_kernel_fn kernel = ynn::get_binary_kernel(
+        binary->op, a.type, b.type, output.type, binary_flags(subgraph));
     if (kernel != nullptr) {
       YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op)
                       << "(convert(x), convert(x)) to " << to_string(binary->op)
@@ -484,8 +497,8 @@ bool rewrite_binary_convert(ynn_subgraph& subgraph, ynn_node& node,
 
   // If both are converts, try rewriting both.
   if (is_convert[0] && is_convert[1]) {
-    ynn::binary_kernel_fn kernel =
-        ynn::get_binary_kernel(binary->op, a.type, b.type, output.type);
+    ynn::binary_kernel_fn kernel = ynn::get_binary_kernel(
+        binary->op, a.type, b.type, output.type, binary_flags(subgraph));
     if (kernel != nullptr) {
       YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op)
                       << "(convert(x), convert(y)) to " << to_string(binary->op)
@@ -503,8 +516,8 @@ bool rewrite_binary_convert(ynn_subgraph& subgraph, ynn_node& node,
     if (!is_convert[i]) continue;
     ynn_type type_a = i == 0 ? a.type : subgraph.value(node.inputs[0]).type;
     ynn_type type_b = i == 1 ? b.type : subgraph.value(node.inputs[1]).type;
-    ynn::binary_kernel_fn kernel =
-        ynn::get_binary_kernel(binary->op, type_a, type_b, output.type);
+    ynn::binary_kernel_fn kernel = ynn::get_binary_kernel(
+        binary->op, type_a, type_b, output.type, binary_flags(subgraph));
     if (kernel != nullptr) {
       YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op)
                       << "(convert(x), y) to " << to_string(binary->op)
@@ -556,8 +569,8 @@ bool rewrite_convert_elementwise(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_value& b = subgraph.value(producer->inputs[1]);
     const ynn_value& x = subgraph.value(node.outputs[0]);
 
-    ynn::binary_kernel_fn kernel =
-        ynn::get_binary_kernel(binary->op, a.type, b.type, x.type);
+    ynn::binary_kernel_fn kernel = ynn::get_binary_kernel(
+        binary->op, a.type, b.type, x.type, binary_flags(subgraph));
     if (!kernel) return false;
     YNN_LOG_DEBUG() << "Rewriting "
                     << "convert(" << to_string(binary->op) << "(a, b)) to "
@@ -573,8 +586,8 @@ bool rewrite_convert_elementwise(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_value& c = subgraph.value(producer->inputs[2]);
     const ynn_value& x = subgraph.value(node.outputs[0]);
 
-    ynn::ternary_kernel_fn kernel =
-        ynn::get_ternary_kernel(ternary->op, a.type, b.type, c.type, x.type);
+    ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
+        ternary->op, a.type, b.type, c.type, x.type, ternary_flags(subgraph));
     if (!kernel) return false;
     YNN_LOG_DEBUG() << "Rewriting "
                     << "convert(" << to_string(ternary->op) << "(a, b, c)) to "
@@ -604,7 +617,8 @@ bool rewrite_negate_multiply(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_value& a = subgraph.value(a_id);
 
     const ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
-        ynn::ternary_op::subtract_multiply, a.type, b.type, c.type, x.type);
+        ynn::ternary_op::subtract_multiply, a.type, b.type, c.type, x.type,
+        ternary_flags(subgraph));
     if (kernel != nullptr) {
       YNN_LOG_DEBUG()
           << "Rewriting -multiply(b, c) to ternary subtract_multiply";
@@ -621,10 +635,6 @@ bool rewrite_negate_multiply(ynn_subgraph& subgraph, ynn_node& node,
 // Rewrite exp(subtract(a, b)) to exp_subtract(a, b)
 bool rewrite_exp_subtract(ynn_subgraph& subgraph, ynn_node& node,
                           subgraph_analysis& analysis) {
-  if ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
-    // We don't try to maintain fma consistency for binary ops.
-    return false;
-  }
   const ynn_node::unary_elementwise* unary =
       std::get_if<ynn_node::unary_elementwise>(&node.op);
   if (!unary || unary->op != ynn_unary_exp ||
@@ -647,8 +657,9 @@ bool rewrite_exp_subtract(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_value& b = subgraph.value(producer->inputs[1]);
   const ynn_value& output = subgraph.value(node.outputs[0]);
 
-  const ynn::binary_kernel_fn kernel = ynn::get_binary_kernel(
-      ynn_binary_exp_subtract, a.type, b.type, output.type);
+  const ynn::binary_kernel_fn kernel =
+      ynn::get_binary_kernel(ynn_binary_exp_subtract, a.type, b.type,
+                             output.type, binary_flags(subgraph));
   if (kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting exp(subtract(a, b)) to exp_subtract(a, b)";
     analysis.update_node(node, [&]() {
@@ -1532,7 +1543,8 @@ bool rewrite_ternary_convert(ynn_subgraph& subgraph, ynn_node& node,
 
   // Try rewriting all converts.
   ynn::ternary_kernel_fn kernel =
-      ynn::get_ternary_kernel(ternary->op, a.type, b.type, c.type, output.type);
+      ynn::get_ternary_kernel(ternary->op, a.type, b.type, c.type, output.type,
+                              ternary_flags(subgraph));
   if (kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting " << to_string(ternary->op)
                     << "(convert(x), ...) to " << to_string(ternary->op)
@@ -1555,7 +1567,7 @@ bool rewrite_ternary_convert(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_value& tc = subgraph.value(test_ids[2]);
 
     kernel = ynn::get_ternary_kernel(ternary->op, ta.type, tb.type, tc.type,
-                                     output.type);
+                                     output.type, ternary_flags(subgraph));
     if (kernel != nullptr) {
       YNN_LOG_DEBUG() << "Rewriting " << to_string(ternary->op)
                       << "(convert(x), ...) to " << to_string(ternary->op)
@@ -2672,9 +2684,9 @@ bool rewrite_requantize_quantize(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_value& input = subgraph.value(input_id);
   const ynn_value& output = subgraph.value(output_id);
 
-  const ynn::ternary_kernel_fn kernel =
-      ynn::get_ternary_kernel(ternary_op::quantize_uint8, input.type,
-                              ynn_type_fp32, ynn_type_int32, output.type);
+  const ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
+      ternary_op::quantize_uint8, input.type, ynn_type_fp32, ynn_type_int32,
+      output.type, ternary_flags(subgraph));
   if (!kernel) {
     return false;
   }

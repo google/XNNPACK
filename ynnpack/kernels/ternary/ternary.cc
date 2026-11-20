@@ -164,9 +164,12 @@ void dequantize_int2_to_fp32(size_t m, size_t n, size_t stride_a_m,
 
 ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
                                      ynn_type type_b, ynn_type type_c,
-                                     ynn_type type_x) {
+                                     ynn_type type_x, uint32_t required_flags,
+                                     uint64_t supported_arch_flags) {
 #define YNN_ELEMENTWISE_KERNEL(arch, name, kernel_op, flags, A, B, C, X) \
-  if (ternary_op::kernel_op == op && is_arch_supported(arch)) {          \
+  if (ternary_op::kernel_op == op &&                                     \
+      (flags & required_flags) == required_flags &&                      \
+      is_arch_supported(arch, supported_arch_flags)) {                   \
     if (type_of<A>() == type_a && type_of<B>() == type_b &&              \
         type_of<C>() == type_c && type_of<X>() == type_x) {              \
       YNN_LOG_DEBUG() << "Using ternary kernel " << #name;               \

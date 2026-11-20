@@ -14,6 +14,17 @@
 
 namespace ynn {
 
+// `enum class` doesn't work well for bitfield values.
+namespace binary_flag {
+
+enum {
+  // This kernel produces results that are numerically consistent with all other
+  // kernels of the same type with this flag.
+  consistent_arithmetic = 1 << 0,
+};
+
+}  // namespace binary_flag
+
 union binary_params {};
 
 // The stride of dimension `n` for any operand must be 0 or the size of one
@@ -33,10 +44,12 @@ typedef void (*binary_kernel_fn)(size_t m, size_t n, size_t stride_a_m,
 #undef YNN_ELEMENTWISE_KERNEL
 
 binary_kernel_fn get_binary_reference_kernel(ynn_binary_operator op,
-                                             ynn_type type);
+                                             ynn_type type,
+                                             uint32_t required_flags = 0);
 
 binary_kernel_fn get_binary_kernel(
     ynn_binary_operator op, ynn_type type_a, ynn_type type_b, ynn_type type_x,
+    uint32_t required_flags = 0,
     uint64_t supported_arch_flags = get_supported_arch_flags());
 
 binary_params get_binary_params(ynn_binary_operator op);

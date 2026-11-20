@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/binary/binary.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/dot.h"
@@ -213,6 +214,35 @@ TEST(fusion, exp_subtract) {
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, IsBinary(ynn_binary_exp_subtract));
+}
+
+TEST(fusion, exp_subtract_consistent_arithmetic) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3, YNN_FLAG_CONSISTENT_ARITHMETIC);
+  uint32_t ab_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 2, b_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, ab_id);
+  builder.AddBinary(ynn_binary_subtract, a_id, b_id, ab_id)
+      .AddUnary(ynn_unary_exp, ab_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  if (ynn::get_binary_kernel(ynn_binary_exp_subtract, ynn_type_fp32,
+                             ynn_type_fp32, ynn_type_fp32,
+                             ynn::binary_flag::consistent_arithmetic)) {
+    ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+    const ynn_node& node = ProducerOf(x_id, subgraph);
+    EXPECT_THAT(node, IsBinary(ynn_binary_exp_subtract));
+  } else {
+    ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(4)));
+  }
 }
 
 TEST(fusion, fold_unary_input_mixed_types) {
