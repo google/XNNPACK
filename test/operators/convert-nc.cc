@@ -23,6 +23,7 @@
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
+#include <pthreadpool.h>
 
 class ConvertOperatorTester {
  public:
@@ -96,6 +97,13 @@ class ConvertOperatorTester {
   }
 
   int16_t zero_point() const { return this->zero_point_; }
+
+  ConvertOperatorTester& num_threads(size_t num_threads) {
+    this->num_threads_ = num_threads;
+    return *this;
+  }
+
+  size_t num_threads() const { return this->num_threads_; }
 
   ConvertOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
@@ -625,6 +633,100 @@ class ConvertOperatorTester {
     }
   }
 
+  // Runs the operator serially and with a thread pool and checks that both
+  // produce identical outputs, quantization params and row sums.
+  void TestF32toQX8Threaded(bool unsigned_output, uint32_t flags) const {
+    xnnpack::ReplicableRandomDevice rng;
+
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    const size_t output_size =
+        (batch_size() - 1) * output_stride() + channels();
+    xnnpack::Buffer<int8_t> output(output_size);
+    xnnpack::Buffer<int8_t> output_ref(output_size);
+    xnnpack::Buffer<xnn_quantization_params> quantization_params(
+        batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    xnnpack::Buffer<xnn_quantization_params> quantization_params_ref(
+        batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    xnnpack::Buffer<float> row_sum(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    xnnpack::Buffer<float> row_sum_ref(batch_size() +
+                                       XNN_EXTRA_QUANTIZATION_PARAMS);
+    std::uniform_real_distribution<float> range_dist(-100000, 100000);
+
+    std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
+        pthreadpool_create(num_threads()), pthreadpool_destroy);
+    ASSERT_NE(nullptr, threadpool.get());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      const float first_val = range_dist(rng);
+      const float second_val = range_dist(rng);
+      std::uniform_real_distribution<float> f32dist(
+          std::min(first_val, second_val), std::max(first_val, second_val));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      auto run = [&](pthreadpool_t pool, int8_t* out,
+                     xnn_quantization_params* qparams, float* rsum) {
+        xnn_operator_t convert_op = nullptr;
+        ASSERT_EQ(xnn_status_success,
+                  unsigned_output
+                      ? xnn_create_convert_nc_f32_qdu8(flags, &convert_op)
+                      : xnn_create_convert_nc_f32_qd8(flags, &convert_op));
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_convert_op(convert_op, xnn_delete_operator);
+        if (unsigned_output) {
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_convert_nc_f32_qdu8(
+                        convert_op, batch_size(), channels(), input_stride(),
+                        output_stride(), pool));
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_convert_nc_f32_qdu8(
+                        convert_op, input.data(),
+                        reinterpret_cast<uint8_t*>(out), rsum, qparams));
+        } else {
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_convert_nc_f32_qd8(
+                        convert_op, batch_size(), channels(), input_stride(),
+                        output_stride(), pool));
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_convert_nc_f32_qd8(convert_op, input.data(), out,
+                                                 rsum, qparams));
+        }
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, pool));
+      };
+      float* rsum = (flags & XNN_NODE_FLAG_REQUIRES_ROW_SUM) ? row_sum.data()
+                                                             : nullptr;
+      float* rsum_ref = (flags & XNN_NODE_FLAG_REQUIRES_ROW_SUM)
+                            ? row_sum_ref.data()
+                            : nullptr;
+      run(nullptr, output_ref.data(), quantization_params_ref.data(),
+          rsum_ref);
+      run(threadpool.get(), output.data(), quantization_params.data(), rsum);
+
+      for (size_t i = 0; i < batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS;
+           i++) {
+        ASSERT_EQ(quantization_params_ref[i].zero_point,
+                  quantization_params[i].zero_point)
+            << "at batch " << i;
+        ASSERT_EQ(quantization_params_ref[i].scale,
+                  quantization_params[i].scale)
+            << "at batch " << i;
+        if (rsum != nullptr) {
+          ASSERT_EQ(row_sum_ref[i], row_sum[i]) << "at batch " << i;
+        }
+      }
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(output_ref[i * output_stride() + c],
+                    output[i * output_stride() + c])
+              << "at batch " << i << " / " << batch_size() << ", channel " << c
+              << " / " << channels();
+        }
+      }
+    }
+  }
+
   void TestF32toQP8() const {
     xnnpack::ReplicableRandomDevice rng;
 
@@ -744,6 +846,7 @@ class ConvertOperatorTester {
   float input_scale_{150.0f};
   float output_scale_{3.0f};
   int16_t zero_point_{1};
+  size_t num_threads_{4};
   size_t iterations_{15};
 };
 
@@ -1099,6 +1202,46 @@ TEST(CONVERT_NC_F32_QDU8, small_batch_with_input_and_output_stride) {
         .output_stride(117)
         .iterations(3)
         .TestF32toQDU8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QD8, large_rows_multithreaded) {
+  for (size_t channels : {8192, 50007, 262147}) {
+    for (size_t batch_size : {1, 3}) {
+      ConvertOperatorTester()
+          .batch_size(batch_size)
+          .channels(channels)
+          .iterations(2)
+          .TestF32toQX8Threaded(/*unsigned_output=*/false, /*flags=*/0);
+    }
+  }
+}
+
+TEST(CONVERT_NC_F32_QD8, large_rows_multithreaded_with_row_sum) {
+  for (size_t channels : {8192, 50007, 262147}) {
+    for (size_t batch_size : {1, 3}) {
+      ConvertOperatorTester()
+          .batch_size(batch_size)
+          .channels(channels)
+          .input_stride(channels + 33)
+          .output_stride(channels + 17)
+          .iterations(2)
+          .TestF32toQX8Threaded(/*unsigned_output=*/false,
+                                XNN_NODE_FLAG_REQUIRES_ROW_SUM);
+    }
+  }
+}
+
+TEST(CONVERT_NC_F32_QDU8, large_rows_multithreaded) {
+  for (size_t channels : {8192, 50007, 262147}) {
+    for (size_t batch_size : {1, 3}) {
+      ConvertOperatorTester()
+          .batch_size(batch_size)
+          .channels(channels)
+          .iterations(2)
+          .TestF32toQX8Threaded(/*unsigned_output=*/true,
+                                XNN_NODE_FLAG_REQUIRES_ROW_SUM);
+    }
   }
 }
 
