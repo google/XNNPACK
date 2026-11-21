@@ -43,6 +43,8 @@ BENCH_UNARY(gnu_vector, tan, f64, 2);
 
 BENCH_UNARY(gnu_vector, approx_erf, f32, 4);
 BENCH_UNARY(gnu_vector, approx_tanh, f32, 4);
+BENCH_UNARY(gnu_vector, approx_expm1, f32, 4);
+BENCH_UNARY(gnu_vector, approx_expm1, f64, 2);
 
 }  // namespace simd
 }  // namespace ynn

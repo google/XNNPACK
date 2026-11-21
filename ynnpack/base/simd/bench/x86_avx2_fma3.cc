@@ -45,6 +45,8 @@ BENCH_UNARY(avx2_fma3, tan, f64, 4);
 
 BENCH_UNARY(avx2_fma3, approx_erf, f32, 8);
 BENCH_UNARY(avx2_fma3, approx_tanh, f32, 8);
+BENCH_UNARY(avx2_fma3, approx_expm1, f32, 8);
+BENCH_UNARY(avx2_fma3, approx_expm1, f64, 4);
 
 }  // namespace simd
 }  // namespace ynn
