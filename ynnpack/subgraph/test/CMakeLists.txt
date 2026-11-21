@@ -76,6 +76,7 @@ YNN_ADD_SUBGRAPH_TEST(subgraphs)
 YNN_ADD_SUBGRAPH_TEST(eliminate_common_subgraphs)
 YNN_ADD_SUBGRAPH_TEST(fold_constants)
 YNN_ADD_SUBGRAPH_TEST(invalidate_dead_values)
+YNN_ADD_SUBGRAPH_TEST(slinky)
 YNN_ADD_SUBGRAPH_TEST(slinky_thread_pool)
 
 ADD_EXECUTABLE(ynnpack_subgraph_fusion_test

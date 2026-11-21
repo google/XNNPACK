@@ -46,6 +46,17 @@ cc_library(
 )
 
 cc_test(
+    name = "slinky",
+    srcs = ["slinky.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack/subgraph",
+        "@slinky//slinky/runtime",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
     name = "slinky_thread_pool",
     srcs = ["slinky_thread_pool.cc"],
     linkopts = ynn_binary_linkopts(),

@@ -69,8 +69,8 @@ auto make_compute_qd8_params_impl(int32_t output_zero_point) {
     slinky::dim zero_point_n[1];
     slinky::dim min_max_n[1];
 
-    if (!fuse_and_slice_leading_dims<1>(scale_n, scale, zero_point_n,
-                                        zero_point, min_max_n, min_max)) {
+    if (!fuse_and_slice_leading_dims<1, /*AllowBroadcastDim0=*/false>(
+            scale_n, scale, zero_point_n, zero_point, min_max_n, min_max)) {
       return 0;
     }
 
@@ -109,7 +109,8 @@ auto make_compute_qs8_params_impl() {
     slinky::dim scale_n[1];
     slinky::dim min_max_n[1];
 
-    if (!fuse_and_slice_leading_dims<1>(scale_n, scale, min_max_n, min_max)) {
+    if (!fuse_and_slice_leading_dims<1, /*AllowBroadcastDim0=*/false>(
+            scale_n, scale, min_max_n, min_max)) {
       return 0;
     }
 

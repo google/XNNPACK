@@ -135,6 +135,50 @@ void TestSymmetricImpl(T) {
   }
 }
 
+template <typename T>
+void TestSymmetricBroadcastImpl(T) {
+  const uint32_t input_min_max_id = 0;
+  uint32_t scale_id = 1;
+  uint32_t broadcast_min_max_id = YNN_INVALID_VALUE_ID;
+
+  const float expected_scale = 0.5f;
+  const std::vector<size_t> input_min_max_shape = {2, 1, 1};
+  const std::vector<size_t> broadcast_min_max_shape = {2, 8, 1};
+  const std::vector<size_t> output_shape = {8, 1};
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(type_of<T>(), 3, input_min_max_id)
+      .AddOutput(ynn_type_fp32, 2, scale_id)
+      .AddTensor(type_of<T>(), 3, broadcast_min_max_id)
+      .AddStaticBroadcast(broadcast_min_max_shape, input_min_max_id,
+                          broadcast_min_max_id);
+
+  ynn_status status = ynn_define_dynamic_quantization(
+      subgraph.GetSubgraph(), broadcast_min_max_id, ynn_type_int8,
+      /*zero_point_id=*/nullptr, &scale_id, /*flags=*/0);
+  ASSERT_EQ(status, ynn_status_success);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  Tensor<T> min_max(input_min_max_shape);
+  min_max(0, 0, 0) = static_cast<T>(-10.0f * expected_scale);
+  min_max(1, 0, 0) = static_cast<T>(127.0f * expected_scale);
+
+  runtime
+      .ReshapeExternalTensor(input_min_max_shape, min_max.base(),
+                             input_min_max_id)
+      .ReshapeRuntime();
+  ASSERT_EQ(runtime.GetExternalTensorShape(scale_id), output_shape);
+
+  Tensor<float> scale(output_shape);
+  runtime.SetupExternalTensor(scale.base(), scale_id).InvokeRuntime();
+
+  for (int s_idx = 0; s_idx < 8; ++s_idx) {
+    EXPECT_NEAR(scale(s_idx, 0), expected_scale, 1e-5);
+  }
+}
+
 template <typename F>
 constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
   switch (type) {
@@ -162,6 +206,12 @@ TEST_P(DynamicQuantizationTest, Symmetric) {
   if (std::get<1>(GetParam()) != ynn_type_int8) GTEST_SKIP();
   SwitchType(std::get<0>(GetParam()),
              [&](auto a_type) { TestSymmetricImpl(a_type); });
+}
+
+TEST_P(DynamicQuantizationTest, SymmetricBroadcast) {
+  if (std::get<1>(GetParam()) != ynn_type_int8) GTEST_SKIP();
+  SwitchType(std::get<0>(GetParam()),
+             [&](auto a_type) { TestSymmetricBroadcastImpl(a_type); });
 }
 
 INSTANTIATE_TEST_SUITE_P(
