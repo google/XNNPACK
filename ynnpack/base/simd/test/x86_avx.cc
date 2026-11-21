@@ -149,8 +149,11 @@ TEST_CAST(x86_avx, f32, f64x4);
 
 TEST_UNARY(x86_avx, exp, f32, 8, std::exp, 1);
 TEST_UNARY(x86_avx, exp, f64, 4, std::exp, 1);
-TEST_UNARY(x86_avx, expm1, f32, 8, std::expm1, 2);
+TEST_UNARY(x86_avx, expm1, f32, 8, std::expm1, 1);
 TEST_UNARY(x86_avx, expm1, f64, 4, std::expm1, 2);
+TEST_KEEPS_SIGNED_ZERO(x86_avx, expm1, f32, 8);
+TEST_KEEPS_SIGNED_ZERO(x86_avx, expm1, f64, 4);
+TEST_EXPM1_ULP_ERROR(x86_avx, 8);
 TEST_UNARY(x86_avx, log, f32, 8, std::log, 1);
 TEST_UNARY(x86_avx, log, f64, 4, std::log, 2);
 TEST_UNARY(x86_avx, log1p, f32, 8, std::log1p, 2);
@@ -164,6 +167,8 @@ TEST_UNARY(x86_avx, sin, f64, 4, std::sin, 2);
 TEST_UNARY(x86_avx, cos, f32, 8, std::cos, 3);
 TEST_UNARY(x86_avx, cos, f64, 4, std::cos, 2);
 
+TEST_UNARY(x86_avx, approx_expm1, f32, 8, std::expm1, 2);
+TEST_UNARY(x86_avx, approx_expm1, f64, 4, std::expm1, 2);
 TEST_UNARY(x86_avx, approx_erf, f32, 8, std::erf, 5);
 TEST_UNARY(x86_avx, approx_tanh, f32, 8, std::tanh, 5);
 
