@@ -1115,6 +1115,343 @@ static vec<T, N> tan(vec<T, N> x) {
   return sincos[0] / sincos[1];
 }
 
+namespace internal {
+
+// Preserves the mask type across `&` / `|` when masks are narrow integer
+// typedefs such as AVX-512 `__mmask8` or `__mmask16` (which C++ promotes to
+// `int`).
+template <typename M>
+YNN_ALWAYS_INLINE M mask_and(M a, M b) {
+  return static_cast<M>(a & b);
+}
+
+template <typename M>
+YNN_ALWAYS_INLINE M mask_or(M a, M b) {
+  return static_cast<M>(a | b);
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE std::pair<vec<T, N>, vec<T, N>> fast_two_sum(vec<T, N> a,
+                                                               vec<T, N> b) {
+  auto s = a + b;
+  auto e = (a - s) + b;
+  return {s, e};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE std::pair<vec<T, N>, vec<T, N>> two_sum(vec<T, N> a,
+                                                          vec<T, N> b) {
+  auto s = a + b;
+  auto v = s - a;
+  auto e = (a - (s - v)) + (b - v);
+  return {s, e};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE std::pair<vec<T, N>, vec<T, N>> two_prod(vec<T, N> a,
+                                                           vec<T, N> b) {
+#ifdef YNN_HAVE_FMA
+  // Compute `p` via `fma(..., 0)` so `fp-contract=fast` cannot fuse `p` into a
+  // later addition and invalidate the error residual `e`.
+  auto p = fma(a, b, broadcast<N>(T{0}));
+  auto e = fma(a, b, -p);
+  return {p, e};
+#else
+  constexpr int shift = (mantissa_bits(T{}) + 2) / 2;
+  const auto split = broadcast<N>(static_cast<T>((1ull << shift) + 1ull));
+  auto ca = a * split;
+  auto a_hi = ca - (ca - a);
+  auto a_lo = a - a_hi;
+  auto cb = b * split;
+  auto b_hi = cb - (cb - b);
+  auto b_lo = b - b_hi;
+  auto p = a * b;
+  auto e = ((a_hi * b_hi - p) + a_hi * b_lo + a_lo * b_hi) + a_lo * b_lo;
+  return {p, e};
+#endif
+}
+
+// Computes log2(m) as (hi, lo) for m in [sqrt(2)/2, sqrt(2)] via
+// u = (m - 1) / (m + 1).
+template <size_t N>
+YNN_ALWAYS_INLINE std::pair<vec<float, N>, vec<float, N>> log2_mantissa_dd(
+    vec<float, N> m) {
+  auto one = broadcast<N>(1.0f);
+  auto n = m - one;
+  auto d = fast_two_sum(one, m);
+  auto inv_d = one / d.first;
+  auto u_hi = n * inv_d;
+  auto prod = two_prod(u_hi, d.first);
+  auto u_lo = (((n - prod.first) - prod.second) - u_hi * d.second) * inv_d;
+  auto u = fast_two_sum(u_hi, u_lo);
+  u_hi = u.first;
+  u_lo = u.second;
+
+  auto u2 = u_hi * u_hi;
+  constexpr std::array<float, 4> P = {
+      2.7584844828e-01f,
+      3.2034704089e-01f,
+      4.1220006347e-01f,
+      5.7707804441e-01f,
+  };
+  auto p = eval_polynomial(P, u2);
+
+  constexpr float c3_hi = 9.6179670095e-01f;
+  constexpr float c3_lo = -7.0284618126e-09f;
+  constexpr float c1_hi = 2.8853900433e+00f;
+  constexpr float c1_lo = 3.8519260670e-08f;
+
+  auto u2_dd = two_prod(u_hi, u_hi);
+  auto u3_dd = two_prod(u2_dd.first, u_hi);
+  auto u3_lo =
+      multiply_add(u2_dd.first, broadcast<N>(3.0f) * u_lo,
+                   multiply_add(u2_dd.second, u_hi, u3_dd.second));
+
+  auto poly_hi = multiply_add(p, u2 * u3_dd.first,
+                              broadcast<N>(c3_lo) * u3_dd.first);
+  auto t3 = two_prod(broadcast<N>(c3_hi), u3_dd.first);
+  auto tail = (t3.second + broadcast<N>(c3_hi) * u3_lo) + poly_hi;
+
+  auto t1 = two_prod(broadcast<N>(c1_hi), u_hi);
+  auto lo = t1.second +
+            multiply_add(broadcast<N>(c1_hi), u_lo,
+                         broadcast<N>(c1_lo) * u_hi) +
+            tail;
+  auto s = fast_two_sum(t1.first, t3.first);
+  return fast_two_sum(s.first, s.second + lo);
+}
+
+template <size_t N>
+YNN_ALWAYS_INLINE std::pair<vec<double, N>, vec<double, N>> log2_mantissa_dd(
+    vec<double, N> m) {
+  auto one = broadcast<N>(1.0);
+  auto n = m - one;
+  auto d = fast_two_sum(one, m);
+  auto inv_d = one / d.first;
+  auto u_hi = n * inv_d;
+  auto prod = two_prod(u_hi, d.first);
+  auto u_lo = (((n - prod.first) - prod.second) - u_hi * d.second) * inv_d;
+  auto u = fast_two_sum(u_hi, u_lo);
+  u_hi = u.first;
+  u_lo = u.second;
+
+  auto u2 = u_hi * u_hi;
+  constexpr std::array<double, 9> P = {
+      1.5526704458257392649e-01, 1.5085312670504313903e-01,
+      1.6975921991934467270e-01, 1.9235880810769975802e-01,
+      2.2195308864344373556e-01, 2.6230818922137755234e-01,
+      3.2059889797541468726e-01, 4.1219858311113227733e-01,
+      5.7707801635558531039e-01,
+  };
+  auto p = eval_polynomial(P, u2);
+
+  constexpr double c3_hi = 9.61796693925975554e-01;
+  constexpr double c3_lo = 5.05776166481259068e-17;
+  constexpr double c1_hi = 2.88539008177792677e+00;
+  constexpr double c1_lo = 4.07105474818620662e-17;
+
+  auto u2_dd = two_prod(u_hi, u_hi);
+  auto u3_dd = two_prod(u2_dd.first, u_hi);
+  auto u3_lo =
+      multiply_add(u2_dd.first, broadcast<N>(3.0) * u_lo,
+                   multiply_add(u2_dd.second, u_hi, u3_dd.second));
+
+  auto u5_dd = two_prod(u3_dd.first, u2_dd.first);
+  auto u5_lo =
+      u5_dd.second + u3_dd.first * u2_dd.second + u3_lo * u2_dd.first;
+  auto t5 = two_prod(p, u5_dd.first);
+  auto poly_tail =
+      t5.second + p * u5_lo + broadcast<N>(c3_lo) * u3_dd.first;
+
+  auto t3 = two_prod(broadcast<N>(c3_hi), u3_dd.first);
+  auto s35 = fast_two_sum(t3.first, t5.first);
+  auto tail35 =
+      s35.second + (t3.second + broadcast<N>(c3_hi) * u3_lo) + poly_tail;
+
+  auto t1 = two_prod(broadcast<N>(c1_hi), u_hi);
+  auto s = fast_two_sum(t1.first, s35.first);
+  auto lo = s.second +
+            (t1.second + multiply_add(broadcast<N>(c1_hi), u_lo,
+                                      broadcast<N>(c1_lo) * u_hi)) +
+            tail35;
+  return fast_two_sum(s.first, lo);
+}
+
+template <size_t N>
+YNN_ALWAYS_INLINE vec<float, N> exp2_dd(vec<float, N> z_hi,
+                                        vec<float, N> z_lo) {
+  auto zero = broadcast<N>(0.0f);
+  auto min_z = broadcast<N>(-152.0f);
+  auto max_z = broadcast<N>(129.0f);
+  auto z_clamped = min(max(z_hi, min_z), max_z);
+  auto k = round_small(z_clamped);
+  auto in_range = mask_and(z_hi >= min_z, z_hi <= max_z);
+  auto r_hi = select(in_range, z_clamped - k, zero);
+  z_lo = select(in_range, z_lo, zero);
+  auto r = r_hi + z_lo;
+
+  constexpr float ln2_hi = 6.9314718246e-01f;
+  constexpr float ln2_lo = -1.9046542121e-09f;
+  constexpr std::array<float, 5> P = {
+      1.5444883320e-04f, 1.3381302124e-03f, 9.6181035042e-03f,
+      5.5503811687e-02f, 2.4022650719e-01f,
+  };
+  auto p = eval_polynomial(P, r);
+
+  auto rl = two_prod(r_hi, broadcast<N>(ln2_hi));
+  auto tail = rl.second + r_hi * broadcast<N>(ln2_lo) +
+              z_lo * broadcast<N>(ln2_hi) + (r * r) * p;
+  auto two_r = broadcast<N>(1.0f) + (rl.first + tail);
+
+  auto k1 = min(max(k, broadcast<N>(-126.0f)), broadcast<N>(127.0f));
+  auto k2 = k - k1;
+  return (two_r * exp2_round(k2)) * exp2_round(k1);
+}
+
+template <size_t N>
+YNN_ALWAYS_INLINE vec<double, N> exp2_dd(vec<double, N> z_hi,
+                                         vec<double, N> z_lo) {
+  auto zero = broadcast<N>(0.0);
+  auto min_z = broadcast<N>(-1077.0);
+  auto max_z = broadcast<N>(1025.0);
+  auto z_clamped = min(max(z_hi, min_z), max_z);
+  auto k = round_small(z_clamped);
+  auto in_range = mask_and(z_hi >= min_z, z_hi <= max_z);
+  auto r_hi = select(in_range, z_clamped - k, zero);
+  z_lo = select(in_range, z_lo, zero);
+  auto r = r_hi + z_lo;
+
+  constexpr double ln2_hi = 6.9314718055994528623e-01;
+  constexpr double ln2_lo = 2.3190468138462995584e-17;
+  constexpr std::array<double, 10> P = {
+      4.4541034105870399950e-10, 7.0709778665081382545e-09,
+      1.0178067267449427280e-07, 1.3215451633221433605e-06,
+      1.5252733820795802658e-05, 1.5403530424776528535e-04,
+      1.3333558146423213093e-03, 9.6181291076186652828e-03,
+      5.5504108664821583119e-02, 2.4022650695910074958e-01,
+  };
+  auto p = eval_polynomial(P, r);
+
+  auto rl = two_prod(r_hi, broadcast<N>(ln2_hi));
+  auto tail = rl.second + r_hi * broadcast<N>(ln2_lo) +
+              z_lo * broadcast<N>(ln2_hi) + (r * r) * p;
+  auto one_plus = fast_two_sum(broadcast<N>(1.0), rl.first);
+  auto two_r = one_plus.first + (one_plus.second + tail);
+
+  auto k1 = min(max(k, broadcast<N>(-1022.0)), broadcast<N>(1023.0));
+  auto k2 = k - k1;
+  return (two_r * exp2_round(k2)) * exp2_round(k1);
+}
+
+template <typename Int, typename T, size_t N>
+static vec<T, N> pow_impl(vec<T, N> x, vec<T, N> y) {
+  constexpr int kMantBits = mantissa_bits(T{});
+  constexpr T kScaleUp = sizeof(T) == 4 ? 0x1p+24f : 0x1p+53;
+  constexpr T kScaleExp = sizeof(T) == 4 ? 24.0f : 53.0;
+  constexpr T kMaxAbsY = sizeof(T) == 4 ? 0x1p+33f : 0x1p+65;
+  constexpr T kSqrt2 = static_cast<T>(1.41421356237309504880);
+
+  auto zero = broadcast<N>(T{0});
+  auto one = broadcast<N>(T{1});
+  auto half = broadcast<N>(T{0.5});
+  auto inf = broadcast<N>(std::numeric_limits<T>::infinity());
+  auto nan = broadcast<N>(std::numeric_limits<T>::quiet_NaN());
+  auto smallest_normal = broadcast<N>(std::numeric_limits<T>::min());
+
+  auto ax = abs(x);
+  auto ay = abs(y);
+
+  // Classify integer and odd-integer exponents in floating point so SSE2 (no
+  // 64-bit integer compare or roundps/roundpd) needs no integer SIMD ops.
+  auto magic_int = broadcast<N>(static_cast<T>(1ull << kMantBits));
+  auto two_to_p = broadcast<N>(static_cast<T>(2ull << kMantBits));
+  auto ay_rint = (ay + magic_int) - magic_int;
+  auto is_y_int =
+      mask_and(isfinite(y), mask_or(ay >= magic_int, ay == ay_rint));
+  auto hy = ay * half;
+  auto hy_rint = (hy + magic_int) - magic_int;
+  auto is_y_odd_int =
+      mask_and(mask_and(is_y_int, ay < two_to_p), hy != hy_rint);
+
+  // Normalize subnormal |x| when DAZ is disabled; under DAZ, `x == zero`
+  // below already selects the signed-zero base path via floating-point compare.
+  auto is_tiny = ax < smallest_normal;
+  auto ax_norm = select(is_tiny, ax * broadcast<N>(kScaleUp), ax);
+  auto safe_ax =
+      select(mask_and(ax_norm > zero, ax_norm < inf), ax_norm, one);
+  auto e =
+      floor_log2(safe_ax) - select(is_tiny, broadcast<N>(kScaleExp), zero);
+
+  auto mant_mask = broadcast<N>(mantissa_mask(T{}));
+  auto one_bits = bit_cast<vec<Int, N>>(one);
+  auto m_bits = (bit_cast<vec<Int, N>>(safe_ax) & mant_mask) | one_bits;
+  auto m = bit_cast<vec<T, N>>(m_bits);
+  auto large_m = m > broadcast<N>(kSqrt2);
+  e = select(large_m, e + one, e);
+  m = select(large_m, m * half, m);
+
+  auto log2_m = log2_mantissa_dd(m);
+  auto log2_x = two_sum(e, log2_m.first);
+  log2_x = fast_two_sum(log2_x.first, log2_x.second + log2_m.second);
+
+  auto y_clamped =
+      min(max(y, broadcast<N>(-kMaxAbsY)), broadcast<N>(kMaxAbsY));
+  auto z = two_prod(y_clamped, log2_x.first);
+  z = fast_two_sum(z.first, multiply_add(y_clamped, log2_x.second, z.second));
+
+  auto result = exp2_dd(z.first, z.second);
+
+  auto x_lt_zero = x < zero;
+  auto neg_x_res =
+      select(is_y_int, select(is_y_odd_int, copysign(result, x), result), nan);
+  result = select(x_lt_zero, neg_x_res, result);
+
+  auto y_gt_zero = y > zero;
+  auto inf_mag = select(y_gt_zero, inf, zero);
+  result = select(ax == inf,
+                  select(mask_and(x_lt_zero, is_y_odd_int),
+                         copysign(inf_mag, x), inf_mag),
+                  result);
+
+  auto zero_mag = select(y_gt_zero, zero, inf);
+  result = select(x == zero,
+                  select(is_y_odd_int, copysign(zero_mag, x), zero_mag),
+                  result);
+
+  auto y_inf_mag = select(
+      ax > one, select(y_gt_zero, inf, zero), select(y_gt_zero, zero, inf));
+  result = select(ay == inf, select(ax == one, one, y_inf_mag), result);
+
+  // IEEE 754-2008: pow(+1, qNaN) == 1 and pow(qNaN, +-0) == 1, whereas sNaN
+  // (quiet bit == 0, i.e. < 1.5 when given exponent 0) propagates qNaN.
+  auto one_point_five = broadcast<N>(T{1.5});
+  auto x_snan = mask_and(
+      isnan(x),
+      bit_cast<vec<T, N>>((bit_cast<vec<Int, N>>(x) & mant_mask) | one_bits) <
+          one_point_five);
+  auto y_snan = mask_and(
+      isnan(y),
+      bit_cast<vec<T, N>>((bit_cast<vec<Int, N>>(y) & mant_mask) | one_bits) <
+          one_point_five);
+
+  result = select(mask_or(isnan(x), isnan(y)), nan, result);
+  result = select(mask_or(x == one, y == zero), one, result);
+  result = select(mask_or(x_snan, y_snan), nan, result);
+  return result;
+}
+
+}  // namespace internal
+
+template <size_t N>
+static vec<float, N> pow(vec<float, N> x, vec<float, N> y) {
+  return internal::pow_impl<int32_t>(x, y);
+}
+
+template <size_t N>
+static vec<double, N> pow(vec<double, N> x, vec<double, N> y) {
+  return internal::pow_impl<int64_t>(x, y);
+}
+
 }  // namespace simd
 
 }  // namespace ynn
