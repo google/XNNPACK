@@ -1843,6 +1843,12 @@ static enum xnn_status select_gemm_config(
                   xnn_operator_type_to_string(context->operator_type));
     return xnn_status_unsupported_hardware;
   }
+  const struct xnn_gemm_config* small_k_config =
+      context->gemm_config->small_k_config;
+  if (small_k_config != NULL &&
+      context->group_input_channels <= ((size_t) 1 << small_k_config->log2_kr)) {
+    context->gemm_config = small_k_config;
+  }
   return xnn_status_success;
 }
 
