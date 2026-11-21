@@ -208,8 +208,11 @@ TEST_HORIZONTAL_SUM(gnu_vector, f64, 2);
 
 TEST_UNARY(gnu_vector, exp, f32, 4, std::exp, 1);
 TEST_UNARY(gnu_vector, exp, f64, 2, std::exp, 1);
-TEST_UNARY(gnu_vector, expm1, f32, 4, std::expm1, 2);
+TEST_UNARY(gnu_vector, expm1, f32, 4, std::expm1, 1);
 TEST_UNARY(gnu_vector, expm1, f64, 2, std::expm1, 2);
+TEST_KEEPS_SIGNED_ZERO(gnu_vector, expm1, f32, 4);
+TEST_KEEPS_SIGNED_ZERO(gnu_vector, expm1, f64, 2);
+TEST_EXPM1_ULP_ERROR(gnu_vector, 4);
 TEST_UNARY(gnu_vector, log, f32, 4, std::log, 1);
 TEST_UNARY(gnu_vector, log, f64, 2, std::log, 2);
 TEST_UNARY(gnu_vector, log1p, f32, 4, std::log1p, 2);
@@ -223,6 +226,8 @@ TEST_UNARY(gnu_vector, sin, f64, 2, std::sin, 2);
 TEST_UNARY(gnu_vector, cos, f32, 4, std::cos, 3);
 TEST_UNARY(gnu_vector, cos, f64, 2, std::cos, 2);
 
+TEST_UNARY(gnu_vector, approx_expm1, f32, 4, std::expm1, 2);
+TEST_UNARY(gnu_vector, approx_expm1, f64, 2, std::expm1, 2);
 TEST_UNARY(gnu_vector, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(gnu_vector, approx_tanh, f32, 4, std::tanh, 5);
 
