@@ -561,6 +561,24 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "kleidiai_packing_bench",
+    srcs = ["kleidiai-packing.cc"],
+    deps = [
+        ":bench_utils",
+        "//:XNNPACK",
+        "//:buffer",
+        "//:common",
+        "//:internal",
+        "//:operator_h",
+        "//:packing",
+        "//src/configs:config_types",
+        "//src/configs:hardware_config",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
     name = "x16_packw_bench",
     srcs = [
         "x16-packw.cc",

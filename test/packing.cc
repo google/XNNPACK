@@ -11,6 +11,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <numeric>
 #include <vector>
 
@@ -26,6 +27,17 @@
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/params.h"
+
+#if XNN_ENABLE_KLEIDIAI && XNN_ARCH_ARM64 && \
+    (XNN_PLATFORM_LINUX || XNN_PLATFORM_ANDROID || XNN_PLATFORM_MAC)
+#include <sys/mman.h>
+#include <unistd.h>
+
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
+#endif
 
 namespace {
 
@@ -936,6 +948,44 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4_nr_eq_2) {
     0xC8, 0xD9, 0xEA, 0xFB,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+static void TestQb4wUnalignedBias(bool transposed) {
+  std::array<uint8_t, 12> weights;
+  weights.fill(0x99);
+  const std::vector<xnn_bfloat16> scale(3, 1.0f);
+  const xnn_qs8_qc4w_packing_params params = {1, 8};
+  for (size_t offset : {0, 1, 2, 3}) {
+    SCOPED_TRACE(offset);
+    alignas(float) std::array<uint8_t, 48> packed;
+    packed.fill(0xA5);
+    auto expected = packed;
+    for (size_t channel = 0; channel < 3; ++channel) {
+      const float expected_bias = -8.0f;
+      std::memcpy(expected.data() + offset + channel * 14, &expected_bias,
+                  sizeof(expected_bias));
+      std::fill_n(expected.data() + offset + channel * 14 + sizeof(float), 4,
+                  0x11);
+    }
+    if (transposed) {
+      xnn_pack_qs8_qb4w_gemm_gio_w(
+          1, 3, 8, 1, 4, 1, 3, 8, weights.data(), nullptr, scale.data(),
+          packed.data() + offset, 2, 4, &params);
+    } else {
+      xnn_pack_qs8_qb4w_gemm_goi_w(
+          1, 3, 8, 1, 4, 1, 8, 8, weights.data(), nullptr, scale.data(),
+          packed.data() + offset, 2, 4, &params);
+    }
+    EXPECT_THAT(packed, ElementsAreArray(expected));
+  }
+}
+
+TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, unaligned_bias_storage) {
+  TestQb4wUnalignedBias(false);
+}
+
+TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, unaligned_bias_storage) {
+  TestQb4wUnalignedBias(true);
 }
 
 TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
@@ -4178,5 +4228,238 @@ TEST(PACK_QS8_QC4W_GEMM_GOI_W_NON_PLANAR, n_stride) {
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
-}  // namespace
+#if XNN_ENABLE_KLEIDIAI && XNN_ARCH_ARM64 && \
+    (XNN_PLATFORM_LINUX || XNN_PLATFORM_ANDROID || XNN_PLATFORM_MAC)
+class GuardedPackingBuffer {
+ public:
+  explicit GuardedPackingBuffer(size_t size)
+      : size_(size), page_size_(getpagesize()),
+        mapping_size_(round_up(size, page_size_) + page_size_),
+        mapping_(mmap(nullptr, mapping_size_, PROT_READ | PROT_WRITE,
+                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0)) {
+    EXPECT_NE(mapping_, MAP_FAILED);
+    if (mapping_ != MAP_FAILED) {
+      EXPECT_EQ(mprotect(static_cast<uint8_t*>(mapping_) + mapping_size_ -
+                             page_size_, page_size_, PROT_NONE), 0);
+    }
+  }
 
+  ~GuardedPackingBuffer() {
+    if (mapping_ != MAP_FAILED) {
+      EXPECT_EQ(munmap(mapping_, mapping_size_), 0);
+    }
+  }
+
+  GuardedPackingBuffer(const GuardedPackingBuffer&) = delete;
+  GuardedPackingBuffer& operator=(const GuardedPackingBuffer&) = delete;
+
+  uint8_t* data() const {
+    return mapping_ == MAP_FAILED ? nullptr :
+        static_cast<uint8_t*>(mapping_) + mapping_size_ - page_size_ - size_;
+  }
+
+ private:
+  const size_t size_;
+  const size_t page_size_;
+  const size_t mapping_size_;
+  void* const mapping_;
+};
+
+static void TestKaiConvPacking(
+    size_t element_size, size_t bias_element_size,
+    size_t (*packed_size)(size_t, size_t, size_t),
+    void (*pack)(size_t, size_t, size_t, size_t, const void*, const void*,
+                 const float*, void*),
+    void (*reference_pack)(size_t, size_t, size_t, const void*, const void*,
+                           const float*, void*),
+    size_t inline_bias_bytes = 0) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  FailingAllocatorGuard allocator_guard(SIZE_MAX);
+  for (size_t groups : {1, 2}) {
+    for (size_t channels : {1, 2, 3, 16, 32, 33, 64}) {
+      for (size_t kernel_size : {1, 3, 9}) {
+        for (size_t depth : {1, 2, 3, 5, 8, 15, 16, 17, 33, 64}) {
+          const size_t width = kernel_size * depth;
+          const size_t group_bytes = channels * width * element_size;
+          const size_t packed_group_size = packed_size(channels, kernel_size, depth);
+          GuardedPackingBuffer weights(groups * group_bytes);
+          GuardedPackingBuffer actual(groups * packed_group_size);
+          ASSERT_NE(weights.data(), nullptr);
+          ASSERT_NE(actual.data(), nullptr);
+          std::vector<uint8_t> transposed(groups * group_bytes);
+          std::vector<uint8_t> bias(groups * channels * bias_element_size, 0);
+          std::vector<uint8_t> zero_bias(channels * bias_element_size, 0);
+          std::vector<float> scales(groups * channels, 0.5f);
+          for (size_t index = 0; index < groups * group_bytes; ++index) {
+            weights.data()[index] = (index * 13 + 7) % 127;
+          }
+          for (size_t index = 0; index < groups * channels; ++index) {
+            bias[index * bias_element_size] = 1;
+            scales[index] += (index % 3) * 0.125f;
+          }
+          for (size_t group = 0; group < groups; ++group) {
+            for (size_t row = 0; row < channels; ++row) {
+              for (size_t column = 0; column < width; ++column) {
+                std::memcpy(transposed.data() + group * group_bytes +
+                                (column * channels + row) * element_size,
+                            weights.data() + group * group_bytes +
+                                (row * width + column) * element_size,
+                            element_size);
+              }
+            }
+          }
+          for (bool has_bias : {false, true}) {
+            SCOPED_TRACE(testing::Message() << element_size << ',' << groups
+                << ',' << channels << ',' << kernel_size << ',' << depth
+                << ',' << has_bias);
+            std::memset(actual.data(), 0xA5, groups * packed_group_size);
+            std::vector<uint8_t> expected(groups * packed_group_size, 0xA5);
+            {
+              FailingAllocatorGuard weight_allocation_guard(
+                  has_bias || groups * channels * bias_element_size <= inline_bias_bytes
+                      ? 0 : SIZE_MAX);
+              pack(groups, channels, kernel_size, depth, weights.data(),
+                   has_bias ? bias.data() : nullptr, scales.data(), actual.data());
+            }
+            for (size_t group = 0; group < groups; ++group) {
+              reference_pack(channels, kernel_size, depth,
+                  transposed.data() + group * group_bytes,
+                  has_bias ? bias.data() + group * channels * bias_element_size :
+                             zero_bias.data(),
+                  scales.data() + group * channels,
+                  expected.data() + group * packed_group_size);
+            }
+            EXPECT_EQ(std::memcmp(actual.data(), expected.data(), expected.size()), 0);
+          }
+        }
+      }
+    }
+  }
+}
+
+TEST(PACK_KAI_F16_CONV_GOKI_W_SME, scalar_reference_guarded_weights) {
+  TestKaiConvPacking(sizeof(uint16_t), sizeof(uint16_t),
+      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme,
+      [](size_t groups, size_t channels, size_t kernel_size, size_t depth,
+         const void* weights, const void* bias, const float* scales, void* packed) {
+        xnn_pack_kai_f16_conv_goki_w_sme(groups, channels, kernel_size, depth,
+            16, 1, 1, static_cast<const uint16_t*>(weights),
+            static_cast<const uint16_t*>(bias), scales, packed, 0, nullptr);
+      },
+      [](size_t channels, size_t kernel_size, size_t depth, const void* weights,
+         const void* bias, const float*, void* packed) {
+        kai_run_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+            channels, kernel_size, depth, channels * sizeof(uint16_t),
+            weights, bias, packed);
+      }, XNN_ALLOCATION_ALIGNMENT);
+}
+
+TEST(PACK_KAI_QS8_CONV_GOKI_W_SME, scalar_reference_guarded_weights) {
+  TestKaiConvPacking(sizeof(int8_t), sizeof(int32_t),
+      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme,
+      [](size_t groups, size_t channels, size_t kernel_size, size_t depth,
+         const void* weights, const void* bias, const float* scales, void* packed) {
+        const xnn_qs8_packing_params params = {-7};
+        xnn_pack_kai_qs8_conv_goki_w_sme(groups, channels, kernel_size, depth,
+            16, 4, 1, static_cast<const int8_t*>(weights),
+            static_cast<const int32_t*>(bias), scales, packed, 0, &params);
+      },
+      [](size_t channels, size_t kernel_size, size_t depth, const void* weights,
+         const void* bias, const float* scales, void* packed) {
+        const kai_rhs_pack_qsi8cx_params params = {-7, 1.0f};
+        kai_run_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+            channels, kernel_size, depth, channels, weights, bias, scales,
+            packed, &params);
+      });
+}
+
+TEST(PACK_KAI_PF32_CONV_GOKI_W_SME, scalar_reference_guarded_weights) {
+  TestKaiConvPacking(sizeof(float), sizeof(float),
+      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme,
+      [](size_t groups, size_t channels, size_t kernel_size, size_t depth,
+         const void* weights, const void* bias, const float* scales, void* packed) {
+        xnn_pack_kai_pf32_conv_goki_w_sme(groups, channels, kernel_size, depth,
+            16, 1, 1, static_cast<const float*>(weights),
+            static_cast<const float*>(bias), scales,
+            static_cast<float*>(packed), 0, nullptr);
+      },
+      [](size_t channels, size_t kernel_size, size_t depth, const void* weights,
+         const void* bias, const float*, void* packed) {
+        kai_run_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme(
+            channels, kernel_size, depth, channels * sizeof(float),
+            weights, bias, packed);
+      }, XNN_ALLOCATION_ALIGNMENT);
+}
+
+TEST(PACK_KAI_QS8_QC8W_WEIGHTS_AND_BIASES_SME, scalar_reference_guarded_weights) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme);
+  FailingAllocatorGuard allocator_guard(SIZE_MAX);
+  const xnn_qs8_packing_params params = {-7};
+  const kai_rhs_pack_qsi8cx_params kai_params = {-7, 1.0f};
+  xnn_gemm_config config = {};
+  config.nr = kai_get_n_step_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme();
+  config.log2_kr = 2;
+  for (size_t groups : {1, 2}) {
+    for (size_t channels : {1, 2, 3, 4, 5, 16, 17, 33}) {
+      for (size_t depth : {1, 2, 15, 16, 17, 33}) {
+        const size_t weights_group_size = channels * depth;
+        GuardedPackingBuffer weights(groups * weights_group_size);
+        ASSERT_NE(weights.data(), nullptr);
+        std::vector<int8_t> transposed(groups * weights_group_size);
+        std::vector<int32_t> bias(groups * channels);
+        std::vector<int32_t> zero_bias(channels, 0);
+        std::vector<float> scales(groups * channels);
+        for (size_t group = 0; group < groups; ++group) {
+          for (size_t row = 0; row < channels; ++row) {
+            bias[group * channels + row] = 3 + group;
+            scales[group * channels + row] = 0.5f + group * 0.125f;
+            for (size_t column = 0; column < depth; ++column) {
+              const int8_t value =
+                  (group * 13 + row * depth + column) % 127;
+              weights.data()[group * weights_group_size + row * depth + column] =
+                  value;
+              transposed[group * weights_group_size + column * channels + row] =
+                  value;
+            }
+          }
+        }
+        const size_t packed_group_size =
+            kai_get_rhs_packed_size_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+                channels, depth);
+        const size_t packed_size = groups * packed_group_size;
+        for (bool has_bias : {false, true}) {
+          for (bool transpose : {false, true}) {
+            SCOPED_TRACE(testing::Message() << groups << ',' << channels << ','
+                                           << depth << ',' << has_bias << ','
+                                           << transpose);
+            GuardedPackingBuffer actual(packed_size);
+            ASSERT_NE(actual.data(), nullptr);
+            std::memset(actual.data(), 0xA5, packed_size);
+            std::vector<uint8_t> expected(packed_size, 0xA5);
+            xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
+                transpose ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0, &config, depth,
+                channels, groups, 0, transpose ? channels : depth,
+                has_bias ? bias.data() : nullptr,
+                transpose ? static_cast<const void*>(transposed.data()) :
+                            static_cast<const void*>(weights.data()),
+                nullptr, scales.data(), sizeof(float), nullptr, nullptr, 0,
+                actual.data(), &params);
+            for (size_t group = 0; group < groups; ++group) {
+              kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+                  1, channels, depth, config.nr, 4, 1, channels,
+                  transposed.data() + group * weights_group_size,
+                  has_bias ? bias.data() + group * channels : zero_bias.data(),
+                  scales.data() + group * channels,
+                  expected.data() + group * packed_group_size, 0, &kai_params);
+            }
+            EXPECT_EQ(std::memcmp(actual.data(), expected.data(), packed_size),
+                      0);
+          }
+        }
+      }
+    }
+  }
+}
+#endif
+
+}  // namespace

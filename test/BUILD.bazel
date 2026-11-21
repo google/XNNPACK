@@ -8,6 +8,7 @@
 load(
     "//:build_defs.bzl",
     "xnnpack_cxx_library",
+    "xnnpack_if_kleidiai_enabled",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
@@ -1168,7 +1169,9 @@ xnnpack_unit_test(
         "//:microkernel_utils",
         "//:operator_utils",
         "//src/configs:config_types",
-    ],
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
 )
 
 xnnpack_unit_test(
