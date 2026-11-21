@@ -1,4 +1,5 @@
 // Copyright 2020 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -220,6 +221,12 @@ enum xnn_status xnn_define_softmax(
     xnn_node_type_softmax, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  if ((flags & XNN_FLAG_SAFE_SOFTMAX) &&
+      input_value->datatype != xnn_datatype_fp32) {
+    xnn_log_error("safe softmax is only supported for FP32");
+    return xnn_status_unsupported_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

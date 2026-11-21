@@ -1,4 +1,5 @@
 // Copyright 2022 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -292,6 +293,77 @@ TEST(Softmax, ReshapeOverflowOutputSize) {
 }
 #else
 // This is not an error in YNNPACK (and it doesn't crash either).
+#endif  // XNNPACK_USE_YNNPACK
+
+#ifndef XNNPACK_USE_YNNPACK
+TEST(SafeSoftmax, fp32_hint_and_forced_conversion) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  for (uint32_t flags : {uint32_t(0), uint32_t(XNN_FLAG_HINT_FP16_INFERENCE),
+                         uint32_t(XNN_FLAG_FORCE_FP16_INFERENCE)}) {
+    xnn_subgraph_t graph = nullptr;
+    ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &graph));
+    const size_t shape[] = {3, 17};
+    uint32_t input_id, output_id;
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_define_tensor_value(graph, xnn_datatype_fp32, 2, shape, nullptr, 0,
+                                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_define_tensor_value(graph, xnn_datatype_fp32, 2, shape, nullptr, 1,
+                                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+    ASSERT_EQ(xnn_status_success, xnn_define_softmax(graph, input_id, output_id,
+                                                     XNN_FLAG_SAFE_SOFTMAX));
+    xnn_runtime_t runtime = nullptr;
+    const auto status =
+        xnn_create_runtime_v3(graph, nullptr, nullptr, flags, &runtime);
+    if (flags == XNN_FLAG_FORCE_FP16_INFERENCE) {
+      EXPECT_TRUE(status == xnn_status_unsupported_parameter ||
+                  status == xnn_status_unsupported_hardware);
+    } else {
+      ASSERT_EQ(status, xnn_status_success);
+      for (size_t batch : {size_t(3), size_t(7), size_t(1)}) {
+        const size_t dynamic_shape[] = {batch, 17};
+        ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(
+                                          runtime, input_id, 2, dynamic_shape));
+        ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+        std::vector<float> input(batch * 17 + XNN_EXTRA_BYTES / sizeof(float),
+                                 -INFINITY);
+        std::vector<float> output(input.size(), 42.0f);
+        const xnn_external_value values[] = {{input_id, input.data()},
+                                             {output_id, output.data()}};
+        ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, 2, values));
+        ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+        for (size_t i = 0; i < batch * 17; i++) {
+          EXPECT_EQ(output[i], 0.0f);
+          EXPECT_FALSE(std::signbit(output[i]));
+        }
+      }
+    }
+    xnn_delete_runtime(runtime);
+    xnn_delete_subgraph(graph);
+  }
+}
+
+TEST(SafeSoftmax, rejects_fp16) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  xnn_subgraph_t graph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &graph));
+  const size_t shape[] = {3, 17};
+  uint32_t input_id, output_id;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(graph, xnn_datatype_fp16, 2, shape, nullptr, 0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(graph, xnn_datatype_fp16, 2, shape, nullptr, 1,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  EXPECT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_define_softmax(graph, input_id, output_id, XNN_FLAG_SAFE_SOFTMAX));
+  xnn_delete_subgraph(graph);
+}
 #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
