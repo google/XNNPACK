@@ -20,23 +20,16 @@
 
 
 
-// Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
-static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* ptr) {
-  return xnn_cvt_f32_f16(xnn_loadu_f16(ptr));
+static XNN_INLINE void xnn_store_exp_f16(
+    xnn_float16* output, xnn_simd_f16_t x, xnn_simd_f32_t y, size_t n) {
+  xnn_simd_f16_t result = xnn_cvt_f16_f32(y);
+  xnn_store_tail_f16(output, result, n);
 }
 
-static XNN_INLINE void xnn_store_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v) {
-  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), xnn_simd_size_f32);
+static XNN_INLINE xnn_simd_f32_t xnn_clamp_exp_f32(
+    xnn_simd_f32_t x, xnn_simd_f32_t min, xnn_simd_f32_t max) {
+  return xnn_min_f32(max, xnn_max_f32(min, x));
 }
-
-static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* ptr, size_t elements) {
-  return xnn_cvt_f32_f16(xnn_load_tail_f16(ptr, elements));
-}
-
-static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* ptr, xnn_simd_f32_t v, size_t elements) {
-  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), elements);
-}
-
 
 static XNN_INLINE xnn_simd_f32_t xnn_setexp_f32(xnn_simd_f32_t vx) {
   // If `x` is an floating point value in the range [-127, 128], then
@@ -81,12 +74,13 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u16(
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 16 * sizeof(xnn_float16); batch -= 16 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
+    const xnn_simd_f16_t vh = xnn_loadu_f16(input);
+    xnn_simd_f32_t vx = xnn_cvt_f32_f16(vh);
     input += 16;
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-    vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f32(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -103,15 +97,16 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u16(
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
 
-    xnn_store_f32_f16(output, vy);
+    xnn_store_exp_f16(output, vh, vy, 16);
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    const xnn_simd_f16_t vh = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    xnn_simd_f32_t vx = xnn_cvt_f32_f16(vh);
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-    vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f32(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -128,7 +123,7 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u16(
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
 
-    xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    xnn_store_exp_f16(output, vh, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u32(
@@ -155,15 +150,17 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u32(
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 32 * sizeof(xnn_float16); batch -= 32 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f16_f32(input + 0 * 16);
-    xnn_simd_f32_t vx_1 = xnn_loadu_f16_f32(input + 1 * 16);
+    const xnn_simd_f16_t vh_0 = xnn_loadu_f16(input + 0 * 16);
+    xnn_simd_f32_t vx_0 = xnn_cvt_f32_f16(vh_0);
+    const xnn_simd_f16_t vh_1 = xnn_loadu_f16(input + 1 * 16);
+    xnn_simd_f32_t vx_1 = xnn_cvt_f32_f16(vh_1);
     input += 32;
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime_0 = xnn_mul_f32(vx_0, vlog2e);
     xnn_simd_f32_t vz_prime_1 = xnn_mul_f32(vx_1, vlog2e);
-    vz_prime_0 = xnn_min_f32(xnn_max_f32(vz_prime_0, vm15), v16);
-    vz_prime_1 = xnn_min_f32(xnn_max_f32(vz_prime_1, vm15), v16);
+    vz_prime_0 = xnn_clamp_exp_f32(vz_prime_0, vm15, v16);
+    vz_prime_1 = xnn_clamp_exp_f32(vz_prime_1, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz_0 = xnn_qd_round_f32(vz_prime_0);
@@ -187,17 +184,18 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u32(
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(v2z_0, v2r_0);
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(v2z_1, v2r_1);
 
-    xnn_store_f32_f16(output + 0 * 16, vy_0);
-    xnn_store_f32_f16(output + 1 * 16, vy_1);
+    xnn_store_exp_f16(output + 0 * 16, vh_0, vy_0, 16);
+    xnn_store_exp_f16(output + 1 * 16, vh_1, vy_1, 16);
     output += 32;
   }
   for (; batch >= 16 * sizeof(xnn_float16); batch -= 16 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
+    const xnn_simd_f16_t vh = xnn_loadu_f16(input);
+    xnn_simd_f32_t vx = xnn_cvt_f32_f16(vh);
     input += 16;
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-    vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f32(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -214,15 +212,16 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u32(
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
 
-    xnn_store_f32_f16(output, vy);
+    xnn_store_exp_f16(output, vh, vy, 16);
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    const xnn_simd_f16_t vh = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    xnn_simd_f32_t vx = xnn_cvt_f32_f16(vh);
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-    vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f32(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -239,7 +238,7 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u32(
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
 
-    xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    xnn_store_exp_f16(output, vh, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u64(
@@ -266,21 +265,25 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u64(
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 64 * sizeof(xnn_float16); batch -= 64 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f16_f32(input + 0 * 16);
-    xnn_simd_f32_t vx_1 = xnn_loadu_f16_f32(input + 1 * 16);
-    xnn_simd_f32_t vx_2 = xnn_loadu_f16_f32(input + 2 * 16);
-    xnn_simd_f32_t vx_3 = xnn_loadu_f16_f32(input + 3 * 16);
+    const xnn_simd_f16_t vh_0 = xnn_loadu_f16(input + 0 * 16);
+    xnn_simd_f32_t vx_0 = xnn_cvt_f32_f16(vh_0);
+    const xnn_simd_f16_t vh_1 = xnn_loadu_f16(input + 1 * 16);
+    xnn_simd_f32_t vx_1 = xnn_cvt_f32_f16(vh_1);
+    const xnn_simd_f16_t vh_2 = xnn_loadu_f16(input + 2 * 16);
+    xnn_simd_f32_t vx_2 = xnn_cvt_f32_f16(vh_2);
+    const xnn_simd_f16_t vh_3 = xnn_loadu_f16(input + 3 * 16);
+    xnn_simd_f32_t vx_3 = xnn_cvt_f32_f16(vh_3);
     input += 64;
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime_0 = xnn_mul_f32(vx_0, vlog2e);
     xnn_simd_f32_t vz_prime_1 = xnn_mul_f32(vx_1, vlog2e);
     xnn_simd_f32_t vz_prime_2 = xnn_mul_f32(vx_2, vlog2e);
     xnn_simd_f32_t vz_prime_3 = xnn_mul_f32(vx_3, vlog2e);
-    vz_prime_0 = xnn_min_f32(xnn_max_f32(vz_prime_0, vm15), v16);
-    vz_prime_1 = xnn_min_f32(xnn_max_f32(vz_prime_1, vm15), v16);
-    vz_prime_2 = xnn_min_f32(xnn_max_f32(vz_prime_2, vm15), v16);
-    vz_prime_3 = xnn_min_f32(xnn_max_f32(vz_prime_3, vm15), v16);
+    vz_prime_0 = xnn_clamp_exp_f32(vz_prime_0, vm15, v16);
+    vz_prime_1 = xnn_clamp_exp_f32(vz_prime_1, vm15, v16);
+    vz_prime_2 = xnn_clamp_exp_f32(vz_prime_2, vm15, v16);
+    vz_prime_3 = xnn_clamp_exp_f32(vz_prime_3, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz_0 = xnn_qd_round_f32(vz_prime_0);
@@ -318,19 +321,20 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u64(
     const xnn_simd_f32_t vy_2 = xnn_mul_f32(v2z_2, v2r_2);
     const xnn_simd_f32_t vy_3 = xnn_mul_f32(v2z_3, v2r_3);
 
-    xnn_store_f32_f16(output + 0 * 16, vy_0);
-    xnn_store_f32_f16(output + 1 * 16, vy_1);
-    xnn_store_f32_f16(output + 2 * 16, vy_2);
-    xnn_store_f32_f16(output + 3 * 16, vy_3);
+    xnn_store_exp_f16(output + 0 * 16, vh_0, vy_0, 16);
+    xnn_store_exp_f16(output + 1 * 16, vh_1, vy_1, 16);
+    xnn_store_exp_f16(output + 2 * 16, vh_2, vy_2, 16);
+    xnn_store_exp_f16(output + 3 * 16, vh_3, vy_3, 16);
     output += 64;
   }
   for (; batch >= 16 * sizeof(xnn_float16); batch -= 16 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
+    const xnn_simd_f16_t vh = xnn_loadu_f16(input);
+    xnn_simd_f32_t vx = xnn_cvt_f32_f16(vh);
     input += 16;
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-    vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f32(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -347,15 +351,16 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u64(
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
 
-    xnn_store_f32_f16(output, vy);
+    xnn_store_exp_f16(output, vh, vy, 16);
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    const xnn_simd_f16_t vh = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    xnn_simd_f32_t vx = xnn_cvt_f32_f16(vh);
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-    vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f32(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -372,6 +377,6 @@ void xnn_f16_f32acc_vexp_ukernel__avx512f_poly_3_u64(
     // Compute 2^z * 2^r.
     const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
 
-    xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+    xnn_store_exp_f16(output, vh, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
