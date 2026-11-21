@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -89,7 +90,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_lut_op_with_config(
 
 static const struct xnn_unary_elementwise_config* get_config(
     enum xnn_unary_operator op_type, enum xnn_datatype input_datatype,
-    enum xnn_datatype output_datatype,
+    enum xnn_datatype output_datatype, const union xnn_unary_params* params,
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization, uint32_t flags) {
   if (input_datatype != output_datatype) {
@@ -119,6 +120,18 @@ static const struct xnn_unary_elementwise_config* get_config(
       }
     }
     return NULL;
+  }
+  if (op_type == xnn_unary_leaky_relu &&
+      (output_datatype == xnn_datatype_qint8 ||
+       output_datatype == xnn_datatype_quint8)) {
+    // The vlrelu microkernels only support these scales; use a LUT otherwise.
+    const float scale = input_quantization->scale / output_quantization->scale;
+    const float negative_scale = scale * params->leaky_relu.negative_slope;
+    if (!(scale >= 0x1.0p-8f && scale <= 0x1.0p+7f &&
+          negative_scale >= -0x1.FFFC00p+6f && negative_scale <= 0x1.0p+7f &&
+          fabsf(negative_scale) >= 0x1.0p-8f)) {
+      return NULL;
+    }
   }
   enum xnn_datatype datatype = output_datatype;
   if (datatype == xnn_datatype_bf16) {
@@ -282,8 +295,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_op(
   }
 
   const struct xnn_unary_elementwise_config* config =
-      get_config(op_type, input_datatype, output_datatype, input_quantization,
-                 output_quantization, flags);
+      get_config(op_type, input_datatype, output_datatype, params,
+                 input_quantization, output_quantization, flags);
   const bool use_reference = config == NULL || config->ukernel == NULL;
   if (use_reference) {
     // Fall back to reference.
