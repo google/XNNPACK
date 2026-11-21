@@ -1160,6 +1160,70 @@ void test_unary(F f, Ref ref, float epsilons,
         epsilons);                                                             \
   }
 
+// Test that op(+0) is +0 and op(-0) is -0. `test_unary` compares values, so it
+// cannot see the sign of a zero result.
+template <typename scalar, size_t N, typename F>
+void test_keeps_signed_zero(F f) {
+  using vector = vec<scalar, N>;
+
+  for (scalar input : {static_cast<scalar>(0.0), static_cast<scalar>(-0.0)}) {
+    scalar a[vector::N];
+    std::fill_n(a, vector::N, input);
+
+    scalar result[vector::N];
+    store(result, f(load(a, vector::N)));
+    for (size_t i = 0; i < vector::N; ++i) {
+      ASSERT_EQ(result[i], static_cast<scalar>(0.0)) << input;
+      ASSERT_EQ(std::signbit(result[i]), std::signbit(input)) << input;
+    }
+  }
+}
+
+#define TEST_KEEPS_SIGNED_ZERO(test_class, op, type, N)                    \
+  TEST_F(test_class, op##_signed_zero_##type##x##N) {                      \
+    test_keeps_signed_zero<type, N>([](vec<type, N> x) { return op(x); }); \
+  }
+
+// Test a float op against a double precision reference, on every `stride`th
+// float in [min_val, max_val] (both positive). `test_unary` compares with the
+// reference rounded to float, so it accepts errors of up to 1.5 ULP.
+template <size_t N, typename F, typename Ref>
+void test_ulp_error(F f, Ref ref, float min_val, float max_val, uint32_t stride,
+                    double max_ulps) {
+  using vector = vec<float, N>;
+
+  uint32_t bits, end;
+  std::memcpy(&bits, &min_val, sizeof(bits));
+  std::memcpy(&end, &max_val, sizeof(end));
+  while (bits <= end) {
+    float a[vector::N];
+    for (size_t i = 0; i < vector::N; ++i) {
+      uint32_t bits_i = std::min(bits, end);
+      std::memcpy(&a[i], &bits_i, sizeof(a[i]));
+      bits += stride;
+    }
+
+    float result[vector::N];
+    store(result, f(load(a, vector::N)));
+    for (size_t i = 0; i < vector::N; ++i) {
+      double expected = ref(static_cast<double>(a[i]));
+      double ulp = std::ldexp(1.0, std::ilogb(static_cast<float>(expected)) -
+                                       std::numeric_limits<float>::digits + 1);
+      ASSERT_LE(std::abs(result[i] - expected), max_ulps * ulp) << a[i];
+    }
+  }
+}
+
+// expm1 is least accurate where 2^b - 1 and 2^b*r nearly cancel (b = 1, r < 0),
+// and where 2^b - 1 is not exact (b around 24).
+#define TEST_EXPM1_ULP_ERROR(test_class, N)              \
+  TEST_F(test_class, expm1_ulp_error_f32x##N) {          \
+    auto f = [](vec<float, N> x) { return expm1(x); };   \
+    auto ref = [](double x) { return std::expm1(x); };   \
+    test_ulp_error<N>(f, ref, 0.3465f, 0.45f, 61, 0.85); \
+    test_ulp_error<N>(f, ref, 16.9f, 17.4f, 7, 0.85);    \
+  }
+
 }  // namespace simd
 
 }  // namespace ynn

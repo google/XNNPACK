@@ -205,7 +205,9 @@ TEST_UNARY(arm_neon, exp, f32, 4, std::exp, 1);
 // TODO: b/515053903 - 32-bit ARM does something weird here.
 #endif
 TEST_UNARY(arm_neon, expm1, bf16, 8, std::expm1, 2);
-TEST_UNARY(arm_neon, expm1, f32, 4, std::expm1, 2);
+TEST_UNARY(arm_neon, expm1, f32, 4, std::expm1, 1);
+TEST_KEEPS_SIGNED_ZERO(arm_neon, expm1, f32, 4);
+TEST_EXPM1_ULP_ERROR(arm_neon, 4);
 TEST_UNARY(arm_neon, log, bf16, 8, std::log, 1);
 TEST_UNARY(arm_neon, log, f32, 4, std::log, 1);
 TEST_UNARY(arm_neon, log1p, bf16, 8, std::log1p, 1);
@@ -221,6 +223,7 @@ TEST_UNARY(arm_neon, tanh, f32, 4, std::tanh, 2);
 TEST_UNARY(arm_neon, sin, f32, 4, std::sin, 3);
 TEST_UNARY(arm_neon, cos, f32, 4, std::cos, 3);
 
+TEST_UNARY(arm_neon, approx_expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(arm_neon, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neon, approx_tanh, f32, 4, std::tanh, 5);
 
