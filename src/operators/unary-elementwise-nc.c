@@ -121,6 +121,14 @@ static const struct xnn_unary_elementwise_config* get_config(
     return NULL;
   }
   enum xnn_datatype datatype = output_datatype;
+  if ((datatype == xnn_datatype_qint8 || datatype == xnn_datatype_quint8) &&
+      op_type == xnn_unary_convert) {
+    // The vcvt microkernels only support these scales; use a LUT otherwise.
+    const float scale = input_quantization->scale / output_quantization->scale;
+    if (!(scale >= 0x1.0p-8f && scale <= 0x1.0p+7f)) {
+      return NULL;
+    }
+  }
   if (datatype == xnn_datatype_bf16) {
     switch (op_type) {
       case xnn_unary_reciprocal_square_root:
