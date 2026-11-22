@@ -437,8 +437,17 @@ reshape_dynamic_fully_connected_nc(
 
   const uint32_t kr = ukernel->kr;
   const uint32_t sr = ukernel->sr;
-  const size_t n_stride = round_up(output_channels, nr);
-  const size_t k_stride = round_up_po2(input_channels, kr * sr);
+  size_t n_stride;
+  size_t k_stride;
+  size_t kr_sr;
+  if (!xnn_safe_round_up(output_channels, nr, &n_stride) ||
+      !xnn_safe_mul((size_t)kr, (size_t)sr, &kr_sr) ||
+      !xnn_safe_round_up_po2(input_channels, kr_sr, &k_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: GEMM strides overflow size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
   const struct xnn_gemm_config* gemm_config =
       dynamic_fully_connected_op->gemm_config;
   size_t weights_stride;
@@ -456,6 +465,12 @@ reshape_dynamic_fully_connected_nc(
           xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
       return xnn_status_out_of_memory;
     }
+  }
+  if (weights_stride == SIZE_MAX) {
+    xnn_log_error(
+        "failed to reshape %s operator: weights stride overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
   }
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
 
@@ -547,17 +562,32 @@ reshape_dynamic_fully_connected_nc(
   }
 
   // Compute the optimal tile size for this GEMM.
+  size_t m_stride;
+  if (!xnn_safe_mul(
+          input_stride,
+          (size_t)1 << (packed_lh_config ? packed_lh_config->log2_packed_element_size
+                                        : log2_input_element_size),
+          &m_stride)) {
+    xnn_log_error(
+        "failed to reshape %s operator: input stride overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
-      /*m_stride=*/input_stride
-          << (packed_lh_config ? packed_lh_config->log2_packed_element_size
-                               : log2_input_element_size),
+      /*m_stride=*/m_stride,
       /*n_stride=*/weights_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr,
       /*num_threads=*/num_threads);
 
-  const size_t workspace_offset =
-      round_up_po2(*workspace_size, XNN_ALLOCATION_ALIGNMENT);
+  size_t workspace_offset;
+  if (!xnn_safe_round_up_po2(*workspace_size, XNN_ALLOCATION_ALIGNMENT,
+                             &workspace_offset)) {
+    xnn_log_error(
+        "failed to reshape %s operator: workspace offset overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
 
   // If we are packing the LHS, provide a per-thread workspace to do so inline.
   memset(&gemm_context->pack_lh, 0, sizeof(struct pack_lh_context));
@@ -567,6 +597,21 @@ reshape_dynamic_fully_connected_nc(
       assert(workspace_size);
       const size_t per_thread_workspace_size = packed_lh_config->size_fn(
           mr, /*k=*/input_channels, mr_packed, kr, sr);
+      if (per_thread_workspace_size == SIZE_MAX) {
+        xnn_log_error(
+            "failed to reshape %s operator: packed LHS size overflows size_t",
+            xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+        return xnn_status_out_of_memory;
+      }
+      size_t rounded_batch_size;
+      size_t thread_rows;
+      if (!xnn_safe_round_up(batch_size, mr, &rounded_batch_size) ||
+          !xnn_safe_mul(num_threads, (size_t)mr, &thread_rows)) {
+        xnn_log_error(
+            "failed to reshape %s operator: batch tiling overflows size_t",
+            xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+        return xnn_status_out_of_memory;
+      }
 
       // If `xnn_gemm_best_tile_size` suggests an `nc` that is smaller than `n`,
       // i.e. it suggests splitting along `output_channels`, then it's probably
@@ -590,8 +635,7 @@ reshape_dynamic_fully_connected_nc(
             "it is a no-op for GEMV.",
             xnn_operator_type_to_string(dynamic_fully_connected_op->type),
             batch_size, output_channels, input_channels);
-      } else if (!should_inline_lhs_packing ||
-                 num_threads * mr > round_up(batch_size, mr)) {
+      } else if (!should_inline_lhs_packing || thread_rows > rounded_batch_size) {
         xnn_log_debug(
             "Pre-packing LHS of %s with m=%zu, n=%zu, and k=%zu despite "
             "request to inline because %s.",
