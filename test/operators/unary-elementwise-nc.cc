@@ -464,3 +464,88 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Values(xnn_unary_convert), testing::ValuesIn(all_datatypes),
         testing::ValuesIn(quantized_datatypes), testing::ValuesIn(run_modes))),
     [](const auto& info) { return info.param.Name(); });
+
+TEST(UNARY_ELEMENTWISE_NC, overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unary_elementwise_nc(
+                xnn_unary_abs, xnn_datatype_fp32, xnn_datatype_fp32,
+                /*params=*/nullptr, /*lut=*/nullptr,
+                /*input_quantization=*/nullptr, /*output_quantization=*/nullptr,
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_unary_elementwise_nc(
+                op, /*batch_size=*/2, /*channels=*/10,
+                /*input_stride=*/SIZE_MAX / 2, /*output_stride=*/10,
+                /*threadpool=*/nullptr));
+}
+
+TEST(UNARY_ELEMENTWISE_NC, overflow_batch_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unary_elementwise_nc(
+                xnn_unary_abs, xnn_datatype_fp32, xnn_datatype_fp32,
+                /*params=*/nullptr, /*lut=*/nullptr,
+                /*input_quantization=*/nullptr, /*output_quantization=*/nullptr,
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_unary_elementwise_nc(
+                op, /*batch_size=*/SIZE_MAX / 50, /*channels=*/10,
+                /*input_stride=*/100, /*output_stride=*/100,
+                /*threadpool=*/nullptr));
+}
+
+TEST(UNARY_ELEMENTWISE_NC, overflow_elements) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_unary_elementwise_nc(
+                xnn_unary_abs, xnn_datatype_fp32, xnn_datatype_fp32,
+                /*params=*/nullptr, /*lut=*/nullptr,
+                /*input_quantization=*/nullptr, /*output_quantization=*/nullptr,
+                /*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_unary_elementwise_nc(
+                op, /*batch_size=*/SIZE_MAX / 2, /*channels=*/4,
+                /*input_stride=*/4, /*output_stride=*/4,
+                /*threadpool=*/nullptr));
+}
+
+TEST(COPY_NC_X32, overflow_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(/*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_copy_nc_x32(
+                op, /*batch_size=*/2, /*channels=*/10,
+                /*input_stride=*/SIZE_MAX / 2, /*output_stride=*/10,
+                /*threadpool=*/nullptr));
+}
+
+TEST(COPY_NC_X32, overflow_batch_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_operator_t op = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(/*flags=*/0, &op));
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  ASSERT_EQ(xnn_status_out_of_memory,
+            xnn_reshape_copy_nc_x32(
+                op, /*batch_size=*/SIZE_MAX / 50, /*channels=*/10,
+                /*input_stride=*/100, /*output_stride=*/100,
+                /*threadpool=*/nullptr));
+}
