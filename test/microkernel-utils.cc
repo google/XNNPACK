@@ -67,3 +67,32 @@ TEST(GEMM_BEST_TILE_SIZE, min_tiles_per_thread) {
     }
   }
 }
+
+TEST(GEMM_BEST_TILE_SIZE, zero_inputs) {
+  EXPECT_EQ(0, xnn_gemm_best_tile_size(1, 0, 10, 4, 4, 4, 2, 4, 1));
+  EXPECT_EQ(0, xnn_gemm_best_tile_size(1, 10, 0, 4, 4, 4, 2, 4, 1));
+  EXPECT_EQ(0, xnn_gemm_best_tile_size(1, 10, 10, 4, 4, 4, 0, 4, 1));
+  EXPECT_EQ(0, xnn_gemm_best_tile_size(1, 10, 10, 4, 4, 4, 2, 0, 1));
+}
+
+TEST(GEMM_BEST_TILE_SIZE, overflow_inputs) {
+  const size_t nc = xnn_gemm_best_tile_size(
+      SIZE_MAX, SIZE_MAX, 100, SIZE_MAX, SIZE_MAX, SIZE_MAX, 4, 8, 4);
+  EXPECT_GT(nc, 0);
+  EXPECT_LE(nc, 100);
+}
+
+TEST(SHOULD_INLINE_LHS_PACKING, null_config) {
+  EXPECT_FALSE(xnn_should_inline_lhs_packing(nullptr, 16, 16, 16, 4, 8));
+}
+
+TEST(USE_NR2, zero_nr) {
+  EXPECT_FALSE(xnn_use_nr2(0, 4, 16));
+  EXPECT_FALSE(xnn_use_nr2(4, 0, 16));
+  EXPECT_FALSE(xnn_use_nr2(0, 0, 16));
+}
+
+TEST(USE_NR2, normal_cases) {
+  EXPECT_TRUE(xnn_use_nr2(8, 4, 3));
+  EXPECT_FALSE(xnn_use_nr2(8, 4, 8));
+}
