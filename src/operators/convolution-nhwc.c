@@ -2996,7 +2996,15 @@ static enum xnn_status reshape_igemm(
 
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
-  const size_t tiled_output_size = round_up(output_size, mr);
+  size_t tiled_output_size = 0;
+  if (!xnn_safe_add(output_size, (size_t)(mr - 1), &tiled_output_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: tiled output size overflows size_t "
+        "(output_size=%zu, mr=%" PRIu32 ")",
+        xnn_operator_type_to_string_v2(convolution_op), output_size, mr);
+    return xnn_status_out_of_memory;
+  }
+  tiled_output_size &= -(size_t)mr;
   size_t indirection_buffer_size = 0;
   if (!xnn_safe_mul(kernel_size, tiled_output_size, &indirection_buffer_size) ||
       !xnn_safe_mul(indirection_buffer_size, sizeof(void*),
