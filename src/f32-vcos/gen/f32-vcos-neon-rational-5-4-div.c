@@ -34,10 +34,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u4(
   // that they are rounded exactly as we expect them to be.
   XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
   XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
-  // The following two values sum to Pi/2 with ~33 bits of accuracy. We use
-  // them to accurately subtract inputs from Pi/2.
-  XNN_SIMD_CONST_F32(vpi_half_hi, 1.5707963705e+00f);  // M_PI / 2 (first 24 bits)
-  XNN_SIMD_CONST_F32(vpi_half_lo, -4.3711388e-08f);   // M_PI / 2 (remaining bits)
+  XNN_SIMD_CONST_F32(vpi_half, 1.5707964f);  // M_PI / 2
 
   // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
   // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -66,7 +63,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u4(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -97,7 +94,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u4(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -137,10 +134,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u8(
   // that they are rounded exactly as we expect them to be.
   XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
   XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
-  // The following two values sum to Pi/2 with ~33 bits of accuracy. We use
-  // them to accurately subtract inputs from Pi/2.
-  XNN_SIMD_CONST_F32(vpi_half_hi, 1.5707963705e+00f);  // M_PI / 2 (first 24 bits)
-  XNN_SIMD_CONST_F32(vpi_half_lo, -4.3711388e-08f);   // M_PI / 2 (remaining bits)
+  XNN_SIMD_CONST_F32(vpi_half, 1.5707964f);  // M_PI / 2
 
   // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
   // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -174,8 +168,8 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u8(
     vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_hi, vx_1);
     vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_lo, vx_0);
     vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_lo, vx_1);
-    vx_0 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_0), vpi_half_lo);
-    vx_1 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_1), vpi_half_lo);
+    vx_0 = xnn_sub_f32(vpi_half, vx_0);
+    vx_1 = xnn_sub_f32(vpi_half, vx_1);
     vx_0 = xnn_min_f32(vx_0, xnn_sub_f32(vpi, vx_0));
     vx_1 = xnn_min_f32(vx_1, xnn_sub_f32(vpi, vx_1));
     vx_0 = xnn_max_f32(vx_0, xnn_sub_f32(xnn_neg_f32(vpi), vx_0));
@@ -218,7 +212,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u8(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -249,7 +243,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u8(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -289,10 +283,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u12(
   // that they are rounded exactly as we expect them to be.
   XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
   XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
-  // The following two values sum to Pi/2 with ~33 bits of accuracy. We use
-  // them to accurately subtract inputs from Pi/2.
-  XNN_SIMD_CONST_F32(vpi_half_hi, 1.5707963705e+00f);  // M_PI / 2 (first 24 bits)
-  XNN_SIMD_CONST_F32(vpi_half_lo, -4.3711388e-08f);   // M_PI / 2 (remaining bits)
+  XNN_SIMD_CONST_F32(vpi_half, 1.5707964f);  // M_PI / 2
 
   // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
   // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -331,9 +322,9 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u12(
     vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_lo, vx_0);
     vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_lo, vx_1);
     vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi_lo, vx_2);
-    vx_0 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_0), vpi_half_lo);
-    vx_1 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_1), vpi_half_lo);
-    vx_2 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_2), vpi_half_lo);
+    vx_0 = xnn_sub_f32(vpi_half, vx_0);
+    vx_1 = xnn_sub_f32(vpi_half, vx_1);
+    vx_2 = xnn_sub_f32(vpi_half, vx_2);
     vx_0 = xnn_min_f32(vx_0, xnn_sub_f32(vpi, vx_0));
     vx_1 = xnn_min_f32(vx_1, xnn_sub_f32(vpi, vx_1));
     vx_2 = xnn_min_f32(vx_2, xnn_sub_f32(vpi, vx_2));
@@ -387,7 +378,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u12(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -418,7 +409,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u12(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -458,10 +449,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u16(
   // that they are rounded exactly as we expect them to be.
   XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
   XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
-  // The following two values sum to Pi/2 with ~33 bits of accuracy. We use
-  // them to accurately subtract inputs from Pi/2.
-  XNN_SIMD_CONST_F32(vpi_half_hi, 1.5707963705e+00f);  // M_PI / 2 (first 24 bits)
-  XNN_SIMD_CONST_F32(vpi_half_lo, -4.3711388e-08f);   // M_PI / 2 (remaining bits)
+  XNN_SIMD_CONST_F32(vpi_half, 1.5707964f);  // M_PI / 2
 
   // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
   // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -505,10 +493,10 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u16(
     vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_lo, vx_1);
     vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi_lo, vx_2);
     vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi_lo, vx_3);
-    vx_0 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_0), vpi_half_lo);
-    vx_1 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_1), vpi_half_lo);
-    vx_2 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_2), vpi_half_lo);
-    vx_3 = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx_3), vpi_half_lo);
+    vx_0 = xnn_sub_f32(vpi_half, vx_0);
+    vx_1 = xnn_sub_f32(vpi_half, vx_1);
+    vx_2 = xnn_sub_f32(vpi_half, vx_2);
+    vx_3 = xnn_sub_f32(vpi_half, vx_3);
     vx_0 = xnn_min_f32(vx_0, xnn_sub_f32(vpi, vx_0));
     vx_1 = xnn_min_f32(vx_1, xnn_sub_f32(vpi, vx_1));
     vx_2 = xnn_min_f32(vx_2, xnn_sub_f32(vpi, vx_2));
@@ -573,7 +561,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u16(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -604,7 +592,7 @@ void xnn_f32_vcos_ukernel__neon_rational_5_4_div_u16(
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
     vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
-    vx = xnn_add_f32(xnn_sub_f32(vpi_half_hi, vx), vpi_half_lo);
+    vx = xnn_sub_f32(vpi_half, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));

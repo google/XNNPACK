@@ -50,10 +50,7 @@ void xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u8v(
   // that they are rounded exactly as we expect them to be.
   const float vpi = 3.1415927f;  // M_PI
   const float v2pi_inv = 0.15915494f; // 0.5 / M_PI
-  // The following two values sum to Pi/2 with ~33 bits of accuracy. We use
-  // them to accurately subtract inputs from Pi/2.
-  const float vpi_half_hi = 1.5707963705e+00f;  // M_PI / 2 (first 24 bits)
-  const float vpi_half_lo = -4.3711388e-08f;   // M_PI / 2 (remaining bits)
+  const float vpi_half = 1.5707964f;  // M_PI / 2
 
   // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
   // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -82,7 +79,7 @@ void xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u8v(
     vx_div_2pi = xnn_round_f32(vx_div_2pi, vl);
     vx = __riscv_vfnmsac(vx, v2pi_hi, vx_div_2pi, vl);
     vx = __riscv_vfnmsac(vx, v2pi_lo, vx_div_2pi, vl);
-    vx = __riscv_vfadd(__riscv_vfrsub(vx, vpi_half_hi, vl), vpi_half_lo, vl);
+    vx = __riscv_vfrsub(vx, vpi_half, vl);
     vx = __riscv_vfmin(vx, __riscv_vfrsub(vx, vpi, vl), vl);
     vx = __riscv_vfmax(vx, __riscv_vfrsub(vx, -vpi, vl), vl);
     vx = __riscv_vfmin(vx, __riscv_vfrsub(vx, vpi, vl), vl);
