@@ -294,34 +294,34 @@
 #define XNN_NO_INLINE_SANITIZER
 #endif
 
-#if XNN_COMPILER_HAS_FEATURE(thread_sanitizer)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_DISABLE_TSAN \
   __attribute__((__no_sanitize__("thread"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_TSAN
 #endif
 
-#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_DISABLE_MSAN __attribute__((__no_sanitize__("memory")))
 #else
 #define XNN_DISABLE_MSAN
 #endif
 
-#if XNN_COMPILER_HAS_FEATURE(hwaddress_sanitizer)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_DISABLE_HWASAN \
   __attribute__((__no_sanitize__("hwaddress"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_HWASAN
 #endif
 
-#if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_DISABLE_ASAN \
   __attribute__((__no_sanitize__("address"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_ASAN
 #endif
 
-#if XNN_COMPILER_HAS_FEATURE(undefined_behavior_sanitizer)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_DISABLE_UBSAN __attribute__((__no_sanitize__("undefined")))
 #else
 #define XNN_DISABLE_UBSAN
@@ -330,7 +330,7 @@
 // Disable function sanitization here. XNNPACK calls these functions
 // via function pointers with void* contexts, which triggers false positives in
 // the function sanitizer when casting and calling the actual context type.
-#if defined(__clang__) && XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_NO_SANITIZE_FUNCTION __attribute__((no_sanitize("function")))
 #else
 #define XNN_NO_SANITIZE_FUNCTION
@@ -339,7 +339,7 @@
 // Disables UBSan's integer-overflow checks for an annotated function. Only use
 // this where the overflow merely yields a wrong numeric result and poses no
 // safety risk. Expands to nothing on compilers without the attribute.
-#if defined(__clang__) && XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
+#if XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
 #define XNN_NO_SANITIZE_INTEGER_OVERFLOW                  \
   __attribute__((no_sanitize("signed-integer-overflow",      \
                              "unsigned-integer-overflow")))
