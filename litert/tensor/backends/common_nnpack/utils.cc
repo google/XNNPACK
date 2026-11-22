@@ -55,6 +55,10 @@ absl::StatusOr<NnpackPadding> ComputePadding(
   if (padding != kPaddingSame) {
     return NnpackPadding{};
   }
+  if (stride_h == 0 || stride_w == 0) {
+    return absl::InvalidArgumentError(
+        "ComputePadding: strides must be non-zero");
+  }
 
   const size_t effective_kernel_height = (kernel_height - 1) * dilation_h + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation_w + 1;
