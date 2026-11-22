@@ -65,6 +65,10 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
 // not be called directly.
 void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out);
 
+// Prints flags names separated by '|' to stderr.
+void xnn_print_flags(const int flags, const int count, const int values[],
+                     const char* names);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
