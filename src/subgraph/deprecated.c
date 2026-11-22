@@ -6,12 +6,18 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph-validation.h"
 #include "src/xnnpack/subgraph.h"
 
 enum xnn_status xnn_define_add2(xnn_subgraph_t subgraph, float output_min,
                                 float output_max, uint32_t input1_id,
                                 uint32_t input2_id, uint32_t output_id,
                                 uint32_t flags) {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+      xnn_node_type_binary_elementwise, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
   struct xnn_binary_params params;
   params.output_min = output_min;
   params.output_max = output_max;
@@ -23,6 +29,11 @@ enum xnn_status xnn_define_subtract(xnn_subgraph_t subgraph, float output_min,
                                     float output_max, uint32_t input1_id,
                                     uint32_t input2_id, uint32_t output_id,
                                     uint32_t flags) {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+      xnn_node_type_binary_elementwise, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
   struct xnn_binary_params params;
   params.output_min = output_min;
   params.output_max = output_max;
@@ -34,6 +45,11 @@ enum xnn_status xnn_define_multiply2(xnn_subgraph_t subgraph, float output_min,
                                      float output_max, uint32_t input1_id,
                                      uint32_t input2_id, uint32_t output_id,
                                      uint32_t flags) {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+      xnn_node_type_binary_elementwise, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
   struct xnn_binary_params params;
   params.output_min = output_min;
   params.output_max = output_max;
@@ -45,6 +61,11 @@ enum xnn_status xnn_define_divide(xnn_subgraph_t subgraph, float output_min,
                                   float output_max, uint32_t input1_id,
                                   uint32_t input2_id, uint32_t output_id,
                                   uint32_t flags) {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+      xnn_node_type_binary_elementwise, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
   struct xnn_binary_params params;
   params.output_min = output_min;
   params.output_max = output_max;
@@ -94,8 +115,15 @@ enum xnn_status xnn_define_static_mean(xnn_subgraph_t subgraph,
                                        const size_t* reduction_axes,
                                        uint32_t input_id, uint32_t output_id,
                                        uint32_t flags) {
-  return xnn_define_static_reduce(subgraph, xnn_reduce_mean, num_reduction_axes,
-                                  reduction_axes, input_id, output_id, flags);
+  if (num_reduction_axes != 0 && reduction_axes == NULL) {
+    xnn_log_error(
+      "failed to define %s operator with reduction axes %p: null pointer",
+      xnn_node_type_to_string(xnn_node_type_static_mean), reduction_axes);
+    return xnn_status_invalid_parameter;
+  }
+  return xnn_define_static_reduce(
+    subgraph, xnn_reduce_mean, num_reduction_axes, reduction_axes, input_id,
+    output_id, flags);
 }
 
 enum xnn_status xnn_define_global_average_pooling_1d(
@@ -106,21 +134,42 @@ enum xnn_status xnn_define_global_average_pooling_1d(
   uint32_t output_id,
   uint32_t flags)
 {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+    xnn_node_type_global_average_pooling_1d, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (subgraph == NULL) {
+    return xnn_status_invalid_parameter;
+  }
+
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_global_average_pooling_1d), input_id);
+      "failed to define %s operator with input ID #%" PRIu32
+      ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_1d),
+      input_id);
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 2) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 2",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_1d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
 
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
 
   reduction_axes[0] = input_value->shape.num_dims - 2;
 
-  enum xnn_status status = (xnn_define_static_reduce(
+  status = xnn_define_static_reduce(
     subgraph, xnn_reduce_mean, 1, reduction_axes, input_id,
-    output_id, flags));
+    output_id, flags);
 
   if (status != xnn_status_success) {
     return status;
@@ -142,20 +191,41 @@ enum xnn_status xnn_define_global_average_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+    xnn_node_type_global_average_pooling_2d, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (subgraph == NULL) {
+    return xnn_status_invalid_parameter;
+  }
+
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d), input_id);
+      "failed to define %s operator with input ID #%" PRIu32
+      ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d),
+      input_id);
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 3) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 3",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
 
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
 
   reduction_axes[0] = input_value->shape.num_dims - 3;
   reduction_axes[1] = input_value->shape.num_dims - 2;
 
-  enum xnn_status status = xnn_define_static_reduce(
+  status = xnn_define_static_reduce(
     subgraph, xnn_reduce_mean, 2, reduction_axes, input_id,
     output_id, flags);
 
@@ -179,17 +249,39 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
   uint32_t output_id,
   uint32_t flags)
 {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+    xnn_node_type_global_sum_pooling_1d, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (subgraph == NULL) {
+    return xnn_status_invalid_parameter;
+  }
+
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_1d), input_id);
+      "failed to define %s operator with input ID #%" PRIu32
+      ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_1d),
+      input_id);
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 2) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 2",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_1d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   reduction_axes[0] = input_value->shape.num_dims - 2;
 
-  enum xnn_status status = xnn_define_static_reduce(
+  status = xnn_define_static_reduce(
     subgraph, xnn_reduce_sum, 1, reduction_axes, input_id,
     output_id, flags);
 
@@ -213,18 +305,40 @@ enum xnn_status xnn_define_global_sum_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+    xnn_node_type_global_sum_pooling_2d, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (subgraph == NULL) {
+    return xnn_status_invalid_parameter;
+  }
+
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_2d), input_id);
+      "failed to define %s operator with input ID #%" PRIu32
+      ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_2d),
+      input_id);
     return xnn_status_invalid_parameter;
   }
   const struct xnn_value* input_value = &subgraph->values[input_id];
+
+  if (input_value->shape.num_dims < 3) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 3",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_2d),
+      input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   reduction_axes[0] = input_value->shape.num_dims - 3;
   reduction_axes[1] = input_value->shape.num_dims - 2;
 
-  enum xnn_status status = xnn_define_static_reduce(
+  status = xnn_define_static_reduce(
     subgraph, xnn_reduce_sum, 2, reduction_axes, input_id,
     output_id, flags);
 
@@ -269,11 +383,16 @@ enum xnn_status xnn_define_ceiling(xnn_subgraph_t subgraph, uint32_t input_id,
 enum xnn_status xnn_define_clamp(xnn_subgraph_t subgraph, float output_min,
                                  float output_max, uint32_t input_id,
                                  uint32_t output_id, uint32_t flags) {
+  enum xnn_status status = xnn_subgraph_check_output_min_max(
+      xnn_node_type_unary_elementwise, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
+  }
   union xnn_unary_params params;
   params.clamp.min = output_min;
   params.clamp.max = output_max;
-  return xnn_define_unary(subgraph, xnn_unary_clamp, &params, input_id, output_id,
-                          flags);
+  return xnn_define_unary(
+      subgraph, xnn_unary_clamp, &params, input_id, output_id, flags);
 }
 
 enum xnn_status xnn_define_elu(xnn_subgraph_t subgraph, float alpha,
@@ -422,13 +541,27 @@ enum xnn_status xnn_define_static_constant_pad(
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags) {
+  if (subgraph == NULL) {
+    return xnn_status_invalid_parameter;
+  }
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      "failed to define %s operator with input ID #%" PRIu32
+      ": invalid Value ID",
       xnn_node_type_to_string(xnn_node_type_static_constant_pad), input_id);
     return xnn_status_invalid_parameter;
   }
   size_t num_padding_dims = subgraph->values[input_id].shape.num_dims;
-  return xnn_define_static_constant_pad_v2(subgraph, num_padding_dims, pre_paddings,
-                                           post_paddings, padding_value, input_id, output_id, flags);
+  if (num_padding_dims != 0 &&
+      (pre_paddings == NULL || post_paddings == NULL)) {
+    xnn_log_error(
+      "failed to define %s operator with %zu padding dims: "
+      "pre-paddings and post-paddings must be non-null",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad),
+      num_padding_dims);
+    return xnn_status_invalid_parameter;
+  }
+  return xnn_define_static_constant_pad_v2(
+    subgraph, num_padding_dims, pre_paddings, post_paddings, padding_value,
+    input_id, output_id, flags);
 }
