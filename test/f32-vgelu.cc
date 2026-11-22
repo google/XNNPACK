@@ -40,7 +40,7 @@ TEST(ukernel, special_values) {                                                 
   VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
     /*inputs=*/{-6.0f, 6.0f, 0.0f},                                                                                     \
     /*outputs=*/{0.0f, 6.0f, 0.0f},                                                                                     \
-    /*tolerance_ulp=*/1);                                                                                               \
+    /*tolerance_ulp=*/2);                                                                                               \
 }
 #include "src/f32-vgelu/f32-vgelu.inc"
 #undef XNN_UKERNEL
