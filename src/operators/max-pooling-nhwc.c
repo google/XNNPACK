@@ -435,30 +435,91 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   max_pooling_op->convolution_op->input_height = input_height;
   max_pooling_op->convolution_op->input_width = input_width;
 
+  size_t effective_kernel_height;
+  size_t effective_kernel_width;
+  if (max_pooling_op->convolution_op->kernel_height == 0 ||
+      max_pooling_op->convolution_op->kernel_width == 0 ||
+      !xnn_safe_mul(
+          (size_t)(max_pooling_op->convolution_op->kernel_height - 1),
+          (size_t)max_pooling_op->convolution_op->dilation_height,
+          &effective_kernel_height) ||
+      !xnn_safe_add(effective_kernel_height, 1, &effective_kernel_height) ||
+      !xnn_safe_mul(
+          (size_t)(max_pooling_op->convolution_op->kernel_width - 1),
+          (size_t)max_pooling_op->convolution_op->dilation_width,
+          &effective_kernel_width) ||
+      !xnn_safe_add(effective_kernel_width, 1, &effective_kernel_width)) {
+    xnn_log_error(
+        "failed to reshape %s operator: effective kernel size overflows size_t",
+        xnn_operator_type_to_string_v2(max_pooling_op));
+    return xnn_status_out_of_memory;
+  }
+
   if (max_pooling_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
     max_pooling_op->convolution_op->output_height = compute_output_dimension_with_tf_same_padding(
         input_height, max_pooling_op->convolution_op->stride_height);
     max_pooling_op->convolution_op->output_width = compute_output_dimension_with_tf_same_padding(
         input_width, max_pooling_op->convolution_op->stride_width);
 
-    const size_t effective_kernel_height = (size_t)(max_pooling_op->convolution_op->kernel_height - 1) * max_pooling_op->convolution_op->dilation_height + 1;
-    const size_t effective_kernel_width = (size_t)(max_pooling_op->convolution_op->kernel_width - 1) * max_pooling_op->convolution_op->dilation_width + 1;
-    const uint32_t total_padding_height =
-      doz((max_pooling_op->convolution_op->output_height - 1) * max_pooling_op->convolution_op->stride_height + effective_kernel_height, input_height);
-    const uint32_t total_padding_width =
-      doz((max_pooling_op->convolution_op->output_width - 1) * max_pooling_op->convolution_op->stride_width + effective_kernel_width, input_width);
+    size_t scaled_output_height;
+    size_t scaled_output_width;
+    size_t total_input_height;
+    size_t total_input_width;
+    if (max_pooling_op->convolution_op->output_height == 0 ||
+        max_pooling_op->convolution_op->output_width == 0 ||
+        !xnn_safe_mul(max_pooling_op->convolution_op->output_height - 1,
+                      max_pooling_op->convolution_op->stride_height,
+                      &scaled_output_height) ||
+        !xnn_safe_add(scaled_output_height, effective_kernel_height,
+                      &total_input_height) ||
+        !xnn_safe_mul(max_pooling_op->convolution_op->output_width - 1,
+                      max_pooling_op->convolution_op->stride_width,
+                      &scaled_output_width) ||
+        !xnn_safe_add(scaled_output_width, effective_kernel_width,
+                      &total_input_width)) {
+      xnn_log_error(
+          "failed to reshape %s operator: padding calculation overflows size_t",
+          xnn_operator_type_to_string_v2(max_pooling_op));
+      return xnn_status_out_of_memory;
+    }
+    const size_t total_padding_height = doz(total_input_height, input_height);
+    const size_t total_padding_width = doz(total_input_width, input_width);
+    if (total_padding_height > UINT32_MAX ||
+        total_padding_width > UINT32_MAX) {
+      xnn_log_error(
+          "failed to reshape %s operator: padding exceeds uint32_t range",
+          xnn_operator_type_to_string_v2(max_pooling_op));
+      return xnn_status_out_of_memory;
+    }
     max_pooling_op->convolution_op->padding_top = total_padding_height / 2;
     max_pooling_op->convolution_op->padding_left = total_padding_width / 2;
     max_pooling_op->convolution_op->padding_bottom = total_padding_height - max_pooling_op->convolution_op->padding_top;
     max_pooling_op->convolution_op->padding_right = total_padding_width - max_pooling_op->convolution_op->padding_left;
   } else {
+    size_t padded_input_height;
+    size_t padded_input_width;
+    if (!xnn_safe_add(max_pooling_op->convolution_op->padding_top,
+                      input_height, &padded_input_height) ||
+        !xnn_safe_add(padded_input_height,
+                      max_pooling_op->convolution_op->padding_bottom,
+                      &padded_input_height) ||
+        !xnn_safe_add(max_pooling_op->convolution_op->padding_left, input_width,
+                      &padded_input_width) ||
+        !xnn_safe_add(padded_input_width,
+                      max_pooling_op->convolution_op->padding_right,
+                      &padded_input_width)) {
+      xnn_log_error(
+          "failed to reshape %s operator: padded input size overflows size_t",
+          xnn_operator_type_to_string_v2(max_pooling_op));
+      return xnn_status_out_of_memory;
+    }
     max_pooling_op->convolution_op->output_height = xnn_compute_convolution_output_dimension(
-        max_pooling_op->convolution_op->padding_top + input_height + max_pooling_op->convolution_op->padding_bottom,
+        padded_input_height,
         max_pooling_op->convolution_op->kernel_height,
         max_pooling_op->convolution_op->dilation_height,
         max_pooling_op->convolution_op->stride_height);
     max_pooling_op->convolution_op->output_width = xnn_compute_convolution_output_dimension(
-        max_pooling_op->convolution_op->padding_left + input_width + max_pooling_op->convolution_op->padding_right,
+        padded_input_width,
         max_pooling_op->convolution_op->kernel_width,
         max_pooling_op->convolution_op->dilation_width,
         max_pooling_op->convolution_op->stride_width);
