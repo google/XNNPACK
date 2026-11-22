@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/subgraph/subgraph-tester.h"
@@ -194,6 +195,41 @@ TEST(SUBGRAPH_NCHW, bottleneck) {
         break;
     }
   }
+}
+
+TEST(DatatypeTest, SizeAndQuantizationChecks) {
+  // Invalid datatype handling:
+  EXPECT_EQ(xnn_datatype_log2_size_bits(xnn_datatype_invalid),
+            static_cast<size_t>(-1));
+  EXPECT_EQ(xnn_datatype_log2_size_bytes(xnn_datatype_invalid),
+            static_cast<size_t>(-1));
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_invalid), 0);
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_invalid), 0);
+
+  // Sub-byte datatypes should return (size_t)-1 for log2 bytes and 0 for bytes:
+  EXPECT_EQ(xnn_datatype_log2_size_bytes(xnn_datatype_qint2),
+            static_cast<size_t>(-1));
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_qint2), 0);
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_qint2), 2);
+
+  EXPECT_EQ(xnn_datatype_log2_size_bytes(xnn_datatype_qint4),
+            static_cast<size_t>(-1));
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_qint4), 0);
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_qint4), 4);
+
+  // Byte-addressable datatypes:
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_quint8), 1);
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_quint8), 8);
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_fp16), 2);
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_fp16), 16);
+  EXPECT_EQ(xnn_datatype_size_bytes(xnn_datatype_fp32), 4);
+  EXPECT_EQ(xnn_datatype_size_bits(xnn_datatype_fp32), 32);
+
+  // Blockwise quantized:
+  EXPECT_TRUE(xnn_datatype_is_blockwise_quantized(xnn_datatype_qbint4));
+  EXPECT_FALSE(xnn_datatype_is_blockwise_quantized(xnn_datatype_fp32));
+  EXPECT_FALSE(
+      xnn_datatype_is_blockwise_quantized(xnn_datatype_invalid));
 }
 
 }  // namespace xnnpack
