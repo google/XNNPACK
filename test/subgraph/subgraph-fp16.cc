@@ -22,6 +22,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/mock-allocator.h"
@@ -1609,6 +1610,30 @@ TEST(SUBGRAPH_FP16, optimize_is_idempotent) {
 
   tester.Optimize();
   ASSERT_EQ(tester.Status(), xnn_status_success);
+}
+
+TEST(PackLhTest, ZeroAndOverflowHandling) {
+  const struct xnn_pack_lh_config* config =
+      xnn_init_f32_qdint8_pack_lh_config();
+  if (config != nullptr && config->size_fn != nullptr) {
+    EXPECT_EQ(0, config->size_fn(10, 10, /*mr_packed=*/0, /*kr=*/1, /*sr=*/1));
+    EXPECT_EQ(0, config->size_fn(10, 10, /*mr_packed=*/1, /*kr=*/0, /*sr=*/1));
+    EXPECT_EQ(0, config->size_fn(10, 10, /*mr_packed=*/1, /*kr=*/1, /*sr=*/0));
+    EXPECT_EQ(0, config->size_fn(10, 10, /*mr_packed=*/1,
+                                 /*kr=*/SIZE_MAX, /*sr=*/2));
+  }
+  const struct xnn_pack_lh_config* rs_config =
+      xnn_init_f32_qdint8_row_sums_pack_lh_config();
+  if (rs_config != nullptr && rs_config->size_fn != nullptr) {
+    EXPECT_EQ(0,
+              rs_config->size_fn(10, 10, /*mr_packed=*/0, /*kr=*/1, /*sr=*/1));
+    EXPECT_EQ(0,
+              rs_config->size_fn(10, 10, /*mr_packed=*/1, /*kr=*/0, /*sr=*/1));
+    EXPECT_EQ(0,
+              rs_config->size_fn(10, 10, /*mr_packed=*/1, /*kr=*/1, /*sr=*/0));
+    EXPECT_EQ(0, rs_config->size_fn(10, 10, /*mr_packed=*/1,
+                                    /*kr=*/SIZE_MAX, /*sr=*/2));
+  }
 }
 
 }  // namespace xnnpack
