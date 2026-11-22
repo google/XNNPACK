@@ -284,25 +284,67 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
     indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
 
-  const size_t indirect_input_height_stride = step_height * sizeof(void*);
-  const size_t output_width_stride = output_pixel_stride * sizeof(float);
-  const size_t index_width_stride = channels * sizeof(uint32_t);
-  const size_t output_height_stride = output_width * output_width_stride;
-  const size_t index_height_stride = output_width * index_width_stride;
+  size_t indirect_input_height_stride = 0;
+  size_t output_width_stride = 0;
+  size_t index_width_stride = 0;
+  size_t output_height_stride = 0;
+  size_t index_height_stride = 0;
+  size_t input_width_stride = 0;
+  size_t input_height_stride = 0;
+  size_t input_batch_stride = 0;
+  size_t output_batch_stride = 0;
+  size_t index_batch_stride = 0;
+  size_t input_increment_elements = 0;
+  size_t input_increment = 0;
+  size_t total_input_bytes = 0;
+  size_t total_output_bytes = 0;
+  size_t total_index_bytes = 0;
+
+  if (!xnn_safe_mul(step_height, sizeof(void*),
+                    &indirect_input_height_stride) ||
+      !xnn_safe_mul(output_pixel_stride, sizeof(float),
+                    &output_width_stride) ||
+      !xnn_safe_mul(channels, sizeof(uint32_t), &index_width_stride) ||
+      !xnn_safe_mul(output_width, output_width_stride,
+                    &output_height_stride) ||
+      !xnn_safe_mul(output_width, index_width_stride,
+                    &index_height_stride) ||
+      !xnn_safe_mul(input_pixel_stride, sizeof(float),
+                    &input_width_stride) ||
+      !xnn_safe_mul(input_width, input_width_stride,
+                    &input_height_stride) ||
+      !xnn_safe_mul(input_height, input_height_stride,
+                    &input_batch_stride) ||
+      !xnn_safe_mul(output_height, output_height_stride,
+                    &output_batch_stride) ||
+      !xnn_safe_mul(output_height, index_height_stride,
+                    &index_batch_stride) ||
+      !xnn_safe_mul(pooling_height, step_width,
+                    &input_increment_elements) ||
+      !xnn_safe_mul(input_increment_elements, sizeof(void*),
+                    &input_increment) ||
+      !xnn_safe_mul(batch_size, input_batch_stride, &total_input_bytes) ||
+      !xnn_safe_mul(batch_size, output_batch_stride, &total_output_bytes) ||
+      !xnn_safe_mul(batch_size, index_batch_stride, &total_index_bytes)) {
+    xnn_log_error(
+      "failed to reshape %s operator: integer overflow in stride calculations",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
+    return xnn_status_out_of_memory;
+  }
 
   argmax_pooling_op->context.argmax_pooling = (struct argmax_pooling_context) {
     .indirect_input = argmax_pooling_op->convolution_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
-    .input_batch_stride = input_height * input_width * input_pixel_stride * sizeof(float),
-    .output_batch_stride = output_height * output_height_stride,
+    .input_batch_stride = input_batch_stride,
+    .output_batch_stride = output_batch_stride,
     .output_height_stride = output_height_stride,
     .output_height = output_height,
     .output_width = output_width,
-    .index_batch_stride = output_height * index_height_stride,
+    .index_batch_stride = index_batch_stride,
     .index_height_stride = index_height_stride,
     .pooling_size = pooling_size,
     .channels = channels,
-    .input_increment = (pooling_height * step_width) * sizeof(void*),
+    .input_increment = input_increment,
     .output_increment = output_width_stride,
     .index_increment = index_width_stride,
   };
