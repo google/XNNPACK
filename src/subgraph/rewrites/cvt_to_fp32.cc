@@ -13,6 +13,7 @@
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/fp16.h"
@@ -292,6 +293,30 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   return OpAction::kRewrite;
 }
 
+// Native bf16 GEMM and convolution nodes are only kept on CPUs with hardware
+// bf16 (FEAT_BF16 or AVX512BF16). Apple cores are excluded: they issue BFDOT at
+// only ~2/3 of the FMLA rate, so the fp32 fallback is faster there.
+bool PreferNativeBf16Gemm() {
+  return !(XNN_PLATFORM_IOS || XNN_PLATFORM_MAC) &&
+         xnn_is_bf16_compatible_config(xnn_init_hardware_config());
+}
+
+bool IsNativeBf16FullyConnected(const xnn_subgraph_t subgraph,
+                                const xnn_node& node) {
+  if (!PreferNativeBf16Gemm()) {
+    return false;
+  }
+  const xnn_value& input = subgraph->values[node.inputs[0]];
+  const xnn_value& filter = subgraph->values[node.inputs[1]];
+  if (input.datatype != xnn_datatype_bf16 ||
+      filter.datatype != xnn_datatype_bf16 ||
+      !xnn_value_is_static(filter.allocation_type) ||
+      (node.flags & XNN_FLAG_INLINE_LHS_PACKING)) {
+    return false;
+  }
+  return xnn_init_bf16_f32_gemm_config() != nullptr;
+}
+
 // Is this op supported when bf16 hardware is missing (allow-list).
 //
 // bf16 has very few native microkernels, so most ops fall back to fp32. The
@@ -329,6 +354,9 @@ OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
           default:
             break;
         }
+      }
+      if (IsNativeBf16FullyConnected(subgraph, node)) {
+        return OpAction::kNone;
       }
       break;
     }
