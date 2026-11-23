@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <tuple>
@@ -1642,16 +1643,25 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   return {split_n, split_m, split_k};
 }
 
-void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
-                        const ynn_value& b) {
-  shape.n = as_constant(b.extent(0)).value_or(unknown_dot_extent);
-  shape.k1 = as_constant(b.extent(1)).value_or(unknown_dot_extent);
-  shape.k2 = num_k_dims >= 2
-                 ? as_constant(b.extent(2)).value_or(unknown_dot_extent)
-                 : 1;
-  shape.k3 = num_k_dims >= 3
-                 ? as_constant(b.extent(3)).value_or(unknown_dot_extent)
-                 : 1;
+void learn_shape(dot_shape& shape, size_t num_k_dims, const ynn_value& a,
+                 const ynn_value& b) {
+  auto extent_or = [](const slinky::expr& e, size_t fallback) -> size_t {
+    if (auto c = as_constant(e); c && *c > 0) {
+      return static_cast<size_t>(*c);
+    }
+    return fallback;
+  };
+  shape.m = extent_or(a.extent(num_k_dims), unknown_dot_extent);
+  shape.n = extent_or(b.extent(0), unknown_dot_extent);
+  shape.k1 = extent_or(b.extent(1), extent_or(a.extent(0), unknown_dot_extent));
+  shape.k2 =
+      num_k_dims >= 2
+          ? extent_or(b.extent(2), extent_or(a.extent(1), unknown_dot_extent))
+          : 1;
+  shape.k3 =
+      num_k_dims >= 3
+          ? extent_or(b.extent(3), extent_or(a.extent(2), unknown_dot_extent))
+          : 1;
 }
 
 ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id,
@@ -1738,8 +1748,20 @@ bool is_constant_or_gather_of_constant(const ynn_subgraph& subgraph,
   return false;
 }
 
+bool is_fusable_transpose(const ynn_subgraph& subgraph, uint32_t id) {
+  const ynn_node* producer = subgraph.get_producer(id);
+  if (!producer) return false;
+  const auto* transpose =
+      std::get_if<ynn_node::static_transpose>(&producer->op);
+  // Matches `rewrite_pack_b_transpose`, which absorbs non-aliased transposes
+  // where dim 0 of the input is either N or K into `pack_b`.
+  return transpose && !transpose->alias && transpose->permutation.size() >= 2 &&
+         (transpose->permutation[0] == 0 || transpose->permutation[1] == 0);
+}
+
 bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
-                   const ynn_value& a, const ynn_value& b,
+                   bool is_ragged, const ynn_value& a, const ynn_value& b,
+                   const dot_shape& full_shape, const dot_shape& tile_shape,
                    const dot_kernel& kernel,
                    const dot_kernel& unpacked_kernel) {
   if (!unpacked_kernel.kernel ||
@@ -1747,76 +1769,213 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // We need to pack B.
     return true;
   }
-  if (unpacked_kernel.cost > kernel.cost * 2.0f) {
-    // We think the unpacked kernel is a lot slower than the packed kernel, we
-    // should pack.
-    return true;
-  }
-  if (is_constant_or_gather_of_constant(subgraph, b.id)) {
+  if (is_constant_or_gather_of_constant(subgraph, b.id) ||
+      is_fusable_transpose(subgraph, b.id)) {
     // TODO(dsharlet): If B is huge and static, it might cost a lot of memory to
     // pre-pack B, and it might not be so bad to just not pack it (or pack it on
     // the fly as if B were dynamic).
     return true;
   }
 
-  const int block_m = unpacked_kernel.block_m;
-  slinky::expr a_batch = 1;
-  slinky::expr b_batch = 1;
+  // Count how many batch slices of A reuse each matrix slice of B.
+  slinky::expr b_batch_reuse = 1;
+  const size_t b_batch_offset = is_ragged ? 1 : 0;
   for (size_t i = num_k_dims + 1; i < a.extents.size(); ++i) {
-    if (a.extent(i).defined()) a_batch *= a.extent(i);
-  }
-  for (size_t i = num_k_dims + 1; i < b.extents.size(); ++i) {
-    if (b.extent(i).defined()) b_batch *= b.extent(i);
-  }
-
-  // How many blocks are we going to split A into?
-  slinky::expr blocks_m =
-      slinky::ceil_div<slinky::expr>(a.extent(num_k_dims), block_m);
-
-  // Assuming that the cost of packing is comparable to the cost of the packed
-  // dot, how many blocks should we allow to be unpacked?
-  int max_unpacked_blocks = 1;
-  if (kernel.cost > 0.0f && unpacked_kernel.cost > kernel.cost) {
-    const float relative_penalty =
-        (unpacked_kernel.cost - kernel.cost) / kernel.cost;
-    max_unpacked_blocks =
-        std::clamp<int>(std::round(1.0f / relative_penalty), 1, 10);
-  } else {
-    max_unpacked_blocks = 10;
-  }
-
-  // The packing cost is not the only thing we need to consider. The logic so
-  // far assumes that memory bandwidth is similar in both cases. However, the
-  // loads of unpacked data are strided.
-  const int b_elem_size = type_size_bytes(b.type);
-  const int block_n = unpacked_kernel.block_n;
-  if ((block_n * b_elem_size) % YNN_CACHE_LINE_SIZE != 0) {
-    slinky::expr b_bytes = b_batch * b_elem_size;
-    for (size_t i = 0; i < num_k_dims + 1; ++i) {
-      if (b.extent(i).defined()) b_bytes *= b.extent(i);
+    const slinky::expr a_ext = a.extent(i);
+    const slinky::expr b_ext = b.extent(i + b_batch_offset);
+    if (!slinky::prove_true(a_ext == 1 || a_ext == b_ext)) {
+      b_batch_reuse *= a_ext;
     }
+  }
+  const slinky::expr num_groups =
+      is_ragged ? b.extent(num_k_dims + 1) : slinky::expr(1);
 
-    const slinky::index_t cache_budget = get_dot_cache_budgets()[1];
+  const int block_m = unpacked_kernel.block_m;
+  const int block_n = unpacked_kernel.block_n;
+  const slinky::expr blocks_m =
+      slinky::ceil_div<slinky::expr>(a.extent(num_k_dims), block_m);
+  const slinky::expr total_blocks_m = blocks_m * b_batch_reuse;
 
-    // The kernel doesn't load whole cache lines. This can require much more
-    // memory bandwidth than the packed case.
-    if (!slinky::prove_true(b_bytes < cache_budget || b.extent(0) <= block_n)) {
-      // B doesn't fit in cache, we should pack if we load it more than once.
+  const int b_elem_bits = static_cast<int>(type_size_bits(b.type));
+  auto elements_to_bytes = [b_elem_bits](slinky::expr elements) {
+    return b_elem_bits % 8 == 0 ? std::move(elements) * (b_elem_bits / 8)
+                                : slinky::ceil_div<slinky::expr>(
+                                      std::move(elements) * b_elem_bits, 8);
+  };
+
+  slinky::expr b_slice_elements = b.extent(0);
+  for (size_t i = 1; i < num_k_dims + 1; ++i) {
+    b_slice_elements *= b.extent(i);
+  }
+  const slinky::expr b_slice_bytes =
+      elements_to_bytes(std::move(b_slice_elements));
+  const bool single_panel_b = slinky::prove_true(b.extent(0) <= block_n);
+  const std::array<size_t, 3> cache_sizes = get_cache_sizes();
+  const size_t l1_size = cache_sizes[0];
+  const size_t l2_size = cache_sizes[1];
+  const bool b_fits_in_l1 =
+      l1_size > 0 &&
+      slinky::prove_true(b_slice_bytes <= static_cast<index_t>(l1_size / 2));
+  const bool b_fits_in_l2 =
+      b_fits_in_l1 ||
+      (l2_size > 0 &&
+       slinky::prove_true(b_slice_bytes <= static_cast<index_t>(l2_size / 2)));
+
+  // Calibrated cost models are in seconds (`load_b_cost` ~1e-12..1e-9);
+  // default/unfitted models use dimensionless constants >= 1.
+  const bool calibrated = kernel.cost_model && unpacked_kernel.cost_model &&
+                          kernel.cost_model->load_b_cost < 1e-3f &&
+                          unpacked_kernel.cost_model->load_b_cost < 1e-3f;
+  if (!calibrated) {
+    if (unpacked_kernel.cost > kernel.cost * 2.0f) {
+      return true;
+    }
+    int max_unpacked_blocks = 10;
+    if (kernel.cost > 0.0f && unpacked_kernel.cost > kernel.cost) {
+      const float relative_penalty =
+          (unpacked_kernel.cost - kernel.cost) / kernel.cost;
+      max_unpacked_blocks =
+          std::clamp<int>(std::round(1.0f / relative_penalty), 1, 10);
+    }
+    const int panel_bytes = ceil_div(block_n * b_elem_bits, 8);
+    if (panel_bytes % YNN_CACHE_LINE_SIZE != 0 && !single_panel_b &&
+        !b_fits_in_l2) {
       max_unpacked_blocks = 1;
     }
+    const slinky::expr max_blocks = is_ragged
+                                        ? num_groups * max_unpacked_blocks
+                                        : slinky::expr(max_unpacked_blocks);
+    return !slinky::prove_true(total_blocks_m <= max_blocks);
   }
 
-  // TODO: b/579134224 - Some CPUs perform very poorly with the large strided
-  // loads of B in the unpacked case. It generally seems like newer CPUs do well
-  // while older CPUs perform poorly. For now, we optimize for the newer CPU
-  // case by not reducing `max_unpacked_blocks` for large B.
+  // Cost of packing one (tile_shape.n x tile_shape.k1) tile of B, including
+  // fixed per-call packing overhead amortized across tiles of B. Align each
+  // row up to 2 cache lines to reflect per-row packing overhead on narrow N.
+  const double pack_bytes_per_second = b_fits_in_l2 ? 32e9 : 16e9;
+  constexpr double pack_call_overhead_seconds = 0.50e-6;
+  const double n_tiles =
+      std::max(1.0, static_cast<double>(full_shape.n) / tile_shape.n);
+  const double k_tiles =
+      std::max(1.0, static_cast<double>(full_shape.k1) / tile_shape.k1);
+  const size_t raw_row_bytes = ceil_div<size_t>(tile_shape.n * b_elem_bits, 8);
+  const double tile_b_bytes = static_cast<double>(align_up<size_t>(
+                                  raw_row_bytes, 2 * YNN_CACHE_LINE_SIZE)) *
+                              tile_shape.k1;
+  const double pack_cost = tile_b_bytes / pack_bytes_per_second +
+                           pack_call_overhead_seconds / (n_tiles * k_tiles);
 
-  if (slinky::prove_true(blocks_m * a_batch <= b_batch * max_unpacked_blocks)) {
-    // A is small relative to B, we should not bother packing B because we're
-    // not going to read it very much, and packing itself costs a read of B.
+  double packed_dot_cost = kernel.cost;
+  if (kernel.tile_k > 1 && full_shape.k1 % kernel.tile_k != 0) {
+    // `make_dot_impl` pads and invokes the packed kernel a second time for
+    // `k1 % tile_k`.
+    const double tail_cost =
+        kernel.estimate_cost(tile_shape.m, tile_shape.n, kernel.tile_k);
+    if (full_shape.k1 <= tile_shape.k1) {
+      const size_t k1_main =
+          tile_shape.k1 & ~static_cast<size_t>(kernel.tile_k - 1);
+      const double main_cost =
+          k1_main > 0
+              ? kernel.estimate_cost(tile_shape.m, tile_shape.n, k1_main)
+              : 0.0;
+      packed_dot_cost = main_cost + tail_cost;
+    } else {
+      packed_dot_cost = kernel.cost + tail_cost / k_tiles;
+    }
+  }
+
+  // If the packed kernel also requires transposing A while the unpacked kernel
+  // does not, include A's transpose cost amortized across N tiles.
+  double transpose_a_tile_cost = 0.0;
+  if ((kernel.flags & dot_flag::transpose_a) != 0 &&
+      (unpacked_kernel.flags & dot_flag::transpose_a) == 0) {
+    const double tile_a_bytes = static_cast<double>(tile_shape.m) *
+                                tile_shape.k1 * type_size_bits(a.type) / 8.0;
+    transpose_a_tile_cost = (tile_a_bytes / n_tiles) / pack_bytes_per_second;
+  }
+
+  // Extra strided-read overhead on unpacked B per M-block beyond the first
+  // read, expressed as a fraction of `pack_cost`.
+  // TODO: b/579134224 - Model per-uarch strided memory bandwidth / prefetcher
+  // behavior instead of fixed factors.
+  double strided_alpha = 0.0;
+  if (!single_panel_b) {
+    if (b_fits_in_l1) {
+      // L1-resident B stays hot across M-blocks without repeated L2->L1
+      // partial-line fills; keep only a small baseline for very large M.
+      strided_alpha = 0.015;
+    } else {
+      const int panel_bytes = ceil_div(block_n * b_elem_bits, 8);
+      const double cache_line_waste =
+          panel_bytes % YNN_CACHE_LINE_SIZE != 0
+              ? static_cast<double>(align_up(panel_bytes, YNN_CACHE_LINE_SIZE) -
+                                    panel_bytes) /
+                    panel_bytes
+              : 0.0;
+      if (b_fits_in_l2) {
+        strided_alpha = std::max(0.015, cache_line_waste * 0.10);
+      } else {
+        const slinky::expr row_stride_bytes = elements_to_bytes(b.extent(0));
+        // Multi-page row strides defeat stream prefetchers and thrash DTLB;
+        // 4 KiB-aligned strides also cause L1/L2 set conflicts.
+        if (slinky::prove_true(row_stride_bytes >= 16384)) {
+          strided_alpha = 0.30;
+        } else if (slinky::prove_true(row_stride_bytes % 4096 == 0)) {
+          strided_alpha = 0.18;
+        } else {
+          strided_alpha = 0.12;
+        }
+        strided_alpha = std::max(strided_alpha, cache_line_waste * 0.50);
+      }
+    }
+  }
+
+  const std::optional<index_t> const_m = as_constant(a.extent(num_k_dims));
+  const std::optional<index_t> const_reuse = as_constant(b_batch_reuse);
+  const std::optional<index_t> const_groups = as_constant(num_groups);
+  if (const_m && const_reuse && const_groups && *const_m > 0 &&
+      *const_reuse > 0 && *const_groups > 0) {
+    const size_t m = static_cast<size_t>(*const_m);
+    const size_t reuse = static_cast<size_t>(*const_reuse);
+    const size_t groups = static_cast<size_t>(*const_groups);
+    const double m_scale =
+        static_cast<double>(m) / static_cast<double>(tile_shape.m);
+    const double dot_penalty = static_cast<double>(reuse) *
+                               (static_cast<double>(unpacked_kernel.cost) -
+                                packed_dot_cost - transpose_a_tile_cost) *
+                               m_scale;
+    const size_t total_blocks = ceil_div<size_t>(m, block_m) * reuse;
+    const double strided_cost =
+        total_blocks > groups ? static_cast<double>(total_blocks - groups) *
+                                    strided_alpha * pack_cost
+                              : 0.0;
+    return dot_penalty + strided_cost >=
+           static_cast<double>(groups) * pack_cost;
+  }
+
+  const double blocks_in_tile =
+      static_cast<double>(ceil_div<size_t>(tile_shape.m, block_m));
+  const double delta_dot_per_block =
+      (static_cast<double>(unpacked_kernel.cost) - packed_dot_cost -
+       transpose_a_tile_cost) /
+      blocks_in_tile;
+  if (delta_dot_per_block >= pack_cost) {
+    return true;
+  }
+  const double per_extra_block =
+      delta_dot_per_block + strided_alpha * pack_cost;
+  if (per_extra_block <= 0.0) {
     return false;
   }
-  return true;
+  const double extra_blocks =
+      (pack_cost - delta_dot_per_block) / per_extra_block;
+  if (extra_blocks >= static_cast<double>(std::numeric_limits<int>::max())) {
+    return false;
+  }
+  const index_t max_unpacked_blocks =
+      static_cast<index_t>(std::ceil(extra_blocks));
+  const slinky::expr max_blocks = is_ragged ? num_groups * max_unpacked_blocks
+                                            : slinky::expr(max_unpacked_blocks);
+  return !slinky::prove_true(total_blocks_m <= max_blocks);
 }
 
 ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
@@ -1895,8 +2054,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   //    compatible with the packed B layout and the transposed-ness of A.
 
   dot_type type = {a.type, b.type, c.type};
-  dot_shape shape;
-  learn_shape_from_b(shape, num_k_dims, b);
+  dot_shape full_shape;
+  learn_shape(full_shape, num_k_dims, a, b);
   static constexpr dot_packed_shape no_tile_k = {0, 1};
   static constexpr dot_packed_shape packed_shape = {};
   const bool symmetric_b = (flags & YNN_NODE_FLAG_SYMMETRIC_B) != 0;
@@ -1915,9 +2074,31 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   // To make these assumptions more valid, we can clamp the shape used for
   // kernel selection to a small size more like to be well represented by the
   // cost model.
-  shape.m = std::min<size_t>(shape.m, 480);
-  shape.n = std::min<size_t>(shape.n, 384);
-  shape.k1 = std::min<size_t>(shape.k1, 256);
+  // Select the packed B layout (`tile_k`, `max_block_n`, `transpose_a`) at a
+  // full tile M=480 so static/transposed B packing stays consistent with
+  // large-M kernels, and re-evaluate compatible kernels at the actual known M
+  // when deciding whether to skip packing B.
+  dot_shape packed_tile = full_shape;
+  packed_tile.m = 480;
+  packed_tile.n = std::min<size_t>(packed_tile.n, 384);
+  packed_tile.k1 = std::min<size_t>(packed_tile.k1, 256);
+
+  dot_shape tile_shape = packed_tile;
+  size_t effective_m = full_shape.m;
+  if (const auto m_c = as_constant(a.extent(num_k_dims));
+      is_ragged && m_c && *m_c > 0) {
+    if (const auto g_c = as_constant(b.extent(num_k_dims + 1));
+        g_c && *g_c > 1) {
+      const uint64_t active_m = static_cast<uint64_t>(*m_c);
+      const uint64_t active_g = static_cast<uint64_t>(*g_c);
+      const uint64_t active_groups =
+          (active_m * active_g + active_m + active_g - 2) /
+          (active_m + active_g - 1);
+      effective_m = static_cast<size_t>(
+          ceil_div(active_m, std::max<uint64_t>(1, active_groups)));
+    }
+  }
+  tile_shape.m = std::min<size_t>(effective_m, 480);
 
   const bool a_broadcast_m =
       slinky::is_one(a.extent(num_k_dims)) &&
@@ -1926,13 +2107,15 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       !slinky::is_one(subgraph.value(input_c_id).extent(1));
   const std::optional<bool> require_transpose_a =
       (is_ragged || a_broadcast_m) ? std::make_optional(false) : std::nullopt;
-  dot_kernel kernel = get_dot_kernel(type, cost_models, shape, packed_shape,
-                                     kernel_flags, require_transpose_a);
+  dot_kernel kernel =
+      get_dot_kernel(type, cost_models, packed_tile, packed_shape, kernel_flags,
+                     require_transpose_a);
   if (!kernel.kernel) {
     YNN_LOG_ERROR() << "Unsupported dot type {" << a.type << ", " << b.type
                     << ", " << c.type << "}";
     return ynn_status_unsupported_parameter;
   }
+  dot_kernel packed_for_m = kernel;
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -1943,9 +2126,16 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     // be nice if we could simply describe all the ways in which something could
     // be implemented, and let a global cost optimization decide what to do...
   } else {
-    unpacked_kernel = kernel;
-    if (kernel.tile_k != 1) {
-      unpacked_kernel = get_dot_kernel(type, cost_models, shape, no_tile_k,
+    if (tile_shape.m != packed_tile.m) {
+      const dot_packed_shape compat_packed = {0, kernel.tile_k};
+      packed_for_m = get_dot_kernel(
+          type, cost_models, tile_shape, compat_packed, kernel_flags,
+          (kernel.flags & dot_flag::transpose_a) != 0);
+    }
+    unpacked_kernel = packed_for_m;
+    if (packed_for_m.tile_k != 1 ||
+        (packed_for_m.flags & dot_flag::unaligned_b) == 0) {
+      unpacked_kernel = get_dot_kernel(type, cost_models, tile_shape, no_tile_k,
                                        kernel_flags | dot_flag::unaligned_b,
                                        require_transpose_a);
     }
@@ -1953,7 +2143,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
   // Insert a packing node (if necessary).
   const bool pack_b =
-      should_pack_b(subgraph, num_k_dims, a, b, kernel, unpacked_kernel);
+      should_pack_b(subgraph, num_k_dims, is_ragged, a, b, full_shape,
+                    tile_shape, packed_for_m, unpacked_kernel);
   uint32_t packed_b_id = input_b_id;
   if (pack_b) {
     packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims, input_b_id);
@@ -2079,10 +2270,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size, unpacked_kernel.block_n);
   // Estimate the throughput of the kernel we expect to run from its cost model
   // (for the shape it was selected for), to decide how small tasks can be.
+  const dot_shape& cost_shape = pack_b ? packed_tile : tile_shape;
   const float seconds_per_mac =
       kernel.cost /
-      (static_cast<float>(std::max<size_t>(1, shape.m)) *
-       std::max<size_t>(1, shape.n) * std::max<size_t>(1, shape.k1));
+      (static_cast<float>(std::max<size_t>(1, cost_shape.m)) *
+       std::max<size_t>(1, cost_shape.n) * std::max<size_t>(1, cost_shape.k1));
   node.create = [block_n_unpacked, seconds_per_mac, tile_k = kernel.tile_k,
                  tile_m = kernel.tile_m](const ynn_node& node,
                                          ynn_runtime& runtime) {
