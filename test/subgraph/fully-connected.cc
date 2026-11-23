@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
@@ -31,6 +32,7 @@
 
 #ifndef XNNPACK_USE_YNNPACK
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/operator.h"
 #endif  // XNNPACK_USE_YNNPACK
 
@@ -1035,6 +1037,138 @@ TEST(FullyConnectedF32QC8W, static_b) {
 TEST(FullyConnectedBF16F32, static_b) {
   TestStaticB<xnn_bfloat16, xnn_bfloat16, float, float>();
 }
+
+#ifndef XNNPACK_USE_YNNPACK
+TEST(FullyConnectedBF16F32, uses_bf16_f32_operator) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const size_t input_shape[] = {3, 37};
+  const size_t filter_shape[] = {19, 37};
+  const size_t bias_shape[] = {19};
+  const size_t output_shape[] = {3, 19};
+  Tensor<xnn_bfloat16> filter({filter_shape[0], filter_shape[1]},
+                              XnnExtraBytes);
+  filter.fill(xnn_bfloat16(0.5f));
+  Tensor<float> bias({bias_shape[0]});
+  bias.fill(1.0f);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  uint32_t input_id, filter_id, bias_id, output_id;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_bf16, 2, input_shape,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &input_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_bf16, 2,
+                                    filter_shape, filter.base(),
+                                    XNN_INVALID_VALUE_ID, 0, &filter_id));
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, bias_shape,
+                              bias.base(), XNN_INVALID_VALUE_ID, 0, &bias_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 2, output_shape, nullptr, 1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(
+                subgraph, -std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(), input_id, filter_id,
+                bias_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr, 0, &runtime));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  xnn_operator_type type = xnn_operator_type_invalid;
+  for (size_t i = 0; i < runtime->num_ops; i++) {
+    if (runtime->opdata[i].type == xnn_node_type_fully_connected) {
+      type = runtime->opdata[i].operator_objects[0]->type;
+    }
+  }
+  EXPECT_EQ(type,
+            !(XNN_PLATFORM_IOS || XNN_PLATFORM_MAC) &&
+                    xnn_is_bf16_compatible_config(xnn_init_hardware_config()) &&
+                    xnn_init_bf16_f32_gemm_config() != nullptr
+                ? xnn_operator_type_fully_connected_nc_bf16_f32
+                : xnn_operator_type_fully_connected_nc_f32);
+}
+
+TEST(FullyConnectedBF16F32, dynamic_bias_uses_fp32_fallback) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const size_t input_shape[] = {3, 37};
+  const size_t filter_shape[] = {19, 37};
+  const size_t bias_shape[] = {19};
+  const size_t output_shape[] = {3, 19};
+  Tensor<xnn_bfloat16> input({input_shape[0], input_shape[1]}, XnnExtraBytes);
+  input.fill(xnn_bfloat16(1.0f));
+  Tensor<xnn_bfloat16> filter({filter_shape[0], filter_shape[1]},
+                              XnnExtraBytes);
+  filter.fill(xnn_bfloat16(0.5f));
+  Tensor<float> bias({bias_shape[0]}, XnnExtraBytes);
+  bias.fill(1.0f);
+  Tensor<float> output({output_shape[0], output_shape[1]});
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  uint32_t input_id, filter_id, bias_id, output_id;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_bf16, 2, input_shape,
+                                    nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &input_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_bf16, 2,
+                                    filter_shape, filter.base(),
+                                    XNN_INVALID_VALUE_ID, 0, &filter_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, bias_shape,
+                                    nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                    &bias_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 2, output_shape, nullptr, 2,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(
+                subgraph, -std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(), input_id, filter_id,
+                bias_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr, 0, &runtime));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  xnn_operator_type type = xnn_operator_type_invalid;
+  for (size_t i = 0; i < runtime->num_ops; i++) {
+    if (runtime->opdata[i].type == xnn_node_type_fully_connected) {
+      type = runtime->opdata[i].operator_objects[0]->type;
+    }
+  }
+  EXPECT_EQ(type, xnn_operator_type_dynamic_fully_connected_nc_f32);
+
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  const xnn_external_value external_values[] = {
+      {0, input.base()},
+      {1, bias.base()},
+      {2, output.base()},
+  };
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime_v2(runtime, 3, external_values));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+  for (const auto& i : EnumerateIndices(output.extents())) {
+    EXPECT_FLOAT_EQ(output(i), 0.5f * filter_shape[1] + 1.0f)
+        << "i=" << index_to_string(i);
+  }
+}
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQD8F16QC2W, static_b) {
   TestStaticB<xnn_float16, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8);

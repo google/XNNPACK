@@ -13,6 +13,7 @@ xnnpack_cxx_library(
         "//:allocation_type",
         "//:allocator",
         "//:cache",
+        "//:common",
         "//:fp16",
         "//:internal",
         "//:logging",
