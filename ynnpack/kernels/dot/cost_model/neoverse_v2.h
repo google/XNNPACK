@@ -101,12 +101,12 @@ static constexpr dot_cost_models neoverse_v2 = {
     },
 #endif  // YNN_ARCH_ARM_NEONDOT
 #ifdef YNN_ARCH_ARM_NEON
-    // Ratio (predicted / actual): std=0.174, min=0.790, max=1.376 (n=200)
+    // Ratio (predicted / actual): std=0.119, min=0.682, max=1.216 (n=200)
     .arm_neon_int8_int8_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.36e-10f,
-        /*load_b_cost=*/1.15e-10f,
-        /*output_c=*/1.04e-10f,
+        /*load_a_cost=*/2.34e-10f,
+        /*load_b_cost=*/8.57e-11f,
+        /*output_c=*/1.40e-10f,
     },
 #endif  // YNN_ARCH_ARM_NEON
 };

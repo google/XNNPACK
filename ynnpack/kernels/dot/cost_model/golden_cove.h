@@ -159,12 +159,12 @@ static constexpr dot_cost_models golden_cove = {
         /*load_b_cost=*/3.22e-11f,
         /*output_c=*/4.16e-11f,
     },
-    // Ratio (predicted / actual): std=0.031, min=0.951, max=1.076 (n=20)
+    // Ratio (predicted / actual): std=0.033, min=0.939, max=1.096 (n=20)
     .x86_avx512_int8_int8_int32_symmetric_b = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/0.00e+00f,
-        /*load_b_cost=*/1.11e-11f,
-        /*output_c=*/3.86e-12f,
+        /*load_a_cost=*/1.08e-11f,
+        /*load_b_cost=*/1.08e-11f,
+        /*output_c=*/2.82e-12f,
     },
     // Ratio (predicted / actual): std=0.104, min=0.815, max=1.237 (n=140)
     .x86_avx512_int8_int8_int32 = {
@@ -194,37 +194,37 @@ static constexpr dot_cost_models golden_cove = {
         /*load_b_cost=*/1.05e-11f,
         /*output_c=*/2.68e-11f,
     },
-    // Ratio (predicted / actual): std=0.116, min=0.810, max=1.173 (n=116)
+    // Ratio (predicted / actual): std=0.053, min=0.839, max=1.084 (n=59)
     .x86_avx512_uint8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/6.33e-11f,
-        /*load_b_cost=*/1.54e-11f,
-        /*output_c=*/5.76e-11f,
+        /*load_a_cost=*/6.50e-11f,
+        /*load_b_cost=*/1.28e-11f,
+        /*output_c=*/3.96e-11f,
     },
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_FMA3
-    // Ratio (predicted / actual): std=0.122, min=0.740, max=1.305 (n=140)
+    // Ratio (predicted / actual): std=0.105, min=0.672, max=1.244 (n=120)
     .x86_fma3_fp32 = {
-        /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.62e-10f,
-        /*load_b_cost=*/2.67e-11f,
-        /*output_c=*/4.17e-11f,
+        /*block_overhead=*/1.64e-10f,
+        /*load_a_cost=*/2.00e-10f,
+        /*load_b_cost=*/2.28e-11f,
+        /*output_c=*/3.87e-11f,
     },
-    // Ratio (predicted / actual): std=0.125, min=0.754, max=1.300 (n=140)
+    // Ratio (predicted / actual): std=0.106, min=0.679, max=1.205 (n=120)
     .x86_fma3_fp64 = {
-        /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.57e-10f,
-        /*load_b_cost=*/5.55e-11f,
-        /*output_c=*/8.32e-11f,
+        /*block_overhead=*/2.49e-10f,
+        /*load_a_cost=*/1.97e-10f,
+        /*load_b_cost=*/4.71e-11f,
+        /*output_c=*/7.47e-11f,
     },
 #endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2_FMA3
-    // Ratio (predicted / actual): std=0.127, min=0.734, max=1.394 (n=160)
+    // Ratio (predicted / actual): std=0.116, min=0.664, max=1.284 (n=160)
     .x86_avx2_fma3_bf16_bf16_fp32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.13e-10f,
-        /*load_b_cost=*/4.14e-11f,
-        /*output_c=*/3.82e-11f,
+        /*load_a_cost=*/2.30e-10f,
+        /*load_b_cost=*/3.28e-11f,
+        /*output_c=*/4.30e-11f,
     },
     // Ratio (predicted / actual): std=0.048, min=0.873, max=1.150 (n=140)
     .x86_avx2_fma3_bf16_bf16_fp32_k1 = {
@@ -293,19 +293,19 @@ static constexpr dot_cost_models golden_cove = {
     },
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
-    // Ratio (predicted / actual): std=0.100, min=0.688, max=1.179 (n=140)
+    // Ratio (predicted / actual): std=0.074, min=0.802, max=1.134 (n=80)
     .x86_avx_fp32 = {
-        /*block_overhead=*/1.52e-09f,
-        /*load_a_cost=*/1.53e-10f,
-        /*load_b_cost=*/3.53e-11f,
-        /*output_c=*/2.56e-11f,
+        /*block_overhead=*/5.74e-10f,
+        /*load_a_cost=*/2.34e-10f,
+        /*load_b_cost=*/2.66e-11f,
+        /*output_c=*/3.93e-11f,
     },
-    // Ratio (predicted / actual): std=0.093, min=0.753, max=1.183 (n=140)
+    // Ratio (predicted / actual): std=0.071, min=0.878, max=1.137 (n=80)
     .x86_avx_fp64 = {
-        /*block_overhead=*/1.62e-09f,
-        /*load_a_cost=*/1.52e-10f,
-        /*load_b_cost=*/7.16e-11f,
-        /*output_c=*/4.65e-11f,
+        /*block_overhead=*/7.56e-10f,
+        /*load_a_cost=*/2.34e-10f,
+        /*load_b_cost=*/5.29e-11f,
+        /*output_c=*/7.03e-11f,
     },
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_F16C_FMA3
@@ -327,12 +327,12 @@ static constexpr dot_cost_models golden_cove = {
     },
 #endif  // YNN_ARCH_X86_F16C
 #ifdef YNN_ARCH_X86_SSE2
-    // Ratio (predicted / actual): std=0.114, min=0.712, max=1.237 (n=160)
+    // Ratio (predicted / actual): std=0.122, min=0.765, max=1.245 (n=100)
     .x86_sse2_fp32 = {
-        /*block_overhead=*/1.03e-09f,
-        /*load_a_cost=*/2.34e-10f,
-        /*load_b_cost=*/7.54e-11f,
-        /*output_c=*/6.78e-11f,
+        /*block_overhead=*/5.30e-10f,
+        /*load_a_cost=*/2.92e-10f,
+        /*load_b_cost=*/6.36e-11f,
+        /*output_c=*/7.98e-11f,
     },
 #endif  // YNN_ARCH_X86_SSE2
 };

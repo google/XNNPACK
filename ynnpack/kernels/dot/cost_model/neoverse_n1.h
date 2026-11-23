@@ -16,12 +16,12 @@ namespace ynn {
 
 static constexpr dot_cost_models neoverse_n1 = {
 #ifdef YNN_ARCH_ARM64_NEON
-    // Ratio (predicted / actual): std=0.181, min=0.698, max=1.364 (n=198)
+    // Ratio (predicted / actual): std=0.161, min=0.510, max=1.330 (n=198)
     .arm64_neon_fp32 = {
-        /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.91e-10f,
-        /*load_b_cost=*/8.90e-11f,
-        /*output_c=*/2.00e-10f,
+        /*block_overhead=*/3.45e-10f,
+        /*load_a_cost=*/2.43e-10f,
+        /*load_b_cost=*/7.86e-11f,
+        /*output_c=*/1.96e-10f,
     },
     // Ratio (predicted / actual): std=0.200, min=0.670, max=1.393 (n=200)
     .arm64_neon_fp64 = {
@@ -62,12 +62,12 @@ static constexpr dot_cost_models neoverse_n1 = {
     },
 #endif  // YNN_ARCH_ARM_NEONDOT
 #ifdef YNN_ARCH_ARM_NEON
-    // Ratio (predicted / actual): std=0.183, min=0.782, max=1.437 (n=200)
+    // Ratio (predicted / actual): std=0.198, min=0.614, max=1.363 (n=200)
     .arm_neon_int8_int8_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/3.71e-10f,
-        /*load_b_cost=*/1.87e-10f,
-        /*output_c=*/2.68e-10f,
+        /*load_a_cost=*/4.26e-10f,
+        /*load_b_cost=*/1.22e-10f,
+        /*output_c=*/3.56e-10f,
     },
 #endif  // YNN_ARCH_ARM_NEON
 };

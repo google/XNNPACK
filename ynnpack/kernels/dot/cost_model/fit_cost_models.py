@@ -255,58 +255,103 @@ def solve_nnls(
   return c
 
 
+def infer_model_type_bits(field_name: str) -> Tuple[int, int]:
+  """Returns (a_bits, b_bits) for fallback load_a : load_b weighting."""
+  if (
+      "uint8_int2" in field_name
+      or "int8_int2" in field_name
+      or field_name.endswith("_int2")
+  ):
+    return (8, 2)
+  if (
+      "uint8_int4" in field_name
+      or "int8_int4" in field_name
+      or field_name.endswith("_int4")
+  ):
+    return (8, 4)
+  if "int8" in field_name or "uint8" in field_name or "fp8" in field_name:
+    return (8, 8)
+  if "bf16" in field_name or "fp16" in field_name:
+    return (16, 16)
+  if "fp64" in field_name:
+    return (64, 64)
+  return (32, 32)
+
+
 def fit_model(
     benchmarks: List[Dict[str, Any]],
     shared_load: Optional[Tuple[float, float]] = None,
+    fallback_shared_load: Tuple[float, float] = (1, 1),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
   """Fits a single cost model to all valid benchmarks.
 
   If `shared_load` is set to (weight_a, weight_b), load_a_cost and load_b_cost
   are constrained to that ratio (see the AMX/SME note below).
   """
-  entries = {}
+  valid_rows = []
+  all_block_ms = set()
+  all_block_ns = set()
+  for b in benchmarks:
+    if b.get("skipped") or b.get("error_occurred") or b.get("error_message"):
+      continue
+    dims = kernel_dims(b)
+    shape = kernel_shape(b)
+    real_time_ns = b.get("real_time") or b.get("cpu_time")
+    if not dims or not shape or not real_time_ns or real_time_ns <= 0:
+      continue
+    valid_rows.append(b)
+    all_block_ms.add(dims[0])
+    all_block_ns.add(dims[1])
 
   # Only exclude m = 1 if the model has kernels with m > 1, so models that are
   # legitimately m=1 only (like x86_avx512_int8_int8_int32_symmetric_b) can
   # still be fit.
-  has_large_m = False
-  for b in benchmarks:
-    dims = kernel_dims(b)
-    if dims and dims[0] > 1:
-      has_large_m = True
-      break
+  has_large_m = any(block_m > 1 for block_m in all_block_ms)
 
-  for b in benchmarks:
-    if b.get("skipped") or b.get("error_occurred") or b.get("error_message"):
-      continue
+  def collect_entries(skip_single_n_tile_bk1: bool):
+    collected = {}
+    block_ms = set()
+    block_ns = set()
+    for b in valid_rows:
+      name = b.get("name", "")
+      dims = kernel_dims(b)
+      assert dims is not None
+      block_m, block_n, block_k, tile_m, tile_n, _ = dims
+      # We avoid m = 1, kernels with few tiles, and single-tile-N block_k = 1
+      # kernels (which run a bounds check on every k step), because these
+      # kernels tend to distort the fits for the larger cases.
+      if has_large_m and block_m == 1:
+        continue
+      if (block_m // tile_m) * (block_n // tile_n) < 4:
+        continue
+      if skip_single_n_tile_bk1 and block_k == 1 and block_n == tile_n:
+        continue
 
-    name = b.get("name", "")
-    dims = kernel_dims(b)
-    if not dims:
-      continue
-    block_m, block_n, _, tile_m, tile_n, _ = dims
-    # We avoid m = 1 and kernels with few tiles, because these kernels tend to
-    # distort the fits for the larger cases.
-    if has_large_m and block_m == 1:
-      continue
-    if (block_m // tile_m) * (block_n // tile_n) < 4:
-      continue
+      shape = kernel_shape(b)
+      assert shape is not None
+      real_time_ns = b.get("real_time") or b.get("cpu_time")
+      real_time_sec = float(real_time_ns) * 1e-9
 
-    shape = kernel_shape(b)
-    if not shape:
-      continue
-    m, n, k = shape
+      base_name = re.sub(r"/(\d+/)*(mn|nm|real_time)$", "", name)
+      key = (base_name, shape, dims)
+      collected.setdefault(key, []).append(real_time_sec)
+      block_ms.add(block_m)
+      block_ns.add(block_n)
+    return collected, block_ms, block_ns
 
-    real_time_ns = b.get("real_time") or b.get("cpu_time")
-    if not real_time_ns or real_time_ns <= 0:
-      continue
-    real_time_sec = float(real_time_ns) * 1e-9
+  entries, filtered_ms, filtered_ns = collect_entries(
+      skip_single_n_tile_bk1=True
+  )
+  if not entries:
+    entries, filtered_ms, filtered_ns = collect_entries(
+        skip_single_n_tile_bk1=False
+    )
 
-    base_name = re.sub(r"/(\d+/)*(mn|nm|real_time)$", "", name)
-    key = (base_name, (m, n, k), dims)
-    if key not in entries:
-      entries[key] = []
-    entries[key].append(real_time_sec)
+  if shared_load is None and (
+      (len(all_block_ms) >= 2 and len(filtered_ms) < 2)
+      or (len(all_block_ns) >= 2 and len(filtered_ns) < 2)
+  ):
+    shared_load = fallback_shared_load
 
   x_list = []
   y_list = []
@@ -382,12 +427,80 @@ def fit_model(
   return c[1:], ratios, y
 
 
+_EXISTING_ENTRY_PAT = re.compile(
+    r"(    // Ratio[^\n]*\n"
+    r"    \.(\w+) = \{\n"
+    r"        /\*block_overhead=\*/([0-9.eE+-]+)f,\n"
+    r"        /\*load_a_cost=\*/([0-9.eE+-]+)f,\n"
+    r"        /\*load_b_cost=\*/([0-9.eE+-]+)f,\n"
+    r"        /\*output_c=\*/([0-9.eE+-]+)f,\n"
+    r"    \},)"
+)
+
+
+def parse_existing_cpu_header(
+    path: str,
+) -> Dict[str, Tuple[np.ndarray, str]]:
+  """Parses existing `<cpu>.h` model coefficients and formatted text blocks."""
+  if not os.path.exists(path):
+    return {}
+  with open(path, "r") as fp:
+    text = fp.read()
+  out: Dict[str, Tuple[np.ndarray, str]] = {}
+  for m in _EXISTING_ENTRY_PAT.finditer(text):
+    coeffs = np.array(
+        [float(m.group(i)) for i in range(3, 7)], dtype=np.float64
+    )
+    out[m.group(2)] = (coeffs, m.group(1))
+  return out
+
+
+def max_rel_cost_diff(
+    old_coeffs: np.ndarray,
+    new_coeffs: np.ndarray,
+    benchmarks: List[Dict[str, Any]],
+) -> Tuple[float, bool]:
+  """Computes max relative predicted-cost change across registered blocks."""
+  rounded_new = np.array(
+      [float(f"{v:.2e}") for v in new_coeffs], dtype=np.float64
+  )
+  dims_set = set()
+  for b in benchmarks:
+    dims = kernel_dims(b)
+    if dims:
+      dims_set.add(dims[:3])
+  if not dims_set:
+    dims_set = {(4, 16, 1)}
+
+  max_rel = 0.0
+  for bm, bn, bk in dims_set:
+    for m in (1, 2, 4, 8, 16, 64, 480):
+      for n in (32, 64, 256, 384):
+        for k in (64, 256):
+          nb = ceil_div(m, bm) * ceil_div(n, bn)
+          ka = align_up(k, bk)
+          vec = (
+              np.array([1.0, bm * ka, bn * ka, bm * bn], dtype=np.float64) * nb
+          )
+          pred_old = float(vec @ old_coeffs)
+          pred_new = float(vec @ rounded_new)
+          if pred_old > 0:
+            max_rel = max(max_rel, abs(pred_new - pred_old) / pred_old)
+
+  fixes_zero_load = (old_coeffs[1] == 0.0 and rounded_new[1] > 0.0) or (
+      old_coeffs[2] == 0.0 and rounded_new[2] > 0.0
+  )
+  return max_rel, fixes_zero_load
+
+
 def generate_cpu_header(
     cpu: str,
     header_fields: List[Tuple[Tuple[str, ...], str]],
     fitted_models: Dict[str, Tuple[np.ndarray, np.ndarray, np.ndarray]],
+    preserved_blocks: Optional[Dict[str, str]] = None,
 ) -> str:
   """Generates the C++ contents of `<cpu>.h`."""
+  preserved_blocks = preserved_blocks or {}
   cpu_ident = re.sub(r"[^a-zA-Z0-9_]", "_", cpu)
   guard_macro = (
       "XNNPACK_YNNPACK_KERNELS_DOT_COST_MODEL_"
@@ -419,7 +532,7 @@ static constexpr dot_cost_models {cpu_ident} = {{""".split("\n")
     return f"#endif  // {macro}"
 
   for guards, field_name in header_fields:
-    if field_name not in fitted_models:
+    if field_name not in fitted_models and field_name not in preserved_blocks:
       continue
     target_guards = list(guards)
     common_len = 0
@@ -438,17 +551,20 @@ static constexpr dot_cost_models {cpu_ident} = {{""".split("\n")
       lines.append(next_guard)
       active_guards.append(next_guard)
 
-    coeffs, ratios, y = fitted_models[field_name]
-    lines.append(
-        f"    // Ratio (predicted / actual): std={np.std(ratios):.3f},"
-        f" min={np.min(ratios):.3f}, max={np.max(ratios):.3f} (n={len(y)})"
-    )
-    lines.append(f"""    .{field_name} = {{
+    if field_name in fitted_models:
+      coeffs, ratios, y = fitted_models[field_name]
+      lines.append(
+          f"    // Ratio (predicted / actual): std={np.std(ratios):.3f},"
+          f" min={np.min(ratios):.3f}, max={np.max(ratios):.3f} (n={len(y)})"
+      )
+      lines.append(f"""    .{field_name} = {{
         /*block_overhead=*/{coeffs[0]:.2e}f,
         /*load_a_cost=*/{coeffs[1]:.2e}f,
         /*load_b_cost=*/{coeffs[2]:.2e}f,
         /*output_c=*/{coeffs[3]:.2e}f,
     }},""")
+    else:
+      lines.append(preserved_blocks[field_name])
 
   while active_guards:
     lines.append(close_guard(active_guards.pop()))
@@ -508,6 +624,15 @@ def main():
       default=None,
       help="Specific CPUs to generate cost model headers for (default: all).",
   )
+  parser.add_argument(
+      "--min_rel_diff",
+      type=float,
+      default=0.15,
+      help=(
+          "Minimum relative predicted-cost difference required to update an"
+          " existing header model entry (default: 0.15; 0 to update all)."
+      ),
+  )
   args = parser.parse_args()
 
   script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -533,6 +658,10 @@ def main():
   os.makedirs(output_dir, exist_ok=True)
 
   for cpu, csv_files in cpu_data.items():
+    out_path = os.path.join(output_dir, f"{cpu}.h")
+    existing = parse_existing_cpu_header(out_path)
+    preserved_blocks: Dict[str, str] = {}
+
     benchmarks = load_benchmark_data(csv_files)
     by_model: Dict[str, List[Dict[str, Any]]] = {}
     for b in benchmarks:
@@ -559,6 +688,8 @@ def main():
     fitted_models: Dict[str, Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
     for _, field_name in header_fields:
       if field_name not in by_model:
+        if args.min_rel_diff > 0.0 and field_name in existing:
+          preserved_blocks[field_name] = existing[field_name][1]
         continue
       shared_load = None
       if "amx" in field_name:
@@ -570,17 +701,35 @@ def main():
         coeffs, ratios, y = fit_model(
             by_model[field_name],
             shared_load=shared_load,
+            fallback_shared_load=infer_model_type_bits(field_name),
         )
       except ValueError:
+        if args.min_rel_diff > 0.0 and field_name in existing:
+          preserved_blocks[field_name] = existing[field_name][1]
         continue
+
+      if args.min_rel_diff > 0.0 and field_name in existing:
+        old_coeffs, old_block = existing[field_name]
+        rel_diff, fixes_zero = max_rel_cost_diff(
+            old_coeffs, coeffs, by_model[field_name]
+        )
+        if not fixes_zero and rel_diff < args.min_rel_diff:
+          preserved_blocks[field_name] = old_block
+          continue
+
       fitted_models[field_name] = (coeffs, ratios, y)
       print(f"[{cpu}] {field_name}")
 
-    out_path = os.path.join(output_dir, f"{cpu}.h")
-    header_content = generate_cpu_header(cpu, header_fields, fitted_models)
+    header_content = generate_cpu_header(
+        cpu, header_fields, fitted_models, preserved_blocks
+    )
     with open(out_path, "w") as fp:
       fp.write(header_content)
-    print(f"[{cpu}] Wrote {out_path} ({len(fitted_models)} models)\n")
+    total_count = len(fitted_models) + len(preserved_blocks)
+    print(
+        f"[{cpu}] Wrote {out_path} ({len(fitted_models)} updated,"
+        f" {len(preserved_blocks)} preserved, {total_count} total)\n"
+    )
 
 
 if __name__ == "__main__":

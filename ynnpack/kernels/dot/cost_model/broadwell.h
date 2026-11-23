@@ -16,12 +16,12 @@ namespace ynn {
 
 static constexpr dot_cost_models broadwell = {
 #ifdef YNN_ARCH_X86_FMA3
-    // Ratio (predicted / actual): std=0.093, min=0.802, max=1.249 (n=140)
+    // Ratio (predicted / actual): std=0.104, min=0.751, max=1.170 (n=120)
     .x86_fma3_fp32 = {
-        /*block_overhead=*/7.64e-10f,
-        /*load_a_cost=*/1.96e-10f,
-        /*load_b_cost=*/5.09e-11f,
-        /*output_c=*/7.91e-11f,
+        /*block_overhead=*/1.79e-09f,
+        /*load_a_cost=*/2.62e-10f,
+        /*load_b_cost=*/3.86e-11f,
+        /*output_c=*/5.79e-11f,
     },
     // Ratio (predicted / actual): std=0.112, min=0.776, max=1.226 (n=140)
     .x86_fma3_fp64 = {
@@ -83,12 +83,12 @@ static constexpr dot_cost_models broadwell = {
         /*load_b_cost=*/4.28e-11f,
         /*output_c=*/9.08e-11f,
     },
-    // Ratio (predicted / actual): std=0.163, min=0.719, max=1.333 (n=120)
+    // Ratio (predicted / actual): std=0.117, min=0.820, max=1.184 (n=60)
     .x86_avx2_uint8_int2_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.20e-10f,
-        /*load_b_cost=*/2.50e-11f,
-        /*output_c=*/2.73e-10f,
+        /*load_a_cost=*/9.49e-11f,
+        /*load_b_cost=*/2.37e-11f,
+        /*output_c=*/1.94e-10f,
     },
     // Ratio (predicted / actual): std=0.085, min=0.830, max=1.134 (n=60)
     .x86_avx2_uint8_int4_int32 = {
@@ -106,19 +106,19 @@ static constexpr dot_cost_models broadwell = {
     },
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
-    // Ratio (predicted / actual): std=0.087, min=0.749, max=1.196 (n=140)
+    // Ratio (predicted / actual): std=0.071, min=0.860, max=1.231 (n=80)
     .x86_avx_fp32 = {
-        /*block_overhead=*/3.97e-09f,
-        /*load_a_cost=*/2.61e-10f,
-        /*load_b_cost=*/6.34e-11f,
-        /*output_c=*/3.08e-11f,
+        /*block_overhead=*/1.67e-09f,
+        /*load_a_cost=*/3.91e-10f,
+        /*load_b_cost=*/4.63e-11f,
+        /*output_c=*/6.02e-11f,
     },
-    // Ratio (predicted / actual): std=0.089, min=0.809, max=1.205 (n=140)
+    // Ratio (predicted / actual): std=0.068, min=0.888, max=1.220 (n=80)
     .x86_avx_fp64 = {
-        /*block_overhead=*/3.27e-09f,
-        /*load_a_cost=*/2.63e-10f,
-        /*load_b_cost=*/1.26e-10f,
-        /*output_c=*/8.44e-11f,
+        /*block_overhead=*/1.70e-09f,
+        /*load_a_cost=*/4.23e-10f,
+        /*load_b_cost=*/9.26e-11f,
+        /*output_c=*/1.36e-10f,
     },
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_F16C_FMA3
@@ -131,20 +131,20 @@ static constexpr dot_cost_models broadwell = {
     },
 #endif  // YNN_ARCH_X86_F16C_FMA3
 #ifdef YNN_ARCH_X86_F16C
-    // Ratio (predicted / actual): std=0.091, min=0.828, max=1.194 (n=140)
+    // Ratio (predicted / actual): std=0.104, min=0.772, max=1.183 (n=80)
     .x86_f16c_fp16_fp16_fp32 = {
-        /*block_overhead=*/1.19e-09f,
-        /*load_a_cost=*/1.11e-09f,
-        /*load_b_cost=*/4.32e-11f,
-        /*output_c=*/5.54e-11f,
+        /*block_overhead=*/0.00e+00f,
+        /*load_a_cost=*/9.11e-10f,
+        /*load_b_cost=*/6.29e-11f,
+        /*output_c=*/9.17e-11f,
     },
 #endif  // YNN_ARCH_X86_F16C
 #ifdef YNN_ARCH_X86_SSE2
-    // Ratio (predicted / actual): std=0.108, min=0.745, max=1.196 (n=160)
+    // Ratio (predicted / actual): std=0.100, min=0.777, max=1.211 (n=100)
     .x86_sse2_fp32 = {
-        /*block_overhead=*/1.95e-09f,
-        /*load_a_cost=*/3.27e-10f,
-        /*load_b_cost=*/1.43e-10f,
+        /*block_overhead=*/1.54e-09f,
+        /*load_a_cost=*/4.45e-10f,
+        /*load_b_cost=*/1.12e-10f,
         /*output_c=*/1.33e-10f,
     },
 #endif  // YNN_ARCH_X86_SSE2
