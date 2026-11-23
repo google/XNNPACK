@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
+- name: xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1
 - name: xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1
 - name: xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u2_acc2
 - name: xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u4_acc4

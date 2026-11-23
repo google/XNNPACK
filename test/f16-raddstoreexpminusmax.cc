@@ -17,6 +17,22 @@
 #include "test/raddstoreexpminusmax-microkernel-tester.h"
 
 
+TEST(F16_RADDSTOREEXPMINUSMAX__SCALAR_RR1_P2_U1, elements_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(1)
+    .Test(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1, nullptr);
+}
+
+TEST(F16_RADDSTOREEXPMINUSMAX__SCALAR_RR1_P2_U1, elements_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
+  for (size_t elements = 2; elements < 10; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1, nullptr);
+  }
+}
+
 TEST(F16_RADDSTOREEXPMINUSMAX__SCALAR_RR2_P2_U1, elements_eq_1) {
   TEST_REQUIRES_ARCH_FLAGS(0);
   RAddStoreExpMinusMaxMicrokernelTester()

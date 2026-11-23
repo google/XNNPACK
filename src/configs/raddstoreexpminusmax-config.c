@@ -15,6 +15,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
 static const int default_config = 0;
@@ -82,7 +83,11 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4);
   #endif
   if (f16_raddstoreexpminusmax_config.ukernel == NULL) {
+    #if XNN_HAVE_FLOAT16
     f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1);
+    #else
+    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1);
+    #endif
   }
 }
 

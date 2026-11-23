@@ -22,6 +22,8 @@ extern "C" {
                             float* sum, const void* params);
 
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
+    xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1)
+DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u2_acc2)

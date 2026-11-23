@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $SIMD_SIZE = {
+$  "scalar": 1,
 $  "wasmrelaxedsimd": 4,
 $  "f16c": 8,
 $  "avx512f": 16,
@@ -36,11 +37,12 @@ static XNN_INLINE xnn_simd_f32_t load_f16_f32(const xnn_float16* input) {
   return xnn_cvt_f32_f16(xnn_loadu_f16(input));
 }
 
-static XNN_INLINE xnn_simd_f32_t load_tail_f16_f32(
-    const xnn_float16* input, size_t elements)
-{
-  return xnn_cvt_f32_f16(xnn_load_tail_f16(input, elements));
-}
+$if SIMD_SIZE > 1:
+  static XNN_INLINE xnn_simd_f32_t load_tail_f16_f32(
+      const xnn_float16* input, size_t elements)
+  {
+    return xnn_cvt_f32_f16(xnn_load_tail_f16(input, elements));
+  }
 
 static XNN_INLINE void store_f32_f16(
     xnn_float16* output, xnn_simd_f32_t value)
@@ -52,12 +54,13 @@ static XNN_INLINE void store_f32_f16(
     xnn_storeu_f16(output, rounded);
 }
 
-static XNN_INLINE void store_tail_f32_f16(
-    xnn_float16* output, xnn_simd_f32_t value, size_t elements)
-{
-  const xnn_simd_f16_t rounded = xnn_cvt_f16_f32(value);
-  xnn_store_tail_f16(output, rounded, elements);
-}
+$if SIMD_SIZE > 1:
+  static XNN_INLINE void store_tail_f32_f16(
+      xnn_float16* output, xnn_simd_f32_t value, size_t elements)
+  {
+    const xnn_simd_f16_t rounded = xnn_cvt_f16_f32(value);
+    xnn_store_tail_f16(output, rounded, elements);
+  }
 
 static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
     xnn_simd_f32_t vx, xnn_simd_f32_t vmax)

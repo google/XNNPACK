@@ -83,6 +83,13 @@ static void f16_raddstoreexpminusmax(
 }
 
 BENCHMARK_CAPTURE(
+    f16_raddstoreexpminusmax, scalar_rr1_p2_u1,
+    xnn_f16_rmax_ukernel__scalar_u2_acc2,
+    xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1, nullptr)
+    ->Apply(
+        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(
     f16_raddstoreexpminusmax, scalar_rr2_p2_u1,
     xnn_f16_rmax_ukernel__scalar_u2_acc2,
     xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1, nullptr)

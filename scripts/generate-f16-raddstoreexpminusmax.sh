@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
+tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=scalar -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr1-p2-u1.c &
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u1.c &
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=2 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u2-acc2.c &
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=4 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u4-acc4.c &
