@@ -1372,10 +1372,47 @@ constexpr float min_task_seconds = 16e-6f;
 constexpr float task_bytes_per_second = 8e9f;
 constexpr float task_output_bytes_per_second = 16e9f;
 
+// Returns true if `output_id` feeds (directly or through single-consumer
+// elementwise ops) a reduction over a batch dimension (d >= 2), such as in
+// blockwise quantization.
+bool is_output_batch_reduced(const ynn_subgraph& subgraph, uint32_t output_id) {
+  uint32_t cur_id = output_id;
+  for (int depth = 0; depth < 8; ++depth) {
+    const ynn_node* consumer = nullptr;
+    for (const ynn_node& node : subgraph.nodes) {
+      if (!node.is_valid()) continue;
+      for (uint32_t in_id : node.inputs) {
+        if (in_id == cur_id) {
+          if (consumer != nullptr) return false;
+          consumer = &node;
+          break;
+        }
+      }
+    }
+    if (consumer == nullptr) return false;
+    if (const auto* reduce = std::get_if<ynn_node::reduce>(&consumer->op)) {
+      for (size_t d = 2; d < reduce->k_dims.size(); ++d) {
+        if (reduce->k_dims[d]) return true;
+      }
+      return false;
+    }
+    if (std::holds_alternative<ynn_node::unary_elementwise>(consumer->op) ||
+        std::holds_alternative<ynn_node::binary_elementwise>(consumer->op) ||
+        std::holds_alternative<ynn_node::ternary_elementwise>(consumer->op)) {
+      if (consumer->outputs.size() != 1) return false;
+      cur_id = consumer->outputs[0];
+      continue;
+    }
+    return false;
+  }
+  return false;
+}
+
 std::tuple<index_t, index_t, index_t> choose_split_factors(
     index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
     size_t b_elem_bits, size_t c_elem_size, float seconds_per_mac,
-    bool a_is_produced, std::optional<index_t> num_groups = std::nullopt) {
+    bool a_is_produced, std::optional<index_t> num_groups = std::nullopt,
+    bool output_batch_reduced = false) {
   assert(block_n > 0);
   const bool is_ragged = num_groups.has_value();
 
@@ -1458,12 +1495,21 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
   // AMD Rome.
   const index_t aspect_ratio = 4;
 
+  // When a dot's batch dimension is reduced by a downstream reduction (e.g.
+  // blockwise quantization), the accumulator tile `split_m * split_n` stays
+  // live across all reduced blocks and the intermediate dot output grows by
+  // `split_blocks`. Keep the accumulator tile within L1 cache and prefer wide
+  // contiguous N tiles before growing M.
+  const uint64_t max_reduced_c_bytes =
+      output_batch_reduced ? get_cache_sizes()[0] : 0;
+
   // Make the tile bigger, doubling the dimension that keeps it closest to
   // `aspect_ratio` (or 1:1 in ragged mode once `split_m` covers a group run,
   // where growing `split_m` adds no intra-group B reuse). Returns false if the
   // tile cannot grow further.
   auto grow = [&](bool limit_produced_a, index_t& split_m, index_t& split_n) {
     bool can_grow_m = split_m < m;
+    bool can_grow_n = split_n < n;
     if (can_grow_m && limit_produced_a) {
       const index_t next_m = split_m * 2;
       const uint64_t a_bytes =
@@ -1474,7 +1520,27 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(
           static_cast<uint64_t>(next_m) * split_n * c_elem_size;
       can_grow_m = a_bytes + b_bytes + c_bytes <= max_produced_task_bytes;
     }
-    const bool can_grow_n = split_n < n;
+    if (output_batch_reduced) {
+      if (can_grow_n) {
+        const uint64_t next_c =
+            static_cast<uint64_t>(split_m) * (split_n * 2) * c_elem_size;
+        can_grow_n = next_c <= max_reduced_c_bytes;
+      }
+      if (can_grow_m) {
+        const uint64_t next_c =
+            static_cast<uint64_t>(split_m * 2) * split_n * c_elem_size;
+        can_grow_m = next_c <= max_reduced_c_bytes;
+      }
+      if (can_grow_n) {
+        split_n *= 2;
+        return true;
+      }
+      if (can_grow_m) {
+        split_m *= 2;
+        return true;
+      }
+      return false;
+    }
     const index_t eff_aspect =
         (is_ragged && split_m >= group_m) ? 1 : aspect_ratio;
     if ((eff_aspect * split_n <= split_m || !can_grow_m) && can_grow_n) {
@@ -1587,7 +1653,8 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
     slinky::expr block_n, size_t a_elem_size, size_t b_elem_bits,
     size_t c_elem_size, float seconds_per_mac, bool a_is_produced,
-    std::optional<slinky::expr> num_groups = std::nullopt) {
+    std::optional<slinky::expr> num_groups = std::nullopt,
+    bool output_batch_reduced = false) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
@@ -1597,9 +1664,9 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     std::optional<index_t> g =
         op->args.size() > 4 ? std::make_optional(evaluate(op->args[4], ctx))
                             : std::nullopt;
-    auto [split_n, split_m, split_k] =
-        choose_split_factors(m, n, k, block_n, a_elem_size, b_elem_bits,
-                             c_elem_size, seconds_per_mac, a_is_produced, g);
+    auto [split_n, split_m, split_k] = choose_split_factors(
+        m, n, k, block_n, a_elem_size, b_elem_bits, c_elem_size,
+        seconds_per_mac, a_is_produced, g, output_batch_reduced);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
     index_t mult_m = std::max<index_t>(1, split_m / step_m);
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
@@ -2328,10 +2395,14 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     std::optional<slinky::expr> num_groups =
         is_ragged ? std::make_optional(input_b.extent(b_k2_dim + num_k_dims))
                   : std::nullopt;
+    const bool output_batch_reduced =
+        output.rank() > 2 && output.is_internal() &&
+        is_output_batch_reduced(*runtime.subgraph, output.id);
     auto [split_n, split_m, split_k] = choose_split_factors(
         runtime, m, n, k, block_n, type_size_bytes(input_a.type),
         type_size_bits(input_b.type), type_size_bytes(output.type),
-        seconds_per_mac, input_a.is_internal(), num_groups);
+        seconds_per_mac, input_a.is_internal(), num_groups,
+        output_batch_reduced);
 
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
