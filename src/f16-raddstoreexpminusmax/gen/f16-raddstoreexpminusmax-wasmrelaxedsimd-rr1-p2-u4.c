@@ -17,6 +17,7 @@
 
 #include "src/xnnpack/simd/f32-wasmrelaxedsimd.h"
 
+// Avoid -Wmacro-redefined: the FP16 header defines its own FMA capability.
 #undef XNN_SIMD_HAS_NATIVE_FMA
 #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 

@@ -25,6 +25,7 @@ $}.get(ARCH, ARCH)
 #include "src/xnnpack/simd/f32-${SIMD_ARCH}.h"
 
 $if ARCH == "wasmrelaxedsimd":
+  // Avoid -Wmacro-redefined: the FP16 header defines its own FMA capability.
   #undef XNN_SIMD_HAS_NATIVE_FMA
   #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 $elif ARCH not in ("f16c", "avx512f"):
