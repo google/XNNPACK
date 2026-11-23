@@ -58,17 +58,17 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     #endif
     #if XNN_ENABLE_AVX512F
       if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
-        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16);
+        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16);
       }
     #endif
     #if XNN_ENABLE_AVX2
       if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
+        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
       }
     #endif
     #if XNN_ENABLE_F16C
       if (f16_raddstoreexpminusmax_config.ukernel == NULL && (hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8);
+        f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8);
       }
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
@@ -80,13 +80,13 @@ static void init_f16_raddstoreexpminusmax_config(void) {
   #elif XNN_ARCH_WASMRELAXEDSIMDFP16
     f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimdfp16_rr2_p2_u8);
   #elif XNN_ARCH_WASMRELAXEDSIMD
-    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4);
+    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4);
   #endif
   if (f16_raddstoreexpminusmax_config.ukernel == NULL) {
     #if XNN_HAVE_FLOAT16
     f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1);
     #else
-    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1);
+    f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_f32acc_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1);
     #endif
   }
 }

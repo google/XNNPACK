@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=scalar -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr1-p2-u1.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=scalar -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-scalar-rr1-p2-u1.c &
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u1.c &
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=2 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u2-acc2.c &
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=scalar -D BATCH_TILE=4 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u4-acc4.c &
@@ -23,20 +23,20 @@ tools/xngen src/f16-raddstoreexpminusmax/neonfp16arith-rr2-p2.c.in -D BATCH_TILE
 tools/xngen src/f16-raddstoreexpminusmax/neonfp16arith-rr2-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32-acc4.c &
 
 # x86 AVX2
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u16.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u16-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32-acc4.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=40 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u40.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=40 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u40-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=40 -D ACCUMULATORS=5 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u40-acc5.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=48 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u48.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=48 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u48-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u48-acc3.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=64 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u64.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u64-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u64-acc4.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u16.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u16-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u32.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u32-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u32-acc4.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=40 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u40.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=40 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u40-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=40 -D ACCUMULATORS=5 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u40-acc5.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=48 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u48.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=48 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u48-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u48-acc3.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=64 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u64.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u64-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u64-acc4.c &
 
 # RISC-V Vector
 tools/xngen src/f16-raddstoreexpminusmax/rvvfp16arith-rr2-p2.c.in -D LMUL=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-rvvfp16arith-rr2-p2-u1v.c &
@@ -49,16 +49,16 @@ tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=wasmrelaxedsimdfp16
 tools/xngen src/f16-raddstoreexpminusmax/rr2-p2.c.in -D ARCH=wasmrelaxedsimdfp16 -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimdfp16-rr2-p2-u32-acc4.c &
 
 # WebAssembly Relaxed SIMD with FP32 accumulation
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=4 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u4.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u8-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=16 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u16-acc4.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=4 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u4.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=8 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u8-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILE=16 -D ACCUMULATORS=4 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-wasmrelaxedsimd-rr1-p2-u16-acc4.c &
 
 # Portable FP32 accumulation
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=8 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-f16c-rr1-p2-u8.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-f16c-rr1-p2-u16-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-f16c-rr1-p2-u32-acc4.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512f-rr1-p2-u16.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512f-rr1-p2-u32-acc2.c &
-tools/xngen src/f16-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512f-rr1-p2-u64-acc4.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=8 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u8.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u16-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=f16c -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u32-acc4.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx512f-rr1-p2-u16.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx512f-rr1-p2-u32-acc2.c &
+tools/xngen src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in -D ARCH=avx512f -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx512f-rr1-p2-u64-acc4.c &
 
 wait

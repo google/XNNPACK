@@ -87,7 +87,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__${ARCH}_rr1_p2_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,

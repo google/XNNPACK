@@ -22,7 +22,7 @@ extern "C" {
                             float* sum, const void* params);
 
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__scalar_rr1_p2_u1)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
@@ -31,33 +31,33 @@ DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u4_acc4)
 
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32_acc4)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32_acc4)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc5)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc5)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48_acc3)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48_acc3)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc4)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc4)
 
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16)
@@ -84,11 +84,11 @@ DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimdfp16_rr2_p2_u32_acc4)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u8_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u8_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u16_acc4)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u16_acc4)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__avx512fp16_rr2_p2_u32)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
@@ -96,17 +96,17 @@ DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__avx512fp16_rr2_p2_u128_acc4)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u8)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u16_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u16_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u32_acc4)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u32_acc4)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u16)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u32_acc2)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u32_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u64_acc4)
+    xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u64_acc4)
 
 #define DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(fn_name)          \
   XNN_INTERNAL void fn_name(size_t n, const float* input, const float* max, \

@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-raddstoreexpminusmax/rr1-p2.c.in
+//   Template: src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -15,7 +15,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
-#include "src/xnnpack/simd/f32-avx.h"
+#include "src/xnnpack/simd/f32-avx512f.h"
 
 
 
@@ -68,7 +68,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u32_acc4(
+void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr1_p2_u64_acc4(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
@@ -88,38 +88,38 @@ void xnn_f16_raddstoreexpminusmax_ukernel__f16c_rr1_p2_u32_acc4(
   xnn_simd_f32_t vacc1 = xnn_zero_f32();
   xnn_simd_f32_t vacc2 = xnn_zero_f32();
   xnn_simd_f32_t vacc3 = xnn_zero_f32();
-  for (; batch >= 32 * sizeof(xnn_float16);
-       batch -= 32 * sizeof(xnn_float16)) {
+  for (; batch >= 64 * sizeof(xnn_float16);
+       batch -= 64 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf0 =
         expminusmax_f32(load_f16_f32(input + 0), vmax);
     store_f32_f16(output + 0, vf0);
     vacc0 =
         xnn_add_f32(vacc0, vf0);
     const xnn_simd_f32_t vf1 =
-        expminusmax_f32(load_f16_f32(input + 8), vmax);
-    store_f32_f16(output + 8, vf1);
+        expminusmax_f32(load_f16_f32(input + 16), vmax);
+    store_f32_f16(output + 16, vf1);
     vacc1 =
         xnn_add_f32(vacc1, vf1);
     const xnn_simd_f32_t vf2 =
-        expminusmax_f32(load_f16_f32(input + 16), vmax);
-    store_f32_f16(output + 16, vf2);
+        expminusmax_f32(load_f16_f32(input + 32), vmax);
+    store_f32_f16(output + 32, vf2);
     vacc2 =
         xnn_add_f32(vacc2, vf2);
     const xnn_simd_f32_t vf3 =
-        expminusmax_f32(load_f16_f32(input + 24), vmax);
-    store_f32_f16(output + 24, vf3);
+        expminusmax_f32(load_f16_f32(input + 48), vmax);
+    store_f32_f16(output + 48, vf3);
     vacc3 =
         xnn_add_f32(vacc3, vf3);
-    input += 32;
-    output += 32;
+    input += 64;
+    output += 64;
   }
 
-  for (; batch >= 8 * sizeof(xnn_float16);
-       batch -= 8 * sizeof(xnn_float16)) {
+  for (; batch >= 16 * sizeof(xnn_float16);
+       batch -= 16 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vf = expminusmax_f32(load_f16_f32(input), vmax);
-    input += 8;
+    input += 16;
     store_f32_f16(output, vf);
-    output += 8;
+    output += 16;
     vacc0 = xnn_add_f32(vacc0, vf);
   }
 

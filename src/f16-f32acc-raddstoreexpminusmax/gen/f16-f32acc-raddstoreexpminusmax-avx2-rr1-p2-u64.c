@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in
+//   Template: src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -18,7 +18,7 @@
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64(
+void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,

@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in
+//   Template: src/f16-f32acc-raddstoreexpminusmax/avx2-rr1-p2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -18,7 +18,7 @@
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc5(
+void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
@@ -52,10 +52,6 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc5(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   __m256 vacc0 = _mm256_setzero_ps();
-  __m256 vacc1 = _mm256_setzero_ps();
-  __m256 vacc2 = _mm256_setzero_ps();
-  __m256 vacc3 = _mm256_setzero_ps();
-  __m256 vacc4 = _mm256_setzero_ps();
   for (; batch >= 40 * sizeof(uint16_t); batch -= 40 * sizeof(uint16_t)) {
     const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     const __m256 vi1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));
@@ -126,15 +122,11 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40_acc5(
     o += 40;
 
     vacc0 = _mm256_add_ps(vacc0, vf0);
-    vacc1 = _mm256_add_ps(vacc1, vf1);
-    vacc2 = _mm256_add_ps(vacc2, vf2);
-    vacc3 = _mm256_add_ps(vacc3, vf3);
-    vacc4 = _mm256_add_ps(vacc4, vf4);
+    vacc0 = _mm256_add_ps(vacc0, vf1);
+    vacc0 = _mm256_add_ps(vacc0, vf2);
+    vacc0 = _mm256_add_ps(vacc0, vf3);
+    vacc0 = _mm256_add_ps(vacc0, vf4);
   }
-  vacc0 = _mm256_add_ps(vacc0, vacc1);
-  vacc2 = _mm256_add_ps(vacc2, vacc3);
-  vacc0 = _mm256_add_ps(vacc0, vacc2);
-  vacc0 = _mm256_add_ps(vacc0, vacc4);
 
   __m256 vacc = vacc0;
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-raddstoreexpminusmax/rr1-p2.c.in
+//   Template: src/f16-f32acc-raddstoreexpminusmax/rr1-p2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -71,7 +71,7 @@ static XNN_INLINE xnn_simd_f32_t expminusmax_f32(
   return xnn_and_f32(vmask, xnn_fmadd_f32(vt, vp, vs));
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4(
+void xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u8_acc2(
     size_t batch,
     const xnn_float16* input,
     const xnn_float16* max,
@@ -88,6 +88,22 @@ void xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4(
 
   const xnn_simd_f32_t vmax = xnn_set1_f32(xnn_float16_to_float(*max));
   xnn_simd_f32_t vacc0 = xnn_zero_f32();
+  xnn_simd_f32_t vacc1 = xnn_zero_f32();
+  for (; batch >= 8 * sizeof(xnn_float16);
+       batch -= 8 * sizeof(xnn_float16)) {
+    const xnn_simd_f32_t vf0 =
+        expminusmax_f32(load_f16_f32(input + 0), vmax);
+    store_f32_f16(output + 0, vf0);
+    vacc0 =
+        xnn_add_f32(vacc0, vf0);
+    const xnn_simd_f32_t vf1 =
+        expminusmax_f32(load_f16_f32(input + 4), vmax);
+    store_f32_f16(output + 4, vf1);
+    vacc1 =
+        xnn_add_f32(vacc1, vf1);
+    input += 8;
+    output += 8;
+  }
 
   for (; batch >= 4 * sizeof(xnn_float16);
        batch -= 4 * sizeof(xnn_float16)) {
@@ -98,6 +114,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr1_p2_u4(
     vacc0 = xnn_add_f32(vacc0, vf);
   }
 
+  vacc0 = xnn_add_f32(vacc0, vacc1);
   float vsum = xnn_reduce_add_f32(vacc0);
   if XNN_UNLIKELY(batch != 0) {
     const size_t num_elements = batch / sizeof(xnn_float16);
