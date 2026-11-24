@@ -16,135 +16,135 @@ namespace ynn {
 
 static constexpr dot_cost_models broadwell = {
 #ifdef YNN_ARCH_X86_FMA3
-    // Ratio (predicted / actual): std=0.093, min=0.802, max=1.249 (n=140)
+    // Ratio (predicted / actual): std=0.104, min=0.751, max=1.170 (n=120)
     .x86_fma3_fp32 = {
-        /*block_overhead=*/7.64e-10f,
-        /*load_a_cost=*/1.96e-10f,
-        /*load_b_cost=*/5.09e-11f,
-        /*output_c=*/7.91e-11f,
+        /*block_overhead=*/1.79e-09f,
+        /*load_a_cost=*/2.62e-10f,
+        /*load_b_cost=*/3.86e-11f,
+        /*output_c=*/5.79e-11f,
     },
-    // Ratio (predicted / actual): std=0.112, min=0.776, max=1.226 (n=140)
+    // Ratio (predicted / actual): std=0.088, min=0.791, max=1.219 (n=120)
     .x86_fma3_fp64 = {
-        /*block_overhead=*/8.47e-10f,
-        /*load_a_cost=*/2.02e-10f,
-        /*load_b_cost=*/9.39e-11f,
-        /*output_c=*/1.41e-10f,
+        /*block_overhead=*/1.25e-09f,
+        /*load_a_cost=*/2.29e-10f,
+        /*load_b_cost=*/9.06e-11f,
+        /*output_c=*/1.35e-10f,
     },
 #endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2_FMA3
-    // Ratio (predicted / actual): std=0.101, min=0.768, max=1.210 (n=160)
+    // Ratio (predicted / actual): std=0.099, min=0.735, max=1.227 (n=160)
     .x86_avx2_fma3_bf16_bf16_fp32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/3.23e-10f,
-        /*load_b_cost=*/6.58e-11f,
-        /*output_c=*/8.03e-11f,
+        /*load_a_cost=*/3.50e-10f,
+        /*load_b_cost=*/5.52e-11f,
+        /*output_c=*/8.55e-11f,
     },
-    // Ratio (predicted / actual): std=0.039, min=0.893, max=1.099 (n=140)
+    // Ratio (predicted / actual): std=0.038, min=0.843, max=1.099 (n=100)
     .x86_avx2_fma3_bf16_bf16_fp32_k1 = {
-        /*block_overhead=*/1.64e-09f,
-        /*load_a_cost=*/6.38e-10f,
-        /*load_b_cost=*/5.24e-11f,
-        /*output_c=*/5.10e-11f,
+        /*block_overhead=*/2.34e-09f,
+        /*load_a_cost=*/6.24e-10f,
+        /*load_b_cost=*/5.27e-11f,
+        /*output_c=*/4.40e-11f,
     },
-    // Ratio (predicted / actual): std=0.047, min=0.859, max=1.094 (n=40)
+    // Ratio (predicted / actual): std=0.042, min=0.891, max=1.098 (n=40)
     .x86_avx2_fma3_fp32_k8 = {
-        /*block_overhead=*/2.56e-09f,
-        /*load_a_cost=*/1.22e-11f,
-        /*load_b_cost=*/1.37e-10f,
-        /*output_c=*/9.64e-10f,
+        /*block_overhead=*/1.93e-09f,
+        /*load_a_cost=*/9.21e-12f,
+        /*load_b_cost=*/1.49e-10f,
+        /*output_c=*/9.93e-10f,
     },
-    // Ratio (predicted / actual): std=0.093, min=0.798, max=1.220 (n=180)
+    // Ratio (predicted / actual): std=0.098, min=0.790, max=1.230 (n=180)
     .x86_avx2_fma3_fp32_k2 = {
-        /*block_overhead=*/5.25e-09f,
-        /*load_a_cost=*/1.10e-10f,
+        /*block_overhead=*/4.16e-09f,
+        /*load_a_cost=*/1.09e-10f,
         /*load_b_cost=*/4.42e-11f,
-        /*output_c=*/6.18e-11f,
+        /*output_c=*/1.07e-10f,
     },
 #endif  // YNN_ARCH_X86_AVX2_FMA3
 #ifdef YNN_ARCH_X86_AVX2
-    // Ratio (predicted / actual): std=0.098, min=0.797, max=1.201 (n=80)
+    // Ratio (predicted / actual): std=0.096, min=0.871, max=1.203 (n=80)
     .x86_avx2_int8_int8_int32_symmetric_b = {
-        /*block_overhead=*/7.82e-10f,
-        /*load_a_cost=*/2.04e-10f,
-        /*load_b_cost=*/2.17e-11f,
-        /*output_c=*/7.08e-11f,
+        /*block_overhead=*/2.07e-10f,
+        /*load_a_cost=*/2.01e-10f,
+        /*load_b_cost=*/2.06e-11f,
+        /*output_c=*/9.16e-11f,
     },
-    // Ratio (predicted / actual): std=0.027, min=0.902, max=1.061 (n=60)
+    // Ratio (predicted / actual): std=0.028, min=0.939, max=1.061 (n=60)
     .x86_avx2_int8_int8_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.39e-10f,
-        /*load_b_cost=*/2.92e-11f,
-        /*output_c=*/1.78e-10f,
+        /*load_a_cost=*/1.41e-10f,
+        /*load_b_cost=*/2.76e-11f,
+        /*output_c=*/1.79e-10f,
     },
-    // Ratio (predicted / actual): std=0.029, min=0.882, max=1.045 (n=60)
+    // Ratio (predicted / actual): std=0.055, min=0.851, max=1.164 (n=60)
     .x86_avx2_int8_int8_int32_k1 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/4.19e-10f,
-        /*load_b_cost=*/4.28e-11f,
-        /*output_c=*/9.08e-11f,
+        /*load_a_cost=*/4.86e-10f,
+        /*load_b_cost=*/3.70e-11f,
+        /*output_c=*/1.16e-10f,
     },
-    // Ratio (predicted / actual): std=0.163, min=0.719, max=1.333 (n=120)
+    // Ratio (predicted / actual): std=0.117, min=0.820, max=1.184 (n=60)
     .x86_avx2_uint8_int2_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.20e-10f,
-        /*load_b_cost=*/2.50e-11f,
-        /*output_c=*/2.73e-10f,
+        /*load_a_cost=*/9.49e-11f,
+        /*load_b_cost=*/2.37e-11f,
+        /*output_c=*/1.94e-10f,
     },
-    // Ratio (predicted / actual): std=0.085, min=0.830, max=1.134 (n=60)
+    // Ratio (predicted / actual): std=0.013, min=0.977, max=1.018 (n=20)
     .x86_avx2_uint8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/6.35e-11f,
-        /*load_b_cost=*/3.26e-11f,
-        /*output_c=*/2.33e-10f,
+        /*load_a_cost=*/6.17e-11f,
+        /*load_b_cost=*/3.08e-11f,
+        /*output_c=*/1.82e-10f,
     },
-    // Ratio (predicted / actual): std=0.131, min=0.677, max=1.274 (n=180)
+    // Ratio (predicted / actual): std=0.147, min=0.664, max=1.326 (n=180)
     .x86_avx2_fp32_k2 = {
-        /*block_overhead=*/1.70e-09f,
-        /*load_a_cost=*/1.39e-10f,
-        /*load_b_cost=*/6.72e-11f,
-        /*output_c=*/1.94e-10f,
+        /*block_overhead=*/1.83e-09f,
+        /*load_a_cost=*/1.29e-10f,
+        /*load_b_cost=*/6.96e-11f,
+        /*output_c=*/1.97e-10f,
     },
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
-    // Ratio (predicted / actual): std=0.087, min=0.749, max=1.196 (n=140)
+    // Ratio (predicted / actual): std=0.071, min=0.860, max=1.231 (n=80)
     .x86_avx_fp32 = {
-        /*block_overhead=*/3.97e-09f,
-        /*load_a_cost=*/2.61e-10f,
-        /*load_b_cost=*/6.34e-11f,
-        /*output_c=*/3.08e-11f,
+        /*block_overhead=*/1.67e-09f,
+        /*load_a_cost=*/3.91e-10f,
+        /*load_b_cost=*/4.63e-11f,
+        /*output_c=*/6.02e-11f,
     },
-    // Ratio (predicted / actual): std=0.089, min=0.809, max=1.205 (n=140)
+    // Ratio (predicted / actual): std=0.068, min=0.888, max=1.220 (n=80)
     .x86_avx_fp64 = {
-        /*block_overhead=*/3.27e-09f,
-        /*load_a_cost=*/2.63e-10f,
-        /*load_b_cost=*/1.26e-10f,
-        /*output_c=*/8.44e-11f,
+        /*block_overhead=*/1.70e-09f,
+        /*load_a_cost=*/4.23e-10f,
+        /*load_b_cost=*/9.26e-11f,
+        /*output_c=*/1.36e-10f,
     },
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_F16C_FMA3
-    // Ratio (predicted / actual): std=0.048, min=0.882, max=1.224 (n=100)
+    // Ratio (predicted / actual): std=0.051, min=0.768, max=1.084 (n=60)
     .x86_f16c_fma3_fp16_fp16_fp32 = {
-        /*block_overhead=*/2.12e-09f,
-        /*load_a_cost=*/1.19e-09f,
-        /*load_b_cost=*/1.45e-11f,
-        /*output_c=*/2.90e-11f,
+        /*block_overhead=*/5.20e-10f,
+        /*load_a_cost=*/1.14e-09f,
+        /*load_b_cost=*/1.87e-11f,
+        /*output_c=*/7.11e-11f,
     },
 #endif  // YNN_ARCH_X86_F16C_FMA3
 #ifdef YNN_ARCH_X86_F16C
-    // Ratio (predicted / actual): std=0.091, min=0.828, max=1.194 (n=140)
+    // Ratio (predicted / actual): std=0.104, min=0.772, max=1.183 (n=80)
     .x86_f16c_fp16_fp16_fp32 = {
-        /*block_overhead=*/1.19e-09f,
-        /*load_a_cost=*/1.11e-09f,
-        /*load_b_cost=*/4.32e-11f,
-        /*output_c=*/5.54e-11f,
+        /*block_overhead=*/0.00e+00f,
+        /*load_a_cost=*/9.11e-10f,
+        /*load_b_cost=*/6.29e-11f,
+        /*output_c=*/9.17e-11f,
     },
 #endif  // YNN_ARCH_X86_F16C
 #ifdef YNN_ARCH_X86_SSE2
-    // Ratio (predicted / actual): std=0.108, min=0.745, max=1.196 (n=160)
+    // Ratio (predicted / actual): std=0.100, min=0.777, max=1.211 (n=100)
     .x86_sse2_fp32 = {
-        /*block_overhead=*/1.95e-09f,
-        /*load_a_cost=*/3.27e-10f,
-        /*load_b_cost=*/1.43e-10f,
+        /*block_overhead=*/1.54e-09f,
+        /*load_a_cost=*/4.45e-10f,
+        /*load_b_cost=*/1.12e-10f,
         /*output_c=*/1.33e-10f,
     },
 #endif  // YNN_ARCH_X86_SSE2

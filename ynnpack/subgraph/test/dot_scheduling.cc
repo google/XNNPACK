@@ -4,18 +4,23 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <mutex>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
+#include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 #include "slinky/builder/simplify.h"
@@ -249,6 +254,86 @@ TEST(DotSchedulingTest, RaggedDotPrefillSplitsOuterM) {
       ASSERT_EQ(out(row, j), expected);
     }
   }
+}
+
+template <typename AT, typename BT>
+bool DotPacksB(const TensorShape& a_shape, const TensorShape& b_shape,
+               bool static_b = false) {
+  const uint32_t a_id = 0;
+  uint32_t b_id = static_b ? YNN_INVALID_VALUE_ID : 1;
+  const uint32_t out_id = static_b ? 1 : 2;
+  SubgraphBuilder builder(static_b ? 2 : 3);
+  builder.AddInput(type_of<AT>(), a_shape, a_id);
+  Tensor<BT> static_b_data;
+  if (static_b) {
+    static_b_data = Tensor<BT>(
+        std::vector<size_t>(b_shape.Dims(), b_shape.Dims() + b_shape.Rank()));
+    builder.AddTensor(type_of<BT>(), b_shape, b_id, static_b_data.data());
+  } else {
+    builder.AddInput(type_of<BT>(), b_shape, b_id);
+  }
+  builder
+      .AddOutput(type_of<float>(),
+                 TensorShape(std::max(a_shape.Rank(), b_shape.Rank())), out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  const ynn_subgraph& subgraph = *builder.GetSubgraph();
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  const auto* dot = std::get_if<ynn_node::dot>(&dot_node.op);
+  EXPECT_NE(dot, nullptr);
+  return dot && dot->pack_b;
+}
+
+bool HasUnalignedFp32Kernel() {
+#if defined(YNN_ARCH_X86)
+  return is_arch_supported(arch_flag::sse2);
+#elif defined(YNN_ARCH_ARM64)
+  return is_arch_supported(arch_flag::neon);
+#else
+  return false;
+#endif
+}
+
+bool HasUnalignedBf16Kernel() {
+#if defined(YNN_ARCH_X86)
+  return is_arch_supported(arch_flag::avx2_fma3);
+#elif defined(YNN_ARCH_ARM64)
+  return is_arch_supported(arch_flag::neon);
+#else
+  return false;
+#endif
+}
+
+TEST(DotSchedulingTest, PackBFp32) {
+  if (!HasUnalignedFp32Kernel()) GTEST_SKIP();
+  EXPECT_FALSE((DotPacksB<float, float>({1, 2048}, {2048, 2048})));
+  EXPECT_TRUE((DotPacksB<float, float>({512, 2048}, {2048, 2048})));
+  EXPECT_TRUE(
+      (DotPacksB<float, float>({1, 64}, {64, 64}, /*static_b=*/true)));
+  EXPECT_TRUE((DotPacksB<float, float>(TensorShape(2), {2048, 2048})));
+  // L2-resident B skips packing for small/moderate M, but packs for very large
+  // M.
+  EXPECT_FALSE((DotPacksB<float, float>({64, 128}, {128, 128})));
+  EXPECT_FALSE((DotPacksB<float, float>({32, 256}, {256, 64})));
+  EXPECT_TRUE((DotPacksB<float, float>({4096, 128}, {128, 128})));
+}
+
+TEST(DotSchedulingTest, PackBBatchBroadcast) {
+  if (!HasUnalignedFp32Kernel()) GTEST_SKIP();
+  // A broadcast over B's batch does not reduce per-slice M reuse of B.
+  EXPECT_TRUE((DotPacksB<float, float>({1, 256, 2048}, {8, 2048, 2048})));
+  // B broadcast over A's batch increases reuse of B across slices.
+  EXPECT_TRUE((DotPacksB<float, float>({128, 1, 2048}, {1, 2048, 2048})));
+  // Matching batch dims with M=1 per slice only read each B slice once.
+  EXPECT_FALSE((DotPacksB<float, float>({8, 1, 2048}, {8, 2048, 2048})));
+}
+
+TEST(DotSchedulingTest, PackBBf16) {
+  if (!HasUnalignedBf16Kernel()) GTEST_SKIP();
+  EXPECT_FALSE((DotPacksB<bfloat16, bfloat16>({1, 2048}, {2048, 2048})));
+  EXPECT_TRUE((DotPacksB<bfloat16, bfloat16>({64, 2048}, {2048, 2048})));
+  EXPECT_TRUE(
+      (DotPacksB<bfloat16, bfloat16>({1, 64}, {64, 64}, /*static_b=*/true)));
 }
 
 }  // namespace
