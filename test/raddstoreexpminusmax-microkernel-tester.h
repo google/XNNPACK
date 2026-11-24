@@ -7,6 +7,7 @@
 #define XNNPACK_TEST_RADDSTOREEXPMINUSMAX_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -48,23 +49,42 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     // doesn't. However, the range is still narrow enough that double-precision
     // exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
+    std::uniform_int_distribution<uint16_t> f16dist(0x8000, 0xFBFF);
+    constexpr std::array<uint16_t, 10> input_bits = {
+        0x0000, 0x8001, 0xB807, 0xC500, 0xC8D9,
+        0xC8DA, 0xC8DB, 0xC900, 0xCD00, 0xFBFF};
 
     xnnpack::Buffer<xnn_float16> x(elements(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> y(elements());
     xnnpack::Buffer<float> y_ref(elements());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
+    for (size_t iteration = 0;
+         iteration < 2 * iterations() + input_bits.size(); iteration++) {
+      float x_max_as_float = 0.0f;
+      if (iteration < iterations()) {
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
+        x_max_as_float = -std::numeric_limits<float>::infinity();
+        for (size_t i = 0; i < elements(); i++) {
+          x_max_as_float = std::max<float>(x_max_as_float, x[i]);
+        }
+      } else if (iteration < 2 * iterations()) {
+        std::generate(x.begin(), x.end(), [&]() {
+          return xnn_float16_from_bits(f16dist(rng));
+        });
+      } else {
+        for (size_t i = 0; i < elements(); i++) {
+          x[i] = xnn_float16_from_bits(
+              input_bits[(i + iteration - 2 * iterations()) % input_bits.size()]);
+        }
+      }
 
       // Compute reference results.
       float sum_ref = 0.0f;
-      float x_max_as_float = -std::numeric_limits<float>::infinity();
-      for (size_t i = 0; i < elements(); i++) {
-        x_max_as_float = std::max<float>(x_max_as_float, x[i]);
-      }
       const xnn_float16 x_max_as_half =
           static_cast<xnn_float16>(x_max_as_float);
       for (size_t i = 0; i < elements(); i++) {
-        const float y_ref_value = exp(x[i] - x_max_as_float);
+        const float x_delta = xnn_float16_to_float(x[i]) - x_max_as_float;
+        const float y_ref_value =
+            x_delta < -0x1.368000p+3f ? 0.0f : exp(x_delta);
         y_ref[i] = y_ref_value;
         sum_ref += y_ref_value;
       }

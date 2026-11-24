@@ -20,6 +20,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-f16c-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x16-minmax-f16c-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x16-minmax-f16c-broadcast.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u8.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u32.c
   src/f16-f32acc-rdsum2/gen/f16-f32acc-rdsum2-7p7x-f16c.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc4.c
@@ -85,6 +86,8 @@ SET(NON_PROD_F16C_MICROKERNEL_SRCS
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x16-minmax-f16c-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-6x8-minmax-f16c-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-7x8-minmax-f16c-broadcast.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u16-acc2.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-f16c-rr1-p2-u32-acc4.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u16.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u64.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u128.c

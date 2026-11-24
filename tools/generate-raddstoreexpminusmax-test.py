@@ -39,7 +39,7 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"xnn_(f16|f32)_raddstoreexpminusmax_ukernel__(.+)_u(\d+)(v)?(_acc(\d+))?",
+      r"xnn_(f16(?:_f32acc)?|f32)_raddstoreexpminusmax_ukernel__(.+)_u(\d+)(v)?(_acc(\d+))?",
       name,
   )
   if match is None:
@@ -199,7 +199,11 @@ def main(args):
       elements_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(
-          name, init_fn, elements_tile, vector_tile, isa
+          name,
+          init_fn,
+          elements_tile,
+          vector_tile,
+          isa,
       )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 

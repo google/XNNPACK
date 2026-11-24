@@ -15,8 +15,8 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x16-minmax-avx2-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x16-minmax-avx2-broadcast.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u32.c
   src/f16-maxpool/gen/f16-maxpool-9p-minmax-avx2-u16.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32.c
   src/f16-velu/gen/f16-velu-avx2-rr1-p3-u16.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u32.c
   src/f16-vunary/gen/f16-vabs-avx2-u32.c
@@ -121,6 +121,19 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x16-minmax-avx2-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-6x8-minmax-avx2-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-7x8-minmax-avx2-broadcast.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u16-acc2.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u16.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u32-acc2.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u32-acc4.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u40-acc2.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u40-acc5.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u40.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u48-acc2.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u48-acc3.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u48.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u64-acc2.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u64-acc4.c
+  src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx2-rr1-p2-u64.c
   src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c
   src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c
   src/f16-gemm/gen/f16-gemm-3x16-minmax-avx2-broadcast.c
@@ -139,19 +152,6 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-5x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/f16-igemm-6x8-minmax-avx2-broadcast.c
   src/f16-igemm/gen/f16-igemm-7x8-minmax-avx2-broadcast.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u16-acc2.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u16.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32-acc2.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32-acc4.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u40-acc2.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u40-acc5.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u40.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u48-acc2.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u48-acc3.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u48.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u64-acc2.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u64-acc4.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u64.c
   src/f16-velu/gen/f16-velu-avx2-rr1-p3-u8.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u8.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u16.c
