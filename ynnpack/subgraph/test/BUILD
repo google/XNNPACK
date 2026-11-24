@@ -251,6 +251,7 @@ cc_test(
     "gather",
     "get_tensor_shape",
     "iota",
+    "multiply_reduce",
     "reduce",
     "reduce_dot",
     "runtime",
@@ -418,5 +419,18 @@ cc_test(
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
+    ] + ynn_benchmark_deps(),
+)
+
+cc_test(
+    name = "multiply_reduce_bench",
+    srcs = ["multiply_reduce_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":scheduler",
+        "//ynnpack",
+        "//ynnpack/base",
     ] + ynn_benchmark_deps(),
 )
