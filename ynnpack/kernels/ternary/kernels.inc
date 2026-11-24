@@ -39,10 +39,10 @@
 #include "ynnpack/kernels/ternary/wasm_simd128.inc"
 #endif  // YNN_ARCH_WASM_SIMD128
 
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_int8, quantize_int8, 0, float, float, int32_t, int8_t)
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_uint8, quantize_uint8, 0, float, float, int32_t, uint8_t)
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int8_to_fp32, dequantize, 0, int8_t, int32_t, float, float)
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_uint8_to_fp32, dequantize, 0, uint8_t, int32_t, float, float)
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int32_to_fp32, dequantize, 0, int32_t, int32_t, float, float)
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int4_to_fp32, dequantize, 0, int4x2, int32_t, float, float)
-YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int2_to_fp32, dequantize, 0, int2x4, int32_t, float, float)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_int8, quantize_int8, ternary_flag::consistent_arithmetic, float, float, int32_t, int8_t)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_uint8, quantize_uint8, ternary_flag::consistent_arithmetic, float, float, int32_t, uint8_t)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int8_to_fp32, dequantize, ternary_flag::consistent_arithmetic, int8_t, int32_t, float, float)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_uint8_to_fp32, dequantize, ternary_flag::consistent_arithmetic, uint8_t, int32_t, float, float)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int32_to_fp32, dequantize, ternary_flag::consistent_arithmetic, int32_t, int32_t, float, float)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int4_to_fp32, dequantize, ternary_flag::consistent_arithmetic, int4x2, int32_t, float, float)
+YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int2_to_fp32, dequantize, ternary_flag::consistent_arithmetic, int2x4, int32_t, float, float)

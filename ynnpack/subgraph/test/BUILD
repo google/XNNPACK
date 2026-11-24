@@ -193,6 +193,7 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = TEST_DEPS + [
+        "//ynnpack/kernels/binary",
         "//ynnpack/kernels/dequantize_dot",
         "//ynnpack/kernels/ternary",
         "//ynnpack/subgraph",
