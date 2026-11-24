@@ -2728,6 +2728,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
           qd8_f16_qb4w_gemm_config.nr = 16;
           qd8_f16_qb4w_gemm_config.log2_kr = 2;
           qd8_f16_qb4w_gemm_config.planes = 2;
+          qd8_f16_qb4w_gemm_config.arch = xnn_arch_arm_neon_dot;
         #endif  // XNN_ENABLE_ARM_DOTPROD
       } else if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
         qd8_f16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16__neonfp16arith_mlal_lane);
@@ -2736,6 +2737,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
         qd8_f16_qb4w_gemm_config.mr = 6;
         qd8_f16_qb4w_gemm_config.nr = 16;
         qd8_f16_qb4w_gemm_config.planes = 2;
+        qd8_f16_qb4w_gemm_config.arch = xnn_arch_arm_neon_fp16_arith;
       }
     }
   #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
@@ -2751,6 +2753,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
         qd8_f16_qb4w_gemm_config.nr = 16;
         qd8_f16_qb4w_gemm_config.log2_kr = 3;
         qd8_f16_qb4w_gemm_config.planes = 2;
+        qd8_f16_qb4w_gemm_config.arch = xnn_arch_arm_neon_i8mm;
       #endif  // XNN_ENABLE_ARM_I8MM
     } else if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       #if XNN_ENABLE_ARM_DOTPROD
@@ -2761,6 +2764,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
         qd8_f16_qb4w_gemm_config.nr = 16;
         qd8_f16_qb4w_gemm_config.log2_kr = 2;
         qd8_f16_qb4w_gemm_config.planes = 2;
+        qd8_f16_qb4w_gemm_config.arch = xnn_arch_arm_neon_dot;
       #endif  // XNN_ENABLE_ARM_DOTPROD
     } else if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
         qd8_f16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16__neonfp16arith_mlal_lane);
@@ -2769,6 +2773,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
         qd8_f16_qb4w_gemm_config.mr = 6;
         qd8_f16_qb4w_gemm_config.nr = 16;
         qd8_f16_qb4w_gemm_config.planes = 2;
+        qd8_f16_qb4w_gemm_config.arch = xnn_arch_arm_neon_fp16_arith;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2783,6 +2788,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
         qd8_f16_qb4w_gemm_config.nr = 8;
         qd8_f16_qb4w_gemm_config.log2_kr = 3;
         qd8_f16_qb4w_gemm_config.planes = 2;
+        qd8_f16_qb4w_gemm_config.arch = xnn_arch_x86_avx2;
       }
     #endif
   #endif
