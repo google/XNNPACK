@@ -57,6 +57,7 @@ cc_test(
         "@abseil-cpp//absl/status",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
+        "@pthreadpool",
     ],
 )
 
