@@ -43,6 +43,13 @@ typedef void (*xnn_x16_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
                                            size_t lhs_stride,
                                            void* lhs_packed);
 
+typedef void (*xnn_x8_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr,
+                                          size_t kr, size_t sr,
+                                          size_t m_idx_start,
+                                          const int8_t* lhs,
+                                          size_t lhs_stride,
+                                          void* lhs_packed);
+
 class GemmMicrokernelTester {
  public:
   GemmMicrokernelTester clone() const { return *this; }
@@ -222,6 +229,13 @@ class GemmMicrokernelTester {
   }
 
   size_t nc_mod_nr() const { return known_nc_mod_nr() ? n() % nr() : SIZE_MAX; }
+
+  GemmMicrokernelTester& large_bias(bool large_bias) {
+    this->large_bias_ = large_bias;
+    return *this;
+  }
+
+  bool large_bias() const { return this->large_bias_; }
 
   void Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
             xnn_init_f16_minmax_params_fn init_params,
@@ -441,8 +455,23 @@ class GemmMicrokernelTester {
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride) const;
 
+  void Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                 xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                 xnn_x8_pack_lh_ukernel_fn pack_lh_fn,
+                 xnn_pack_lh_size_fn pack_lh_size_fn,
+                 xnn_pack_weights_and_biases_fn pack,
+                 xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
   void Test_PQS8QC4W(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
                      xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                     xnn_pack_weights_and_biases_fn pack,
+                     xnn_packed_stride_weights_and_biases_fn packed_stride,
+                     xnn_qs8_requantize_fn requantize) const;
+
+  void Test_PQS8QC4W(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                     xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                     xnn_x8_pack_lh_ukernel_fn pack_lh_fn,
+                     xnn_pack_lh_size_fn pack_lh_size_fn,
                      xnn_pack_weights_and_biases_fn pack,
                      xnn_packed_stride_weights_and_biases_fn packed_stride,
                      xnn_qs8_requantize_fn requantize) const;
@@ -478,6 +507,7 @@ class GemmMicrokernelTester {
   size_t zero_index_{0};
   bool known_nc_mod_nr_{true};
   size_t mr_packed_{0};
+  bool large_bias_{false};
 };
 
 enum class LoopStepType { Linear, NextPrime };
