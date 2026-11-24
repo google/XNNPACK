@@ -200,18 +200,22 @@ void xnn_f16_igemm_minmax_ukernel_4x4__scalar(
         c3[0] = xnn_float16_from_float(vacc30);
         c3[1] = xnn_float16_from_float(vacc31);
         vacc30 = vacc32;
+        vacc31 = vacc33;
         c3 += 2;
         c2[0] = xnn_float16_from_float(vacc20);
         c2[1] = xnn_float16_from_float(vacc21);
         vacc20 = vacc22;
+        vacc21 = vacc23;
         c2 += 2;
         c1[0] = xnn_float16_from_float(vacc10);
         c1[1] = xnn_float16_from_float(vacc11);
         vacc10 = vacc12;
+        vacc11 = vacc13;
         c1 += 2;
         c0[0] = xnn_float16_from_float(vacc00);
         c0[1] = xnn_float16_from_float(vacc01);
         vacc00 = vacc02;
+        vacc01 = vacc03;
         c0 += 2;
       }
       if (nc & 1) {

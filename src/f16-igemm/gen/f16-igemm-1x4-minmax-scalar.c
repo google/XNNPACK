@@ -107,6 +107,7 @@ void xnn_f16_igemm_minmax_ukernel_1x4__scalar(
         c0[0] = xnn_float16_from_float(vacc00);
         c0[1] = xnn_float16_from_float(vacc01);
         vacc00 = vacc02;
+        vacc01 = vacc03;
         c0 += 2;
       }
       if (nc & 1) {
