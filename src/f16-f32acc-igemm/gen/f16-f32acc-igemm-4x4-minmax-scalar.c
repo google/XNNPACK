@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-gemm/scalar.c.in
+//   Template: src/f16-f32acc-igemm/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -13,21 +13,23 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/igemm.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 
-void xnn_f16_gemm_minmax_ukernel_4x4__scalar(
+void xnn_f16_f32acc_igemm_minmax_ukernel_4x4__scalar(
     size_t mr,
     size_t nc,
     size_t kc,
-    const xnn_float16* restrict a,
-    size_t a_stride,
+    size_t ks,
+    const xnn_float16** restrict a,
     const xnn_float16* restrict w,
     xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
+    size_t a_offset,
+    const xnn_float16* zero,
     const struct xnn_f16_minmax_params* restrict params)
 {
   assert(mr != 0);
@@ -35,28 +37,24 @@ void xnn_f16_gemm_minmax_ukernel_4x4__scalar(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(xnn_float16) == 0);
+  assert(ks != 0);
+  assert(ks % (4 * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(xnn_float16) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
-  const xnn_float16* a0 = a;
   xnn_float16* c0 = c;
-  const xnn_float16* a1 = (const xnn_float16*) ((uintptr_t) a0 + a_stride);
   xnn_float16* c1 = (xnn_float16*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
-    a1 = a0;
     c1 = c0;
   }
-  const xnn_float16* a2 = (const xnn_float16*) ((uintptr_t) a1 + a_stride);
   xnn_float16* c2 = (xnn_float16*) ((uintptr_t) c1 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 2) {
-    a2 = a1;
     c2 = c1;
   }
-  const xnn_float16* a3 = (const xnn_float16*) ((uintptr_t) a2 + a_stride);
   xnn_float16* c3 = (xnn_float16*) ((uintptr_t) c2 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 4) {
-    a3 = a2;
     c3 = c2;
   }
 
@@ -81,38 +79,64 @@ void xnn_f16_gemm_minmax_ukernel_4x4__scalar(
     float vacc33 = vacc03;
     w += 4;
 
-    size_t k = kc;
+    size_t p = ks;
     do {
-      const float va0 = xnn_float16_to_float(*a0++);
-      const float va1 = xnn_float16_to_float(*a1++);
-      const float va2 = xnn_float16_to_float(*a2++);
-      const float va3 = xnn_float16_to_float(*a3++);
+      const xnn_float16* restrict a0 = a[0];
+      assert(a0 != NULL);
+      if XNN_UNPREDICTABLE(a0 != zero) {
+        a0 = (const xnn_float16*) ((uintptr_t) a0 + a_offset);
+      }
+      const xnn_float16* restrict a1 = a[1];
+      assert(a1 != NULL);
+      if XNN_UNPREDICTABLE(a1 != zero) {
+        a1 = (const xnn_float16*) ((uintptr_t) a1 + a_offset);
+      }
+      const xnn_float16* restrict a2 = a[2];
+      assert(a2 != NULL);
+      if XNN_UNPREDICTABLE(a2 != zero) {
+        a2 = (const xnn_float16*) ((uintptr_t) a2 + a_offset);
+      }
+      const xnn_float16* restrict a3 = a[3];
+      assert(a3 != NULL);
+      if XNN_UNPREDICTABLE(a3 != zero) {
+        a3 = (const xnn_float16*) ((uintptr_t) a3 + a_offset);
+      }
+      a += 4;
 
-      const float vb0 = xnn_float16_to_float(w[0]);
-      const float vb1 = xnn_float16_to_float(w[1]);
-      const float vb2 = xnn_float16_to_float(w[2]);
-      const float vb3 = xnn_float16_to_float(w[3]);
-      w += 4;
+      size_t k = kc;
+      do {
+        const float va0 = xnn_float16_to_float(*a0++);
+        const float va1 = xnn_float16_to_float(*a1++);
+        const float va2 = xnn_float16_to_float(*a2++);
+        const float va3 = xnn_float16_to_float(*a3++);
 
-      vacc00 = math_muladd_f32(va0, vb0, vacc00);
-      vacc01 = math_muladd_f32(va0, vb1, vacc01);
-      vacc02 = math_muladd_f32(va0, vb2, vacc02);
-      vacc03 = math_muladd_f32(va0, vb3, vacc03);
-      vacc10 = math_muladd_f32(va1, vb0, vacc10);
-      vacc11 = math_muladd_f32(va1, vb1, vacc11);
-      vacc12 = math_muladd_f32(va1, vb2, vacc12);
-      vacc13 = math_muladd_f32(va1, vb3, vacc13);
-      vacc20 = math_muladd_f32(va2, vb0, vacc20);
-      vacc21 = math_muladd_f32(va2, vb1, vacc21);
-      vacc22 = math_muladd_f32(va2, vb2, vacc22);
-      vacc23 = math_muladd_f32(va2, vb3, vacc23);
-      vacc30 = math_muladd_f32(va3, vb0, vacc30);
-      vacc31 = math_muladd_f32(va3, vb1, vacc31);
-      vacc32 = math_muladd_f32(va3, vb2, vacc32);
-      vacc33 = math_muladd_f32(va3, vb3, vacc33);
+        const float vb0 = xnn_float16_to_float(w[0]);
+        const float vb1 = xnn_float16_to_float(w[1]);
+        const float vb2 = xnn_float16_to_float(w[2]);
+        const float vb3 = xnn_float16_to_float(w[3]);
+        w += 4;
 
-      k -= sizeof(xnn_float16);
-    } while (k != 0);
+        vacc00 = math_muladd_f32(va0, vb0, vacc00);
+        vacc01 = math_muladd_f32(va0, vb1, vacc01);
+        vacc02 = math_muladd_f32(va0, vb2, vacc02);
+        vacc03 = math_muladd_f32(va0, vb3, vacc03);
+        vacc10 = math_muladd_f32(va1, vb0, vacc10);
+        vacc11 = math_muladd_f32(va1, vb1, vacc11);
+        vacc12 = math_muladd_f32(va1, vb2, vacc12);
+        vacc13 = math_muladd_f32(va1, vb3, vacc13);
+        vacc20 = math_muladd_f32(va2, vb0, vacc20);
+        vacc21 = math_muladd_f32(va2, vb1, vacc21);
+        vacc22 = math_muladd_f32(va2, vb2, vacc22);
+        vacc23 = math_muladd_f32(va2, vb3, vacc23);
+        vacc30 = math_muladd_f32(va3, vb0, vacc30);
+        vacc31 = math_muladd_f32(va3, vb1, vacc31);
+        vacc32 = math_muladd_f32(va3, vb2, vacc32);
+        vacc33 = math_muladd_f32(va3, vb3, vacc33);
+
+        k -= sizeof(xnn_float16);
+      } while (k != 0);
+      p -= 4 * sizeof(void*);
+    } while (p != 0);
 
     vacc00 = math_max_f32(vacc00, vmin);
     vacc01 = math_max_f32(vacc01, vmin);
@@ -169,11 +193,7 @@ void xnn_f16_gemm_minmax_ukernel_4x4__scalar(
       c0[3] = xnn_float16_from_float(vacc03);
       c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
-      a3 = (const xnn_float16*) ((uintptr_t) a3 - kc);
-      a2 = (const xnn_float16*) ((uintptr_t) a2 - kc);
-      a1 = (const xnn_float16*) ((uintptr_t) a1 - kc);
-      a0 = (const xnn_float16*) ((uintptr_t) a0 - kc);
-
+      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
       nc -= 4;
     } else {
       if (nc & 2) {

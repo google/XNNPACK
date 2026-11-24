@@ -2135,46 +2135,6 @@ std::vector<GemmTestParams> CreateHmxGemmTests(
 #endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 
-INSTANTIATE_TEST_SUITE_P(
-    F16_GEMM_MINMAX_1X4__SCALAR, GemmTest,
-    testing::ValuesIn(CreateTests1(
-        /*k_block=*/1,
-        /*adj_k_block=*/1,
-        /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-        /*is_igemm=*/false,
-        /*unsigned_inputs=*/false,
-        /*planes=*/1,
-        [](GemmMicrokernelTester& tester) {
-          tester.Test(xnn_f16_gemm_minmax_ukernel_1x4__scalar,
-                      xnn_init_f16_minmax_scalar_params,
-                      xnn_pack_f16_gemm_goi_w);
-        },
-        0)),
-    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-      return info.param.test_name;
-    });
-
-
-INSTANTIATE_TEST_SUITE_P(
-    F16_GEMM_MINMAX_4X4__SCALAR, GemmTest,
-    testing::ValuesIn(CreateTests1(
-        /*k_block=*/1,
-        /*adj_k_block=*/1,
-        /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-        /*is_igemm=*/false,
-        /*unsigned_inputs=*/false,
-        /*planes=*/1,
-        [](GemmMicrokernelTester& tester) {
-          tester.Test(xnn_f16_gemm_minmax_ukernel_4x4__scalar,
-                      xnn_init_f16_minmax_scalar_params,
-                      xnn_pack_f16_gemm_goi_w);
-        },
-        0)),
-    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-      return info.param.test_name;
-    });
-
-
 #if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
   INSTANTIATE_TEST_SUITE_P(
       F16_GEMM_MINMAX_1X4V__RVVFP16ARITH, GemmTest,

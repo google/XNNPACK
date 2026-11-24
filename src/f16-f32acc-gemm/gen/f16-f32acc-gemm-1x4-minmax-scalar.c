@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-igemm/scalar.c.in
+//   Template: src/f16-f32acc-gemm/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -13,23 +13,21 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 
-void xnn_f16_igemm_minmax_ukernel_1x4__scalar(
+void xnn_f16_f32acc_gemm_minmax_ukernel_1x4__scalar(
     size_t mr,
     size_t nc,
     size_t kc,
-    size_t ks,
-    const xnn_float16** restrict a,
+    const xnn_float16* restrict a,
+    size_t a_stride,
     const xnn_float16* restrict w,
     xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    size_t a_offset,
-    const xnn_float16* zero,
     const struct xnn_f16_minmax_params* restrict params)
 {
   assert(mr != 0);
@@ -37,13 +35,11 @@ void xnn_f16_igemm_minmax_ukernel_1x4__scalar(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(xnn_float16) == 0);
-  assert(ks != 0);
-  assert(ks % (1 * sizeof(void*)) == 0);
-  assert(a_offset % sizeof(xnn_float16) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
+  const xnn_float16* a0 = a;
   xnn_float16* c0 = c;
 
   const float vmin = xnn_float16_to_float(params->scalar.min);
@@ -55,34 +51,23 @@ void xnn_f16_igemm_minmax_ukernel_1x4__scalar(
     float vacc03 = xnn_float16_to_float(w[3]);
     w += 4;
 
-    size_t p = ks;
+    size_t k = kc;
     do {
-      const xnn_float16* restrict a0 = a[0];
-      assert(a0 != NULL);
-      if XNN_UNPREDICTABLE(a0 != zero) {
-        a0 = (const xnn_float16*) ((uintptr_t) a0 + a_offset);
-      }
-      a += 1;
+      const float va0 = xnn_float16_to_float(*a0++);
 
-      size_t k = kc;
-      do {
-        const float va0 = xnn_float16_to_float(*a0++);
+      const float vb0 = xnn_float16_to_float(w[0]);
+      const float vb1 = xnn_float16_to_float(w[1]);
+      const float vb2 = xnn_float16_to_float(w[2]);
+      const float vb3 = xnn_float16_to_float(w[3]);
+      w += 4;
 
-        const float vb0 = xnn_float16_to_float(w[0]);
-        const float vb1 = xnn_float16_to_float(w[1]);
-        const float vb2 = xnn_float16_to_float(w[2]);
-        const float vb3 = xnn_float16_to_float(w[3]);
-        w += 4;
+      vacc00 = math_muladd_f32(va0, vb0, vacc00);
+      vacc01 = math_muladd_f32(va0, vb1, vacc01);
+      vacc02 = math_muladd_f32(va0, vb2, vacc02);
+      vacc03 = math_muladd_f32(va0, vb3, vacc03);
 
-        vacc00 = math_muladd_f32(va0, vb0, vacc00);
-        vacc01 = math_muladd_f32(va0, vb1, vacc01);
-        vacc02 = math_muladd_f32(va0, vb2, vacc02);
-        vacc03 = math_muladd_f32(va0, vb3, vacc03);
-
-        k -= sizeof(xnn_float16);
-      } while (k != 0);
-      p -= 1 * sizeof(void*);
-    } while (p != 0);
+      k -= sizeof(xnn_float16);
+    } while (k != 0);
 
     vacc00 = math_max_f32(vacc00, vmin);
     vacc01 = math_max_f32(vacc01, vmin);
@@ -100,7 +85,8 @@ void xnn_f16_igemm_minmax_ukernel_1x4__scalar(
       c0[3] = xnn_float16_from_float(vacc03);
       c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
-      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
+      a0 = (const xnn_float16*) ((uintptr_t) a0 - kc);
+
       nc -= 4;
     } else {
       if (nc & 2) {

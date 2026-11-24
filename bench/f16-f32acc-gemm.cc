@@ -112,6 +112,17 @@ static void f16_gemm(benchmark::State& state,
                          benchmark::Counter::kIsRate);
 }
 
+static void f16_f32acc_gemm_1x4__scalar(benchmark::State& state) {
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x4__scalar, 1, 4, 1, 1,
+           xnn_init_f16_minmax_scalar_params);
+}
+static void f16_f32acc_gemm_4x4__scalar(benchmark::State& state) {
+  f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x4__scalar, 4, 4, 1, 1,
+           xnn_init_f16_minmax_scalar_params);
+}
+BENCHMARK_GEMM(f16_f32acc_gemm_1x4__scalar)
+BENCHMARK_GEMM(f16_f32acc_gemm_4x4__scalar)
+
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f16_f32acc_gemm_1x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast, 1, 8,

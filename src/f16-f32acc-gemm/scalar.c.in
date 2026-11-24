@@ -16,7 +16,7 @@ $assert ACTIVATION in ["LINEAR", "MINMAX"]
 
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "struct xnn_f16_default_params", "MINMAX": "struct xnn_f16_minmax_params"}[ACTIVATION]
-void xnn_f16_gemm${SUFFIX}_ukernel_${MR}x${NR}__scalar(
+void xnn_f16_f32acc_gemm${SUFFIX}_ukernel_${MR}x${NR}__scalar(
     size_t mr,
     size_t nc,
     size_t kc,

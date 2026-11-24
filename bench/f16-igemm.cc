@@ -789,28 +789,6 @@ namespace {
 #endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
 
 
-static void f16_igemm_minmax_ukernel_1x4__scalar(benchmark::State& state) {
-  IGEMMBenchmark(state,
-    xnn_f16_igemm_minmax_ukernel_1x4__scalar,
-    xnn_init_f16_minmax_scalar_params,
-    xnn_pack_f16_conv_goki_w,
-    /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-    /*arch_flags=*/0);
-}
-
-BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x4__scalar)
-
-static void f16_igemm_minmax_ukernel_4x4__scalar(benchmark::State& state) {
-  IGEMMBenchmark(state,
-    xnn_f16_igemm_minmax_ukernel_4x4__scalar,
-    xnn_init_f16_minmax_scalar_params,
-    xnn_pack_f16_conv_goki_w,
-    /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-    /*arch_flags=*/0);
-}
-
-BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x4__scalar)
-
 }  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

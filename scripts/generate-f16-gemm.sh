@@ -5,8 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 ##################################### Scalar ####################################
-tools/xngen src/f16-gemm/scalar.c.in -D MR=1 -D NR=4 -D ACTIVATION=MINMAX -o src/f16-gemm/gen/f16-gemm-1x4-minmax-scalar.c &
-tools/xngen src/f16-gemm/scalar.c.in -D MR=4 -D NR=4 -D ACTIVATION=MINMAX -o src/f16-gemm/gen/f16-gemm-4x4-minmax-scalar.c &
+tools/xngen src/f16-f32acc-gemm/scalar.c.in -D MR=1 -D NR=4 -D ACTIVATION=MINMAX -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x4-minmax-scalar.c &
+tools/xngen src/f16-f32acc-gemm/scalar.c.in -D MR=4 -D NR=4 -D ACTIVATION=MINMAX -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x4-minmax-scalar.c &
 
 ############################### AArch64 assembly ##############################
 tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/f16-gemm-1x16-minmax-asm-aarch64-neonfp16arith-ld64.S &

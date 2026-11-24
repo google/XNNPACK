@@ -23,11 +23,11 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-f32acc-dwconv-9p1c-minmax-scalar-acc2.c
   src/f16-dwconv/gen/f16-f32acc-dwconv-25p2c-minmax-scalar-acc2.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x4-minmax-scalar.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x4-minmax-scalar.c
+  src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x4-minmax-scalar.c
+  src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x4-minmax-scalar.c
   src/f16-f32acc-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-scalar-rr1-p2-u1.c
-  src/f16-gemm/gen/f16-gemm-1x4-minmax-scalar.c
-  src/f16-gemm/gen/f16-gemm-4x4-minmax-scalar.c
-  src/f16-igemm/gen/f16-igemm-1x4-minmax-scalar.c
-  src/f16-igemm/gen/f16-igemm-4x4-minmax-scalar.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-scalar-rr2-p2-u1.c
