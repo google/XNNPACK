@@ -46,6 +46,14 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int4_int32_32x32x64_16x16x8_amxint8
                32, 32, 64, 16, 16, 8,
                dot_flag::consistent_arithmetic, uint8_t, int4x2, int32_t,
                cost_models.x86_amx_uint8_int4)
+YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int2_int32_16x32x64_16x16x16_amxint8,
+               16, 32, 64, 16, 16, 16,
+               dot_flag::consistent_arithmetic, uint8_t, int2x4, int32_t,
+               cost_models.x86_amx_uint8_int2)
+YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int2_int32_32x32x64_16x16x16_amxint8,
+               32, 32, 64, 16, 16, 16,
+               dot_flag::consistent_arithmetic, uint8_t, int2x4, int32_t,
+               cost_models.x86_amx_uint8_int2)
 #endif  // YNN_ARCH_X86_AMXINT8
 #ifdef YNN_ARCH_X86_ACE
 YNN_DOT_KERNEL(arch_flag::ace, dot_int8_int8_int32_16x32x4_1x16x4_ace,

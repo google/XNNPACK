@@ -46,6 +46,13 @@ static constexpr dot_cost_models golden_cove = {
         /*load_b_cost=*/9.41e-12f,
         /*output_c=*/3.72e-11f,
     },
+    // Ratio (predicted / actual): std=0.027, min=0.954, max=1.059 (n=11)
+    .x86_amx_uint8_int2 = {
+        /*block_overhead=*/0.00e+00f,
+        /*load_a_cost=*/4.35e-12f,
+        /*load_b_cost=*/9.57e-12f,
+        /*output_c=*/3.60e-11f,
+    },
 #endif  // YNN_ARCH_X86_AMXINT8
 #ifdef YNN_ARCH_X86_AVX512VNNI
     // Ratio (predicted / actual): std=0.084, min=0.837, max=1.229 (n=119)

@@ -1006,6 +1006,7 @@ multi_type dot_types[] = {
     multi_type::bf16_bf16_fp32,
     multi_type::int8_int8_int32,
     multi_type::int8_int4_int32,
+    multi_type::int8_int2_int32,
     multi_type::uint8_int8_int32,
 };
 

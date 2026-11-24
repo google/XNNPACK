@@ -430,6 +430,91 @@ YNN_ALWAYS_INLINE static void unpack_int4_b_tile(int8_t* dst, const void* src,
   }
 }
 
+// Unpacks `k_chunks` 64-byte rows of packed int2x4 weights (each representing
+// tile_k = 16 rows and tile_n = 16 columns) into `4 * k_chunks` 64-byte AMX
+// B-tile rows of signed int8_t weights (each representing 4 K-rows and 16
+// N-columns).
+template <size_t StaticKChunks = 0>
+YNN_ALWAYS_INLINE static void unpack_int2_b_tile(int8_t* dst, const void* src,
+                                                 size_t stride_k1,
+                                                 size_t k_chunks) {
+  // Within each 128-bit lane (4 columns), group bytes by K-group (t = 0..3):
+  // bytes 0..3 hold k = 0..3, 4..7 hold k = 4..7, 8..11 hold k = 8..11, and
+  // 12..15 hold k = 12..15.
+  const __m512i perm_mask = _mm512_broadcast_i32x4(
+      _mm_setr_epi8(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15));
+#ifdef __GFNI__
+  // Sign-extend each 2-bit plane to int8_t by replicating its sign bit across
+  // bits 1..7.
+  const __m512i gfni_0 = _mm512_set1_epi64(0x0102020202020202ULL);
+  const __m512i gfni_1 = _mm512_set1_epi64(0x0408080808080808ULL);
+  const __m512i gfni_2 = _mm512_set1_epi64(0x1020202020202020ULL);
+  const __m512i gfni_3 = _mm512_set1_epi64(0x4080808080808080ULL);
+#else
+  const __m512i mask_0f = _mm512_set1_epi8(0x0f);
+  const __m512i sign_lut = _mm512_broadcast_i32x4(
+      _mm_setr_epi8(0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1));
+  const __m512i sign_lut_x4 = _mm512_broadcast_i32x4(
+      _mm_setr_epi8(0, 0, 0, 0, 1, 1, 1, 1, -2, -2, -2, -2, -1, -1, -1, -1));
+#endif
+
+  auto unpack_one = [&](size_t i) {
+    const __m512i v = _mm512_loadu_si512(src);
+    src = offset_bytes(src, stride_k1);
+    const __m512i vp = _mm512_shuffle_epi8(v, perm_mask);
+#ifdef __GFNI__
+    const __m512i s0 = _mm512_gf2p8affine_epi64_epi8(vp, gfni_0, 0);
+    const __m512i s1 = _mm512_gf2p8affine_epi64_epi8(vp, gfni_1, 0);
+    const __m512i s2 = _mm512_gf2p8affine_epi64_epi8(vp, gfni_2, 0);
+    const __m512i s3 = _mm512_gf2p8affine_epi64_epi8(vp, gfni_3, 0);
+#else
+    const __m512i lo = _mm512_and_si512(vp, mask_0f);
+    const __m512i hi = _mm512_and_si512(_mm512_srli_epi16(vp, 4), mask_0f);
+    const __m512i s0 = _mm512_shuffle_epi8(sign_lut, lo);
+    const __m512i s1 = _mm512_shuffle_epi8(sign_lut_x4, lo);
+    const __m512i s2 = _mm512_shuffle_epi8(sign_lut, hi);
+    const __m512i s3 = _mm512_shuffle_epi8(sign_lut_x4, hi);
+#endif
+    const __m512i u01_lo = _mm512_unpacklo_epi8(s0, s1);
+    const __m512i u23_lo = _mm512_unpacklo_epi8(s2, s3);
+    const __m512i r0 = _mm512_unpacklo_epi16(u01_lo, u23_lo);
+    const __m512i r1 = _mm512_unpackhi_epi16(u01_lo, u23_lo);
+    const __m512i u01_hi = _mm512_unpackhi_epi8(s0, s1);
+    const __m512i u23_hi = _mm512_unpackhi_epi8(s2, s3);
+    const __m512i r2 = _mm512_unpacklo_epi16(u01_hi, u23_hi);
+    const __m512i r3 = _mm512_unpackhi_epi16(u01_hi, u23_hi);
+    _mm512_store_si512(dst + (4 * i + 0) * tile_row_bytes, r0);
+    _mm512_store_si512(dst + (4 * i + 1) * tile_row_bytes, r1);
+    _mm512_store_si512(dst + (4 * i + 2) * tile_row_bytes, r2);
+    _mm512_store_si512(dst + (4 * i + 3) * tile_row_bytes, r3);
+  };
+
+  if constexpr (StaticKChunks > 0) {
+    YNN_UNROLL
+    for (size_t i = 0; i < StaticKChunks; ++i) {
+      unpack_one(i);
+    }
+  } else {
+    for (size_t i = 0; i < k_chunks; ++i) {
+      unpack_one(i);
+    }
+  }
+}
+
+template <typename TB>
+constexpr bool is_subbyte_b =
+    std::is_same_v<TB, int4x2> || std::is_same_v<TB, int2x4>;
+
+template <typename TB, size_t StaticKChunks = 0>
+YNN_ALWAYS_INLINE static void unpack_b_tile(int8_t* dst, const void* src,
+                                            size_t stride_k1, size_t k_chunks) {
+  if constexpr (std::is_same_v<TB, int4x2>) {
+    unpack_int4_b_tile<StaticKChunks>(dst, src, stride_k1, k_chunks);
+  } else if constexpr (std::is_same_v<TB, int2x4>) {
+    unpack_int2_b_tile<StaticKChunks>(dst, src, stride_k1, k_chunks);
+  }
+}
+
 // Calculates the dot product of A and B over the K dimension.
 //
 // If HasM1 && HasN1, loops over the K dimension of a 2x2 output tile.
@@ -479,17 +564,17 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
     do {
       const void* B_k1 = B_k2;
       const void* A_k1 = A_k2;
-      if constexpr (std::is_same<TB, int4x2>::value) {
+      if constexpr (is_subbyte_b<TB>) {
         alignas(64) int8_t b_buf0[16 * tile_row_bytes];
         alignas(64) int8_t b_buf1[16 * tile_row_bytes];
-        const size_t k_chunks = k_len / 8;
+        constexpr size_t subbyte_tile_k = std::is_same_v<TB, int2x4> ? 16 : 8;
+        const size_t k_chunks = k_len / subbyte_tile_k;
 
         if constexpr (HasN1) {
-          unpack_int4_b_tile<StaticKChunks>(b_buf0, B_k1, B_stride_k1,
-                                            k_chunks);
-          unpack_int4_b_tile<StaticKChunks>(b_buf1,
-                                            offset_bytes(B_k1, tile_row_bytes),
-                                            B_stride_k1, k_chunks);
+          unpack_b_tile<TB, StaticKChunks>(b_buf0, B_k1, B_stride_k1, k_chunks);
+          unpack_b_tile<TB, StaticKChunks>(
+              b_buf1, offset_bytes(B_k1, tile_row_bytes), B_stride_k1,
+              k_chunks);
 
           for (size_t k = 0; k + 1 < k1_iters; ++k) {
             _tile_loadd(4, A_k1, A_stride_m);
@@ -503,15 +588,15 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
             if constexpr (HasM1) {
               TileOp<2, 6, 5>()();
             }
-            unpack_int4_b_tile<StaticKChunks>(b_buf0, B_next, B_stride_k1,
-                                              k_chunks);
+            unpack_b_tile<TB, StaticKChunks>(b_buf0, B_next, B_stride_k1,
+                                             k_chunks);
 
             YNN_TILE_LOADD(7, b_buf1, tile_row_bytes);
             TileOp<1, 4, 7>()();
             if constexpr (HasM1) {
               TileOp<3, 6, 7>()();
             }
-            unpack_int4_b_tile<StaticKChunks>(
+            unpack_b_tile<TB, StaticKChunks>(
                 b_buf1, offset_bytes(B_next, tile_row_bytes), B_stride_k1,
                 k_chunks);
 
@@ -537,8 +622,8 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
           int8_t* bufs[2] = {b_buf0, b_buf1};
           size_t cur = 0;
 
-          unpack_int4_b_tile<StaticKChunks>(bufs[0], B_k1, B_stride_k1,
-                                            k_chunks);
+          unpack_b_tile<TB, StaticKChunks>(bufs[0], B_k1, B_stride_k1,
+                                           k_chunks);
 
           for (size_t k = 0; k + 1 < k1_iters; ++k) {
             _tile_loadd(4, A_k1, A_stride_m);
@@ -551,8 +636,8 @@ YNN_ALWAYS_INLINE static void k_loops_2x2_impl(
               TileOp<2, 6, 5>()();
             }
             B_k1 = offset_bytes(B_k1, B_stride_k1_block);
-            unpack_int4_b_tile<StaticKChunks>(bufs[cur ^ 1], B_k1, B_stride_k1,
-                                              k_chunks);
+            unpack_b_tile<TB, StaticKChunks>(bufs[cur ^ 1], B_k1, B_stride_k1,
+                                             k_chunks);
             cur ^= 1;
             A_k1 = offset_bytes(A_k1, A_stride_k1);
           }
@@ -680,7 +765,9 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2_impl(
     dot_kernel_state& state) {
   constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
   constexpr size_t align_k = 4 / sizeof(TAB);
-  constexpr size_t tile_k = std::is_same<TB, int4x2>::value ? 8 : align_k;
+  constexpr size_t tile_k = std::is_same_v<TB, int2x4>
+                                ? 16
+                                : (std::is_same_v<TB, int4x2> ? 8 : align_k);
 
   assert(M > 0);
   assert(N > 0);

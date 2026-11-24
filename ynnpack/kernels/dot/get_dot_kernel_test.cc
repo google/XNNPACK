@@ -278,6 +278,47 @@ TEST(get_dot_kernel, int4_amxint8) {
               "dot_uint8_int4_int32_32x32x64_16x16x8_amxint8");
   }
 }
+
+TEST(get_dot_kernel, int2_amxint8) {
+  dot_type uint8_int2 = {ynn_type_uint8, ynn_type_int2, ynn_type_int32};
+  const uint64_t arch_flags_amxint8 =
+      arch_flags_avx512 | arch_flag::avx512vnni | arch_flag::amxint8;
+
+  for (const dot_cost_models* cost_models : {&golden_cove, &redwood_cove}) {
+    auto get_name = [&](const dot_type& type, const dot_shape& shape,
+                        const dot_packed_shape& packed_shape = {}) {
+      return kernels[get_dot_kernel(type, *cost_models, shape, packed_shape,
+                                    /*required_flags=*/0,
+                                    /*transpose_a=*/std::nullopt,
+                                    arch_flags_amxint8)
+                         .kernel];
+    };
+
+    dot_kernel k_prefill =
+        get_dot_kernel(uint8_int2, *cost_models, {m, n, k}, {},
+                       /*required_flags=*/0, std::nullopt, arch_flags_amxint8);
+    EXPECT_EQ(kernels[k_prefill.kernel],
+              "dot_uint8_int2_int32_32x32x64_16x16x16_amxint8");
+
+    dot_packed_shape packed_shape = {k_prefill.block_n, k_prefill.tile_k};
+    EXPECT_EQ(get_name(uint8_int2, {1, 256, 256}),
+              "dot_uint8_int2_int32_1x64x16_1x16x16_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int2, {1, 2048, 2048}, packed_shape),
+              "dot_uint8_int2_int32_1x64x16_1x16x16_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int2, {1, 4096, 5376}, packed_shape),
+              "dot_uint8_int2_int32_1x64x16_1x16x16_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int2, {4, 4096, 5376}, packed_shape),
+              "dot_uint8_int2_int32_4x64x16_1x16x16_avx512vnni");
+    EXPECT_EQ(get_name(uint8_int2, {5, 4096, 5376}, packed_shape),
+              "dot_uint8_int2_int32_16x32x64_16x16x16_amxint8");
+    EXPECT_EQ(get_name(uint8_int2, {8, 4096, 5376}, packed_shape),
+              "dot_uint8_int2_int32_16x32x64_16x16x16_amxint8");
+    EXPECT_EQ(get_name(uint8_int2, {16, 4096, 5376}, packed_shape),
+              "dot_uint8_int2_int32_16x32x64_16x16x16_amxint8");
+    EXPECT_EQ(get_name(uint8_int2, {32, 4096, 5376}, packed_shape),
+              "dot_uint8_int2_int32_32x32x64_16x16x16_amxint8");
+  }
+}
 #endif  // !YNN_COMPILER_HAS_FEATURE(memory_sanitizer) &&
         // defined(YNN_ARCH_X86_AMXINT8)
 

@@ -36,6 +36,7 @@ struct dot_cost_models {
   dot_cost_model x86_amx_int8;
   dot_cost_model x86_amx_uint8;
   dot_cost_model x86_amx_uint8_int4;
+  dot_cost_model x86_amx_uint8_int2;
 #endif  // YNN_ARCH_X86_AMXINT8
 #ifdef YNN_ARCH_X86_ACE
   // Assumed to match AMX int8 until real hardware is available to fit a model.
