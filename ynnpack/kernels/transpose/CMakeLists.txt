@@ -29,6 +29,8 @@ ENDFUNCTION()
 # ARM
 YNN_ADD_TRANSPOSE_SRC(arm_neon arm_neon.cc)
 YNN_ADD_TRANSPOSE_SRC(arm64_sve arm64_sve.cc)
+YNN_ADD_TRANSPOSE_SRC(arm64_sme arm64_sme.cc)
+YNN_ADD_TRANSPOSE_SRC(arm64_sme2 arm64_sme2.cc)
 
 # x86
 YNN_ADD_TRANSPOSE_SRC(x86_sse2 x86_sse2.cc)

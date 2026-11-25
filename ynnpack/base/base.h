@@ -90,6 +90,10 @@
 #define YNN_UNROLL
 #endif
 
+#if defined(__APPLE__) && defined(__clang_major__) && __clang_major__ < 17
+#define YNN_DISABLE_SME
+#endif
+
 #if defined(__GNUC__) && !defined(__clang__)
 // This warning has a ton of false positives and often requires adding
 // initialization with non-trivial cost to silence it. Furthermore, it is

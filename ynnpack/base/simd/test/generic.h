@@ -156,8 +156,7 @@ void test_partial_load_zero() {
       scalar dst[N];
       store(dst, v);
       EXPECT_THAT(as_span(dst, n), ElementsAreArray(src, n));
-      EXPECT_THAT(as_span(dst + n, dst + N),
-                  ElementsAreArray(dst + n, dst + N));
+      EXPECT_THAT(as_span(dst + n, dst + N), Each(static_cast<scalar>(0)));
     }
   }
 }

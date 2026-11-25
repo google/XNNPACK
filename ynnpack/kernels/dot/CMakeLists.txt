@@ -250,12 +250,6 @@ YNN_ADD_DOT_KERNELS(hexagon_fp32
   hexagon_hvx hexagon_hvx_fp32_32x1
 )
 
-
-
-IF(YNNPACK_TARGET_PROCESSOR STREQUAL "arm64")
-  TARGET_SOURCES(ynnpack_kernels_dot PRIVATE arm64_sme_stubs.cc)
-ENDIF()
-
 IF(YNNPACK_BUILD_TESTS)
   ADD_LIBRARY(ynnpack_kernels_dot_test_tensor INTERFACE)
   TARGET_INCLUDE_DIRECTORIES(ynnpack_kernels_dot_test_tensor INTERFACE .)

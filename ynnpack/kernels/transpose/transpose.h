@@ -11,6 +11,7 @@
 #include <cstdint>  // IWYU pragma: keep
 #include <functional>
 
+#include "ynnpack/base/base.h"  // IWYU pragma: keep
 #include "ynnpack/base/type.h"  // IWYU pragma: keep
 
 namespace ynn {

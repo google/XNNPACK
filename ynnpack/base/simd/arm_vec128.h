@@ -15,7 +15,9 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <tuple>
+#include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
@@ -844,52 +846,104 @@ YNN_ALWAYS_INLINE void store(fp8_e5m2* ptr, f8_e5m2x8 value, size_t n) {
 
 namespace internal {
 
-template <typename T, size_t N>
-void store_aligned(T* dst, zeros<N>) {
-  memset(dst, 0, N * sizeof(T));
+template <typename T>
+YNN_ALWAYS_INLINE T load_unaligned(const void* ptr) {
+  T v;
+  memcpy(&v, ptr, sizeof(v));
+  return v;
+}
+template <typename T>
+YNN_ALWAYS_INLINE void store_unaligned(void* ptr, T v) {
+  memcpy(ptr, &v, sizeof(v));
 }
 
-template <typename T, size_t N>
-void store_aligned(T* dst, undef<N>) {}
+YNN_ALWAYS_INLINE int32x2_t vld1_x32(const int32_t* ptr) {
+  return vld1_s32(ptr);
+}
+YNN_ALWAYS_INLINE float32x2_t vld1_x32(const float* ptr) {
+  return vld1_f32(ptr);
+}
+YNN_ALWAYS_INLINE void vst1_x32(int32_t* ptr, int32x2_t v) {
+  vst1_s32(ptr, v);
+}
+YNN_ALWAYS_INLINE void vst1_x32(float* ptr, float32x2_t v) {
+  vst1_f32(ptr, v);
+}
+template <int Lane>
+YNN_ALWAYS_INLINE int32x2_t vld1_lane_x32(const int32_t* ptr, int32x2_t src) {
+  return vld1_lane_s32(ptr, src, Lane);
+}
+template <int Lane>
+YNN_ALWAYS_INLINE float32x2_t vld1_lane_x32(const float* ptr, float32x2_t src) {
+  return vld1_lane_f32(ptr, src, Lane);
+}
+template <int Lane>
+YNN_ALWAYS_INLINE int32x4_t vld1q_lane_x32(const int32_t* ptr, int32x4_t src) {
+  return vld1q_lane_s32(ptr, src, Lane);
+}
+template <int Lane>
+YNN_ALWAYS_INLINE float32x4_t vld1q_lane_x32(const float* ptr,
+                                             float32x4_t src) {
+  return vld1q_lane_f32(ptr, src, Lane);
+}
+YNN_ALWAYS_INLINE int32x2_t vzero_x32(const int32_t*) { return vdup_n_s32(0); }
+YNN_ALWAYS_INLINE float32x2_t vzero_x32(const float*) { return vdup_n_f32(0); }
 
 // Partial load/store with a non-constant number of elements.
 template <typename T, typename Init>
-inline vec<T, 4> partial_load_neon_x32(const T* ptr, size_t n, Init src) {
+YNN_ALWAYS_INLINE vec<T, 4> partial_load_neon_x32(const T* ptr, size_t n,
+                                                  Init src) {
   assert(n <= 4);
-  if (n == 4) {
-    return load(ptr, std::integral_constant<size_t, 4>{});
-  }
-  alignas(vec<T, 4>) T lanes[4];
-  store_aligned(lanes, src);
+  constexpr bool kZero = std::is_same_v<Init, zeros<4>>;
+  auto hi = [&]() {
+    if constexpr (kZero) {
+      return vzero_x32(ptr);
+    } else {
+      return vget_high(src.v);
+    }
+  };
   switch (n) {
+    case 4:
+      return load(ptr, std::integral_constant<size_t, 4>{});
     case 3:
-      lanes[2] = ptr[2];
-      [[fallthrough]];
+      return vec<T, 4>{
+          vcombine(vld1_x32(ptr), vld1_lane_x32<0>(ptr + 2, hi()))};
     case 2:
-      lanes[1] = ptr[1];
-      [[fallthrough]];
+      return vec<T, 4>{vcombine(vld1_x32(ptr), hi())};
     case 1:
-      lanes[0] = ptr[0];
-      break;
+      if constexpr (kZero) {
+        return vec<T, 4>{
+            vcombine(vld1_lane_x32<0>(ptr, vzero_x32(ptr)), vzero_x32(ptr))};
+      } else {
+        return vec<T, 4>{vld1q_lane_x32<0>(ptr, src.v)};
+      }
     default:
-      break;
+      if constexpr (kZero) {
+        return vec<T, 4>{T{0}};
+      } else {
+        return src;
+      }
   }
-  return load_aligned(lanes, std::integral_constant<size_t, 4>{});
 }
 template <typename T>
-inline void partial_store_neon_x32(T* ptr, vec<T, 4> b, size_t n) {
+YNN_ALWAYS_INLINE vec<T, 4> partial_load_neon_x32(const T* ptr, size_t n,
+                                                  undef<4>) {
+  return partial_load_neon_x32(ptr, n, zeros<4>{});
+}
+template <typename T>
+YNN_ALWAYS_INLINE void partial_store_neon_x32(T* ptr, vec<T, 4> b, size_t n) {
   assert(n <= 4);
-  if (n == 4) {
-    store(ptr, b);
-    return;
-  }
   switch (n) {
+    case 4:
+      store(ptr, b);
+      break;
     case 3:
+      vst1_x32(ptr, vget_low(b.v));
       vst1_lane<0>(&ptr[2], vget_high(b.v));
-      [[fallthrough]];
+      break;
     case 2:
-      vst1_lane<1>(&ptr[1], vget_low(b.v));
-      [[fallthrough]];
+      vst1_x32(ptr, vget_low(b.v));
+      break;
     case 1:
       vst1_lane<0>(&ptr[0], vget_low(b.v));
       break;
@@ -926,6 +980,207 @@ inline void partial_store_neon_x64(T* ptr, vec<T, 2> b, size_t n) {
   }
 }
 
+// Byte-granularity partial load/store for 64- and 128-bit NEON vectors using
+// overlapping power-of-2 unaligned accesses strictly within [ptr,
+// ptr + n_bytes) to avoid stack spills and libc memcpy calls.
+template <bool Zero>
+YNN_ALWAYS_INLINE uint64_t partial_load_u64_lt8(const uint8_t* ptr,
+                                                size_t n_bytes,
+                                                uint64_t src_lo) {
+  assert(n_bytes < 8);
+  auto blend = [&](uint64_t val, size_t bits) -> uint64_t {
+    if constexpr (Zero) {
+      return val;
+    } else {
+      return val | (src_lo & (~uint64_t{0} << bits));
+    }
+  };
+  if (n_bytes >= 4) {
+    uint32_t w0 = load_unaligned<uint32_t>(ptr);
+    if (n_bytes == 4) {
+      return blend(w0, 32);
+    }
+    uint32_t w1 = load_unaligned<uint32_t>(ptr + n_bytes - 4);
+    uint64_t lo = w0 | (static_cast<uint64_t>(w1) << ((n_bytes - 4) * 8));
+    return blend(lo, n_bytes * 8);
+  }
+  if (n_bytes >= 2) {
+    uint16_t h0 = load_unaligned<uint16_t>(ptr);
+    if (n_bytes == 2) {
+      return blend(h0, 16);
+    }
+    return blend(h0 | (static_cast<uint64_t>(ptr[2]) << 16), 24);
+  }
+  if (n_bytes == 1) {
+    return blend(ptr[0], 8);
+  }
+  return Zero ? 0 : src_lo;
+}
+
+YNN_ALWAYS_INLINE void partial_store_u64_lt8(uint8_t* ptr, uint64_t lo,
+                                             size_t n_bytes) {
+  assert(n_bytes < 8);
+  if (n_bytes >= 4) {
+    store_unaligned<uint32_t>(ptr, static_cast<uint32_t>(lo));
+    if (n_bytes > 4) {
+      store_unaligned<uint32_t>(
+          ptr + n_bytes - 4, static_cast<uint32_t>(lo >> ((n_bytes - 4) * 8)));
+    }
+    return;
+  }
+  if (n_bytes >= 2) {
+    store_unaligned<uint16_t>(ptr, static_cast<uint16_t>(lo));
+    if (n_bytes == 3) {
+      ptr[2] = static_cast<uint8_t>(lo >> 16);
+    }
+    return;
+  }
+  if (n_bytes == 1) {
+    ptr[0] = static_cast<uint8_t>(lo);
+  }
+}
+
+template <bool Zero>
+YNN_ALWAYS_INLINE uint8x16_t partial_load_neon_128(const void* src_ptr,
+                                                   size_t n_bytes,
+                                                   uint8x16_t src = {}) {
+  assert(n_bytes <= 16);
+  const uint8_t* ptr = static_cast<const uint8_t*>(src_ptr);
+  if (n_bytes >= 8) {
+    uint8x8_t lo = vld1_u8(ptr);
+    if (n_bytes == 8) {
+      if constexpr (Zero) {
+        return vcombine_u8(lo, vdup_n_u8(0));
+      } else {
+        return vcombine_u8(lo, vget_high_u8(src));
+      }
+    }
+    if (n_bytes == 16) {
+      return vcombine_u8(lo, vld1_u8(ptr + 8));
+    }
+    uint64_t tail = load_unaligned<uint64_t>(ptr + n_bytes - 8);
+    uint64_t hi = tail >> ((16 - n_bytes) * 8);
+    if constexpr (!Zero) {
+      uint64_t src_hi = vgetq_lane_u64(vreinterpretq_u64_u8(src), 1);
+      hi |= src_hi & (~uint64_t{0} << ((n_bytes - 8) * 8));
+    }
+    return vreinterpretq_u8_u64(
+        vcombine_u64(vreinterpret_u64_u8(lo), vcreate_u64(hi)));
+  }
+  if constexpr (Zero) {
+    uint64_t lo = partial_load_u64_lt8<true>(ptr, n_bytes, 0);
+    return vreinterpretq_u8_u64(vcombine_u64(vcreate_u64(lo), vdup_n_u64(0)));
+  } else {
+    uint64x2_t src64 = vreinterpretq_u64_u8(src);
+    uint64_t lo =
+        partial_load_u64_lt8<false>(ptr, n_bytes, vgetq_lane_u64(src64, 0));
+    return vreinterpretq_u8_u64(vsetq_lane_u64(lo, src64, 0));
+  }
+}
+
+YNN_ALWAYS_INLINE void partial_store_neon_128(void* dst_ptr, uint8x16_t v,
+                                              size_t n_bytes) {
+  assert(n_bytes <= 16);
+  uint8_t* ptr = static_cast<uint8_t*>(dst_ptr);
+  if (n_bytes >= 8) {
+    vst1_u8(ptr, vget_low_u8(v));
+    if (n_bytes > 8) {
+      if (n_bytes == 16) {
+        vst1_u8(ptr + 8, vget_high_u8(v));
+      } else {
+        uint64x2_t v64 = vreinterpretq_u64_u8(v);
+        uint64_t lo = vgetq_lane_u64(v64, 0);
+        uint64_t hi = vgetq_lane_u64(v64, 1);
+        uint64_t tail =
+            (lo >> ((n_bytes - 8) * 8)) | (hi << ((16 - n_bytes) * 8));
+        store_unaligned<uint64_t>(ptr + n_bytes - 8, tail);
+      }
+    }
+    return;
+  }
+  partial_store_u64_lt8(ptr, vgetq_lane_u64(vreinterpretq_u64_u8(v), 0),
+                        n_bytes);
+}
+
+template <bool Zero>
+YNN_ALWAYS_INLINE uint8x8_t partial_load_neon_64(const void* src_ptr,
+                                                 size_t n_bytes,
+                                                 uint8x8_t src = {}) {
+  assert(n_bytes <= 8);
+  const uint8_t* ptr = static_cast<const uint8_t*>(src_ptr);
+  if (n_bytes == 8) {
+    return vld1_u8(ptr);
+  }
+  uint64_t src_lo = 0;
+  if constexpr (!Zero) {
+    src_lo = vget_lane_u64(vreinterpret_u64_u8(src), 0);
+  }
+  return vreinterpret_u8_u64(
+      vcreate_u64(partial_load_u64_lt8<Zero>(ptr, n_bytes, src_lo)));
+}
+
+YNN_ALWAYS_INLINE void partial_store_neon_64(void* dst_ptr, uint8x8_t v,
+                                             size_t n_bytes) {
+  assert(n_bytes <= 8);
+  uint8_t* ptr = static_cast<uint8_t*>(dst_ptr);
+  if (n_bytes == 8) {
+    vst1_u8(ptr, v);
+    return;
+  }
+  partial_store_u64_lt8(ptr, vget_lane_u64(vreinterpret_u64_u8(v), 0), n_bytes);
+}
+
+template <typename Vec>
+YNN_ALWAYS_INLINE Vec partial_load_neon_bytes(
+    const typename Vec::value_type* ptr, size_t n, Vec src) {
+  const size_t n_bytes = n * sizeof(typename Vec::value_type);
+  if constexpr (sizeof(Vec) == 16) {
+    uint8x16_t raw;
+    memcpy(&raw, &src.v, sizeof(raw));
+    raw = partial_load_neon_128<false>(ptr, n_bytes, raw);
+    memcpy(&src.v, &raw, sizeof(raw));
+  } else {
+    static_assert(sizeof(Vec) == 8);
+    uint8x8_t raw;
+    memcpy(&raw, &src.v, sizeof(raw));
+    raw = partial_load_neon_64<false>(ptr, n_bytes, raw);
+    memcpy(&src.v, &raw, sizeof(raw));
+  }
+  return src;
+}
+
+template <typename Vec>
+YNN_ALWAYS_INLINE Vec partial_load_neon_bytes(
+    const typename Vec::value_type* ptr, size_t n) {
+  const size_t n_bytes = n * sizeof(typename Vec::value_type);
+  Vec dst;
+  if constexpr (sizeof(Vec) == 16) {
+    uint8x16_t raw = partial_load_neon_128<true>(ptr, n_bytes);
+    memcpy(&dst.v, &raw, sizeof(raw));
+  } else {
+    static_assert(sizeof(Vec) == 8);
+    uint8x8_t raw = partial_load_neon_64<true>(ptr, n_bytes);
+    memcpy(&dst.v, &raw, sizeof(raw));
+  }
+  return dst;
+}
+
+template <typename Vec>
+YNN_ALWAYS_INLINE void partial_store_neon_bytes(typename Vec::value_type* ptr,
+                                                Vec value, size_t n) {
+  const size_t n_bytes = n * sizeof(typename Vec::value_type);
+  if constexpr (sizeof(Vec) == 16) {
+    uint8x16_t raw;
+    memcpy(&raw, &value.v, sizeof(raw));
+    partial_store_neon_128(ptr, raw, n_bytes);
+  } else {
+    static_assert(sizeof(Vec) == 8);
+    uint8x8_t raw;
+    memcpy(&raw, &value.v, sizeof(raw));
+    partial_store_neon_64(ptr, raw, n_bytes);
+  }
+}
+
 }  // namespace internal
 
 #ifdef YNN_ARCH_ARM64
@@ -940,32 +1195,32 @@ YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
   return internal::partial_load_neon_x32(ptr, n, src);
 }
 YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, bf16x8 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, f16x8 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, s16x8 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, u8x16 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 
 YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, f16x4 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, u8x8 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, f8_e4m3x8 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, f8_e5m2x8 src) {
-  return internal::partial_load_memcpy(ptr, n, src);
+  return internal::partial_load_neon_bytes(ptr, n, src);
 }
 
 #ifdef YNN_ARCH_ARM64
@@ -979,33 +1234,33 @@ YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, zeros<4> src) {
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, zeros<4> src) {
   return internal::partial_load_neon_x32(ptr, n, src);
 }
-YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, zeros<8> src) {
-  return internal::partial_load_memcpy(ptr, n, bf16x8{0});
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, zeros<8>) {
+  return internal::partial_load_neon_bytes<bf16x8>(ptr, n);
 }
-YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, zeros<8> src) {
-  return internal::partial_load_memcpy(ptr, n, f16x8{0});
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, zeros<8>) {
+  return internal::partial_load_neon_bytes<f16x8>(ptr, n);
 }
-YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, zeros<8> src) {
-  return internal::partial_load_memcpy(ptr, n, s16x8{0});
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, zeros<8>) {
+  return internal::partial_load_neon_bytes<s16x8>(ptr, n);
 }
-YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, zeros<16> src) {
-  return internal::partial_load_memcpy(ptr, n, u8x16{0});
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, zeros<16>) {
+  return internal::partial_load_neon_bytes<u8x16>(ptr, n);
 }
-YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16> src) {
-  return internal::partial_load_memcpy(ptr, n, s8x16{0});
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16>) {
+  return internal::partial_load_neon_bytes<s8x16>(ptr, n);
 }
 
-YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, zeros<4> src) {
-  return internal::partial_load_memcpy(ptr, n, f16x4{0});
+YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, zeros<4>) {
+  return internal::partial_load_neon_bytes<f16x4>(ptr, n);
 }
-YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8> src) {
-  return internal::partial_load_memcpy(ptr, n, u8x8{0});
+YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8>) {
+  return internal::partial_load_neon_bytes<u8x8>(ptr, n);
 }
-YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, zeros<8> src) {
-  return internal::partial_load_memcpy(ptr, n, f8_e4m3x8{0});
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, zeros<8>) {
+  return internal::partial_load_neon_bytes<f8_e4m3x8>(ptr, n);
 }
-YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, zeros<8> src) {
-  return internal::partial_load_memcpy(ptr, n, f8_e5m2x8{0});
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, zeros<8>) {
+  return internal::partial_load_neon_bytes<f8_e5m2x8>(ptr, n);
 }
 
 #ifdef YNN_ARCH_ARM64
@@ -1019,33 +1274,33 @@ YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4> src) {
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, undef<4> src) {
   return internal::partial_load_neon_x32(ptr, n, src);
 }
-YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, undef<8> src) {
-  return internal::partial_load_memcpy(ptr, n, bf16x8{});
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
 }
-YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, undef<4> src) {
-  return internal::partial_load_memcpy(ptr, n, f16x4{});
+YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, undef<4>) {
+  return load(ptr, n, zeros<4>{});
 }
-YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, undef<8> src) {
-  return internal::partial_load_memcpy(ptr, n, f16x8{});
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
 }
-YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, undef<8> src) {
-  return internal::partial_load_memcpy(ptr, n, s16x8{});
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
 }
-YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, undef<16> src) {
-  return internal::partial_load_memcpy(ptr, n, u8x16{});
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, undef<16>) {
+  return load(ptr, n, zeros<16>{});
 }
-YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16> src) {
-  return internal::partial_load_memcpy(ptr, n, s8x16{});
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16>) {
+  return load(ptr, n, zeros<16>{});
 }
 
-YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, undef<8> src) {
-  return internal::partial_load_memcpy(ptr, n, u8x8{});
+YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
 }
-YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, undef<8> src) {
-  return internal::partial_load_memcpy(ptr, n, f8_e4m3x8{});
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
 }
-YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, undef<8> src) {
-  return internal::partial_load_memcpy(ptr, n, f8_e5m2x8{});
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
 }
 
 #ifdef YNN_ARCH_ARM64
@@ -1060,32 +1315,32 @@ YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 b, size_t n) {
   internal::partial_store_neon_x32(ptr, b, n);
 }
 YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x8 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(half* ptr, f16x8 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x8 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 
 YNN_ALWAYS_INLINE void store(half* ptr, f16x4 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(fp8_e4m3* ptr, f8_e4m3x8 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(fp8_e5m2* ptr, f8_e5m2x8 value, size_t n) {
-  internal::partial_store_memcpy(ptr, value, n);
+  internal::partial_store_neon_bytes(ptr, value, n);
 }
 #endif  // YNN_ARCH_ARM64_SVE
 
@@ -2002,10 +2257,19 @@ YNN_ALWAYS_INLINE bool all(s64x2 x) { return !any(~x); }
 
 YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
     std::integral_constant<size_t, 64>, u8x16 x0, u8x16 x1) {
+#ifdef YNN_ARCH_ARM64
+  uint64x2_t a = vreinterpretq_u64_u8(x0.v);
+  uint64x2_t b = vreinterpretq_u64_u8(x1.v);
+  return {
+      u8x16{vreinterpretq_u8_u64(vtrn1q_u64(a, b))},
+      u8x16{vreinterpretq_u8_u64(vtrn2q_u64(a, b))},
+  };
+#else
   return {
       u8x16{vcombine_u8(vget_low_u8(x0.v), vget_low_u8(x1.v))},
       u8x16{vcombine_u8(vget_high_u8(x0.v), vget_high_u8(x1.v))},
   };
+#endif
 }
 YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
     std::integral_constant<size_t, 32>, u8x16 x0, u8x16 x1) {

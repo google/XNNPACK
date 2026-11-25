@@ -9,15 +9,13 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "ynnpack/base/base.h"  // IWYU pragma: export
+
 namespace ynn {
 
 // Get the size of an SME vector for the given datatype.
 size_t sme_vl(float);
 size_t sme_vl(int32_t);
-
-#if __APPLE__ && __clang_major__ < 17
-#define YNN_DISABLE_SME
-#endif
 
 }  // namespace ynn
 

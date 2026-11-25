@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -207,6 +208,133 @@ TEST_P(Transpose, tiled) {
     auto sizes = aligned_sizes(element_size_bits);
     TestTranspose(type, tiled, sizes, sizes);
   });
+}
+
+TEST_P(Transpose, sub_element_n_bytes) {
+  TransposeParam kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  if (kernel.element_size_bits != 32) GTEST_SKIP();
+
+  constexpr size_t kElemBytes = 4;
+  // Test shapes spanning partial SVLs, svl, 2*svl, and >4*svl (up to SVL=128B),
+  // with byte-granularity n_bytes_a including 0 and non-multiples of 4.
+  const std::vector<std::pair<size_t, size_t>> shapes = {
+      {1, 1},   {3, 5},   {15, 16}, {16, 15}, {17, 17},
+      {33, 35}, {37, 65}, {70, 19}, {70, 70}, {135, 70},
+  };
+  for (const auto& [m, n] : shapes) {
+    const size_t stride_a = m * kElemBytes + 13;
+    const size_t stride_x = n * kElemBytes + 17;
+    // Offset buffers by 1 byte to also exercise unaligned pointers under UBSan.
+    std::vector<uint8_t> input_storage(n * stride_a + 1);
+    std::vector<uint8_t> output_storage(m * stride_x + 1, 0xCD);
+    uint8_t* input = input_storage.data() + 1;
+    uint8_t* output = output_storage.data() + 1;
+
+    for (size_t j = 0; j < n; ++j) {
+      for (size_t b = 0; b < m * kElemBytes; ++b) {
+        input[j * stride_a + b] =
+            static_cast<uint8_t>((j * 31 + b * 7 + 1) & 0xFF);
+      }
+    }
+
+    const size_t full_bytes = m * kElemBytes;
+    std::vector<size_t> n_bytes_cases = {0, 1, 2, 3, full_bytes};
+    if (full_bytes > 5) n_bytes_cases.push_back(5);
+    if (full_bytes > 7) n_bytes_cases.push_back(7);
+    if (full_bytes > 3) n_bytes_cases.push_back(full_bytes - 1);
+    if (full_bytes > 3) n_bytes_cases.push_back(full_bytes - 3);
+    if (full_bytes > 8) n_bytes_cases.push_back((full_bytes / 2) | 1);
+
+    for (size_t n_bytes_a : n_bytes_cases) {
+      std::fill(output_storage.begin(), output_storage.end(), 0xCD);
+      kernel.kernel(m, n, n_bytes_a, stride_a, input, stride_x, output);
+
+      ASSERT_EQ(output_storage[0], 0xCD)
+          << "m=" << m << " n=" << n << " n_bytes_a=" << n_bytes_a;
+      for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+          for (size_t b = 0; b < kElemBytes; ++b) {
+            const size_t src_byte = i * kElemBytes + b;
+            const uint8_t expected =
+                src_byte < n_bytes_a ? input[j * stride_a + src_byte] : 0;
+            ASSERT_EQ(output[i * stride_x + j * kElemBytes + b], expected)
+                << "m=" << m << " n=" << n << " n_bytes_a=" << n_bytes_a
+                << " i=" << i << " j=" << j << " b=" << b;
+          }
+        }
+        for (size_t b = n * kElemBytes; b < stride_x; ++b) {
+          ASSERT_EQ(output[i * stride_x + b], 0xCD)
+              << "m=" << m << " n=" << n << " n_bytes_a=" << n_bytes_a
+              << " i=" << i << " pad_b=" << b;
+        }
+      }
+    }
+  }
+}
+
+TEST_P(Transpose, large_and_pow2_stride) {
+  TransposeParam kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  if (kernel.element_size_bits != 32) GTEST_SKIP();
+
+  // Exercises kMBlock (512), 4*svl/2*svl/svl loops (up to SVL=128B), narrow
+  // strip-tiled fallbacks, bottom tails, and power-of-2 row strides.
+  const std::vector<std::tuple<size_t, size_t, size_t, size_t>> cases = {
+      {520, 40, 2080, 160},
+      {515, 70, 2064, 296},
+      {12, 135, 64, 560},
+      {135, 70, 1024, 512},
+      {70, 135, 512, 1024},
+      {130, 16, 1024, 64},
+      {130, 32, 1024, 128},
+      {64, 64, 2048, 2048},
+  };
+  for (const auto& [m, n, stride_a, stride_x] : cases) {
+    std::vector<uint8_t> input(n * stride_a, 0);
+    std::vector<uint8_t> output(m * stride_x, 0xAB);
+    for (size_t j = 0; j < n; ++j) {
+      uint32_t* row = reinterpret_cast<uint32_t*>(input.data() + j * stride_a);
+      for (size_t i = 0; i < m; ++i) {
+        row[i] = static_cast<uint32_t>(j * 10007 + i * 3 + 1);
+      }
+    }
+    kernel.kernel(m, n, m * 4, stride_a, input.data(), stride_x, output.data());
+    for (size_t i = 0; i < m; ++i) {
+      const uint32_t* row =
+          reinterpret_cast<const uint32_t*>(output.data() + i * stride_x);
+      for (size_t j = 0; j < n; ++j) {
+        ASSERT_EQ(row[j], static_cast<uint32_t>(j * 10007 + i * 3 + 1))
+            << "m=" << m << " n=" << n << " i=" << i << " j=" << j;
+      }
+      for (size_t b = n * 4; b < stride_x; ++b) {
+        ASSERT_EQ(output[i * stride_x + b], 0xAB)
+            << "m=" << m << " n=" << n << " i=" << i << " pad_b=" << b;
+      }
+    }
+  }
+}
+
+TEST_P(Transpose, zero_dimensions) {
+  TransposeParam kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  if (kernel.element_size_bits != 32) GTEST_SKIP();
+
+  std::vector<uint8_t> input(64, 0x3C);
+  std::vector<uint8_t> output(64, 0x5A);
+  kernel.kernel(0, 16, 0, 64, input.data(), 64, output.data());
+  kernel.kernel(16, 0, 64, 64, input.data(), 64, output.data());
+  kernel.kernel(0, 0, 0, 0, input.data(), 0, output.data());
+  for (uint8_t byte : output) {
+    ASSERT_EQ(byte, 0x5A);
+  }
+}
+
+TEST(GetTiledTranspose, x32) {
+  transpose_fn tiled = get_tiled_transpose(32);
+  ASSERT_NE(tiled, nullptr);
+  TestTranspose(uint32_t{}, tiled, {1, 12, 15, 16, 64, 520},
+                {1, 15, 16, 40, 135});
 }
 
 #define YNN_TRANSPOSE_KERNEL(arch_flags, name, elem_size_bits) \
