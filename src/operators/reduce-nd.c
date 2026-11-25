@@ -18,6 +18,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microkernel-type.h"
@@ -241,6 +242,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
   const uint32_t log2_data_element_size = reduce_op->reduce.log2_data_element_size;
   const uint32_t log2_accumulator_element_size =
       reduce_op->reduce.log2_accumulator_element_size;
+  const uint32_t log2_output_element_size =
+      reduce_op->cvt_config != NULL ? log2_data_element_size
+                                    : log2_accumulator_element_size;
   const bool is_old_reduce =
       reduce_op->ukernel.type != xnn_microkernel_type_reduce2;
   reduce_op->ukernel.type = is_old_reduce
@@ -276,7 +280,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     *reduce_op->dynamic_context.reduce = (struct reduce_context) {
       .channels = axis_dim << log2_data_element_size,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
-      .output_element_size = UINT32_C(1) << log2_data_element_size,
+      .output_element_size = UINT32_C(1) << log2_output_element_size,
       .identity_value = identity_value,
       .ukernel.contiguous_reduce = reduce_op->reduce_config->ukernel,
       .is_old_reduce = is_old_reduce,
@@ -340,7 +344,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
         .channels = axis_dim,
         .ukernel.discontiguous_reduce = reduce_op->reduce_config->rd_ukernel,
         .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
-        .output_element_size = UINT32_C(1) << log2_data_element_size,
+        .output_element_size = UINT32_C(1) << log2_output_element_size,
         .identity_value = identity_value,
         .is_old_reduce = true,
       };
@@ -350,7 +354,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
         .channels = axis_dim,
         .ukernel.discontiguous_reduce2 = reduce_op->reduce_config->rd_ukernel2,
         .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
-        .output_element_size = UINT32_C(1) << log2_data_element_size,
+        .output_element_size = UINT32_C(1) << log2_output_element_size,
         .identity_value = identity_value,
         .is_old_reduce = false,
       };
@@ -449,9 +453,10 @@ static enum xnn_status setup_reduce_nd(
   return xnn_status_success;
 }
 
-XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd_v2(
     const enum xnn_reduce_operator reduce_operator_type,
-    const enum xnn_datatype datatype,
+    const enum xnn_datatype input_datatype,
+    const enum xnn_datatype output_datatype,
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization,
     uint32_t flags,
@@ -468,15 +473,27 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
 
   const bool is_minmax = (operator_type == xnn_operator_type_reduce_max_nd ||
                           operator_type == xnn_operator_type_reduce_min_nd);
+  const bool is_fp16_to_fp32 = input_datatype == xnn_datatype_fp16 &&
+                               output_datatype == xnn_datatype_fp32 &&
+                               !is_minmax;
+  if (input_datatype != output_datatype && !is_fp16_to_fp32) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported input (%s) to output (%s) "
+        "data type combination",
+        xnn_operator_type_to_string(operator_type),
+        xnn_datatype_to_string(input_datatype),
+        xnn_datatype_to_string(output_datatype));
+    return xnn_status_invalid_parameter;
+  }
 
   // Load configs.
   const struct xnn_reduce_config* reduce_config = NULL;
   const struct xnn_unary_elementwise_config* cvt_config = NULL;
   const struct xnn_xx_fill_config* fill_config = xnn_init_xx_fill_config();
 
-  uint32_t log2_data_element_size = xnn_datatype_log2_size_bytes(datatype);
+  uint32_t log2_data_element_size = xnn_datatype_log2_size_bytes(input_datatype);
   uint32_t log2_accumulator_element_size;
-  switch (datatype) {
+  switch (input_datatype) {
     case xnn_datatype_fp16: {
       switch (operator_type) {
         case xnn_operator_type_sum_nd:
@@ -498,6 +515,9 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
       }
       if (is_minmax) {
         log2_accumulator_element_size = 1;
+        cvt_config = cvt_unused;
+      } else if (output_datatype == xnn_datatype_fp32) {
+        log2_accumulator_element_size = 2;
         cvt_config = cvt_unused;
       } else {
         log2_accumulator_element_size = 2;
@@ -590,7 +610,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
     }
     default:
       xnn_log_error("failed to create Sum (ND) operator: unsupported data type: %s",
-                  xnn_datatype_to_string(datatype));
+                  xnn_datatype_to_string(input_datatype));
       return xnn_status_invalid_parameter;
   };
 
@@ -598,7 +618,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
   if (reduce_config == NULL || cvt_config == NULL) {
     xnn_log_error(
         "failed to create %s (%s) operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(operator_type), xnn_datatype_to_string(datatype));
+        xnn_operator_type_to_string(operator_type), xnn_datatype_to_string(input_datatype));
     return xnn_status_unsupported_hardware;
   } else {
     cvt_config = cvt_config == cvt_unused ? NULL : cvt_config;
@@ -628,7 +648,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
     return status;
   }
 
-  if ((datatype == xnn_datatype_fp16 || datatype == xnn_datatype_fp32) &&
+  if ((input_datatype == xnn_datatype_fp16 || input_datatype == xnn_datatype_fp32) &&
       (reduce_operator_type == xnn_reduce_sum ||
        reduce_operator_type == xnn_reduce_sum_squared ||
        reduce_operator_type == xnn_reduce_mean ||
@@ -636,6 +656,19 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
     (*reduce_op_out)->ukernel.type = xnn_microkernel_type_reduce2;
   }
   return xnn_status_success;
+}
+
+enum xnn_status xnn_create_reduce_nd(
+    const enum xnn_reduce_operator reduce_operator_type,
+    const enum xnn_datatype datatype,
+    const struct xnn_quantization_params* input_quantization,
+    const struct xnn_quantization_params* output_quantization,
+    uint32_t flags,
+    xnn_operator_t* reduce_op_out)
+{
+  return xnn_create_reduce_nd_v2(
+      reduce_operator_type, datatype, datatype, input_quantization,
+      output_quantization, flags, reduce_op_out);
 }
 
 enum xnn_status xnn_reshape_reduce_nd(

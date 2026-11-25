@@ -2689,26 +2689,82 @@ static enum xnn_status optimize_common_subgraphs_binary_to_const(
   return xnn_status_success;
 }
 
-static void convert_static_value_to_fp32(struct xnn_value* value) {
+static enum xnn_status convert_static_value_to_fp32(struct xnn_value* value) {
   assert(xnn_value_is_static(value->allocation_type));
-  if (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
-    xnn_release_memory(value->data);
+  float data;
+  if (value->fp32_data != NULL) {
+    memcpy(&data, value->fp32_data, sizeof(float));
+  } else {
+    data = get_scalar_value_as_float(value);
   }
-  value->data = xnn_allocate_memory(sizeof(float));
-  float data = get_scalar_value_as_float(value);
-  memcpy(value->data, &data, sizeof(float));
-  value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+  void* new_data = xnn_allocate_memory(sizeof(float) + XNN_EXTRA_BYTES);
+  if (new_data == NULL) {
+    return xnn_status_out_of_memory;
+  }
+  if (value->fp16_rewrite.fp16_compatible ||
+      (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP)) {
+    XNN_PRAGMA_CLANG("clang diagnostic push")
+    XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
+    xnn_release_memory((void*)value->data);
+    XNN_PRAGMA_CLANG("clang diagnostic pop")
+    value->fp16_rewrite.fp16_compatible = false;
+  }
+  memcpy(new_data, &data, sizeof(float));
+  value->data = new_data;
+  value->fp32_data = NULL;
+  value->size = sizeof(float);
+  value->flags &= ~(XNN_VALUE_FLAG_IS_ZERO | XNN_VALUE_FLAG_IS_ONE);
+  value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP |
+                  ((data == 0.0f)   ? XNN_VALUE_FLAG_IS_ZERO
+                   : (data == 1.0f) ? XNN_VALUE_FLAG_IS_ONE
+                                    : 0);
   value->datatype = xnn_datatype_fp32;
+  return xnn_status_success;
 }
 
-// Replace `mul(reduce_sum(x), 1/n)`, `div(reduce_sum(x), n)`  or
-// `mul(reduce_sum_squared(x), 1/n)`, `div(reduce_sum_squared(x), n)`
-// with `reduce_mean(x)` or `reduce_mean_squared(x)`, respectively.
+static enum xnn_status clone_static_value_to_fp32(xnn_subgraph_t subgraph,
+                                                  struct xnn_value* value,
+                                                  uint32_t* fp32_id_out) {
+  assert(xnn_value_is_static(value->allocation_type));
+  float data;
+  if (value->fp32_data != NULL) {
+    memcpy(&data, value->fp32_data, sizeof(float));
+  } else {
+    data = get_scalar_value_as_float(value);
+  }
+  void* new_data = xnn_allocate_memory(sizeof(float) + XNN_EXTRA_BYTES);
+  if (new_data == NULL) {
+    return xnn_status_out_of_memory;
+  }
+  memcpy(new_data, &data, sizeof(float));
+  const size_t num_dims = value->shape.num_dims;
+  size_t dims[XNN_MAX_TENSOR_DIMS];
+  memcpy(dims, value->shape.dim, num_dims * sizeof(size_t));
+  enum xnn_status status = xnn_define_tensor_value(
+      subgraph, xnn_datatype_fp32, num_dims, dims, new_data,
+      XNN_INVALID_VALUE_ID, /*flags=*/0, fp32_id_out);
+  if (status != xnn_status_success) {
+    xnn_release_memory(new_data);
+    return status;
+  }
+  struct xnn_value* fp32_value = &subgraph->values[*fp32_id_out];
+  fp32_value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP |
+                       XNN_VALUE_FLAG_SHAPE_IS_STATIC |
+                       ((data == 0.0f)   ? XNN_VALUE_FLAG_IS_ZERO
+                        : (data == 1.0f) ? XNN_VALUE_FLAG_IS_ONE
+                                         : 0);
+  fp32_value->num_consumers = 1;
+  value->num_consumers--;
+  return xnn_status_success;
+}
+
+// Widen fp16 intermediate tensors of `mul(reduce_sum(x), c)` and
+// `div(reduce_sum(x), c)` (and `reduce_sum_squared` variants) to fp32.
 static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
                                                uint32_t node_id,
                                                size_t* changes) {
   XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
-  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 2));
 
   struct xnn_node* node = &subgraph->nodes[node_id];
 
@@ -2720,11 +2776,13 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
 
   struct xnn_value* reduced_value = &subgraph->values[node->inputs[0]];
   struct xnn_value* arg_value = &subgraph->values[node->inputs[1]];
+  uint32_t arg_input_idx = 1;
   if (xnn_shape_multiply_all_dims(&arg_value->shape) != 1 ||
       !xnn_value_is_static(arg_value->allocation_type)) {
     if (xnn_shape_multiply_all_dims(&reduced_value->shape) == 1 &&
         xnn_value_is_static(reduced_value->allocation_type)) {
       swap_value_pointers(&reduced_value, &arg_value);
+      arg_input_idx = 0;
     } else {
       return xnn_status_success;
     }
@@ -2732,11 +2790,13 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
 
   // Check that one of the args is a sum or sum2 reduction.
   if (reduced_value->datatype != xnn_datatype_fp16 ||
+      arg_value->datatype != xnn_datatype_fp16 ||
       reduced_value->producer == XNN_INVALID_NODE_ID) {
     return xnn_status_success;
   }
 
-  if (reduced_value->num_consumers > 1 || arg_value->num_consumers > 1) {
+  if (reduced_value->num_consumers > 1 ||
+      xnn_value_is_external(reduced_value->flags)) {
     // Don't rewrite if we might modify an unrelated consumer.
     return xnn_status_success;
   }
@@ -2748,21 +2808,40 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
     return xnn_status_success;
   }
 
-  // Rewrite the internal values to this subgraph to be fp32.
-  reduced_value->datatype = xnn_datatype_fp32;
-  convert_static_value_to_fp32(arg_value);
-
   uint32_t output_id = node->outputs[0];
   struct xnn_value* output_value = &subgraph->values[output_id];
-  uint32_t output_fp32_id;
+  if (output_value->datatype != xnn_datatype_fp16) {
+    return xnn_status_success;
+  }
+
+  // Rewrite the internal values to this subgraph to be fp32.
+  if (arg_value->num_consumers > 1 || xnn_value_is_external(arg_value->flags)) {
+    uint32_t arg_fp32_id = XNN_INVALID_VALUE_ID;
+    XNN_RETURN_IF_ERROR(
+        clone_static_value_to_fp32(subgraph, arg_value, &arg_fp32_id));
+    node->inputs[arg_input_idx] = arg_fp32_id;
+    arg_value = &subgraph->values[arg_fp32_id];
+    arg_value->first_consumer = node_id;
+  } else {
+    XNN_RETURN_IF_ERROR(convert_static_value_to_fp32(arg_value));
+  }
+  reduced_value->datatype = xnn_datatype_fp32;
+  reduced_value->size = xnn_tensor_get_size(reduced_value);
+
+  const size_t output_num_dims = output_value->shape.num_dims;
+  size_t output_dims[XNN_MAX_TENSOR_DIMS];
+  memcpy(output_dims, output_value->shape.dim, output_num_dims * sizeof(size_t));
+  const uint32_t output_fp32_flags =
+      output_value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC;
+  uint32_t output_fp32_id = XNN_INVALID_VALUE_ID;
   enum xnn_status status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_value->shape.num_dims,
-      output_value->shape.dim,
+      subgraph, xnn_datatype_fp32, output_num_dims, output_dims,
       /*data=*/NULL, XNN_INVALID_VALUE_ID,
       /*flags=*/0, &output_fp32_id);
   if (status != xnn_status_success) {
     return status;
   }
+  subgraph->values[output_fp32_id].flags |= output_fp32_flags;
   node->outputs[0] = output_fp32_id;
 
   status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/NULL,
@@ -2770,11 +2849,13 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
   if (status != xnn_status_success) {
     return status;
   }
-  move_last_node_to(subgraph, node_id);
+  subgraph->values[output_fp32_id].producer = node_id;
+  subgraph->values[output_fp32_id].first_consumer = subgraph->num_nodes - 1;
+  subgraph->values[output_fp32_id].num_consumers = 1;
+  subgraph->values[output_id].producer = subgraph->num_nodes - 1;
 
   xnn_log_info(
-      "Converted %s[#%u](reduce_sum%s[#%u](v%03u), v%03u) to "
-      "fp32.",
+      "Converted %s[#%u](reduce_sum%s[#%u](v%03u), v%03u) to fp32.",
       (node->binary_operator == xnn_binary_multiply) ? "mul" : "div", node_id,
       reduce_node_type == xnn_node_type_static_sum_squared ? "_squared" : "",
       reduced_value->producer, reduce_node->inputs[0], arg_value->id);

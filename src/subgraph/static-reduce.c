@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
@@ -69,6 +70,7 @@ static enum xnn_status create_reduce_operator(
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
+  const struct xnn_runtime_value *output_value = &values[output_id];
 
   struct xnn_quantization_params input_quantization;
   struct xnn_quantization_params output_quantization;
@@ -85,9 +87,9 @@ static enum xnn_status create_reduce_operator(
       break;
   }
 
-  status = xnn_create_reduce_nd(
+  status = xnn_create_reduce_nd_v2(
     xnn_node_type_to_reduce_operator(node->type),
-    input_value->datatype,
+    input_value->datatype, output_value->datatype,
     &input_quantization, &output_quantization,
     node->flags,
     &opdata->operator_objects[0]);
@@ -117,9 +119,10 @@ static enum xnn_status reshape_reduce_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
+  struct xnn_runtime_value* output_value = values + output_id;
   void* workspace_size = &opdata->workspace_size;
 
-  if(input_value->datatype == xnn_datatype_fp32) {
+  if (output_value->datatype == xnn_datatype_fp32) {
     workspace_size = NULL;
   }
 
@@ -165,7 +168,6 @@ static enum xnn_status reshape_reduce_operator(
       workspace_size,
       threadpool);
 
-  struct xnn_runtime_value* output_value = values + output_id;
   if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
     output_value->shape.num_dims = input_num_dims;
     for (size_t input_idx = 0; input_idx < input_num_dims; ++input_idx) {
@@ -258,7 +260,7 @@ static enum xnn_status setup_reduce_operator(
   const bool is_minmax = (opdata->type == xnn_node_type_static_reduce_min ||
                           opdata->type == xnn_node_type_static_reduce_max);
   void* workspace =
-      (input_value->datatype != xnn_datatype_fp32 && !is_minmax)
+      (output_value->datatype != xnn_datatype_fp32 && !is_minmax)
       ? opdata->workspace : NULL;
 
   return xnn_setup_reduce_nd(opdata->operator_objects[0], workspace, input_data, output_data);
@@ -353,6 +355,19 @@ enum xnn_status xnn_define_static_reduce_v2(
 
   const bool is_minmax = reduce_operator == xnn_reduce_min ||
                          reduce_operator == xnn_reduce_max;
+  const bool is_fp16_to_fp32 = input_value->datatype == xnn_datatype_fp16 &&
+                               output_value->datatype == xnn_datatype_fp32 &&
+                               !is_minmax;
+  if (input_value->datatype != output_value->datatype && !is_fp16_to_fp32) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32
+        " and output ID #%" PRIu32
+        ": mismatching datatypes across input (%s) and output (%s)",
+        xnn_node_type_to_string(node_type), input_id, output_id,
+        xnn_datatype_to_string(input_value->datatype),
+        xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_invalid_parameter;
+  }
   const bool is_quantized = input_value->datatype == xnn_datatype_qint8 ||
                             input_value->datatype == xnn_datatype_quint8;
   if (is_minmax && is_quantized &&

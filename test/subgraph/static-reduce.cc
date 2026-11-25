@@ -467,6 +467,344 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32Rewrite, params3,
                          [](auto p) { return p.param.Name(); });
 
 #ifndef XNNPACK_USE_YNNPACK
+TEST(StaticReduce, WidenFp16Accumulators) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const std::vector<size_t> input_shape = {4, 128};
+  Tensor<xnn_float16> input(input_shape, xnnpack::XnnExtraBytes);
+  // Each element is 32, so sum(sqr(x)) = 128 * 1024 = 131072 > fp16 max
+  // (65504), while the scaled mean 1024 fits in fp16.
+  for (size_t i = 0; i < input.size(); ++i) {
+    input.base()[i] = xnn_float16(32.0f + static_cast<float>(i % 4));
+  }
+
+  for (int64_t axis : {int64_t{0}, int64_t{1}}) {
+    for (bool keep_dims : {false, true}) {
+      for (bool square_input : {false, true}) {
+        for (int op_variant = 0; op_variant < 4; ++op_variant) {
+          const size_t reduced_elements = input_shape[axis];
+          std::vector<size_t> output_shape;
+          for (size_t d = 0; d < input_shape.size(); ++d) {
+            if (static_cast<int64_t>(d) == axis) {
+              if (keep_dims) {
+                output_shape.push_back(1);
+              }
+            } else {
+              output_shape.push_back(input_shape[d]);
+            }
+          }
+
+          const xnn_float16 scale =
+              op_variant >= 2
+                  ? xnn_float16(static_cast<float>(reduced_elements))
+                  : xnn_float16(1.0f / static_cast<float>(reduced_elements));
+
+          SubgraphTester subgraph(2);
+          subgraph.AddInputTensor(input_shape.size(), xnn_datatype_fp16, 0)
+              .AddOutputTensor(output_shape.size(), xnn_datatype_fp16, 1);
+          uint32_t reduce_input_id = 0;
+          if (square_input) {
+            subgraph.AddInternalDynamicTensor(
+                input_shape.size(), xnn_datatype_fp16, &reduce_input_id);
+            subgraph.AddMultiply(0, 0, reduce_input_id);
+          }
+          uint32_t reduced_id = XNN_INVALID_VALUE_ID;
+          subgraph.AddInternalDynamicTensor(output_shape.size(),
+                                            xnn_datatype_fp16, &reduced_id);
+          subgraph.AddReduce(xnn_reduce_sum, {axis}, reduce_input_id,
+                             reduced_id, keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
+          uint32_t scale_id = XNN_INVALID_VALUE_ID;
+          subgraph.AddInternalStaticTensor({1}, xnn_datatype_fp16, &scale_id,
+                                           &scale);
+          if (op_variant == 0) {
+            subgraph.AddMultiply(reduced_id, scale_id, 1);
+          } else if (op_variant == 1) {
+            subgraph.AddMultiply(scale_id, reduced_id, 1);
+          } else if (op_variant == 2) {
+            subgraph.AddDivide(reduced_id, scale_id, 1);
+          } else {
+            subgraph.AddDivide(scale_id, reduced_id, 1);
+          }
+
+          const xnn_status status = subgraph.CreateRuntime();
+          if (status == xnn_status_unsupported_hardware) {
+            GTEST_SKIP();
+          }
+          ASSERT_EQ(status, xnn_status_success);
+
+          for (const std::vector<size_t>& shape :
+               {input_shape, std::vector<size_t>{2, 64}}) {
+            std::vector<size_t> cur_out_shape;
+            for (size_t d = 0; d < shape.size(); ++d) {
+              if (static_cast<int64_t>(d) == axis) {
+                if (keep_dims) {
+                  cur_out_shape.push_back(1);
+                }
+              } else {
+                cur_out_shape.push_back(shape[d]);
+              }
+            }
+            Tensor<xnn_float16> output(cur_out_shape, xnnpack::XnnExtraBytes);
+            subgraph.ReshapeExternalTensor(shape, input.data(), 0)
+                .ReshapeRuntime()
+                .SetupExternalTensor(output.base(), 1)
+                .SetupRuntime()
+                .InvokeRuntime();
+
+            const size_t cur_reduced = shape[axis];
+            const size_t unreduced = shape[1 - axis];
+            for (size_t o = 0; o < unreduced; ++o) {
+              float acc = 0.0f;
+              for (size_t r = 0; r < cur_reduced; ++r) {
+                const size_t idx =
+                    axis == 1 ? (o * shape[1] + r) : (r * shape[1] + o);
+                const float v = static_cast<float>(input.base()[idx]);
+                acc += square_input ? v * v : v;
+              }
+              float expected;
+              if (op_variant < 2) {
+                expected = acc * static_cast<float>(scale);
+              } else if (op_variant == 2) {
+                expected = acc / static_cast<float>(scale);
+              } else {
+                expected = static_cast<float>(scale) / acc;
+              }
+              const float actual = static_cast<float>(output.base()[o]);
+              ASSERT_NEAR(actual, expected, std::abs(expected) * 2e-3f)
+                  << "axis=" << axis << ", keep_dims=" << keep_dims
+                  << ", square_input=" << square_input
+                  << ", op_variant=" << op_variant << ", o=" << o;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+TEST(StaticReduce, WidenFp16AccumulatorsForceFp16) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const std::vector<size_t> input_shape = {4, 128};
+  Tensor<float> input(input_shape, xnnpack::XnnExtraBytes);
+  for (size_t i = 0; i < input.size(); ++i) {
+    input.base()[i] = 32.0f + static_cast<float>(i % 4);
+  }
+
+  for (int64_t axis : {int64_t{0}, int64_t{1}}) {
+    for (bool keep_dims : {false, true}) {
+      for (bool square_input : {false, true}) {
+        for (int op_variant = 0; op_variant < 3; ++op_variant) {
+          const size_t reduced_elements = input_shape[axis];
+          std::vector<size_t> output_shape;
+          for (size_t d = 0; d < input_shape.size(); ++d) {
+            if (static_cast<int64_t>(d) == axis) {
+              if (keep_dims) {
+                output_shape.push_back(1);
+              }
+            } else {
+              output_shape.push_back(input_shape[d]);
+            }
+          }
+          // For divide with squared inputs on axis 1, divide by 65536 (> fp16
+          // max) to verify the original fp32 scalar is preserved.
+          const float divisor = (square_input && axis == 1)
+                                    ? 65536.0f
+                                    : static_cast<float>(reduced_elements);
+          const float scale = op_variant == 2 ? divisor : (1.0f / divisor);
+
+          SubgraphTester subgraph(2);
+          subgraph.AddInputTensor(input_shape, xnn_datatype_fp32, 0)
+              .AddOutputTensor(output_shape.size(), xnn_datatype_fp32, 1);
+          uint32_t reduce_input_id = 0;
+          if (square_input) {
+            subgraph.AddInternalDynamicTensor(input_shape, xnn_datatype_fp32,
+                                              &reduce_input_id);
+            subgraph.AddMultiply(0, 0, reduce_input_id);
+          }
+          uint32_t sum_id = XNN_INVALID_VALUE_ID;
+          subgraph.AddInternalDynamicTensor(output_shape, xnn_datatype_fp32,
+                                            &sum_id);
+          subgraph.AddReduce(xnn_reduce_sum, {axis}, reduce_input_id, sum_id,
+                             keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
+          uint32_t scale_id = XNN_INVALID_VALUE_ID;
+          subgraph.AddInternalStaticTensor({1}, xnn_datatype_fp32, &scale_id,
+                                           &scale);
+          if (op_variant == 0) {
+            subgraph.AddMultiply(sum_id, scale_id, 1);
+          } else if (op_variant == 1) {
+            subgraph.AddMultiply(scale_id, sum_id, 1);
+          } else {
+            subgraph.AddDivide(sum_id, scale_id, 1);
+          }
+
+          const xnn_status status = subgraph.CreateRuntime(
+              /*threadpool=*/nullptr,
+              xnn_test_runtime_flags() | XNN_FLAG_FORCE_FP16_INFERENCE);
+          if (status == xnn_status_unsupported_hardware) {
+            GTEST_SKIP();
+          }
+          ASSERT_EQ(status, xnn_status_success);
+
+          Tensor<float> output(output_shape, xnnpack::XnnExtraBytes);
+          subgraph.ReshapeExternalTensor(input_shape, input.data(), 0)
+              .ReshapeRuntime()
+              .SetupExternalTensor(output.base(), 1)
+              .SetupRuntime()
+              .InvokeRuntime();
+
+          const size_t unreduced = input_shape[1 - axis];
+          for (size_t o = 0; o < unreduced; ++o) {
+            float acc = 0.0f;
+            for (size_t r = 0; r < reduced_elements; ++r) {
+              const float v = axis == 1 ? input({o, r}) : input({r, o});
+              acc += square_input ? v * v : v;
+            }
+            const float expected = acc / divisor;
+            ASSERT_NEAR(output.base()[o], expected, expected * 2e-3f)
+                << "axis=" << axis << ", keep_dims=" << keep_dims
+                << ", square_input=" << square_input
+                << ", op_variant=" << op_variant << ", o=" << o;
+          }
+        }
+      }
+    }
+  }
+
+  // Verify subgraph cleanup when optimized without creating a runtime.
+  const float scale = 1.0f / 128.0f;
+  SubgraphTester unrun(2);
+  unrun.AddInputTensor(input_shape, xnn_datatype_fp32, 0)
+      .AddOutputTensor(2, xnn_datatype_fp32, 1);
+  uint32_t sum_id = XNN_INVALID_VALUE_ID;
+  unrun.AddInternalDynamicTensor({4, 1}, xnn_datatype_fp32, &sum_id);
+  unrun.AddReduce(xnn_reduce_sum, {1}, 0, sum_id, XNN_FLAG_KEEP_DIMS);
+  uint32_t scale_id = XNN_INVALID_VALUE_ID;
+  unrun.AddInternalStaticTensor({1}, xnn_datatype_fp32, &scale_id, &scale);
+  unrun.AddMultiply(sum_id, scale_id, 1);
+  unrun.Optimize(xnn_test_runtime_flags() | XNN_FLAG_FORCE_FP16_INFERENCE);
+}
+
+TEST(StaticReduce, WidenFp16AccumulatorsSharedScalarAndExternalSum) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const std::vector<size_t> shape = {2, 128};
+  Tensor<xnn_float16> input_a(shape, xnnpack::XnnExtraBytes);
+  Tensor<xnn_float16> input_b(shape, xnnpack::XnnExtraBytes);
+  input_a.fill(xnn_float16(600.0f));  // sum = 76800 > fp16 max (65504)
+  input_b.fill(xnn_float16(800.0f));  // sum = 102400 > fp16 max (65504)
+  const xnn_float16 scale(1.0f / 128.0f);
+
+  // Two reduce_sum->mul ops (one with a downstream unary op) and a non-reduce
+  // mul sharing a single static scalar constant.
+  {
+    SubgraphTester subgraph(5);
+    subgraph.AddInputTensor(shape, xnn_datatype_fp16, 0)
+        .AddInputTensor(shape, xnn_datatype_fp16, 1)
+        .AddOutputTensor(2, xnn_datatype_fp16, 2)
+        .AddOutputTensor(2, xnn_datatype_fp16, 3)
+        .AddOutputTensor(2, xnn_datatype_fp16, 4);
+    uint32_t scale_id = XNN_INVALID_VALUE_ID;
+    subgraph.AddInternalStaticTensor({1}, xnn_datatype_fp16, &scale_id, &scale);
+    uint32_t sum_a_id = XNN_INVALID_VALUE_ID;
+    uint32_t mean_a_id = XNN_INVALID_VALUE_ID;
+    uint32_t sum_b_id = XNN_INVALID_VALUE_ID;
+    subgraph.AddInternalDynamicTensor({2, 1}, xnn_datatype_fp16, &sum_a_id)
+        .AddInternalDynamicTensor({2, 1}, xnn_datatype_fp16, &mean_a_id)
+        .AddInternalDynamicTensor({2, 1}, xnn_datatype_fp16, &sum_b_id)
+        .AddReduce(xnn_reduce_sum, {1}, 0, sum_a_id, XNN_FLAG_KEEP_DIMS)
+        .AddMultiply(sum_a_id, scale_id, mean_a_id)
+        .AddUnary(xnn_unary_square_root, /*params=*/nullptr, mean_a_id, 2)
+        .AddReduce(xnn_reduce_sum, {1}, 1, sum_b_id, XNN_FLAG_KEEP_DIMS)
+        .AddMultiply(scale_id, sum_b_id, 3)
+        .AddMultiply(0, scale_id, 4);
+
+    const xnn_status status = subgraph.CreateRuntime(
+        /*threadpool=*/nullptr, xnn_test_runtime_flags());
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+    }
+    ASSERT_EQ(status, xnn_status_success);
+
+    Tensor<xnn_float16> out_sqrt_mean_a({2, 1}, xnnpack::XnnExtraBytes);
+    Tensor<xnn_float16> out_mean_b({2, 1}, xnnpack::XnnExtraBytes);
+    Tensor<xnn_float16> out_scaled_a(shape, xnnpack::XnnExtraBytes);
+    subgraph.ReshapeExternalTensor(shape, input_a.data(), 0)
+        .ReshapeExternalTensor(shape, input_b.data(), 1)
+        .ReshapeRuntime()
+        .SetupExternalTensor(out_sqrt_mean_a.base(), 2)
+        .SetupExternalTensor(out_mean_b.base(), 3)
+        .SetupExternalTensor(out_scaled_a.base(), 4)
+        .SetupRuntime()
+        .InvokeRuntime();
+
+    for (size_t i = 0; i < 2; ++i) {
+      ASSERT_NEAR(static_cast<float>(out_sqrt_mean_a.base()[i]),
+                  std::sqrt(600.0f), 5e-2f);
+      ASSERT_NEAR(static_cast<float>(out_mean_b.base()[i]), 800.0f, 1.0f);
+    }
+    ASSERT_NEAR(static_cast<float>(out_scaled_a.base()[0]), 600.0f / 128.0f,
+                1e-2f);
+  }
+
+  // External reduce_sum output must keep its fp16 datatype and buffer size.
+  {
+    Tensor<xnn_float16> small_input(shape, xnnpack::XnnExtraBytes);
+    small_input.fill(xnn_float16(2.0f));
+    SubgraphTester subgraph(3);
+    subgraph.AddInputTensor(shape, xnn_datatype_fp16, 0)
+        .AddOutputTensor(2, xnn_datatype_fp16, 1)
+        .AddOutputTensor(2, xnn_datatype_fp16, 2);
+    uint32_t scale_id = XNN_INVALID_VALUE_ID;
+    subgraph.AddInternalStaticTensor({1}, xnn_datatype_fp16, &scale_id, &scale);
+    subgraph.AddReduce(xnn_reduce_sum, {1}, 0, 1, XNN_FLAG_KEEP_DIMS)
+        .AddMultiply(1, scale_id, 2);
+
+    const xnn_status status = subgraph.CreateRuntime(
+        /*threadpool=*/nullptr, xnn_test_runtime_flags());
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+    }
+    ASSERT_EQ(status, xnn_status_success);
+
+    Tensor<xnn_float16> out_sum({2, 1}, xnnpack::XnnExtraBytes);
+    Tensor<xnn_float16> out_mean({2, 1}, xnnpack::XnnExtraBytes);
+    subgraph.ReshapeExternalTensor(shape, small_input.data(), 0)
+        .ReshapeRuntime()
+        .SetupExternalTensor(out_sum.base(), 1)
+        .SetupExternalTensor(out_mean.base(), 2)
+        .SetupRuntime()
+        .InvokeRuntime();
+
+    for (size_t i = 0; i < 2; ++i) {
+      ASSERT_NEAR(static_cast<float>(out_sum.base()[i]), 256.0f, 0.5f);
+      ASSERT_NEAR(static_cast<float>(out_mean.base()[i]), 2.0f, 1e-2f);
+    }
+  }
+}
+
+TEST(StaticReduce, DefineRejectsMismatchedOutputDatatype) {
+  const int64_t reduction_axes[1] = {1};
+  for (xnn_reduce_operator op : {xnn_reduce_min, xnn_reduce_max}) {
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(2, xnn_datatype_fp16, 0)
+        .AddOutputTensor(2, xnn_datatype_fp32, 1);
+    EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), op,
+                                          /*num_reduction_axes=*/1,
+                                          reduction_axes, /*input_id=*/0,
+                                          /*output_id=*/1, /*flags=*/0),
+              xnn_status_invalid_parameter);
+  }
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(2, xnn_datatype_fp32, 0)
+      .AddOutputTensor(2, xnn_datatype_fp16, 1);
+  EXPECT_EQ(xnn_define_static_reduce_v2(subgraph.Subgraph(), xnn_reduce_sum,
+                                        /*num_reduction_axes=*/1,
+                                        reduction_axes, /*input_id=*/0,
+                                        /*output_id=*/1, /*flags=*/0),
+            xnn_status_invalid_parameter);
+}
+
 TEST(StaticReduce, DefineRejectsUnsupportedInputDatatype) {
   SubgraphTester subgraph(2);
   subgraph.AddInputTensor(2, xnn_datatype_int32, 0)

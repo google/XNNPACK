@@ -810,6 +810,13 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
     xnn_operator_t deconvolution_op, const int8_t* input, int8_t* output,
     void* workspace);
 
+enum xnn_status xnn_create_reduce_nd_v2(
+    enum xnn_reduce_operator reduce_operator_type,
+    enum xnn_datatype input_datatype, enum xnn_datatype output_datatype,
+    const struct xnn_quantization_params* input_quantization,
+    const struct xnn_quantization_params* output_quantization, uint32_t flags,
+    xnn_operator_t* reduce_op_out);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
