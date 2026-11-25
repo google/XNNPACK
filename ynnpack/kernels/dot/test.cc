@@ -11,6 +11,7 @@
 #include <cstring>
 #include <optional>
 #include <ostream>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -319,6 +320,67 @@ TEST_P(Dot, BlockOverflow) {
   const DotShape& block_shape = kernel.block_shape;
   SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
     TestMatMulOverflow(a_type, b_type, c_type, block_shape, kernel);
+  });
+}
+
+TEST_P(Dot, LargeKOverflow) {
+  KernelInfo kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
+    using AT = decltype(a_type);
+    using BT = decltype(b_type);
+    using CT = decltype(c_type);
+    if constexpr (std::is_same_v<AT, int8_t> && std::is_same_v<BT, int4x2> &&
+                  std::is_same_v<CT, int32_t>) {
+      const auto a_min = type_info<AT>::min();
+      const auto b_min = (kernel.flags & dot_flag::symmetric_b)
+                             ? -type_info<BT>::max()
+                             : type_info<BT>::min();
+      // K > 131072 overflows int32_t if 4-bit nibbles are scaled by 16x without
+      // chunking (|-128 * -8 * 16| * 131072 = 2^31).
+      const size_t m = kernel.tile_m;
+      const size_t n =
+          std::max<size_t>(kernel.tile_n, type_element_count(type_of<BT>()));
+      const size_t large_k = 131072 + kernel.block_shape.k + kernel.tile_k;
+      const DotShape shape = {m, n, large_k};
+      TestMatMul(a_type, b_type, c_type, shape, kernel, /*init_zero=*/true,
+                 a_min, b_min);
+      TestMatMul(a_type, b_type, c_type, shape, kernel, /*init_zero=*/false,
+                 a_min, b_min);
+
+      // Also exercise multi-dimensional K2 / K3 chunking via zero-stride reuse.
+      const size_t k1 = 2048;
+      const size_t k_outer = 65;  // 65 * 2048 = 133120 > 131072.
+      const bool pack_a = kernel.flags & dot_flag::transpose_a;
+      const bool unpacked_b = kernel.flags & dot_flag::unaligned_b;
+      Tensor<AT> a({m, k1});
+      Tensor<BT> b(
+          {k1, n},
+          Alignment{.bytes = (unpacked_b ? 1 : kernel.tile_n) * sizeof(BT)});
+      a.fill(a_min);
+      b.fill(b_min);
+      Tensor<BT> packed_b =
+          unpacked_b ? b : pack_b(b, kernel.tile_k, kernel.tile_n);
+      Tensor<AT> packed_a = pack_a ? transpose_a(a, m, kernel.tile_k) : a;
+      const CT expected_val =
+          static_cast<CT>(a_min) * static_cast<CT>(b_min) * k1 * k_outer;
+      for (bool use_k3 : {false, true}) {
+        Tensor<CT> c({m, n});
+        c.fill(0);
+        dot_kernel_state kernel_state = {};
+        const size_t k3 = use_k3 ? k_outer : 1;
+        const size_t k2 = use_k3 ? 1 : k_outer;
+        kernel.kernel(m, n, k3, k2, k1,
+                      packed_a.stride_bytes(0) / (pack_a ? kernel.tile_k : 1),
+                      0, 0, packed_a.base(), 0, 0,
+                      packed_b.stride_bytes(0) / kernel.tile_k, packed_b.base(),
+                      c.stride_bytes(0), nullptr, c.stride_bytes(0), c.base(),
+                      &kernel_state);
+        for (const auto& i : EnumerateIndices({m, n})) {
+          ASSERT_EQ(c(i), expected_val);
+        }
+      }
+    }
   });
 }
 

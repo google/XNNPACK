@@ -381,7 +381,7 @@ TEST(get_dot_kernel_arm, int8_int4_int32) {
 
   EXPECT_EQ(get_dot_kernel_name(int8_int4, {1, 2048, 2048}, arch, packed_shape,
                                 /*thread_count=*/4),
-            "dot_int8_int4_int32_1x32x8_1x4x8_neondot");
+            "dot_int8_int4_int32_1x32x16_1x4x8_neondot");
 #endif
 }
 

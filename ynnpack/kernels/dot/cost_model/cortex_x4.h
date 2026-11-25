@@ -85,12 +85,12 @@ static constexpr dot_cost_models cortex_x4 = {
         /*load_b_cost=*/2.41e-11f,
         /*output_c=*/7.54e-11f,
     },
-    // Ratio (predicted / actual): std=0.165, min=0.718, max=1.308 (n=160)
+    // Ratio (predicted / actual): std=0.175, min=0.764, max=1.322 (n=160)
     .arm_neondot_int8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/5.48e-11f,
-        /*load_b_cost=*/3.03e-11f,
-        /*output_c=*/5.75e-11f,
+        /*load_a_cost=*/4.18e-11f,
+        /*load_b_cost=*/2.00e-11f,
+        /*output_c=*/9.94e-11f,
     },
     // Ratio (predicted / actual): std=0.142, min=0.668, max=1.308 (n=180)
     .arm_neondot_int8_int8_int32 = {

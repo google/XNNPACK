@@ -16,97 +16,90 @@ namespace ynn {
 
 static constexpr dot_cost_models cortex_a710 = {
 #ifdef YNN_ARCH_ARM64_NEONI8MM
-    // Ratio (predicted / actual): std=0.072, min=0.764, max=1.159 (n=140)
-    .arm64_neoni8mm_int8_int2_int32 = {
-        /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.05e-11f,
-        /*load_b_cost=*/6.36e-11f,
-        /*output_c=*/1.11e-10f,
-    },
-    // Ratio (predicted / actual): std=0.170, min=0.606, max=1.240 (n=140)
+    // Ratio (predicted / actual): std=0.160, min=0.607, max=1.244 (n=140)
     .arm64_neoni8mm_int8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.22e-11f,
-        /*load_b_cost=*/5.76e-11f,
-        /*output_c=*/1.18e-10f,
+        /*load_a_cost=*/2.39e-11f,
+        /*load_b_cost=*/6.63e-11f,
+        /*output_c=*/1.31e-10f,
     },
-    // Ratio (predicted / actual): std=0.175, min=0.707, max=1.299 (n=140)
+    // Ratio (predicted / actual): std=0.176, min=0.698, max=1.302 (n=140)
     .arm64_neoni8mm_int8_int8_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.59e-11f,
-        /*load_b_cost=*/1.38e-11f,
-        /*output_c=*/1.11e-10f,
+        /*load_a_cost=*/2.92e-11f,
+        /*load_b_cost=*/1.53e-11f,
+        /*output_c=*/1.24e-10f,
     },
 #endif  // YNN_ARCH_ARM64_NEONI8MM
 #ifdef YNN_ARCH_ARM_NEONBF16
-    // Ratio (predicted / actual): std=0.173, min=0.711, max=1.305 (n=140)
+    // Ratio (predicted / actual): std=0.175, min=0.705, max=1.310 (n=140)
     .arm_neonbf16_bf16_bf16_fp32_k4 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/5.26e-11f,
-        /*load_b_cost=*/2.72e-11f,
-        /*output_c=*/1.23e-10f,
+        /*load_a_cost=*/5.89e-11f,
+        /*load_b_cost=*/3.04e-11f,
+        /*output_c=*/1.40e-10f,
     },
-    // Ratio (predicted / actual): std=0.098, min=0.827, max=1.169 (n=140)
+    // Ratio (predicted / actual): std=0.103, min=0.833, max=1.167 (n=140)
     .arm_neonbf16_bf16_bf16_fp32_k2 = {
-        /*block_overhead=*/4.56e-10f,
-        /*load_a_cost=*/2.33e-10f,
-        /*load_b_cost=*/4.35e-11f,
-        /*output_c=*/4.48e-11f,
+        /*block_overhead=*/3.16e-10f,
+        /*load_a_cost=*/2.65e-10f,
+        /*load_b_cost=*/4.85e-11f,
+        /*output_c=*/5.10e-11f,
     },
 #endif  // YNN_ARCH_ARM_NEONBF16
 #ifdef YNN_ARCH_ARM64_NEON
-    // Ratio (predicted / actual): std=0.186, min=0.678, max=1.324 (n=198)
+    // Ratio (predicted / actual): std=0.189, min=0.529, max=1.384 (n=198)
     .arm64_neon_fp32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/1.92e-10f,
-        /*load_b_cost=*/9.13e-11f,
-        /*output_c=*/1.07e-10f,
+        /*load_a_cost=*/2.43e-10f,
+        /*load_b_cost=*/9.58e-11f,
+        /*output_c=*/1.24e-10f,
     },
-    // Ratio (predicted / actual): std=0.189, min=0.685, max=1.343 (n=200)
+    // Ratio (predicted / actual): std=0.192, min=0.653, max=1.362 (n=200)
     .arm64_neon_fp64 = {
-        /*block_overhead=*/6.35e-11f,
-        /*load_a_cost=*/1.98e-10f,
-        /*load_b_cost=*/1.81e-10f,
-        /*output_c=*/1.67e-10f,
+        /*block_overhead=*/4.22e-10f,
+        /*load_a_cost=*/2.32e-10f,
+        /*load_b_cost=*/1.98e-10f,
+        /*output_c=*/1.78e-10f,
     },
-    // Ratio (predicted / actual): std=0.133, min=0.782, max=1.258 (n=200)
+    // Ratio (predicted / actual): std=0.146, min=0.624, max=1.273 (n=200)
     .arm64_neon_bf16_bf16_fp32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/3.28e-10f,
-        /*load_b_cost=*/1.82e-10f,
-        /*output_c=*/4.80e-11f,
+        /*load_a_cost=*/3.79e-10f,
+        /*load_b_cost=*/1.99e-10f,
+        /*output_c=*/6.12e-11f,
     },
 #endif  // YNN_ARCH_ARM64_NEON
 #ifdef YNN_ARCH_ARM_NEONDOT
-    // Ratio (predicted / actual): std=0.126, min=0.754, max=1.167 (n=120)
+    // Ratio (predicted / actual): std=0.127, min=0.757, max=1.173 (n=120)
     .arm_neondot_int8_int2_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/5.84e-11f,
-        /*load_b_cost=*/3.29e-11f,
-        /*output_c=*/7.24e-11f,
+        /*load_a_cost=*/6.54e-11f,
+        /*load_b_cost=*/3.69e-11f,
+        /*output_c=*/8.28e-11f,
     },
-    // Ratio (predicted / actual): std=0.146, min=0.759, max=1.283 (n=160)
+    // Ratio (predicted / actual): std=0.172, min=0.766, max=1.323 (n=160)
     .arm_neondot_int8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/6.26e-11f,
-        /*load_b_cost=*/5.32e-11f,
-        /*output_c=*/4.89e-11f,
+        /*load_a_cost=*/7.50e-11f,
+        /*load_b_cost=*/3.91e-11f,
+        /*output_c=*/1.83e-10f,
     },
-    // Ratio (predicted / actual): std=0.220, min=0.698, max=1.418 (n=180)
+    // Ratio (predicted / actual): std=0.214, min=0.667, max=1.341 (n=160)
     .arm_neondot_int8_int8_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/5.31e-11f,
-        /*load_b_cost=*/2.22e-11f,
-        /*output_c=*/9.68e-11f,
+        /*load_a_cost=*/5.40e-11f,
+        /*load_b_cost=*/2.55e-11f,
+        /*output_c=*/1.02e-10f,
     },
 #endif  // YNN_ARCH_ARM_NEONDOT
 #ifdef YNN_ARCH_ARM_NEON
-    // Ratio (predicted / actual): std=0.164, min=0.741, max=1.314 (n=200)
+    // Ratio (predicted / actual): std=0.210, min=0.682, max=1.527 (n=200)
     .arm_neon_int8_int8_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/3.58e-10f,
-        /*load_b_cost=*/2.02e-10f,
-        /*output_c=*/1.69e-10f,
+        /*load_a_cost=*/4.65e-10f,
+        /*load_b_cost=*/1.58e-10f,
+        /*output_c=*/2.68e-10f,
     },
 #endif  // YNN_ARCH_ARM_NEON
 };

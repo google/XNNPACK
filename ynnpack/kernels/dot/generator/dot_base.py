@@ -61,10 +61,18 @@ class dot_base:
     self.min_tiles = 4
     self.flags = []
     self.handle_tail = False
+    self.max_k = None
     self.dot_cost_model = type(self).__name__
 
+  def _a_k1_step(self):
+    return (
+        "A_stride_m"
+        if "dot_flag::transpose_a" in self.flags
+        else f"sizeof({self.a_type})"
+    )
+
   def header(self):
-    return """
+    result = """
 #include <cassert>
 #include <cstdint>
 #include <cstddef>
@@ -98,6 +106,22 @@ class dot_base:
 #define YNN_ALWAYS_INLINE inline
 #endif
 
+#ifndef YNN_NO_INLINE
+#if defined(__GNUC__)
+#define YNN_NO_INLINE inline __attribute__((noinline))
+#else
+#define YNN_NO_INLINE
+#endif
+#endif
+
+#ifndef YNN_UNLIKELY
+#if defined(__GNUC__)
+#define YNN_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+#define YNN_UNLIKELY(x) (x)
+#endif
+#endif
+
 #if YNN_COMPILER_HAS_ATTRIBUTE(unused)
 #define YNN_UNUSED __attribute__((unused))
 #else
@@ -118,6 +142,62 @@ YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
 
 }  // namespace
 """
+    if self.max_k is not None:
+      result += f"""
+namespace {{
+
+using dot_chunk_fn = void (*)(
+    std::size_t, std::size_t, std::size_t, std::size_t, std::size_t,
+    std::size_t, std::size_t, std::size_t, const void*,
+    std::size_t, std::size_t, std::size_t, const void*,
+    std::size_t, const void*, std::size_t, void*, dot_kernel_state*);
+
+template <dot_chunk_fn Fn>
+YNN_NO_INLINE void dot_chunk_k(
+    std::size_t M, std::size_t N, std::size_t K3, std::size_t K2, std::size_t K1,
+    std::size_t A_stride_m, std::size_t A_stride_k3, std::size_t A_stride_k2, const void* A,
+    std::size_t B_stride_k3, std::size_t B_stride_k2, std::size_t B_stride_k1, const void* B,
+    std::size_t C_in_stride_m, const void* C_in, std::size_t C_out_stride_m, void* C_out) {{
+  constexpr std::size_t kMaxK = {self.max_k};
+  if (K1 == 0 || K2 == 0 || K3 == 0) return;
+  std::size_t* dim;
+  std::size_t a_stride;
+  std::size_t b_stride;
+  std::size_t chunk;
+  if (K1 > kMaxK) {{
+    dim = &K1;
+    a_stride = {self._a_k1_step()};
+    b_stride = B_stride_k1;
+    chunk = kMaxK;
+  }} else if (K2 > kMaxK / K1) {{
+    dim = &K2;
+    a_stride = A_stride_k2;
+    b_stride = B_stride_k2;
+    chunk = kMaxK / K1;
+  }} else {{
+    dim = &K3;
+    a_stride = A_stride_k3;
+    b_stride = B_stride_k3;
+    chunk = kMaxK / (K1 * K2);
+  }}
+  std::size_t rem = *dim;
+  while (rem > 0) {{
+    const std::size_t step = min(rem, chunk);
+    *dim = step;
+    Fn(M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A,
+       B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+       C_out_stride_m, C_out, nullptr);
+    C_in = C_out;
+    C_in_stride_m = C_out_stride_m;
+    A = offset_bytes(A, step * a_stride);
+    B = offset_bytes(B, step * b_stride);
+    rem -= step;
+  }}
+}}
+
+}}  // namespace
+"""
+    return result
 
   def footer(self):
     return "}  // namespace ynn\n"
@@ -171,6 +251,20 @@ void {func_name}(
 
     if self.tile_shape[2] > 1:
       result += f"  assert(K1 % {self.tile_shape[2]} == 0);\n"
+
+    if self.max_k is not None:
+      assert self.max_k % self.block_shape[2] == 0
+      result += f"""  if (YNN_UNLIKELY(
+          K1 > {self.max_k} ||
+          ((K2 | K3) > 1 &&
+           (K2 > {self.max_k} || K3 > {self.max_k} ||
+            static_cast<std::uint64_t>(K1) * K2 * K3 > {self.max_k})))) {{
+    return dot_chunk_k<{func_name}>(
+        M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A,
+        B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+        C_out_stride_m, C_out);
+  }}
+"""
 
     return result
 
@@ -412,11 +506,7 @@ void {func_name}(
     result += """const void* A_k1 = A_k2;
 std::ptrdiff_t k1 = K1;
 """
-    a_step = (
-        "A_stride_m"
-        if "dot_flag::transpose_a" in self.flags
-        else f"sizeof({self.a_type})"
-    )
+    a_step = self._a_k1_step()
 
     def advance_k1(k_step):
       step = f"k1 -= {k_step};\n"
