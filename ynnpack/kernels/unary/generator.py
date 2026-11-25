@@ -43,6 +43,7 @@ def main(argv: Sequence[str]) -> None:
           (abs_fp32, (8, 1), consistent),
           (abs_fp64, (4, 1), consistent),
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (convert_bf16_to_fp32, (16, 1), consistent),
           (convert_fp32_to_fp64, (8, 1), consistent),
@@ -84,6 +85,7 @@ def main(argv: Sequence[str]) -> None:
       "x86_sse2_fma": [
           # go/keep-sorted start
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (cos_fp32, (16, 1), consistent),
           (erf_fp32, (16, 1), consistent),
@@ -103,6 +105,7 @@ def main(argv: Sequence[str]) -> None:
       "x86_sse41": [
           # go/keep-sorted start
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (ceil_fp32, (8, 1), consistent),
           (ceil_fp64, (4, 1), consistent),
@@ -138,6 +141,7 @@ def main(argv: Sequence[str]) -> None:
           (abs_fp32, (16, 1), consistent),
           (abs_fp64, (8, 1), consistent),
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (ceil_fp32, (16, 1), consistent),
           (ceil_fp64, (8, 1), consistent),
@@ -182,6 +186,7 @@ def main(argv: Sequence[str]) -> None:
       "x86_avx2": [
           # go/keep-sorted start
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (convert_bf16_to_fp32, (16, 1), consistent),
           (convert_fp32_to_bf16, (16, 1), consistent),
@@ -215,6 +220,7 @@ def main(argv: Sequence[str]) -> None:
       "x86_fma3": [
           # go/keep-sorted start
           (approx_erf_fp32, (32, 1)),
+          (approx_expm1_fp32, (32, 1)),
           (approx_tanh_fp32, (32, 1)),
           (cos_fp32, (32, 1), consistent),
           (cos_fp64, (16, 1)),
@@ -243,6 +249,7 @@ def main(argv: Sequence[str]) -> None:
       "x86_avx2_fma3": [
           # go/keep-sorted start
           (approx_erf_fp32, (32, 1)),
+          (approx_expm1_fp32, (32, 1)),
           (approx_tanh_fp32, (32, 1)),
           (cos_fp32, (32, 1), consistent),
           (cos_fp64, (16, 1)),
@@ -277,6 +284,7 @@ def main(argv: Sequence[str]) -> None:
           (abs_fp32, (32, 1), consistent),
           (abs_fp64, (16, 1), consistent),
           (approx_erf_fp32, (32, 1)),
+          (approx_expm1_fp32, (32, 1)),
           (approx_tanh_fp32, (32, 1)),
           (ceil_fp32, (32, 1), consistent),
           (ceil_fp64, (16, 1), consistent),
@@ -337,6 +345,7 @@ def main(argv: Sequence[str]) -> None:
           # go/keep-sorted start
           (abs_fp32, (8, 1), consistent),
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (ceil_fp32, (8, 1), consistent),
           (convert_bf16_to_fp32, (16, 1), consistent),
@@ -365,6 +374,7 @@ def main(argv: Sequence[str]) -> None:
       "arm_neonfma": [
           # go/keep-sorted start
           (approx_erf_fp32, (16, 1)),
+          (approx_expm1_fp32, (16, 1)),
           (approx_tanh_fp32, (16, 1)),
           (cos_fp32, (32, 1), consistent),
           (erf_fp32, (16, 1), consistent),
@@ -420,6 +430,7 @@ def main(argv: Sequence[str]) -> None:
           # go/keep-sorted start
           (abs_fp32, (8, 1)),
           (approx_erf_fp32, (8, 1)),
+          (approx_expm1_fp32, (8, 1)),
           (approx_tanh_fp32, (8, 1)),
           (ceil_fp32, (8, 1)),
           (cos_fp32, (8, 1)),

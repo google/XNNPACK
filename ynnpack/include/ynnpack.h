@@ -212,6 +212,7 @@ enum ynn_unary_operator {
   ynn_unary_approx_erf = 24,
   ynn_unary_approx_tanh = 25,
   ynn_unary_tan = 26,
+  ynn_unary_approx_expm1 = 27,
 
   // Internal use only
   ynn_unary_requantize_to_uint8,

@@ -247,6 +247,8 @@ struct ynn_node {
           return a.params.exp == b.params.exp;
         case ynn_unary_expm1:
           return a.params.expm1 == b.params.expm1;
+        case ynn_unary_approx_expm1:
+          return a.params.approx_expm1 == b.params.approx_expm1;
         case ynn_unary_log:
           return a.params.log == b.params.log;
         case ynn_unary_log1p:
@@ -296,6 +298,8 @@ struct ynn_node {
           return a.params.exp < b.params.exp;
         case ynn_unary_expm1:
           return a.params.expm1 < b.params.expm1;
+        case ynn_unary_approx_expm1:
+          return a.params.approx_expm1 < b.params.approx_expm1;
         case ynn_unary_log:
           return a.params.log < b.params.log;
         case ynn_unary_log1p:

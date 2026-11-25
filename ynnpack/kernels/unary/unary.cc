@@ -380,6 +380,7 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op,
     case ynn_unary_exp:
       return unary_impl<T, T, exp_op>;
     case ynn_unary_expm1:
+    case ynn_unary_approx_expm1:
       return unary_impl<T, T, expm1_op>;
     case ynn_unary_erf:
       return unary_impl<T, T, erf_op>;
@@ -515,6 +516,9 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
     case ynn_unary_approx_tanh:
       return get_unary_kernel(ynn_unary_tanh, a_type, x_type, required_flags,
                               supported_arch_flags);
+    case ynn_unary_approx_expm1:
+      return get_unary_kernel(ynn_unary_expm1, a_type, x_type, required_flags,
+                              supported_arch_flags);
     case ynn_unary_convert:
       return get_convert_reference_kernel(a_type, x_type, required_flags);
     default:
@@ -543,6 +547,7 @@ unary_params get_unary_params(ynn_unary_operator op) {
   switch (op) {
     case ynn_unary_exp:
     case ynn_unary_expm1:
+    case ynn_unary_approx_expm1:
       return unary_params{
           .exp = exp_params{
               ._ = 0.0,

@@ -58,6 +58,8 @@ TEST_CAST(arm_neon, f32, f64x4);
 
 TEST_UNARY(arm_neon, exp, f64, 2, std::exp, 1);
 TEST_UNARY(arm_neon, expm1, f64, 2, std::expm1, 2);
+TEST_KEEPS_SIGNED_ZERO(arm_neon, expm1, f64, 2);
+TEST_UNARY(arm_neon, approx_expm1, f64, 2, std::expm1, 2);
 TEST_UNARY(arm_neon, log, f64, 2, std::log, 2);
 TEST_UNARY(arm_neon, log1p, f64, 2, std::log1p, 3);
 TEST_UNARY(arm_neon, erf, f64, 2, std::erf, 3);
