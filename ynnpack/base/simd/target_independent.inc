@@ -209,10 +209,9 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor1(vec<T, N> x, const P& p,
 }
 
 // Implements exp(x) (m = 0) or expm1(x) (m = 1), given a polynomial
-// such that expm1(x) ~= x + x^2*P(x) for x in [-0.5, 0.5], i.e. the
+// such that expm1(x) ~= x + x^2*P(x) for x in [-ln(2)/2, ln(2)/2], i.e. the
 // polynomials P(x)/Q(x) approximate the error after 2 terms of the Taylor
 // series.
-// See rational_approximation.py for the polynomial generation logic.
 template <int m, typename T, size_t N, typename P, typename Q>
 YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
                                         T min_x, T max_x, T log2e,
@@ -243,6 +242,61 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
   return select(b > broadcast<N>(max_b), exp_x + exp_x, exp_x);
 }
 
+// Implements expm1(x) with less than 1 ULP of error, given P as in exp_taylor2
+// without a denominator, where the last coefficient of P is exactly 1/2.
+//
+// With x = b*ln(2) + r, expm1(x) = [(2^b - 1) + 2^b*r] + 2^b*(expm1(r) - r).
+// The bracket can nearly cancel (b = 1, r < 0), so it is added first, its
+// rounding error is recovered, and the small last term is added to that error.
+template <typename T, size_t N, size_t Degree>
+YNN_ALWAYS_INLINE vec<T, N> expm1_taylor3(vec<T, N> x,
+                                          const std::array<T, Degree>& p,
+                                          T min_x, T max_x, T log2e, T ln2_hi,
+                                          T ln2_lo) {
+  auto x_clamped = min(max(x, min_x), max_x);
+  auto b = round_small(x_clamped * broadcast<N>(log2e));
+  // r_lo is the rounding error of r, scaled by e^r ~= 1 + r because
+  // expm1(r + r_lo) ~= expm1(r) + e^r*r_lo.
+  auto neg_ln2_lo = broadcast<N>(-ln2_lo);
+  auto r_hi = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
+  auto r = multiply_add(b, neg_ln2_lo, r_hi);
+  auto r_lo = multiply_add(b, neg_ln2_lo, r_hi - r);
+  r_lo = multiply_add(r, r_lo, r_lo);
+
+  // Compute 2^b, avoiding overflow if b is the max exponent. We double the
+  // result below in this case (the missing factor of 2).
+  constexpr T max_b = static_cast<T>(std::numeric_limits<T>::max_exponent - 1);
+  auto exp2_b = exp2_round(min(b, max_b));
+  exp2_b = select(isnan(x), x, exp2_b);
+
+  // tail = expm1(r) - r + r_lo = r^2/2 + r^3*Q(r) + r_lo, where
+  // P(r) = 1/2 + r*Q(r). r^2/2 gets a multiply_add of its own, so that with FMA
+  // it is not rounded.
+  assert(p[Degree - 1] == static_cast<T>(0.5));
+  std::array<T, Degree - 1> q;
+  for (size_t i = 0; i < q.size(); ++i) {
+    q[i] = p[i];
+  }
+  auto r2 = r * r;
+  auto q_r = eval_polynomial(q, r, r2);
+  auto tail = multiply_add(r2, r * q_r, r_lo);
+  tail = multiply_add(broadcast<N>(static_cast<T>(0.5)) * r, r, tail);
+
+  // head = (2^b - 1) + 2^b*r. The second multiply_add gives the rounding error
+  // of head, and the last term the rounding error of 2^b - 1 for large b.
+  auto neg_one = broadcast<N>(static_cast<T>(-1));
+  auto exp2_b_m1 = exp2_b + neg_one;
+  auto head = multiply_add(exp2_b, r, exp2_b_m1);
+  auto head_err = multiply_add(exp2_b, r, exp2_b_m1 - head);
+  head_err = head_err + (neg_one - (exp2_b_m1 - exp2_b));
+
+  auto expm1_x = head + multiply_add(exp2_b, tail, head_err);
+  expm1_x = select(b > broadcast<N>(max_b), expm1_x + expm1_x, expm1_x);
+  // expm1(+-0) = +-0. This also returns subnormal x as is when denormals are
+  // treated as zero.
+  return select(x == broadcast<N>(static_cast<T>(0)), x, expm1_x);
+}
+
 // TODO: b/515053903 - We should be able to make an `exp_impl` that works with
 // fp16 arithmetic, not just lower precision.
 
@@ -263,16 +317,21 @@ static vec<float, N> exp_impl(vec<float, N> x, precision12) {
   return exp_taylor1<m>(x, p, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
-template <int m, size_t N>
+// m = 0: exp(x). m = 1: expm1(x), or approx_expm1(x) if `approx` is set.
+template <int m, size_t N, bool approx = false>
 static vec<float, N> exp_impl(vec<float, N> x) {
-  std::array<float, 7> p = {
-      -4.9866619520e-05f,
-      2.2773783712e-04f,
-      1.4132461511e-03f,
-      8.3242934197e-03f,
-      4.1665628552e-02f,
-      1.6666725278e-01f,
-      4.9999994040e-01f,
+  // P(r) = 1/2 + r*Q(r), where Q is a minimax fit of
+  // (expm1(r) - r - r^2/2) / r^3 on [-ln(2)/2, ln(2)/2]. r + r^2*P(r) is within
+  // 0.02 ULP of expm1(r). Generated with Sollya:
+  //   dom = [-log(2)/2; log(2)/2];
+  //   fpminimax((expm1(x) - x - 0.5*x^2) / x^3, 4, [|SG...|], dom);
+  std::array<float, 6> p = {
+      1.9979433273e-04f,
+      1.3926025713e-03f,
+      8.3331689239e-03f,
+      4.1666556150e-02f,
+      1.6666667163e-01f,
+      5.0000000000e-01f,
   };
   constexpr float log2e = 1.4426950408889634f;
   constexpr float ln2_hi = 6.9314575195e-01f;
@@ -280,23 +339,32 @@ static vec<float, N> exp_impl(vec<float, N> x) {
   constexpr float min_x = -88.02969360351562f;
   constexpr float max_x = 88.72283935546875f;
 
-  return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  if constexpr (m == 1 && !approx) {
+    return expm1_taylor3(x, p, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  } else {
+    return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  }
 }
 
-template <int m, size_t N>
+template <int m, size_t N, bool approx = false>
 static vec<double, N> exp_impl(vec<double, N> x) {
+  // P(r) = 1/2 + r*Q(r), as for float above. r + r^2*P(r) is within 0.003 ULP
+  // of expm1(r). Generated with Sollya:
+  //   dom = [-log(2)/2; log(2)/2];
+  //   fpminimax(expm1(x), [|3, 4, 5, 6, 7, 8, 9, 10, 11, 12|], [|D...|], dom,
+  //             relative, floating, x + 0.5*x^2);
   std::array<double, 11> p = {
-      2.119890244143296032e-09,
-      2.521079371356939368e-08,
-      2.755585399809175769e-07,
-      2.755675838881680360e-06,
-      2.480158976814372031e-05,
-      1.984127071808468106e-04,
-      1.388888888680978647e-03,
-      8.333333332743943569e-03,
-      4.166666666668113195e-02,
-      1.666666666666796748e-01,
-      4.999999999999995559e-01,
+      2.088315703950183599e-09,
+      2.510912613729357576e-08,
+      2.755737370931683058e-07,
+      2.755724391307656133e-06,
+      2.480158721302026944e-05,
+      1.984126988647339027e-04,
+      1.388888888893592211e-03,
+      8.333333333321464240e-03,
+      4.166666666666658803e-02,
+      1.666666666666667684e-01,
+      5.000000000000000000e-01,
   };
   constexpr double log2e = 1.4426950408889634;
   constexpr double ln2_hi = 6.93147180369123816490e-01;
@@ -304,7 +372,11 @@ static vec<double, N> exp_impl(vec<double, N> x) {
   constexpr double min_x = -709.0895657128241;
   constexpr double max_x = 709.78271289338409;
 
-  return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  if constexpr (m == 1 && !approx) {
+    return expm1_taylor3(x, p, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  } else {
+    return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  }
 }
 
 }  // namespace internal
@@ -353,6 +425,17 @@ static vec<double, N> exp(vec<double, N> x) {
 template <size_t N>
 static vec<double, N> expm1(vec<double, N> x) {
   return internal::exp_impl<1>(x);
+}
+
+// Faster than expm1(x), but up to ~2 ULPs of error, and approx_expm1(-0) is
+// +0.
+template <size_t N>
+static vec<float, N> approx_expm1(vec<float, N> x) {
+  return internal::exp_impl<1, N, /*approx=*/true>(x);
+}
+template <size_t N>
+static vec<double, N> approx_expm1(vec<double, N> x) {
+  return internal::exp_impl<1, N, /*approx=*/true>(x);
 }
 
 namespace internal {
@@ -771,7 +854,7 @@ template <size_t N>
 static vec<float, N> tanh(vec<float, N> x) {
   auto two = broadcast<N>(2.0f);
   // Clamp large x to avoid Inf/Inf = NaN.
-  auto expm1_2x = expm1(min(two*x, 80.0f));
+  auto expm1_2x = approx_expm1(min(two * x, 80.0f));
   return expm1_2x / (expm1_2x + two);
 }
 
@@ -779,7 +862,7 @@ template <size_t N>
 static vec<double, N> tanh(vec<double, N> x) {
   auto two = broadcast<N>(2.0);
   // Clamp large x to avoid Inf/Inf = NaN.
-  auto expm1_2x = expm1(min(two*x, 300.0));
+  auto expm1_2x = approx_expm1(min(two * x, 300.0));
   return expm1_2x / (expm1_2x + two);
 }
 
