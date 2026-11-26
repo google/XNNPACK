@@ -106,3 +106,15 @@ cc_test(
         "//ynnpack/subgraph/test:subgraph_builder",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "unit_slice_concatenate",
+    srcs = ["unit_slice_concatenate.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/subgraph/test:subgraph_builder",
+    ] + ynn_test_deps(),
+)
