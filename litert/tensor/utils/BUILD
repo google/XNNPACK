@@ -16,6 +16,23 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "parallel",
+    srcs = ["parallel.cc"],
+    hdrs = ["parallel.h"],
+    deps = ["@pthreadpool"],
+)
+
+cc_test(
+    name = "parallel_test",
+    srcs = ["parallel_test.cc"],
+    deps = [
+        ":parallel",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
+
 cc_test(
     name = "macros_test",
     srcs = ["macros_test.cc"],
