@@ -47,10 +47,10 @@ TEST_P(FingerprintTest, ComputeFingerprint) {
   }
   ASSERT_THAT(status, Eq(xnn_status_invalid_parameter));
 
-  const xnn_fingerprint* fingerprint = xnn_get_fingerprint(GetFingerprintId());
-  ASSERT_THAT(fingerprint, NotNull());
-  EXPECT_THAT(fingerprint->id, GetFingerprintId());
-  EXPECT_THAT(fingerprint->value, Not(0));
+  struct xnn_fingerprint fingerprint;
+  ASSERT_THAT(xnn_get_fingerprint(GetFingerprintId(), &fingerprint), Eq(true));
+  EXPECT_THAT(fingerprint.id, GetFingerprintId());
+  EXPECT_THAT(fingerprint.value, Not(0));
 }
 
 std::vector<xnn_fingerprint_id> kFingerprintIds = {

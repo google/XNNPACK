@@ -27,28 +27,36 @@ XNN_INIT_ONCE_GUARD(mutex);
 
 static void init_mutex_config() { xnn_mutex_init(&mutex); }
 
-const struct xnn_fingerprint* xnn_get_fingerprint(const uint32_t id) {
+bool xnn_get_fingerprint(
+    const uint32_t id, struct xnn_fingerprint* fingerprint)
+{
+  assert(fingerprint != NULL);
   XNN_INIT_ONCE(mutex);
-  uint32_t i = 0;
+  bool found = false;
   xnn_mutex_lock(&mutex);
-  for (; i < fingerprint_vector_size; ++i) {
+  for (uint32_t i = 0; i < fingerprint_vector_size; ++i) {
     if (fingerprint_vector[i].id == id) {
+      *fingerprint = fingerprint_vector[i];
+      found = true;
       break;
     }
   }
-  const struct xnn_fingerprint* result =
-      i < fingerprint_vector_size ? fingerprint_vector + i : NULL;
   xnn_mutex_unlock(&mutex);
-  return result;
+  return found;
 }
 
-const struct xnn_fingerprint* xnn_get_fingerprint_by_idx(const uint32_t idx) {
+bool xnn_get_fingerprint_by_idx(const uint32_t idx,
+                                struct xnn_fingerprint* fingerprint) {
+  assert(fingerprint != NULL);
   XNN_INIT_ONCE(mutex);
+  bool found = false;
   xnn_mutex_lock(&mutex);
-  struct xnn_fingerprint* result =
-      idx < fingerprint_vector_size ? fingerprint_vector + idx : NULL;
+  if (idx < fingerprint_vector_size) {
+    *fingerprint = fingerprint_vector[idx];
+    found = true;
+  }
   xnn_mutex_unlock(&mutex);
-  return result;
+  return found;
 }
 
 void xnn_set_fingerprint(const struct xnn_fingerprint fingerprint) {
@@ -148,12 +156,15 @@ struct fingerprint_context create_fingerprint_context(
   };
   if (context.fingerprint_id == xnn_fingerprint_id_unknown) {
     context.status = xnn_status_unsupported_parameter;
-  } else if (xnn_get_fingerprint(context.fingerprint_id)) {
-    context.status = xnn_status_success;
   } else {
-    // Do this after the checks to avoid a memory allocation when unnecessary.
-    context.cache.context =
-        xnn_allocate_zero_memory(sizeof(struct fingerprint_cache_context));
+    struct xnn_fingerprint fingerprint;
+    if (xnn_get_fingerprint(context.fingerprint_id, &fingerprint)) {
+      context.status = xnn_status_success;
+    } else {
+      // Do this after the checks to avoid a memory allocation when unnecessary.
+      context.cache.context =
+          xnn_allocate_zero_memory(sizeof(struct fingerprint_cache_context));
+    }
   }
   return context;
 }
