@@ -288,7 +288,7 @@ xnnpack_unit_test(
     name = "static_reduce_test",
     srcs = ["static-reduce.cc"],
     shard_count = 5,
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + [":runtime_tester"],
 )
 
 xnnpack_unit_test(

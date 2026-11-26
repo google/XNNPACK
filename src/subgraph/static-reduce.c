@@ -126,6 +126,7 @@ static enum xnn_status reshape_reduce_operator(
     workspace_size = NULL;
   }
 
+  const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
 
   size_t num_reduction_axes = opdata->num_reduction_axes;
@@ -167,6 +168,11 @@ static enum xnn_status reshape_reduce_operator(
       input_dims,
       workspace_size,
       threadpool);
+  if (status != xnn_status_success) {
+    // A retry must still see the workspace as grown.
+    opdata->workspace_size = old_workspace_size;
+    return status;
+  }
 
   if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
     output_value->shape.num_dims = input_num_dims;
@@ -226,7 +232,8 @@ static enum xnn_status reshape_reduce_operator(
     output_value->shape.num_dims = input_num_dims - num_skip_axis;
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
-  if (new_size > output_value->size) {
+  if (new_size > output_value->size ||
+      opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }
