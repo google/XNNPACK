@@ -209,10 +209,9 @@ YNN_ALWAYS_INLINE vec<T, N> exp_taylor1(vec<T, N> x, const P& p,
 }
 
 // Implements exp(x) (m = 0) or expm1(x) (m = 1), given a polynomial
-// such that expm1(x) ~= x + x^2*P(x) for x in [-0.5, 0.5], i.e. the
+// such that expm1(x) ~= x + x^2*P(x) for x in [-ln(2)/2, ln(2)/2], i.e. the
 // polynomials P(x)/Q(x) approximate the error after 2 terms of the Taylor
 // series.
-// See rational_approximation.py for the polynomial generation logic.
 template <int m, typename T, size_t N, typename P, typename Q>
 YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
                                         T min_x, T max_x, T log2e,
@@ -265,14 +264,18 @@ static vec<float, N> exp_impl(vec<float, N> x, precision12) {
 
 template <int m, size_t N>
 static vec<float, N> exp_impl(vec<float, N> x) {
-  std::array<float, 7> p = {
-      -4.9866619520e-05f,
-      2.2773783712e-04f,
-      1.4132461511e-03f,
-      8.3242934197e-03f,
-      4.1665628552e-02f,
-      1.6666725278e-01f,
-      4.9999994040e-01f,
+  // P(r) = 1/2 + r*Q(r), where Q is a minimax fit of
+  // (expm1(r) - r - r^2/2) / r^3 on [-ln(2)/2, ln(2)/2]. r + r^2*P(r) is within
+  // 0.02 ULP of expm1(r). Generated with Sollya:
+  //   dom = [-log(2)/2; log(2)/2];
+  //   fpminimax((expm1(x) - x - x^2/2) / x^3, 4, [|SG...|], dom);
+  std::array<float, 6> p = {
+      1.9979433273e-04f,
+      1.3926025713e-03f,
+      8.3331689239e-03f,
+      4.1666556150e-02f,
+      1.6666667163e-01f,
+      5.0000000000e-01f,
   };
   constexpr float log2e = 1.4426950408889634f;
   constexpr float ln2_hi = 6.9314575195e-01f;
@@ -285,18 +288,23 @@ static vec<float, N> exp_impl(vec<float, N> x) {
 
 template <int m, size_t N>
 static vec<double, N> exp_impl(vec<double, N> x) {
+  // P(r) = 1/2 + r*Q(r), as for float above. r + r^2*P(r) is within 0.003 ULP
+  // of expm1(r). Generated with Sollya:
+  //   dom = [-log(2)/2; log(2)/2];
+  //   fpminimax(expm1(x), [|3, 4, 5, 6, 7, 8, 9, 10, 11, 12|], [|D...|], dom,
+  //             relative, floating, x + 0.5*x^2);
   std::array<double, 11> p = {
-      2.119890244143296032e-09,
-      2.521079371356939368e-08,
-      2.755585399809175769e-07,
-      2.755675838881680360e-06,
-      2.480158976814372031e-05,
-      1.984127071808468106e-04,
-      1.388888888680978647e-03,
-      8.333333332743943569e-03,
-      4.166666666668113195e-02,
-      1.666666666666796748e-01,
-      4.999999999999995559e-01,
+      2.088315703950183599e-09,
+      2.510912613729357576e-08,
+      2.755737370931683058e-07,
+      2.755724391307656133e-06,
+      2.480158721302026944e-05,
+      1.984126988647339027e-04,
+      1.388888888893592211e-03,
+      8.333333333321464240e-03,
+      4.166666666666658803e-02,
+      1.666666666666667684e-01,
+      5.000000000000000000e-01,
   };
   constexpr double log2e = 1.4426950408889634;
   constexpr double ln2_hi = 6.93147180369123816490e-01;
