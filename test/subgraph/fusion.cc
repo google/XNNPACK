@@ -1095,6 +1095,39 @@ TEST(UNARY_QUANTIZED_TO_LUT, binary_first) {
   EXPECT_EQ(unoptimized_output, optimized_output);
 }
 
+TEST(COPY_THEN_BINARY_WITH_REPEATED_INPUT, fusion) {
+  // add(y, y) with y = copy(x): the Copy is fused downstream and both inputs
+  // of the add have to be rewritten to x, since the Copy's output value is
+  // cleared.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t copy_output_id = 2;
+  const TensorShape dims = {2, 4};
+  RuntimeTester tester(3);
+  tester.AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, copy_output_id)
+      .AddOutputTensorF32(dims, output_id)
+      .AddCopy(input_id, copy_output_id)
+      .AddBinary(xnn_binary_add, nullptr, copy_output_id, copy_output_id,
+                 output_id);
+
+  xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  ASSERT_EQ(tester.NumOperators(), 2);
+
+  xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
+  ASSERT_EQ(tester.NumOperators(), 1);
+  const xnn_node* add_node = nullptr;
+  for (size_t i = 0; i < tester.NumNodes(); i++) {
+    if (tester.Node(i)->type == xnn_node_type_binary_elementwise) {
+      add_node = tester.Node(i);
+    }
+  }
+  ASSERT_NE(add_node, nullptr);
+  ASSERT_EQ(add_node->inputs[0], input_id);
+  ASSERT_EQ(add_node->inputs[1], input_id);
+  ASSERT_EQ(unoptimized_output, optimized_output);
+}
+
 TEST(UNARY_QUANTIZED_TO_LUT, binary_not_unary) {
   // Create the subgraph x + max(x, y)
   const uint32_t x_id = 0;
