@@ -33,6 +33,7 @@ cc_library(
         "//litert/tensor/utils:macros",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
@@ -51,12 +52,15 @@ cc_test(
         "//:XNNPACK",
         "//litert/tensor",
         "//litert/tensor:arithmetic",
+        "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/backends/xnnpack:arithmetic",
+        "//litert/tensor/backends/xnnpack:graph",
         "//litert/tensor/runners/common_nnpack:runner_test_suite",
         "@abseil-cpp//absl/status",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",  # gunit
+        "@pthreadpool",
     ],
 )
 
