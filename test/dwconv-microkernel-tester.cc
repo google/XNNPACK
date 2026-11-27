@@ -579,6 +579,105 @@ void DWConvMicrokernelTester::Test(
   }
 }
 
+void DWConvMicrokernelTester::Test(
+    xnn_bf16_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
+    xnn_init_f32_minmax_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+
+  xnnpack::Buffer<const xnn_bfloat16*> indirection((width() - 1) * step() +
+                                                   kernel_tile());
+  xnnpack::Buffer<xnn_bfloat16> input(indirection.size() * channels(),
+                                      xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<xnn_bfloat16> kernel(channels() * kernel_tile());
+  xnnpack::Buffer<float> bias(channels());
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      (kernel_tile() * sizeof(xnn_bfloat16) + sizeof(float)) *
+      packed_channels());
+  xnnpack::Buffer<xnn_bfloat16> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> output((width() - 1) * output_stride() + channels());
+  xnnpack::Buffer<float> output_ref(width() * channels());
+
+  // Use the same packed kernel and indirection buffers for all iterations.
+  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  xnn_pack_bf16_f32_dwconv_ghw_w(
+      kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
+      reinterpret_cast<const uint16_t*>(kernel.data()), bias.data(),
+      /*scale=*/nullptr, packed_weights.data(),
+      /*per_tile_extra_bytes=*/0,
+      /*params=*/nullptr);
+  for (size_t i = 0; i < indirection.size(); i++) {
+    indirection[i] = input.data() + i * channels() - input_offset();
+  }
+  std::shuffle(indirection.begin(), indirection.end(), rng);
+  if (zero_index() != SIZE_MAX) {
+    for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
+      indirection[i + zero_index()] = zero.data();
+    }
+  }
+
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+
+  // Compute reference results, without clamping.
+  for (size_t x = 0; x < width(); x++) {
+    for (size_t c = 0; c < channels(); c++) {
+      float acc = bias[c];
+      for (size_t k = 0; k < kernel_tile(); k++) {
+        if (indirection[x * step() + k] != zero.data()) {
+          acc += static_cast<float>(
+                     indirection[x * step() + k][c + input_offset()]) *
+                 static_cast<float>(kernel[c * kernel_tile() + k]);
+        }
+      }
+      output_ref[x * channels() + c] = acc;
+    }
+  }
+
+  // Compute clamping parameters.
+  const float accumulated_min =
+      *std::min_element(output_ref.cbegin(), output_ref.cend());
+  const float accumulated_max =
+      *std::max_element(output_ref.cbegin(), output_ref.cend());
+  const float accumulated_range = accumulated_max - accumulated_min;
+  const float output_min =
+      accumulated_min + accumulated_range / 255.0f * static_cast<float>(qmin());
+  const float output_max =
+      accumulated_max -
+      accumulated_range / 255.0f * static_cast<float>(255 - qmax());
+
+  // Prepare parameters.
+  xnn_f32_minmax_params params;
+  init_params(&params, output_min, output_max);
+
+  // Clamp reference results.
+  for (float& output_val : output_ref) {
+    output_val = std::max(std::min(output_val, output_max), output_min);
+  }
+
+  // Call optimized micro-kernel.
+  dwconv_minmax(channels(), width(), indirection.data(), packed_weights.data(),
+                output.data(), step() * sizeof(void*),
+                (output_stride() - channels()) * sizeof(float),
+                input_offset() * sizeof(xnn_bfloat16),
+                /*input_pixel_stride=*/0, zero.data(), &params);
+
+  // Verify results.
+  for (size_t x = 0; x < width(); x++) {
+    for (size_t c = 0; c < channels(); c++) {
+      ASSERT_GE(output[x * output_stride() + c], output_min)
+          << "x = " << x << ", channel = " << c;
+      ASSERT_LE(output[x * output_stride() + c], output_max)
+          << "x = " << x << ", channel = " << c;
+      ASSERT_NEAR(output_ref[x * channels() + c],
+                  output[x * output_stride() + c],
+                  1.0e-5f * kernel_tile() +
+                      std::abs(output_ref[x * channels() + c]) * 1.0e-5f)
+          << "x = " << x << ", channel = " << c;
+    }
+  }
+}
+
 void DWConvMicrokernelTester::Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
                                    const void*) const {
   xnnpack::ReplicableRandomDevice rng;
