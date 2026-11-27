@@ -15,6 +15,9 @@ if (build_with_chromium) {
 
 xnnpack_add_configs = [
   "//build/config/compiler:no_chromium_code",
+
+  # Microkernels are called through pointers with generalized argument types.
+  "//build/config/sanitizers:cfi_icall_generalize_pointers",
   xnnpack_path_prefix + ":xnnpack_public_config",
   xnnpack_path_prefix + ":xnnpack_private_config",
 ]
