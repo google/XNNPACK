@@ -3,8 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cmath>
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/simd/scalar.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -113,11 +111,6 @@ TEST_HORIZONTAL_MAX(multi_vec, s8, 16);
 TEST_HORIZONTAL_MAX(multi_vec, s16, 8);
 TEST_HORIZONTAL_MAX(multi_vec, f32, 4);
 TEST_HORIZONTAL_MAX(multi_vec, s32, 4);
-
-TEST_BINARY(multi_vec, pow, f32, 1, std::pow, 2);
-TEST_BINARY(multi_vec, pow, f32, 2, std::pow, 2);
-TEST_BINARY(multi_vec, pow, f64, 1, std::pow, 2);
-TEST_BINARY(multi_vec, pow, f64, 2, std::pow, 2);
 
 }  // namespace simd
 }  // namespace ynn

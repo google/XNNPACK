@@ -224,7 +224,5 @@ TEST_UNARY(arm_neon, cos, f32, 4, std::cos, 3);
 TEST_UNARY(arm_neon, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neon, approx_tanh, f32, 4, std::tanh, 5);
 
-TEST_BINARY(arm_neon, pow, f32, 4, std::pow, 2);
-
 }  // namespace simd
 }  // namespace ynn

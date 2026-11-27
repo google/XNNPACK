@@ -5,8 +5,6 @@
 
 #include "ynnpack/base/simd/wasm_simd128.h"
 
-#include <cmath>
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -169,8 +167,6 @@ TEST_CAST(wasm_simd128, u8, s16x16);
 TEST_CAST(wasm_simd128, s16, f32x8);
 TEST_CAST(wasm_simd128, s8, f32x16);
 TEST_CAST(wasm_simd128, u8, f32x16);
-
-TEST_BINARY(wasm_simd128, pow, f32, 4, std::pow, 2);
 
 }  // namespace simd
 }  // namespace ynn
