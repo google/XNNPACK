@@ -46,12 +46,12 @@ static constexpr dot_cost_models neoverse_n1 = {
         /*load_b_cost=*/3.13e-11f,
         /*output_c=*/1.64e-10f,
     },
-    // Ratio (predicted / actual): std=0.157, min=0.769, max=1.235 (n=160)
+    // Ratio (predicted / actual): std=0.152, min=0.751, max=1.244 (n=160)
     .arm_neondot_int8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/7.82e-11f,
-        /*load_b_cost=*/4.74e-11f,
-        /*output_c=*/1.13e-10f,
+        /*load_a_cost=*/7.57e-11f,
+        /*load_b_cost=*/3.23e-11f,
+        /*output_c=*/2.12e-10f,
     },
     // Ratio (predicted / actual): std=0.264, min=0.592, max=1.527 (n=180)
     .arm_neondot_int8_int8_int32 = {

@@ -85,12 +85,12 @@ static constexpr dot_cost_models lumex_c1_ultra = {
         /*load_b_cost=*/1.62e-11f,
         /*output_c=*/7.46e-11f,
     },
-    // Ratio (predicted / actual): std=0.171, min=0.643, max=1.330 (n=160)
+    // Ratio (predicted / actual): std=0.205, min=0.582, max=1.316 (n=160)
     .arm_neondot_int8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.66e-11f,
-        /*load_b_cost=*/2.13e-11f,
-        /*output_c=*/4.60e-11f,
+        /*load_a_cost=*/1.97e-11f,
+        /*load_b_cost=*/9.34e-12f,
+        /*output_c=*/6.57e-11f,
     },
     // Ratio (predicted / actual): std=0.156, min=0.668, max=1.349 (n=180)
     .arm_neondot_int8_int8_int32 = {

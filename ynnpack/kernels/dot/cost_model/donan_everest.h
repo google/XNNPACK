@@ -161,12 +161,12 @@ static constexpr dot_cost_models donan_everest = {
         /*load_b_cost=*/1.29e-11f,
         /*output_c=*/0.00e+00f,
     },
-    // Ratio (predicted / actual): std=0.172, min=0.655, max=1.377 (n=160)
+    // Ratio (predicted / actual): std=0.171, min=0.660, max=1.378 (n=160)
     .arm_neondot_int8_int4_int32 = {
         /*block_overhead=*/0.00e+00f,
-        /*load_a_cost=*/2.26e-11f,
-        /*load_b_cost=*/1.51e-11f,
-        /*output_c=*/1.82e-11f,
+        /*load_a_cost=*/2.81e-11f,
+        /*load_b_cost=*/1.21e-11f,
+        /*output_c=*/3.33e-11f,
     },
     // Ratio (predicted / actual): std=0.173, min=0.701, max=1.484 (n=180)
     .arm_neondot_int8_int8_int32 = {
