@@ -25,7 +25,6 @@ cc_library(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/backends/common_nnpack:graph",
-        "//litert/tensor/backends/common_nnpack:utils",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
         "@abseil-cpp//absl/algorithm:container",
