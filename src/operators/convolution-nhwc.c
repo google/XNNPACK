@@ -1552,8 +1552,9 @@ static enum xnn_status set_context_params_f16(
     context->pack_dwconv_ghw_w =
         (xnn_pack_dwconv_ghw_w_fn)xnn_pack_f16_dwconv_ghw_w;
     context->pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn)xnn_pack_f16_conv_kgo_w;
-    context->pack_conv_goki_w =
-        (xnn_pack_conv_goki_w_fn)xnn_pack_f16_conv_goki_w;
+    context->pack_conv_goki_w = context->operator_type == xnn_operator_type_convolution_nhwc_pf16
+            ? context->gemm_config->pack_igemm_goki
+            : (xnn_pack_conv_goki_w_fn)xnn_pack_f16_conv_goki_w;
   }
   return xnn_status_success;
 }
@@ -1567,7 +1568,10 @@ static enum xnn_status set_context_params_f32(
   context->pack_dwconv_ghw_w =
       (xnn_pack_dwconv_ghw_w_fn)xnn_pack_f32_dwconv_ghw_w;
   context->pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn)xnn_pack_f32_conv_kgo_w;
-  context->pack_conv_goki_w = (xnn_pack_conv_goki_w_fn)xnn_pack_f32_conv_goki_w;
+  context->pack_conv_goki_w =
+      context->operator_type == xnn_operator_type_convolution_nhwc_pf32
+          ? context->gemm_config->pack_igemm_goki
+          : (xnn_pack_conv_goki_w_fn)xnn_pack_f32_conv_goki_w;
   return xnn_status_success;
 }
 
@@ -3124,7 +3128,7 @@ static enum xnn_status reshape_igemm(
       if (inline_lhs_packing) {
         packed_lh_config = xnn_init_x32_igemm_pack_lh_config();
       }
-      break;  
+      break;
     default:
       break;
   }

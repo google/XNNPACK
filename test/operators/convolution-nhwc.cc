@@ -6,15 +6,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <gtest/gtest.h>
+
+#include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
-#include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
@@ -24,6 +28,168 @@
 #include "test/operators/convolution-operator-tester.h"
 
 namespace {
+
+class GokiPackerTracker {
+ public:
+  explicit GokiPackerTracker(const xnn_gemm_config* config)
+      : config_(const_cast<xnn_gemm_config*>(config)),
+        original_(config_->pack_igemm_goki) {
+    assert(active_ == nullptr);
+    active_ = this;
+    config_->pack_igemm_goki = Track;
+  }
+
+  ~GokiPackerTracker() {
+    config_->pack_igemm_goki = original_;
+    active_ = nullptr;
+  }
+
+  size_t calls() const { return calls_; }
+
+ private:
+  static void Track(size_t groups, size_t channels, size_t kernel_size,
+                    size_t depth, size_t nr, size_t kr, size_t sr,
+                    const void* kernel, const void* bias, const void* scale,
+                    void* packed, size_t extra_bytes, const void* params) {
+    ++active_->calls_;
+    active_->original_(groups, channels, kernel_size, depth, nr, kr, sr, kernel,
+                       bias, scale, packed, extra_bytes, params);
+  }
+
+  inline static GokiPackerTracker* active_ = nullptr;
+  xnn_gemm_config* config_;
+  xnn_pack_conv_goki_w_fn original_;
+  size_t calls_ = 0;
+};
+
+template <bool fp16, bool converted_weights = false>
+void TestPackedFloatGoki() {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const xnn_gemm_config* config =
+      fp16 ? xnn_init_pf16_gemm_config() : xnn_init_pf32_gemm_config();
+  if (config == nullptr) {
+    GTEST_SKIP();
+  }
+  ASSERT_NE(nullptr, config->pack_igemm_goki);
+  constexpr size_t expected_packer_calls = fp16 && converted_weights ? 0 : 1;
+  using Value = std::conditional_t<fp16, xnn_float16, float>;
+  using Weight =
+      std::conditional_t<fp16 != converted_weights, xnn_float16, float>;
+  const auto convert = [](float value) -> Value {
+    if constexpr (fp16) {
+      return xnn_float16_from_float(value);
+    } else {
+      return value;
+    }
+  };
+  const auto convert_weight = [](float value) -> Weight {
+    if constexpr (fp16 != converted_weights) {
+      return xnn_float16_from_float(value);
+    } else {
+      return value;
+    }
+  };
+  const size_t shapes[][4] = {{1, 3, 3, 1},   {1, 3, 3, 15},  {1, 33, 9, 17},
+                              {2, 33, 3, 17}, {1, 64, 9, 64}, {2, 64, 9, 64}};
+  for (const auto& shape : shapes) {
+    const size_t groups = shape[0];
+    const size_t channels = shape[1];
+    const size_t kernel_size = shape[2];
+    const size_t depth = shape[3];
+    const size_t kernel_height = kernel_size == 9 ? 3 : 1;
+    const size_t kernel_width = 3;
+    for (const bool has_bias : {false, true}) {
+      SCOPED_TRACE(testing::Message()
+                   << groups << '/' << channels << '/' << kernel_size << '/'
+                   << depth << "/bias:" << has_bias);
+      std::vector<Weight> kernel(groups * channels * kernel_size * depth);
+      std::vector<Weight> bias(groups * channels, convert_weight(0.5f));
+      for (size_t channel = 0; channel < groups * channels; ++channel) {
+        const int sign = static_cast<int>(channel % 3) - 1;
+        std::fill_n(kernel.data() + channel * kernel_size * depth,
+                    kernel_size * depth, convert_weight(sign * 0.25f));
+      }
+      const size_t input_height = kernel_height + 1;
+      const size_t input_width = kernel_width + 2;
+      std::vector<Value> input(input_height * input_width * groups * depth +
+                                   XNN_EXTRA_BYTES / sizeof(Value),
+                               convert(0.5f));
+      std::vector<Value> output(6 * groups * channels);
+      GokiPackerTracker tracker(config);
+      xnn_operator_t raw_operation = nullptr;
+      xnn_status status;
+      const uint32_t flags =
+          XNN_FLAG_INLINE_LHS_PACKING |
+          ((fp16 && converted_weights) ? XNN_FLAG_FP32_STATIC_WEIGHTS : 0);
+      if constexpr (fp16) {
+        status = xnn_create_convolution2d_nhwc_pf16(
+            0, 0, 0, 0, kernel_height, kernel_width, 1, 1, 1, 1, groups, depth,
+            channels, groups * depth, groups * channels, kernel.data(),
+            has_bias ? bias.data() : nullptr,
+            -std::numeric_limits<float>::infinity(),
+            std::numeric_limits<float>::infinity(), flags, nullptr,
+            &raw_operation);
+      } else {
+        if constexpr (converted_weights) {
+          status = xnn_create_convolution2d_nhwc_pf32_f16(
+              0, 0, 0, 0, kernel_height, kernel_width, 1, 1, 1, 1, groups,
+              depth, channels, groups * depth, groups * channels, kernel.data(),
+              has_bias ? bias.data() : nullptr,
+              -std::numeric_limits<float>::infinity(),
+              std::numeric_limits<float>::infinity(), flags, nullptr,
+              &raw_operation);
+        } else {
+          status = xnn_create_convolution2d_nhwc_pf32(
+              0, 0, 0, 0, kernel_height, kernel_width, 1, 1, 1, 1, groups,
+              depth, channels, groups * depth, groups * channels, kernel.data(),
+              has_bias ? bias.data() : nullptr,
+              -std::numeric_limits<float>::infinity(),
+              std::numeric_limits<float>::infinity(), flags, nullptr,
+              &raw_operation);
+        }
+      }
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> operation(
+          raw_operation, xnn_delete_operator);
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, operation);
+      EXPECT_EQ(expected_packer_calls, tracker.calls());
+      size_t workspace_size = 0;
+      size_t output_height = 0;
+      size_t output_width = 0;
+      const auto reshape = fp16 ? xnn_reshape_convolution2d_nhwc_pf16
+                                : xnn_reshape_convolution2d_nhwc_pf32;
+      ASSERT_EQ(
+          xnn_status_success,
+          reshape(operation.get(), 1, input_height, input_width,
+                  &workspace_size, &output_height, &output_width, nullptr));
+      ASSERT_EQ(2, output_height);
+      ASSERT_EQ(3, output_width);
+      xnnpack::Buffer<uint8_t> workspace(workspace_size);
+      if constexpr (fp16) {
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_pf16(
+                                          operation.get(), workspace.data(),
+                                          input.data(), output.data()));
+      } else {
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_pf32(
+                                          operation.get(), workspace.data(),
+                                          input.data(), output.data()));
+      }
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(operation.get(), nullptr));
+      EXPECT_EQ(expected_packer_calls, tracker.calls());
+      for (size_t index = 0; index < output.size(); ++index) {
+        const int sign =
+            static_cast<int>((index % (groups * channels)) % 3) - 1;
+        const float expected =
+            sign * 0.125f * (kernel_size * depth) + (has_bias ? 0.5f : 0.0f);
+        if constexpr (fp16) {
+          EXPECT_EQ(expected, xnn_float16_to_float(output[index]));
+        } else {
+          EXPECT_EQ(expected, output[index]);
+        }
+      }
+    }
+  }
+}
 
 using ConvolutionTestCase =
     std::pair<const char*, std::vector<ConvolutionOperatorTester>>;
@@ -1219,6 +1385,22 @@ CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_F32, TestSetupNHWCxF32)
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_F16, TestNHWCxF16)
 CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_F16, TestSetupNHWCxF16)
+
+TEST(CONVOLUTION_NHWC_PF16, native_goki_uses_configured_packer) {
+  TestPackedFloatGoki<true>();
+}
+
+TEST(CONVOLUTION_NHWC_PF32, native_goki_uses_configured_packer) {
+  TestPackedFloatGoki<false>();
+}
+
+TEST(CONVOLUTION_NHWC_PF16, fp32_static_weights_preserve_conversion) {
+  TestPackedFloatGoki<true, true>();
+}
+
+TEST(CONVOLUTION_NHWC_PF32, f16_weights_preserve_conversion) {
+  TestPackedFloatGoki<false, true>();
+}
 
 TEST(CONVOLUTION_NHWC, conversion_buffer_size_overflow) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

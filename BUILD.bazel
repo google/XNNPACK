@@ -576,6 +576,8 @@ xnnpack_cxx_library(
         ":xnnpack_h",
         "//src/configs:config_hdrs",
     ] + xnnpack_if_kleidiai_enabled([
+        ":microkernel_hdrs",
+        ":prod_microkernels",
         "@KleidiAI//kai/ukernels/matmul",
     ]),
 )

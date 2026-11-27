@@ -27,8 +27,11 @@
 #include "src/xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
+#include <arm_neon.h>
+
 #include "kai/ukernels/matmul/kai_matmul_pack_rhs.h"
 #include "kai/ukernels/matmul/kai_matmul_pack_rhs_types.h"
+#include "kai/ukernels/matmul/pack/kai_imatmul_pack_rhs_nxk_x16p2vlx2bx16_x16_x16_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme.h"
@@ -46,6 +49,7 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_x16p2vlx2b_x16_x16_sme.h"
 #include "src/xnnpack/allocator.h"
+#include "src/xnnpack/transpose.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 class unaligned_int32_t {
@@ -96,6 +100,100 @@ int32_t copy_n_and_sum(const Src* src, size_t n, Dst* dst) {
   }
   return sum;
 }
+
+#if XNN_ENABLE_KLEIDIAI
+template <size_t tail_size>
+static void pack_qs8_nxk_tail(size_t nc, size_t stride, const int8_t* weights, uint32_t* packed_weights) {
+  for (size_t channel = 0; channel < nc; ++channel) {
+    uint32_t tail = 0;
+    std::memcpy(&tail, weights + channel * stride, tail_size);
+    packed_weights[channel] = tail;
+  }
+}
+
+static void pack_qs8_nxk_sme(size_t nc, size_t ks, size_t kc, size_t nr,
+                             const int8_t* weights, const int32_t* bias,
+                             const float* scale, void* packed_weights,
+                             const xnn_qs8_packing_params* params) {
+  const size_t source_stride = ks * kc;
+  const size_t packed_k = ks * round_up_po2(kc, 4);
+  const size_t packed_stride = nr * (sizeof(int32_t) + packed_k + sizeof(float));
+  const size_t chunks = kc % 4 == 0 ? 1 : ks;
+  const size_t chunk_length = source_stride / chunks;
+  const size_t words = chunk_length / 4;
+  const size_t vector_words = round_down_po2(words, 4);
+  const size_t chunk_words = round_up_po2(chunk_length, 4) / 4;
+  for (size_t channel = 0; channel < nc; channel += nr) {
+    const size_t active_channels = std::min(nc - channel, nr);
+    uint8_t* block = static_cast<uint8_t*>(packed_weights) +
+                     channel / nr * packed_stride;
+    float* packed_scale = reinterpret_cast<float*>(
+        block + nr * (sizeof(int32_t) + packed_k));
+    int32_t* packed_bias = reinterpret_cast<int32_t*>(block);
+    for (size_t row = 0; row < active_channels; ++row) {
+      const int8_t* source = weights + (channel + row) * source_stride;
+      uint32_t sum = 0;
+      size_t depth = 0;
+      for (; depth + 16 <= source_stride; depth += 16) {
+        sum += static_cast<uint32_t>(vaddlvq_s8(vld1q_s8(source + depth)));
+      }
+      for (; depth < source_stride; ++depth) {
+        sum += static_cast<uint32_t>(source[depth]);
+      }
+      packed_bias[row] = static_cast<int32_t>(
+          static_cast<uint32_t>(bias[channel + row]) -
+          sum * static_cast<uint32_t>(params->input_zero_point));
+      packed_scale[row] = scale[channel + row];
+    }
+    uint32_t* packed_words = reinterpret_cast<uint32_t*>(block) + nr;
+    for (size_t chunk = 0; chunk < chunks; ++chunk) {
+      const int8_t* source = weights + channel * source_stride +
+                             chunk * chunk_length;
+      uint32_t* destination = packed_words + chunk * chunk_words * nr;
+      for (size_t row = 0; row < active_channels; row += 32) {
+        const size_t height = std::min(active_channels - row, size_t{32});
+        for (size_t column = 0; column < vector_words; column += 32) {
+          xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128(
+              reinterpret_cast<const uint32_t*>(source + row * source_stride +
+                                                 column * 4),
+              destination + column * nr + row, source_stride, nr * 4,
+              std::min(vector_words - column, size_t{32}), height);
+        }
+        if (vector_words != words) {
+          xnn_xx_transposev_ukernel__1x1_scalar_memcpy(
+              source + row * source_stride + vector_words * 4,
+              destination + vector_words * nr + row, source_stride, nr * 4,
+              sizeof(uint32_t), sizeof(uint32_t), sizeof(uint32_t),
+              words - vector_words, height);
+        }
+      }
+      uint32_t* tail = destination + words * nr;
+      const int8_t* source_tail = source + words * 4;
+      switch (chunk_length % 4) {
+        case 1:
+          pack_qs8_nxk_tail<1>(active_channels, source_stride, source_tail, tail);
+          break;
+        case 2:
+          pack_qs8_nxk_tail<2>(active_channels, source_stride, source_tail, tail);
+          break;
+        case 3:
+          pack_qs8_nxk_tail<3>(active_channels, source_stride, source_tail, tail);
+          break;
+      }
+    }
+    if (active_channels != nr) {
+      std::memset(block + active_channels * sizeof(int32_t), 0,
+                  (nr - active_channels) * sizeof(int32_t));
+      for (size_t depth = 0; depth < packed_k; depth += 4) {
+        std::memset(block + nr * sizeof(int32_t) + depth * nr +
+                        active_channels * 4,
+                    0, (nr - active_channels) * 4);
+      }
+      std::fill_n(packed_scale + active_channels, nr - active_channels, 0.0f);
+    }
+  }
+}
+#endif  // XNN_ENABLE_KLEIDIAI
 
 extern "C" {
 
@@ -1390,9 +1488,9 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      float* packed_b = (float*)packed_weights;
-      std::fill_n(packed_b, nr, 0.0f);
-      packed_weights = (float*)packed_weights + nr;
+      uint8_t* packed_b = (uint8_t*)packed_weights;
+      std::memset(packed_b, 0, nr * sizeof(float));
+      packed_weights = packed_b + nr * sizeof(float);
 
       for (size_t kr_block_start = 0;
            kr_block_start < round_up_po2(kc, skr * 2);
@@ -1508,9 +1606,9 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      int32_t* packed_b = (int32_t*)packed_weights;
-      std::fill_n(packed_b, nr, 0);
-      packed_weights = (float*)packed_weights + nr;
+      uint8_t* packed_b = (uint8_t*)packed_weights;
+      std::memset(packed_b, 0, nr * sizeof(float));
+      packed_weights = packed_b + nr * sizeof(float);
 
       for (size_t kr_block_start = 0;
            kr_block_start < round_up_po2(kc, skr * 2);
@@ -3138,24 +3236,6 @@ size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme(
   return ret_val;
 }
 
-void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
-                          size_t width) {
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      out[j * height + i] = in[i * width + j];
-    }
-  }
-}
-
-static void transpose_weights_x16(const uint16_t* in, uint16_t* out,
-                                  size_t height, size_t width) {
-  for (size_t j = 0; j < width; ++j) {
-    for (size_t i = 0; i < height; ++i) {
-      out[j * height + i] = in[i * width + j];
-    }
-  }
-}
-
 void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
@@ -3169,60 +3249,58 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   const size_t rhs_stride = output_channels * sizeof(int8_t);
+  const bool has_bias = accumulator_init != NULL;
 
   // Some packing kernels assume that the bias is non-null. Allocate a zero
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(int32_t));
-    if (accumulator_init == NULL) {
-      xnn_log_error(
-          "failed to allocate %zu bytes for KleidiAI SME bias substitute "
-          "buffer",
-          output_channels * sizeof(int32_t));
-      assert(false);
-      return;
+    static const int32_t zero_bias[16] = {};
+    if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0 &&
+        output_channels <= sizeof(zero_bias) / sizeof(zero_bias[0])) {
+      accumulator_init = zero_bias;
+    } else {
+      accumulator_init = calloc(output_channels, sizeof(int32_t));
+      if (accumulator_init == NULL) {
+        xnn_log_error(
+            "failed to allocate %zu bytes for KleidiAI SME bias substitute "
+            "buffer",
+            output_channels * sizeof(int32_t));
+        assert(false);
+        return;
+      }
+      free_accumulator_init = true;
     }
-    free_accumulator_init = true;
   }
   const struct xnn_qs8_packing_params* xnn_params =
       reinterpret_cast<const struct xnn_qs8_packing_params*>(params);
   struct kai_rhs_pack_qsi8cx_params kai_params;
   kai_params.lhs_zero_point = xnn_params->input_zero_point;
   kai_params.scale_multiplier = 1.f;
-  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
-        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
-        /*rhs=*/weights,
-        /*bias=*/accumulator_init,
-        /*scale=*/extra_data0,
-        /*rhs_packed=*/packed_weights_ptr,
-        /*extra_bytes=*/0, &kai_params);
-  } else {
-    // Transpose the weights until the transpose packing function is ready.
-    int8_t* tmp_data =
-        (int8_t*)malloc(input_channels * output_channels * sizeof(int8_t));
-    if (tmp_data == NULL) {
-      xnn_log_error(
-          "failed to allocate %zu bytes for KleidiAI SME weight transpose "
-          "buffer",
-          input_channels * output_channels * sizeof(int8_t));
-      if (free_accumulator_init) {
-        free((void*)accumulator_init);
-      }
-      assert(false);
-      return;
+  const size_t weights_group_size = input_channels * output_channels;
+  const size_t packed_group_size =
+      groups > 1
+          ? kai_get_rhs_packed_size_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+                output_channels, input_channels)
+          : 0;
+  for (size_t group = 0; group < groups; ++group) {
+    const int8_t* group_weights =
+        static_cast<const int8_t*>(weights) + group * weights_group_size;
+    const int32_t* group_bias = static_cast<const int32_t*>(accumulator_init) +
+                                (has_bias ? group * output_channels : 0);
+    const float* group_scale =
+        static_cast<const float*>(extra_data0) + group * output_channels;
+    uint8_t* group_packed =
+        static_cast<uint8_t*>(packed_weights_ptr) + group * packed_group_size;
+    if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+      kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+          1, output_channels, input_channels, nr, kr, sr, rhs_stride,
+          group_weights, group_bias, group_scale, group_packed,
+          /*extra_bytes=*/0, &kai_params);
+    } else {
+      pack_qs8_nxk_sme(output_channels, 1, input_channels, nr, group_weights,
+                       group_bias, group_scale, group_packed, xnn_params);
     }
-    transpose_weights_x8((const int8_t*)weights, tmp_data, output_channels,
-                         input_channels);
-    kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
-        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
-        /*rhs=*/tmp_data,
-        /*bias=*/accumulator_init,
-        /*scale=*/extra_data0,
-        /*rhs_packed=*/packed_weights_ptr,
-        /*extra_bytes=*/0, &kai_params);
-    free(tmp_data);
   }
   if (free_accumulator_init) {
     free((void*)accumulator_init);
@@ -3694,6 +3772,11 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
   assert(packed_weights != nullptr);
 
   uint16_t* tmp_bias = NULL;
+  static const uint16_t zero_bias[XNN_ALLOCATION_ALIGNMENT / sizeof(uint16_t)] = {};
+
+  if (b == NULL && g * nc <= sizeof(zero_bias) / sizeof(zero_bias[0])) {
+    b = zero_bias;
+  }
 
   if (b == NULL) {
     tmp_bias = (uint16_t*)xnn_allocate_zero_memory(g * nc * sizeof(uint16_t));
@@ -3707,39 +3790,24 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks, size_t kc,
     b = tmp_bias;
   }
 
-  uint16_t* tmp_data =
-      (uint16_t*)xnn_allocate_memory(nc * ks * kc * sizeof(uint16_t));
-  if (tmp_data == NULL) {
-    xnn_log_error(
-        "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(uint16_t));
-    if (tmp_bias != NULL) {
-      xnn_release_memory(tmp_bias);
-    }
-    assert(false);
-    return;
-  }
-  const size_t rhs_row_stride = nc * sizeof(uint16_t);
+  const size_t rhs_row_stride = ks * kc * sizeof(uint16_t);
   const size_t packed_rhs_size =
-      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
-          nc, ks, kc);
+      g > 1
+          ? kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+                nc, ks, kc)
+          : 0;
 
   for (size_t g_idx = 0; g_idx < g; ++g_idx) {
-    // TODO: Remove transpose_weights_x16 if KleidiAI release imatmul_pack_nxk
-    // packing variant
-    transpose_weights_x16(k, tmp_data, nc, ks * kc);
     // Pass FP16 bias directly to the rhs_imatmul packer which expects FP16 bias
     // for this kernel.
-    kai_run_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
-        nc, ks, kc, rhs_row_stride, tmp_data, b, packed_weights);
+    kai_run_imatmul_pack_rhs_nxk_x16p2vlx2bx16_x16_x16_sme(
+        nc, ks, kc, rhs_row_stride, k, b, packed_weights);
 
     k += nc * ks * kc;
     b += nc;
 
     packed_weights = (void*)((uintptr_t)packed_weights + packed_rhs_size);
   }
-
-  xnn_release_memory(tmp_data);
 
   if (tmp_bias != NULL) {
     xnn_release_memory(tmp_bias);
@@ -3760,10 +3828,6 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
 
-  kai_rhs_pack_qsi8cx_params kai_params{};
-  kai_params.lhs_zero_point = params->input_zero_point;
-  kai_params.scale_multiplier = 1.0F;
-
   int32_t* tmp_bias = NULL;
 
   if (b == NULL) {
@@ -3778,28 +3842,14 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
     b = tmp_bias;
   }
 
-  int8_t* tmp_data =
-      (int8_t*)xnn_allocate_memory(nc * ks * kc * sizeof(int8_t));
-  if (tmp_data == NULL) {
-    xnn_log_error(
-        "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(int8_t));
-    if (tmp_bias != NULL) {
-      xnn_release_memory(tmp_bias);
-    }
-    assert(false);
-    return;
-  }
-  const size_t rhs_row_stride = nc * sizeof(int8_t);
+  const size_t packed_nr =
+      kai_get_n_step_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme();
   const size_t packed_rhs_size =
       kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
           nc, ks, kc);
 
   for (size_t g_idx = 0; g_idx < g; ++g_idx) {
-    transpose_weights_x8(k, tmp_data, nc, ks * kc);
-    kai_run_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
-        nc, ks, kc, rhs_row_stride, tmp_data, b, scale, packed_weights,
-        &kai_params);
+    pack_qs8_nxk_sme(nc, ks, kc, packed_nr, k, b, scale, packed_weights, params);
 
     k += nc * ks * kc;
     b += nc;
@@ -3811,19 +3861,8 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
     packed_weights = (uint8_t*)packed_weights + packed_rhs_size;
   }
 
-  xnn_release_memory(tmp_data);
-
   if (tmp_bias != NULL) {
     xnn_release_memory(tmp_bias);
-  }
-}
-
-void transpose_weights(const float* in, float* out, size_t height,
-                       size_t width) {
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      out[j * height + i] = in[i * width + j];
-    }
   }
 }
 
@@ -3839,6 +3878,11 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
   assert(packed_weights != nullptr);
 
   float* tmp_bias = NULL;
+  static const float zero_bias[XNN_ALLOCATION_ALIGNMENT / sizeof(float)] = {};
+
+  if (b == NULL && g * nc <= sizeof(zero_bias) / sizeof(zero_bias[0])) {
+    b = zero_bias;
+  }
 
   if (b == NULL) {
     tmp_bias = (float*)xnn_allocate_zero_memory(g * nc * sizeof(float));
@@ -3852,33 +3896,22 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
     b = tmp_bias;
   }
 
-  float* tmp_data = (float*)malloc(nc * ks * kc * sizeof(float));
-  if (tmp_data == NULL) {
-    xnn_log_error(
-        "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
-        nc * ks * kc * sizeof(float));
-    if (tmp_bias != NULL) {
-      xnn_release_memory(tmp_bias);
-    }
-    assert(false);
-    return;
-  }
-  const size_t rhs_row_stride = nc * sizeof(float);
+  const size_t packed_nr =
+      kai_get_n_step_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme();
+  const size_t rhs_row_stride = ks * kc * sizeof(float);
   const size_t packed_rhs_size =
       kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme(
           nc, ks, kc);
 
   for (size_t g_idx = 0; g_idx < g; ++g_idx) {
-    transpose_weights(k, tmp_data, nc, ks * kc);
-    kai_run_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme(
-        nc, ks, kc, rhs_row_stride, tmp_data, b, packed_weights);
+    kai_run_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(
+        1, nc, ks * kc, packed_nr, 1, 1, rhs_row_stride, k, b, nullptr,
+        packed_weights, 0, nullptr);
 
     k += nc * ks * kc;
     b += nc;
     packed_weights = (float*)((uintptr_t)packed_weights + packed_rhs_size);
   }
-
-  free(tmp_data);
 
   if (tmp_bias != NULL) {
     xnn_release_memory(tmp_bias);

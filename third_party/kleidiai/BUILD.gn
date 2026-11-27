@@ -366,6 +366,9 @@ source_set("matmul") {
     "src/kai/ukernels/matmul/matmul_clamp_qai8_qai8p_qsi8cxp/kai_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa.h",
     "src/kai/ukernels/matmul/matmul_clamp_qai8_qai8p_qsi8cxp/kai_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa_asm.S",
     "src/kai/ukernels/matmul/matmul_clamp_qai8_qai8p_qsi8cxp/kai_matmul_clamp_qai8_qai8p_qsi8cxpsb_interface.h",
+    "src/kai/ukernels/matmul/pack/kai_imatmul_pack_rhs_nxk_x16p2vlx2bx16_x16_x16_sme.c",
+    "src/kai/ukernels/matmul/pack/kai_imatmul_pack_rhs_nxk_x16p2vlx2bx16_x16_x16_sme.h",
+    "src/kai/ukernels/matmul/pack/kai_imatmul_pack_rhs_nxk_x16p2vlx2bx16_x16_x16_sme_asm.S",
     "src/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x16p2vlx2_x16p_sme.c",
     "src/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x16p2vlx2_x16p_sme.h",
     "src/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x16p2vlx2_x16p_sme_asm.S",
@@ -511,6 +514,10 @@ source_set("matmul") {
     "-Xclang",
     "-target-feature",
     "-Xclang",
+    "+dotprod",
+    "-Xclang",
+    "-target-feature",
+    "-Xclang",
     "+sme2",
     "-Xclang",
     "-target-feature",
@@ -524,6 +531,10 @@ source_set("matmul") {
     "-target-feature",
     "-Xclang",
     "+bf16",
+    "-Xclang",
+    "-target-feature",
+    "-Xclang",
+    "+fullfp16",
 
     # -fno-tree-vectorize seems to be very important: without it, we get a
     # SIGILL on the unit tests. TODO(ritownsend): figure out what's wrong here.
