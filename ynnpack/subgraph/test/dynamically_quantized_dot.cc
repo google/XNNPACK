@@ -170,6 +170,97 @@ TEST_P(DynamicallyQuantizedDot, SplitDimAndTransposeChain) {
   }
 }
 
+TEST_P(DynamicallyQuantizedDot, Gather) {
+  const ynn_type rhs_type = GetParam();
+  const uint32_t a_id = 0;
+  const uint32_t min_max_id = 1;
+  const uint32_t indices_id = 2;
+  const uint32_t b_id = 3;
+  const uint32_t output_id = 4;
+
+  SubgraphBuilder builder(5);
+  builder.AddInput(ynn_type_fp32, {8, 16}, a_id)
+      .AddInput(ynn_type_fp32, {2, 8, 1}, min_max_id)
+      .AddInput(ynn_type_int32, {5, 1}, indices_id)
+      .AddInput(rhs_type, {16, 32}, b_id)
+      .AddOutput(ynn_type_int32, {5, 32}, output_id);
+
+  uint32_t scale_id = YNN_INVALID_VALUE_ID;
+  uint32_t zp_id = YNN_INVALID_VALUE_ID;
+  uint32_t quantized_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddTensor(ynn_type_fp32, {8, 1}, scale_id)
+      .AddTensor(ynn_type_int32, {8, 1}, zp_id)
+      .AddTensor(ynn_type_int8, {8, 16}, quantized_id)
+      .AddTensor(ynn_type_int8, {5, 16}, gathered_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ASSERT_EQ(ynn_define_dynamic_quantization(
+                &subgraph, min_max_id, ynn_type_int8, &zp_id, &scale_id, 0),
+            ynn_status_success);
+
+  builder.AddQuantize(a_id, ynn_type_int8, zp_id, scale_id, quantized_id)
+      .AddGather({0}, 2, quantized_id, indices_id, gathered_id)
+      .AddDot(1, gathered_id, b_id, YNN_INVALID_VALUE_ID, output_id);
+
+  if (prefer_uint8_dot(rhs_type)) {
+    EXPECT_THAT(subgraph.value(quantized_id), HasType(ynn_type_uint8));
+    EXPECT_THAT(subgraph.value(gathered_id), HasType(ynn_type_uint8));
+    EXPECT_THAT(ProducerOf(zp_id, subgraph), IsDynamicQuantization(128));
+    EXPECT_THAT(ProducerOf(quantized_id, subgraph), IsQuantize());
+    EXPECT_THAT(ProducerOf(output_id, subgraph), IsDot());
+  } else {
+    EXPECT_THAT(subgraph.value(quantized_id), HasType(ynn_type_int8));
+    EXPECT_THAT(subgraph.value(gathered_id), HasType(ynn_type_int8));
+    EXPECT_THAT(ProducerOf(zp_id, subgraph), IsDynamicQuantization(0));
+  }
+}
+
+TEST_P(DynamicallyQuantizedDot, DoNotRewriteWhenSharedWithExistingConsumer) {
+  const ynn_type rhs_type = GetParam();
+  const uint32_t a_id = 0;
+  const uint32_t min_max_id = 1;
+  const uint32_t b_id = 2;
+  const uint32_t converted_out_id = 3;
+  const uint32_t dot_out_id = 4;
+
+  SubgraphBuilder builder(5);
+  builder.AddInput(ynn_type_fp32, {8, 16}, a_id)
+      .AddInput(ynn_type_fp32, {2, 8, 1}, min_max_id)
+      .AddInput(rhs_type, {16, 32}, b_id)
+      .AddOutput(ynn_type_fp32, {8, 16}, converted_out_id)
+      .AddOutput(ynn_type_int32, {4, 2, 32}, dot_out_id);
+
+  uint32_t scale_id = YNN_INVALID_VALUE_ID;
+  uint32_t zp_id = YNN_INVALID_VALUE_ID;
+  uint32_t quantized_id = YNN_INVALID_VALUE_ID;
+  uint32_t split_id = YNN_INVALID_VALUE_ID;
+  uint32_t transposed_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddTensor(ynn_type_fp32, {8, 1}, scale_id)
+      .AddTensor(ynn_type_int32, {8, 1}, zp_id)
+      .AddTensor(ynn_type_int8, {8, 16}, quantized_id)
+      .AddTensor(ynn_type_int8, {2, 4, 16}, split_id)
+      .AddTensor(ynn_type_int8, {4, 2, 16}, transposed_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ASSERT_EQ(ynn_define_dynamic_quantization(
+                &subgraph, min_max_id, ynn_type_int8, &zp_id, &scale_id, 0),
+            ynn_status_success);
+
+  builder.AddQuantize(a_id, ynn_type_int8, zp_id, scale_id, quantized_id);
+  builder.AddConvert(quantized_id, ynn_type_fp32, converted_out_id);
+  builder.AddSplitDim(0, {2, 4}, quantized_id, split_id);
+  builder.AddTranspose({1, 0, 2}, split_id, transposed_id);
+  builder.AddDot(1, transposed_id, b_id, YNN_INVALID_VALUE_ID, dot_out_id);
+
+  EXPECT_THAT(subgraph.value(quantized_id), HasType(ynn_type_int8));
+  EXPECT_THAT(subgraph.value(split_id), HasType(ynn_type_int8));
+  EXPECT_THAT(subgraph.value(transposed_id), HasType(ynn_type_int8));
+  EXPECT_THAT(ProducerOf(zp_id, subgraph), IsDynamicQuantization(0));
+}
+
 INSTANTIATE_TEST_SUITE_P(RhsType, DynamicallyQuantizedDot,
                          testing::Values(ynn_type_int8, ynn_type_int4,
                                          ynn_type_int2),

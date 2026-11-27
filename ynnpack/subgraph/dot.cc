@@ -84,6 +84,7 @@ namespace {
 
 bool is_layout_transform(const ynn_node& node) {
   return std::holds_alternative<ynn_node::copy>(node.op) ||
+         std::holds_alternative<ynn_node::gather>(node.op) ||
          std::holds_alternative<ynn_node::reshape>(node.op) ||
          std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
          std::holds_alternative<ynn_node::static_slice>(node.op) ||
@@ -92,15 +93,22 @@ bool is_layout_transform(const ynn_node& node) {
 
 bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
                                       uint32_t input_a_id) {
+  if (subgraph.value(input_a_id).is_external_output() ||
+      subgraph.count_consumers(input_a_id) != 0) {
+    return false;
+  }
   std::vector<uint32_t> path = {input_a_id};
-  // This rewrite assumes that there are no other users of these values. We
-  // can't check for that here, because we are in the middle of constructing the
-  // graph. Even if there are no other users now, there might be users later.
-  // We should be doing this kind of rewrite as part of `ynn_optimize_subgraph`,
-  // to fix this problem.
+  // This rewrite assumes that there are no other users of these values. Even if
+  // there are no other users now, there might be users added later. We should
+  // be doing this kind of rewrite as part of `ynn_optimize_subgraph`, to fix
+  // this problem.
   ynn_node* producer_a = subgraph.get_producer(input_a_id);
   while (producer_a && is_layout_transform(*producer_a)) {
     input_a_id = producer_a->inputs[0];
+    if (subgraph.value(input_a_id).is_external_output() ||
+        subgraph.count_consumers(input_a_id) != 1) {
+      return false;
+    }
     path.push_back(input_a_id);
     producer_a = subgraph.get_producer(input_a_id);
   }
