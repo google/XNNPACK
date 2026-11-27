@@ -27,6 +27,7 @@
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/runtime-flags.h"
+#include "test/subgraph/runtime-tester.h"
 #include "test/subgraph/subgraph-tester.h"
 
 using ::testing::Contains;
@@ -891,6 +892,46 @@ TEST(StaticReduce, DefineRejectsQuantizedMinMaxRequantization) {
                                             reduction_axes, /*input_id=*/0,
                                             /*output_id=*/1, /*flags=*/0),
                 xnn_status_success);
+    }
+  }
+}
+
+TEST(StaticReduce, ReshapeGrowsAfterPlanningAtSmallerShape) {
+  const xnn_quantization_params quantization = {0, 1.0f};
+  constexpr size_t kRows = 256;
+  constexpr size_t kCols = 64;
+
+  RuntimeTester tester(2);
+  tester
+      .AddInputTensor(std::vector<size_t>{kRows, kCols}, xnn_datatype_qint8,
+                      quantization, 0)
+      .AddOutputTensor(std::vector<size_t>{kRows}, xnn_datatype_qint8,
+                       quantization, 1)
+      .AddReduce(xnn_reduce_sum, std::vector<int64_t>{1}, 0, 1);
+  ASSERT_NO_FATAL_FAILURE(tester.CreateRuntime(xnn_test_runtime_flags()));
+
+  for (size_t rows : {size_t{1}, kRows}) {
+    Tensor<int8_t> input({rows, kCols}, xnnpack::XnnExtraBytes);
+    input.fill(1);
+    Tensor<int8_t> output({rows});
+    tester
+        .ReshapeExternalTensor(std::vector<size_t>{rows, kCols}, input.data(),
+                               0)
+        .ReshapeRuntime();
+
+    const xnn_runtime_t runtime = tester.Runtime();
+    const xnn_operator_data& opdata = runtime->opdata[0];
+    const size_t workspace_offset =
+        static_cast<char*>(opdata.workspace) -
+        static_cast<char*>(runtime->workspace->data);
+    ASSERT_LE(workspace_offset + opdata.workspace_size,
+              runtime->workspace->size)
+        << "rows=" << rows;
+
+    tester.SetupExternalTensor(output.data(), 1).SetupRuntime();
+    ASSERT_EQ(tester.InvokeRuntime(), xnn_status_success);
+    for (size_t i = 0; i < rows; i++) {
+      ASSERT_EQ(output(i), static_cast<int8_t>(kCols)) << "rows=" << rows;
     }
   }
 }
