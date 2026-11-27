@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -99,5 +100,56 @@ TEST(ReshapeQU8, test) { TestImpl<quantized<uint8_t>>(); }
 TEST(ReshapeBF16, test) { TestImpl<xnn_bfloat16>(); }
 TEST(ReshapeF16, test) { TestImpl<xnn_float16>(); }
 TEST(ReshapeF32, test) { TestImpl<float>(); }
+
+TEST(ReshapeF32, static_input_element_count_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  const size_t dims[1] = {64};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, dims,
+                                    nullptr, /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  const size_t output_dims[1] = {128};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 1, output_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  Tensor<float> static_data({4}, XnnExtraBytes);
+  static_data.fill(1.0f);
+  uint32_t static_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, static_data.rank(),
+                              static_data.extents().data(), static_data.base(),
+                              XNN_INVALID_VALUE_ID, /*flags=*/0, &static_id));
+  uint32_t reshaped_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, dims,
+                                    nullptr, XNN_INVALID_VALUE_ID,
+                                    /*flags=*/0, &reshaped_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_static_reshape(subgraph, 1, dims, static_id, reshaped_id,
+                                      /*flags=*/0));
+  const uint32_t inputs[2] = {input_id, reshaped_id};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_concatenate(subgraph, /*axis=*/0, 2, inputs, output_id,
+                                   /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v4(subgraph, nullptr, nullptr, nullptr,
+                                  /*flags=*/0, &runtime));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  EXPECT_EQ(xnn_status_invalid_parameter, xnn_reshape_runtime(runtime));
+}
 
 }  // namespace xnnpack
