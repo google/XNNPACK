@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -354,6 +355,20 @@ YNN_ALWAYS_INLINE bool any(vec<T, N> x) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE bool all(vec<T, N> x) {
   return all(lo(x) & hi(x));
+}
+
+template <size_t ElemSize, typename T, size_t N>
+YNN_ALWAYS_INLINE std::tuple<vec<T, N>, vec<T, N>> interleave(
+    std::integral_constant<size_t, ElemSize> elem_size, vec<T, N> a,
+    vec<T, N> b) {
+  static_assert(ElemSize <= N * sizeof(T) * 4, "");
+  if constexpr (ElemSize == N * sizeof(T) * 4) {
+    return {concat(lo(a), lo(b)), concat(hi(a), hi(b))};
+  } else {
+    auto [lo0, lo1] = interleave(elem_size, lo(a), lo(b));
+    auto [hi0, hi1] = interleave(elem_size, hi(a), hi(b));
+    return {concat(lo0, lo1), concat(hi0, hi1)};
+  }
 }
 
 }  // namespace simd
