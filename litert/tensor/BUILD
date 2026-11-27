@@ -46,7 +46,7 @@ cc_library(
     hdrs = ["buffer.h"],
     # copybara:uncomment includes = ["utils"],
     deps = [
-        "//litert/tensor:datatypes",
+        ":datatypes",
         "//litert/tensor/internal:type_id",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
