@@ -258,3 +258,18 @@ cc_library(
         "@abseil-cpp//absl/strings:string_view",
     ],
 )
+
+cc_test(
+    name = "tensor_hash_test",
+    srcs = ["tensor_hash_test.cc"],
+    deps = [
+        ":graph",
+        ":tensor_hash",
+        ":type_id",
+        "//litert/tensor:buffer",
+        "//litert/tensor:datatypes",
+        "@abseil-cpp//absl/status:statusor",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
