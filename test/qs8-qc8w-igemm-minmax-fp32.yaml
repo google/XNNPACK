@@ -118,6 +118,10 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4s2__asm_aarch64_neon_mlal
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
   pack: xnn_pack_qs8_conv_goki_w
@@ -135,6 +139,10 @@
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x8c16__asm_aarch64_neon_mlal
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x16c4s2__asm_aarch64_neon_mlal
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
