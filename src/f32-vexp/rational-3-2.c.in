@@ -34,6 +34,18 @@ static XNN_INLINE xnn_simd_f32_t xnn_qd_round_f32(xnn_simd_f32_t vx) {
   return xnn_sub_f32(xnn_add_f32(vmagic, vx), vmagic);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_scale_exp_f32(
+    xnn_simd_f32_t x, xnn_simd_f32_t v2z, xnn_simd_f32_t v2r) {
+  const xnn_simd_f32_t y = xnn_mul_f32(v2z, v2r);
+  $if ARCH == "hvx":
+    // HVX arithmetic can discard NaNs before the exponent clamp.
+    const HVX_VectorPred nan =
+        Q6_Q_vcmp_gt_VuwVuw(xnn_abs_f32(x), Q6_V_vsplat_R(0x7F800000));
+    return Q6_V_vmux_QVV(nan, Q6_V_vsplat_R(0x7FC00000), y);
+  $else:
+    return y;
+}
+
 $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE % SIMD_SIZE == 0
   $assert BATCH_TILE >= SIMD_SIZE
@@ -77,7 +89,7 @@ $for BATCH_TILE in BATCH_TILES:
         $for N in range(0, SIMD_TILE):
           xnn_simd_f32_t vz_prime_${N} = xnn_mul_f32(vx_${N}, vlog2e);
         $for N in range(0, SIMD_TILE):
-          vz_prime_${N} = xnn_min_f32(xnn_max_f32(vz_prime_${N}, vm127), v128);
+          vz_prime_${N} = xnn_min_f32(v128, xnn_max_f32(vm127, vz_prime_${N}));
 
         // Decompose x * log2e into `z` (integer part) and `r` (remainder).
         $for N in range(0, SIMD_TILE):
@@ -119,7 +131,7 @@ $for BATCH_TILE in BATCH_TILES:
 
         // Compute 2^z * 2^r.
         $for N in range(0, SIMD_TILE):
-          const xnn_simd_f32_t vy_${N} = xnn_mul_f32(v2z_${N}, v2r_${N});
+          const xnn_simd_f32_t vy_${N} = xnn_scale_exp_f32(vx_${N}, v2z_${N}, v2r_${N});
 
         $for N in range(SIMD_TILE):
           xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy_${N});
@@ -131,7 +143,7 @@ $for BATCH_TILE in BATCH_TILES:
 
       // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
       xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-      vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm127), v128);
+      vz_prime = xnn_min_f32(v128, xnn_max_f32(vm127, vz_prime));
 
       // Decompose x * log2e into `z` (integer part) and `r` (remainder).
       const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -160,7 +172,7 @@ $for BATCH_TILE in BATCH_TILES:
         const xnn_simd_f32_t v2r = xnn_fmadd_f32(vp, vrq, vone);
 
       // Compute 2^z * 2^r.
-      const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
+      const xnn_simd_f32_t vy = xnn_scale_exp_f32(vx, v2z, v2r);
 
       xnn_storeu_f32(output, vy);
       output += xnn_simd_size_f32;
@@ -171,7 +183,7 @@ $for BATCH_TILE in BATCH_TILES:
 
         // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
         xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
-        vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm127), v128);
+        vz_prime = xnn_min_f32(v128, xnn_max_f32(vm127, vz_prime));
 
         // Decompose x * log2e into `z` (integer part) and `r` (remainder).
         const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
@@ -200,7 +212,7 @@ $for BATCH_TILE in BATCH_TILES:
           const xnn_simd_f32_t v2r = xnn_fmadd_f32(vp, vrq, vone);
 
         // Compute 2^z * 2^r.
-        const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
+        const xnn_simd_f32_t vy = xnn_scale_exp_f32(vx, v2z, v2r);
 
         xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
       }

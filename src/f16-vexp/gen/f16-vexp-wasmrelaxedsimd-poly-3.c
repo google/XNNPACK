@@ -18,6 +18,12 @@
 #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 
 
+static XNN_INLINE xnn_simd_f16_t xnn_clamp_exp_f16(
+    xnn_simd_f16_t x, xnn_simd_f16_t min, xnn_simd_f16_t max) {
+  // WebAssembly pseudo-min/max select their first operand for unordered inputs.
+  return wasm_f16x8_pmin(wasm_f16x8_pmax(x, min), max);
+}
+
 static XNN_INLINE xnn_simd_f16_t xnn_setexp_f16(xnn_simd_f16_t vx) {
   // If `x` is an xnn_float16ing point value in the range [-15, 16], then
   // `(x + magic) << 10` will generate the floating point value corresponding
@@ -64,9 +70,9 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u8(
     xnn_simd_f16_t vx = xnn_loadu_f16(input);
     input += xnn_simd_size_f16;
     
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-    vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f16(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
@@ -89,9 +95,9 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u8(
   if XNN_UNLIKELY(batch != 0) {
     xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-    vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f16(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
@@ -140,11 +146,11 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
     xnn_simd_f16_t vx_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     input += 16;
     
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime_0 = xnn_mul_f16(vx_0, vlog2e);
     xnn_simd_f16_t vz_prime_1 = xnn_mul_f16(vx_1, vlog2e);
-    vz_prime_0 = xnn_min_f16(xnn_max_f16(vz_prime_0, vm15), v16);
-    vz_prime_1 = xnn_min_f16(xnn_max_f16(vz_prime_1, vm15), v16);
+    vz_prime_0 = xnn_clamp_exp_f16(vz_prime_0, vm15, v16);
+    vz_prime_1 = xnn_clamp_exp_f16(vz_prime_1, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz_0 = xnn_qd_round_f16(vz_prime_0);
@@ -176,9 +182,9 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
     xnn_simd_f16_t vx = xnn_loadu_f16(input);
     input += xnn_simd_size_f16;
     
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-    vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f16(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
@@ -201,9 +207,9 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
   if XNN_UNLIKELY(batch != 0) {
     xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-    vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f16(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
@@ -254,15 +260,15 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
     xnn_simd_f16_t vx_3 = xnn_loadu_f16(input + 3 * xnn_simd_size_f16);
     input += 32;
     
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime_0 = xnn_mul_f16(vx_0, vlog2e);
     xnn_simd_f16_t vz_prime_1 = xnn_mul_f16(vx_1, vlog2e);
     xnn_simd_f16_t vz_prime_2 = xnn_mul_f16(vx_2, vlog2e);
     xnn_simd_f16_t vz_prime_3 = xnn_mul_f16(vx_3, vlog2e);
-    vz_prime_0 = xnn_min_f16(xnn_max_f16(vz_prime_0, vm15), v16);
-    vz_prime_1 = xnn_min_f16(xnn_max_f16(vz_prime_1, vm15), v16);
-    vz_prime_2 = xnn_min_f16(xnn_max_f16(vz_prime_2, vm15), v16);
-    vz_prime_3 = xnn_min_f16(xnn_max_f16(vz_prime_3, vm15), v16);
+    vz_prime_0 = xnn_clamp_exp_f16(vz_prime_0, vm15, v16);
+    vz_prime_1 = xnn_clamp_exp_f16(vz_prime_1, vm15, v16);
+    vz_prime_2 = xnn_clamp_exp_f16(vz_prime_2, vm15, v16);
+    vz_prime_3 = xnn_clamp_exp_f16(vz_prime_3, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz_0 = xnn_qd_round_f16(vz_prime_0);
@@ -310,9 +316,9 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
     xnn_simd_f16_t vx = xnn_loadu_f16(input);
     input += xnn_simd_size_f16;
     
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-    vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f16(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
@@ -335,9 +341,9 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
   if XNN_UNLIKELY(batch != 0) {
     xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
-    vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
+    vz_prime = xnn_clamp_exp_f16(vz_prime, vm15, v16);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);

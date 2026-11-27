@@ -63,9 +63,10 @@ void xnn_f16_vexp_ukernel__rvvfp16arith_poly_3_u${LMUL}v(
     size_t vl = __riscv_vsetvl_e16m${LMUL}(batch); batch -= vl;
     vfloat16m${LMUL}_t vx = __riscv_vle16_v_f16m${LMUL}(input, vl); input += vl;
       
-    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+    // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-15, 16].
     vfloat16m${LMUL}_t vz_prime = __riscv_vfmul(vx, vlog2e, vl);
-    vz_prime = __riscv_vfmin(__riscv_vfmax(vz_prime, vm15, vl), v16, vl);
+    const vbool${16 // LMUL}_t ordered = __riscv_vmfeq(vx, vx, vl);
+    vz_prime = __riscv_vfmin_mu(ordered, vz_prime, __riscv_vfmax(vz_prime, vm15, vl), v16, vl);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const vfloat16m${LMUL}_t vz = xnn_qd_round_f16(vz_prime, vl);

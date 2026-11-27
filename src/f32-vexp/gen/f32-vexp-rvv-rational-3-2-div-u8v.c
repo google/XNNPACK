@@ -72,7 +72,8 @@ void xnn_f32_vexp_ukernel__rvv_rational_3_2_div_u8v(
 
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     vfloat32m8_t vz_prime = __riscv_vfmul(vx, vlog2e, vl);
-    vz_prime = __riscv_vfmin(__riscv_vfmax(vz_prime, vm127, vl), v128, vl);
+    const vbool4_t ordered = __riscv_vmfeq(vx, vx, vl);
+    vz_prime = __riscv_vfmin_mu(ordered, vz_prime, __riscv_vfmax(vz_prime, vm127, vl), v128, vl);
 
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const vfloat32m8_t vz = xnn_qd_round_f32(vz_prime, vl);
