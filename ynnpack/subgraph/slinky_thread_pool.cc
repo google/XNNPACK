@@ -6,6 +6,7 @@
 #include "ynnpack/subgraph/slinky_thread_pool.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -23,9 +24,10 @@ slinky_thread_pool::slinky_thread_pool(const ynn_scheduler* scheduler,
     : impl_(/*workers=*/0),
       scheduler_(scheduler),
       scheduler_context_(scheduler_context) {
-  num_threads_ = scheduler_ ? scheduler_->num_threads(scheduler_context_) : 0;
-  idle_workers_ = num_threads_;
-  impl_.expect_workers(idle_workers_);
+  num_threads_ =
+      scheduler_ ? std::max(0, scheduler_->num_threads(scheduler_context_)) : 0;
+  idle_workers_.store(num_threads_, std::memory_order_relaxed);
+  impl_.expect_workers(num_threads_);
 }
 
 slinky_thread_pool::~slinky_thread_pool() {
@@ -34,7 +36,7 @@ slinky_thread_pool::~slinky_thread_pool() {
   // after this destructor runs.
   // TODO: Try to find a way to do this without spinning, and without adding
   // overhead to the steady state (b/429222328).
-  while (idle_workers_.load() < num_threads_) {
+  while (idle_workers_.load(std::memory_order_acquire) < num_threads_) {
     std::this_thread::yield();
   }
 }
@@ -44,31 +46,30 @@ int slinky_thread_pool::thread_count() const { return num_threads_; }
 slinky::ref_count<slinky::thread_pool::task> slinky_thread_pool::enqueue(
     size_t n, task_body t, int max_workers) {
   auto result = impl_.enqueue(n, t, max_workers);
-  if (scheduler_) {
-    // Atomically increment the expected workers, so we know how many workers
-    // this enqueue should schedule.
-
+  if (scheduler_ && max_workers > 0) {
     // Limit the number of workers we enqueue to the most workers we could use,
-    // and the number of threads in the thread pool. Since these workers are
-    // generic, we don't want more live workers than there are threads.
-    max_workers = std::min<size_t>(max_workers, n);
-    max_workers = std::min<int>(max_workers, idle_workers_);
-
-    // The logic here is a bit racy, because the number of workers we compute we
-    // need is based on this shared state that might be changed by another
-    // thread. It seems best to account for the new workers here, before they
-    // actually exist, so we don't end up enqueuing many instances based on
-    // accounting for the same idle workers many times. Doing this here doesn't
-    // fix this race, it just makes it less bad. Ideally we'd do it atomically,
-    // unfortunately there is no saturating atomic add.
-    idle_workers_ -= max_workers;
-    for (int32_t i = 0; i < max_workers; ++i) {
+    // and atomically claim up to that many idle workers so concurrent enqueues
+    // never over-subscribe the thread pool or drive `idle_workers_` negative.
+    const int desired_workers =
+        static_cast<int>(std::min<size_t>(max_workers, n));
+    int idle = idle_workers_.load(std::memory_order_relaxed);
+    int workers_to_schedule = 0;
+    while (idle > 0 && desired_workers > 0) {
+      workers_to_schedule = std::min(desired_workers, idle);
+      if (idle_workers_.compare_exchange_weak(idle, idle - workers_to_schedule,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_relaxed)) {
+        break;
+      }
+      workers_to_schedule = 0;
+    }
+    for (int32_t i = 0; i < workers_to_schedule; ++i) {
       // Note that here, every worker is identical, so we can re-use the same
       // context for all scheduled tasks!
       scheduler_->schedule(scheduler_context_, this, [](void* context) {
         auto pool = reinterpret_cast<slinky_thread_pool*>(context);
         pool->impl_.work_until_idle();
-        ++pool->idle_workers_;
+        pool->idle_workers_.fetch_add(1, std::memory_order_acq_rel);
       });
     }
   }

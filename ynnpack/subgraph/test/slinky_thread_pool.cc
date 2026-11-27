@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -78,6 +79,80 @@ TEST(thread_pool, nested_loops) {
 
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(data[i], size);
+  }
+}
+
+TEST(thread_pool, concurrent_nested_enqueue_and_destroy) {
+  struct LifecycleScheduler {
+    explicit LifecycleScheduler(int thread_count) : inner(thread_count) {}
+
+    static int num_threads_impl(void* self) {
+      auto* s = static_cast<LifecycleScheduler*>(self);
+      return TestScheduler::num_threads_impl(&s->inner);
+    }
+
+    static void schedule_impl(void* self, void* context,
+                              void (*task)(void* context)) {
+      auto* s = static_cast<LifecycleScheduler*>(self);
+      struct TaskCall {
+        std::shared_ptr<std::atomic<bool>> pool_destroyed;
+        void* context;
+        void (*task)(void*);
+      };
+      auto* call = new TaskCall{s->pool_destroyed, context, task};
+      TestScheduler::schedule_impl(&s->inner, call, [](void* raw) {
+        std::unique_ptr<TaskCall> c(static_cast<TaskCall*>(raw));
+        EXPECT_FALSE(c->pool_destroyed->load(std::memory_order_acquire));
+        c->task(c->context);
+      });
+    }
+
+    static const ynn_scheduler* scheduler() {
+      static const ynn_scheduler s = {num_threads_impl, schedule_impl};
+      return &s;
+    }
+
+    TestScheduler inner;
+    std::shared_ptr<std::atomic<bool>> pool_destroyed;
+  };
+
+  // Use outer_size < num_threads so idle_workers_ > 0 when multiple outer
+  // iterations concurrently enqueue inner parallel loops.
+  static constexpr int num_threads = 32;
+  static constexpr size_t outer_size = 8;
+  static constexpr size_t inner_size = 16;
+
+  LifecycleScheduler scheduler(num_threads);
+  const bool can_synchronize = LifecycleScheduler::num_threads_impl(
+                                   &scheduler) >= static_cast<int>(outer_size);
+
+  for (int iter = 0; iter < 200; ++iter) {
+    auto pool_destroyed = std::make_shared<std::atomic<bool>>(false);
+    scheduler.pool_destroyed = pool_destroyed;
+    auto thread_pool =
+        std::make_unique<slinky_thread_pool>(scheduler.scheduler(), &scheduler);
+
+    std::array<std::atomic<int32_t>, inner_size> data = {{0}};
+    for (int round = 0; round < 20; ++round) {
+      std::atomic<size_t> started{0};
+      thread_pool->parallel_for(outer_size, [&](size_t) {
+        if (can_synchronize) {
+          started.fetch_add(1, std::memory_order_acq_rel);
+          while (started.load(std::memory_order_acquire) < outer_size) {
+            std::this_thread::yield();
+          }
+        }
+        thread_pool->parallel_for(inner_size, [&](size_t j) { data[j]++; });
+      });
+    }
+
+    thread_pool.reset();
+    pool_destroyed->store(true, std::memory_order_release);
+
+    for (size_t j = 0; j < inner_size; ++j) {
+      EXPECT_EQ(data[j], static_cast<int32_t>(20 * outer_size))
+          << "at index " << j;
+    }
   }
 }
 
