@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019-2025 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -121,6 +122,9 @@ extern "C" {
 /// build of XNNPACK. This causes XNNPACK to avoid using faster codepaths that are numerically inconsistent
 /// with any other codepath that could be used in the same compiled XNNPACK library.
 #define XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC 0x00002000
+
+/// FP32 softmax: return positive zeros for rows containing only negative infinity.
+#define XNN_FLAG_SAFE_SOFTMAX 0x00004000
 
 /// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
@@ -2179,7 +2183,8 @@ XNN_DEPRECATED enum xnn_status xnn_define_sigmoid(
 ///                   least one dimension.
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
-/// @param flags - binary features of the SoftMax Node. No supported flags are currently defined.
+/// @param flags - binary features of the SoftMax Node. Supported flags are
+///                XNN_FLAG_SAFE_SOFTMAX (FP32 only) and XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC.
 enum xnn_status xnn_define_softmax(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
