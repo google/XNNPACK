@@ -255,58 +255,103 @@ def solve_nnls(
   return c
 
 
+def infer_model_type_bits(field_name: str) -> Tuple[int, int]:
+  """Returns (a_bits, b_bits) for fallback load_a : load_b weighting."""
+  if (
+      "uint8_int2" in field_name
+      or "int8_int2" in field_name
+      or field_name.endswith("_int2")
+  ):
+    return (8, 2)
+  if (
+      "uint8_int4" in field_name
+      or "int8_int4" in field_name
+      or field_name.endswith("_int4")
+  ):
+    return (8, 4)
+  if "int8" in field_name or "uint8" in field_name or "fp8" in field_name:
+    return (8, 8)
+  if "bf16" in field_name or "fp16" in field_name:
+    return (16, 16)
+  if "fp64" in field_name:
+    return (64, 64)
+  return (32, 32)
+
+
 def fit_model(
     benchmarks: List[Dict[str, Any]],
     shared_load: Optional[Tuple[float, float]] = None,
+    fallback_shared_load: Tuple[float, float] = (1, 1),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
   """Fits a single cost model to all valid benchmarks.
 
   If `shared_load` is set to (weight_a, weight_b), load_a_cost and load_b_cost
   are constrained to that ratio (see the AMX/SME note below).
   """
-  entries = {}
+  valid_rows = []
+  all_block_ms = set()
+  all_block_ns = set()
+  for b in benchmarks:
+    if b.get("skipped") or b.get("error_occurred") or b.get("error_message"):
+      continue
+    dims = kernel_dims(b)
+    shape = kernel_shape(b)
+    real_time_ns = b.get("real_time") or b.get("cpu_time")
+    if not dims or not shape or not real_time_ns or real_time_ns <= 0:
+      continue
+    valid_rows.append(b)
+    all_block_ms.add(dims[0])
+    all_block_ns.add(dims[1])
 
   # Only exclude m = 1 if the model has kernels with m > 1, so models that are
   # legitimately m=1 only (like x86_avx512_int8_int8_int32_symmetric_b) can
   # still be fit.
-  has_large_m = False
-  for b in benchmarks:
-    dims = kernel_dims(b)
-    if dims and dims[0] > 1:
-      has_large_m = True
-      break
+  has_large_m = any(block_m > 1 for block_m in all_block_ms)
 
-  for b in benchmarks:
-    if b.get("skipped") or b.get("error_occurred") or b.get("error_message"):
-      continue
+  def collect_entries(skip_single_n_tile_bk1: bool):
+    collected = {}
+    block_ms = set()
+    block_ns = set()
+    for b in valid_rows:
+      name = b.get("name", "")
+      dims = kernel_dims(b)
+      assert dims is not None
+      block_m, block_n, block_k, tile_m, tile_n, _ = dims
+      # We avoid m = 1, kernels with few tiles, and single-tile-N block_k = 1
+      # kernels (which run a bounds check on every k step), because these
+      # kernels tend to distort the fits for the larger cases.
+      if has_large_m and block_m == 1:
+        continue
+      if (block_m // tile_m) * (block_n // tile_n) < 4:
+        continue
+      if skip_single_n_tile_bk1 and block_k == 1 and block_n == tile_n:
+        continue
 
-    name = b.get("name", "")
-    dims = kernel_dims(b)
-    if not dims:
-      continue
-    block_m, block_n, _, tile_m, tile_n, _ = dims
-    # We avoid m = 1 and kernels with few tiles, because these kernels tend to
-    # distort the fits for the larger cases.
-    if has_large_m and block_m == 1:
-      continue
-    if (block_m // tile_m) * (block_n // tile_n) < 4:
-      continue
+      shape = kernel_shape(b)
+      assert shape is not None
+      real_time_ns = b.get("real_time") or b.get("cpu_time")
+      real_time_sec = float(real_time_ns) * 1e-9
 
-    shape = kernel_shape(b)
-    if not shape:
-      continue
-    m, n, k = shape
+      base_name = re.sub(r"/(\d+/)*(mn|nm|real_time)$", "", name)
+      key = (base_name, shape, dims)
+      collected.setdefault(key, []).append(real_time_sec)
+      block_ms.add(block_m)
+      block_ns.add(block_n)
+    return collected, block_ms, block_ns
 
-    real_time_ns = b.get("real_time") or b.get("cpu_time")
-    if not real_time_ns or real_time_ns <= 0:
-      continue
-    real_time_sec = float(real_time_ns) * 1e-9
+  entries, filtered_ms, filtered_ns = collect_entries(
+      skip_single_n_tile_bk1=True
+  )
+  if not entries:
+    entries, filtered_ms, filtered_ns = collect_entries(
+        skip_single_n_tile_bk1=False
+    )
 
-    base_name = re.sub(r"/(\d+/)*(mn|nm|real_time)$", "", name)
-    key = (base_name, (m, n, k), dims)
-    if key not in entries:
-      entries[key] = []
-    entries[key].append(real_time_sec)
+  if shared_load is None and (
+      (len(all_block_ms) >= 2 and len(filtered_ms) < 2)
+      or (len(all_block_ns) >= 2 and len(filtered_ns) < 2)
+  ):
+    shared_load = fallback_shared_load
 
   x_list = []
   y_list = []
@@ -570,6 +615,7 @@ def main():
         coeffs, ratios, y = fit_model(
             by_model[field_name],
             shared_load=shared_load,
+            fallback_shared_load=infer_model_type_bits(field_name),
         )
       except ValueError:
         continue
