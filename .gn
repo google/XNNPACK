@@ -5,6 +5,7 @@
 
 # build/ comes from DEPS + running `gclient sync`
 import("//build/dotfile_settings.gni")
+import("//build/strict_deps_failures.gni")
 
 # The location of the build configuration file.
 buildconfig = "//build/config/BUILDCONFIG.gn"
