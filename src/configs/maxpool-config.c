@@ -77,132 +77,92 @@ static void init_f16_maxpool_config(void) {
 }
 
 static void init_f32_maxpool_config(void) {
+  f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1);
+  f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__neon_u4);
-      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    } else {
-      f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1);
-      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__neon_u4);
-    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_SSE2
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_SSE2
-      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
-        f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4);
-        f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      } else
-    #endif
-    {
-      f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1);
-      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+      f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4);
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4);
-    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v);
-    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->arch_flags & xnn_arch_hvx) {
       f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__hvx_u32);
-      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     }
-  #else
-    f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1);
-    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #endif
 }
 
 static void init_s8_maxpool_config(void) {
+  s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1);
+  s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__neon_u16);
-      s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
-    } else {
-      s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1);
-      s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__neon_u16);
-    s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_SSE41
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_SSE41
-      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-        s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16);
-        s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
-      } else
-    #endif
-    {
-      s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1);
-      s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
+    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+      s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16);
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__wasmsimd_u16);
-    s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__rvv_u2v);
-    s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
-  #else
-    s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1);
-    s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_hvx) {
+      s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__hvx_u128);
+    }
   #endif
 }
 
 static void init_u8_maxpool_config(void) {
+  u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1);
+  u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__neon_u16);
-      u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
-    } else {
-      u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1);
-      u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__neon_u16);
-    u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_SSE2
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_SSE2
-      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
-        u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__sse2_u16);
-        u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
-      } else
-    #endif
-    {
-      u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1);
-      u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
+    if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+      u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__sse2_u16);
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__wasmsimd_u16);
-    u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__rvv_u2v);
-    u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
-  #else
-    u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1);
-    u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_hvx) {
+      u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__hvx_u128);
+    }
   #endif
 }
 
