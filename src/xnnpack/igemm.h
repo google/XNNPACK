@@ -19,6 +19,18 @@
 extern "C" {
 #endif
 
+#define DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)              \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,      \
+                            const xnn_bfloat16** a, const void* w, float* c, \
+                            size_t cm_stride, size_t cn_stride,              \
+                            size_t a_offset, const xnn_bfloat16* zero,       \
+                            const struct xnn_f32_minmax_params* params);
+
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_1x4c2__scalar)
+DECLARE_BF16_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_bf16_f32_igemm_minmax_ukernel_4x4c2__scalar)
+
 #define DECLARE_F32_IGEMM_UKERNEL_FUNCTION(fn_name)                     \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks, \
                             const float** a, const float* w, float* c,  \
