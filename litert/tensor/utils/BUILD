@@ -17,6 +17,33 @@ cc_library(
 )
 
 cc_library(
+    name = "mapped_file",
+    srcs = ["mapped_file.cc"],
+    hdrs = ["mapped_file.h"],
+    deps = [
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_test(
+    name = "mapped_file_test",
+    srcs = ["mapped_file_test.cc"],
+    deps = [
+        ":mapped_file",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:string_view",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
+
+cc_library(
     name = "parallel",
     srcs = ["parallel.cc"],
     hdrs = ["parallel.h"],
