@@ -10,7 +10,7 @@ $assert NR % 8 == 0
 
 #include "src/xnnpack/igemm.h"
 
-void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__wasmrelaxedsimd_splat(
+void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__wasmrelaxedsimdfp16_splat(
     size_t mr,
     size_t nc,
     size_t kc,

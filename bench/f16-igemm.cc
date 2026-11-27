@@ -29,93 +29,93 @@ namespace {
 
 
 #if XNN_ARCH_WASMRELAXEDSIMDFP16
-  static void f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat)
 
-  static void f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat(benchmark::State& state) {
+  static void f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimdfp16_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat,
+      xnn_f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimdfp16_splat,
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_f16_conv_goki_w,
       /*mr=*/8, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/0);
   }
 
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat)
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimdfp16_splat)
 #endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 
