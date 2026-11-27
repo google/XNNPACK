@@ -1153,9 +1153,11 @@ xnnpack_unit_test(
     srcs = ["microkernel-utils.cc"],
     deps = [
         ":replicable_random_device",
+        "//:common",
         "//:math",
         "//:microfnptr_h",
         "//:microkernel_utils",
+        "//src/configs:hardware_config",
     ],
 )
 

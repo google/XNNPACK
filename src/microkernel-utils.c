@@ -83,8 +83,7 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
   const size_t num_tiles_m = divide_round_up(m, mr);
 
   // Select which cache we want the tiles to fit in. Start with L1, and if the
-  // smallest possible tile won't fit, try L2. If the smallest tile still won't
-  // fit, then don't try to fit to the cache size.
+  // smallest possible tile won't fit, try L2.
   size_t cache_size = hardware_config->l1_data_cache_bytes;
   size_t cache_line_size = hardware_config->l1_data_cache_line_size;
   if (XNN_ARCH_X86 || XNN_ARCH_X86_64 ||
@@ -92,11 +91,6 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
                                          cache_size, cache_line_size))) {
     cache_size = hardware_config->l2_data_cache_bytes;
     cache_line_size = hardware_config->l2_data_cache_line_size;
-    if (cache_size && !gemm_fits_in_cache(mr, nr, m_stride, n_stride, cn_stride,
-                                          cache_size, cache_line_size)) {
-      // Don't check for cache fit.
-      cache_size = 0;
-    }
   }
 
   int max_j = divide_round_up(n, nr) + 1;

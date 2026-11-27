@@ -5,10 +5,13 @@
 
 #include "src/xnnpack/microkernel-utils.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <random>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "test/replicable_random_device.h"
@@ -66,4 +69,46 @@ TEST(GEMM_BEST_TILE_SIZE, min_tiles_per_thread) {
       }
     }
   }
+}
+
+TEST(GEMM_BEST_TILE_SIZE, cache_overflow_clamps_to_nr) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    GTEST_SKIP();
+  }
+  size_t active_cache_size = hardware_config->l1_data_cache_bytes;
+  if (XNN_ARCH_X86 || XNN_ARCH_X86_64) {
+    active_cache_size = hardware_config->l2_data_cache_bytes;
+  }
+  if (active_cache_size == 0 || hardware_config->l2_data_cache_bytes == 0) {
+    GTEST_SKIP() << "Cache size detection unavailable on this host";
+  }
+
+  const size_t mr = 6;
+  const size_t nr = 16;
+  const size_t m = 128;
+  const size_t n = 1536;
+
+  const size_t medium_stride =
+      std::max<size_t>(sizeof(float), active_cache_size / (4 * nr));
+  const size_t nc_medium = xnn_gemm_best_tile_size(
+      /*num_groups=*/1, m, n, /*m_stride=*/medium_stride,
+      /*n_stride=*/medium_stride, /*cn_stride=*/sizeof(float), mr, nr,
+      /*num_threads=*/1);
+
+  const size_t huge_stride = std::max(hardware_config->l1_data_cache_bytes,
+                                      hardware_config->l2_data_cache_bytes);
+  const size_t nc_overflow = xnn_gemm_best_tile_size(
+      /*num_groups=*/1, m, n, /*m_stride=*/huge_stride,
+      /*n_stride=*/huge_stride, /*cn_stride=*/sizeof(float), mr, nr,
+      /*num_threads=*/1);
+  EXPECT_EQ(nc_overflow, nr);
+  EXPECT_LE(nc_overflow, nc_medium);
+
+  const size_t nc_gemv = xnn_gemm_best_tile_size(
+      /*num_groups=*/1, /*m=*/mr, n, /*m_stride=*/huge_stride,
+      /*n_stride=*/huge_stride, /*cn_stride=*/sizeof(float), mr, nr,
+      /*num_threads=*/1);
+  EXPECT_EQ(nc_gemv, n);
 }
