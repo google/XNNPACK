@@ -1122,25 +1122,28 @@ if (current_cpu == "x64" || current_cpu == "x86") {
     ]
   }
 
-  xnnpack_source_set("ace_microkernels") {
-    deps = [
-      ":microkernel_defs",
-      ":microkernel_headers",
-    ]
-    sources = BUILT_ACE_MICROKERNEL_SRCS
-    sources += [ "src/xnnpack/ace.h" ]
-    cflags = [
-      "-mf16c",
-      "-mfma",
-      "-mavx512f",
-      "-mavx512cd",
-      "-mavx512bw",
-      "-mavx512dq",
-      "-mavx512vl",
-      "-mavx512vnni",
-      "-mgfni",
-      "-mamx-tile",
-    ]
+  # ACE sources only compile for x64, but this block also covers x86.
+  if (xnnpack_enable_ace) {
+    xnnpack_source_set("ace_microkernels") {
+      deps = [
+        ":microkernel_defs",
+        ":microkernel_headers",
+      ]
+      sources = BUILT_ACE_MICROKERNEL_SRCS
+      sources += [ "src/xnnpack/ace.h" ]
+      cflags = [
+        "-mf16c",
+        "-mfma",
+        "-mavx512f",
+        "-mavx512cd",
+        "-mavx512bw",
+        "-mavx512dq",
+        "-mavx512vl",
+        "-mavx512vnni",
+        "-mgfni",
+        "-mamx-tile",
+      ]
+    }
   }
 
   xnnpack_source_set("avx_microkernels") {
