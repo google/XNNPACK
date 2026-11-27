@@ -6,6 +6,8 @@
 #
 
 PROD_NEONBF16_MICROKERNEL_SRCS = [
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-1x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
     "src/bf16-vbinary/gen/bf16-vadd-neonbf16-u16.c",
     "src/bf16-vbinary/gen/bf16-vaddc-neonbf16-u16.c",
     "src/bf16-vbinary/gen/bf16-vdiv-neonbf16-u16.c",
@@ -29,6 +31,9 @@ PROD_NEONBF16_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEONBF16_MICROKERNEL_SRCS = [
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-1x16c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-4x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-4x16c2-minmax-neonbf16-bfdot-lane-ld128.c",
     "src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonbf16-bfdot.c",
     "src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonbf16-bfmlal.c",
     "src/bf16-gemm/gen/bf16-gemm-1x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
