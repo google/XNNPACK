@@ -599,4 +599,91 @@ TEST(pack, tile_1xn_strided_output_padding) {
   EXPECT_THAT(output, ElementsAreArray(expected));
 }
 
+TEST(pack, transpose_coalesce_contiguous_blocks) {
+  const size_t elem_size = sizeof(int);
+  const size_t tile_m = 1;
+  const size_t tile_n = 16;
+  const size_t m = 64;
+  const size_t n = 50;
+  const size_t padded_n = align_up(n, tile_n);
+
+  const size_t stride_m = elem_size;
+  const size_t stride_n = m * elem_size;
+  const size_t output_stride = padded_n * elem_size;
+  const size_t output_block_stride = tile_n * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n, output_stride,
+           /*transpose=*/true);
+
+  std::vector<int> input = iota_columns<int>(/*transposed=*/true, m, n);
+  std::vector<int> output(m * padded_n, -1);
+
+  p.pack(m, n, input.data(), output_block_stride, output.data());
+
+  for (size_t r = 0; r < m; ++r) {
+    for (size_t c = 0; c < padded_n; ++c) {
+      const int expected = c < n ? static_cast<int>(c * m + r) : 0;
+      EXPECT_EQ(output[r * padded_n + c], expected) << "r=" << r << " c=" << c;
+    }
+  }
+}
+
+TEST(pack, transpose_coalesce_single_row_tile) {
+  const size_t elem_size = sizeof(int);
+  const size_t tile_m = 1;
+  const size_t tile_n = 16;
+  const size_t m = 1;
+  const size_t n = 50;
+  const size_t padded_n = align_up(n, tile_n);
+
+  const size_t stride_m = elem_size;
+  const size_t stride_n = m * elem_size;
+  const size_t output_stride = tile_n * elem_size;
+  const size_t output_block_stride = tile_n * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n, output_stride,
+           /*transpose=*/true);
+
+  std::vector<int> input = iota_columns<int>(/*transposed=*/true, m, n);
+  std::vector<int> output(padded_n, -1);
+
+  p.pack(m, n, input.data(), output_block_stride, output.data());
+
+  for (size_t c = 0; c < padded_n; ++c) {
+    const int expected = c < n ? static_cast<int>(c) : 0;
+    EXPECT_EQ(output[c], expected) << "c=" << c;
+  }
+}
+
+TEST(pack, transpose_large_multi_strip) {
+  const size_t elem_size = sizeof(int);
+  const size_t tile_m = 1;
+  const size_t tile_n = 192;
+  const size_t m = 256;
+  const size_t n = 200;
+  const size_t blocks_n = ceil_div(n, tile_n);
+
+  const size_t stride_m = elem_size;
+  const size_t stride_n = m * elem_size;
+  const size_t output_stride = tile_n * elem_size;
+  const size_t output_block_stride = m * tile_n * elem_size;
+  packer p(stride_m, stride_n, elem_size * 8, tile_m, tile_n, output_stride,
+           /*transpose=*/true);
+
+  std::vector<int> input = iota_columns<int>(/*transposed=*/true, m, n);
+  std::vector<int> output(blocks_n * m * tile_n, -1);
+
+  p.pack(m, n, input.data(), output_block_stride, output.data());
+
+  for (size_t b = 0; b < blocks_n; ++b) {
+    for (size_t r = 0; r < m; ++r) {
+      for (size_t c = 0; c < tile_n; ++c) {
+        const size_t global_c = b * tile_n + c;
+        const int expected =
+            global_c < n ? static_cast<int>(global_c * m + r) : 0;
+        EXPECT_EQ(output[(b * m + r) * tile_n + c], expected)
+            << "b=" << b << " r=" << r << " c=" << c;
+      }
+    }
+  }
+}
+
 }  // namespace ynn

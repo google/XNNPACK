@@ -14,6 +14,9 @@
 #include <cstring>
 #include <tuple>
 #include <type_traits>
+#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
+#include <xmmintrin.h>
+#endif
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
@@ -370,6 +373,16 @@ static void store(const std::array<simd::vec<uint8_t, N>, M>& x, void* a,
   }
 }
 
+YNN_ALWAYS_INLINE static void prefetch_l2(const void* ptr) {
+#if defined(__GNUC__) || defined(__clang__)
+  __builtin_prefetch(ptr, 0, 2);
+#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
+  _mm_prefetch(static_cast<const char*>(ptr), _MM_HINT_T1);
+#else
+  (void)ptr;
+#endif
+}
+
 template <typename Tile, typename ElemSize>
 static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                       const void* a, size_t stride_x, void* x,
@@ -378,6 +391,72 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
   std::integral_constant<size_t, sizeof(std::declval<Tile>()[0])> N_bytes;
   constexpr size_t M_bytes = elem_size_bits * M / 8;
   constexpr size_t N = N_bytes * 8 / elem_size_bits;
+
+  if constexpr (M == 16 && N_bytes == YNN_CACHE_LINE_SIZE &&
+                M_bytes == N_bytes) {
+    // Strip-mine n to 2 * N rows so DTLB entries and L1 sets don't thrash when
+    // n is large (e.g. pack_b with large block_n), and prefetch ahead into L2
+    // without contending for L1 line-fill buffers.
+    constexpr size_t kStripN = 2 * N;
+    constexpr size_t kPrefetchAheadBytes = 3 * M_bytes;
+    while (n >= N) {
+      const size_t n_cur = std::min(n, kStripN);
+      size_t m_rem = m;
+      size_t n_bytes_rem = n_bytes_a;
+      const void* a_m = a;
+      void* x_m = x;
+      while (m_rem >= M && n_bytes_rem >= std::max<size_t>(M_bytes, N_bytes)) {
+        size_t j = n_cur;
+        const void* a_j = a_m;
+        void* x_j = x_m;
+        while (j >= N) {
+          Tile t = load(Tile{}, a_j, stride_a, M, N_bytes);
+          if (n_bytes_rem > kPrefetchAheadBytes + M_bytes) {
+            YNN_UNROLL
+            for (size_t i = 0; i < M; ++i) {
+              prefetch_l2(
+                  offset_bytes(a_j, kPrefetchAheadBytes + i * stride_a));
+            }
+          }
+          interleave_in_place(elem_size_bits, t);
+          store(t, x_j, stride_x, M, N_bytes);
+
+          j -= N;
+          a_j = offset_bytes(a_j, N * stride_a);
+          x_j = offset_bytes(x_j, N_bytes);
+        }
+        m_rem -= M;
+        n_bytes_rem -= M_bytes;
+        a_m = offset_bytes(a_m, M_bytes);
+        x_m = offset_bytes(x_m, M * stride_x);
+      }
+      while (m_rem > 0) {
+        const size_t n_bytes = std::min(
+            {M_bytes, n_bytes_rem, ceil_div(elem_size_bits * m_rem, 8)});
+        size_t j = n_cur;
+        const void* a_j = a_m;
+        void* x_j = x_m;
+        while (j >= N) {
+          Tile t = load(Tile{}, a_j, stride_a, M, n_bytes);
+          interleave_in_place(elem_size_bits, t);
+          store(t, x_j, stride_x, std::min(m_rem, M), N_bytes);
+
+          j -= N;
+          a_j = offset_bytes(a_j, N * stride_a);
+          x_j = offset_bytes(x_j, N_bytes);
+        }
+        m_rem = sub_sat(m_rem, M);
+        n_bytes_rem = sub_sat(n_bytes_rem, M_bytes);
+        a_m = offset_bytes(a_m, M_bytes);
+        x_m = offset_bytes(x_m, M * stride_x);
+      }
+      const size_t n_done = (n_cur / N) * N;
+      n -= n_done;
+      a = offset_bytes(a, n_done * stride_a);
+      x = offset_bytes(x, (n_done / N) * N_bytes);
+    }
+    if (n == 0) return;
+  }
 
   while (m >= M && n_bytes_a >= N_bytes) {
     // Handle a full set of M rows.

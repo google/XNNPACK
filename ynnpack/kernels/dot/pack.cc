@@ -145,11 +145,26 @@ void packer::pack(size_t m, size_t n, const void* input,
       }
     }
   } else if (transpose_fn) {
+    const size_t m_tiles = ceil_div(m, tile_m);
+    const size_t n_bytes_a = ceil_div(m * elem_size_bits, 8);
+    if (tile_n > 1 && (tile_m * elem_size_bits) % 8 == 0 &&
+        output_block_stride == tile_n * tile_m * elem_size_bits / 8 &&
+        n >= 2 * tile_n) {
+      const size_t full_blocks = n / tile_n;
+      const size_t full_n = full_blocks * tile_n;
+      const size_t total_blocks = full_blocks + (full_n < n ? 1 : 0);
+      if (m_tiles == 1 || output_stride >= total_blocks * output_block_stride) {
+        transpose_fn(m_tiles, full_n, n_bytes_a, stride_n, input, output_stride,
+                     output);
+        input = offset_bytes(input, stride_n * full_n);
+        output = offset_bytes(output, output_block_stride * full_blocks);
+        n -= full_n;
+      }
+    }
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
-      const size_t m_tiles = ceil_div(m, tile_m);
-      transpose_fn(m_tiles, n_i, ceil_div(m * elem_size_bits, 8), stride_n,
-                   input, output_stride, output);
+      transpose_fn(m_tiles, n_i, n_bytes_a, stride_n, input, output_stride,
+                   output);
       if (n_i < tile_n) {
         // The transpose only produces `n_i` columns of each row, set the
         // padding columns to 0. This should not be necessary, but the kernels
