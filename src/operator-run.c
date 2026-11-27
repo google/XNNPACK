@@ -1825,6 +1825,92 @@ void xnn_compute_f32_qdu8_convert(
   }
 }
 
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_f32_qx8_convert_minmax_chunk(
+    struct f32_qd8_convert_context* restrict context, size_t batch_index,
+    size_t chunk_index) {
+  const size_t offset = chunk_index * context->chunk_size;
+  const size_t n = min(context->chunk_size, context->n - offset);
+  const void* input = (const void*)((uintptr_t)context->x +
+                                    context->x_stride * batch_index + offset);
+  float* minmax =
+      context->chunk_minmax[batch_index * context->num_chunks + chunk_index];
+  minmax[0] = INFINITY;
+  minmax[1] = -INFINITY;
+  context->rminmax_ukernel(n, input, minmax, &context->params);
+}
+
+static void compute_f32_qx8_convert_params(
+    struct f32_qd8_convert_context* restrict context,
+    f32_quantization_params_fn quantization_params_function,
+    size_t batch_index) {
+  const size_t num_chunks = context->num_chunks;
+  const float(*minmax)[2] = &context->chunk_minmax[batch_index * num_chunks];
+  float min = minmax[0][0];
+  float max = minmax[0][1];
+  for (size_t i = 1; i < num_chunks; i++) {
+    min = math_min_f32(min, minmax[i][0]);
+    max = math_max_f32(max, minmax[i][1]);
+  }
+  context->quantization_params[batch_index] =
+      quantization_params_function(min, max, &context->scale[batch_index]);
+}
+
+void xnn_compute_f32_qd8_convert_params(
+    struct f32_qd8_convert_context* restrict context, size_t batch_index) {
+  compute_f32_qx8_convert_params(
+      context, xnn_f32_qd8_asymmetric_quantization_params, batch_index);
+}
+
+void xnn_compute_f32_qdu8_convert_params(
+    struct f32_qd8_convert_context* restrict context, size_t batch_index) {
+  compute_f32_qx8_convert_params(
+      context, xnn_f32_qdu8_asymmetric_quantization_params, batch_index);
+}
+
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_f32_qx8_convert_chunk(
+    struct f32_qd8_convert_context* restrict context, size_t batch_index,
+    size_t chunk_index) {
+  const size_t offset = chunk_index * context->chunk_size;
+  const size_t n = min(context->chunk_size, context->n - offset);
+  const void* input = (const void*)((uintptr_t)context->x +
+                                    context->x_stride * batch_index + offset);
+  void* output = (void*)((uintptr_t)context->y +
+                         context->y_stride * batch_index +
+                         offset / sizeof(float));
+
+  struct xnn_f32_qs8_cvt_params params;
+  params.scalar.scale = context->scale[batch_index];
+  params.scalar.output_zero_point =
+      context->quantization_params[batch_index].zero_point;
+  context->convert_ukernel(n, input, output, (union xnn_unary_uparams*)&params);
+
+  if (context->rsum_ukernel) {
+    int32_t row_sum = 0;
+    struct xnn_qs8_rsum_params rsum_params = {
+        0,
+    };
+    context->rsum_ukernel(n / sizeof(float) * sizeof(int8_t), output, &row_sum,
+                          &rsum_params);
+    context->chunk_rsum[batch_index * context->num_chunks + chunk_index] =
+        row_sum;
+  }
+}
+
+void xnn_compute_f32_qx8_convert_finalize(
+    struct f32_qd8_convert_context* restrict context, size_t unused) {
+  if (context->rsum_ukernel) {
+    const size_t num_chunks = context->num_chunks;
+    for (size_t b = 0; b < context->batch_size; b++) {
+      int32_t row_sum = 0;
+      for (size_t i = 0; i < num_chunks; i++) {
+        row_sum += context->chunk_rsum[b * num_chunks + i];
+      }
+      context->row_sum[b] = (float)row_sum;
+    }
+  }
+  xnn_compute_pad_qd8_params(context, 0);
+}
+
 XNN_NO_SANITIZE_FUNCTION void xnn_compute_pack_lh(
     struct pack_lh_context* restrict context, size_t group_idx,
     size_t m_idx_start, size_t tile) {
