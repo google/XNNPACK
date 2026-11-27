@@ -3741,7 +3741,7 @@ void GemmMicrokernelTester::Test_PQS8(
   xnnpack::Buffer<int8_t> input_packed(input_packed_size);
   pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
              /*m_idx_start=*/0, a.data(),
-             /*lhs_stride=*/k() * sizeof(int8_t), input_packed.data());
+             /*lhs_stride=*/a_stride() * sizeof(int8_t), input_packed.data());
 
   // Compute 32-bit results and output quantization arguments.
   std::fill(acc.begin(), acc.end(), 0);

@@ -1,5 +1,6 @@
 // Copyright 2023-2025 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -1736,17 +1737,23 @@ void GEMMBenchmark(benchmark::State& state,
                    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
                    size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags) {
-#if XNN_ENABLE_ARM_SME
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const struct xnn_pack_lh_config* pack_lh_config =
+      (arch_flags & xnn_arch_arm_sme2) != 0
+          ? xnn_init_x8_qc8w_pack_lh_config()
+          : xnn_init_x8_pack_lh_config();
+  if (pack_lh_config == nullptr || pack_lh_config->pack_lh_fn == nullptr) {
+    state.SkipWithError("LHS packing is unavailable");
+    return;
+  }
+
   GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
-                xnn_x8_pack_lh_ukernel__neonsme, xnn_x8_pack_lh_size__neonsme,
-                xnn_x8_pack_lh_offset__neonsme, mr, nr, kr, sr, mr_packed,
-                arch_flags);
-#else
-  GEMMBenchmark(state, gemm, init_minmax_params, pack_weights, packed_stride,
-                xnn_x8_pack_lh_ukernel__neonsme2, xnn_x8_pack_lh_size__neonsme2,
-                xnn_x8_pack_lh_offset__neonsme2, mr, nr, kr, sr, mr_packed,
-                arch_flags);
-#endif  // XNN_ENABLE_ARM_SME
+                (xnn_x8_pack_lh_ukernel_fn)pack_lh_config->pack_lh_fn,
+                pack_lh_config->size_fn, pack_lh_config->offset_fn, mr, nr, kr,
+                sr, mr_packed, arch_flags);
 }
 #endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
@@ -1819,11 +1826,11 @@ void GEMMBenchmark(benchmark::State& state,
   const xnn_qs8_packing_params packing_params = {127};
   pack_weights(/*flags=*/0, &gemm_config, kc, nc,
                /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/kc,
-               /*accumulator_init=*/nullptr,
+               /*accumulator_init=*/b.data(),
                /*weights=*/k.data(),
                /*int_extra_data0_fn=*/nullptr,
-               /*extra_data0=*/b.data(),
-               /*extra_data0_size=*/sizeof(int32_t),
+               /*extra_data0=*/kernel_scale.data(),
+               /*extra_data0_size=*/sizeof(float),
                /*init_extra_data1_fn=*/nullptr,
                /*extra_data1=*/kernel_scale.data(),
                /*extra_data1_size=*/sizeof(float),

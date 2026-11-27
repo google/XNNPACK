@@ -249,6 +249,7 @@ xnnpack_unit_test(
         "fully-connected-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS + [
+        "//:compute_h",
         "//:isa_checks",
         "//:operator_h",
     ],

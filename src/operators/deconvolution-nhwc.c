@@ -1062,7 +1062,7 @@ static enum xnn_status setup_variant_and_gemm_config(
       break;
     }
     case xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w:
-      context->gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+      context->gemm_config = xnn_init_pqs8_qc8w_igemm_config();
       variant_tmp = &qx8_qc8w_variant;
       break;
     case xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w:

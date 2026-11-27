@@ -3128,6 +3128,117 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
 }
 #endif  // XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2
 
+#if XNN_ENABLE_ARM_SME2
+void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  if (groups == 0 || input_channels == 0 || output_channels == 0) {
+    return;
+  }
+  assert(extra_data0 != nullptr);
+  assert(extra_data0_element_size == sizeof(float));
+  const struct kai_matmul_pack_rhs_uker_api api =
+      kai_matmul_pack_rhs_kxn_qsi8cxp4vsx4bi32sf32_qsi8_i32_f32_sme();
+  const size_t n_step = api.get_step(nullptr).n;
+  assert(n_step != 0 && gemm_config->nr % n_step == 0);
+  assert(gemm_config->log2_kr == 2);
+  assert(gemm_config->log2_sr == 0);
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args shape = {
+      output_channels, input_channels};
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args packed_stride =
+      api.get_rhs_packed_stride(nullptr, &shape);
+  // Consumers allocate and advance groups padded to the compute NR, which can
+  // be larger than the packing step used by KleidiAI.
+  const size_t packed_group_size =
+      round_up(output_channels, gemm_config->nr) * (packed_stride.n / n_step);
+  const struct xnn_qs8_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_packing_params*>(params);
+  const int32_t k_sum_scale = -(int32_t) xnn_params->input_zero_point;
+  const float scale_multiplier = 1.0f;
+
+  int32_t* zero_bias = nullptr;
+  if (accumulator_init == nullptr) {
+    zero_bias = (int32_t*) calloc(output_channels, sizeof(int32_t));
+    if (zero_bias == nullptr) {
+      xnn_log_error("failed to allocate KleidiAI bias buffer");
+      assert(false);
+      return;
+    }
+  }
+  // The KleidiAI quantized RHS packer consumes KxN weights.
+  int8_t* transposed_weights = nullptr;
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0) {
+    size_t transpose_size;
+    if (!xnn_safe_mul(input_channels, output_channels, &transpose_size)) {
+      free(zero_bias);
+      xnn_log_error(
+          "KleidiAI transpose buffer size overflows size_t");
+      assert(false);
+      return;
+    }
+    transposed_weights = (int8_t*) malloc(transpose_size);
+    if (transposed_weights == nullptr) {
+      free(zero_bias);
+      xnn_log_error("failed to allocate KleidiAI transpose buffer");
+      assert(false);
+      return;
+    }
+  }
+
+  const size_t weights_group_stride = (flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+      ? input_channels * k_stride : output_channels * k_stride;
+  for (size_t group = 0; group < groups; group++) {
+    const int8_t* group_weights = (const int8_t*) weights +
+        group * weights_group_stride;
+    if (transposed_weights != nullptr) {
+      for (size_t n = 0; n < output_channels; n++) {
+        for (size_t k = 0; k < input_channels; k++) {
+          transposed_weights[k * output_channels + n] =
+              group_weights[n * k_stride + k];
+        }
+      }
+      group_weights = transposed_weights;
+    }
+    struct kai_matmul_pack_rhs_uker_args args = {};
+    args.shape.n = output_channels;
+    args.shape.k = input_channels;
+    args.operand.rhs.ptr = group_weights;
+    args.operand.rhs.stride.n = sizeof(int8_t);
+    args.operand.rhs.stride.k = (flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+        ? k_stride * sizeof(int8_t) : output_channels * sizeof(int8_t);
+    args.operand.rhs_packed.ptr = (uint8_t*) packed_weights_ptr +
+        group * packed_group_size;
+    args.operand.rhs_packed.stride = packed_stride;
+    args.operand.bias_n.ptr = zero_bias != nullptr ? zero_bias :
+        (const int32_t*) accumulator_init + group * output_channels;
+    args.operand.k_sum_scale_global.ptr = &k_sum_scale;
+    args.operand.scale_n.ptr = (const uint8_t*) extra_data0 +
+        group * output_channels * extra_data0_element_size;
+    args.operand.scale_global.ptr = &scale_multiplier;
+    api.run(nullptr, &args);
+  }
+  free(transposed_weights);
+  free(zero_bias);
+}
+
+size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  const struct kai_matmul_pack_rhs_uker_api api =
+      kai_matmul_pack_rhs_kxn_qsi8cxp4vsx4bi32sf32_qsi8_i32_f32_sme();
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args shape = {0, k};
+  return api.get_rhs_packed_stride(nullptr, &shape).n /
+      api.get_step(nullptr).n;
+}
+
+#endif  // XNN_ENABLE_ARM_SME2
+
 size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme(
     const struct xnn_gemm_config* gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {

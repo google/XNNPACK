@@ -118,7 +118,8 @@ xnnpack_cxx_library(
         ":conv",
         "//:indirection",
         "//:microparams_h",
-        "//src/configs:config_hdrs",
+        "//src/configs:config_types",
+        "//src/configs:microkernel_configs",
         "@com_google_benchmark//:benchmark",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",

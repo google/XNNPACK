@@ -4470,7 +4470,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             (kernel_datatype == xnn_datatype_qcint8 ||
              kernel_datatype == xnn_datatype_qint8) &&
             output_datatype == xnn_datatype_qint8 &&
-            xnn_init_pqs8_qc8w_gemm_config() != NULL &&
+            xnn_init_pqs8_qc8w_igemm_config() != NULL &&
             !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
           // Note that there is currently no option to not use inlining for this
           // iGEMM kernel.

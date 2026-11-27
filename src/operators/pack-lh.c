@@ -1,5 +1,7 @@
 // Copyright 2024 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -86,7 +88,7 @@ enum xnn_status xnn_create_pack_lh_x16(uint32_t flags,
 enum xnn_status xnn_create_pack_lh_x8(uint32_t flags,
                                       xnn_operator_t* pack_lh_op_out) {
   const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x8_pack_lh_config();
+      xnn_init_x8_qc8w_pack_lh_config();
   return create_pack_lh(flags, pack_lh_config, xnn_operator_type_pack_lh_x8,
                         pack_lh_op_out);
 }
@@ -117,8 +119,8 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
                                                       : gemm_config->mr;
     // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  // For SME1 operator type = xnn_operator_type_pack_lh_x8, kernel support for mr = 1 (GEMV) 
-  // does not exist in Kleidiai.                                                 
+  // For SME1 operator type = xnn_operator_type_pack_lh_x8, kernel support for mr = 1 (GEMV)
+  // does not exist in Kleidiai.
   if (gemm_config->arch == xnn_arch_arm_sme && pack_lh_op->type == xnn_operator_type_pack_lh_x8) {
     mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed
                                        : gemm_config->mr;
@@ -183,7 +185,7 @@ enum xnn_status xnn_reshape_pack_lh_x8(xnn_operator_t pack_lh_op,
                                        pthreadpool_t threadpool) {
   const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
   const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x8_pack_lh_config();
+      xnn_init_x8_qc8w_pack_lh_config();
   return reshape_pack_lh(pack_lh_op, num_groups, batch_size, channels,
                          output_size_bytes, xnn_operator_type_pack_lh_x8,
                          /*element_size=*/sizeof(int8_t), gemm_config,

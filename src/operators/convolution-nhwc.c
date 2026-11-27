@@ -1807,7 +1807,7 @@ static enum xnn_status select_gemm_config(
       context->gemm_config = xnn_init_qs8_qc8w_gemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
-      context->gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+      context->gemm_config = xnn_init_pqs8_qc8w_igemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_f16:
       context->gemm_config = xnn_init_f16_gemm_config();
