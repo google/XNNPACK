@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -225,6 +226,44 @@ TEST(AveragePooling2D, PaddingExceedsInputHeight) {
 }
 
 #ifndef XNNPACK_USE_YNNPACK
+
+template <typename T>
+void TestAveragePoolNaN() {
+  for (size_t width : {9, 11}) {
+    Tensor<T> input({1, 1, width, 19}, XnnExtraBytes);
+    input.fill(1.0f);
+    for (size_t c = 0; c < 17; ++c) {
+      input(0, 0, c % width, c) = NAN;
+    }
+    input(0, 0, 0, 17) = INFINITY;
+    input(0, 0, width - 1, 17) = -INFINITY;
+    input(0, 0, 0, 18) = INFINITY;
+    Tensor<T> output({1, 1, 1, 19});
+    const float upper = width == 9 ? INFINITY : 1.0f;
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(input.extents(), input.base(), 0)
+        .AddOutputTensor(output.extents(), output.base(), 1);
+    ASSERT_EQ(
+        xnn_define_average_pooling_2d(subgraph.Subgraph(), 0, 0, 0, 0, 1, width,
+                                      1, 1, -INFINITY, upper, 0, 1, 0),
+        xnn_status_success);
+    const xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+    }
+    ASSERT_EQ(status, xnn_status_success);
+    ASSERT_EQ(subgraph.ReshapeRuntime().SetupRuntime().InvokeRuntime(),
+              xnn_status_success);
+    for (size_t c = 0; c < 18; ++c) {
+      EXPECT_TRUE(std::isnan(float(output(0, 0, 0, c)))) << c;
+    }
+    EXPECT_EQ(float(output(0, 0, 0, 18)), upper);
+  }
+}
+
+TEST(AveragePooling2DF16, PropagatesNaN) { TestAveragePoolNaN<xnn_float16>(); }
+TEST(AveragePooling2DF32, PropagatesNaN) { TestAveragePoolNaN<float>(); }
+
 static xnn_status DefineAveragePooling2D(xnn_subgraph_t subgraph) {
   return xnn_define_average_pooling_2d(
       subgraph, /*input_padding_top=*/0, /*input_padding_right=*/0,

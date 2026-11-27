@@ -256,8 +256,8 @@ void xnn_f16_f32acc_avgpool_minmax_ukernel_9p__wasmrelaxedsimd_u4(
 
       xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
       vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = wasm_f32x4_max(vmin, vacc);
+      vacc = wasm_f32x4_min(vmax, vacc);
 
       xnn_store_f32_f16(o, vacc); o += 4;
     }
@@ -284,8 +284,8 @@ void xnn_f16_f32acc_avgpool_minmax_ukernel_9p__wasmrelaxedsimd_u4(
 
       xnn_simd_f32_t vacc = xnn_add_f32(vprev, vsum012345678);
       vacc = xnn_mul_f32(vacc, vscale);
-      vacc = xnn_max_f32(vacc, vmin);
-      vacc = xnn_min_f32(vacc, vmax);
+      vacc = wasm_f32x4_max(vmin, vacc);
+      vacc = wasm_f32x4_min(vmax, vacc);
 
       xnn_store_tail_f32_f16(o, vacc, c); o += c;
     }
