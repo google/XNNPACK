@@ -371,6 +371,50 @@ TEST_P(Convert, test) {
   }
 }
 
+TEST(UnaryTest, QuantizedConvertScaleRange) {
+  const UnaryOpInfo* op_info = GetUnaryOpInfo(xnn_unary_convert);
+  for (xnn_datatype datatype : {xnn_datatype_qint8, xnn_datatype_quint8}) {
+    const bool is_signed = datatype == xnn_datatype_qint8;
+    const int32_t zero_point = is_signed ? 0 : 128;
+    Buffer<uint8_t> input(256, XnnExtraBytes);
+    Buffer<uint8_t> output(256);
+    for (size_t i = 0; i < input.size(); ++i) {
+      input[i] = static_cast<uint8_t>(i);
+    }
+    for (float ratio :
+         {128.0f, 129.0f, 200.0f, 255.0f, 0x1.0p-8f, 0x1.0p-9f}) {
+      SCOPED_TRACE(testing::Message()
+                   << "datatype=" << datatype << ", ratio=" << ratio);
+      xnn_unary_params params = {};
+      const xnn_quantization_params input_quantization = {zero_point, 1.0f};
+      const xnn_quantization_params output_quantization = {zero_point,
+                                                          1.0f / ratio};
+      SubgraphTester subgraph(2);
+      subgraph.AddInputTensor({256}, datatype, input_quantization, 0)
+          .AddOutputTensor({256}, datatype, output_quantization, 1)
+          .AddUnary(xnn_unary_convert, &params, 0, 1);
+      ASSERT_EQ(subgraph.CreateRuntime(), xnn_status_success);
+      subgraph.ReshapeRuntime()
+          .SetupExternalTensor(input.data(), 0)
+          .SetupExternalTensor(output.data(), 1)
+          .SetupRuntime();
+      ASSERT_EQ(subgraph.InvokeRuntime(), xnn_status_success);
+      for (size_t i = 0; i < input.size(); ++i) {
+        const int32_t x = is_signed ? static_cast<int8_t>(input[i]) : input[i];
+        const float y = op_info->ReferenceImpl(
+            static_cast<float>(x - zero_point), params);
+        float expected = std::nearbyint(
+            y / output_quantization.scale + output_quantization.zero_point);
+        expected = std::max<float>(expected, is_signed ? -128 : 0);
+        expected = std::min<float>(expected, is_signed ? 127 : 255);
+        const int32_t actual =
+            is_signed ? static_cast<int8_t>(output[i]) : output[i];
+        ASSERT_NEAR(expected, actual, 1) << "input=" << x;
+      }
+    }
+  }
+}
+
 // clang-format off
 const xnn_datatype all_integer_datatypes[] = {
     xnn_datatype_int32,
