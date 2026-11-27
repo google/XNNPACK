@@ -369,13 +369,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "arm64_sme_stubs",
-    srcs = ["arm64_sme_stubs.cc"],
-    compatible_with = _COMPATIBLE_WITH,
-    deps = ["//ynnpack/base"],
-)
-
 ynn_cc_library(
     name = "dot",
     srcs = ["dot.cc"],
@@ -564,7 +557,7 @@ ynn_cc_library(
         "//ynnpack/base/simd",
         "//ynnpack/kernels/dot/cost_model",
     ] + select({
-        "//ynnpack:arm64": [":arm64_sme_stubs"],
+        "//ynnpack:arm64": ["//ynnpack/base:arm64_sme_stubs"],
         "//conditions:default": [],
     }) + select({
         "//ynnpack:ynn_enable_cpuinfo": ["@cpuinfo"],

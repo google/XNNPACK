@@ -138,3 +138,11 @@ cc_library(
         "//conditions:default": [],
     }),
 )
+
+cc_library(
+    name = "arm64_sme_stubs",
+    srcs = ["arm64_sme_stubs.cc"],
+    compatible_with = _COMPATIBLE_WITH,
+    deps = [":base"],
+    alwayslink = True,
+)

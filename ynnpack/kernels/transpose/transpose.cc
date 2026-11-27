@@ -60,16 +60,30 @@ void transpose_x128(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
             std::integral_constant<size_t, 16>{});
 }
 
-transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
-#define YNN_TRANSPOSE_KERNEL(arch_flags, name, kernel_element_size_bits) \
-  if (kernel_element_size_bits == element_size_bits) {                   \
-    if (is_arch_supported(arch_flags)) {                                 \
-      YNN_LOG_DEBUG() << "Using transpose kernel " << #name;             \
-      return name;                                                       \
-    }                                                                    \
+namespace {
+
+struct transpose_kernel_info {
+  transpose_kernel_fn fn;
+  bool self_tiled;
+};
+
+transpose_kernel_info get_transpose_kernel_info(size_t element_size_bits) {
+#define YNN_TRANSPOSE_KERNEL_IMPL(arch_flags, name, kernel_element_size_bits, \
+                                  tiled)                                      \
+  if (kernel_element_size_bits == element_size_bits) {                        \
+    if (is_arch_supported(arch_flags)) {                                      \
+      YNN_LOG_DEBUG() << "Using transpose kernel " << #name;                  \
+      return {name, tiled};                                                   \
+    }                                                                         \
   }
+#define YNN_TRANSPOSE_KERNEL(arch_flags, name, kernel_element_size_bits) \
+  YNN_TRANSPOSE_KERNEL_IMPL(arch_flags, name, kernel_element_size_bits, false)
+#define YNN_TILED_TRANSPOSE_KERNEL(arch_flags, name, kernel_element_size_bits) \
+  YNN_TRANSPOSE_KERNEL_IMPL(arch_flags, name, kernel_element_size_bits, true)
 #include "ynnpack/kernels/transpose/transpose.inc"
+#undef YNN_TILED_TRANSPOSE_KERNEL
 #undef YNN_TRANSPOSE_KERNEL
+#undef YNN_TRANSPOSE_KERNEL_IMPL
   // TODO(dsharlet): There is currently a bit of a wart here in that
   // `get_transpose_kernel` can fail for element sizes we don't have a kernel
   // for, but `get_tiled_tranpose` always works because it returns a call to
@@ -78,10 +92,8 @@ transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
   // `transpose_kernel_fn` (a function pointer).
   YNN_LOG_DEBUG() << "Unsupported transpose of " << element_size_bits
                   << "-bit elements.";
-  return nullptr;
+  return {nullptr, false};
 }
-
-namespace {
 
 void tile_transpose(size_t tile, size_t elem_size_bits, size_t m, size_t n,
                     size_t n_bytes_a, size_t stride_a, const void* a,
@@ -102,6 +114,10 @@ void tile_transpose(size_t tile, size_t elem_size_bits, size_t m, size_t n,
 
 }  // namespace
 
+transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
+  return get_transpose_kernel_info(element_size_bits).fn;
+}
+
 transpose_fn make_tiled_transpose(size_t elem_size_bits,
                                   transpose_kernel_fn transpose_fn) {
   assert(transpose_fn);
@@ -116,9 +132,12 @@ transpose_fn make_tiled_transpose(size_t elem_size_bits,
 }
 
 transpose_fn get_tiled_transpose(size_t elem_size_bits) {
-  transpose_kernel_fn transpose_fn = get_transpose_kernel(elem_size_bits);
-  if (transpose_fn) {
-    return make_tiled_transpose(elem_size_bits, transpose_fn);
+  transpose_kernel_info info = get_transpose_kernel_info(elem_size_bits);
+  if (info.fn) {
+    if (info.self_tiled) {
+      return info.fn;
+    }
+    return make_tiled_transpose(elem_size_bits, info.fn);
   } else if (elem_size_bits % 8 == 0) {
     // TODO(dsharlet): Tiling might be helpful here too, but hopefully we are
     // only hitting this case when elem_size_bits is very large, and the

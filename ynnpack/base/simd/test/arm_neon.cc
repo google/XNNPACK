@@ -62,6 +62,7 @@ TEST_PARTIAL_LOAD_STORE(arm_neon, bf16, 8);
 TEST_PARTIAL_LOAD_STORE(arm_neon, f32, 4);
 TEST_PARTIAL_LOAD_STORE(arm_neon, s32, 4);
 
+TEST_PARTIAL_LOAD_STORE(arm_neon, f16, 4);
 TEST_PARTIAL_LOAD_STORE(arm_neon, u8, 8);
 
 TEST_ADD(arm_neon, u8, 16);

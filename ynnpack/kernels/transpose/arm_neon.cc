@@ -3,35 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <arm_neon.h>
-
+#include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
-#include <cstring>
+#include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/simd/arm_vec128.h"
+#include "ynnpack/kernels/transpose/arm_neon_internal.h"
+#include "ynnpack/kernels/transpose/generic.h"
 #include "ynnpack/kernels/transpose/interleave.h"
 #include "ynnpack/kernels/transpose/transpose.h"
-
-namespace ynn {
-
-// TODO(b/450992581): This is faster than using simd::load (the default).
-template <size_t M, size_t N>
-static std::array<simd::vec<uint8_t, N>, M> load(
-    std::array<simd::vec<uint8_t, N>, M>, const void* a, size_t stride,
-    size_t m, size_t n_bytes) {
-  std::array<simd::vec<uint8_t, N>, M> result;
-  memset(&result, 0, sizeof(result));
-  for (size_t i = 0; i < m; ++i) {
-    memcpy(&result[i], offset_bytes(a, i * stride), n_bytes);
-  }
-  return result;
-}
-
-}  // namespace ynn
-
-#include "ynnpack/kernels/transpose/generic.h"
 
 namespace ynn {
 
@@ -58,10 +41,15 @@ void transpose_x16_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
   transpose<std::array<u8x16, 8>>(m, n, n_bytes_a, stride_a, a, stride_x, x,
                                   std::integral_constant<size_t, 16>{});
 }
+
 void transpose_x32_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                         const void* a, size_t stride_x, void* x) {
+#ifdef YNN_ARCH_ARM64
+  internal::transpose_x32_arm64(m, n, n_bytes_a, stride_a, a, stride_x, x);
+#else
   transpose<std::array<u8x16, 4>>(m, n, n_bytes_a, stride_a, a, stride_x, x,
                                   std::integral_constant<size_t, 32>{});
+#endif  // YNN_ARCH_ARM64
 }
 void transpose_x64_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                         const void* a, size_t stride_x, void* x) {

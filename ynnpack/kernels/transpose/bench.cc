@@ -112,6 +112,17 @@ void TransposeParams(benchmark::Benchmark* b) {
       b->Args({num_elements, num_elements});
     }
   }
+#if !defined(YNN_ARCH_HEXAGON) && !defined(YNN_ARCH_WASM)
+  if (ElemSizeBits == 32) {
+    // Power-of-2 stride shapes and non-power-of-2 large shapes (e.g. LLM
+    // weight packing and transpose).
+    b->Args({512, 16});
+    b->Args({256, 1024});
+    b->Args({512, 4096});
+    b->Args({4096, 512});
+    b->Args({1152, 2520});
+  }
+#endif
 }
 
 #define YNN_TRANSPOSE_KERNEL(arch_flags, kernel, elem_size_bits)       \

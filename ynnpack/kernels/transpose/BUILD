@@ -24,8 +24,22 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(),
     per_arch_srcs = {
-        "arm_neon": ["arm_neon.cc"],
-        "arm64_sve": ["arm64_sve.cc"],
+        "arm_neon": [
+            "arm_neon.cc",
+            "arm_neon_internal.h",
+        ],
+        "arm64_sve": [
+            "arm64_sve.cc",
+            "arm_neon_internal.h",
+        ],
+        "arm64_sme": [
+            "arm64_sme.cc",
+            "arm64_sme_internal.h",
+        ],
+        "arm64_sme2": [
+            "arm64_sme2.cc",
+            "arm64_sme_internal.h",
+        ],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],
@@ -38,7 +52,10 @@ ynn_cc_library(
         "//ynnpack/base",
         "//ynnpack/base:log",
         "//ynnpack/base/simd",  # buildcleaner: keep
-    ],
+    ] + select({
+        "//ynnpack:arm64": ["//ynnpack/base:arm64_sme_stubs"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
