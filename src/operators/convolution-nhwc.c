@@ -2119,9 +2119,9 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
     status = create_convolution2d_nhwc(variant, &context, &f_context.op);
     variant->cleanup(variant, &context);
   }
-  finalize_fingerprint_context(&f_context);
+  const enum xnn_status finalize_status = finalize_fingerprint_context(&f_context);
   xnn_release_simd_memory(data.data);
-  return status;
+  return status == xnn_status_success ? finalize_status : status;
 }
 
 enum xnn_status create_convolution2d_nhwc_helper(
@@ -2134,14 +2134,13 @@ enum xnn_status create_convolution2d_nhwc_helper(
   }
 
   status = xnn_fingerprint_convolution2d_nhwc(context->fingerprint_id);
-  if (status != xnn_status_success) {
+  if (status == xnn_status_success) {
+    status = create_convolution2d_nhwc(variant, context,
+                                       convolution_op_out);
+  } else {
     xnn_log_error("failed fingerprinting %s",
                   xnn_operator_type_to_string(context->operator_type));
-    return status;
   }
-
-  status = create_convolution2d_nhwc(variant, context,
-                                     convolution_op_out);
   variant->cleanup(variant, context);
   return status;
 }
