@@ -114,16 +114,20 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
-    // Constrain the first non-trivial dimension of both input and output to be
-    // dense so Slinky's copy and in-place aliasers can match their strides.
+    // Constrain the first non-trivial dimension of the input and the innermost
+    // dimension of the output to be dense so Slinky's copy and in-place
+    // aliasers can match their strides. When the slice reduces the innermost
+    // output dimension to extent 1, a dense outer dimension would be wrong once
+    // the output is aliased into a larger buffer (e.g. a concatenation along
+    // the sliced dimension), so the output is left unconstrained then.
     const size_t first_non_trivial_in = first_non_trivial_dim(input.extents);
     if (first_non_trivial_in < input.buffer->rank()) {
       input.buffer->dim(first_non_trivial_in).stride =
           input.buffer->elem_size();
     }
-    const size_t first_non_trivial = first_non_trivial_dim(output.extents);
-    if (first_non_trivial < output.buffer->rank()) {
-      output.buffer->dim(first_non_trivial).stride = output.buffer->elem_size();
+    if (output.buffer->rank() > 0 &&
+        first_non_trivial_dim(output.extents) == 0) {
+      output.buffer->dim(0).stride = output.buffer->elem_size();
     }
 
     const int rank = input.rank();
