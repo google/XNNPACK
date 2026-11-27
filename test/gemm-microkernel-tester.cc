@@ -3727,7 +3727,7 @@ void GemmMicrokernelTester::Test_PQS8(
 
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   std::generate(b.begin(), b.end(), std::ref(w8rng));
-  if (large_bias()) {
+  if (large_bias() || large_scale()) {
     for (size_t j = 0; j < bias.size(); j++) {
       bias[j] = (j % 2 == 0) ? INT32_C(200000000) : INT32_C(-200000000);
     }
@@ -3757,7 +3757,6 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 
-  const int8_t c_zero_point = -1;
   for (size_t n_index = 0; n_index < n(); n_index++) {
     int32_t accumulated_min = acc[n_index];
     int32_t accumulated_max = acc[n_index];
@@ -3770,7 +3769,8 @@ void GemmMicrokernelTester::Test_PQS8(
     const float c_scale = accumulated_range >= 256
                               ? static_cast<double>(accumulated_range) / 255.0
                               : 256.0 / 255;
-    scale[n_index] = large_bias() ? 1.0e-7f : (1.0f / c_scale);
+    scale[n_index] =
+        large_scale() ? 64.0f : (large_bias() ? 1.0e-7f : (1.0f / c_scale));
   }
 
   // RHS packing.
@@ -3790,40 +3790,45 @@ void GemmMicrokernelTester::Test_PQS8(
        /*extra_data1_size=*/sizeof(float),
        /*packed_weights_ptr=*/packed_w.data(), &params);
 
-  union xnn_qs8_qc8w_conv_minmax_params minmax_params;
-  init_minmax_params(&minmax_params, c_zero_point,
-                     static_cast<int8_t>(qmin() - 0x80),
-                     static_cast<int8_t>(qmax() - 0x80));
+  const int8_t zero_points[2] = {-1, 1};
+  const size_t num_zps = large_scale() ? 2 : 1;
+  for (size_t zp_idx = 0; zp_idx < num_zps; zp_idx++) {
+    const int8_t c_zero_point = zero_points[zp_idx];
+    union xnn_qs8_qc8w_conv_minmax_params minmax_params;
+    init_minmax_params(&minmax_params, c_zero_point,
+                       static_cast<int8_t>(qmin() - 0x80),
+                       static_cast<int8_t>(qmax() - 0x80));
 
-  gemm(m(), n(), k(), input_packed.data(), packed_w.data(), c.data(),
-       cm_stride() * sizeof(int8_t), sizeof(int8_t), &minmax_params);
+    gemm(m(), n(), k(), input_packed.data(), packed_w.data(), c.data(),
+         cm_stride() * sizeof(int8_t), sizeof(int8_t), &minmax_params);
 
-  for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      c_ref[m_index * n() + n_index] = xnn_qs8_requantize_fp32(
-          acc[m_index * n() + n_index], scale[n_index], c_zero_point,
-          static_cast<int8_t>(qmin() - 0x80),
-          static_cast<int8_t>(qmax() - 0x80));
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        c_ref[m_index * n() + n_index] = xnn_qs8_requantize_fp32(
+            acc[m_index * n() + n_index], scale[n_index], c_zero_point,
+            static_cast<int8_t>(qmin() - 0x80),
+            static_cast<int8_t>(qmax() - 0x80));
+      }
     }
-  }
 
-  for (size_t i = 0; i < m(); i++) {
-    for (size_t j = 0; j < n(); j++) {
-      const size_t idx = i * cm_stride() + j;
-      ASSERT_LE(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(qmax()) - 0x80);
-      ASSERT_GE(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(qmin()) - 0x80);
-      ASSERT_EQ(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(c_ref[i * n() + j]))
-          << "at " << i << ", " << j
-          << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
-          << " (accumulator = " << acc[i * n() + j]
-          << "), optimized = " << static_cast<int32_t>(c[idx])
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x K = " << m() << " x " << n() << " x " << k()
-          << ", requantization scale = " << scale[j]
-          << ", output zero point = " << static_cast<int32_t>(c_zero_point);
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        const size_t idx = i * cm_stride() + j;
+        ASSERT_LE(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(qmax()) - 0x80);
+        ASSERT_GE(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(qmin()) - 0x80);
+        ASSERT_EQ(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(c_ref[i * n() + j]))
+            << "at " << i << ", " << j
+            << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
+            << " (accumulator = " << acc[i * n() + j]
+            << "), optimized = " << static_cast<int32_t>(c[idx])
+            << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+            << ", M x N x K = " << m() << " x " << n() << " x " << k()
+            << ", requantization scale = " << scale[j]
+            << ", output zero point = " << static_cast<int32_t>(c_zero_point);
+      }
     }
   }
 }
@@ -3880,7 +3885,7 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
 
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::fill_uniform_random_bits(b.data(), b.size(), rng);
-  if (large_bias()) {
+  if (large_bias() || large_scale()) {
     for (size_t j = 0; j < bias.size(); j++) {
       bias[j] = (j % 2 == 0) ? INT32_C(200000000) : INT32_C(-200000000);
     }
@@ -3928,7 +3933,8 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
   const float c_scale = accumulated_range >= 256
                             ? static_cast<double>(accumulated_range) / 255.0
                             : 256.0 / 255;
-  const float requantization_scale = large_bias() ? 1.0e-7f : (1.0f / c_scale);
+  const float requantization_scale =
+      large_scale() ? 64.0f : (large_bias() ? 1.0e-7f : (1.0f / c_scale));
   const xnnpack::Buffer<float> requantization_scale_buffer(
       n(), requantization_scale);
 
@@ -3948,41 +3954,45 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
        /*extra_data1_size=*/0,
        /*packed_weights_ptr=*/packed_w.data(), &params);
 
-  const int8_t c_zero_point = -1;
-  union xnn_qs8_qc8w_conv_minmax_params minmax_params;
-  init_minmax_params(&minmax_params, c_zero_point,
-                     static_cast<int8_t>(qmin() - 0x80),
-                     static_cast<int8_t>(qmax() - 0x80));
+  const int8_t zero_points[2] = {-1, 1};
+  const size_t num_zps = large_scale() ? 2 : 1;
+  for (size_t zp_idx = 0; zp_idx < num_zps; zp_idx++) {
+    const int8_t c_zero_point = zero_points[zp_idx];
+    union xnn_qs8_qc8w_conv_minmax_params minmax_params;
+    init_minmax_params(&minmax_params, c_zero_point,
+                       static_cast<int8_t>(qmin() - 0x80),
+                       static_cast<int8_t>(qmax() - 0x80));
 
-  gemm(m(), n(), k2, input_packed.data(), packed_w.data(), c.data(),
-       cm_stride() * sizeof(int8_t), sizeof(int8_t), &minmax_params);
+    gemm(m(), n(), k2, input_packed.data(), packed_w.data(), c.data(),
+         cm_stride() * sizeof(int8_t), sizeof(int8_t), &minmax_params);
 
-  for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      c_ref[m_index * n() + n_index] =
-          requantize(acc[m_index * n() + n_index], requantization_scale,
-                     c_zero_point, static_cast<int8_t>(qmin() - 0x80),
-                     static_cast<int8_t>(qmax() - 0x80));
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        c_ref[m_index * n() + n_index] =
+            requantize(acc[m_index * n() + n_index], requantization_scale,
+                       c_zero_point, static_cast<int8_t>(qmin() - 0x80),
+                       static_cast<int8_t>(qmax() - 0x80));
+      }
     }
-  }
 
-  for (size_t i = 0; i < m(); i++) {
-    for (size_t j = 0; j < n(); j++) {
-      const size_t idx = i * cm_stride() + j;
-      ASSERT_LE(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(qmax()) - 0x80);
-      ASSERT_GE(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(qmin()) - 0x80);
-      ASSERT_EQ(static_cast<int32_t>(c[idx]),
-                static_cast<int32_t>(c_ref[i * n() + j]))
-          << "at " << i << ", " << j
-          << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
-          << " (accumulator = " << acc[i * n() + j]
-          << "), optimized = " << static_cast<int32_t>(c[idx])
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x K = " << m() << " x " << n() << " x " << k2
-          << ", requantization scale = " << requantization_scale
-          << ", output zero point = " << static_cast<int32_t>(c_zero_point);
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        const size_t idx = i * cm_stride() + j;
+        ASSERT_LE(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(qmax()) - 0x80);
+        ASSERT_GE(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(qmin()) - 0x80);
+        ASSERT_EQ(static_cast<int32_t>(c[idx]),
+                  static_cast<int32_t>(c_ref[i * n() + j]))
+            << "at " << i << ", " << j
+            << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
+            << " (accumulator = " << acc[i * n() + j]
+            << "), optimized = " << static_cast<int32_t>(c[idx])
+            << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+            << ", M x N x K = " << m() << " x " << n() << " x " << k2
+            << ", requantization scale = " << requantization_scale
+            << ", output zero point = " << static_cast<int32_t>(c_zero_point);
+      }
     }
   }
 }

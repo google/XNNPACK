@@ -445,17 +445,13 @@ XNNPACK_PARAMS_FOR_ARCH = {
     # or `+sve2`, since adding `+sve+sve2` would allow the auto-vectorizer to
     # emit SVE into non-streaming code, faulting with SIGILL on CPUs
     # implementing FEAT_SME/FEAT_SME2 without FEAT_SVE (e.g. Apple Silicon).
+    # Pass `-g0` on `windows_arm64` to avoid LLVM CodeView backend crashes on
+    # SME2 predicate-as-counter registers (`unknown codeview register PN8`).
     "sme": _create_params(
         cond = "//:arm_sme_acle_sme_enabled",
-        copts = xnnpack_select_if(
-            "//:arm_sme_acle_non_lexan_enabled",
-            ["-march=armv8.2-a+sme+fp16"],
-        ) + xnnpack_select_if(
-            "//:arm_sme_acle_lexan_enabled",
-            [
-                "/clang:-march=armv8.2-a+sme+fp16",
-                "/clang:-g0",
-            ],
+        copts = ["-march=armv8.2-a+sme+fp16"] + xnnpack_select_if(
+            "//build_config:windows_arm64",
+            ["-g0"],
         ),
         extra_deps = [
             "//:arm_sme_abi_stubs",
@@ -463,15 +459,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "sme2": _create_params(
         cond = "//:arm_sme_acle_sme2_enabled",
-        copts = xnnpack_select_if(
-            "//:arm_sme_acle_non_lexan_enabled",
-            ["-march=armv8.2-a+sme2+fp16"],
-        ) + xnnpack_select_if(
-            "//:arm_sme_acle_lexan_enabled",
-            [
-                "/clang:-march=armv8.2-a+sme2+fp16",
-                "/clang:-g0",
-            ],
+        copts = ["-march=armv8.2-a+sme2+fp16"] + xnnpack_select_if(
+            "//build_config:windows_arm64",
+            ["-g0"],
         ),
         extra_deps = [
             "//:arm_sme_abi_stubs",

@@ -1023,8 +1023,11 @@ jobs:
             //test:qp8_f32_qc8w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
             //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc4w_gemm_minmax_test \
             //test:pqs8_qc8w_gemm_minmax_test \
+            //test:x8_pack_lh_test \
             //test:x8_packq_test \
+            //test:packing_test \
             //test/subgraph/... \
             //ynnpack/...
         working-directory: ${{ github.workspace }}
@@ -1048,10 +1051,13 @@ jobs:
             //test:qp8_f32_qc8w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
             //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc4w_gemm_minmax_test \
             //test:pqs8_qc8w_gemm_minmax_test \
+            //test:x8_pack_lh_test \
             //test:x8_packq_test \
+            //test:packing_test \
             --cache_test_results=no \
-            --test_filter="*SME2*:*sme2*" \
+            --test_filter="*SME*:*sme*" \
             --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)

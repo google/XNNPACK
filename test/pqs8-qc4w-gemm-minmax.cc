@@ -552,6 +552,14 @@ std::vector<GemmTestParams> CreateTests2(
           .large_bias(true)
           .b_zero_point(8)
       , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "large_scale",
+      tester.clone()
+          .m(mr).k(k_block)
+          .large_scale(true)
+          .b_zero_point(8)
+      , test_func, arch_flags)
+      .loop_n(1, nr * 2, nr > 1 ? nr - 1 : 1, LoopStepType::Linear));
 
   return gemm_tests;
 }

@@ -134,6 +134,7 @@ SET(MICROKERNEL_UNIT_TESTS
     x32-packx
     x32-unpool
     x8-lut
+    x8-pack-lh
     x8-packw
     xN-transpose
     xx-fill

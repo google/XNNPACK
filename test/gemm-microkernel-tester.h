@@ -237,6 +237,13 @@ class GemmMicrokernelTester {
 
   bool large_bias() const { return this->large_bias_; }
 
+  GemmMicrokernelTester& large_scale(bool large_scale) {
+    this->large_scale_ = large_scale;
+    return *this;
+  }
+
+  bool large_scale() const { return this->large_scale_; }
+
   void Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
             xnn_init_f16_minmax_params_fn init_params,
             xnn_pack_qs8_igemm_fn pack) const;
@@ -508,6 +515,7 @@ class GemmMicrokernelTester {
   bool known_nc_mod_nr_{true};
   size_t mr_packed_{0};
   bool large_bias_{false};
+  bool large_scale_{false};
 };
 
 enum class LoopStepType { Linear, NextPrime };

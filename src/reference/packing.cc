@@ -48,6 +48,18 @@
 #include "src/xnnpack/allocator.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
+#ifndef KLEIDI_PACKBUG
+#define KLEIDI_PACKBUG 1
+#endif
+
+#if XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) && \
+    ((XNN_ENABLE_KLEIDIAI && KLEIDI_PACKBUG) ||                      \
+     (!XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME_ACLE))
+#include <arm_neon.h>
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) &&
+        // ((XNN_ENABLE_KLEIDIAI && KLEIDI_PACKBUG) ||
+        //  (!XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME_ACLE))
+
 class unaligned_int32_t {
  public:
   XNN_INLINE unaligned_int32_t(  // NOLINT(google-explicit-constructor)
@@ -2583,15 +2595,9 @@ void xnn_pack_qu8_weights_and_biases(
       extra_data1_element_size, packed_weights_ptr, extra_bytes, params);
 }
 
-#ifndef KLEIDI_PACKBUG
-#define KLEIDI_PACKBUG 1
-#endif
-
 #if XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) && \
-    ((XNN_ENABLE_KLEIDIAI && KLEIDI_PACKBUG) ||                     \
+    ((XNN_ENABLE_KLEIDIAI && KLEIDI_PACKBUG) ||                      \
      (!XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME_ACLE))
-#include <arm_neon.h>
-
 static void xnn_pack_rhs_nxk_qsi4cxp8vsx4sf32bi32_qsx4cx_f32_i32(
     size_t n, size_t k, size_t nr, size_t rhs_stride_row, size_t packed_stride,
     const uint8_t* rhs_ptr, const int32_t* bias_ptr, const float* scale_ptr,
@@ -2787,25 +2793,29 @@ static void xnn_pack_rhs_nxk_qsi4cxp8vsx4sf32bi32_qsx4cx_f32_i32(
       const int32x4_t rhs_sums = vld1q_s32(sums + group);
       const int32x4_t packed_bias =
           vmlaq_n_s32(input_bias, rhs_sums, k_sum_scale);
-      vst1q_s32(
-          reinterpret_cast<int32_t*>(packed_ptr + group * BIAS_ELEM_BYTES),
-          packed_bias);
+      vst1q_u8(packed_ptr + group * BIAS_ELEM_BYTES,
+               vreinterpretq_u8_s32(packed_bias));
 
       const float32x4_t input_scale = vld1q_f32(scale_ptr + n_base + group);
-      vst1q_f32(reinterpret_cast<float*>(scale_out + group * SCALE_ELEM_BYTES),
-                vmulq_n_f32(input_scale, scale_multiplier));
+      const float32x4_t packed_scale =
+          vmulq_n_f32(input_scale, scale_multiplier);
+      vst1q_u8(scale_out + group * SCALE_ELEM_BYTES,
+               vreinterpretq_u8_f32(packed_scale));
     }
 
     for (; group < block_width; ++group) {
-      reinterpret_cast<int32_t*>(packed_ptr)[group] =
-          bias_ptr[n_base + group] + k_sum_scale * sums[group];
-      reinterpret_cast<float*>(scale_out)[group] =
-          scale_ptr[n_base + group] * scale_multiplier;
+      const int32_t packed_bias =
+          static_cast<int32_t>(static_cast<uint32_t>(bias_ptr[n_base + group]) +
+                               static_cast<uint32_t>(k_sum_scale) *
+                                   static_cast<uint32_t>(sums[group]));
+      unaligned_store_s32(packed_ptr + group * BIAS_ELEM_BYTES, packed_bias);
+      unaligned_store_f32(scale_out + group * SCALE_ELEM_BYTES,
+                          scale_ptr[n_base + group] * scale_multiplier);
     }
 
     for (; group < nr; ++group) {
-      reinterpret_cast<int32_t*>(packed_ptr)[group] = 0;
-      reinterpret_cast<float*>(scale_out)[group] = 0.0F;
+      unaligned_store_s32(packed_ptr + group * BIAS_ELEM_BYTES, 0);
+      unaligned_store_f32(scale_out + group * SCALE_ELEM_BYTES, 0.0F);
       for (size_t k_base = 0; k_base < rounded_k; k_base += 32) {
         uint8_t* group_out = payload + k_base * nr / 2;
         uint8_t* dst = group_out + group * 2;
@@ -6497,8 +6507,8 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
           reinterpret_cast<unaligned_int32_t*>(packed);
       int8_t* dst_weights =
           reinterpret_cast<int8_t*>(packed + nr * sizeof(int32_t));
-      float* dst_scales = reinterpret_cast<float*>(
-          packed + nr * sizeof(int32_t) + nr * k_rounded * sizeof(int8_t));
+      uint8_t* dst_scales =
+          packed + nr * sizeof(int32_t) + nr * k_rounded * sizeof(int8_t);
 
       for (size_t nr_idx = 0; nr_idx < nr; ++nr_idx) {
         const size_t n_idx = block * nr + nr_idx;
@@ -6514,25 +6524,26 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
             sum += static_cast<int32_t>(v);
           }
           const int32_t b_val = bias != nullptr ? bias[n_idx] : 0;
-          dst_biases[nr_idx] = b_val - lhs_zero_point * sum;
-          if (scale != nullptr) {
-            dst_scales[nr_idx] = scale[n_idx];
-          }
+          dst_biases[nr_idx] =
+              static_cast<int32_t>(static_cast<uint32_t>(b_val) -
+                                   static_cast<uint32_t>(lhs_zero_point) *
+                                       static_cast<uint32_t>(sum));
+          unaligned_store_f32(dst_scales + nr_idx * sizeof(float),
+                              scale != nullptr ? scale[n_idx] : 1.0f);
         } else {
           for (size_t k_idx = 0; k_idx < k_rounded; ++k_idx) {
             dst_weights[(k_idx / kr) * (nr * kr) + nr_idx * kr + (k_idx % kr)] =
                 0;
           }
           dst_biases[nr_idx] = 0;
-          if (scale != nullptr) {
-            dst_scales[nr_idx] = 0.0f;
-          }
+          unaligned_store_f32(dst_scales + nr_idx * sizeof(float), 0.0f);
         }
       }
       packed += block_stride;
     }
   }
 }
-#endif  // XNN_ARCH_ARM64 && ... && !XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ARCH_ARM64 && (XNN_ENABLE_ARM_SME || XNN_ENABLE_ARM_SME2) &&
+        // XNN_ENABLE_ARM_SME_ACLE && !XNN_ENABLE_KLEIDIAI
 
 }  // extern "C"
