@@ -18,6 +18,10 @@
 #include <type_traits>
 #include <utility>
 
+#ifdef YNN_ARCH_X86
+#include <xmmintrin.h>
+#endif  // YNN_ARCH_X86
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/arithmetic.h"
@@ -1063,6 +1067,45 @@ void test_sub_sat() {
   TEST_F(test_class, add_sat_##type##x##N) { test_add_sat<type, N>(); }
 #define TEST_SUB_SAT(test_class, type, N) \
   TEST_F(test_class, sub_sat_##type##x##N) { test_sub_sat<type, N>(); }
+
+#ifdef YNN_ARCH_X86
+// Test that exp is accurate down to the smallest normal number when subnormal
+// numbers are flushed to zero, i.e. that it does not rely on a subnormal
+// intermediate value.
+template <typename scalar, size_t N>
+void test_exp_flush_to_zero(float epsilons) {
+  using vector = vec<scalar, N>;
+  using scalar_info = type_info<scalar>;
+
+  // Inputs with results in the lowest binades of the normal numbers.
+  const double min_val =
+      std::log(static_cast<double>(scalar_info::smallest_normal())) + 0.01;
+  const double max_val = min_val + 20.0;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng, min_val, max_val);
+
+    scalar result[vector::N];
+    const unsigned int mxcsr = _mm_getcsr();
+    _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+    store(result, exp(load(a, vector::N)));
+    _mm_setcsr(mxcsr);
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      const scalar k = static_cast<scalar>(std::exp(static_cast<double>(a[i])));
+      const scalar abs_error = (scalar_info::epsilon() * epsilons) * k;
+      ASSERT_NEAR(result[i], k, abs_error) << a[i];
+    }
+  }
+}
+
+#define TEST_EXP_FLUSH_TO_ZERO(test_class, type, N, epsilons) \
+  TEST_F(test_class, exp_flush_to_zero_##type##x##N) {        \
+    test_exp_flush_to_zero<type, N>(epsilons);                \
+  }
+#endif  // YNN_ARCH_X86
 
 template <typename scalar, size_t N, typename F, typename Ref>
 void test_unary(F f, Ref ref, float epsilons,
