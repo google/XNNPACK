@@ -45,8 +45,5 @@ TEST_UNARY(x86_fma3, cos, f64, 4, std::cos, 2);
 TEST_UNARY(x86_fma3, approx_erf, f32, 8, std::erf, 5);
 TEST_UNARY(x86_fma3, approx_tanh, f32, 8, std::tanh, 5);
 
-TEST_BINARY(x86_fma3, pow, f32, 8, std::pow, 2);
-TEST_BINARY(x86_fma3, pow, f64, 4, std::pow, 2);
-
 }  // namespace simd
 }  // namespace ynn

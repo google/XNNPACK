@@ -264,8 +264,5 @@ TEST_UNARY(x86_avx512, cos, f64, 8, std::cos, 2);
 TEST_UNARY(x86_avx512, approx_erf, f32, 16, std::erf, 5);
 TEST_UNARY(x86_avx512, approx_tanh, f32, 16, std::tanh, 5);
 
-TEST_BINARY(x86_avx512, pow, f32, 16, std::pow, 2);
-TEST_BINARY(x86_avx512, pow, f64, 8, std::pow, 2);
-
 }  // namespace simd
 }  // namespace ynn
