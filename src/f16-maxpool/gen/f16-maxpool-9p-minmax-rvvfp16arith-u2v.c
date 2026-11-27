@@ -13,6 +13,13 @@
 #include <riscv_vector.h>
 
 
+static XNN_INLINE vfloat16m2_t max_nan(
+    vfloat16m2_t a, vfloat16m2_t b, size_t vl) {
+  const vbool8_t take_a =
+      __riscv_vmor(__riscv_vmfne(a, a, vl), __riscv_vmfgt(a, b, vl), vl);
+  return __riscv_vmerge(b, a, take_a, vl);
+}
+
 void xnn_f16_maxpool_minmax_ukernel_9p__rvvfp16arith_u2v(
     size_t output_pixels,
     size_t kernel_elements,
@@ -68,18 +75,18 @@ void xnn_f16_maxpool_minmax_ukernel_9p__rvvfp16arith_u2v(
       vfloat16m2_t vi7 = __riscv_vle16_v_f16m2(i7, vl); i7 += vl;
       vfloat16m2_t vi8 = __riscv_vle16_v_f16m2(i8, vl); i8 += vl;
 
-      vfloat16m2_t vmax01 = __riscv_vfmax(vi0, vi1, vl);
-      vfloat16m2_t vmax23 = __riscv_vfmax(vi2, vi3, vl);
-      vfloat16m2_t vmax45 = __riscv_vfmax(vi4, vi5, vl);
-      vfloat16m2_t vmax67 = __riscv_vfmax(vi6, vi7, vl);
-      vfloat16m2_t vmax018 = __riscv_vfmax(vmax01, vi8, vl);
+      vfloat16m2_t vmax01 = max_nan(vi0, vi1, vl);
+      vfloat16m2_t vmax23 = max_nan(vi2, vi3, vl);
+      vfloat16m2_t vmax45 = max_nan(vi4, vi5, vl);
+      vfloat16m2_t vmax67 = max_nan(vi6, vi7, vl);
+      vfloat16m2_t vmax018 = max_nan(vmax01, vi8, vl);
 
-      vfloat16m2_t vmax2345 = __riscv_vfmax(vmax23, vmax45, vl);
-      vfloat16m2_t vmax01678 = __riscv_vfmax(vmax67, vmax018, vl);
-      vfloat16m2_t vacc = __riscv_vfmax(vmax2345, vmax01678, vl);
+      vfloat16m2_t vmax2345 = max_nan(vmax23, vmax45, vl);
+      vfloat16m2_t vmax01678 = max_nan(vmax67, vmax018, vl);
+      vfloat16m2_t vacc = max_nan(vmax2345, vmax01678, vl);
 
-      vacc = __riscv_vfmax(vacc, output_min, vl);
-      vacc = __riscv_vfmin(vacc, output_max, vl);
+      vacc = __riscv_vfmerge(vacc, output_min, __riscv_vmflt(vacc, output_min, vl), vl);
+      vacc = __riscv_vfmerge(vacc, output_max, __riscv_vmfgt(vacc, output_max, vl), vl);
       __riscv_vse16_v_f16m2(o, vacc, vl); o += vl;
 
       c -= vl;
@@ -123,18 +130,18 @@ void xnn_f16_maxpool_minmax_ukernel_9p__rvvfp16arith_u2v(
 
         vfloat16m2_t vprev = __riscv_vle16_v_f16m2(o, vl);
 
-        vfloat16m2_t vmax01 = __riscv_vfmax(vi0, vi1, vl);
-        vfloat16m2_t vmax23 = __riscv_vfmax(vi2, vi3, vl);
-        vfloat16m2_t vmax45 = __riscv_vfmax(vi4, vi5, vl);
-        vfloat16m2_t vmax67 = __riscv_vfmax(vi6, vi7, vl);
-        vfloat16m2_t vmax018 = __riscv_vfmax(vmax01, vi8, vl);
+        vfloat16m2_t vmax01 = max_nan(vi0, vi1, vl);
+        vfloat16m2_t vmax23 = max_nan(vi2, vi3, vl);
+        vfloat16m2_t vmax45 = max_nan(vi4, vi5, vl);
+        vfloat16m2_t vmax67 = max_nan(vi6, vi7, vl);
+        vfloat16m2_t vmax018 = max_nan(vmax01, vi8, vl);
 
-        vfloat16m2_t vmax2345 = __riscv_vfmax(vmax23, vmax45, vl);
-        vfloat16m2_t vmax01678 = __riscv_vfmax(vmax67, vmax018, vl);
-        vfloat16m2_t vmax012345678 = __riscv_vfmax(vmax2345, vmax01678, vl);
+        vfloat16m2_t vmax2345 = max_nan(vmax23, vmax45, vl);
+        vfloat16m2_t vmax01678 = max_nan(vmax67, vmax018, vl);
+        vfloat16m2_t vmax012345678 = max_nan(vmax2345, vmax01678, vl);
 
-        vfloat16m2_t vacc = __riscv_vfmax(vprev, vmax012345678, vl);
-        vacc = __riscv_vfmin(vacc, output_max, vl);
+        vfloat16m2_t vacc = max_nan(vprev, vmax012345678, vl);
+        vacc = __riscv_vfmerge(vacc, output_max, __riscv_vmfgt(vacc, output_max, vl), vl);
         __riscv_vse16_v_f16m2(o, vacc, vl); o += vl;
 
         c -= vl;

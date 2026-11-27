@@ -14,9 +14,23 @@ $VTYPE = {"f32": "vfloat32", "f16": "vfloat16", "u8": "vuint8", "s8": "vint8"}[D
 $VLOAD = {"f32": "__riscv_vle32_v_f32", "f16": "__riscv_vle16_v_f16", "u8": "__riscv_vle8_v_u8", "s8": "__riscv_vle8_v_i8"}[DATATYPE]
 $VSTORE = {"f32": "__riscv_vse32_v_f32", "f16": "__riscv_vse16_v_f16", "u8": "__riscv_vse8_v_u8", "s8": "__riscv_vse8_v_i8"}[DATATYPE]
 $VSETVL = {"f32": "__riscv_vsetvl_e32", "f16": "__riscv_vsetvl_e16", "u8": "__riscv_vsetvl_e8", "s8": "__riscv_vsetvl_e8"}[DATATYPE]
-$VMAX = {"f32": "__riscv_vfmax", "f16": "__riscv_vfmax", "u8": "__riscv_vmaxu", "s8": "__riscv_vmax"}[DATATYPE]
-$VMIN = {"f32": "__riscv_vfmin", "f16": "__riscv_vfmin", "u8": "__riscv_vminu", "s8": "__riscv_vmin"}[DATATYPE]
 $ISA = "fp16arith" if DATATYPE == "f16" else ""
+$if DATATYPE in ("f16", "f32"):
+  $VMAX = "max_nan"
+  $LOWER = "__riscv_vfmerge(vacc, output_min, __riscv_vmflt(vacc, output_min, vl), vl)"
+  $UPPER = "__riscv_vfmerge(vacc, output_max, __riscv_vmfgt(vacc, output_max, vl), vl)"
+
+  static XNN_INLINE ${VTYPE}m${LMUL}_t max_nan(
+      ${VTYPE}m${LMUL}_t a, ${VTYPE}m${LMUL}_t b, size_t vl) {
+    const vbool${int(DATATYPE[1:]) // LMUL}_t take_a =
+        __riscv_vmor(__riscv_vmfne(a, a, vl), __riscv_vmfgt(a, b, vl), vl);
+    return __riscv_vmerge(b, a, take_a, vl);
+  }
+$else:
+  $VMAX = "__riscv_vmaxu" if DATATYPE == "u8" else "__riscv_vmax"
+  $VMIN = "__riscv_vminu" if DATATYPE == "u8" else "__riscv_vmin"
+  $LOWER = f"{VMAX}(vacc, output_min, vl)"
+  $UPPER = f"{VMIN}(vacc, output_max, vl)"
 
 void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__rvv${ISA}_u${LMUL}v(
     size_t output_pixels,
@@ -63,8 +77,8 @@ void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__rvv${ISA}_u${LMUL}v(
       ${VTYPE}m${LMUL}_t vmax01678 = ${VMAX}(vmax67, vmax018, vl);
       ${VTYPE}m${LMUL}_t vacc = ${VMAX}(vmax2345, vmax01678, vl);
 
-      vacc = ${VMAX}(vacc, output_min, vl);
-      vacc = ${VMIN}(vacc, output_max, vl);
+      vacc = ${LOWER};
+      vacc = ${UPPER};
       ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
 
       c -= vl;
@@ -99,7 +113,7 @@ void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__rvv${ISA}_u${LMUL}v(
         ${VTYPE}m${LMUL}_t vmax012345678 = ${VMAX}(vmax2345, vmax01678, vl);
 
         ${VTYPE}m${LMUL}_t vacc = ${VMAX}(vprev, vmax012345678, vl);
-        vacc = ${VMIN}(vacc, output_max, vl);
+        vacc = ${UPPER};
         ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
 
         c -= vl;
