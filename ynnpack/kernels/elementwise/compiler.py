@@ -540,6 +540,12 @@ def tan(value):
 
 
 @intrinsic
+def pow(x, y):  # pylint: disable=redefined-builtin
+  (x, y) = promote_types(x, y)
+  return Op(x.ty, "pow", [x, y])
+
+
+@intrinsic
 def cast(ty, value):
   """Casts value to a given type."""
   # This is no-op.
@@ -1071,6 +1077,7 @@ class Target:
         "sin",
         "cos",
         "tan",
+        "pow",
     }
     self.infix_ops = {
         "add": "+",
@@ -1151,7 +1158,7 @@ class Target:
       return "simd::cast"
     elif op.name == "saturating_rounding_cast":
       return "simd::cast"
-    elif op.name == "min" or op.name == "max":
+    elif op.name in ("min", "max", "pow"):
       return f"simd::{op.name}"
     return op.name
 

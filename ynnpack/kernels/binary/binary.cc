@@ -16,6 +16,7 @@
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/simd/scalar.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
@@ -121,8 +122,12 @@ struct SquaredDifferenceOp {
 };
 
 struct PowOp {
-  float operator()(float a, float b) const { return std::pow(a, b); }
-  double operator()(double a, double b) const { return std::pow(a, b); }
+  float operator()(float a, float b) const {
+    return simd::pow(simd::vec<float, 1>{a}, simd::vec<float, 1>{b}).v;
+  }
+  double operator()(double a, double b) const {
+    return simd::pow(simd::vec<double, 1>{a}, simd::vec<double, 1>{b}).v;
+  }
   int32_t operator()(int32_t a, int32_t b) const { return integer_pow(a, b); }
   using commutative = std::false_type;
 };
@@ -147,7 +152,8 @@ binary_kernel_fn get_float_binary_reference_kernel(ynn_binary_operator op,
   if (required_flags & binary_flag::consistent_arithmetic) {
     switch (op) {
       case ynn_binary_pow:
-        // We call into cmath, which might not be numerically consistent.
+        // Reference PowOp is compiled without FMA, unlike consistent fp32
+        // kernels.
         return nullptr;
 #ifdef YNN_ARCH_ARM32
       // 32-bit ARM handles denormals differently between scalar and NEON.

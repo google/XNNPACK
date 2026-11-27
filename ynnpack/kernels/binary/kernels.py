@@ -205,3 +205,19 @@ def copysign_fp64(a, b, x):
   vb = load(b)
   mask = reinterpret_cast(Float(64), 0x7FFFFFFFFFFFFFFF)
   return store(select_bits(mask, va, vb), x)
+
+
+@const_buffer("a", Float(32))
+@const_buffer("b", Float(32))
+@buffer("x", Float(32))
+@operator_name("pow")
+def pow_fp32(a, b, x):
+  return store(pow(load(a), load(b)), x)
+
+
+@const_buffer("a", Float(64))
+@const_buffer("b", Float(64))
+@buffer("x", Float(64))
+@operator_name("pow")
+def pow_fp64(a, b, x):
+  return store(pow(load(a), load(b)), x)

@@ -44,6 +44,8 @@ def main(argv: Sequence[str]) -> None:
           (multiply_fp32, (8, 1), consistent),
           (multiply_fp64, (4, 1), consistent),
           (multiply_int32_fp32, (8, 1), consistent),
+          (pow_fp32, (8, 1)),
+          (pow_fp64, (4, 1), consistent),
           (squared_difference_fp32, (8, 1), consistent),
           (squared_difference_fp64, (4, 1), consistent),
           (subtract_fp32, (8, 1), consistent),
@@ -65,6 +67,8 @@ def main(argv: Sequence[str]) -> None:
           (min_fp64, (8, 1), consistent),
           (multiply_fp32, (16, 1), consistent),
           (multiply_fp64, (8, 1), consistent),
+          (pow_fp32, (16, 1)),
+          (pow_fp64, (8, 1), consistent),
           (squared_difference_fp32, (16, 1), consistent),
           (squared_difference_fp64, (8, 1), consistent),
           (subtract_fp32, (16, 1), consistent),
@@ -74,6 +78,8 @@ def main(argv: Sequence[str]) -> None:
       "x86_fma3": [
           # go/keep-sorted start
           (exp_subtract_fp32, (16, 1), consistent),
+          (pow_fp32, (16, 1), consistent),
+          (pow_fp64, (8, 1)),
           # go/keep-sorted end
       ],
       "x86_avx2": [
@@ -91,6 +97,8 @@ def main(argv: Sequence[str]) -> None:
       "x86_avx2_fma3": [
           # go/keep-sorted start
           (exp_subtract_fp32, (16, 1), consistent),
+          (pow_fp32, (16, 1), consistent),
+          (pow_fp64, (8, 1)),
           # go/keep-sorted end
       ],
       "x86_avx512": [
@@ -111,6 +119,8 @@ def main(argv: Sequence[str]) -> None:
           (multiply_fp32, (32, 1), consistent),
           (multiply_fp64, (16, 1), consistent),
           (multiply_int32_fp32, (32, 1), consistent),
+          (pow_fp32, (32, 1), consistent),
+          (pow_fp64, (16, 1)),
           (squared_difference_fp32, (32, 1), consistent),
           (squared_difference_fp64, (16, 1), consistent),
           (subtract_bf16_fp32, (64, 1), consistent),
@@ -140,6 +150,7 @@ def main(argv: Sequence[str]) -> None:
           (multiply_bf16_fp32_bf16, (16, 1), consistent),
           (multiply_fp32, (8, 1), consistent),
           (multiply_int32_fp32, (8, 1), consistent),
+          (pow_fp32, (8, 1)),
           (squared_difference_fp32, (32, 1), consistent),
           (subtract_bf16_fp32, (16, 1), consistent),
           (subtract_fp32, (8, 1), consistent),
@@ -148,6 +159,7 @@ def main(argv: Sequence[str]) -> None:
       "arm_neonfma": [
           # go/keep-sorted start
           (exp_subtract_fp32, (16, 1), consistent),
+          (pow_fp32, (8, 1), consistent),
           # go/keep-sorted end
       ],
       "arm64_neon": [
@@ -158,6 +170,7 @@ def main(argv: Sequence[str]) -> None:
           (max_fp64, (4, 1), consistent),
           (min_fp64, (4, 1), consistent),
           (multiply_fp64, (4, 1), consistent),
+          (pow_fp64, (4, 1)),
           (squared_difference_fp64, (16, 1), consistent),
           (subtract_fp64, (4, 1), consistent),
           # go/keep-sorted end
@@ -178,6 +191,7 @@ def main(argv: Sequence[str]) -> None:
           (min_fp32, (8, 1), consistent),
           (multiply_fp32, (8, 1), consistent),
           (multiply_int32_fp32, (8, 1), consistent),
+          (pow_fp32, (8, 1)),
           (squared_difference_fp32, (8, 1), consistent),
           (subtract_fp32, (8, 1), consistent),
           # go/keep-sorted end

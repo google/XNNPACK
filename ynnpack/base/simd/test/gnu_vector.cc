@@ -226,5 +226,8 @@ TEST_UNARY(gnu_vector, cos, f64, 2, std::cos, 2);
 TEST_UNARY(gnu_vector, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(gnu_vector, approx_tanh, f32, 4, std::tanh, 5);
 
+TEST_BINARY(gnu_vector, pow, f32, 4, std::pow, 2);
+TEST_BINARY(gnu_vector, pow, f64, 2, std::pow, 2);
+
 }  // namespace simd
 }  // namespace ynn

@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cmath>
 #include <cstdint>
 
 #include <gtest/gtest.h>
@@ -64,6 +65,8 @@ TEST_UNARY(arm_neon, erf, f64, 2, std::erf, 3);
 TEST_UNARY(arm_neon, tanh, f64, 2, std::tanh, 4);
 TEST_UNARY(arm_neon, sin, f64, 2, std::sin, 2);
 TEST_UNARY(arm_neon, cos, f64, 2, std::cos, 2);
+
+TEST_BINARY(arm_neon, pow, f64, 2, std::pow, 2);
 
 }  // namespace simd
 }  // namespace ynn

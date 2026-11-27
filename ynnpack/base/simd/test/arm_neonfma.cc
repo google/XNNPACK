@@ -49,5 +49,7 @@ TEST_UNARY(arm_neonfma, cos, f32, 4, std::cos, 2);
 TEST_UNARY(arm_neonfma, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neonfma, approx_tanh, f32, 4, std::tanh, 5);
 
+TEST_BINARY(arm_neonfma, pow, f32, 4, std::pow, 2);
+
 }  // namespace simd
 }  // namespace ynn
