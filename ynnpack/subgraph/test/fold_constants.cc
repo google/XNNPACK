@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <numeric>
 #include <vector>
 
@@ -566,6 +567,105 @@ TEST(fold_constants, transpose_a) {
       }
     }
   }
+}
+
+namespace {
+
+using buffer_weak_ptr = std::weak_ptr<slinky::raw_buffer_ptr::element_type>;
+
+Runtime BuildFoldedCopiedConstant(float bias, buffer_weak_ptr& unpacked,
+                                  slinky::raw_buffer_ptr* folded = nullptr) {
+  constexpr float values[] = {10.0f, 20.0f, 30.0f, 40.0f};
+  uint32_t const_id = YNN_INVALID_VALUE_ID;
+  uint32_t temp_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder builder(2);
+  builder.AddInput(type_of<float>(), {4}, 0)
+      .AddOutput(type_of<float>(), {4}, 1)
+      .AddTensor(type_of<float>(), {4}, const_id, values,
+                 YNN_VALUE_FLAG_COPY_DATA)
+      .AddTensor(type_of<float>(), 1, temp_id);
+  const uint32_t bias_id = builder.DefineScalar(bias);
+  builder.AddBinary(ynn_binary_add, const_id, bias_id, temp_id)
+      .AddBinary(ynn_binary_add, 0, temp_id, 1);
+
+  ynn_subgraph_t subgraph = builder.GetSubgraph();
+  unpacked = subgraph->value(const_id).data;
+  EXPECT_FALSE(unpacked.expired());
+  Runtime runtime(subgraph);
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+  if (folded) *folded = subgraph->value(temp_id).data;
+  return runtime;
+}
+
+}  // namespace
+
+TEST(fold_constants, release_copied_input) {
+  buffer_weak_ptr unpacked;
+  Runtime rt = BuildFoldedCopiedConstant(1.0f, unpacked);
+  EXPECT_TRUE(unpacked.expired());
+
+  float input[] = {1.0f, 2.0f, 3.0f, 4.0f};
+  float output[4] = {};
+  rt.ReshapeExternalTensor({4}, input, 0)
+      .SetupExternalTensor(output, 1)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(rt.Status(), ynn_status_success);
+  EXPECT_THAT(output, ElementsAre(12.0f, 23.0f, 34.0f, 45.0f));
+}
+
+TEST(fold_constants, cache_hit_releases_copied_inputs) {
+  buffer_weak_ptr unpacked1;
+  buffer_weak_ptr unpacked2;
+  slinky::raw_buffer_ptr folded1;
+  slinky::raw_buffer_ptr folded2;
+  Runtime rt1 = BuildFoldedCopiedConstant(2.0f, unpacked1, &folded1);
+  Runtime rt2 = BuildFoldedCopiedConstant(2.0f, unpacked2, &folded2);
+  ASSERT_NE(folded1, nullptr);
+  EXPECT_EQ(folded1.get(), folded2.get());
+  EXPECT_TRUE(unpacked1.expired());
+  EXPECT_TRUE(unpacked2.expired());
+
+  float input[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  float output[4] = {};
+  rt2.ReshapeExternalTensor({4}, input, 0)
+      .SetupExternalTensor(output, 1)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(rt2.Status(), ynn_status_success);
+  EXPECT_THAT(output, ElementsAre(13.0f, 23.0f, 33.0f, 43.0f));
+}
+
+TEST(fold_constants, unfolded_copied_input_kept) {
+  constexpr size_t count = 256;
+  const std::vector<half> constant_values(count, half(1.5f));
+  uint32_t fp16_id = YNN_INVALID_VALUE_ID;
+  uint32_t fp32_id = YNN_INVALID_VALUE_ID;
+
+  // Wide half->float convert is not constant-folded (output == 2 * input).
+  SubgraphBuilder builder(2);
+  builder.AddInput(type_of<float>(), {count}, 0)
+      .AddOutput(type_of<float>(), {count}, 1)
+      .AddTensor(type_of<half>(), {count}, fp16_id, constant_values.data(),
+                 YNN_VALUE_FLAG_COPY_DATA)
+      .AddTensor(type_of<float>(), {count}, fp32_id)
+      .AddConvert(fp16_id, type_of<float>(), fp32_id)
+      .AddBinary(ynn_binary_add, 0, fp32_id, 1);
+
+  ynn_subgraph_t subgraph = builder.GetSubgraph();
+  buffer_weak_ptr unpacked = subgraph->value(fp16_id).data;
+  Runtime runtime(subgraph);
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_FALSE(unpacked.expired());
+
+  std::vector<float> input(count, 2.5f);
+  std::vector<float> output(count, 0.0f);
+  runtime.ReshapeExternalTensor({count}, input.data(), 0)
+      .SetupExternalTensor(output.data(), 1)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_THAT(output, ::testing::Each(4.0f));
 }
 
 }  // namespace ynn

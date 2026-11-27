@@ -941,19 +941,22 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
 
   // Use the results of reshape to allocate static buffers for the constants.
   for (uint32_t i : needed_constants) {
-    ynn_runtime_value& folded = runtime.value(i);
-    assert(folded.data);
-    assert(values[i].extents.size() == folded.data->rank);
-    for (size_t d = 0; d < folded.data->rank; ++d) {
-      slinky::index_t extent = folded.data->dim(d).extent();
+    auto cached = cached_values.find(i);
+    const slinky::raw_buffer_ptr& data =
+        cached != cached_values.end() ? cached->second : runtime.value(i).data;
+    assert(data);
+    assert(values[i].extents.size() == data->rank);
+    for (size_t d = 0; d < data->rank; ++d) {
+      slinky::index_t extent = data->dim(d).extent();
       if (d == 0) {
         extent *= ynn::type_element_count(values[i].type);
       }
       values[i].extents[d] = extent;
     }
-    if (cached_values.count(i)) {
-      values[i].data = folded.data;
+    if (cached != cached_values.end()) {
+      values[i].data = cached->second;
     } else {
+      ynn_runtime_value& folded = runtime.value(i);
       // The producer of the constant may require strides that are not those of
       // a dense array.
       for (size_t d = 0; d < folded.data->rank; ++d) {

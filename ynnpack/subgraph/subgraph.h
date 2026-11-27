@@ -137,7 +137,10 @@ struct ynn_value {
   ynn_status set_external_shape(size_t rank, const size_t* dims);
   ynn_status get_external_shape(size_t* rank, size_t* dims) const;
 
-  void invalidate() { id = YNN_INVALID_VALUE_ID; }
+  void invalidate() {
+    id = YNN_INVALID_VALUE_ID;
+    data.reset();
+  }
 
   const char* name_prefix() const {
     if (is_static()) {
