@@ -59,8 +59,10 @@ TEST(fusion, convert_broadcast_unary) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  EXPECT_THAT(ProducerOf(out_id, subgraph),
-              AllOf(IsStaticBroadcast(), InputsAre(broadcast_x_id)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
+  uint32_t abs_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(abs_out_id, subgraph),
+              AllOf(IsUnary(ynn_unary_abs), InputsAre(x_id)));
 }
 
 TEST(fusion, convert_broadcast_binary) {
@@ -319,7 +321,7 @@ TEST(fusion, keep_static_broadcast_from_elementwise_binary) {
               AllOf(IsBinary(ynn_binary_add), InputsInclude(x_id, y_id)));
 }
 
-TEST(fusion, keep_static_broadcast_multiple_consumers) {
+TEST(fusion, static_broadcast_multiple_consumers) {
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   const uint32_t out_id = 2;
@@ -342,11 +344,15 @@ TEST(fusion, keep_static_broadcast_multiple_consumers) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  // We can't rewrite this because the broadcast has two consumers. We could
-  // improve the rewrite to handle this case.
-  EXPECT_THAT(
-      ProducerOf(out_id, subgraph),
-      AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
+  uint32_t add_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(add_out_id, subgraph),
+              AllOf(IsBinary(ynn_binary_add), InputsInclude(x_id, y_id)));
+
+  EXPECT_THAT(ProducerOf(out2_id, subgraph), IsStaticBroadcast());
+  uint32_t abs_out_id = ProducerOf(out2_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(abs_out_id, subgraph),
+              AllOf(IsUnary(ynn_unary_abs), InputsAre(x_id)));
 }
 
 TEST(fusion, move_static_broadcast_to_output_transpose) {
@@ -815,10 +821,14 @@ TEST(fusion, move_broadcast_to_output_topological_order) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(subgraph.nodes.size(), 3);
-  EXPECT_THAT(subgraph.nodes[0], IsUnary(ynn_unary_abs));
-  EXPECT_THAT(subgraph.nodes[1], IsBinary(ynn_binary_add));
-  EXPECT_THAT(subgraph.nodes[2], IsStaticBroadcast());
+  std::vector<const ynn_node*> valid_nodes;
+  for (const ynn_node& node : subgraph.nodes) {
+    if (node.is_valid()) valid_nodes.push_back(&node);
+  }
+  ASSERT_EQ(valid_nodes.size(), 3);
+  EXPECT_THAT(*valid_nodes[0], IsUnary(ynn_unary_abs));
+  EXPECT_THAT(*valid_nodes[1], IsBinary(ynn_binary_add));
+  EXPECT_THAT(*valid_nodes[2], IsStaticBroadcast());
 }
 
 TEST(fusion, move_broadcast_to_output_external) {
