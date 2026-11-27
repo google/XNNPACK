@@ -115,6 +115,7 @@ cc_library(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:macros",
+        "//litert/tensor/utils:parallel",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:inlined_vector",
