@@ -15,6 +15,8 @@
 
 #include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
@@ -24,16 +26,18 @@
 
 namespace models {
 
+template <typename T>
 struct Weights {
-  std::vector<float> w0;
+  std::vector<T> w0;
   std::vector<float> w1;
 };
 
 // Depthwise convolution with kernel size kw x kw, followed by a 1x1 conv with
 // ci -> co channels. This is a common pattern in imaging models.
-xnn_subgraph_t FP32Convolution(size_t w, size_t h, size_t kw, size_t ci,
-                               size_t co, uint32_t op_flags,
-                               Weights& weights) {
+template <typename T>
+xnn_subgraph_t Convolution(size_t w, size_t h, size_t kw, size_t ci, size_t co,
+                           uint32_t op_flags, Weights<T>& weights) {
+  const xnn_datatype datatype = xnn_datatype_of<T>();
   xnn_status status;
   auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/2, 0);
   if (!subgraph) {
@@ -46,7 +50,7 @@ xnn_subgraph_t FP32Convolution(size_t w, size_t h, size_t kw, size_t ci,
   uint32_t v0 = 0;
   std::array<size_t, 4> v0_dims = {{1, h, w, ci}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, v0_dims.size(), v0_dims.data(),
+      subgraph.get(), datatype, v0_dims.size(), v0_dims.data(),
       /*data=*/nullptr, v0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
@@ -56,7 +60,7 @@ xnn_subgraph_t FP32Convolution(size_t w, size_t h, size_t kw, size_t ci,
   uint32_t v1 = 1;
   std::array<size_t, 4> v1_dims = {{1, h - 2, w - 2, co}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, v1_dims.size(), v1_dims.data(),
+      subgraph.get(), datatype, v1_dims.size(), v1_dims.data(),
       /*data=*/nullptr, v1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v1" << std::endl;
@@ -64,13 +68,13 @@ xnn_subgraph_t FP32Convolution(size_t w, size_t h, size_t kw, size_t ci,
   }
 
   weights.w0 =
-      std::vector<float>(co * kw * kw * ci + XNN_EXTRA_BYTES / sizeof(float));
+      std::vector<T>(co * kw * kw * ci + XNN_EXTRA_BYTES / sizeof(T));
   weights.w1 = std::vector<float>(co + XNN_EXTRA_BYTES / sizeof(float));
 
   uint32_t w0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w0_dims = {{co, kw, kw, ci}};
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, w0_dims.size(), w0_dims.data(),
+      subgraph.get(), datatype, w0_dims.size(), w0_dims.data(),
       /*data=*/weights.w0.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w0" << std::endl;
@@ -89,7 +93,8 @@ xnn_subgraph_t FP32Convolution(size_t w, size_t h, size_t kw, size_t ci,
 
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
                           std::ref(rng));
-  std::generate(weights.w0.begin(), weights.w0.end(), std::ref(f32rng));
+  std::generate(weights.w0.begin(), weights.w0.end(),
+                [&]() { return static_cast<T>(f32rng()); });
   std::generate(weights.w1.begin(), weights.w1.end(), std::ref(f32rng));
 
   status = xnn_define_convolution_2d(
@@ -115,17 +120,26 @@ xnn_subgraph_t FP32Convolution(size_t w, size_t h, size_t kw, size_t ci,
 
 }  // namespace models
 
-static void FP32Convolution(benchmark::State& state) {
-  models::Weights weights;
+template <typename T>
+static void Convolution(benchmark::State& state) {
+  models::Weights<T> weights;
   xnnpack::RunBenchmark(state, [&state, &weights]() {
     uint32_t op_flags = 0;
     if (state.range(5)) {
       op_flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
     }
-    return models::FP32Convolution(state.range(0), state.range(1),
-                                   state.range(2), state.range(3),
-                                   state.range(4), op_flags, weights);
+    return models::Convolution<T>(state.range(0), state.range(1),
+                                  state.range(2), state.range(3),
+                                  state.range(4), op_flags, weights);
   });
+}
+
+static void FP32Convolution(benchmark::State& state) {
+  Convolution<float>(state);
+}
+
+static void BF16Convolution(benchmark::State& state) {
+  Convolution<xnn_bfloat16>(state);
 }
 
 static void ConvolutionArguments(benchmark::Benchmark* b) {
@@ -147,6 +161,12 @@ static void ConvolutionArguments(benchmark::Benchmark* b) {
 }
 
 BENCHMARK(FP32Convolution)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ConvolutionArguments);
+
+BENCHMARK(BF16Convolution)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
