@@ -244,7 +244,7 @@ std::vector<slinky::expr> make_split_factors(
 
   auto alignment_of = [&](int d) {
     if (d < alignments.size() && alignments[d].defined()) {
-      return alignments[d];
+      return globals.get(alignments[d], "align");
     }
     return slinky::expr(1);
   };
@@ -257,6 +257,7 @@ std::vector<slinky::expr> make_split_factors(
     if (!extents[d].defined() || d < given_splits.size()) continue;
     tile_area_so_far = slinky::simplify(tile_area_so_far * alignment_of(d));
   }
+  tile_area_so_far = globals.get(tile_area_so_far, "area");
 
   for (int index_d = 0; index_d < rank; ++index_d) {
     int d = get_loop_dim(index_d);
@@ -265,9 +266,9 @@ std::vector<slinky::expr> make_split_factors(
     if (d < given_splits.size()) {
       splits[d] = given_splits[d];
       if (splits[d].defined()) {
-        tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
+        tile_area_so_far = globals.get(tile_area_so_far * splits[d], "area");
       } else {
-        tile_area_so_far = slinky::simplify(tile_area_so_far * extents[d]);
+        tile_area_so_far = globals.get(tile_area_so_far * extents[d], "area");
       }
     } else {
       const slinky::expr align = alignment_of(d);
@@ -283,8 +284,8 @@ std::vector<slinky::expr> make_split_factors(
       // The reservation is already a factor of tile_area_so_far, so multiply
       // by the number of blocks the split uses rather than by the split
       // itself.
-      tile_area_so_far = slinky::simplify(tile_area_so_far *
-                                          slinky::ceil_div(splits[d], align));
+      tile_area_so_far = globals.get(
+          tile_area_so_far * slinky::ceil_div(splits[d], align), "area");
     }
   }
   return splits;

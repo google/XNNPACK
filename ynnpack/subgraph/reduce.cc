@@ -314,19 +314,19 @@ slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
 // the promoted one.
 std::vector<slinky::expr> compute_reduce_alignments(
     ynn_type stored_type, span<const slinky::expr> extents,
-    const axes_set& k_dims) {
+    const axes_set& k_dims, slinky::index_t min_reduction_elems = 256,
+    bool reserve_row_target = true) {
   // A tile is read as contiguous rows: dimension 0's split, extended by the
   // kept dimensions above it while their extents are covered whole. Short
   // rows are dominated by per-row kernel startup, which is especially
   // expensive for the sub-byte unpack.
   constexpr slinky::index_t row_target_bytes = 1024;
-  // Each tile must reduce at least this many elements, as the *product* of
-  // its reduction-dimension chunks, so writing out the partial accumulators
-  // is amortized: with a chunk of 1 the "partial reduction" is just an
-  // expensive copy of the input. This floor is also what lets a reduction
-  // dimension small enough to fit in the tile reach its full extent, so no
-  // partial reduction is created at all.
-  constexpr slinky::index_t min_reduction_elems = 256;
+  // Each tile must reduce at least `min_reduction_elems` elements, as the
+  // *product* of its reduction-dimension chunks, so writing out the partial
+  // accumulators is amortized: with a chunk of 1 the "partial reduction" is
+  // just an expensive copy of the input. This floor is also what lets a
+  // reduction dimension small enough to fit in the tile reach its full extent,
+  // so no partial reduction is created at all.
 
   const size_t stored_size = std::max<size_t>(1, type_size_bytes(stored_type));
   const slinky::index_t row_elems = std::max<size_t>(
@@ -335,19 +335,14 @@ std::vector<slinky::expr> compute_reduce_alignments(
   // every floor below is clamped by the extent of its dimension.
   const int rank = extents.size();
   std::vector<slinky::expr> alignments(rank);
-  if (rank > 0) {
-    alignments[0] =
-        slinky::simplify(slinky::max(1, slinky::min(row_elems, extents[0])));
-    if (!k_dims[0]) {
-      // Dimension 0 reserves the whole row target; each kept dimension of the
-      // contiguous prefix above it only reserves the factor still missing.
-      slinky::expr prefix = alignments[0];
-      for (int i = 1; i < rank && !k_dims[i]; ++i) {
-        alignments[i] = slinky::simplify(slinky::max(
-            1, slinky::min(slinky::ceil_div(slinky::expr(row_elems), prefix),
-                           extents[i])));
-        prefix = slinky::simplify(prefix * alignments[i]);
-      }
+  if (reserve_row_target && rank > 0) {
+    slinky::expr prefix = 1;
+    for (int i = 0; i < rank && (i == 0 || (!k_dims[0] && !k_dims[i])); ++i) {
+      if (!extents[i].defined()) continue;
+      alignments[i] = slinky::simplify(slinky::max(
+          1, slinky::min(slinky::ceil_div(slinky::expr(row_elems), prefix),
+                         extents[i])));
+      prefix = slinky::simplify(prefix * alignments[i]);
     }
   }
   // Visiting dimensions inner to outer, k_chunk_so_far accumulates the
@@ -357,8 +352,8 @@ std::vector<slinky::expr> compute_reduce_alignments(
   // still missing from the target.
   slinky::expr k_chunk_so_far = 1;
   for (int i = 0; i < rank; ++i) {
-    if (!k_dims[i]) continue;
-    if (i > 0) {
+    if (!k_dims[i] || !extents[i].defined()) continue;
+    if (!alignments[i].defined()) {
       alignments[i] = slinky::simplify(slinky::max(
           1, slinky::min(slinky::ceil_div(slinky::expr(min_reduction_elems),
                                           k_chunk_so_far),
@@ -544,9 +539,20 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
       }
     }
     if (computed_reduction) {
-      std::vector<slinky::expr> splits =
-          make_split_factors(runtime.globals, phys_extents,
-                             input_a.buffer->elem_size(), split_factors);
+      // When the reduction input is computed in this graph, reserve at least a
+      // few reduction elements per tile (e.g. 8 blocks) so the reduction kernel
+      // doesn't get called with k=1 per iteration while keeping intermediate
+      // tiles small enough to stay in cache.
+      constexpr slinky::index_t min_computed_reduction_elems = 4;
+      std::vector<slinky::expr> alignments =
+          input_a.is_internal()
+              ? compute_reduce_alignments(input_a.type, phys_extents, op.k_dims,
+                                          min_computed_reduction_elems,
+                                          /*reserve_row_target=*/false)
+              : std::vector<slinky::expr>{};
+      std::vector<slinky::expr> splits = make_split_factors(
+          runtime.globals, phys_extents, input_a.buffer->elem_size(),
+          split_factors, /*loop_order=*/{}, alignments);
       std::vector<int> order;
       order.reserve(all_dims.size());
       for (size_t d = 0; d < all_dims.size(); ++d) {
